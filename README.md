@@ -1,0 +1,343 @@
+# CJQT6 - 仓颉语言的Qt6封装库
+
+CJQT6 是一个为仓颉(Cangjie)语言提供的Qt6封装库，通过FFI桥接技术让仓颉语言能够使用Qt6的GUI功能。
+
+## 项目结构
+
+```
+CJQT6/
+├── CMakeLists.txt              # CMake构建配置
+├── README.md                   # 项目说明文档
+├── cjpm.toml                   # 仓颉项目配置
+│
+├── doc/                        # 文档目录
+│   ├── API使用文档.md          # 控件API使用说明
+│   ├── 封装进度.md             # 封装进度跟踪
+│   ├── CJQT6仓颉基础窗口.md
+│   ├── 环境检测报告.md
+│   ├── 重构总结.md
+│   └── 项目规划.md
+│
+├── native/                     # C++原生桥接代码
+│   ├── build/                  # CMake构建输出
+│   │   └── lib/
+│   │       └── libcjqt6_bridge.so  # FFI桥接库
+│   ├── includes/               # C++头文件
+│   │   ├── cj_string.h
+│   │   ├── core.h
+│   │   ├── gui.h
+│   │   ├── types.h
+│   │   ├── version.h
+│   │   └── widgets.h
+│   └── src/                    # C++实现
+│       ├── core/
+│       ├── gui/
+│       ├── widgets/
+│       └── tools/bridge.cpp    # FFI桥接函数
+│
+├── src/                        # 仓颉源代码（模块化）
+│   ├── main.cj                 # 主入口
+│   ├── core/                   # 核心模块
+│   │   ├── application.cj
+│   │   ├── widget.cj
+│   │   ├── timer.cj
+│   │   └── signal.cj
+│   ├── widgets/                # 部件模块
+│   │   ├── common.cj
+│   │   ├── label.cj
+│   │   ├── pushbutton.cj
+│   │   ├── lineedit.cj
+│   │   ├── textedit.cj
+│   │   ├── checkbox.cj
+│   │   ├── radiobutton.cj
+│   │   ├── spinbox.cj
+│   │   ├── slider.cj
+│   │   ├── combobox.cj
+│   │   ├── progressbar.cj
+│   │   └── containers.cj
+│   ├── gui/                    # GUI模块
+│   │   ├── types.cj
+│   │   └── layout.cj
+│   ├── dialogs/                # 对话框模块
+│   │   └── dialogs.cj
+│   └── views/                  # 视图模块
+│       └── tablewidget.cj
+│
+├── examples/                   # 示例程序
+│   ├── run_example.sh          # 运行脚本
+│   ├── hello_window/           # 基础窗口示例
+│   ├── widget_demo/            # 控件演示
+│   └── table_demo/             # 表格演示
+│
+└── tests/                      # 测试代码
+```
+
+## 技术架构
+
+```
+┌─────────────────────────────────────────────────────┐
+│                   仓颉应用程序                        │
+│  ┌─────────────────────────────────────────────┐   │
+│  │  CJQT6 仓颉封装类                             │   │
+│  │  QApplication / QWidget / QTimer            │   │
+│  │  QLabel / QPushButton / QLineEdit           │   │
+│  │  QSpinBox / QSlider / QProgressBar          │   │
+│  │  QTableWidget / QGroupBox / QTabWidget      │   │
+│  └─────────────────────────────────────────────┘   │
+│                        │                            │
+│                   FFI调用 (foreign)                 │
+│                        ▼                            │
+└─────────────────────────────────────────────────────┘
+                         │
+                         ▼
+┌─────────────────────────────────────────────────────┐
+│              libcjqt6_bridge.so                      │
+│         C++桥接函数 (extern "C")                     │
+└─────────────────────────────────────────────────────┘
+                         │
+                         ▼
+┌─────────────────────────────────────────────────────┐
+│                    Qt6 框架                          │
+│         QtCore | QtGui | QtWidgets                  │
+└─────────────────────────────────────────────────────┘
+```
+
+## 已封装的Qt组件
+
+### 核心组件
+| 类 | Qt类 | 说明 |
+|----|------|------|
+| QApplication | QApplication | 应用程序主类 |
+| QWidget | QWidget | 基础窗口 |
+| QTimer | QTimer | 定时器 |
+
+### 基础部件
+| 类 | Qt类 | 说明 |
+|----|------|------|
+| QLabel | QLabel | 标签 |
+| QPushButton | QPushButton | 按钮 |
+| QLineEdit | QLineEdit | 单行文本输入 |
+| QTextEdit | QTextEdit | 多行文本编辑 |
+
+### 选择部件
+| 类 | Qt类 | 说明 |
+|----|------|------|
+| QCheckBox | QCheckBox | 复选框 |
+| QRadioButton | QRadioButton | 单选按钮 |
+| QComboBox | QComboBox | 下拉框 |
+
+### 数值部件
+| 类 | Qt类 | 说明 |
+|----|------|------|
+| QSpinBox | QSpinBox | 整数旋转框 |
+| QSlider | QSlider | 滑动条 |
+| QProgressBar | QProgressBar | 进度条 |
+
+### 容器部件
+| 类 | Qt类 | 说明 |
+|----|------|------|
+| QGroupBox | QGroupBox | 分组框 |
+| QTabWidget | QTabWidget | 标签页 |
+| QScrollArea | QScrollArea | 滚动区域 |
+| QFrame | QFrame | 边框容器 |
+
+### 布局管理
+| 类 | Qt类 | 说明 |
+|----|------|------|
+| QVBoxLayout | QVBoxLayout | 垂直布局 |
+| QHBoxLayout | QHBoxLayout | 水平布局 |
+| QGridLayout | QGridLayout | 网格布局 |
+
+### 表格视图
+| 类 | Qt类 | 说明 |
+|----|------|------|
+| QTableWidget | QTableWidget | 表格控件 |
+
+### 对话框
+| 类 | Qt类 | 说明 |
+|----|------|------|
+| QMessageBox | QMessageBox | 消息对话框 |
+| QFileDialog | QFileDialog | 文件对话框 |
+
+## 构建和运行
+
+### 环境要求
+
+- CMake 3.20+
+- Qt6.4+
+- GCC 13+ 或 Clang 10+
+- 仓颉编译器 cjc 1.0.5+
+- C++17 支持
+
+### 构建步骤
+
+```bash
+# 1. 构建C++桥接库
+cd native/build
+cmake ../..
+make cjqt6_bridge
+
+# 2. 编译仓颉库
+cd ../..
+cjpm build
+
+# 3. 运行示例
+cd examples/widget_demo
+cjpm build
+../run_example.sh ./target/release/bin/main
+```
+
+### 示例代码
+
+```cangjie
+package demo
+
+import CJQT6.core.*
+import CJQT6.widgets.*
+import CJQT6.gui.*
+
+main(): Int32 {
+    let app = QApplication()
+    let window = QWidget()
+    window.setTitle("CJQT6 示例")
+    window.resize(400, 300)
+    
+    let layout = QVBoxLayout()
+    
+    let label = QLabel()
+    label.setText("欢迎使用CJQT6！")
+    layout.addWidget(label.getPtr())
+    
+    let btn = QPushButton()
+    btn.setText("点击我")
+    layout.addWidget(btn.getPtr())
+    
+    window.setLayout(layout.getPtr())
+    window.show()
+    
+    let result = app.exec()
+    
+    label.delete()
+    btn.delete()
+    window.delete()
+    app.delete()
+    
+    return result
+}
+```
+
+## 信号与槽
+
+使用CFunc回调实现信号槽：
+
+```cangjie
+// 定义回调
+let clickCallback: CFunc<(Int64) -> Unit> = { _: Int64 =>
+    println("按钮被点击！")
+}
+
+// 连接信号
+btn.setOnClick(clickCallback)
+
+// 值变化
+spinBox.setOnValueChanged({ _: Int64 =>
+    println("值: ${spinBox.value()}")
+})
+```
+
+## 布局使用
+
+```cangjie
+// 垂直布局
+let vLayout = QVBoxLayout()
+vLayout.addWidget(label.getPtr())
+vLayout.addWidget(btn.getPtr())
+vLayout.setSpacing(10)
+vLayout.setMargin(20)
+
+// 水平布局
+let hLayout = QHBoxLayout()
+hLayout.addWidget(btn1.getPtr())
+hLayout.addWidget(btn2.getPtr())
+
+// 网格布局
+let grid = QGridLayout()
+grid.addWidget(label.getPtr(), 0, 0)
+grid.addWidget(edit.getPtr(), 0, 1)
+```
+
+## 表格使用
+
+```cangjie
+import CJQT6.views.*
+
+let table = QTableWidget(5, 3)
+table.setHorizontalHeaderLabel(0, "姓名")
+table.setHorizontalHeaderLabel(1, "年龄")
+table.setItem(0, 0, "张三")
+table.setItem(0, 1, "25")
+table.setAutoFillWidth()  // 自动填充宽度
+table.setAlternatingRowColors(true)
+```
+
+## 运行时设置
+
+运行程序时需要设置库路径：
+
+```bash
+# 方式1：使用运行脚本
+./examples/run_example.sh ./examples/widget_demo/target/release/bin/main
+
+# 方式2：设置环境变量
+LD_LIBRARY_PATH=./native/build/lib:$LD_LIBRARY_PATH ./your_program
+```
+
+## 输入法支持
+
+程序支持中文输入，需安装输入法：
+
+```bash
+# 安装ibus
+sudo apt install ibus ibus-pinyin
+
+# 启动ibus
+ibus-daemon -drx
+ibus engine pinyin
+```
+
+## 开发指南
+
+### 添加新组件
+
+1. 在 `native/src/tools/bridge.cpp` 添加FFI函数
+2. 在 `src/widgets/` 添加仓颉封装类
+3. 更新 `CMakeLists.txt`（如需要）
+4. 编译验证
+
+### 代码规范
+
+- C++使用 extern "C" 导出函数
+- 仓颉使用 `foreign` 声明外部函数
+- FFI调用需在 `unsafe` 块中
+- 字符串使用 `LibC.mallocCString` 转换
+
+## 项目特点
+
+1. **仓颉原生风格** - API设计符合仓颉语言习惯
+2. **模块化设计** - 代码按功能模块组织
+3. **FFI桥接** - 高效的仓颉与Qt6交互
+4. **类型安全** - 使用CType约束确保安全
+5. **完整文档** - 提供API文档和示例
+
+## 参考资源
+
+- [Qt6官方文档](https://doc.qt.io/qt-6/)
+- [仓颉语言文档](https://developer.huawei.com/consumer/cn/forum/home)
+
+## 许可证
+
+MIT License
+
+## 贡献
+
+欢迎提交Issue和Pull Request!

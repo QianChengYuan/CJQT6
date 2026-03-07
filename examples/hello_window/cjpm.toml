@@ -1,0 +1,16 @@
+[package]
+  cjc-version = "1.1.0"
+  name = "hello_window"
+  organization = ""
+  description = "CJQT6 Hello Window Example"
+  version = "1.0.0"
+  target-dir = ""
+  script-dir = ""
+  output-type = "executable"
+  compile-option = ""
+  override-compile-option = ""
+  link-option = "-L/home/yuan123/cangjiecode/CJQT6/native/build/lib -lcjqt6_bridge"
+  package-configuration = {}
+
+[dependencies]
+  CJQT6 = {path = "../../"}

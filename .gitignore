@@ -1,0 +1,25 @@
+# 编译输出
+build/
+target/
+*.o
+*.so
+*.a
+*.cjo
+
+# IDE配置
+.vscode/
+.idea/
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 临时文件
+*.log
+*.tmp
+*~
+
+# cjpm缓存
+.cjpm-cache
+.dep-cache
+.cjpm-history
