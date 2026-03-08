@@ -10,8 +10,12 @@
 6. [容器控件](#容器控件)
 7. [布局管理](#布局管理)
 8. [表格控件](#表格控件)
-9. [对话框](#对话框)
-10. [信号与槽](#信号与槽)
+9. [列表控件](#列表控件)
+10. [树形控件](#树形控件)
+11. [菜单与工具栏](#菜单与工具栏)
+12. [对话框](#对话框)
+13. [事件处理](#事件处理)
+14. [信号与槽](#信号与槽)
 
 ---
 
@@ -531,6 +535,322 @@ ContiguousSelection  // 连续选择
 
 ---
 
+## 列表控件
+
+### QListWidget
+
+列表控件，用于显示一系列可选择的项。
+
+```cangjie
+import CJQT6.views.*
+
+let listWidget = QListWidget()
+listWidget.setAlternatingRowColors(true)
+
+// 添加项
+listWidget.addItem("苹果")
+listWidget.addItem("香蕉")
+listWidget.addItem("橙子")
+
+// 设置可勾选
+listWidget.setItemCheckable(0, true)
+listWidget.setChecked(0, true)
+
+// 获取当前选中
+let row = listWidget.currentRow()
+let text = listWidget.currentItemText()
+```
+
+**常用方法**:
+| 方法 | 说明 |
+|------|------|
+| `addItem(text: String)` | 添加项 |
+| `insertItem(row: Int32, text: String)` | 在指定位置插入项 |
+| `removeItem(row: Int32)` | 移除指定行 |
+| `clear()` | 清空所有项 |
+| `count(): Int32` | 获取项数量 |
+| `currentRow(): Int32` | 获取当前选中行（-1表示无选中） |
+| `setCurrentRow(row: Int32)` | 设置当前选中行 |
+| `currentItemText(): String` | 获取当前选中项文本 |
+| `itemText(row: Int32): String` | 获取指定行文本 |
+| `setItemText(row: Int32, text: String)` | 设置指定行文本 |
+| `setItemData(row: Int32, data: Int64)` | 设置项用户数据 |
+| `getItemData(row: Int32): Int64` | 获取项用户数据 |
+
+**勾选相关**:
+| 方法 | 说明 |
+|------|------|
+| `setItemCheckable(row: Int32, checkable: Bool)` | 设置项是否可勾选 |
+| `isChecked(row: Int32): Bool` | 获取项是否被勾选 |
+| `setChecked(row: Int32, checked: Bool)` | 设置项勾选状态 |
+
+**外观设置**:
+| 方法 | 说明 |
+|------|------|
+| `setSelectionMode(mode: Int32)` | 设置选择模式 |
+| `setAlternatingRowColors(enable: Bool)` | 设置交替行颜色 |
+| `setSortingEnabled(enable: Bool)` | 设置是否可排序 |
+| `setItemIcon(row: Int32, iconType: Int32)` | 设置项图标 |
+
+**选择模式常量** (ListSelectionMode):
+```cangjie
+NoSelection          // 不可选择
+SingleSelection      // 单选
+MultiSelection       // 多选
+ExtendedSelection    // 扩展选择（Ctrl/Shift）
+ContiguousSelection  // 连续选择
+```
+
+**图标类型常量** (ListIconType):
+```cangjie
+None         // 无图标
+Folder       // 文件夹图标
+File         // 文件图标
+Warning      // 警告图标
+Information  // 信息图标
+Critical     // 错误图标
+```
+
+---
+
+## 树形控件
+
+### QTreeWidget
+
+树形控件，用于显示层次结构数据。
+
+```cangjie
+import CJQT6.views.*
+
+let treeWidget = QTreeWidget()
+treeWidget.setColumnCount(3)
+treeWidget.setHeaderLabel(0, "名称")
+treeWidget.setHeaderLabel(1, "类型")
+treeWidget.setHeaderLabel(2, "大小")
+
+// 添加顶级项
+let root = treeWidget.addTopLevelItem("项目文件夹")
+root.setText(1, "文件夹")
+root.setText(2, "-")
+
+// 添加子项
+let child = root.addChild("src")
+child.setText(1, "文件夹")
+
+let file = child.addChild("main.cj")
+file.setText(1, "源码")
+file.setText(2, "2KB")
+
+// 展开所有
+treeWidget.expandAll()
+```
+
+**QTreeWidget 方法**:
+| 方法 | 说明 |
+|------|------|
+| `setColumnCount(columns: Int32)` | 设置列数 |
+| `setHeaderLabel(column: Int32, label: String)` | 设置表头标签 |
+| `setHeaderHidden(hidden: Bool)` | 隐藏/显示表头 |
+| `addTopLevelItem(text: String): QTreeWidgetItem` | 添加顶级项 |
+| `insertTopLevelItem(index: Int32, item: QTreeWidgetItem)` | 插入顶级项 |
+| `takeTopLevelItem(index: Int32)` | 移除顶级项 |
+| `topLevelItemCount(): Int32` | 获取顶级项数量 |
+| `topLevelItem(index: Int32): QTreeWidgetItem` | 获取顶级项 |
+| `currentItem(): ?QTreeWidgetItem` | 获取当前选中项 |
+| `setCurrentItem(item: QTreeWidgetItem)` | 设置当前选中项 |
+| `expandItem(item: QTreeWidgetItem)` | 展开项 |
+| `collapseItem(item: QTreeWidgetItem)` | 折叠项 |
+| `expandAll()` | 展开所有 |
+| `collapseAll()` | 折叠所有 |
+| `clear()` | 清空 |
+
+### QTreeWidgetItem
+
+树形项，表示树中的一个节点。
+
+```cangjie
+// 创建项
+let item = QTreeWidgetItem("节点名称")
+item.setText(1, "附加信息")
+
+// 添加子项
+let child = item.addChild("子节点")
+
+// 获取父项
+let parent = item.parent()
+
+// 用户数据
+item.setData(0, 12345)
+let data = item.getData(0)
+```
+
+**QTreeWidgetItem 方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` | 创建空项 |
+| `init(text: String)` | 创建带文本的项 |
+| `setText(column: Int32, text: String)` | 设置列文本 |
+| `text(column: Int32): String` | 获取列文本 |
+| `addChild(text: String): QTreeWidgetItem` | 添加子项并返回 |
+| `addChildItem(child: QTreeWidgetItem)` | 添加子项对象 |
+| `childCount(): Int32` | 获取子项数量 |
+| `child(index: Int32): QTreeWidgetItem` | 获取子项 |
+| `takeChild(index: Int32)` | 移除子项 |
+| `parent(): ?QTreeWidgetItem` | 获取父项 |
+| `setData(column: Int32, data: Int64)` | 设置用户数据 |
+| `getData(column: Int32): Int64` | 获取用户数据 |
+| `setExpanded(expanded: Bool)` | 设置展开状态 |
+| `isExpanded(): Bool` | 是否展开 |
+| `setSelected(selected: Bool)` | 设置选中状态 |
+| `isSelected(): Bool` | 是否选中 |
+| `setHidden(hidden: Bool)` | 设置隐藏状态 |
+| `isHidden(): Bool` | 是否隐藏 |
+| `setCheckState(column: Int32, state: Int32)` | 设置勾选状态 |
+| `checkState(column: Int32): Int32` | 获取勾选状态 |
+
+**勾选状态常量** (CheckState):
+```cangjie
+Unchecked          // 未勾选
+PartiallyChecked   // 部分勾选
+Checked            // 已勾选
+```
+
+---
+
+## 菜单与工具栏
+
+### QMainWindow
+
+主窗口，提供菜单栏、工具栏、状态栏的标准布局。
+
+```cangjie
+import CJQT6.menu.*
+
+let window = QMainWindow()
+window.setWindowTitle("主窗口")
+window.resize(800, 600)
+
+// 设置中心控件
+window.setCentralWidget(textEdit.getPtr())
+
+// 设置菜单栏
+window.setMenuBar(menuBar.getPtr())
+
+// 设置状态栏
+window.setStatusBar(statusBar.getPtr())
+
+// 添加工具栏
+window.addToolBar(toolBar.getPtr())
+```
+
+**QMainWindow 方法**:
+| 方法 | 说明 |
+|------|------|
+| `setWindowTitle(title: String)` | 设置窗口标题 |
+| `setCentralWidget(ptr: Int64)` | 设置中心控件 |
+| `setMenuBar(ptr: Int64)` | 设置菜单栏 |
+| `setStatusBar(ptr: Int64)` | 设置状态栏 |
+| `addToolBar(ptr: Int64)` | 添加工具栏 |
+| `resize(width: Int32, height: Int32)` | 设置大小 |
+| `show()` | 显示窗口 |
+
+### QMenuBar
+
+菜单栏，包含多个菜单。
+
+```cangjie
+let menuBar = QMenuBar()
+
+// 添加菜单
+let fileMenu = menuBar.addMenu("文件(&F)")
+let editMenu = menuBar.addMenu("编辑(&E)")
+let helpMenu = menuBar.addMenu("帮助(&H)")
+```
+
+### QMenu
+
+菜单，包含多个菜单项。
+
+```cangjie
+let fileMenu = QMenu("文件(&F)")
+
+// 添加动作
+let newAction = QAction("新建(&N)")
+newAction.setShortcut("Ctrl+N")
+fileMenu.addActionPtr(newAction.getPtr())
+
+// 添加分隔符
+fileMenu.addSeparator()
+
+// 添加子菜单
+let recentMenu = fileMenu.addMenu("最近文件")
+```
+
+**QMenu 方法**:
+| 方法 | 说明 |
+|------|------|
+| `init(title: String)` | 创建菜单 |
+| `addActionPtr(ptr: Int64)` | 添加动作 |
+| `addSeparator()` | 添加分隔符 |
+| `addMenu(title: String): QMenu` | 添加子菜单 |
+| `clear()` | 清空菜单 |
+
+### QAction
+
+菜单动作，表示一个菜单项或工具栏按钮。
+
+```cangjie
+let openAction = QAction("打开(&O)...")
+openAction.setShortcut("Ctrl+O")
+openAction.setOnTriggered({ _: Int64 =>
+    // 打���文件逻辑
+})
+```
+
+**QAction 方法**:
+| 方法 | 说明 |
+|------|------|
+| `init(text: String)` | 创建动作 |
+| `setText(text: String)` | 设置文本 |
+| `setShortcut(key: String)` | 设置快捷键 |
+| `setCheckable(checkable: Bool)` | 设置可勾选 |
+| `setChecked(checked: Bool)` | 设置勾选状态 |
+| `isEnabled(): Bool` | 是否启用 |
+| `setEnabled(enabled: Bool)` | 设置启用状态 |
+| `setOnTriggered(callback: CFunc)` | 设置触发回调 |
+| `getPtr(): Int64` | 获取指针 |
+
+### QToolBar
+
+工具栏，包含快捷操作按钮。
+
+```cangjie
+let toolBar = QToolBar()
+toolBar.addAction(newAction.getPtr())
+toolBar.addAction(openAction.getPtr())
+toolBar.addSeparator()
+toolBar.addAction(saveAction.getPtr())
+```
+
+### QStatusBar
+
+状态栏，显示状态信息。
+
+```cangjie
+let statusBar = QStatusBar()
+statusBar.showMessage("就绪")
+window.setStatusBar(statusBar.getPtr())
+```
+
+**QStatusBar 方法**:
+| 方法 | 说明 |
+|------|------|
+| `showMessage(text: String)` | 显示临时消息 |
+| `showMessage(text: String, timeout: Int32)` | 显示消息指定毫秒 |
+| `clearMessage()` | 清除消息 |
+
+---
+
 ## 对话框
 
 ### QMessageBox - 消息对话框
@@ -570,6 +890,39 @@ let savePath = QFileDialog.getSaveFileName(0, "保存文件", "*.txt")
 let dirPath = QFileDialog.getExistingDirectory(0, "选择目录")
 ```
 
+### QInputDialog - 输入对话框
+
+```cangjie
+// 获取文本输入
+let name = QInputDialog.getText(0, "输入姓名", "请输入姓名:", "")
+if (name.size > 0) {
+    println("输入了: ${name}")
+}
+
+// 获取整数输入 (返回Int32最小值表示取消)
+let age = QInputDialog.getInt(0, "输入年龄", "请输入年龄:", 18, 0, 150)
+
+// 获取浮点数输入 (返回NaN表示取消)
+let price = QInputDialog.getDouble(0, "输入价格", "请输入价格:", 0.0, 0.0, 10000.0)
+```
+
+**QInputDialog 方法**:
+| 方法 | 说明 |
+|------|------|
+| `getText(parent, title, label, defaultText): String` | 获取文本输入 |
+| `getInt(parent, title, label, value, min, max): Int32` | 获取整数输入 |
+| `getDouble(parent, title, label, value, min, max): Float64` | 获取浮点数输入 |
+
+### QColorDialog - 颜色对话框
+
+```cangjie
+// 获取颜色 (返回十六进制字符串如 "#FF0000"，空字符串表示取消)
+let color = QColorDialog.getColor(0, "选择颜色")
+if (color.size > 0) {
+    println("选择了颜色: ${color}")
+}
+```
+
 ---
 
 ## 信号与槽
@@ -602,6 +955,7 @@ spinBox.setOnValueChanged(valueCallback)
 | QLineEdit | `setOnTextChanged(callback)` | 文本变化 |
 | QSpinBox | `setOnValueChanged(callback)` | 值变化 |
 | QSlider | `setOnValueChanged(callback)` | 值变化 |
+| QAction | `setOnTriggered(callback)` | 触发 |
 | QTimer | `setTimeout(callback)` | 超时 |
 
 ### 回调中访问控件

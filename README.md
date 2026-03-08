@@ -60,14 +60,20 @@ CJQT6/
 │   │   └── layout.cj
 │   ├── dialogs/                # 对话框模块
 │   │   └── dialogs.cj
+│   ├── menu/                   # 菜单模块
+│   │   └── menu.cj
 │   └── views/                  # 视图模块
-│       └── tablewidget.cj
+│       ├── tablewidget.cj
+│       ├── listwidget.cj
+│       └── treewidget.cj
 │
 ├── examples/                   # 示例程序
 │   ├── run_example.sh          # 运行脚本
 │   ├── hello_window/           # 基础窗口示例
 │   ├── widget_demo/            # 控件演示
-│   └── table_demo/             # 表格演示
+│   ├── table_demo/             # 表格演示
+│   ├── menu_demo/              # 菜单/记事本示例
+│   └── views_demo/             # 列表/树形视图示例
 │
 └── tests/                      # 测试代码
 ```
@@ -83,6 +89,9 @@ CJQT6/
 │  │  QLabel / QPushButton / QLineEdit           │   │
 │  │  QSpinBox / QSlider / QProgressBar          │   │
 │  │  QTableWidget / QGroupBox / QTabWidget      │   │
+│  │  QListWidget / QTreeWidget                  │   │
+│  │  QMessageBox / QFileDialog / QInputDialog   │   │
+│  │  QMenuBar / QMenu / QAction / QToolBar      │   │
 │  └─────────────────────────────────────────────┘   │
 │                        │                            │
 │                   FFI调用 (foreign)                 │
@@ -152,12 +161,26 @@ CJQT6/
 | 类 | Qt类 | 说明 |
 |----|------|------|
 | QTableWidget | QTableWidget | 表格控件 |
+| QListWidget | QListWidget | 列表控件 |
+| QTreeWidget | QTreeWidget | 树形控件 |
+
+### 菜单与工具栏
+| 类 | Qt类 | 说明 |
+|----|------|------|
+| QMenuBar | QMenuBar | 菜单栏 |
+| QMenu | QMenu | 菜单 |
+| QAction | QAction | 动作 |
+| QToolBar | QToolBar | 工具栏 |
+| QStatusBar | QStatusBar | 状态栏 |
+| QMainWindow | QMainWindow | 主窗口 |
 
 ### 对话框
 | 类 | Qt类 | 说明 |
 |----|------|------|
 | QMessageBox | QMessageBox | 消息对话框 |
 | QFileDialog | QFileDialog | 文件对话框 |
+| QInputDialog | QInputDialog | 输入对话框 |
+| QColorDialog | QColorDialog | 颜色对话框 |
 
 ## 构建和运行
 

@@ -26,9 +26,6 @@ else()
     add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-# 预编译头文件
-set(PCH_HEADER ${CMAKE_SOURCE_DIR}/native/includes/cjqt6_pch.h)
-
 # 包含目录
 include_directories(
     ${CMAKE_SOURCE_DIR}/native/includes
@@ -38,22 +35,36 @@ include_directories(
 # CJQT6 桥接库 (用于仓颉语言FFI)
 # ============================================================
 
-# 按模块组织源文件
+# 核心模块 - QApplication, QWidget, QTimer, Events
 set(CORE_SOURCES
     native/src/core/string.cpp
     native/src/core/core.cpp
+    native/src/core/bridge_core.cpp
+    native/src/core/bridge_events.cpp
 )
 
+# GUI模块 - 布局、对话框、菜单
 set(GUI_SOURCES
     native/src/gui/gui.cpp
+    native/src/gui/bridge_layout.cpp
+    native/src/gui/bridge_dialogs.cpp
+    native/src/gui/bridge_menu.cpp
 )
 
+# Widgets模块 - 基础部件、选择部件、数值部件、容器
 set(WIDGETS_SOURCES
     native/src/widgets/widgets.cpp
+    native/src/widgets/bridge_widgets.cpp
+    native/src/widgets/bridge_selectors.cpp
+    native/src/widgets/bridge_values.cpp
+    native/src/widgets/bridge_containers.cpp
 )
 
-set(TOOLS_SOURCES
-    native/src/tools/bridge.cpp
+# Views模块 - 表格视图、列表视图、树形视图
+set(VIEWS_SOURCES
+    native/src/views/bridge_table.cpp
+    native/src/views/bridge_list.cpp
+    native/src/views/bridge_tree.cpp
 )
 
 # 创建共享库
@@ -61,7 +72,7 @@ add_library(cjqt6_bridge SHARED
     ${CORE_SOURCES}
     ${GUI_SOURCES}
     ${WIDGETS_SOURCES}
-    ${TOOLS_SOURCES}
+    ${VIEWS_SOURCES}
     # 头文件 (用于MOC处理)
     native/includes/gui.h
     native/includes/widgets.h

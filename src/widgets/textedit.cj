@@ -6,10 +6,15 @@ foreign func qTextEditSetText(ptr: Int64, text: CString): Unit
 foreign func qTextEditText(ptr: Int64): CString
 foreign func qTextEditSetReadOnly(ptr: Int64, readonly: Bool): Unit
 foreign func qTextEditClear(ptr: Int64): Unit
+foreign func qTextEditCut(ptr: Int64): Unit
+foreign func qTextEditCopy(ptr: Int64): Unit
+foreign func qTextEditPaste(ptr: Int64): Unit
+foreign func qTextEditSelectAll(ptr: Int64): Unit
+foreign func qTextEditCanPaste(ptr: Int64): Bool
 foreign func qTextEditDelete(ptr: Int64): Unit
 
 public class QTextEdit {
-    private var ptr: Int64 = 0
+    private let ptr: Int64
     
     public init() {
         unsafe {
@@ -41,7 +46,7 @@ public class QTextEdit {
         unsafe {
             let cstr = qTextEditText(ptr)
             let result = cstr.toString()
-            LibC.free(cstr)
+            // 注意：cstr指向静态缓冲区，不要free
             return result
         }
     }
@@ -55,6 +60,36 @@ public class QTextEdit {
     public func clear() {
         unsafe {
             qTextEditClear(ptr)
+        }
+    }
+    
+    public func cut() {
+        unsafe {
+            qTextEditCut(ptr)
+        }
+    }
+    
+    public func copy() {
+        unsafe {
+            qTextEditCopy(ptr)
+        }
+    }
+    
+    public func paste() {
+        unsafe {
+            qTextEditPaste(ptr)
+        }
+    }
+    
+    public func selectAll() {
+        unsafe {
+            qTextEditSelectAll(ptr)
+        }
+    }
+    
+    public func canPaste(): Bool {
+        unsafe {
+            qTextEditCanPaste(ptr)
         }
     }
     
@@ -73,7 +108,6 @@ public class QTextEdit {
             unsafe {
                 qTextEditDelete(ptr)
             }
-            ptr = 0
         }
     }
 }

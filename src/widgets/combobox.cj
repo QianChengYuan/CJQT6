@@ -42,7 +42,7 @@ public class QComboBox {
         unsafe {
             let cstr = qComboBoxCurrentText(ptr)
             let result = cstr.toString()
-            LibC.free(cstr)
+            // 注意：cstr指向静态缓冲区，不要free
             return result
         }
     }

@@ -1,0 +1,183 @@
+/**
+ * @file bridge_values.cpp
+ * @brief 数值部件桥接函数 - QSpinBox, QSlider, QProgressBar
+ */
+
+#include <QSpinBox>
+#include <QSlider>
+#include <QProgressBar>
+#include <functional>
+#include <unordered_map>
+
+// 回调映射
+static std::unordered_map<int64_t, std::function<void(int64_t)>> g_spinBoxCallbacks;
+static std::unordered_map<int64_t, std::function<void(int64_t)>> g_sliderCallbacks;
+
+extern "C" {
+
+// ============================================================
+// QSpinBox 桥接函数
+// ============================================================
+
+int64_t qSpinBoxCreate() {
+    QSpinBox* spinBox = new QSpinBox();
+    return reinterpret_cast<int64_t>(spinBox);
+}
+
+void qSpinBoxSetValue(int64_t ptr, int32_t value) {
+    QSpinBox* spinBox = reinterpret_cast<QSpinBox*>(ptr);
+    if (spinBox) {
+        spinBox->setValue(value);
+    }
+}
+
+int32_t qSpinBoxValue(int64_t ptr) {
+    QSpinBox* spinBox = reinterpret_cast<QSpinBox*>(ptr);
+    if (spinBox) {
+        return spinBox->value();
+    }
+    return 0;
+}
+
+void qSpinBoxSetRange(int64_t ptr, int32_t min, int32_t max) {
+    QSpinBox* spinBox = reinterpret_cast<QSpinBox*>(ptr);
+    if (spinBox) {
+        spinBox->setRange(min, max);
+    }
+}
+
+void qSpinBoxSetSingleStep(int64_t ptr, int32_t step) {
+    QSpinBox* spinBox = reinterpret_cast<QSpinBox*>(ptr);
+    if (spinBox) {
+        spinBox->setSingleStep(step);
+    }
+}
+
+void qSpinBoxSetOnValueChanged(int64_t ptr, void (*callback)(int64_t)) {
+    QSpinBox* spinBox = reinterpret_cast<QSpinBox*>(ptr);
+    if (spinBox) {
+        int64_t widgetPtr = ptr;
+        g_spinBoxCallbacks[ptr] = [callback, widgetPtr](int64_t) { callback(widgetPtr); };
+        QObject::connect(spinBox, QOverload<int>::of(&QSpinBox::valueChanged), [widgetPtr](int) {
+            auto it = g_spinBoxCallbacks.find(widgetPtr);
+            if (it != g_spinBoxCallbacks.end()) {
+                it->second(widgetPtr);
+            }
+        });
+    }
+}
+
+void qSpinBoxDelete(int64_t ptr) {
+    QSpinBox* spinBox = reinterpret_cast<QSpinBox*>(ptr);
+    if (spinBox) {
+        g_spinBoxCallbacks.erase(ptr);
+        delete spinBox;
+    }
+}
+
+// ============================================================
+// QSlider 桥接函数
+// ============================================================
+
+int64_t qSliderCreate() {
+    QSlider* slider = new QSlider();
+    return reinterpret_cast<int64_t>(slider);
+}
+
+void qSliderSetValue(int64_t ptr, int32_t value) {
+    QSlider* slider = reinterpret_cast<QSlider*>(ptr);
+    if (slider) {
+        slider->setValue(value);
+    }
+}
+
+int32_t qSliderValue(int64_t ptr) {
+    QSlider* slider = reinterpret_cast<QSlider*>(ptr);
+    if (slider) {
+        return slider->value();
+    }
+    return 0;
+}
+
+void qSliderSetRange(int64_t ptr, int32_t min, int32_t max) {
+    QSlider* slider = reinterpret_cast<QSlider*>(ptr);
+    if (slider) {
+        slider->setRange(min, max);
+    }
+}
+
+void qSliderSetOrientation(int64_t ptr, int32_t orientation) {
+    QSlider* slider = reinterpret_cast<QSlider*>(ptr);
+    if (slider) {
+        slider->setOrientation(static_cast<Qt::Orientation>(orientation));
+    }
+}
+
+void qSliderSetOnValueChanged(int64_t ptr, void (*callback)(int64_t)) {
+    QSlider* slider = reinterpret_cast<QSlider*>(ptr);
+    if (slider) {
+        int64_t widgetPtr = ptr;
+        g_sliderCallbacks[ptr] = [callback, widgetPtr](int64_t) { callback(widgetPtr); };
+        QObject::connect(slider, &QSlider::valueChanged, [widgetPtr](int) {
+            auto it = g_sliderCallbacks.find(widgetPtr);
+            if (it != g_sliderCallbacks.end()) {
+                it->second(widgetPtr);
+            }
+        });
+    }
+}
+
+void qSliderDelete(int64_t ptr) {
+    QSlider* slider = reinterpret_cast<QSlider*>(ptr);
+    if (slider) {
+        g_sliderCallbacks.erase(ptr);
+        delete slider;
+    }
+}
+
+// ============================================================
+// QProgressBar 桥接函数
+// ============================================================
+
+int64_t qProgressBarCreate() {
+    QProgressBar* progressBar = new QProgressBar();
+    return reinterpret_cast<int64_t>(progressBar);
+}
+
+void qProgressBarSetValue(int64_t ptr, int32_t value) {
+    QProgressBar* progressBar = reinterpret_cast<QProgressBar*>(ptr);
+    if (progressBar) {
+        progressBar->setValue(value);
+    }
+}
+
+int32_t qProgressBarValue(int64_t ptr) {
+    QProgressBar* progressBar = reinterpret_cast<QProgressBar*>(ptr);
+    if (progressBar) {
+        return progressBar->value();
+    }
+    return 0;
+}
+
+void qProgressBarSetRange(int64_t ptr, int32_t min, int32_t max) {
+    QProgressBar* progressBar = reinterpret_cast<QProgressBar*>(ptr);
+    if (progressBar) {
+        progressBar->setRange(min, max);
+    }
+}
+
+void qProgressBarSetTextVisible(int64_t ptr, bool visible) {
+    QProgressBar* progressBar = reinterpret_cast<QProgressBar*>(ptr);
+    if (progressBar) {
+        progressBar->setTextVisible(visible);
+    }
+}
+
+void qProgressBarDelete(int64_t ptr) {
+    QProgressBar* progressBar = reinterpret_cast<QProgressBar*>(ptr);
+    if (progressBar) {
+        delete progressBar;
+    }
+}
+
+} // extern "C"

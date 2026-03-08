@@ -73,7 +73,7 @@ public class QGroupBox {
         unsafe {
             let cstr = qGroupBoxTitle(ptr)
             let result = cstr.toString()
-            LibC.free(cstr)
+            // 注意：cstr指向静态缓冲区，不要free
             return result
         }
     }
