@@ -205,3 +205,143 @@ void qFrameDelete(int64_t ptr) {
 }
 
 } // extern "C"
+// ============================================================
+// QSplitter 桥接函数
+// ============================================================
+
+#include <QSplitter>
+
+int64_t qSplitterCreate(int64_t parentPtr) {
+    QWidget* parent = reinterpret_cast<QWidget*>(parentPtr);
+    QSplitter* splitter = new QSplitter(parent);
+    return reinterpret_cast<int64_t>(splitter);
+}
+
+int64_t qSplitterCreateHorizontal(int64_t parentPtr) {
+    QWidget* parent = reinterpret_cast<QWidget*>(parentPtr);
+    QSplitter* splitter = new QSplitter(Qt::Horizontal, parent);
+    return reinterpret_cast<int64_t>(splitter);
+}
+
+int64_t qSplitterCreateVertical(int64_t parentPtr) {
+    QWidget* parent = reinterpret_cast<QWidget*>(parentPtr);
+    QSplitter* splitter = new QSplitter(Qt::Vertical, parent);
+    return reinterpret_cast<int64_t>(splitter);
+}
+
+void qSplitterDelete(int64_t ptr) {
+    QSplitter* splitter = reinterpret_cast<QSplitter*>(ptr);
+    if (splitter) {
+        delete splitter;
+    }
+}
+
+void qSplitterAddWidget(int64_t ptr, int64_t widgetPtr) {
+    QSplitter* splitter = reinterpret_cast<QSplitter*>(ptr);
+    QWidget* widget = reinterpret_cast<QWidget*>(widgetPtr);
+    if (splitter && widget) {
+        splitter->addWidget(widget);
+    }
+}
+
+int32_t qSplitterCount(int64_t ptr) {
+    QSplitter* splitter = reinterpret_cast<QSplitter*>(ptr);
+    if (splitter) {
+        return splitter->count();
+    }
+    return 0;
+}
+
+int64_t qSplitterWidget(int64_t ptr, int32_t index) {
+    QSplitter* splitter = reinterpret_cast<QSplitter*>(ptr);
+    if (splitter) {
+        QWidget* widget = splitter->widget(index);
+        return reinterpret_cast<int64_t>(widget);
+    }
+    return 0;
+}
+
+void qSplitterSetSizes(int64_t ptr, int32_t* sizes, int32_t count) {
+    QSplitter* splitter = reinterpret_cast<QSplitter*>(ptr);
+    if (splitter && sizes) {
+        QList<int> sizeList;
+        for (int i = 0; i < count; ++i) {
+            sizeList.append(sizes[i]);
+        }
+        splitter->setSizes(sizeList);
+    }
+}
+
+void qSplitterSetStretchFactor(int64_t ptr, int32_t index, int32_t stretch) {
+    QSplitter* splitter = reinterpret_cast<QSplitter*>(ptr);
+    if (splitter) {
+        splitter->setStretchFactor(index, stretch);
+    }
+}
+
+void qSplitterSetHandleWidth(int64_t ptr, int32_t width) {
+    QSplitter* splitter = reinterpret_cast<QSplitter*>(ptr);
+    if (splitter) {
+        splitter->setHandleWidth(width);
+    }
+}
+
+int32_t qSplitterHandleWidth(int64_t ptr) {
+    QSplitter* splitter = reinterpret_cast<QSplitter*>(ptr);
+    if (splitter) {
+        return splitter->handleWidth();
+    }
+    return 0;
+}
+
+void qSplitterSetChildrenCollapsible(int64_t ptr, int32_t collapsible) {
+    QSplitter* splitter = reinterpret_cast<QSplitter*>(ptr);
+    if (splitter) {
+        splitter->setChildrenCollapsible(collapsible != 0);
+    }
+}
+
+int32_t qSplitterChildrenCollapsible(int64_t ptr) {
+    QSplitter* splitter = reinterpret_cast<QSplitter*>(ptr);
+    if (splitter) {
+        return splitter->childrenCollapsible() ? 1 : 0;
+    }
+    return 0;
+}
+
+void qSplitterSetOrientation(int64_t ptr, int32_t orientation) {
+    QSplitter* splitter = reinterpret_cast<QSplitter*>(ptr);
+    if (splitter) {
+        splitter->setOrientation(static_cast<Qt::Orientation>(orientation));
+    }
+}
+
+int32_t qSplitterOrientation(int64_t ptr) {
+    QSplitter* splitter = reinterpret_cast<QSplitter*>(ptr);
+    if (splitter) {
+        return static_cast<int32_t>(splitter->orientation());
+    }
+    return 1; // Qt::Horizontal
+}
+
+void qSplitterSaveState(int64_t ptr, char* buffer, int32_t* bufferSize) {
+    QSplitter* splitter = reinterpret_cast<QSplitter*>(ptr);
+    if (splitter && buffer && bufferSize) {
+        QByteArray state = splitter->saveState();
+        int len = state.size();
+        if (len < *bufferSize) {
+            std::memcpy(buffer, state.constData(), len);
+            *bufferSize = len;
+        }
+    }
+}
+
+int32_t qSplitterRestoreState(int64_t ptr, const char* buffer, int32_t size) {
+    QSplitter* splitter = reinterpret_cast<QSplitter*>(ptr);
+    if (splitter && buffer) {
+        QByteArray state(buffer, size);
+        return splitter->restoreState(state) ? 1 : 0;
+    }
+    return 0;
+}
+

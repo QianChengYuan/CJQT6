@@ -195,3 +195,254 @@ public class QColorDialog {
         }
     }
 }
+
+// ============================================================
+// QFontDialog - 字体对话框
+// ============================================================
+foreign func qFontDialogGetFontName(parentPtr: Int64, title: CString): CString
+foreign func qFontDialogGetFontSize(parentPtr: Int64, title: CString): Int32
+foreign func qFontDialogGetFontInfo(parentPtr: Int64, title: CString): CString
+foreign func qFontDialogGetFontWithDefault(parentPtr: Int64, title: CString, family: CString, size: Int32, bold: Int32, italic: Int32): CString
+
+// 字体信息类
+public class QFontInfo {
+    public let family: String
+    public let size: Int32
+    public let bold: Bool
+    public let italic: Bool
+    
+    public init(family: String, size: Int32, bold: Bool, italic: Bool) {
+        this.family = family
+        this.size = size
+        this.bold = bold
+        this.italic = italic
+    }
+}
+
+
+// 辅助函数：字符串转Int32
+func parseSize(s: String): Int32 {
+    var result: Int32 = 0
+    var negative = false
+    var start = 0
+    if (s.size > 0 && s[0] == 45) {  // '-' ASCII码是45
+        negative = true
+        start = 1
+    }
+    for (i in start..s.size) {
+        let c = s[i]
+        if (c >= 48 && c <= 57) {  // '0'-'9' ASCII码是48-57
+            result = result * 10 + Int32(c - 48)
+        }
+    }
+    return if (negative) { -result } else { result }
+}
+public class QFontDialog {
+    
+    // 获取字体名称 (返回空字符串表示取消)
+    public static func getFontName(parent: Int64, title: String): String {
+        unsafe {
+            var titleCstr = LibC.mallocCString(title)
+            let cstr = qFontDialogGetFontName(parent, titleCstr)
+            let result = cstr.toString()
+            LibC.free(titleCstr)
+            return result
+        }
+    }
+    
+    // 获取字体大小 (返回-1表示取消)
+    public static func getFontSize(parent: Int64, title: String): Int32 {
+        unsafe {
+            var titleCstr = LibC.mallocCString(title)
+            let result = qFontDialogGetFontSize(parent, titleCstr)
+            LibC.free(titleCstr)
+            return result
+        }
+    }
+    
+    // 获取完整字体信息 (返回None表示取消)
+    public static func getFont(parent: Int64, title: String): Option<QFontInfo> {
+        unsafe {
+            var titleCstr = LibC.mallocCString(title)
+            let cstr = qFontDialogGetFontInfo(parent, titleCstr)
+            let info = cstr.toString()
+            LibC.free(titleCstr)
+            
+            if (info.isEmpty()) {
+                return None
+            }
+            
+            // 解析格式: "Family,Size,Bold,Italic"
+            let parts = info.split(",")
+            if (parts.size >= 4) {
+                let family = parts[0]
+                let size = parseSize(parts[1])
+                let bold = parts[2] == "1"
+                let italic = parts[3] == "1"
+                return Some(QFontInfo(family, size, bold, italic))
+            }
+            return None
+        }
+    }
+    
+    // 使用默认字体获取字体信息
+    public static func getFontWithDefault(parent: Int64, title: String, defaultFamily: String, defaultSize: Int32, defaultBold: Bool, defaultItalic: Bool): Option<QFontInfo> {
+        unsafe {
+            var titleCstr = LibC.mallocCString(title)
+            var familyCstr = LibC.mallocCString(defaultFamily)
+            
+            let cstr = qFontDialogGetFontWithDefault(parent, titleCstr, familyCstr, defaultSize, (if (defaultBold) { 1 } else { 0 }), (if (defaultItalic) { 1 } else { 0 }))
+            let info = cstr.toString()
+            
+            LibC.free(titleCstr)
+            LibC.free(familyCstr)
+            
+            if (info.isEmpty()) {
+                return None
+            }
+            
+            // 解析格式: "Family,Size,Bold,Italic"
+            let parts = info.split(",")
+            if (parts.size >= 4) {
+                let family = parts[0]
+                let size = parseSize(parts[1])
+                let bold = parts[2] == "1"
+                let italic = parts[3] == "1"
+                return Some(QFontInfo(family, size, bold, italic))
+            }
+            return None
+        }
+    }
+}
+
+// ============================================================
+// QProgressDialog - 进度对话框
+// ============================================================
+foreign func qProgressDialogCreate(parentPtr: Int64, labelText: CString, cancelButtonText: CString, minimum: Int32, maximum: Int32): Int64
+foreign func qProgressDialogDelete(ptr: Int64): Unit
+foreign func qProgressDialogSetValue(ptr: Int64, value: Int32): Unit
+foreign func qProgressDialogValue(ptr: Int64): Int32
+foreign func qProgressDialogSetMinimum(ptr: Int64, minimum: Int32): Unit
+foreign func qProgressDialogSetMaximum(ptr: Int64, maximum: Int32): Unit
+foreign func qProgressDialogSetLabelText(ptr: Int64, text: CString): Unit
+foreign func qProgressDialogSetCancelButtonText(ptr: Int64, text: CString): Unit
+foreign func qProgressDialogSetWindowTitle(ptr: Int64, title: CString): Unit
+foreign func qProgressDialogSetAutoClose(ptr: Int64, autoClose: Int32): Unit
+foreign func qProgressDialogSetAutoReset(ptr: Int64, autoReset: Int32): Unit
+foreign func qProgressDialogWasCanceled(ptr: Int64): Int32
+foreign func qProgressDialogShow(ptr: Int64): Unit
+foreign func qProgressDialogHide(ptr: Int64): Unit
+foreign func qProgressDialogCancel(ptr: Int64): Unit
+foreign func qProgressDialogReset(ptr: Int64): Unit
+
+public class QProgressDialog {
+    private let ptr: Int64
+    
+    public init(parent: Int64, labelText: String, cancelButtonText: String, minimum: Int32, maximum: Int32) {
+        unsafe {
+            var labelCstr = LibC.mallocCString(labelText)
+            var cancelCstr = LibC.mallocCString(cancelButtonText)
+            ptr = qProgressDialogCreate(parent, labelCstr, cancelCstr, minimum, maximum)
+            LibC.free(labelCstr)
+            LibC.free(cancelCstr)
+        }
+    }
+    
+    public func setValue(value: Int32) {
+        unsafe {
+            qProgressDialogSetValue(ptr, value)
+        }
+    }
+    
+    public func value(): Int32 {
+        unsafe {
+            qProgressDialogValue(ptr)
+        }
+    }
+    
+    public func setMinimum(minimum: Int32) {
+        unsafe {
+            qProgressDialogSetMinimum(ptr, minimum)
+        }
+    }
+    
+    public func setMaximum(maximum: Int32) {
+        unsafe {
+            qProgressDialogSetMaximum(ptr, maximum)
+        }
+    }
+    
+    public func setLabelText(text: String) {
+        unsafe {
+            var cstr = LibC.mallocCString(text)
+            qProgressDialogSetLabelText(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+    
+    public func setCancelButtonText(text: String) {
+        unsafe {
+            var cstr = LibC.mallocCString(text)
+            qProgressDialogSetCancelButtonText(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+    
+    public func setWindowTitle(title: String) {
+        unsafe {
+            var cstr = LibC.mallocCString(title)
+            qProgressDialogSetWindowTitle(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+    
+    public func setAutoClose(autoClose: Bool) {
+        unsafe {
+            qProgressDialogSetAutoClose(ptr, (if (autoClose) { 1 } else { 0 }))
+        }
+    }
+    
+    public func setAutoReset(autoReset: Bool) {
+        unsafe {
+            qProgressDialogSetAutoReset(ptr, (if (autoReset) { 1 } else { 0 }))
+        }
+    }
+    
+    public func wasCanceled(): Bool {
+        unsafe {
+            qProgressDialogWasCanceled(ptr) == 1
+        }
+    }
+    
+    public func show() {
+        unsafe {
+            qProgressDialogShow(ptr)
+        }
+    }
+    
+    public func hide() {
+        unsafe {
+            qProgressDialogHide(ptr)
+        }
+    }
+    
+    public func cancel() {
+        unsafe {
+            qProgressDialogCancel(ptr)
+        }
+    }
+    
+    public func reset() {
+        unsafe {
+            qProgressDialogReset(ptr)
+        }
+    }
+    
+    public func delete() {
+        if (ptr != 0) {
+            unsafe {
+                qProgressDialogDelete(ptr)
+            }
+        }
+    }
+}

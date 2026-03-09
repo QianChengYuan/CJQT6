@@ -160,3 +160,105 @@ void qTimerDelete(int64_t ptr) {
 }
 
 } // extern "C"
+// ============================================================
+// QWidget 样式表支持
+// ============================================================
+
+void qWidgetSetStyleSheet(int64_t ptr, const char* styleSheet) {
+    QWidget* widget = reinterpret_cast<QWidget*>(ptr);
+    if (widget) {
+        widget->setStyleSheet(QString::fromUtf8(styleSheet));
+    }
+}
+
+const char* qWidgetStyleSheet(int64_t ptr) {
+    QWidget* widget = reinterpret_cast<QWidget*>(ptr);
+    if (widget) {
+        static QByteArray styleSheet;
+        styleSheet = widget->styleSheet().toUtf8();
+        return styleSheet.constData();
+    }
+    return "";
+}
+
+void qWidgetSetEnabled(int64_t ptr, int32_t enabled) {
+    QWidget* widget = reinterpret_cast<QWidget*>(ptr);
+    if (widget) {
+        widget->setEnabled(enabled != 0);
+    }
+}
+
+int32_t qWidgetIsEnabled(int64_t ptr) {
+    QWidget* widget = reinterpret_cast<QWidget*>(ptr);
+    if (widget) {
+        return widget->isEnabled() ? 1 : 0;
+    }
+    return 0;
+}
+
+void qWidgetSetVisible(int64_t ptr, int32_t visible) {
+    QWidget* widget = reinterpret_cast<QWidget*>(ptr);
+    if (widget) {
+        widget->setVisible(visible != 0);
+    }
+}
+
+int32_t qWidgetIsVisible(int64_t ptr) {
+    QWidget* widget = reinterpret_cast<QWidget*>(ptr);
+    if (widget) {
+        return widget->isVisible() ? 1 : 0;
+    }
+    return 0;
+}
+
+void qWidgetSetToolTip(int64_t ptr, const char* toolTip) {
+    QWidget* widget = reinterpret_cast<QWidget*>(ptr);
+    if (widget) {
+        widget->setToolTip(QString::fromUtf8(toolTip));
+    }
+}
+
+void qWidgetSetMinimumSize(int64_t ptr, int32_t width, int32_t height) {
+    QWidget* widget = reinterpret_cast<QWidget*>(ptr);
+    if (widget) {
+        widget->setMinimumSize(width, height);
+    }
+}
+
+void qWidgetSetMaximumSize(int64_t ptr, int32_t width, int32_t height) {
+    QWidget* widget = reinterpret_cast<QWidget*>(ptr);
+    if (widget) {
+        widget->setMaximumSize(width, height);
+    }
+}
+
+int32_t qWidgetWidth(int64_t ptr) {
+    QWidget* widget = reinterpret_cast<QWidget*>(ptr);
+    if (widget) {
+        return widget->width();
+    }
+    return 0;
+}
+
+int32_t qWidgetHeight(int64_t ptr) {
+    QWidget* widget = reinterpret_cast<QWidget*>(ptr);
+    if (widget) {
+        return widget->height();
+    }
+    return 0;
+}
+
+void qWidgetUpdate(int64_t ptr) {
+    QWidget* widget = reinterpret_cast<QWidget*>(ptr);
+    if (widget) {
+        widget->update();
+    }
+}
+
+void qWidgetRepaint(int64_t ptr) {
+    QWidget* widget = reinterpret_cast<QWidget*>(ptr);
+    if (widget) {
+        widget->repaint();
+    }
+}
+

@@ -348,3 +348,140 @@ public class QFrame {
         }
     }
 }
+
+// ============================================================
+// QSplitter - 分割器
+// ============================================================
+foreign func qSplitterCreate(parentPtr: Int64): Int64
+foreign func qSplitterCreateHorizontal(parentPtr: Int64): Int64
+foreign func qSplitterCreateVertical(parentPtr: Int64): Int64
+foreign func qSplitterDelete(ptr: Int64): Unit
+foreign func qSplitterAddWidget(ptr: Int64, widgetPtr: Int64): Unit
+foreign func qSplitterCount(ptr: Int64): Int32
+foreign func qSplitterWidget(ptr: Int64, index: Int32): Int64
+foreign func qSplitterSetStretchFactor(ptr: Int64, index: Int32, stretch: Int32): Unit
+foreign func qSplitterSetHandleWidth(ptr: Int64, width: Int32): Unit
+foreign func qSplitterHandleWidth(ptr: Int64): Int32
+foreign func qSplitterSetChildrenCollapsible(ptr: Int64, collapsible: Int32): Unit
+foreign func qSplitterChildrenCollapsible(ptr: Int64): Int32
+foreign func qSplitterSetOrientation(ptr: Int64, orientation: Int32): Unit
+foreign func qSplitterOrientation(ptr: Int64): Int32
+
+public class QSplitter {
+    private let ptr: Int64
+    
+    // 创建水平分割器
+    public static func createHorizontal(parent: Int64): QSplitter {
+        unsafe {
+            QSplitter(qSplitterCreateHorizontal(parent), true)
+        }
+    }
+    
+    // 创建垂直分割器
+    public static func createVertical(parent: Int64): QSplitter {
+        unsafe {
+            QSplitter(qSplitterCreateVertical(parent), true)
+        }
+    }
+    
+    public init(parent: Int64) {
+        unsafe {
+            ptr = qSplitterCreate(parent)
+        }
+    }
+    
+    // 内部构造函数，用于静态工厂方法
+    private init(ptr: Int64, internal: Bool) {
+        this.ptr = ptr
+    }
+    
+    public func addWidget(widgetPtr: Int64) {
+        unsafe {
+            qSplitterAddWidget(ptr, widgetPtr)
+        }
+    }
+    
+    public func count(): Int32 {
+        unsafe {
+            qSplitterCount(ptr)
+        }
+    }
+    
+    public func setStretchFactor(index: Int32, stretch: Int32) {
+        unsafe {
+            qSplitterSetStretchFactor(ptr, index, stretch)
+        }
+    }
+    
+    public func setHandleWidth(width: Int32) {
+        unsafe {
+            qSplitterSetHandleWidth(ptr, width)
+        }
+    }
+    
+    public func handleWidth(): Int32 {
+        unsafe {
+            qSplitterHandleWidth(ptr)
+        }
+    }
+    
+    public func setChildrenCollapsible(collapsible: Bool) {
+        unsafe {
+            qSplitterSetChildrenCollapsible(ptr, if (collapsible) { 1 } else { 0 })
+        }
+    }
+    
+    public func childrenCollapsible(): Bool {
+        unsafe {
+            qSplitterChildrenCollapsible(ptr) == 1
+        }
+    }
+    
+    public func setOrientation(orientation: Int32) {
+        unsafe {
+            qSplitterSetOrientation(ptr, orientation)
+        }
+    }
+    
+    public func orientation(): Int32 {
+        unsafe {
+            qSplitterOrientation(ptr)
+        }
+    }
+    
+    public func show() {
+        unsafe {
+            qWidgetShow(ptr)
+        }
+    }
+    
+    public func hide() {
+        unsafe {
+            qWidgetHide(ptr)
+        }
+    }
+    
+    public func resize(width: Int32, height: Int32) {
+        unsafe {
+            qWidgetResize(ptr, width, height)
+        }
+    }
+    
+    public func getPtr(): Int64 {
+        ptr
+    }
+    
+    public func delete() {
+        if (ptr != 0) {
+            unsafe {
+                qSplitterDelete(ptr)
+            }
+        }
+    }
+}
+
+// 分割器方向常量
+public class SplitterOrientation {
+    public static let Horizontal: Int32 = 1  // Qt::Horizontal
+    public static let Vertical: Int32 = 2    // Qt::Vertical
+}

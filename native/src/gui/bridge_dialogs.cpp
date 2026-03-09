@@ -130,3 +130,196 @@ const char* qColorDialogGetColorHex(int64_t parentPtr, const char* title) {
 }
 
 } // extern "C"
+
+// ============================================================
+// QFontDialog 桥接函数
+// ============================================================
+
+#include <QFontDialog>
+#include <QFont>
+
+// 获取字体名称
+const char* qFontDialogGetFontName(int64_t parentPtr, const char* title) {
+    QWidget* parent = reinterpret_cast<QWidget*>(parentPtr);
+    bool ok = false;
+    QFont font = QFontDialog::getFont(&ok, parent);
+    if (ok) {
+        return safeCopyString(font.family());
+    }
+    return safeCopyString(QString()); // 空字符串表示取消
+}
+
+// 获取字体大小
+int32_t qFontDialogGetFontSize(int64_t parentPtr, const char* title) {
+    QWidget* parent = reinterpret_cast<QWidget*>(parentPtr);
+    bool ok = false;
+    QFont font = QFontDialog::getFont(&ok, parent);
+    if (ok) {
+        return font.pointSize();
+    }
+    return -1; // -1表示取消
+}
+
+// 获取完整字体信息 (格式: "Family,Size,Bold,Italic")
+const char* qFontDialogGetFontInfo(int64_t parentPtr, const char* title) {
+    QWidget* parent = reinterpret_cast<QWidget*>(parentPtr);
+    bool ok = false;
+    QFont font = QFontDialog::getFont(&ok, parent);
+    if (ok) {
+        QString info = QString("%1,%2,%3,%4")
+            .arg(font.family())
+            .arg(font.pointSize())
+            .arg(font.bold() ? 1 : 0)
+            .arg(font.italic() ? 1 : 0);
+        return safeCopyString(info);
+    }
+    return safeCopyString(QString()); // 空字符串表示取消
+}
+
+// 使用初始字体获取字体
+const char* qFontDialogGetFontWithDefault(int64_t parentPtr, const char* title, 
+                                           const char* family, int32_t size, 
+                                           int32_t bold, int32_t italic) {
+    QWidget* parent = reinterpret_cast<QWidget*>(parentPtr);
+    QFont initialFont(QString::fromUtf8(family), size);
+    initialFont.setBold(bold != 0);
+    initialFont.setItalic(italic != 0);
+    
+    bool ok = false;
+    QFont font = QFontDialog::getFont(&ok, initialFont, parent, QString::fromUtf8(title));
+    if (ok) {
+        QString info = QString("%1,%2,%3,%4")
+            .arg(font.family())
+            .arg(font.pointSize())
+            .arg(font.bold() ? 1 : 0)
+            .arg(font.italic() ? 1 : 0);
+        return safeCopyString(info);
+    }
+    return safeCopyString(QString()); // 空字符串表示取消
+}
+
+// ============================================================
+// QProgressDialog 桥接函数
+// ============================================================
+
+#include <QProgressDialog>
+
+int64_t qProgressDialogCreate(int64_t parentPtr, const char* labelText, const char* cancelButtonText, int32_t minimum, int32_t maximum) {
+    QWidget* parent = reinterpret_cast<QWidget*>(parentPtr);
+    QProgressDialog* progress = new QProgressDialog(
+        QString::fromUtf8(labelText),
+        QString::fromUtf8(cancelButtonText),
+        minimum, maximum,
+        parent
+    );
+    progress->setWindowModality(Qt::WindowModal);
+    return reinterpret_cast<int64_t>(progress);
+}
+
+void qProgressDialogDelete(int64_t ptr) {
+    QProgressDialog* progress = reinterpret_cast<QProgressDialog*>(ptr);
+    if (progress) {
+        delete progress;
+    }
+}
+
+void qProgressDialogSetValue(int64_t ptr, int32_t value) {
+    QProgressDialog* progress = reinterpret_cast<QProgressDialog*>(ptr);
+    if (progress) {
+        progress->setValue(value);
+    }
+}
+
+int32_t qProgressDialogValue(int64_t ptr) {
+    QProgressDialog* progress = reinterpret_cast<QProgressDialog*>(ptr);
+    if (progress) {
+        return progress->value();
+    }
+    return 0;
+}
+
+void qProgressDialogSetMinimum(int64_t ptr, int32_t minimum) {
+    QProgressDialog* progress = reinterpret_cast<QProgressDialog*>(ptr);
+    if (progress) {
+        progress->setMinimum(minimum);
+    }
+}
+
+void qProgressDialogSetMaximum(int64_t ptr, int32_t maximum) {
+    QProgressDialog* progress = reinterpret_cast<QProgressDialog*>(ptr);
+    if (progress) {
+        progress->setMaximum(maximum);
+    }
+}
+
+void qProgressDialogSetLabelText(int64_t ptr, const char* text) {
+    QProgressDialog* progress = reinterpret_cast<QProgressDialog*>(ptr);
+    if (progress) {
+        progress->setLabelText(QString::fromUtf8(text));
+    }
+}
+
+void qProgressDialogSetCancelButtonText(int64_t ptr, const char* text) {
+    QProgressDialog* progress = reinterpret_cast<QProgressDialog*>(ptr);
+    if (progress) {
+        progress->setCancelButtonText(QString::fromUtf8(text));
+    }
+}
+
+void qProgressDialogSetWindowTitle(int64_t ptr, const char* title) {
+    QProgressDialog* progress = reinterpret_cast<QProgressDialog*>(ptr);
+    if (progress) {
+        progress->setWindowTitle(QString::fromUtf8(title));
+    }
+}
+
+void qProgressDialogSetAutoClose(int64_t ptr, int32_t autoClose) {
+    QProgressDialog* progress = reinterpret_cast<QProgressDialog*>(ptr);
+    if (progress) {
+        progress->setAutoClose(autoClose != 0);
+    }
+}
+
+void qProgressDialogSetAutoReset(int64_t ptr, int32_t autoReset) {
+    QProgressDialog* progress = reinterpret_cast<QProgressDialog*>(ptr);
+    if (progress) {
+        progress->setAutoReset(autoReset != 0);
+    }
+}
+
+int32_t qProgressDialogWasCanceled(int64_t ptr) {
+    QProgressDialog* progress = reinterpret_cast<QProgressDialog*>(ptr);
+    if (progress) {
+        return progress->wasCanceled() ? 1 : 0;
+    }
+    return 0;
+}
+
+void qProgressDialogShow(int64_t ptr) {
+    QProgressDialog* progress = reinterpret_cast<QProgressDialog*>(ptr);
+    if (progress) {
+        progress->show();
+    }
+}
+
+void qProgressDialogHide(int64_t ptr) {
+    QProgressDialog* progress = reinterpret_cast<QProgressDialog*>(ptr);
+    if (progress) {
+        progress->hide();
+    }
+}
+
+void qProgressDialogCancel(int64_t ptr) {
+    QProgressDialog* progress = reinterpret_cast<QProgressDialog*>(ptr);
+    if (progress) {
+        progress->cancel();
+    }
+}
+
+void qProgressDialogReset(int64_t ptr) {
+    QProgressDialog* progress = reinterpret_cast<QProgressDialog*>(ptr);
+    if (progress) {
+        progress->reset();
+    }
+}
+
