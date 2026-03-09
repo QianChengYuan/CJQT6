@@ -4,6 +4,7 @@ package CJQT6.widgets
 foreign func qLabelCreate(): Int64
 foreign func qLabelSetText(ptr: Int64, text: CString): Unit
 foreign func qLabelSetAlignment(ptr: Int64, alignment: Int32): Unit
+foreign func qLabelSetPixmap(ptr: Int64, pixmapPtr: Int64): Unit
 foreign func qLabelDelete(ptr: Int64): Unit
 
 public class QLabel {
@@ -38,6 +39,12 @@ public class QLabel {
     public func setAlignment(alignment: Int32) {
         unsafe {
             qLabelSetAlignment(ptr, alignment)
+        }
+    }
+    
+    public func setPixmap(pixmapPtr: Int64) {
+        unsafe {
+            qLabelSetPixmap(ptr, pixmapPtr)
         }
     }
     

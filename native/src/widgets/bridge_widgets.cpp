@@ -42,6 +42,14 @@ void qLabelSetAlignment(int64_t ptr, int32_t alignment) {
     }
 }
 
+void qLabelSetPixmap(int64_t ptr, int64_t pixmapPtr) {
+    QLabel* label = reinterpret_cast<QLabel*>(ptr);
+    QPixmap* pixmap = reinterpret_cast<QPixmap*>(pixmapPtr);
+    if (label && pixmap) {
+        label->setPixmap(*pixmap);
+    }
+}
+
 void qLabelDelete(int64_t ptr) {
     QLabel* label = reinterpret_cast<QLabel*>(ptr);
     if (label) {

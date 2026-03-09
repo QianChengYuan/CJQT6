@@ -67,12 +67,18 @@ set(VIEWS_SOURCES
     native/src/views/bridge_tree.cpp
 )
 
+# Paint模块 - 绘图相关类
+set(PAINT_SOURCES
+    native/src/paint/bridge_painter.cpp
+)
+
 # 创建共享库
 add_library(cjqt6_bridge SHARED
     ${CORE_SOURCES}
     ${GUI_SOURCES}
     ${WIDGETS_SOURCES}
     ${VIEWS_SOURCES}
+    ${PAINT_SOURCES}
     # 头文件 (用于MOC处理)
     native/includes/gui.h
     native/includes/widgets.h
