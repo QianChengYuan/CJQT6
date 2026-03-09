@@ -72,6 +72,11 @@ set(PAINT_SOURCES
     native/src/paint/bridge_painter.cpp
 )
 
+# Process模块 - 进程管理
+set(PROCESS_SOURCES
+    native/src/process/bridge_process.cpp
+)
+
 # 创建共享库
 add_library(cjqt6_bridge SHARED
     ${CORE_SOURCES}
@@ -79,6 +84,7 @@ add_library(cjqt6_bridge SHARED
     ${WIDGETS_SOURCES}
     ${VIEWS_SOURCES}
     ${PAINT_SOURCES}
+    ${PROCESS_SOURCES}
     # 头文件 (用于MOC处理)
     native/includes/gui.h
     native/includes/widgets.h
