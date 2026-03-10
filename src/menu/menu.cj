@@ -61,6 +61,7 @@ foreign func qMainWindowSetMenuBar(ptr: Int64, menuBarPtr: Int64): Unit
 foreign func qMainWindowAddToolBar(ptr: Int64, toolBarPtr: Int64): Unit
 foreign func qMainWindowSetStatusBar(ptr: Int64, statusBarPtr: Int64): Unit
 foreign func qMainWindowSetCentralWidget(ptr: Int64, widgetPtr: Int64): Unit
+foreign func qMainWindowSetWindowTitle(ptr: Int64, title: CString): Unit
 foreign func qMainWindowDelete(ptr: Int64): Unit
 
 // ============================================================
@@ -426,6 +427,14 @@ public class QMainWindow {
     public func hide() {
         unsafe {
             qWidgetHide(ptr)
+        }
+    }
+    
+    public func setTitle(title: String) {
+        unsafe {
+            var cstr = LibC.mallocCString(title)
+            qMainWindowSetWindowTitle(ptr, cstr)
+            LibC.free(cstr)
         }
     }
     

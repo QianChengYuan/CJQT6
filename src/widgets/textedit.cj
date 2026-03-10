@@ -103,6 +103,22 @@ public class QTextEdit {
         ptr
     }
     
+    // 样式表支持
+    public func setWidgetStyleSheet(style: String) {
+        unsafe {
+            var cstr = LibC.mallocCString(style)
+            qWidgetSetStyleSheet(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+    
+    public func widgetStyleSheet(): String {
+        unsafe {
+            let cstr = qWidgetStyleSheet(ptr)
+            cstr.toString()
+        }
+    }
+    
     public func delete() {
         if (ptr != 0) {
             unsafe {

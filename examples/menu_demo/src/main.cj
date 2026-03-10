@@ -6,12 +6,13 @@ import CJQT6.widgets.*
 import CJQT6.dialogs.*
 import std.fs.*
 
-// 全局变量存储控件引用（使用Option延迟初始化）
+// 全局变量存储控件引用
 var g_textEdit: Option<QTextEdit> = None
 var g_statusBar: Option<QStatusBar> = None
 var g_app: Option<QApplication> = None
 var g_window: Option<QMainWindow> = None
-var g_currentFile: Option<String> = None  // 当前文件路径
+var g_currentFile: Option<String> = None
+var g_currentFont: Option<QFontInfo> = None
 
 // 回调函数 - 新建
 func onNew(_: Int64): Unit {
@@ -28,11 +29,9 @@ func onNew(_: Int64): Unit {
 func onOpen(_: Int64): Unit {
     let fileName = QFileDialog.getOpenFileName(0, "打开文件", "文本文件 (*.txt);;所有文件 (*)")
     if (fileName.size > 0) {
-        // 读取文件内容
         try {
             let content = File.readFrom(fileName)
             if (let Some(textEdit) <- g_textEdit) {
-                // 将Array<UInt8>转为String
                 let text = String.fromUtf8(content)
                 textEdit.setText(text)
             }
@@ -50,7 +49,6 @@ func onOpen(_: Int64): Unit {
 func onSave(_: Int64): Unit {
     var fileName = ""
     
-    // 如果没有当前文件，弹出保存对话框
     if (let Some(f) <- g_currentFile) {
         fileName = f
     } else {
@@ -58,16 +56,13 @@ func onSave(_: Int64): Unit {
     }
     
     if (fileName.size > 0) {
-        // 确保文件名有.txt后缀
         if (!fileName.endsWith(".txt")) {
             fileName = "${fileName}.txt"
         }
         
-        // 获取文本内容并保存
         if (let Some(textEdit) <- g_textEdit) {
             let content = textEdit.text()
             try {
-                // 将String转为Array<UInt8>写入文件
                 let bytes = content.toArray()
                 File.writeTo(fileName, bytes)
                 g_currentFile = Some(fileName)
@@ -85,17 +80,14 @@ func onSave(_: Int64): Unit {
 func onSaveAs(_: Int64): Unit {
     let fileName = QFileDialog.getSaveFileName(0, "另存为", "文本文件 (*.txt)")
     if (fileName.size > 0) {
-        // 确保文件名有.txt后缀
         var finalName = fileName
         if (!fileName.endsWith(".txt")) {
             finalName = "${fileName}.txt"
         }
         
-        // 获取文本内容并保存
         if (let Some(textEdit) <- g_textEdit) {
             let content = textEdit.text()
             try {
-                // 将String转为Array<UInt8>写入文件
                 let bytes = content.toArray()
                 File.writeTo(finalName, bytes)
                 g_currentFile = Some(finalName)
@@ -166,32 +158,72 @@ func onClear(_: Int64): Unit {
     }
 }
 
+// 回调函数 - 设置字体
+func onSetFont(_: Int64): Unit {
+    // 使用当前字体作为默认值
+    var defaultFamily = "Sans Serif"
+    var defaultSize: Int32 = 12
+    var defaultBold = false
+    var defaultItalic = false
+    
+    if (let Some(font) <- g_currentFont) {
+        defaultFamily = font.family
+        defaultSize = font.size
+        defaultBold = font.bold
+        defaultItalic = font.italic
+    }
+    
+    let fontInfo = QFontDialog.getFontWithDefault(0, "选择字体", defaultFamily, defaultSize, defaultBold, defaultItalic)
+    if (let Some(info) <- fontInfo) {
+        g_currentFont = Some(info)
+        // 应用样式到文本编辑器
+        if (let Some(textEdit) <- g_textEdit) {
+            let style = "font-family: '${info.family}'; font-size: ${info.size}pt;"
+            textEdit.setWidgetStyleSheet(style)
+        }
+        if (let Some(statusBar) <- g_statusBar) {
+            statusBar.showMessage("字体: ${info.family} ${info.size}pt")
+        }
+    }
+}
+
+// 回调函数 - 设置颜色
+func onSetColor(_: Int64): Unit {
+    let color = QColorDialog.getColor(0, "选择文本颜色")
+    if (color.size > 0) {
+        if (let Some(textEdit) <- g_textEdit) {
+            let currentStyle = textEdit.widgetStyleSheet()
+            let newStyle = "${currentStyle} color: ${color};"
+            textEdit.setWidgetStyleSheet(newStyle)
+        }
+        if (let Some(statusBar) <- g_statusBar) {
+            statusBar.showMessage("颜色: ${color}")
+        }
+    }
+}
+
 // 回调函数 - 关于
 func onAbout(_: Int64): Unit {
-    QMessageBox.information(0, "关于", "CJQT6 记事本 v1.0\n\n仓颉语言 Qt6 封装库示例程序\n\n功能:\n- 文件: 新建、打开、保存、另存为、退出\n- 编辑: 剪切、复制、粘贴、全选、清空\n- 帮助: 关于")
+    QMessageBox.information(0, "关于", "CJQT6 记事本 v2.0\n\n仓颉语言 Qt6 封装库示例程序\n\n功能:\n- 文件: 新建、打开、保存、另存为、退出\n- 编辑: 剪切、复制、粘贴、全选、清空\n- 格式: 字体、颜色\n- 帮助: 关于")
 }
 
 main(): Int32 {
-    // 创建应用 (必须先创建)
     let app = QApplication()
     g_app = Some(app)
     
-    // 创建主窗口
     let window = QMainWindow()
     g_window = Some(window)
+    window.setTitle("CJQT6 记事本")
     
-    // 创建文本编辑区
     let textEdit = QTextEdit()
     g_textEdit = Some(textEdit)
     window.setCentralWidget(textEdit.getPtr())
     
-    // 创建状态栏
     let statusBar = QStatusBar()
     g_statusBar = Some(statusBar)
     statusBar.showMessage("就绪 - CJQT6 记事本")
     window.setStatusBar(statusBar.getPtr())
     
-    // 创建菜单栏
     let menuBar = QMenuBar()
     
     // ========== 文件菜单 ==========
@@ -252,6 +284,18 @@ main(): Int32 {
     editMenu.addActionPtr(selectAllAction.getPtr())
     editMenu.addActionPtr(clearAction.getPtr())
     
+    // ========== 格式菜单 ==========
+    let formatMenu = menuBar.addMenu("格式(&O)")
+    
+    let fontAction = QAction("字体(&F)...")
+    fontAction.setOnTriggered({ _: Int64 => onSetFont(0) })
+    
+    let colorAction = QAction("颜色(&C)...")
+    colorAction.setOnTriggered({ _: Int64 => onSetColor(0) })
+    
+    formatMenu.addActionPtr(fontAction.getPtr())
+    formatMenu.addActionPtr(colorAction.getPtr())
+    
     // ========== 帮助菜单 ==========
     let helpMenu = menuBar.addMenu("帮助(&H)")
     
@@ -260,7 +304,6 @@ main(): Int32 {
     
     helpMenu.addActionPtr(aboutAction.getPtr())
     
-    // 设置菜单栏到主窗口
     window.setMenuBar(menuBar.getPtr())
     
     // ========== 工具栏 ==========
@@ -272,18 +315,16 @@ main(): Int32 {
     toolBar.addAction(cutAction.getPtr())
     toolBar.addAction(copyAction.getPtr())
     toolBar.addAction(pasteAction.getPtr())
+    toolBar.addSeparator()
+    toolBar.addAction(fontAction.getPtr())
+    toolBar.addAction(colorAction.getPtr())
     window.addToolBar(toolBar.getPtr())
     
-    // 设置窗口属性
     window.resize(800, 600)
-    
-    // 显示窗口
     window.show()
     
-    // 运行应用
     let result = app.exec()
     
-    // 清理资源
     textEdit.delete()
     window.delete()
     

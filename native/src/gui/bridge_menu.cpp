@@ -340,6 +340,13 @@ void qMainWindowSetCentralWidget(int64_t ptr, int64_t widgetPtr) {
     }
 }
 
+void qMainWindowSetWindowTitle(int64_t ptr, const char* title) {
+    QMainWindow* mainWindow = reinterpret_cast<QMainWindow*>(ptr);
+    if (mainWindow) {
+        mainWindow->setWindowTitle(QString::fromUtf8(title));
+    }
+}
+
 void qMainWindowDelete(int64_t ptr) {
     QMainWindow* mainWindow = reinterpret_cast<QMainWindow*>(ptr);
     if (mainWindow) {

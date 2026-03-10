@@ -1,13 +1,16 @@
 /**
  * @file bridge_dialogs.cpp
- * @brief 对话框桥接函数 - QMessageBox, QFileDialog, QInputDialog, QColorDialog
+ * @brief 对话框桥接函数 - QMessageBox, QFileDialog, QInputDialog, QColorDialog, QFontDialog, QProgressDialog
  */
 
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QColorDialog>
+#include <QFontDialog>
+#include <QProgressDialog>
 #include <QColor>
+#include <QFont>
 #include <limits>
 #include <cstring>
 
@@ -129,16 +132,10 @@ const char* qColorDialogGetColorHex(int64_t parentPtr, const char* title) {
     return safeCopyString(QString()); // 空字符串表示取消
 }
 
-} // extern "C"
-
 // ============================================================
 // QFontDialog 桥接函数
 // ============================================================
 
-#include <QFontDialog>
-#include <QFont>
-
-// 获取字体名称
 const char* qFontDialogGetFontName(int64_t parentPtr, const char* title) {
     QWidget* parent = reinterpret_cast<QWidget*>(parentPtr);
     bool ok = false;
@@ -149,7 +146,6 @@ const char* qFontDialogGetFontName(int64_t parentPtr, const char* title) {
     return safeCopyString(QString()); // 空字符串表示取消
 }
 
-// 获取字体大小
 int32_t qFontDialogGetFontSize(int64_t parentPtr, const char* title) {
     QWidget* parent = reinterpret_cast<QWidget*>(parentPtr);
     bool ok = false;
@@ -160,7 +156,6 @@ int32_t qFontDialogGetFontSize(int64_t parentPtr, const char* title) {
     return -1; // -1表示取消
 }
 
-// 获取完整字体信息 (格式: "Family,Size,Bold,Italic")
 const char* qFontDialogGetFontInfo(int64_t parentPtr, const char* title) {
     QWidget* parent = reinterpret_cast<QWidget*>(parentPtr);
     bool ok = false;
@@ -176,7 +171,6 @@ const char* qFontDialogGetFontInfo(int64_t parentPtr, const char* title) {
     return safeCopyString(QString()); // 空字符串表示取消
 }
 
-// 使用初始字体获取字体
 const char* qFontDialogGetFontWithDefault(int64_t parentPtr, const char* title, 
                                            const char* family, int32_t size, 
                                            int32_t bold, int32_t italic) {
@@ -201,8 +195,6 @@ const char* qFontDialogGetFontWithDefault(int64_t parentPtr, const char* title,
 // ============================================================
 // QProgressDialog 桥接函数
 // ============================================================
-
-#include <QProgressDialog>
 
 int64_t qProgressDialogCreate(int64_t parentPtr, const char* labelText, const char* cancelButtonText, int32_t minimum, int32_t maximum) {
     QWidget* parent = reinterpret_cast<QWidget*>(parentPtr);
@@ -323,3 +315,4 @@ void qProgressDialogReset(int64_t ptr) {
     }
 }
 
+} // extern "C"

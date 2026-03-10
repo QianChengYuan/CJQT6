@@ -1,12 +1,13 @@
 /**
  * @file bridge_containers.cpp
- * @brief 容器部件桥接函数 - QGroupBox, QTabWidget, QScrollArea, QFrame
+ * @brief 容器部件桥接函数 - QGroupBox, QTabWidget, QScrollArea, QFrame, QSplitter
  */
 
 #include <QGroupBox>
 #include <QTabWidget>
 #include <QScrollArea>
 #include <QFrame>
+#include <QSplitter>
 #include <QVBoxLayout>
 
 extern "C" {
@@ -204,12 +205,9 @@ void qFrameDelete(int64_t ptr) {
     }
 }
 
-} // extern "C"
 // ============================================================
 // QSplitter 桥接函数
 // ============================================================
-
-#include <QSplitter>
 
 int64_t qSplitterCreate(int64_t parentPtr) {
     QWidget* parent = reinterpret_cast<QWidget*>(parentPtr);
@@ -345,3 +343,4 @@ int32_t qSplitterRestoreState(int64_t ptr, const char* buffer, int32_t size) {
     return 0;
 }
 
+} // extern "C"
