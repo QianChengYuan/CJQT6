@@ -142,6 +142,17 @@ CJQT6/
 | QSlider | QSlider | 滑动条 |
 | QProgressBar | QProgressBar | 进度条 |
 
+### 日期时间
+| 类 | Qt类 | 说明 |
+|----|------|------|
+| QCalendarWidget | QCalendarWidget | 日历部件 |
+| QDateEdit | QDateEdit | 日期编辑器 |
+| QTimeEdit | QTimeEdit | 时间编辑器 |
+| QDateTimeEdit | QDateTimeEdit | 日期时间编辑器 |
+| QDate | QDate | 日期类 |
+| QTime | QTime | 时间类 |
+| QDateTime | QDateTime | 日期时间类 |
+
 ### 容器部件
 | 类 | Qt类 | 说明 |
 |----|------|------|

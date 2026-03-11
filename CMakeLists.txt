@@ -51,13 +51,14 @@ set(GUI_SOURCES
     native/src/gui/bridge_menu.cpp
 )
 
-# Widgets模块 - 基础部件、选择部件、数值部件、容器
+# Widgets模块 - 基础部件、选择部件、数值部件、容器、日期时间
 set(WIDGETS_SOURCES
     native/src/widgets/widgets.cpp
     native/src/widgets/bridge_widgets.cpp
     native/src/widgets/bridge_selectors.cpp
     native/src/widgets/bridge_values.cpp
     native/src/widgets/bridge_containers.cpp
+    native/src/widgets/bridge_datetime.cpp
 )
 
 # Views模块 - 表格视图、列表视图、树形视图
