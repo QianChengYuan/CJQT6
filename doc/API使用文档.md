@@ -17,7 +17,8 @@
 13. [事件处理](#事件处理)
 14. [绘图模块](#绘图模块)
 15. [进程管理](#进程管理)
-16. [信号与槽](#信号与槽)
+16. [QML模块](#qml模块)
+17. [信号与槽](#信号与槽)
 
 ---
 
@@ -1768,6 +1769,182 @@ main(): Int32 {
     timeEdit.delete()
     datetimeEdit.delete()
     window.delete()
+    app.delete()
+    
+    return result
+}
+```
+
+---
+
+## QML模块
+
+QML模块提供Qt Quick/QML支持，允许使用声明式QML语言构建现代UI。
+
+### QQmlApplicationEngine - QML应用引擎
+
+```cangjie
+import CJQT6.qml.*
+
+// 创建引擎
+let engine = QQmlApplicationEngine()
+
+// 加载内联QML代码
+let qmlCode = """
+import QtQuick
+import QtQuick.Controls
+
+ApplicationWindow {
+    visible: true
+    width: 400
+    height: 300
+    title: "QML Demo"
+    
+    Button {
+        text: "Click Me"
+        anchors.centerIn: parent
+        onClicked: console.log("Clicked!")
+    }
+}
+"""
+engine.loadData(qmlCode)
+```
+
+**QQmlApplicationEngine 方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` | 创建QML引擎 |
+| `loadFile(path: String)` | 加载QML文件 |
+| `loadUrl(url: String)` | 加载QML URL |
+| `loadData(qmlCode: String)` | 加载内联QML代码 |
+| `setContextProperty(name: String, value: Int64)` | 设置上下文对象 |
+| `setContextPropertyString(name, value)` | 设置上下文字符串 |
+| `setContextPropertyInt(name, value)` | 设置上下文整数 |
+| `setContextPropertyDouble(name, value)` | 设置上下文浮点数 |
+| `setContextPropertyBool(name, value)` | 设置上下文布尔值 |
+| `rootObjects(): Int64` | 获取根对象列表 |
+| `rootObjectsCount(): Int32` | 获取根对象数量 |
+| `clearComponentCache()` | 清除组件缓存 |
+| `addImportPath(path: String)` | 添加导入路径 |
+| `delete()` | 释放资源 |
+
+### QQuickView - QML视图窗口
+
+```cangjie
+let view = QQuickView()
+view.setTitle("QML View")
+view.resize(400, 300)
+view.setResizeMode(ResizeMode.SizeRootObjectToView)
+view.setSourceUrl("qrc:/main.qml")  // 或内联QML
+view.show()
+```
+
+**QQuickView 方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` | 创建QML视图 |
+| `setSource(path: String)` | 设置QML源文件 |
+| `setSourceUrl(url: String)` | 设置QML URL |
+| `show()` | 显示窗口 |
+| `hide()` | 隐藏窗口 |
+| `setTitle(title: String)` | 设置标题 |
+| `resize(width, height)` | 设置大小 |
+| `setResizeMode(mode: Int32)` | 设置调整模式 |
+| `rootObject(): Int64` | 获取根对象 |
+| `delete()` | 释放资源 |
+
+**ResizeMode 常量**:
+```cangjie
+ResizeMode.SizeViewToRootObject    // 视图跟随根项
+ResizeMode.SizeRootObjectToView    // 根项跟随视图
+```
+
+### QQuickItem - QML项操作
+
+```cangjie
+// 获取QML项
+let item = QQuickItem(itemPtr)
+
+// 设置属性
+item.setPropertyString("text", "Hello")
+item.setPropertyInt("value", 42)
+item.setPropertyBool("visible", true)
+
+// 获取属性
+let text = item.getPropertyString("text")
+let value = item.getPropertyInt("value")
+```
+
+**QQuickItem 方法**:
+| 方法 | 说明 |
+|------|------|
+| `setVisible(visible: Bool)` | 设置可见性 |
+| `isVisible(): Bool` | 是否可见 |
+| `setEnabled(enabled: Bool)` | 设置启用状态 |
+| `isEnabled(): Bool` | 是否启用 |
+| `setX(x: Float32)` | 设置X坐标 |
+| `setY(y: Float32)` | 设置Y坐标 |
+| `setWidth(w: Float32)` | 设置宽度 |
+| `setHeight(h: Float32)` | 设置高度 |
+| `x(): Float32` | 获取X坐标 |
+| `y(): Float32` | 获取Y坐标 |
+| `width(): Float32` | 获取宽度 |
+| `height(): Float32` | 获取高度 |
+| `findChild(name: String): Int64` | 查找子项 |
+| `setProperty(name, value: String)` | 设置字符串属性 |
+| `setPropertyInt(name, value: Int32)` | 设置整数属性 |
+| `setPropertyDouble(name, value: Float64)` | 设置浮点属性 |
+| `setPropertyBool(name, value: Bool)` | 设置布尔属性 |
+| `getPropertyString(name): String` | 获取字符串属性 |
+| `getPropertyInt(name): Int32` | 获取整数属性 |
+| `getPropertyDouble(name): Float64` | 获取浮点属性 |
+| `getPropertyBool(name): Bool` | 获取布尔属性 |
+
+### QML示例
+
+```cangjie
+package qml_demo
+
+import CJQT6.core.*
+import CJQT6.qml.*
+
+main(): Int32 {
+    let app = QApplication()
+    let engine = QQmlApplicationEngine()
+    
+    let qmlCode = """
+import QtQuick
+import QtQuick.Controls
+
+ApplicationWindow {
+    visible: true
+    width: 400
+    height: 300
+    title: "CJQT6 QML Demo"
+    
+    Column {
+        anchors.centerIn: parent
+        spacing: 20
+        
+        Text {
+            id: title
+            text: "Hello QML!"
+            font.pixelSize: 28
+        }
+        
+        Button {
+            text: "Click Me"
+            onClicked: title.text = "Clicked!"
+        }
+    }
+}
+"""
+    
+    engine.loadData(qmlCode)
+    
+    let result = app.exec()
+    
+    engine.delete()
     app.delete()
     
     return result

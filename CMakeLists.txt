@@ -12,7 +12,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 # 查找 Qt6 包
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Qml Quick QuickWidgets)
 
 # 设置 Qt6 自动 MOC、UIC、RCC
 set(CMAKE_AUTOMOC ON)
@@ -78,6 +78,11 @@ set(PROCESS_SOURCES
     native/src/process/bridge_process.cpp
 )
 
+# QML模块 - Qt Quick/QML支持
+set(QML_SOURCES
+    native/src/qml/bridge_qml.cpp
+)
+
 # 创建共享库
 add_library(cjqt6_bridge SHARED
     ${CORE_SOURCES}
@@ -86,6 +91,7 @@ add_library(cjqt6_bridge SHARED
     ${VIEWS_SOURCES}
     ${PAINT_SOURCES}
     ${PROCESS_SOURCES}
+    ${QML_SOURCES}
     # 头文件 (用于MOC处理)
     native/includes/gui.h
     native/includes/widgets.h
@@ -96,6 +102,9 @@ target_link_libraries(cjqt6_bridge PRIVATE
     Qt6::Core
     Qt6::Gui
     Qt6::Widgets
+    Qt6::Qml
+    Qt6::Quick
+    Qt6::QuickWidgets
 )
 
 # 设置输出名称
