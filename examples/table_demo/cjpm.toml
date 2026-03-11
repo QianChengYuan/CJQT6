@@ -3,7 +3,7 @@
   name = "table_demo"
   version = "1.0.0"
   output-type = "executable"
-  link-option = "-L/home/yuan123/cangjiecode/CJQT6/native/build/lib -lcjqt6_bridge"
+  link-option = "-L../lib -lcjqt6_bridge"
 
 [dependencies]
   CJQT6 = { path = "../.." }

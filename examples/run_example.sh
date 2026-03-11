@@ -4,10 +4,19 @@
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
-LIB_PATH="$PROJECT_ROOT/native/build/lib"
+LIB_PATH="$SCRIPT_DIR/lib"
+BRIDGE_LIB="$PROJECT_ROOT/native/build/lib/libcjqt6_bridge.so"
 
-# 设置库路径
-export LD_LIBRARY_PATH="$LIB_PATH:$LD_LIBRARY_PATH"
+# 如果lib目录不存在或库文件过期，自动复制
+if [ ! -f "$LIB_PATH/libcjqt6_bridge.so" ] || [ "$BRIDGE_LIB" -nt "$LIB_PATH/libcjqt6_bridge.so" ]; then
+    mkdir -p "$LIB_PATH"
+    cp "$BRIDGE_LIB" "$LIB_PATH/"
+    echo "已更新库文件到 examples/lib/"
+fi
+
+# 设置库路径（包含cjqt6_bridge和仓颉运行时）
+CANGJIE_RUNTIME="/home/yuan123/cangjie/cangjie_1.1.0/cangjie/runtime/lib/linux_x86_64_cjnative"
+export LD_LIBRARY_PATH="$LIB_PATH:$CANGJIE_RUNTIME:$LD_LIBRARY_PATH"
 
 # ===== 输入法配置 =====
 # 检查并启动ibus
