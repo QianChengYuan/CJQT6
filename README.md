@@ -215,11 +215,32 @@ make cjqt6_bridge
 cd ../..
 cjpm build
 
-# 3. 运行示例
+# 3. 编译示例
 cd examples/widget_demo
 cjpm build
-../run_example.sh ./target/release/bin/main
 ```
+
+### 运行示例
+
+使用 `run_example.sh` 脚本运行示例，会自动设置库路径和输入法支持：
+
+```bash
+cd examples
+
+# 运行widget_demo示例
+./run_example.sh ./widget_demo/target/release/bin/main
+
+# 运行其他示例
+./run_example.sh ./datetime_demo/target/release/bin/main
+./run_example.sh ./paint_demo/target/release/bin/main
+./run_example.sh ./table_demo/target/release/bin/main
+./run_example.sh ./menu_demo/target/release/bin/main
+```
+
+脚本会自动：
+- 复制最新的桥接库到 `examples/lib/`
+- 设置仓颉运行时库路径
+- 配置输入法支持（IBus/Fcitx）
 
 ### 示例代码
 
