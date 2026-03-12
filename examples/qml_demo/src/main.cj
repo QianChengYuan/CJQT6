@@ -19,7 +19,7 @@ main(): Int32 {
     // 创建 QML 文件内容
     // 注意：QQuickView 需要以 Item 或 Rectangle 作为根元素
     let qmlPath = "/tmp/cjqt6_demo.qml"
-    let qmlContent = "import QtQuick; Rectangle { width: 400; height: 300; color: \"#f5f5f5\"; Text { anchors.centerIn: parent; text: \"Hello from CJQT6!\"; font.pixelSize: 24; color: \"#333\"; } Rectangle { anchors.bottom: parent.bottom; anchors.horizontalCenter: parent.horizontalCenter; anchors.bottomMargin: 20; width: 120; height: 40; color: mouseArea.pressed ? \"#388E3C\" : \"#4CAF50\"; radius: 5; Text { anchors.centerIn: parent; text: \"Quit\"; color: \"white\"; font.pixelSize: 14; } MouseArea { id: mouseArea; anchors.fill: parent; onClicked: Qt.quit(); } } }"
+    let qmlContent = "import QtQuick; Rectangle { width: 400; height: 300; color: \"#f5f5f5\"; Text { anchors.centerIn: parent; text: \"Hello from CJQT6!\"; font.pixelSize: 24; color: \"#333\"; } }"
     
     // 写入临时 QML 文件
     unsafe {
