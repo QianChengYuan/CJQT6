@@ -51,7 +51,16 @@ fi
 
 # 运行参数指定的可执行文件
 if [ -n "$1" ]; then
-    echo "正在运行: $1"
+    # QML 应用与某些输入法配置有兼容性问题，清除输入法环境变量
+    if [[ "$1" == *"qml"* ]]; then
+        unset GTK_IM_MODULE
+        unset QT_IM_MODULE
+        unset XMODIFIERS
+        unset IBUS_ADDRESS
+        echo "正在运行: $1 (QML模式)"
+    else
+        echo "正在运行: $1"
+    fi
     echo "----------------------------------------"
     exec "$@"
 else
