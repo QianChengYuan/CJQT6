@@ -101,6 +101,11 @@ public class QQmlApplicationEngine {
         }
     }
     
+    /// 获取内部指针（调试用）
+    public func getPtr(): Int64 {
+        return ptr
+    }
+    
     /// 加载QML文件
     public func loadFile(filePath: String): Unit {
         unsafe {
@@ -213,10 +218,6 @@ public class QQmlApplicationEngine {
                 ptr = 0
             }
         }
-    }
-    
-    public func getPtr(): Int64 {
-        return ptr
     }
 }
 

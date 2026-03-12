@@ -26,8 +26,8 @@ int64_t qQmlEngineCreate() {
 
 void qQmlEngineLoadFile(int64_t ptr, const char* filePath) {
     QQmlApplicationEngine* engine = reinterpret_cast<QQmlApplicationEngine*>(ptr);
-    if (engine) {
-        engine->load(QUrl::fromLocalFile(filePath));
+    if (engine && filePath) {
+        engine->load(QString::fromUtf8(filePath));
     }
 }
 
@@ -40,8 +40,9 @@ void qQmlEngineLoadUrl(int64_t ptr, const char* url) {
 
 void qQmlEngineLoadData(int64_t ptr, const char* qmlData) {
     QQmlApplicationEngine* engine = reinterpret_cast<QQmlApplicationEngine*>(ptr);
-    if (engine) {
-        engine->loadData(qmlData);
+    if (engine && qmlData) {
+        QByteArray data(qmlData);
+        engine->loadData(data);
     }
 }
 

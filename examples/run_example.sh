@@ -18,6 +18,9 @@ fi
 CANGJIE_RUNTIME="/home/yuan123/cangjie/cangjie_1.1.0/cangjie/runtime/lib/linux_x86_64_cjnative"
 export LD_LIBRARY_PATH="$LIB_PATH:$CANGJIE_RUNTIME:$LD_LIBRARY_PATH"
 
+# QML 导入路径（Qt6 QML 模块位置）
+export QML2_IMPORT_PATH="/usr/lib/x86_64-linux-gnu/qt6/qml"
+
 # ===== 输入法配置 =====
 # 检查并启动ibus
 if command -v ibus-daemon &> /dev/null; then

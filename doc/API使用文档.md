@@ -1951,6 +1951,17 @@ ApplicationWindow {
 }
 ```
 
+### 已知限制
+
+**QQmlApplicationEngine**: 由于仓颉 FFI 与 Qt 虚函数机制的兼容性问题，QQmlApplicationEngine 在某些情况下可能会崩溃。建议使用 QQuickView 作为替代方案。
+
+**QQuickView**: 推荐使用。QQuickView 需要以 Item 或 Rectangle 作为 QML 根元素，不能使用 Window 或 ApplicationWindow。
+
+**运行环境**: 运行 QML 应用需要设置 `QML2_IMPORT_PATH` 环境变量：
+```bash
+export QML2_IMPORT_PATH=/usr/lib/x86_64-linux-gnu/qt6/qml
+```
+
 ---
 
 ## 信号与槽
