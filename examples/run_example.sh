@@ -21,48 +21,40 @@ export LD_LIBRARY_PATH="$LIB_PATH:$CANGJIE_RUNTIME:$LD_LIBRARY_PATH"
 # QML 导入路径（Qt6 QML 模块位置）
 export QML2_IMPORT_PATH="/usr/lib/x86_64-linux-gnu/qt6/qml"
 
-# ===== 输入法配置 =====
-# 检查并启动ibus
-if command -v ibus-daemon &> /dev/null; then
-    # 启动ibus守护进程（如果未运行）
-    if ! pgrep -x "ibus-daemon" > /dev/null; then
-        ibus-daemon -drx
-        sleep 1
-    fi
-    
-    # 设置ibus输入法环境变量
-    export GTK_IM_MODULE=ibus
-    export QT_IM_MODULE=ibus
-    export XMODIFIERS=@im=ibus
-    export IBUS_ADDRESS=unix:path=/run/user/$(id -u)/ibus/socket
-    
-    echo "已启用 IBus 输入法支持"
-    echo "切换输入法: 点击输入框后按 Super+Space 或 Ctrl+Space"
-elif command -v fcitx &> /dev/null || command -v fcitx5 &> /dev/null; then
-    export QT_IM_MODULE=fcitx
-    export GTK_IM_MODULE=fcitx
-    export XMODIFIERS=@im=fcitx
-    echo "已启用 Fcitx 输入法支持"
-else
-    # WSL环境下使用XIM作为后备
-    export QT_IM_MODULE=xim
-    echo "使用 XIM 输入法（后备模式）"
-fi
-
 # 运行参数指定的可执行文件
 if [ -n "$1" ]; then
-    # QML 应用与某些输入法配置有兼容性问题，清除输入法环境变量
+    # QML 应用需要干净的环境
     if [[ "$1" == *"qml"* ]]; then
-        unset GTK_IM_MODULE
-        unset QT_IM_MODULE
-        unset XMODIFIERS
-        unset IBUS_ADDRESS
         echo "正在运行: $1 (QML模式)"
+        echo "----------------------------------------"
+        # 使用 env -u 清除输入法相关变量
+        exec env -u GTK_IM_MODULE -u QT_IM_MODULE -u XMODIFIERS -u IBUS_ADDRESS -u XMODIFIERS "@im=ibus" "$@"
     else
+        # ===== 输入法配置（非QML应用）=====
+        if command -v ibus-daemon &> /dev/null; then
+            if ! pgrep -x "ibus-daemon" > /dev/null; then
+                ibus-daemon -drx
+                sleep 1
+            fi
+            export GTK_IM_MODULE=ibus
+            export QT_IM_MODULE=ibus
+            export XMODIFIERS=@im=ibus
+            export IBUS_ADDRESS=unix:path=/run/user/$(id -u)/ibus/socket
+            echo "已启用 IBus 输入法支持"
+            echo "切换输入法: 点击输入框后按 Super+Space 或 Ctrl+Space"
+        elif command -v fcitx &> /dev/null || command -v fcitx5 &> /dev/null; then
+            export QT_IM_MODULE=fcitx
+            export GTK_IM_MODULE=fcitx
+            export XMODIFIERS=@im=fcitx
+            echo "已启用 Fcitx 输入法支持"
+        else
+            export QT_IM_MODULE=xim
+            echo "使用 XIM 输入法（后备模式）"
+        fi
         echo "正在运行: $1"
+        echo "----------------------------------------"
+        exec "$@"
     fi
-    echo "----------------------------------------"
-    exec "$@"
 else
     echo "用法: $0 <可执行文件路径>"
     exit 1
