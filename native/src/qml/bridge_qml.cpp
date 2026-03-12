@@ -124,8 +124,28 @@ void qQmlEngineDelete(int64_t ptr) {
 // ============================================================
 
 int64_t qQuickViewCreate() {
-    QQuickView* view = new QQuickView();
-    return reinterpret_cast<int64_t>(view);
+    try {
+        // 检查QApplication是否存在
+        if (!QCoreApplication::instance()) {
+            qWarning() << "QQuickView requires QApplication instance";
+            return 0;
+        }
+        
+        QQuickView* view = new QQuickView();
+        if (!view) {
+            qWarning() << "Failed to create QQuickView";
+            return 0;
+        }
+        
+        qDebug() << "QQuickView created successfully:" << (void*)view;
+        return reinterpret_cast<int64_t>(view);
+    } catch (const std::exception& e) {
+        qCritical() << "Exception creating QQuickView:" << e.what();
+        return 0;
+    } catch (...) {
+        qCritical() << "Unknown exception creating QQuickView";
+        return 0;
+    }
 }
 
 void qQuickViewSetSource(int64_t ptr, const char* source) {
