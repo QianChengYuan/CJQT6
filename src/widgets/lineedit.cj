@@ -1,5 +1,7 @@
 package CJQT6.widgets
 
+import CJQT6.core.*
+
 // QLineEdit - 单行文本输入框
 foreign func qLineEditCreate(): Int64
 foreign func qLineEditSetText(ptr: Int64, text: CString): Unit
@@ -9,12 +11,13 @@ foreign func qLineEditSetMaxLength(ptr: Int64, length: Int32): Unit
 foreign func qLineEditSetReadOnly(ptr: Int64, readonly: Bool): Unit
 foreign func qLineEditSetEchoMode(ptr: Int64, mode: Int32): Unit
 foreign func qLineEditClear(ptr: Int64): Unit
-foreign func qLineEditSetOnTextChanged(ptr: Int64, callback: CFunc<(Int64) -> Unit>): Unit
+foreign func qLineEditConnectTextChanged(ptr: Int64, callback: CStringCallback): Unit
+foreign func qLineEditDisconnectTextChanged(ptr: Int64): Unit
 foreign func qLineEditDelete(ptr: Int64): Unit
 
+/// 单行文本输入框部件
 public class QLineEdit {
     private var ptr: Int64 = 0
-    private var onTextChangedHandler: ?() -> Unit = None
     
     public init() {
         unsafe {
@@ -36,7 +39,7 @@ public class QLineEdit {
     
     public func setText(text: String) {
         unsafe {
-            var cstr = LibC.mallocCString(text)
+            let cstr = LibC.mallocCString(text)
             qLineEditSetText(ptr, cstr)
             LibC.free(cstr)
         }
@@ -45,15 +48,13 @@ public class QLineEdit {
     public func text(): String {
         unsafe {
             let cstr = qLineEditText(ptr)
-            let result = cstr.toString()
-            // 注意：cstr指向静态缓冲区，不要free
-            return result
+            return cstr.toString()
         }
     }
     
     public func setPlaceholder(text: String) {
         unsafe {
-            var cstr = LibC.mallocCString(text)
+            let cstr = LibC.mallocCString(text)
             qLineEditSetPlaceholder(ptr, cstr)
             LibC.free(cstr)
         }
@@ -83,33 +84,36 @@ public class QLineEdit {
         }
     }
     
-    // 设置文本变化回调（CFunc方式）
-    public func setOnTextChanged(callback: CFunc<(Int64) -> Unit>) {
-        unsafe {
-            qLineEditSetOnTextChanged(ptr, callback)
-        }
-    }
-    
-    // 触发文本变化事件
-    public func emitTextChanged() {
-        if (let Some(h) <- onTextChangedHandler) {
-            h()
-        }
-    }
-    
     public func resize(width: Int32, height: Int32) {
         unsafe {
             qWidgetResize(ptr, width, height)
         }
     }
     
-    public func getPtr(): Int64 {
-        ptr
+    /// 设置文本变化回调
+    public func setOnTextChanged(callback: CStringCallback) {
+        unsafe {
+            qLineEditConnectTextChanged(ptr, callback)
+        }
     }
     
+    /// 断开文本变化信号
+    public func disconnectTextChanged() {
+        unsafe {
+            qLineEditDisconnectTextChanged(ptr)
+        }
+    }
+    
+    /// 获取对象指针
+    public func getPtr(): Int64 {
+        return ptr
+    }
+    
+    /// 删除文本框
     public func delete() {
         if (ptr != 0) {
             unsafe {
+                qSignalCleanup(ptr)
                 qLineEditDelete(ptr)
             }
             ptr = 0

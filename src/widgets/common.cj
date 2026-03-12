@@ -9,3 +9,6 @@ foreign func qWidgetDelete(ptr: Int64): Unit
 foreign func qWidgetSetLayout(widgetPtr: Int64, layoutPtr: Int64): Unit
 foreign func qWidgetSetStyleSheet(ptr: Int64, styleSheet: CString): Unit
 foreign func qWidgetStyleSheet(ptr: Int64): CString
+
+// 公共FFI声明 - 信号清理
+foreign func qSignalCleanup(ptr: Int64): Unit

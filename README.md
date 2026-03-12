@@ -30,10 +30,17 @@ CJQT6/
 │   │   ├── version.h
 │   │   └── widgets.h
 │   └── src/                    # C++实现
-│       ├── core/
-│       ├── gui/
-│       ├── widgets/
-│       └── tools/bridge.cpp    # FFI桥接函数
+│       ├── core/               # 核心模块
+│       │   ├── bridge_core.cpp
+│       │   ├── bridge_events.cpp
+│       │   ├── bridge_signal.cpp  # 信号槽桥接
+│       │   └── string.cpp
+│       ├── gui/                # GUI模块
+│       ├── widgets/            # 部件模块
+│       ├── views/              # 视图模块
+│       ├── paint/              # 绘图模块
+│       ├── process/            # 进程模块
+│       └── qml/                # QML模块
 │
 ├── src/                        # 仓颉源代码（模块化）
 │   ├── main.cj                 # 主入口
@@ -41,7 +48,9 @@ CJQT6/
 │   │   ├── application.cj
 │   │   ├── widget.cj
 │   │   ├── timer.cj
-│   │   └── signal.cj
+│   │   ├── signal.cj           # 信号类型定义
+│   │   ├── events.cj
+│   │   └── process.cj
 │   ├── widgets/                # 部件模块
 │   │   ├── common.cj
 │   │   ├── label.cj
@@ -54,7 +63,8 @@ CJQT6/
 │   │   ├── slider.cj
 │   │   ├── combobox.cj
 │   │   ├── progressbar.cj
-│   │   └── containers.cj
+│   │   ├── containers.cj
+│   │   └── datetime.cj
 │   ├── gui/                    # GUI模块
 │   │   ├── types.cj
 │   │   └── layout.cj
@@ -62,10 +72,14 @@ CJQT6/
 │   │   └── dialogs.cj
 │   ├── menu/                   # 菜单模块
 │   │   └── menu.cj
-│   └── views/                  # 视图模块
-│       ├── tablewidget.cj
-│       ├── listwidget.cj
-│       └── treewidget.cj
+│   ├── views/                  # 视图模块
+│   │   ├── tablewidget.cj
+│   │   ├── listwidget.cj
+│   │   └── treewidget.cj
+│   ├── paint/                  # 绘图模块
+│   │   └── painter.cj
+│   └── qml/                    # QML模块
+│       └── qml.cj
 │
 ├── examples/                   # 示例程序
 │   ├── run_example.sh          # 运行脚本
@@ -73,7 +87,10 @@ CJQT6/
 │   ├── widget_demo/            # 控件演示
 │   ├── table_demo/             # 表格演示
 │   ├── menu_demo/              # 菜单/记事本示例
-│   └── views_demo/             # 列表/树形视图示例
+│   ├── views_demo/             # 列表/树形视图示例
+│   ├── paint_demo/             # 绘图演示
+│   ├── datetime_demo/          # 日期时间演示
+│   └── qml_demo/               # QML演示
 │
 └── tests/                      # 测试代码
 ```
@@ -193,6 +210,32 @@ CJQT6/
 | QInputDialog | QInputDialog | 输入对话框 |
 | QColorDialog | QColorDialog | 颜色对话框 |
 
+### 绘图模块
+| 类 | Qt类 | 说明 |
+|----|------|------|
+| QColor | QColor | 颜色 |
+| QPen | QPen | 画笔 |
+| QBrush | QBrush | 画刷 |
+| QLinearGradient | QLinearGradient | 线性渐变 |
+| QFont | QFont | 绘图字体 |
+| QPainterPath | QPainterPath | 绘图路径 |
+| QPixmap | QPixmap | 图像 |
+| QPainter | QPainter | 绘图器 |
+
+### 进程管理
+| 类 | Qt类 | 说明 |
+|----|------|------|
+| QProcess | QProcess | 进程管理 |
+| QProcessEnvironment | QProcessEnvironment | 环境变量 |
+
+### QML模块
+| 类 | Qt类 | 说明 |
+|----|------|------|
+| QQmlApplicationEngine | QQmlApplicationEngine | QML应用引擎 |
+| QQuickView | QQuickView | QML视图窗口 |
+| QQuickWidget | QQuickWidget | QML嵌入控件 |
+| QQuickItem | QQuickItem | QML项操作 |
+
 ## 构建和运行
 
 ### 环境要求
@@ -251,6 +294,14 @@ import CJQT6.core.*
 import CJQT6.widgets.*
 import CJQT6.gui.*
 
+var label: ?QLabel = None
+
+let clickCallback: VoidCallback = { =>
+    if (let Some(l) <- label) {
+        l.setText("按钮被点击了！")
+    }
+}
+
 main(): Int32 {
     let app = QApplication()
     let window = QWidget()
@@ -259,12 +310,13 @@ main(): Int32 {
     
     let layout = QVBoxLayout()
     
-    let label = QLabel()
+    label = QLabel()
     label.setText("欢迎使用CJQT6！")
     layout.addWidget(label.getPtr())
     
     let btn = QPushButton()
     btn.setText("点击我")
+    btn.setOnClick(clickCallback)
     layout.addWidget(btn.getPtr())
     
     window.setLayout(layout.getPtr())
@@ -285,20 +337,58 @@ main(): Int32 {
 
 使用CFunc回调实现信号槽：
 
+### 回调类型
+
 ```cangjie
-// 定义回调
-let clickCallback: CFunc<(Int64) -> Unit> = { _: Int64 =>
+// 无参数回调
+public type VoidCallback = CFunc<() -> Unit>
+
+// Int32参数回调
+public type Int32Callback = CFunc<(Int32) -> Unit>
+
+// CString参数回调
+public type CStringCallback = CFunc<(CString) -> Unit>
+```
+
+### 使用示例
+
+```cangjie
+// 按钮点击
+let clickCallback: VoidCallback = { =>
     println("按钮被点击！")
 }
-
-// 连接信号
 btn.setOnClick(clickCallback)
 
 // 值变化
-spinBox.setOnValueChanged({ _: Int64 =>
-    println("值: ${spinBox.value()}")
-})
+let valueCallback: Int32Callback = { value: Int32 =>
+    println("值: ${value}")
+}
+spinBox.setOnValueChanged(valueCallback)
+
+// 文本变化
+let textCallback: CStringCallback = { text: CString =>
+    println("文本: ${text}")
+}
+lineEdit.setOnTextChanged(textCallback)
+
+// 断开信号连接
+btn.disconnect()
+spinBox.disconnect()
 ```
+
+### 支持信号的控件
+
+| 控件 | 方法 | 回调类型 |
+|------|------|----------|
+| QPushButton | setOnClick | VoidCallback |
+| QLineEdit | setOnTextChanged | CStringCallback |
+| QSpinBox | setOnValueChanged | Int32Callback |
+| QSlider | setOnValueChanged | Int32Callback |
+| QCheckBox | setOnStateChanged | Int32Callback |
+| QRadioButton | setOnToggled | VoidCallback |
+| QComboBox | setOnCurrentIndexChanged | Int32Callback |
+| QAction | setOnTriggered | VoidCallback |
+| QTimer | setTimeout | VoidCallback |
 
 ## 布局使用
 

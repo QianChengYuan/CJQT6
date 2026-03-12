@@ -82,7 +82,7 @@ window.show()
 let timer = QTimer()
 timer.setInterval(1000)  // 1秒
 
-let timerCallback: CFunc<(Int64) -> Unit> = { _: Int64 =>
+let timerCallback: VoidCallback = { =>
     println("定时器触发！")
 }
 timer.setTimeout(timerCallback)
@@ -95,7 +95,8 @@ timer.start()
 | `setInterval(ms: Int32)` | 设置间隔（毫秒） |
 | `start()` | 启动定时器 |
 | `stop()` | 停止定时器 |
-| `setTimeout(callback: CFunc)` | 设置超时回调 |
+| `setTimeout(callback: VoidCallback)` | 设置超时回调 |
+| `disconnect()` | 断开信号连接 |
 | `delete()` | 释放资源 |
 
 ---
@@ -134,7 +135,7 @@ let btn = QPushButton()
 btn.setText("点击我")
 
 // 设置点击回调
-let callback: CFunc<(Int64) -> Unit> = { _: Int64 =>
+let callback: VoidCallback = { =>
     println("按钮被点击！")
 }
 btn.setOnClick(callback)
@@ -144,7 +145,8 @@ btn.setOnClick(callback)
 | 方法 | 说明 |
 |------|------|
 | `setText(text: String)` | 设置按钮文本 |
-| `setOnClick(callback: CFunc)` | 设置点击回调 |
+| `setOnClick(callback: VoidCallback)` | 设置点击回调 |
+| `disconnect()` | 断开信号连接 |
 
 ---
 
@@ -169,7 +171,8 @@ edit.setEchoMode(Password)  // 密码模式
 | `setReadOnly(readonly: Bool)` | 设置只读 |
 | `setEchoMode(mode: Int32)` | 设置回显模式 |
 | `clear()` | 清空 |
-| `setOnTextChanged(callback: CFunc)` | 文本变化回调 |
+| `setOnTextChanged(callback: CStringCallback)` | 文本变化回调 |
+| `disconnect()` | 断开信号连接 |
 
 **回显模式常量**:
 ```cangjie
@@ -209,6 +212,12 @@ checkbox.setChecked(true)
 if (checkbox.isChecked()) {
     println("已选中")
 }
+
+// 状态变化回调
+let stateCallback: Int32Callback = { state: Int32 =>
+    println("状态: ${state}")
+}
+checkbox.setOnStateChanged(stateCallback)
 ```
 
 **方法**:
@@ -217,6 +226,8 @@ if (checkbox.isChecked()) {
 | `setText(text: String)` | 设置文本 |
 | `setChecked(checked: Bool)` | 设置选中状态 |
 | `isChecked(): Bool` | 获取选中状态 |
+| `setOnStateChanged(callback: Int32Callback)` | 状态变化回调 |
+| `disconnect()` | 断开信号连接 |
 
 ### QRadioButton - 单选按钮
 
@@ -227,6 +238,12 @@ radio1.setChecked(true)
 
 let radio2 = QRadioButton()
 radio2.setText("选项2")
+
+// 切换回调
+let toggleCallback: VoidCallback = { =>
+    println("单选按钮切换")
+}
+radio1.setOnToggled(toggleCallback)
 ```
 
 **方法**:
@@ -235,6 +252,8 @@ radio2.setText("选项2")
 | `setText(text: String)` | 设置文本 |
 | `setChecked(checked: Bool)` | 设置选中状态 |
 | `isChecked(): Bool` | 获取选中状态 |
+| `setOnToggled(callback: VoidCallback)` | 切换回调 |
+| `disconnect()` | 断开信号连接 |
 
 ### QComboBox - 下拉框
 
@@ -246,6 +265,12 @@ combo.addItem("选项3")
 
 let currentText = combo.currentText()
 let currentIndex = combo.currentIndex()
+
+// 索引变化回调
+let indexCallback: Int32Callback = { index: Int32 =>
+    println("选中索引: ${index}")
+}
+combo.setOnCurrentIndexChanged(indexCallback)
 ```
 
 **方法**:
@@ -256,6 +281,8 @@ let currentIndex = combo.currentIndex()
 | `currentText(): String` | 获取当前文本 |
 | `currentIndex(): Int32` | 获取当前索引 |
 | `setCurrentIndex(index: Int32)` | 设置当前索引 |
+| `setOnCurrentIndexChanged(callback: Int32Callback)` | 索引变化回调 |
+| `disconnect()` | 断开信号连接 |
 
 ---
 
@@ -279,7 +306,8 @@ let value = spinBox.value()
 | `value(): Int32` | 获取值 |
 | `setRange(min: Int32, max: Int32)` | 设置范围 |
 | `setSingleStep(step: Int32)` | 设置步长 |
-| `setOnValueChanged(callback: CFunc)` | 值变化回调 |
+| `setOnValueChanged(callback: Int32Callback)` | 值变化回调 |
+| `disconnect()` | 断开信号连接 |
 
 ### QSlider - 滑动条
 
@@ -297,7 +325,8 @@ slider.setOrientation(Horizontal)
 | `value(): Int32` | 获取值 |
 | `setRange(min: Int32, max: Int32)` | 设置范围 |
 | `setOrientation(orientation: Int32)` | 设置方向 |
-| `setOnValueChanged(callback: CFunc)` | 值变化回调 |
+| `setOnValueChanged(callback: Int32Callback)` | 值变化回调 |
+| `disconnect()` | 断开信号连接 |
 
 **方向常量**:
 ```cangjie
@@ -820,7 +849,8 @@ openAction.setOnTriggered({ _: Int64 =>
 | `setChecked(checked: Bool)` | 设置勾选状态 |
 | `isEnabled(): Bool` | 是否启用 |
 | `setEnabled(enabled: Bool)` | 设置启用状态 |
-| `setOnTriggered(callback: CFunc)` | 设置触发回调 |
+| `setOnTriggered(callback: VoidCallback)` | 设置触发回调 |
+| `disconnect()` | 断开信号连接 |
 | `getPtr(): Int64` | 获取指针 |
 
 ### QToolBar
@@ -1968,54 +1998,100 @@ export QML2_IMPORT_PATH=/usr/lib/x86_64-linux-gnu/qt6/qml
 
 CJQT6使用CFunc回调实现信号槽机制。
 
+### 回调类型
+
+```cangjie
+// 无参数回调
+public type VoidCallback = CFunc<() -> Unit>
+
+// Int32参数回调
+public type Int32Callback = CFunc<(Int32) -> Unit>
+
+// CString参数回调
+public type CStringCallback = CFunc<(CString) -> Unit>
+```
+
 ### 基本用法
 
 ```cangjie
-// 定义回调函数
-let clickCallback: CFunc<(Int64) -> Unit> = { _: Int64 =>
+// 按钮点击回调
+let clickCallback: VoidCallback = { =>
     println("按钮被点击！")
 }
-
-// 连接信号
 btn.setOnClick(clickCallback)
 
-// 值变化回调
-let valueCallback: CFunc<(Int64) -> Unit> = { _: Int64 =>
-    println("值改变了！")
+// 滑块值变化回调
+let valueCallback: Int32Callback = { value: Int32 =>
+    println("值改变了: ${value}")
 }
-spinBox.setOnValueChanged(valueCallback)
+slider.setOnValueChanged(valueCallback)
+
+// 文本变化回调
+let textCallback: CStringCallback = { text: CString =>
+    println("文本: ${text}")
+}
+lineEdit.setOnTextChanged(textCallback)
 ```
 
 ### 支持信号的控件
 
-| 控件 | 方法 | 信号 |
-|------|------|------|
-| QPushButton | `setOnClick(callback)` | 点击 |
-| QLineEdit | `setOnTextChanged(callback)` | 文本变化 |
-| QSpinBox | `setOnValueChanged(callback)` | 值变化 |
-| QSlider | `setOnValueChanged(callback)` | 值变化 |
-| QAction | `setOnTriggered(callback)` | 触发 |
-| QTimer | `setTimeout(callback)` | 超时 |
+| 控件 | 方法 | 回调类型 | 说明 |
+|------|------|----------|------|
+| QPushButton | `setOnClick(callback)` | VoidCallback | 点击 |
+| QLineEdit | `setOnTextChanged(callback)` | CStringCallback | 文本变化 |
+| QSpinBox | `setOnValueChanged(callback)` | Int32Callback | 值变化 |
+| QSlider | `setOnValueChanged(callback)` | Int32Callback | 值变化 |
+| QCheckBox | `setOnStateChanged(callback)` | Int32Callback | 状态变化 |
+| QRadioButton | `setOnToggled(callback)` | VoidCallback | 切换 |
+| QComboBox | `setOnCurrentIndexChanged(callback)` | Int32Callback | 索引变化 |
+| QAction | `setOnTriggered(callback)` | VoidCallback | 触发 |
+| QTimer | `setTimeout(callback)` | VoidCallback | 超时 |
+
+### 断开信号连接
+
+所有支持信号的控件都提供了 `disconnect()` 方法：
+
+```cangjie
+// 断开信号连接
+button.disconnect()
+slider.disconnect()
+checkBox.disconnect()
+radioButton.disconnect()
+comboBox.disconnect()
+lineEdit.disconnect()
+timer.disconnect()
+```
 
 ### 回调中访问控件
 
-由于CFunc不能捕获外部变量，如需在回调中访问其他控件，可使用全局变量或重新获取：
+由于CFunc不能捕获外部变量，如需在回调中访问其他控件，可使用全局变量：
 
 ```cangjie
-// 方式1：使用全局变量
+// 使用全局变量
 var globalLabel: ?QLabel = None
 
-let callback: CFunc<(Int64) -> Unit> = { _: Int64 =>
+let callback: VoidCallback = { =>
     if (let Some(label) <- globalLabel) {
         label.setText("已点击")
     }
 }
+```
 
-// 方式2：在回调中查询状态
-let spinCallback: CFunc<(Int64) -> Unit> = { _: Int64 =>
-    let value = spinBox.value()  // 直接读取控件值
-    println("当前值: ${value}")
+### 定时器示例
+
+```cangjie
+let timer = QTimer()
+timer.setInterval(1000)  // 1秒
+
+let timerCallback: VoidCallback = { =>
+    println("定时器触发！")
 }
+timer.setTimeout(timerCallback)
+timer.start()
+
+// 停止并断开连接
+timer.stop()
+timer.disconnect()
 ```
 
 ---
@@ -2032,7 +2108,8 @@ import CJQT6.views.*
 import CJQT6.dialogs.*
 
 var label: ?QLabel = None
-let clickCallback: CFunc<(Int64) -> Unit> = { _: Int64 =>
+
+let clickCallback: VoidCallback = { =>
     if (let Some(l) <- label) {
         l.setText("按钮被点击了！")
     }
@@ -2102,8 +2179,7 @@ layout.addWidget(bottomWidget.getPtr())
 
 A: 使用信号槽机制：
 ```cangjie
-let sliderCallback: CFunc<(Int64) -> Unit> = { _: Int64 =>
-    let value = slider.value()
+let sliderCallback: Int32Callback = { value: Int32 =>
     progressBar.setValue(value)
 }
 slider.setOnValueChanged(sliderCallback)

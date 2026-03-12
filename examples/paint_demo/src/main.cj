@@ -253,11 +253,11 @@ func clearCanvas(): Unit {
 foreign func qLabelSetPixmap(ptr: Int64, pixmapPtr: Int64): Unit
 
 // 按钮回调
-let onShapes: CFunc<(Int64) -> Unit> = { _: Int64 => drawShapes() }
-let onGradients: CFunc<(Int64) -> Unit> = { _: Int64 => drawGradients() }
-let onPaths: CFunc<(Int64) -> Unit> = { _: Int64 => drawPaths() }
-let onTexts: CFunc<(Int64) -> Unit> = { _: Int64 => drawTexts() }
-let onClear: CFunc<(Int64) -> Unit> = { _: Int64 => clearCanvas() }
+let onShapes: VoidCallback = { => drawShapes() }
+let onGradients: VoidCallback = { => drawGradients() }
+let onPaths: VoidCallback = { => drawPaths() }
+let onTexts: VoidCallback = { => drawTexts() }
+let onClear: VoidCallback = { => clearCanvas() }
 
 main(): Int32 {
     let app = QApplication()

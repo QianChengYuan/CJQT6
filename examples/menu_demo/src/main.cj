@@ -15,7 +15,7 @@ var g_currentFile: Option<String> = None
 var g_currentFont: Option<QFontInfo> = None
 
 // 回调函数 - 新建
-func onNew(_: Int64): Unit {
+func onNew(): Unit {
     if (let Some(textEdit) <- g_textEdit) {
         textEdit.clear()
     }
@@ -26,7 +26,7 @@ func onNew(_: Int64): Unit {
 }
 
 // 回调函数 - 打开文件
-func onOpen(_: Int64): Unit {
+func onOpen(): Unit {
     let fileName = QFileDialog.getOpenFileName(0, "打开文件", "文本文件 (*.txt);;所有文件 (*)")
     if (fileName.size > 0) {
         try {
@@ -46,7 +46,7 @@ func onOpen(_: Int64): Unit {
 }
 
 // 回调函数 - 保存文件
-func onSave(_: Int64): Unit {
+func onSave(): Unit {
     var fileName = ""
     
     if (let Some(f) <- g_currentFile) {
@@ -77,7 +77,7 @@ func onSave(_: Int64): Unit {
 }
 
 // 回调函数 - 另存为
-func onSaveAs(_: Int64): Unit {
+func onSaveAs(): Unit {
     let fileName = QFileDialog.getSaveFileName(0, "另存为", "文本文件 (*.txt)")
     if (fileName.size > 0) {
         var finalName = fileName
@@ -102,14 +102,14 @@ func onSaveAs(_: Int64): Unit {
 }
 
 // 回调函数 - 退出
-func onExit(_: Int64): Unit {
+func onExit(): Unit {
     if (let Some(app) <- g_app) {
         app.quit()
     }
 }
 
 // 回调函数 - 剪切
-func onCut(_: Int64): Unit {
+func onCut(): Unit {
     if (let Some(textEdit) <- g_textEdit) {
         textEdit.cut()
     }
@@ -119,7 +119,7 @@ func onCut(_: Int64): Unit {
 }
 
 // 回调函数 - 复制
-func onCopy(_: Int64): Unit {
+func onCopy(): Unit {
     if (let Some(textEdit) <- g_textEdit) {
         textEdit.copy()
     }
@@ -129,7 +129,7 @@ func onCopy(_: Int64): Unit {
 }
 
 // 回调函数 - 粘贴
-func onPaste(_: Int64): Unit {
+func onPaste(): Unit {
     if (let Some(textEdit) <- g_textEdit) {
         textEdit.paste()
     }
@@ -139,7 +139,7 @@ func onPaste(_: Int64): Unit {
 }
 
 // 回调函数 - 全选
-func onSelectAll(_: Int64): Unit {
+func onSelectAll(): Unit {
     if (let Some(textEdit) <- g_textEdit) {
         textEdit.selectAll()
     }
@@ -149,7 +149,7 @@ func onSelectAll(_: Int64): Unit {
 }
 
 // 回调函数 - 清空
-func onClear(_: Int64): Unit {
+func onClear(): Unit {
     if (let Some(textEdit) <- g_textEdit) {
         textEdit.clear()
     }
@@ -159,7 +159,7 @@ func onClear(_: Int64): Unit {
 }
 
 // 回调函数 - 设置字体
-func onSetFont(_: Int64): Unit {
+func onSetFont(): Unit {
     // 使用当前字体作为默认值
     var defaultFamily = "Sans Serif"
     var defaultSize: Int32 = 12
@@ -188,7 +188,7 @@ func onSetFont(_: Int64): Unit {
 }
 
 // 回调函数 - 设置颜色
-func onSetColor(_: Int64): Unit {
+func onSetColor(): Unit {
     let color = QColorDialog.getColor(0, "选择文本颜色")
     if (color.size > 0) {
         if (let Some(textEdit) <- g_textEdit) {
@@ -203,7 +203,7 @@ func onSetColor(_: Int64): Unit {
 }
 
 // 回调函数 - 关于
-func onAbout(_: Int64): Unit {
+func onAbout(): Unit {
     QMessageBox.information(0, "关于", "CJQT6 记事本 v2.0\n\n仓颉语言 Qt6 封装库示例程序\n\n功能:\n- 文件: 新建、打开、保存、另存为、退出\n- 编辑: 剪切、复制、粘贴、全选、清空\n- 格式: 字体、颜色\n- 帮助: 关于")
 }
 
@@ -231,22 +231,22 @@ main(): Int32 {
     
     let newAction = QAction("新建(&N)")
     newAction.setShortcut("Ctrl+N")
-    newAction.setOnTriggered({ _: Int64 => onNew(0) })
+    newAction.setOnTriggered({ => onNew() })
     
     let openAction = QAction("打开(&O)...")
     openAction.setShortcut("Ctrl+O")
-    openAction.setOnTriggered({ _: Int64 => onOpen(0) })
+    openAction.setOnTriggered({ => onOpen() })
     
     let saveAction = QAction("保存(&S)")
     saveAction.setShortcut("Ctrl+S")
-    saveAction.setOnTriggered({ _: Int64 => onSave(0) })
+    saveAction.setOnTriggered({ => onSave() })
     
     let saveAsAction = QAction("另存为(&A)...")
-    saveAsAction.setOnTriggered({ _: Int64 => onSaveAs(0) })
+    saveAsAction.setOnTriggered({ => onSaveAs() })
     
     let exitAction = QAction("退出(&X)")
     exitAction.setShortcut("Ctrl+Q")
-    exitAction.setOnTriggered({ _: Int64 => onExit(0) })
+    exitAction.setOnTriggered({ => onExit() })
     
     fileMenu.addActionPtr(newAction.getPtr())
     fileMenu.addActionPtr(openAction.getPtr())
@@ -260,22 +260,22 @@ main(): Int32 {
     
     let cutAction = QAction("剪切(&X)")
     cutAction.setShortcut("Ctrl+X")
-    cutAction.setOnTriggered({ _: Int64 => onCut(0) })
+    cutAction.setOnTriggered({ => onCut() })
     
     let copyAction = QAction("复制(&C)")
     copyAction.setShortcut("Ctrl+C")
-    copyAction.setOnTriggered({ _: Int64 => onCopy(0) })
+    copyAction.setOnTriggered({ => onCopy() })
     
     let pasteAction = QAction("粘贴(&V)")
     pasteAction.setShortcut("Ctrl+V")
-    pasteAction.setOnTriggered({ _: Int64 => onPaste(0) })
+    pasteAction.setOnTriggered({ => onPaste() })
     
     let selectAllAction = QAction("全选(&A)")
     selectAllAction.setShortcut("Ctrl+A")
-    selectAllAction.setOnTriggered({ _: Int64 => onSelectAll(0) })
+    selectAllAction.setOnTriggered({ => onSelectAll() })
     
     let clearAction = QAction("清空")
-    clearAction.setOnTriggered({ _: Int64 => onClear(0) })
+    clearAction.setOnTriggered({ => onClear() })
     
     editMenu.addActionPtr(cutAction.getPtr())
     editMenu.addActionPtr(copyAction.getPtr())
@@ -288,10 +288,10 @@ main(): Int32 {
     let formatMenu = menuBar.addMenu("格式(&O)")
     
     let fontAction = QAction("字体(&F)...")
-    fontAction.setOnTriggered({ _: Int64 => onSetFont(0) })
+    fontAction.setOnTriggered({ => onSetFont() })
     
     let colorAction = QAction("颜色(&C)...")
-    colorAction.setOnTriggered({ _: Int64 => onSetColor(0) })
+    colorAction.setOnTriggered({ => onSetColor() })
     
     formatMenu.addActionPtr(fontAction.getPtr())
     formatMenu.addActionPtr(colorAction.getPtr())
@@ -300,7 +300,7 @@ main(): Int32 {
     let helpMenu = menuBar.addMenu("帮助(&H)")
     
     let aboutAction = QAction("关于(&A)...")
-    aboutAction.setOnTriggered({ _: Int64 => onAbout(0) })
+    aboutAction.setOnTriggered({ => onAbout() })
     
     helpMenu.addActionPtr(aboutAction.getPtr())
     

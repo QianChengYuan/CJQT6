@@ -30,6 +30,8 @@ foreign func qQuickViewSetTitle(ptr: Int64, title: CString): Unit
 foreign func qQuickViewResize(ptr: Int64, width: Int32, height: Int32): Unit
 foreign func qQuickViewRootObject(ptr: Int64): Int64
 foreign func qQuickViewSetResizeMode(ptr: Int64, mode: Int32): Unit
+foreign func qQuickViewStatus(ptr: Int64): Int32
+foreign func qQuickViewErrors(ptr: Int64): Int32
 foreign func qQuickViewDelete(ptr: Int64): Unit
 
 // QQuickWidget
@@ -298,6 +300,27 @@ public class QQuickView {
         }
     }
     
+    /// 获取加载状态
+    public func status(): Int32 {
+        unsafe {
+            return qQuickViewStatus(ptr)
+        }
+    }
+    
+    /// 检查是否有错误
+    public func hasErrors(): Bool {
+        unsafe {
+            return qQuickViewErrors(ptr) != 0
+        }
+    }
+    
+    /// 检查是否加载成功
+    public func isReady(): Bool {
+        unsafe {
+            return qQuickViewStatus(ptr) == Status.Ready
+        }
+    }
+    
     public func delete(): Unit {
         unsafe {
             if (ptr != 0) {
@@ -393,16 +416,24 @@ public class QQuickWidget {
 // ============================================================
 
 /// QML项，QML中的可视元素基类
+/// 注意：QQuickItem 的指针由 Qt 管理，不应手动删除
 public class QQuickItem {
     private var ptr: Int64 = 0
+    private var owned: Bool = false  // 是否拥有所有权（默认不拥有）
     
     private init() {}
     
-    /// 从指针创建
+    /// 从指针创建（不拥有所有权，由 Qt 管理）
     public static func fromPtr(p: Int64): QQuickItem {
         let item = QQuickItem()
         item.ptr = p
+        item.owned = false  // Qt 管理的对象
         return item
+    }
+    
+    /// 检查指针是否有效
+    public func isValid(): Bool {
+        return ptr != 0
     }
     
     /// 设置可见性

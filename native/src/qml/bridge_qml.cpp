@@ -212,13 +212,49 @@ void qQuickViewDelete(int64_t ptr) {
     }
 }
 
+int32_t qQuickViewStatus(int64_t ptr) {
+    QQuickView* view = reinterpret_cast<QQuickView*>(ptr);
+    if (view) {
+        return static_cast<int32_t>(view->status());
+    }
+    return 0;  // Null
+}
+
+int32_t qQuickViewErrors(int64_t ptr) {
+    QQuickView* view = reinterpret_cast<QQuickView*>(ptr);
+    if (view) {
+        return view->errors().isEmpty() ? 0 : 1;
+    }
+    return 1;
+}
+
 // ============================================================
 // QQuickWidget - QML嵌入Widget
 // ============================================================
 
 int64_t qQuickWidgetCreate() {
-    QQuickWidget* widget = new QQuickWidget();
-    return reinterpret_cast<int64_t>(widget);
+    try {
+        // 检查QApplication是否存在
+        if (!QCoreApplication::instance()) {
+            qWarning() << "QQuickWidget requires QApplication instance";
+            return 0;
+        }
+        
+        QQuickWidget* widget = new QQuickWidget();
+        if (!widget) {
+            qWarning() << "Failed to create QQuickWidget";
+            return 0;
+        }
+        
+        qDebug() << "QQuickWidget created successfully:" << (void*)widget;
+        return reinterpret_cast<int64_t>(widget);
+    } catch (const std::exception& e) {
+        qCritical() << "Exception creating QQuickWidget:" << e.what();
+        return 0;
+    } catch (...) {
+        qCritical() << "Unknown exception creating QQuickWidget";
+        return 0;
+    }
 }
 
 void qQuickWidgetSetSource(int64_t ptr, const char* source) {

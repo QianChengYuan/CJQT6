@@ -11,7 +11,7 @@ var g_listWidget: Option<QListWidget> = None
 var g_treeWidget: Option<QTreeWidget> = None
 
 // 列表操作函数
-func onAddItem(_: Int64): Unit {
+func onAddItem(): Unit {
     let text = QInputDialog.getText(0, "添加项", "请输入项名称:", "")
     if (text.size > 0) {
         if (let Some(list) <- g_listWidget) {
@@ -20,7 +20,7 @@ func onAddItem(_: Int64): Unit {
     }
 }
 
-func onRemoveItem(_: Int64): Unit {
+func onRemoveItem(): Unit {
     if (let Some(list) <- g_listWidget) {
         let row = list.currentRow()
         if (row >= 0) {
@@ -29,7 +29,7 @@ func onRemoveItem(_: Int64): Unit {
     }
 }
 
-func onCountItems(_: Int64): Unit {
+func onCountItems(): Unit {
     if (let Some(list) <- g_listWidget) {
         let count = list.count()
         QMessageBox.information(0, "统计", "列表共有 ${count} 项")
@@ -37,19 +37,19 @@ func onCountItems(_: Int64): Unit {
 }
 
 // 树形操作函数
-func onExpandAll(_: Int64): Unit {
+func onExpandAll(): Unit {
     if (let Some(tree) <- g_treeWidget) {
         tree.expandAll()
     }
 }
 
-func onCollapseAll(_: Int64): Unit {
+func onCollapseAll(): Unit {
     if (let Some(tree) <- g_treeWidget) {
         tree.collapseAll()
     }
 }
 
-func onShowItemInfo(_: Int64): Unit {
+func onShowItemInfo(): Unit {
     if (let Some(tree) <- g_treeWidget) {
         if (let Some(item) <- tree.currentItem()) {
             let name = item.text(0)
@@ -105,17 +105,17 @@ main(): Int32 {
     
     let addBtn = QPushButton()
     addBtn.setText("添加项")
-    addBtn.setOnClick({ _: Int64 => onAddItem(0) })
+    addBtn.setOnClick({ => onAddItem() })
     listBtnLayout.addWidget(addBtn.getPtr())
     
     let removeBtn = QPushButton()
     removeBtn.setText("删除选中")
-    removeBtn.setOnClick({ _: Int64 => onRemoveItem(0) })
+    removeBtn.setOnClick({ => onRemoveItem() })
     listBtnLayout.addWidget(removeBtn.getPtr())
     
     let countBtn = QPushButton()
     countBtn.setText("统计")
-    countBtn.setOnClick({ _: Int64 => onCountItems(0) })
+    countBtn.setOnClick({ => onCountItems() })
     listBtnLayout.addWidget(countBtn.getPtr())
     
     leftLayout.addLayout(listBtnLayout.getPtr())
@@ -184,17 +184,17 @@ main(): Int32 {
     
     let expandBtn = QPushButton()
     expandBtn.setText("展开全部")
-    expandBtn.setOnClick({ _: Int64 => onExpandAll(0) })
+    expandBtn.setOnClick({ => onExpandAll() })
     treeBtnLayout.addWidget(expandBtn.getPtr())
     
     let collapseBtn = QPushButton()
     collapseBtn.setText("折叠全部")
-    collapseBtn.setOnClick({ _: Int64 => onCollapseAll(0) })
+    collapseBtn.setOnClick({ => onCollapseAll() })
     treeBtnLayout.addWidget(collapseBtn.getPtr())
     
     let infoBtn = QPushButton()
     infoBtn.setText("查看选中")
-    infoBtn.setOnClick({ _: Int64 => onShowItemInfo(0) })
+    infoBtn.setOnClick({ => onShowItemInfo() })
     treeBtnLayout.addWidget(infoBtn.getPtr())
     
     rightLayout.addLayout(treeBtnLayout.getPtr())

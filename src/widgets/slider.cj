@@ -1,21 +1,24 @@
 package CJQT6.widgets
 
+import CJQT6.core.*
+
 // QSlider - 滑动条
 foreign func qSliderCreate(): Int64
 foreign func qSliderSetValue(ptr: Int64, value: Int32): Unit
 foreign func qSliderValue(ptr: Int64): Int32
 foreign func qSliderSetRange(ptr: Int64, min: Int32, max: Int32): Unit
 foreign func qSliderSetOrientation(ptr: Int64, orientation: Int32): Unit
-foreign func qSliderSetOnValueChanged(ptr: Int64, callback: CFunc<(Int64) -> Unit>): Unit
+foreign func qSliderConnectValueChanged(ptr: Int64, callback: Int32Callback): Unit
+foreign func qSliderDisconnectValueChanged(ptr: Int64): Unit
 foreign func qSliderDelete(ptr: Int64): Unit
 
-// 滑动条方向常量
+/// 滑动条方向常量
 public const Horizontal: Int32 = 1
 public const Vertical: Int32 = 2
 
+/// 滑动条部件
 public class QSlider {
     private var ptr: Int64 = 0
-    private var onValueChangedHandler: ?(Int32) -> Unit = None
     
     public init() {
         unsafe {
@@ -43,7 +46,7 @@ public class QSlider {
     
     public func value(): Int32 {
         unsafe {
-            qSliderValue(ptr)
+            return qSliderValue(ptr)
         }
     }
     
@@ -59,32 +62,30 @@ public class QSlider {
         }
     }
     
-    // 设置值变化回调（CFunc方式）
-    public func setOnValueChanged(callback: CFunc<(Int64) -> Unit>) {
+    /// 设置值变化回调
+    public func setOnValueChanged(callback: Int32Callback) {
         unsafe {
-            qSliderSetOnValueChanged(ptr, callback)
+            qSliderConnectValueChanged(ptr, callback)
         }
     }
     
-    // 连接值变化信号
-    public func onValueChanged(handler: (Int32) -> Unit) {
-        onValueChangedHandler = Some(handler)
-    }
-    
-    // 触发值变化事件
-    public func emitValueChanged() {
-        if (let Some(h) <- onValueChangedHandler) {
-            h(value())
+    /// 断开值变化信号
+    public func disconnectValueChanged() {
+        unsafe {
+            qSliderDisconnectValueChanged(ptr)
         }
     }
     
+    /// 获取对象指针
     public func getPtr(): Int64 {
-        ptr
+        return ptr
     }
     
+    /// 删除滑动条
     public func delete() {
         if (ptr != 0) {
             unsafe {
+                qSignalCleanup(ptr)
                 qSliderDelete(ptr)
             }
             ptr = 0

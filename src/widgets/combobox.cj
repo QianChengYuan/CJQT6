@@ -1,5 +1,7 @@
 package CJQT6.widgets
 
+import CJQT6.core.*
+
 // QComboBox - 下拉框
 foreign func qComboBoxCreate(): Int64
 foreign func qComboBoxAddItem(ptr: Int64, text: CString): Unit
@@ -7,8 +9,11 @@ foreign func qComboBoxCurrentText(ptr: Int64): CString
 foreign func qComboBoxSetCurrentIndex(ptr: Int64, index: Int32): Unit
 foreign func qComboBoxCurrentIndex(ptr: Int64): Int32
 foreign func qComboBoxClear(ptr: Int64): Unit
+foreign func qComboBoxConnectCurrentIndexChanged(ptr: Int64, callback: Int32Callback): Unit
+foreign func qComboBoxDisconnectCurrentIndexChanged(ptr: Int64): Unit
 foreign func qComboBoxDelete(ptr: Int64): Unit
 
+/// 下拉框部件
 public class QComboBox {
     private var ptr: Int64 = 0
     
@@ -32,7 +37,7 @@ public class QComboBox {
     
     public func addItem(text: String) {
         unsafe {
-            var cstr = LibC.mallocCString(text)
+            let cstr = LibC.mallocCString(text)
             qComboBoxAddItem(ptr, cstr)
             LibC.free(cstr)
         }
@@ -41,9 +46,7 @@ public class QComboBox {
     public func currentText(): String {
         unsafe {
             let cstr = qComboBoxCurrentText(ptr)
-            let result = cstr.toString()
-            // 注意：cstr指向静态缓冲区，不要free
-            return result
+            return cstr.toString()
         }
     }
     
@@ -55,7 +58,7 @@ public class QComboBox {
     
     public func currentIndex(): Int32 {
         unsafe {
-            qComboBoxCurrentIndex(ptr)
+            return qComboBoxCurrentIndex(ptr)
         }
     }
     
@@ -65,13 +68,30 @@ public class QComboBox {
         }
     }
     
-    public func getPtr(): Int64 {
-        ptr
+    /// 设置当前索引变化回调
+    public func setOnCurrentIndexChanged(callback: Int32Callback) {
+        unsafe {
+            qComboBoxConnectCurrentIndexChanged(ptr, callback)
+        }
     }
     
+    /// 断开索引变化信号
+    public func disconnectCurrentIndexChanged() {
+        unsafe {
+            qComboBoxDisconnectCurrentIndexChanged(ptr)
+        }
+    }
+    
+    /// 获取对象指针
+    public func getPtr(): Int64 {
+        return ptr
+    }
+    
+    /// 删除下拉框
     public func delete() {
         if (ptr != 0) {
             unsafe {
+                qSignalCleanup(ptr)
                 qComboBoxDelete(ptr)
             }
             ptr = 0

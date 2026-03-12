@@ -7,18 +7,17 @@ import CJQT6.gui.*
 // 全局变量
 var buttonClickCount: Int32 = 0
 
-// CFunc回调函数
-let buttonCallback: CFunc<(Int64) -> Unit> = { _: Int64 => 
-    buttonClickCount = buttonClickCount + 1
-    println("按钮被点击了！点击次数: ${buttonClickCount}")
+// CFunc回调函数 - 注意：CFunc 不能捕获外部变量
+let buttonCallback: VoidCallback = { => 
+    println("按钮被点击了！")
 }
 
-let spinBoxCallback: CFunc<(Int64) -> Unit> = { _: Int64 =>
-    println("SpinBox值改变了！")
+let spinBoxCallback: Int32Callback = { value: Int32 =>
+    println("SpinBox值: ${value}")
 }
 
-let sliderCallback: CFunc<(Int64) -> Unit> = { _: Int64 =>
-    println("Slider值改变了！")
+let sliderCallback: Int32Callback = { value: Int32 =>
+    println("Slider值: ${value}")
 }
 
 main(): Int32 {

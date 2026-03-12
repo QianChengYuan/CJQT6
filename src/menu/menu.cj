@@ -1,5 +1,7 @@
 package CJQT6.menu
 
+import CJQT6.core.{VoidCallback}
+
 // ============================================================
 // FFI 声明
 // ============================================================
@@ -37,7 +39,8 @@ foreign func qActionSetEnabled(ptr: Int64, enabled: Bool): Unit
 foreign func qActionIsEnabled(ptr: Int64): Bool
 foreign func qActionSetVisible(ptr: Int64, visible: Bool): Unit
 foreign func qActionIsVisible(ptr: Int64): Bool
-foreign func qActionSetOnTriggered(ptr: Int64, callback: CFunc<(Int64) -> Unit>): Unit
+foreign func qActionConnectTriggered(ptr: Int64, callback: VoidCallback): Unit
+foreign func qActionDisconnectTriggered(ptr: Int64): Unit
 foreign func qActionDelete(ptr: Int64): Unit
 
 // QToolBar
@@ -156,9 +159,15 @@ public class QAction {
         }
     }
     
-    public func setOnTriggered(callback: CFunc<(Int64) -> Unit>) {
+    public func setOnTriggered(callback: VoidCallback) {
         unsafe {
-            qActionSetOnTriggered(ptr, callback)
+            qActionConnectTriggered(ptr, callback)
+        }
+    }
+    
+    public func disconnect() {
+        unsafe {
+            qActionDisconnectTriggered(ptr)
         }
     }
     

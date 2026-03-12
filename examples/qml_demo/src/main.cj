@@ -2,9 +2,7 @@ package qml_demo
 
 import CJQT6.core.*
 import CJQT6.qml.*
-
-// LibC system 函数
-foreign func system(cmd: CString): Int32
+import std.fs.*
 
 main(): Int32 {
     // 创建应用
@@ -21,13 +19,8 @@ main(): Int32 {
     let qmlPath = "/tmp/cjqt6_demo.qml"
     let qmlContent = "import QtQuick; Rectangle { width: 400; height: 300; color: \"#f5f5f5\"; Text { anchors.centerIn: parent; text: \"Hello from CJQT6!\"; font.pixelSize: 24; color: \"#333\"; } }"
     
-    // 写入临时 QML 文件
-    unsafe {
-        let cmd = "echo '" + qmlContent + "' > " + qmlPath
-        let cmdCStr = LibC.mallocCString(cmd)
-        system(cmdCStr)
-        LibC.free(cmdCStr)
-    }
+    // 使用仓颉标准库写入 QML 文件
+    File.writeTo(qmlPath, qmlContent.toArray())
     
     // 设置 QML 源文件
     view.setSource(qmlPath)

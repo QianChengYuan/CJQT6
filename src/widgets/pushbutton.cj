@@ -1,14 +1,17 @@
 package CJQT6.widgets
 
+import CJQT6.core.*
+
 // QPushButton - 按钮
 foreign func qButtonCreate(): Int64
 foreign func qButtonSetText(ptr: Int64, text: CString): Unit
-foreign func qButtonSetOnClick(ptr: Int64, callback: CFunc<(Int64) -> Unit>): Unit
+foreign func qButtonConnectClicked(ptr: Int64, callback: VoidCallback): Unit
+foreign func qButtonDisconnectClicked(ptr: Int64): Unit
 foreign func qButtonDelete(ptr: Int64): Unit
 
+/// 按钮部件
 public class QPushButton {
     private var ptr: Int64 = 0
-    private var onClickHandler: ?() -> Unit = None
     
     public init() {
         unsafe {
@@ -30,7 +33,7 @@ public class QPushButton {
     
     public func setText(text: String) {
         unsafe {
-            var cstr = LibC.mallocCString(text)
+            let cstr = LibC.mallocCString(text)
             qButtonSetText(ptr, cstr)
             LibC.free(cstr)
         }
@@ -42,38 +45,30 @@ public class QPushButton {
         }
     }
     
-    // 设置点击回调（CFunc方式）
-    public func setOnClick(callback: CFunc<(Int64) -> Unit>) {
+    /// 设置点击回调
+    public func setOnClick(callback: VoidCallback) {
         unsafe {
-            qButtonSetOnClick(ptr, callback)
+            qButtonConnectClicked(ptr, callback)
         }
     }
     
-    // 连接点击信号（闭包方式）
-    public func onClick(handler: () -> Unit) {
-        onClickHandler = Some(handler)
-        // 使用CFunc包装
+    /// 断开点击信号
+    public func disconnectClick() {
         unsafe {
-            qButtonSetOnClick(ptr, { _: Int64 => 
-                // 注意：CFunc不能捕获外部变量，这里需要使用全局变量或其他方式
-            })
+            qButtonDisconnectClicked(ptr)
         }
     }
     
-    // 触发点击事件（内部调用）
-    public func emitClick() {
-        if (let Some(h) <- onClickHandler) {
-            h()
-        }
-    }
-    
+    /// 获取对象指针
     public func getPtr(): Int64 {
-        ptr
+        return ptr
     }
     
+    /// 删除按钮
     public func delete() {
         if (ptr != 0) {
             unsafe {
+                qSignalCleanup(ptr)
                 qButtonDelete(ptr)
             }
             ptr = 0
