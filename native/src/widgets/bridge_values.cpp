@@ -1,10 +1,12 @@
 /**
  * @file bridge_values.cpp
- * @brief 数值部件桥接函数 - QSpinBox, QSlider, QProgressBar
+ * @brief 数值部件桥接函数 - QSpinBox, QDoubleSpinBox, QSlider, QDial, QProgressBar
  */
 
 #include <QSpinBox>
+#include <QDoubleSpinBox>
 #include <QSlider>
+#include <QDial>
 #include <QProgressBar>
 #include <functional>
 #include <unordered_map>
@@ -177,6 +179,141 @@ void qProgressBarDelete(int64_t ptr) {
     QProgressBar* progressBar = reinterpret_cast<QProgressBar*>(ptr);
     if (progressBar) {
         delete progressBar;
+    }
+}
+
+// ============================================================
+// QDoubleSpinBox 桥接函数
+// ============================================================
+
+int64_t qDoubleSpinBoxCreate() {
+    QDoubleSpinBox* spinBox = new QDoubleSpinBox();
+    return reinterpret_cast<int64_t>(spinBox);
+}
+
+void qDoubleSpinBoxSetValue(int64_t ptr, double value) {
+    QDoubleSpinBox* spinBox = reinterpret_cast<QDoubleSpinBox*>(ptr);
+    if (spinBox) {
+        spinBox->setValue(value);
+    }
+}
+
+double qDoubleSpinBoxValue(int64_t ptr) {
+    QDoubleSpinBox* spinBox = reinterpret_cast<QDoubleSpinBox*>(ptr);
+    if (spinBox) {
+        return spinBox->value();
+    }
+    return 0.0;
+}
+
+void qDoubleSpinBoxSetRange(int64_t ptr, double min, double max) {
+    QDoubleSpinBox* spinBox = reinterpret_cast<QDoubleSpinBox*>(ptr);
+    if (spinBox) {
+        spinBox->setRange(min, max);
+    }
+}
+
+void qDoubleSpinBoxSetSingleStep(int64_t ptr, double step) {
+    QDoubleSpinBox* spinBox = reinterpret_cast<QDoubleSpinBox*>(ptr);
+    if (spinBox) {
+        spinBox->setSingleStep(step);
+    }
+}
+
+void qDoubleSpinBoxSetDecimals(int64_t ptr, int32_t decimals) {
+    QDoubleSpinBox* spinBox = reinterpret_cast<QDoubleSpinBox*>(ptr);
+    if (spinBox) {
+        spinBox->setDecimals(decimals);
+    }
+}
+
+int32_t qDoubleSpinBoxDecimals(int64_t ptr) {
+    QDoubleSpinBox* spinBox = reinterpret_cast<QDoubleSpinBox*>(ptr);
+    if (spinBox) {
+        return spinBox->decimals();
+    }
+    return 2;
+}
+
+void qDoubleSpinBoxDelete(int64_t ptr) {
+    QDoubleSpinBox* spinBox = reinterpret_cast<QDoubleSpinBox*>(ptr);
+    if (spinBox) {
+        delete spinBox;
+    }
+}
+
+// ============================================================
+// QDial 桥接函数
+// ============================================================
+
+int64_t qDialCreate() {
+    QDial* dial = new QDial();
+    return reinterpret_cast<int64_t>(dial);
+}
+
+void qDialSetValue(int64_t ptr, int32_t value) {
+    QDial* dial = reinterpret_cast<QDial*>(ptr);
+    if (dial) {
+        dial->setValue(value);
+    }
+}
+
+int32_t qDialValue(int64_t ptr) {
+    QDial* dial = reinterpret_cast<QDial*>(ptr);
+    if (dial) {
+        return dial->value();
+    }
+    return 0;
+}
+
+void qDialSetRange(int64_t ptr, int32_t min, int32_t max) {
+    QDial* dial = reinterpret_cast<QDial*>(ptr);
+    if (dial) {
+        dial->setRange(min, max);
+    }
+}
+
+void qDialSetSingleStep(int64_t ptr, int32_t step) {
+    QDial* dial = reinterpret_cast<QDial*>(ptr);
+    if (dial) {
+        dial->setSingleStep(step);
+    }
+}
+
+void qDialSetWrapping(int64_t ptr, bool wrapping) {
+    QDial* dial = reinterpret_cast<QDial*>(ptr);
+    if (dial) {
+        dial->setWrapping(wrapping);
+    }
+}
+
+bool qDialWrapping(int64_t ptr) {
+    QDial* dial = reinterpret_cast<QDial*>(ptr);
+    if (dial) {
+        return dial->wrapping();
+    }
+    return false;
+}
+
+void qDialSetNotchesVisible(int64_t ptr, bool visible) {
+    QDial* dial = reinterpret_cast<QDial*>(ptr);
+    if (dial) {
+        dial->setNotchesVisible(visible);
+    }
+}
+
+bool qDialNotchesVisible(int64_t ptr) {
+    QDial* dial = reinterpret_cast<QDial*>(ptr);
+    if (dial) {
+        return dial->notchesVisible();
+    }
+    return false;
+}
+
+void qDialDelete(int64_t ptr) {
+    QDial* dial = reinterpret_cast<QDial*>(ptr);
+    if (dial) {
+        delete dial;
     }
 }
 

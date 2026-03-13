@@ -1,10 +1,14 @@
 /**
  * @file bridge_widgets.cpp
- * @brief 基础部件桥接函数 - QLabel, QPushButton, QLineEdit, QTextEdit
+ * @brief 基础部件桥接函数 - QLabel, QPushButton, QToolButton, QLineEdit, QTextEdit
  */
 
 #include <QLabel>
 #include <QPushButton>
+#include <QToolButton>
+#include <QMenu>
+#include <QIcon>
+#include <QSize>
 #include <QLineEdit>
 #include <QTextEdit>
 #include <functional>
@@ -91,6 +95,95 @@ void qButtonDelete(int64_t ptr) {
     QPushButton* button = reinterpret_cast<QPushButton*>(ptr);
     if (button) {
         g_buttonCallbacks.erase(ptr);
+        delete button;
+    }
+}
+
+// ============================================================
+// QToolButton 桥接函数
+// ============================================================
+
+int64_t qToolButtonCreate() {
+    QToolButton* button = new QToolButton();
+    return reinterpret_cast<int64_t>(button);
+}
+
+void qToolButtonSetText(int64_t ptr, const char* text) {
+    QToolButton* button = reinterpret_cast<QToolButton*>(ptr);
+    if (button) {
+        button->setText(text);
+    }
+}
+
+void qToolButtonSetIcon(int64_t ptr, int64_t iconPtr) {
+    QToolButton* button = reinterpret_cast<QToolButton*>(ptr);
+    QIcon* icon = reinterpret_cast<QIcon*>(iconPtr);
+    if (button && icon) {
+        button->setIcon(*icon);
+    }
+}
+
+void qToolButtonSetIconSize(int64_t ptr, int32_t width, int32_t height) {
+    QToolButton* button = reinterpret_cast<QToolButton*>(ptr);
+    if (button) {
+        button->setIconSize(QSize(width, height));
+    }
+}
+
+void qToolButtonSetToolButtonStyle(int64_t ptr, int32_t style) {
+    QToolButton* button = reinterpret_cast<QToolButton*>(ptr);
+    if (button) {
+        button->setToolButtonStyle(static_cast<Qt::ToolButtonStyle>(style));
+    }
+}
+
+void qToolButtonSetPopupMode(int64_t ptr, int32_t mode) {
+    QToolButton* button = reinterpret_cast<QToolButton*>(ptr);
+    if (button) {
+        button->setPopupMode(static_cast<QToolButton::ToolButtonPopupMode>(mode));
+    }
+}
+
+void qToolButtonSetAutoRaise(int64_t ptr, bool enabled) {
+    QToolButton* button = reinterpret_cast<QToolButton*>(ptr);
+    if (button) {
+        button->setAutoRaise(enabled);
+    }
+}
+
+bool qToolButtonAutoRaise(int64_t ptr) {
+    QToolButton* button = reinterpret_cast<QToolButton*>(ptr);
+    if (button) {
+        return button->autoRaise();
+    }
+    return false;
+}
+
+void qToolButtonSetArrowType(int64_t ptr, int32_t type) {
+    QToolButton* button = reinterpret_cast<QToolButton*>(ptr);
+    if (button) {
+        button->setArrowType(static_cast<Qt::ArrowType>(type));
+    }
+}
+
+void qToolButtonSetMenu(int64_t ptr, int64_t menuPtr) {
+    QToolButton* button = reinterpret_cast<QToolButton*>(ptr);
+    QMenu* menu = reinterpret_cast<QMenu*>(menuPtr);
+    if (button && menu) {
+        button->setMenu(menu);
+    }
+}
+
+void qToolButtonShowMenu(int64_t ptr) {
+    QToolButton* button = reinterpret_cast<QToolButton*>(ptr);
+    if (button) {
+        button->showMenu();
+    }
+}
+
+void qToolButtonDelete(int64_t ptr) {
+    QToolButton* button = reinterpret_cast<QToolButton*>(ptr);
+    if (button) {
         delete button;
     }
 }

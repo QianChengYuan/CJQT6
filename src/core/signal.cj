@@ -17,6 +17,9 @@ public type Int32Callback = CFunc<(Int32) -> Unit>
 /// Int64参数回调  
 public type Int64Callback = CFunc<(Int64) -> Unit>
 
+/// Float64参数回调
+public type Float64Callback = CFunc<(Float64) -> Unit>
+
 /// 字符串回调
 public type CStringCallback = CFunc<(CString) -> Unit>
 
@@ -42,6 +45,13 @@ foreign func qButtonConnectClicked(ptr: Int64, callback: VoidCallback): Unit
 foreign func qButtonDisconnectClicked(ptr: Int64): Unit
 
 // ============================================================
+// QToolButton 信号连接
+// ============================================================
+
+foreign func qToolButtonConnectClicked(ptr: Int64, callback: VoidCallback): Unit
+foreign func qToolButtonDisconnectClicked(ptr: Int64): Unit
+
+// ============================================================
 // QSlider 信号连接
 // ============================================================
 
@@ -54,6 +64,20 @@ foreign func qSliderDisconnectValueChanged(ptr: Int64): Unit
 
 foreign func qSpinBoxConnectValueChanged(ptr: Int64, callback: Int32Callback): Unit
 foreign func qSpinBoxDisconnectValueChanged(ptr: Int64): Unit
+
+// ============================================================
+// QDoubleSpinBox 信号连接
+// ============================================================
+
+foreign func qDoubleSpinBoxConnectValueChanged(ptr: Int64, callback: Float64Callback): Unit
+foreign func qDoubleSpinBoxDisconnectValueChanged(ptr: Int64): Unit
+
+// ============================================================
+// QDial 信号连接
+// ============================================================
+
+foreign func qDialConnectValueChanged(ptr: Int64, callback: Int32Callback): Unit
+foreign func qDialDisconnectValueChanged(ptr: Int64): Unit
 
 // ============================================================
 // QCheckBox 信号连接

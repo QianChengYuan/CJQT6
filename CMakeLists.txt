@@ -35,13 +35,14 @@ include_directories(
 # CJQT6 桥接库 (用于仓颉语言FFI)
 # ============================================================
 
-# 核心模块 - QApplication, QWidget, QTimer, Events, Signal/Slot
+# 核心模块 - QApplication, QWidget, QTimer, Events, Signal/Slot, Drag&Drop
 set(CORE_SOURCES
     native/src/core/string.cpp
     native/src/core/core.cpp
     native/src/core/bridge_core.cpp
     native/src/core/bridge_events.cpp
     native/src/core/bridge_signal.cpp
+    native/src/core/bridge_dragdrop.cpp
 )
 
 # GUI模块 - 布局、对话框、菜单

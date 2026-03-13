@@ -10,8 +10,11 @@
 
 #include <QObject>
 #include <QPushButton>
+#include <QToolButton>
 #include <QSlider>
 #include <QSpinBox>
+#include <QDoubleSpinBox>
+#include <QDial>
 #include <QCheckBox>
 #include <QRadioButton>
 #include <QComboBox>
@@ -37,6 +40,9 @@ static QHash<int64_t, std::function<void(int32_t)>> g_int32Callbacks;
 // Int64参数回调存储
 static QHash<int64_t, std::function<void(int64_t)>> g_int64Callbacks;
 
+// Float64参数回调存储
+static QHash<int64_t, std::function<void(double)>> g_float64Callbacks;
+
 // ============================================================
 // QPushButton 信号
 // ============================================================
@@ -55,6 +61,27 @@ void qButtonConnectClicked(int64_t ptr, void (*callback)()) {
 }
 
 void qButtonDisconnectClicked(int64_t ptr) {
+    g_voidCallbacks.remove(ptr);
+}
+
+// ============================================================
+// QToolButton 信号
+// ============================================================
+
+void qToolButtonConnectClicked(int64_t ptr, void (*callback)()) {
+    QToolButton* btn = reinterpret_cast<QToolButton*>(ptr);
+    if (btn && callback) {
+        g_voidCallbacks[ptr] = callback;
+        QObject::connect(btn, &QToolButton::clicked, [ptr]() {
+            auto it = g_voidCallbacks.find(ptr);
+            if (it != g_voidCallbacks.end()) {
+                it.value()();
+            }
+        });
+    }
+}
+
+void qToolButtonDisconnectClicked(int64_t ptr) {
     g_voidCallbacks.remove(ptr);
 }
 
@@ -230,6 +257,48 @@ void qActionDisconnectTriggered(int64_t ptr) {
 }
 
 // ============================================================
+// QDoubleSpinBox 信号
+// ============================================================
+
+void qDoubleSpinBoxConnectValueChanged(int64_t ptr, void (*callback)(double)) {
+    QDoubleSpinBox* spinBox = reinterpret_cast<QDoubleSpinBox*>(ptr);
+    if (spinBox && callback) {
+        g_float64Callbacks[ptr] = callback;
+        QObject::connect(spinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [ptr](double value) {
+            auto it = g_float64Callbacks.find(ptr);
+            if (it != g_float64Callbacks.end()) {
+                it.value()(value);
+            }
+        });
+    }
+}
+
+void qDoubleSpinBoxDisconnectValueChanged(int64_t ptr) {
+    g_float64Callbacks.remove(ptr);
+}
+
+// ============================================================
+// QDial 信号
+// ============================================================
+
+void qDialConnectValueChanged(int64_t ptr, void (*callback)(int32_t)) {
+    QDial* dial = reinterpret_cast<QDial*>(ptr);
+    if (dial && callback) {
+        g_int32Callbacks[ptr] = callback;
+        QObject::connect(dial, &QDial::valueChanged, [ptr](int value) {
+            auto it = g_int32Callbacks.find(ptr);
+            if (it != g_int32Callbacks.end()) {
+                it.value()(value);
+            }
+        });
+    }
+}
+
+void qDialDisconnectValueChanged(int64_t ptr) {
+    g_int32Callbacks.remove(ptr);
+}
+
+// ============================================================
 // 清理函数
 // ============================================================
 
@@ -237,6 +306,7 @@ void qSignalCleanup(int64_t ptr) {
     g_voidCallbacks.remove(ptr);
     g_int32Callbacks.remove(ptr);
     g_int64Callbacks.remove(ptr);
+    g_float64Callbacks.remove(ptr);
     g_textChangedCallbacks.remove(ptr);
 }
 
