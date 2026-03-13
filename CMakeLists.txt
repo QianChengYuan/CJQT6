@@ -12,7 +12,9 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 # 查找 Qt6 包
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Qml Quick QuickWidgets)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Qml Quick QuickWidgets Sql PrintSupport)
+# Multimedia 是可选的
+find_package(Qt6 COMPONENTS Multimedia QUIET)
 
 # 设置 Qt6 自动 MOC、UIC、RCC
 set(CMAKE_AUTOMOC ON)
@@ -85,6 +87,25 @@ set(QML_SOURCES
     native/src/qml/bridge_qml.cpp
 )
 
+# Sql模块 - 数据库支持
+set(SQL_SOURCES
+    native/src/sql/bridge_sql.cpp
+)
+
+# Print模块 - 打印支持
+set(PRINT_SOURCES
+    native/src/print/bridge_print.cpp
+)
+
+# Multimedia模块 - 多媒体支持 (可选)
+set(MULTIMEDIA_SOURCES)
+if(Qt6Multimedia_FOUND)
+    set(MULTIMEDIA_SOURCES native/src/multimedia/bridge_multimedia.cpp)
+    message(STATUS "Qt6 Multimedia: Found")
+else()
+    message(STATUS "Qt6 Multimedia: Not found, multimedia support disabled")
+endif()
+
 # 创建共享库
 add_library(cjqt6_bridge SHARED
     ${CORE_SOURCES}
@@ -94,6 +115,9 @@ add_library(cjqt6_bridge SHARED
     ${PAINT_SOURCES}
     ${PROCESS_SOURCES}
     ${QML_SOURCES}
+    ${MULTIMEDIA_SOURCES}
+    ${SQL_SOURCES}
+    ${PRINT_SOURCES}
     # 头文件 (用于MOC处理)
     native/includes/gui.h
     native/includes/widgets.h
@@ -107,7 +131,14 @@ target_link_libraries(cjqt6_bridge PRIVATE
     Qt6::Qml
     Qt6::Quick
     Qt6::QuickWidgets
+    Qt6::Sql
+    Qt6::PrintSupport
 )
+
+# 可选链接 Multimedia
+if(TARGET Qt6::Multimedia)
+    target_link_libraries(cjqt6_bridge PRIVATE Qt6::Multimedia)
+endif()
 
 # 设置输出名称
 set_target_properties(cjqt6_bridge PROPERTIES
