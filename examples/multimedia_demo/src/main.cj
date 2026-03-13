@@ -26,7 +26,7 @@ main(): Int32 {
     let fileLabel = QLabel()
     fileLabel.setText("媒体文件:")
     let fileEdit = QLineEdit()
-    fileEdit.setPlaceholder("输入音频/视频文件路径")
+    fileEdit.setText("sample.mp3")
     g_fileEdit = fileEdit
     fileLayout.addWidget(fileLabel.getPtr())
     fileLayout.addWidget(fileEdit.getPtr())
@@ -46,7 +46,7 @@ main(): Int32 {
     let volumeSlider = QSlider()
     volumeSlider.setRange(0, 100)
     volumeSlider.setValue(80)
-    volumeSlider.setOrientation(0) // Horizontal
+    volumeSlider.setOrientation(0)
     
     let volumeCallback: Int32Callback = { value: Int32 =>
         if (let Some(p) <- g_player) {
@@ -115,7 +115,7 @@ main(): Int32 {
     
     // 说明
     let infoLabel = QLabel()
-    infoLabel.setText("提示: 输入媒体文件路径后点击加载，然后播放")
+    infoLabel.setText("提示: 默认已加载 sample.mp3，点击加载后播放")
     mainLayout.addWidget(infoLabel.getPtr())
     
     window.setLayout(mainLayout.getPtr())
