@@ -5,6 +5,7 @@
 
 #include <QSpinBox>
 #include <QDoubleSpinBox>
+#include <QLCDNumber>
 #include <QSlider>
 #include <QDial>
 #include <QProgressBar>
@@ -314,6 +315,110 @@ void qDialDelete(int64_t ptr) {
     QDial* dial = reinterpret_cast<QDial*>(ptr);
     if (dial) {
         delete dial;
+    }
+}
+
+
+// ============================================================
+// QLCDNumber 桥接函数
+// ============================================================
+
+int64_t qLCDNumberCreate() {
+    QLCDNumber* lcd = new QLCDNumber();
+    return reinterpret_cast<int64_t>(lcd);
+}
+
+int64_t qLCDNumberCreateWithDigits(int32_t numDigits) {
+    QLCDNumber* lcd = new QLCDNumber(numDigits);
+    return reinterpret_cast<int64_t>(lcd);
+}
+
+void qLCDNumberDisplay(int64_t ptr, double value) {
+    QLCDNumber* lcd = reinterpret_cast<QLCDNumber*>(ptr);
+    if (lcd) {
+        lcd->display(value);
+    }
+}
+
+void qLCDNumberDisplayInt(int64_t ptr, int32_t value) {
+    QLCDNumber* lcd = reinterpret_cast<QLCDNumber*>(ptr);
+    if (lcd) {
+        lcd->display(value);
+    }
+}
+
+void qLCDNumberSetMode(int64_t ptr, int32_t mode) {
+    QLCDNumber* lcd = reinterpret_cast<QLCDNumber*>(ptr);
+    if (lcd) {
+        lcd->setMode(static_cast<QLCDNumber::Mode>(mode));
+    }
+}
+
+int32_t qLCDNumberMode(int64_t ptr) {
+    QLCDNumber* lcd = reinterpret_cast<QLCDNumber*>(ptr);
+    if (lcd) {
+        return static_cast<int32_t>(lcd->mode());
+    }
+    return 0;
+}
+
+void qLCDNumberSetSegmentStyle(int64_t ptr, int32_t style) {
+    QLCDNumber* lcd = reinterpret_cast<QLCDNumber*>(ptr);
+    if (lcd) {
+        lcd->setSegmentStyle(static_cast<QLCDNumber::SegmentStyle>(style));
+    }
+}
+
+int32_t qLCDNumberSegmentStyle(int64_t ptr) {
+    QLCDNumber* lcd = reinterpret_cast<QLCDNumber*>(ptr);
+    if (lcd) {
+        return static_cast<int32_t>(lcd->segmentStyle());
+    }
+    return 0;
+}
+
+void qLCDNumberSetSmallDecimalPoint(int64_t ptr, bool small) {
+    QLCDNumber* lcd = reinterpret_cast<QLCDNumber*>(ptr);
+    if (lcd) {
+        lcd->setSmallDecimalPoint(small);
+    }
+}
+
+bool qLCDNumberSmallDecimalPoint(int64_t ptr) {
+    QLCDNumber* lcd = reinterpret_cast<QLCDNumber*>(ptr);
+    if (lcd) {
+        return lcd->smallDecimalPoint();
+    }
+    return false;
+}
+
+int32_t qLCDNumberDigitCount(int64_t ptr) {
+    QLCDNumber* lcd = reinterpret_cast<QLCDNumber*>(ptr);
+    if (lcd) {
+        return lcd->digitCount();
+    }
+    return 0;
+}
+
+void qLCDNumberSetDigitCount(int64_t ptr, int32_t numDigits) {
+    QLCDNumber* lcd = reinterpret_cast<QLCDNumber*>(ptr);
+    if (lcd) {
+        lcd->setDigitCount(numDigits);
+    }
+}
+
+bool qLCDNumberCheckOverflow(int64_t ptr, double value) {
+    QLCDNumber* lcd = reinterpret_cast<QLCDNumber*>(ptr);
+    if (lcd) {
+        return lcd->checkOverflow(value);
+    }
+    return true;
+}
+
+void qLCDNumberDelete(int64_t ptr) {
+    QLCDNumber* lcd = reinterpret_cast<QLCDNumber*>(ptr);
+    if (lcd) {
+        delete lcd;
     }
 }
 

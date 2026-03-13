@@ -162,6 +162,49 @@ public class QLinearGradient {
     public func getPtr(): Int64 { ptr }
 }
 
+/// 径向渐变
+public class QRadialGradient {
+    private var ptr: Int64 = 0
+    
+    /// 创建径向渐变
+    /// cx, cy: 圆心坐标
+    /// radius: 半径
+    /// fx, fy: 焦点坐标
+    public init(cx: Float32, cy: Float32, radius: Float32, fx: Float32, fy: Float32) {
+        unsafe { ptr = qRadialGradientCreate(cx, cy, radius, fx, fy) }
+    }
+    
+    public static func fromInt(cx: Int32, cy: Int32, radius: Int32, fx: Int32, fy: Int32): QRadialGradient {
+        QRadialGradient(Float32(cx), Float32(cy), Float32(radius), Float32(fx), Float32(fy))
+    }
+    
+    public func setColorAt(pos: Float32, c: QColor): QRadialGradient { 
+        unsafe { qGradientSetColorAt(ptr, pos, c.getPtr()) }; this 
+    }
+    public func getPtr(): Int64 { ptr }
+}
+
+/// 锥形渐变
+public class QConicalGradient {
+    private var ptr: Int64 = 0
+    
+    /// 创建锥形渐变
+    /// cx, cy: 中心坐标
+    /// angle: 起始角度(度)
+    public init(cx: Float32, cy: Float32, angle: Float32) {
+        unsafe { ptr = qConicalGradientCreate(cx, cy, angle) }
+    }
+    
+    public static func fromInt(cx: Int32, cy: Int32, angle: Int32): QConicalGradient {
+        QConicalGradient(Float32(cx), Float32(cy), Float32(angle))
+    }
+    
+    public func setColorAt(pos: Float32, c: QColor): QConicalGradient { 
+        unsafe { qGradientSetColorAt(ptr, pos, c.getPtr()) }; this 
+    }
+    public func getPtr(): Int64 { ptr }
+}
+
 // ============================================================
 // 绘图字体类
 // ============================================================
@@ -391,6 +434,8 @@ foreign func qBrushSetColor(p: Int64, c: Int64): Unit
 foreign func qBrushSetStyle(p: Int64, s: Int32): Unit
 
 foreign func qLinearGradientCreate(x1: Float32, y1: Float32, x2: Float32, y2: Float32): Int64
+foreign func qRadialGradientCreate(cx: Float32, cy: Float32, radius: Float32, fx: Float32, fy: Float32): Int64
+foreign func qConicalGradientCreate(cx: Float32, cy: Float32, angle: Float32): Int64
 foreign func qGradientSetColorAt(p: Int64, pos: Float32, c: Int64): Unit
 
 foreign func qFontCreate(f: CString, s: Int32, b: Int32, i: Int32): Int64

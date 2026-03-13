@@ -1115,4 +1115,177 @@ void qPainterStrokePath(int64_t painterPtr, int64_t pathPtr, int64_t penPtr) {
     }
 }
 
+
+// ============================================================
+// QTransform 桥接函数
+// ============================================================
+
+int64_t qTransformCreate() {
+    QTransform* t = new QTransform();
+    return reinterpret_cast<int64_t>(t);
+}
+
+int64_t qTransformCreateWithValues(float m11, float m12, float m13, float m21, float m22, float m23, float m31, float m32, float m33) {
+    QTransform* t = new QTransform(m11, m12, m13, m21, m22, m23, m31, m32, m33);
+    return reinterpret_cast<int64_t>(t);
+}
+
+void qTransformSetMatrix(int64_t ptr, float m11, float m12, float m13, float m21, float m22, float m23, float m31, float m32, float m33) {
+    QTransform* t = reinterpret_cast<QTransform*>(ptr);
+    if (t) {
+        t->setMatrix(m11, m12, m13, m21, m22, m23, m31, m32, m33);
+    }
+}
+
+int64_t qTransformTranslate(int64_t ptr, float dx, float dy) {
+    QTransform* t = reinterpret_cast<QTransform*>(ptr);
+    if (t) {
+        QTransform* result = new QTransform(*t);
+        result->translate(dx, dy);
+        return reinterpret_cast<int64_t>(result);
+    }
+    return 0;
+}
+
+int64_t qTransformScale(int64_t ptr, float sx, float sy) {
+    QTransform* t = reinterpret_cast<QTransform*>(ptr);
+    if (t) {
+        QTransform* result = new QTransform(*t);
+        result->scale(sx, sy);
+        return reinterpret_cast<int64_t>(result);
+    }
+    return 0;
+}
+
+int64_t qTransformRotate(int64_t ptr, float angle) {
+    QTransform* t = reinterpret_cast<QTransform*>(ptr);
+    if (t) {
+        QTransform* result = new QTransform(*t);
+        result->rotate(angle);
+        return reinterpret_cast<int64_t>(result);
+    }
+    return 0;
+}
+
+int64_t qTransformShear(int64_t ptr, float sh, float sv) {
+    QTransform* t = reinterpret_cast<QTransform*>(ptr);
+    if (t) {
+        QTransform* result = new QTransform(*t);
+        result->shear(sh, sv);
+        return reinterpret_cast<int64_t>(result);
+    }
+    return 0;
+}
+
+void qTransformReset(int64_t ptr) {
+    QTransform* t = reinterpret_cast<QTransform*>(ptr);
+    if (t) {
+        t->reset();
+    }
+}
+
+float qTransformM11(int64_t ptr) {
+    QTransform* t = reinterpret_cast<QTransform*>(ptr);
+    if (t) return t->m11();
+    return 1.0f;
+}
+
+float qTransformM12(int64_t ptr) {
+    QTransform* t = reinterpret_cast<QTransform*>(ptr);
+    if (t) return t->m12();
+    return 0.0f;
+}
+
+float qTransformM13(int64_t ptr) {
+    QTransform* t = reinterpret_cast<QTransform*>(ptr);
+    if (t) return t->m13();
+    return 0.0f;
+}
+
+float qTransformM21(int64_t ptr) {
+    QTransform* t = reinterpret_cast<QTransform*>(ptr);
+    if (t) return t->m21();
+    return 0.0f;
+}
+
+float qTransformM22(int64_t ptr) {
+    QTransform* t = reinterpret_cast<QTransform*>(ptr);
+    if (t) return t->m22();
+    return 1.0f;
+}
+
+float qTransformM23(int64_t ptr) {
+    QTransform* t = reinterpret_cast<QTransform*>(ptr);
+    if (t) return t->m23();
+    return 0.0f;
+}
+
+float qTransformM31(int64_t ptr) {
+    QTransform* t = reinterpret_cast<QTransform*>(ptr);
+    if (t) return t->m31();
+    return 0.0f;
+}
+
+float qTransformM32(int64_t ptr) {
+    QTransform* t = reinterpret_cast<QTransform*>(ptr);
+    if (t) return t->m32();
+    return 0.0f;
+}
+
+float qTransformM33(int64_t ptr) {
+    QTransform* t = reinterpret_cast<QTransform*>(ptr);
+    if (t) return t->m33();
+    return 1.0f;
+}
+
+float qTransformDx(int64_t ptr) {
+    QTransform* t = reinterpret_cast<QTransform*>(ptr);
+    if (t) return t->dx();
+    return 0.0f;
+}
+
+float qTransformDy(int64_t ptr) {
+    QTransform* t = reinterpret_cast<QTransform*>(ptr);
+    if (t) return t->dy();
+    return 0.0f;
+}
+
+int32_t qTransformIsIdentity(int64_t ptr) {
+    QTransform* t = reinterpret_cast<QTransform*>(ptr);
+    if (t) return t->isIdentity() ? 1 : 0;
+    return 1;
+}
+
+int32_t qTransformIsInvertible(int64_t ptr) {
+    QTransform* t = reinterpret_cast<QTransform*>(ptr);
+    if (t) return t->isInvertible() ? 1 : 0;
+    return 0;
+}
+
+int64_t qTransformInverted(int64_t ptr) {
+    QTransform* t = reinterpret_cast<QTransform*>(ptr);
+    if (t) {
+        QTransform* result = new QTransform(t->inverted());
+        return reinterpret_cast<int64_t>(result);
+    }
+    return 0;
+}
+
+int64_t qTransformMultiply(int64_t ptr, int64_t other) {
+    QTransform* t = reinterpret_cast<QTransform*>(ptr);
+    QTransform* o = reinterpret_cast<QTransform*>(other);
+    if (t && o) {
+        QTransform* result = new QTransform(*t * *o);
+        return reinterpret_cast<int64_t>(result);
+    }
+    return 0;
+}
+
+void qTransformDelete(int64_t ptr) {
+    QTransform* t = reinterpret_cast<QTransform*>(ptr);
+    if (t) {
+        delete t;
+    }
+}
+
 } // extern "C"
