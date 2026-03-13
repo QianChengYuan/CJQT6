@@ -15,6 +15,14 @@ func setStatus(msg: String): Unit {
     }
 }
 
+func closeConnection(): Unit {
+    if (let Some(db) <- g_db) {
+        db.close()
+        g_db = None
+    }
+    QSqlDatabase.removeDatabase("demo_conn")
+}
+
 main(): Int32 {
     let app = QApplication()
     let window = QWidget()
@@ -45,6 +53,9 @@ main(): Int32 {
     let connectBtn = QPushButton()
     connectBtn.setText("连接数据库")
     let connectCallback: VoidCallback = { =>
+        // 先关闭旧连接
+        closeConnection()
+        
         let db = QSqlDatabase.addDatabase(SqlDriver.sqlite(), "demo_conn")
         db.setDatabaseName(":memory:")
         if (db.open()) {
@@ -84,6 +95,7 @@ main(): Int32 {
                     } else {
                         setStatus("状态: 执行失败")
                     }
+                    query.finish()
                     query.delete()
                 }
             }
@@ -104,6 +116,7 @@ main(): Int32 {
                     }
                     setStatus(result)
                 }
+                query.finish()
                 query.delete()
             }
         }
@@ -125,10 +138,9 @@ main(): Int32 {
     let result = app.exec()
     
     // 清理
-    g_db = None
+    closeConnection()
     g_statusLabel = None
     g_sqlEdit = None
-    QSqlDatabase.removeDatabase("demo_conn")
     titleLabel.delete()
     dbPathLabel.delete()
     dbPathEdit.delete()
