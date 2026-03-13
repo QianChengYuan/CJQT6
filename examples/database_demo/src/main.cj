@@ -8,6 +8,7 @@ import CJQT6.sql.*
 var g_db: ?QSqlDatabase = None
 var g_statusLabel: ?QLabel = None
 var g_sqlEdit: ?QTextEdit = None
+var g_dbPathEdit: ?QLineEdit = None
 
 func setStatus(msg: String): Unit {
     if (let Some(label) <- g_statusLabel) {
@@ -40,12 +41,23 @@ func initDatabase(db: QSqlDatabase): Unit {
         return
     }
     
-    // 插入数据
-    execSingleSql(db, "INSERT OR REPLACE INTO users VALUES (1, '张三')")
-    execSingleSql(db, "INSERT OR REPLACE INTO users VALUES (2, '李四')")
-    execSingleSql(db, "INSERT OR REPLACE INTO users VALUES (3, '王五')")
-    
-    setStatus("数据库初始化成功，已创建users表并插入示例数据")
+    // 检查是否有数据
+    let checkQuery = QSqlQuery(db)
+    if (checkQuery.exec("SELECT COUNT(*) FROM users")) {
+        if (checkQuery.next() && checkQuery.valueInt(0) == 0) {
+            // 插入示例数据
+            execSingleSql(db, "INSERT INTO users VALUES (1, '张三')")
+            execSingleSql(db, "INSERT INTO users VALUES (2, '李四')")
+            execSingleSql(db, "INSERT INTO users VALUES (3, '王五')")
+            setStatus("数据库初始化成功，已创建users表并插入示例数据")
+        } else {
+            setStatus("数据库连接成功，users表已存在")
+        }
+        checkQuery.delete()
+    } else {
+        checkQuery.delete()
+        setStatus("数据库连接成功")
+    }
 }
 
 main(): Int32 {
@@ -67,9 +79,10 @@ main(): Int32 {
     let dbLayout = QVBoxLayout()
     
     let dbPathLabel = QLabel()
-    dbPathLabel.setText("SQLite数据库路径 (留空使用内存数据库):")
+    dbPathLabel.setText("SQLite数据库路径 (留空使用 demo.db):")
     let dbPathEdit = QLineEdit()
-    dbPathEdit.setPlaceholder(":memory: 或 /path/to/db.sqlite")
+    dbPathEdit.setPlaceholder("demo.db 或 /path/to/db.sqlite")
+    g_dbPathEdit = dbPathEdit
     
     let statusLabel = QLabel()
     statusLabel.setText("状态: 就绪")
@@ -81,13 +94,23 @@ main(): Int32 {
         // 先关闭旧连接
         closeConnection()
         
+        // 获取数据库路径
+        var dbPath = "demo.db"
+        if (let Some(edit) <- g_dbPathEdit) {
+            let inputPath = edit.text()
+            if (inputPath.size > 0) {
+                dbPath = inputPath
+            }
+        }
+        
         let db = QSqlDatabase.addDatabase(SqlDriver.sqlite(), "demo_conn")
-        db.setDatabaseName(":memory:")
+        db.setDatabaseName(dbPath)
         if (db.open()) {
             g_db = db
             initDatabase(db)
+            println("数据库路径: ${dbPath}")
         } else {
-            setStatus("状态: 连接失败")
+            setStatus("状态: 连接失败: ${db.lastError()}")
         }
     }
     connectBtn.setOnClick(connectCallback)
@@ -164,6 +187,7 @@ main(): Int32 {
     closeConnection()
     g_statusLabel = None
     g_sqlEdit = None
+    g_dbPathEdit = None
     titleLabel.delete()
     dbPathLabel.delete()
     dbPathEdit.delete()
