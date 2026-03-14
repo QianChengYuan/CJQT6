@@ -1,0 +1,9 @@
+/home/yuan123/cangjiecode/CJQT6/native/build-win64/CMakeFiles/cjqt6_bridge.dir
+/home/yuan123/cangjiecode/CJQT6/native/build-win64/CMakeFiles/edit_cache.dir
+/home/yuan123/cangjiecode/CJQT6/native/build-win64/CMakeFiles/rebuild_cache.dir
+/home/yuan123/cangjiecode/CJQT6/native/build-win64/CMakeFiles/list_install_components.dir
+/home/yuan123/cangjiecode/CJQT6/native/build-win64/CMakeFiles/install.dir
+/home/yuan123/cangjiecode/CJQT6/native/build-win64/CMakeFiles/install/local.dir
+/home/yuan123/cangjiecode/CJQT6/native/build-win64/CMakeFiles/install/strip.dir
+/home/yuan123/cangjiecode/CJQT6/native/build-win64/CMakeFiles/cjqt6_bridge_autogen_timestamp_deps.dir
+/home/yuan123/cangjiecode/CJQT6/native/build-win64/CMakeFiles/cjqt6_bridge_autogen.dir

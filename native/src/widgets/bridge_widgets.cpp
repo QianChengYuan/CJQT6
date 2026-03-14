@@ -9,6 +9,7 @@
 #include <QMenu>
 #include <QIcon>
 #include <QSize>
+#include <QStyle>
 #include <QLineEdit>
 #include <QTextEdit>
 #include <functional>
@@ -88,6 +89,61 @@ void qButtonSetOnClick(int64_t ptr, void (*callback)(int64_t)) {
                 it->second(widgetPtr);
             }
         });
+    }
+}
+
+// 设置按钮图标（从文件路径）
+void qButtonSetIcon(int64_t ptr, const char* iconPath) {
+    QPushButton* button = reinterpret_cast<QPushButton*>(ptr);
+    if (button && iconPath) {
+        QIcon icon(QString::fromUtf8(iconPath));
+        button->setIcon(icon);
+    }
+}
+
+// 设置按钮图标大小
+void qButtonSetIconSize(int64_t ptr, int32_t width, int32_t height) {
+    QPushButton* button = reinterpret_cast<QPushButton*>(ptr);
+    if (button) {
+        button->setIconSize(QSize(width, height));
+    }
+}
+
+// 设置按钮使用 Qt 标准图标
+void qButtonSetStandardIcon(int64_t ptr, int32_t iconType) {
+    QPushButton* button = reinterpret_cast<QPushButton*>(ptr);
+    if (button) {
+        QStyle::StandardPixmap standardIcon;
+        switch (iconType) {
+            case 0: standardIcon = QStyle::SP_DialogOpenButton; break;
+            case 1: standardIcon = QStyle::SP_DialogSaveButton; break;
+            case 2: standardIcon = QStyle::SP_DialogCloseButton; break;
+            case 3: standardIcon = QStyle::SP_DialogApplyButton; break;
+            case 4: standardIcon = QStyle::SP_DialogCancelButton; break;
+            case 5: standardIcon = QStyle::SP_DialogHelpButton; break;
+            case 6: standardIcon = QStyle::SP_FileIcon; break;
+            case 7: standardIcon = QStyle::SP_DirIcon; break;
+            case 8: standardIcon = QStyle::SP_FileDialogNewFolder; break;
+            case 9: standardIcon = QStyle::SP_CommandLink; break;
+            case 10: standardIcon = QStyle::SP_BrowserReload; break;
+            case 11: standardIcon = QStyle::SP_BrowserStop; break;
+            case 12: standardIcon = QStyle::SP_MediaPlay; break;
+            case 13: standardIcon = QStyle::SP_MediaPause; break;
+            case 14: standardIcon = QStyle::SP_MediaStop; break;
+            case 15: standardIcon = QStyle::SP_MediaSeekForward; break;
+            case 16: standardIcon = QStyle::SP_MediaSeekBackward; break;
+            case 17: standardIcon = QStyle::SP_MediaSkipForward; break;
+            case 18: standardIcon = QStyle::SP_MediaSkipBackward; break;
+            case 19: standardIcon = QStyle::SP_ArrowUp; break;
+            case 20: standardIcon = QStyle::SP_ArrowDown; break;
+            case 21: standardIcon = QStyle::SP_ArrowLeft; break;
+            case 22: standardIcon = QStyle::SP_ArrowRight; break;
+            case 23: standardIcon = QStyle::SP_DialogYesButton; break;
+            case 24: standardIcon = QStyle::SP_DialogNoButton; break;
+            default: standardIcon = QStyle::SP_DialogApplyButton; break;
+        }
+        QIcon icon = button->style()->standardIcon(standardIcon);
+        button->setIcon(icon);
     }
 }
 
@@ -263,10 +319,199 @@ void qLineEditSetOnTextChanged(int64_t ptr, void (*callback)(int64_t)) {
     }
 }
 
+// 密码可见性切换按钮存储
+static std::unordered_map<int64_t, std::function<void()>> g_passwordToggleCallbacks;
+static std::unordered_map<int64_t, QToolButton*> g_passwordToggleButtons;
+
+// 添加密码可见性切换按钮到输入框右侧
+void qLineEditAddPasswordToggleAction(int64_t ptr, void (*callback)()) {
+    QLineEdit* lineEdit = reinterpret_cast<QLineEdit*>(ptr);
+    if (lineEdit && callback) {
+        // 创建一个 QToolButton 作为切换按钮
+        QToolButton* toggleBtn = new QToolButton(lineEdit);
+        
+        // 使用文本符号：● 表示隐藏状态，○ 表示显示状态
+        toggleBtn->setText(QString::fromUtf8("\u25CF"));  // ● 实心圆点
+        toggleBtn->setCursor(Qt::PointingHandCursor);
+        toggleBtn->setFixedSize(20, 20);  // 更小的按钮
+        toggleBtn->setStyleSheet(
+            "QToolButton {"
+            "  border: none;"
+            "  background: transparent;"
+            "  font-size: 12px;"
+            "  color: #666;"
+            "  padding: 0px;"
+            "}"
+            "QToolButton:hover {"
+            "  color: #333;"
+            "  background: rgba(0,0,0,0.1);"
+            "  border-radius: 2px;"
+            "}"
+        );
+        
+        // 存储回调和按钮
+        g_passwordToggleCallbacks[ptr] = callback;
+        g_passwordToggleButtons[ptr] = toggleBtn;
+        
+        // 连接点击信号
+        int64_t widgetPtr = ptr;
+        QObject::connect(toggleBtn, &QToolButton::clicked, [widgetPtr]() {
+            auto it = g_passwordToggleCallbacks.find(widgetPtr);
+            if (it != g_passwordToggleCallbacks.end()) {
+                it->second();
+            }
+        });
+        
+        // 设置输入框右侧内边距
+        int frameWidth = lineEdit->style()->pixelMetric(QStyle::PM_DefaultFrameWidth);
+        lineEdit->setStyleSheet(
+            QString("QLineEdit { padding-right: %1px; }").arg(20 + frameWidth + 1)
+        );
+        
+        // 定位按钮 - 垂直居中，向上微调
+        int editHeight = lineEdit->height();
+        int yPos = (editHeight - 20) / 2 - 1;  // 向上偏移1像素
+        int xPos = lineEdit->width() - 20 - frameWidth - 1;  // 减少右边空隙
+        toggleBtn->move(xPos, yPos);
+        toggleBtn->show();
+        
+        // 监听文本变化重新定位
+        QObject::connect(lineEdit, &QLineEdit::textChanged, [lineEdit, toggleBtn]() {
+            int frameWidth = lineEdit->style()->pixelMetric(QStyle::PM_DefaultFrameWidth);
+            int editHeight = lineEdit->height();
+            int yPos = (editHeight - 20) / 2 - 1;
+            int xPos = lineEdit->width() - 20 - frameWidth - 1;
+            toggleBtn->move(xPos, yPos);
+        });
+    }
+}
+
+// 设置密码切换按钮图标（true=可见，false=隐藏）
+void qLineEditSetPasswordToggleIcon(int64_t ptr, bool visible) {
+    auto it = g_passwordToggleButtons.find(ptr);
+    if (it != g_passwordToggleButtons.end()) {
+        QToolButton* btn = it->second;
+        if (btn) {
+            if (visible) {
+                // 密码可见时显示空心圆点（表示可以隐藏）
+                btn->setText(QString::fromUtf8("\u25CB"));  // ○ 空心圆点
+            } else {
+                // 密码隐藏时显示实心圆点（表示可以显示）
+                btn->setText(QString::fromUtf8("\u25CF"));  // ● 实心圆点
+            }
+        }
+    }
+}
+
+// 设置输入掩码（格式化输入）
+// 掩码字符：
+// 0 - 数字（必填）
+// 9 - 数字（可选）
+// # - 数字或正负号（可选）
+// D - 非零数字（必填）
+// d - 非零数字（可选）
+// A - 字母（必填）
+// a - 字母（可选）
+// N - 字母或数字（必填）
+// n - 字母或数字（可选）
+// H - 十六进制字符（必填）
+// h - 十六进制字符（可选）
+// X - 任意字符（必填）
+// x - 任意字符（可选）
+// > - 转换为大写
+// < - 转换为小写
+// ! - 关闭大小写转换
+// ;c - 设置占位字符为 c
+void qLineEditSetInputMask(int64_t ptr, const char* mask) {
+    QLineEdit* lineEdit = reinterpret_cast<QLineEdit*>(ptr);
+    if (lineEdit && mask) {
+        lineEdit->setInputMask(QString::fromUtf8(mask));
+    }
+}
+
+// 设置是否显示边框
+void qLineEditSetFrame(int64_t ptr, bool enabled) {
+    QLineEdit* lineEdit = reinterpret_cast<QLineEdit*>(ptr);
+    if (lineEdit) {
+        lineEdit->setFrame(enabled);
+    }
+}
+
+// 设置文本对齐方式
+// 0x01 = AlignLeft
+// 0x02 = AlignRight
+// 0x04 = AlignHCenter
+// 0x20 = AlignTop
+// 0x40 = AlignBottom
+// 0x80 = AlignVCenter
+// 0x84 = AlignCenter
+void qLineEditSetAlignment(int64_t ptr, int32_t alignment) {
+    QLineEdit* lineEdit = reinterpret_cast<QLineEdit*>(ptr);
+    if (lineEdit) {
+        lineEdit->setAlignment(static_cast<Qt::Alignment>(alignment));
+    }
+}
+
+// 获取文本长度
+int32_t qLineEditLength(int64_t ptr) {
+    QLineEdit* lineEdit = reinterpret_cast<QLineEdit*>(ptr);
+    if (lineEdit) {
+        return lineEdit->text().length();
+    }
+    return 0;
+}
+
+// 获取最大长度
+int32_t qLineEditMaxLength(int64_t ptr) {
+    QLineEdit* lineEdit = reinterpret_cast<QLineEdit*>(ptr);
+    if (lineEdit) {
+        return lineEdit->maxLength();
+    }
+    return 32767;
+}
+
+// 是否有选中文本
+bool qLineEditHasSelectedText(int64_t ptr) {
+    QLineEdit* lineEdit = reinterpret_cast<QLineEdit*>(ptr);
+    if (lineEdit) {
+        return lineEdit->hasSelectedText();
+    }
+    return false;
+}
+
+// 获取选中的文本
+const char* qLineEditSelectedText(int64_t ptr) {
+    static thread_local std::string selectedTextStr;
+    QLineEdit* lineEdit = reinterpret_cast<QLineEdit*>(ptr);
+    if (lineEdit) {
+        selectedTextStr = lineEdit->selectedText().toStdString();
+        return selectedTextStr.c_str();
+    }
+    return "";
+}
+
+// 选中所有文本
+void qLineEditSelectAll(int64_t ptr) {
+    QLineEdit* lineEdit = reinterpret_cast<QLineEdit*>(ptr);
+    if (lineEdit) {
+        lineEdit->selectAll();
+    }
+}
+
+// 设置焦点
+void qLineEditSetFocus(int64_t ptr) {
+    QLineEdit* lineEdit = reinterpret_cast<QLineEdit*>(ptr);
+    if (lineEdit) {
+        lineEdit->setFocus();
+    }
+}
+
 void qLineEditDelete(int64_t ptr) {
     QLineEdit* lineEdit = reinterpret_cast<QLineEdit*>(ptr);
     if (lineEdit) {
         g_textChangedCallbacks.erase(ptr);
+        g_passwordToggleCallbacks.erase(ptr);
+        g_passwordToggleButtons.erase(ptr);
         delete lineEdit;
     }
 }

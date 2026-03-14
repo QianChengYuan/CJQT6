@@ -1,9 +1,0 @@
-[package]
-  cjc-version = "1.1.0"
-  name = "widget_demo"
-  version = "1.0.0"
-  output-type = "executable"
-  link-option = "-L../lib -lcjqt6_bridge"
-
-[dependencies]
-  CJQT6 = { path = "../.." }

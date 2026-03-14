@@ -83,14 +83,10 @@ CJQT6/
 │
 ├── examples/                   # 示例程序
 │   ├── run_example.sh          # 运行脚本
-│   ├── hello_window/           # 基础窗口示例
-│   ├── widget_demo/            # 控件演示
-│   ├── table_demo/             # 表格演示
-│   ├── menu_demo/              # 菜单/记事本示例
-│   ├── views_demo/             # 列表/树形视图示例
-│   ├── paint_demo/             # 绘图演示
-│   ├── datetime_demo/          # 日期时间演示
-│   └── qml_demo/               # QML演示
+│   ├── lib/                    # 共享库目录
+│   └── widgets_demo/           # 常用控件演示
+│       ├── cjpm.toml
+│       └── src/main.cj
 │
 └── tests/                      # 测试代码
 ```
@@ -141,8 +137,8 @@ CJQT6/
 | 类 | Qt类 | 说明 |
 |----|------|------|
 | QLabel | QLabel | 标签 |
-| QPushButton | QPushButton | 按钮 |
-| QLineEdit | QLineEdit | 单行文本输入 |
+| QPushButton | QPushButton | 按钮（支持图标） |
+| QLineEdit | QLineEdit | 单行文本输入（支持掩码、密码切换） |
 | QTextEdit | QTextEdit | 多行文本编辑 |
 
 ### 选择部件
@@ -270,14 +266,8 @@ cjpm build
 ```bash
 cd examples
 
-# 运行widget_demo示例
-./run_example.sh ./widget_demo/target/release/bin/main
-
-# 运行其他示例
-./run_example.sh ./datetime_demo/target/release/bin/main
-./run_example.sh ./paint_demo/target/release/bin/main
-./run_example.sh ./table_demo/target/release/bin/main
-./run_example.sh ./menu_demo/target/release/bin/main
+# 运行常用控件演示
+./run_example.sh ./widgets_demo/target/release/bin/main
 ```
 
 脚本会自动：
@@ -294,43 +284,98 @@ import CJQT6.core.*
 import CJQT6.widgets.*
 import CJQT6.gui.*
 
-var label: ?QLabel = None
+// 全局变量（用于回调中访问，CFunc 闭包不能捕获局部变量）
+var infoLabel: ?QLabel = None
 
+// 回调函数（必须在顶层定义）
 let clickCallback: VoidCallback = { =>
-    if (let Some(l) <- label) {
-        l.setText("按钮被点击了！")
+    if (let Some(label) <- infoLabel) {
+        label.setText("按钮被点击了！")
     }
 }
 
 main(): Int32 {
-    let app = QApplication()
+    let app = QApplication()  // 必须最先创建
     let window = QWidget()
     window.setTitle("CJQT6 示例")
     window.resize(400, 300)
     
     let layout = QVBoxLayout()
     
-    label = QLabel()
+    let label = QLabel()
     label.setText("欢迎使用CJQT6！")
+    infoLabel = label  // 保存到全局变量
     layout.addWidget(label.getPtr())
     
+    // 带图标的按钮
     let btn = QPushButton()
-    btn.setText("点击我")
+    btn.setStandardIcon(StandardIcon.Open)
+    btn.setText("打开")
     btn.setOnClick(clickCallback)
     layout.addWidget(btn.getPtr())
+    
+    // 输入框 - IP地址掩码
+    let ipEdit = QLineEdit()
+    ipEdit.setInputMask(InputMask.IP)
+    ipEdit.setPlaceholder("000.000.000.000")
+    layout.addWidget(ipEdit.getPtr())
+    
+    // 密码输入框（带切换按钮）
+    let pwdEdit = QLineEdit()
+    pwdEdit.setEchoMode(2)  // Password
+    pwdEdit.addPasswordToggleAction({ =>
+        // 切换密码可见性逻辑
+    })
+    layout.addWidget(pwdEdit.getPtr())
     
     window.setLayout(layout.getPtr())
     window.show()
     
+    // 不需要手动 delete，终结器会自动清理资源
     let result = app.exec()
-    
-    label.delete()
-    btn.delete()
-    window.delete()
-    app.delete()
-    
     return result
 }
+```
+
+## 资源管理
+
+### 自动清理
+
+所有控件类都实现了终结器 `~init`，垃圾回收时会自动释放资源：
+
+```cangjie
+main(): Int32 {
+    let app = QApplication()
+    let window = QWidget()
+    // ... 创建控件 ...
+    window.show()
+    let result = app.exec()
+    // 不需要手动清理，终结器自动处理
+    return result
+}
+```
+
+### 手动释放（可选）
+
+如果需要立即释放资源，可以调用 `close()` 或 `delete()`：
+
+```cangjie
+// 方式1：close() - 实现 QtResource 接口
+widget.close()
+
+// 方式2：delete() - 直接释放
+widget.delete()
+```
+
+### try-with-resources
+
+对于需要精确控制资源生命周期的场景：
+
+```cangjie
+try (widget = QWidget()) {
+    widget.show()
+    // ... 使用 widget ...
+}  // 自动调用 close()
 ```
 
 ## 信号与槽
@@ -472,7 +517,9 @@ ibus engine pinyin
 2. **模块化设计** - 代码按功能模块组织
 3. **FFI桥接** - 高效的仓颉与Qt6交互
 4. **类型安全** - 使用CType约束确保安全
-5. **完整文档** - 提供API文档和示例
+5. **自动资源管理** - 终结器自动释放，无需手动清理
+6. **线程安全** - 回调映射使用互斥锁保护
+7. **完整文档** - 提供API文档和示例
 
 ## 参考资源
 

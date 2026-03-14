@@ -19,6 +19,85 @@
 15. [进程管理](#进程管理)
 16. [QML模块](#qml模块)
 17. [信号与槽](#信号与槽)
+18. [资源管理](#资源管理)
+
+---
+
+## 资源管理
+
+### 自动清理机制
+
+所有控件类都实现了终结器 `~init`，垃圾回收时会自动释放资源。**无需手动调用 `delete()`**。
+
+```cangjie
+main(): Int32 {
+    let app = QApplication()
+    let window = QWidget()
+    let label = QLabel()
+    let btn = QPushButton()
+    // ... 创建更多控件 ...
+    window.show()
+    let result = app.exec()
+    // 不需要手动清理，终结器自动处理
+    return result
+}
+```
+
+### 手动释放（可选）
+
+如果需要**立即释放**资源，可以调用 `close()` 或 `delete()`：
+
+```cangjie
+// 方式1：close() - 实现 QtResource 接口
+widget.close()
+
+// 方式2：delete() - 直接释放
+widget.delete()
+```
+
+### try-with-resources 模式
+
+对于需要精确控制资源生命周期的场景：
+
+```cangjie
+try (widget = QWidget()) {
+    widget.show()
+    // ... 使用 widget ...
+}  // 自动调用 close()
+```
+
+### QtResource 接口
+
+```cangjie
+interface QtResource {
+    func isClosed(): Bool    // 检查资源是否已释放
+    func close(): Unit       // 释放资源
+}
+```
+
+### 异常处理
+
+```cangjie
+import CJQT6.core.*
+
+// 安全执行操作
+let result = safeExecute(widget, { w =>
+    w.setText("Hello")  // 如果 widget 已释放，返回 false
+})
+
+// 安全运行代码块
+let success = safeRun({ =>
+    // 可能抛出异常的代码
+})
+```
+
+**异常类型**：
+| 异常 | 说明 |
+|------|------|
+| `QtException` | 基类异常 |
+| `ResourceDisposedException` | 资源已释放 |
+| `NullPointerException` | 空指针 |
+| `CreateFailedException` | 创建失败 |
 
 ---
 
@@ -37,7 +116,7 @@ main(): Int32 {
     // 创建窗口和控件...
     
     let result = app.exec()  // 进入事件循环
-    app.delete()             // 清理资源
+    // 不需要手动清理，终结器自动处理
     return result
 }
 ```
@@ -48,7 +127,7 @@ main(): Int32 {
 | `init()` | 创建应用程序实例 |
 | `exec(): Int32` | 进入事件循环，返回退出码 |
 | `quit()` | 退出应用程序 |
-| `delete()` | 释放资源 |
+| `close()` | 释放资源（实现 QtResource 接口） |
 
 ### QWidget
 
@@ -72,7 +151,8 @@ window.show()
 | `show()` | 显示窗口 |
 | `hide()` | 隐藏窗口 |
 | `getPtr(): Int64` | 获取指针（用于布局） |
-| `delete()` | 释放资源 |
+| `close()` | 释放资源 |
+| `isClosed(): Bool` | 检查是否已释放 |
 
 ### QTimer
 
@@ -139,6 +219,14 @@ let callback: VoidCallback = { =>
     println("按钮被点击！")
 }
 btn.setOnClick(callback)
+
+// 设置图标
+btn.setIcon("/path/to/icon.png")  // 从文件加载
+btn.setIconSize(24, 24)           // 设置图标大小
+
+// 使用 Qt 标准图标
+btn.setStandardIcon(StandardIcon.Open)
+btn.setStandardIcon(StandardIcon.Save)
 ```
 
 **方法**:
@@ -146,7 +234,31 @@ btn.setOnClick(callback)
 |------|------|
 | `setText(text: String)` | 设置按钮文本 |
 | `setOnClick(callback: VoidCallback)` | 设置点击回调 |
+| `setIcon(path: String)` | 从文件加载图标 |
+| `setIconSize(w: Int32, h: Int32)` | 设置图标大小 |
+| `setStandardIcon(type: Int32)` | 使用 Qt 标准图标 |
 | `disconnect()` | 断开信号连接 |
+
+**标准图标常量** (StandardIcon):
+```cangjie
+Open          // 打开
+Save          // 保存
+Close         // 关闭
+Apply         // 应用
+Cancel        // 取消
+Help          // 帮助
+File          // 文件
+Folder        // 文件夹
+ArrowUp       // 向上箭头
+ArrowDown     // 向下箭头
+ArrowLeft     // 向左箭头
+ArrowRight    // 向右箭头
+MediaPlay     // 播放
+MediaPause    // 暂停
+MediaStop     // 停止
+Yes           // 是
+No            // 否
+```
 
 ---
 
@@ -159,6 +271,32 @@ let edit = QLineEdit()
 edit.setPlaceholder("请输入...")
 edit.setMaxLength(100)
 edit.setEchoMode(Password)  // 密码模式
+
+// 输入掩码 - 格式化输入
+edit.setInputMask(InputMask.IP)        // IP地址: 000.000.000.000
+edit.setInputMask(InputMask.MAC)       // MAC地址: HH:HH:HH:HH:HH:HH
+edit.setInputMask(InputMask.Date)      // 日期: 9999-99-99
+edit.setInputMask(InputMask.LicenseKey) // 密钥: XXXXX-XXXXX-...
+
+// 自定义掩码
+edit.setInputMask("(999) 999-9999;_")  // 电话号码
+
+// 样式设置
+edit.setFrame(false)                   // 无边框
+edit.setAlignment(Alignment.Center)    // 居中对齐
+edit.setStyleSheet("background-color: #f0f0f0;")
+
+// 文本选择
+edit.selectAll()
+if (edit.hasSelectedText()) {
+    let selected = edit.selectedText()
+}
+
+// 密码切换按钮（嵌入输入框内部）
+edit.setEchoMode(2)  // Password 模式
+edit.addPasswordToggleAction({ =>
+    // 切换密码可见性
+})
 ```
 
 **方法**:
@@ -168,6 +306,53 @@ edit.setEchoMode(Password)  // 密码模式
 | `text(): String` | 获取文本 |
 | `setPlaceholder(text: String)` | 设置占位文本 |
 | `setMaxLength(len: Int32)` | 设置最大长度 |
+| `setReadOnly(readonly: Bool)` | 设置只读 |
+| `setEchoMode(mode: Int32)` | 设置回显模式 |
+| `setInputMask(mask: String)` | 设置输入掩码 |
+| `setFrame(visible: Bool)` | 设置边框显示 |
+| `setAlignment(alignment: Int32)` | 设置文本对齐 |
+| `setStyleSheet(style: String)` | 设置样式表 |
+| `selectAll()` | 全选文本 |
+| `hasSelectedText(): Bool` | 是否有选中文本 |
+| `selectedText(): String` | 获取选中文本 |
+| `setFocus()` | 设置焦点 |
+| `addPasswordToggleAction(callback)` | 添加密码切换按钮 |
+| `setPasswordToggleIcon(visible: Bool)` | 设置密码切换按钮图标 |
+| `clear()` | 清空 |
+| `setOnTextChanged(callback: CStringCallback)` | 文本变化回调 |
+| `disconnect()` | 断开信号连接 |
+
+**回显模式常量**:
+```cangjie
+Normal             // 正常
+NoEcho             // 不显示
+Password           // 密码
+PasswordEchoOnEdit // 编辑时显示
+```
+
+**输入掩码预设** (InputMask):
+```cangjie
+IP          // "000.000.000.000;_" - IP地址
+MAC         // "HH:HH:HH:HH:HH:HH;_" - MAC地址
+Date        // "9999-99-99;_" - 日期
+Time        // "99:99:99;_" - 时间
+Phone       // "(999) 999-9999;_" - 电话
+LicenseKey  // ">AAAAA-AAAAA-AAAAA-AAAAA-AAAAA;#" - 软件密钥
+```
+
+**掩码字符说明**:
+| 字符 | 说明 |
+|------|------|
+| `0` | 数字，必填 |
+| `9` | 数字，可选 |
+| `A` | 字母，必填 |
+| `a` | 字母，可选 |
+| `H` | 十六进制字符，必填 |
+| `h` | 十六进制字符，可选 |
+| `>` | 后续字符转大写 |
+| `<` | 后续字符转小写 |
+| `!` | 取消大小写转换 |
+| `;` | 分隔符，后跟占位字符 |
 | `setReadOnly(readonly: Bool)` | 设置只读 |
 | `setEchoMode(mode: Int32)` | 设置回显模式 |
 | `clear()` | 清空 |
@@ -2009,6 +2194,43 @@ public type Int32Callback = CFunc<(Int32) -> Unit>
 
 // CString参数回调
 public type CStringCallback = CFunc<(CString) -> Unit>
+
+// Float64参数回调
+public type Float64Callback = CFunc<(Float64) -> Unit>
+```
+
+### 重要说明：CFunc 的限制
+
+**CFunc 闭包不能捕获局部变量**，只能：
+- 使用全局变量
+- 使用参数
+
+因此，如果需要在回调中访问其他控件，必须使用全局变量：
+
+```cangjie
+// ❌ 错误：不能捕获局部变量
+main(): Int32 {
+    let label = QLabel()
+    let callback: VoidCallback = { =>
+        label.setText("clicked")  // 编译错误！
+    }
+}
+
+// ✅ 正确：使用全局变量
+var globalLabel: ?QLabel = None
+
+let callback: VoidCallback = { =>
+    if (let Some(label) <- globalLabel) {
+        label.setText("clicked")
+    }
+}
+
+main(): Int32 {
+    let app = QApplication()
+    let label = QLabel()
+    globalLabel = label  // 保存到全局变量
+    // ...
+}
 ```
 
 ### 基本用法
@@ -2107,8 +2329,10 @@ import CJQT6.gui.*
 import CJQT6.views.*
 import CJQT6.dialogs.*
 
+// 全局变量（用于回调中访问，CFunc 闭包不能捕获局部变量）
 var label: ?QLabel = None
 
+// 回调函数（必须在顶层定义）
 let clickCallback: VoidCallback = { =>
     if (let Some(l) <- label) {
         l.setText("按钮被点击了！")
@@ -2125,9 +2349,10 @@ main(): Int32 {
     let mainLayout = QVBoxLayout()
     
     // 标签
-    label = QLabel()
-    label.setText("欢迎使用CJQT6")
-    mainLayout.addWidget(label.getPtr())
+    let lbl = QLabel()
+    lbl.setText("欢迎使用CJQT6")
+    label = lbl  // 保存到全局变量
+    mainLayout.addWidget(lbl.getPtr())
     
     // 按钮
     let btn = QPushButton()
@@ -2149,14 +2374,8 @@ main(): Int32 {
     window.setLayout(mainLayout.getPtr())
     window.show()
     
+    // 不需要手动清理，终结器自动处理
     let result = app.exec()
-    
-    table.delete()
-    btn.delete()
-    label.delete()
-    window.delete()
-    app.delete()
-    
     return result
 }
 ```

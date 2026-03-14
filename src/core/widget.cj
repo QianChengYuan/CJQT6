@@ -25,146 +25,240 @@ foreign func qWidgetHeight(ptr: Int64): Int32
 foreign func qWidgetUpdate(ptr: Int64): Unit
 foreign func qWidgetRepaint(ptr: Int64): Unit
 
-public class QWidget {
+/// 基础窗口部件
+/// 支持资源管理，可使用 try-with-resources 自动释放
+public class QWidget <: QtResource {
     private var ptr: Int64 = 0
+    private var closed: Bool = false
     
+    /// 创建窗口部件
     public init() {
         unsafe {
             ptr = qWidgetCreate()
+            if (ptr == 0) {
+                throw CreateFailedException("QWidget 创建失败")
+            }
         }
     }
     
-    public func show() {
+    /// 从指针创建（用于继承）
+    protected init(ptr: Int64) {
+        if (ptr == 0) {
+            throw CreateFailedException("QWidget 指针无效")
+        }
+        this.ptr = ptr
+    }
+    
+    /// 显示窗口
+    public func show(): Unit {
+        checkValid()
         unsafe {
             qWidgetShow(ptr)
         }
     }
     
-    public func hide() {
+    /// 隐藏窗口
+    public func hide(): Unit {
+        checkValid()
         unsafe {
             qWidgetHide(ptr)
         }
     }
     
-    public func setTitle(title: String) {
+    /// 设置窗口标题
+    public func setTitle(title: String): Unit {
+        checkValid()
         unsafe {
-            var cstr = LibC.mallocCString(title)
+            let cstr = LibC.mallocCString(title)
             qWidgetSetTitle(ptr, cstr)
             LibC.free(cstr)
         }
     }
     
-    public func resize(width: Int32, height: Int32) {
+    /// 调整窗口大小
+    public func resize(width: Int32, height: Int32): Unit {
+        checkValid()
         unsafe {
             qWidgetResize(ptr, width, height)
         }
     }
     
-    public func setGeometry(x: Int32, y: Int32, width: Int32, height: Int32) {
+    /// 设置窗口位置和大小
+    public func setGeometry(x: Int32, y: Int32, width: Int32, height: Int32): Unit {
+        checkValid()
         unsafe {
             qWidgetSetGeometry(ptr, x, y, width, height)
         }
     }
     
-    public func setLayout(layoutPtr: Int64) {
+    /// 设置布局
+    public func setLayout(layoutPtr: Int64): Unit {
+        checkValid()
         unsafe {
             qWidgetSetLayout(ptr, layoutPtr)
         }
     }
     
+    /// 获取原生指针
     public func getPtr(): Int64 {
-        ptr
+        return ptr
     }
     
-    public func delete() {
-        if (ptr != 0) {
+    /// 是否已关闭
+    public func isClosed(): Bool {
+        return closed
+    }
+    
+    /// 检查对象有效性
+    public func isValid(): Bool {
+        return !closed && ptr != 0
+    }
+    
+    /// 检查有效性，无效时抛出异常
+    public func checkValid(): Unit {
+        if (closed) {
+            throw ResourceDisposedException("QWidget 已经被释放")
+        }
+        if (ptr == 0) {
+            throw NullPointerException("QWidget 指针为空")
+        }
+    }
+    
+    /// 关闭资源，释放Qt对象
+    public func close(): Unit {
+        if (!closed && ptr != 0) {
             unsafe {
+                qSignalCleanup(ptr)
                 qWidgetDelete(ptr)
             }
+            closed = true
+            ptr = 0
+        }
+    }
+    
+    /// 删除窗口（兼容旧API）
+    public func delete(): Unit {
+        close()
+    }
+    
+    /// 终结器 - 作为最后保障
+    ~init() {
+        if (!closed && ptr != 0) {
+            unsafe {
+                qSignalCleanup(ptr)
+                qWidgetDelete(ptr)
+            }
+            closed = true
             ptr = 0
         }
     }
     
     // ========== 样式表和扩展功能 ==========
     
-    public func setStyleSheet(styleSheet: String) {
+    /// 设置样式表
+    public func setStyleSheet(styleSheet: String): Unit {
+        checkValid()
         unsafe {
-            var cstr = LibC.mallocCString(styleSheet)
+            let cstr = LibC.mallocCString(styleSheet)
             qWidgetSetStyleSheet(ptr, cstr)
             LibC.free(cstr)
         }
     }
     
+    /// 获取样式表
     public func styleSheet(): String {
+        checkValid()
         unsafe {
             let cstr = qWidgetStyleSheet(ptr)
-            cstr.toString()
+            return cstr.toString()
         }
     }
     
-    public func setEnabled(enabled: Bool) {
+    /// 设置启用状态
+    public func setEnabled(enabled: Bool): Unit {
+        checkValid()
         unsafe {
             qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
         }
     }
     
+    /// 是否启用
     public func isEnabled(): Bool {
+        checkValid()
         unsafe {
-            qWidgetIsEnabled(ptr) == 1
+            return qWidgetIsEnabled(ptr) == 1
         }
     }
     
-    public func setVisible(visible: Bool) {
+    /// 设置可见性
+    public func setVisible(visible: Bool): Unit {
+        checkValid()
         unsafe {
             qWidgetSetVisible(ptr, if (visible) { 1 } else { 0 })
         }
     }
     
+    /// 是否可见
     public func isVisible(): Bool {
+        checkValid()
         unsafe {
-            qWidgetIsVisible(ptr) == 1
+            return qWidgetIsVisible(ptr) == 1
         }
     }
     
-    public func setToolTip(toolTip: String) {
+    /// 设置工具提示
+    public func setToolTip(toolTip: String): Unit {
+        checkValid()
         unsafe {
-            var cstr = LibC.mallocCString(toolTip)
+            let cstr = LibC.mallocCString(toolTip)
             qWidgetSetToolTip(ptr, cstr)
             LibC.free(cstr)
         }
     }
     
-    public func setMinimumSize(width: Int32, height: Int32) {
+    /// 设置最小尺寸
+    public func setMinimumSize(width: Int32, height: Int32): Unit {
+        checkValid()
         unsafe {
             qWidgetSetMinimumSize(ptr, width, height)
         }
     }
     
-    public func setMaximumSize(width: Int32, height: Int32) {
+    /// 设置最大尺寸
+    public func setMaximumSize(width: Int32, height: Int32): Unit {
+        checkValid()
         unsafe {
             qWidgetSetMaximumSize(ptr, width, height)
         }
     }
     
+    /// 获取宽度
     public func width(): Int32 {
+        checkValid()
         unsafe {
-            qWidgetWidth(ptr)
+            return qWidgetWidth(ptr)
         }
     }
     
+    /// 获取高度
     public func height(): Int32 {
+        checkValid()
         unsafe {
-            qWidgetHeight(ptr)
+            return qWidgetHeight(ptr)
         }
     }
     
-    public func update() {
+    /// 更新窗口
+    public func update(): Unit {
+        checkValid()
         unsafe {
             qWidgetUpdate(ptr)
         }
     }
     
-    public func repaint() {
+    /// 重绘窗口
+    public func repaint(): Unit {
+        checkValid()
         unsafe {
             qWidgetRepaint(ptr)
         }

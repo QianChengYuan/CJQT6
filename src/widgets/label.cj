@@ -1,5 +1,7 @@
 package CJQT6.widgets
 
+import CJQT6.core.*
+
 // QLabel - 标签
 foreign func qLabelCreate(): Int64
 foreign func qLabelSetText(ptr: Int64, text: CString): Unit
@@ -7,62 +9,120 @@ foreign func qLabelSetAlignment(ptr: Int64, alignment: Int32): Unit
 foreign func qLabelSetPixmap(ptr: Int64, pixmapPtr: Int64): Unit
 foreign func qLabelDelete(ptr: Int64): Unit
 
-public class QLabel {
+/// 标签部件
+/// 支持资源管理，可使用 try-with-resources 自动释放
+public class QLabel <: QtResource {
     private var ptr: Int64 = 0
+    private var closed: Bool = false
     
+    /// 创建标签
     public init() {
         unsafe {
             ptr = qLabelCreate()
+            if (ptr == 0) {
+                throw CreateFailedException("QLabel 创建失败")
+            }
         }
     }
     
-    public func show() {
+    /// 显示标签
+    public func show(): Unit {
+        checkValid()
         unsafe {
             qWidgetShow(ptr)
         }
     }
     
-    public func hide() {
+    /// 隐藏标签
+    public func hide(): Unit {
+        checkValid()
         unsafe {
             qWidgetHide(ptr)
         }
     }
     
-    public func setText(text: String) {
+    /// 设置标签文本
+    public func setText(text: String): Unit {
+        checkValid()
         unsafe {
-            var cstr = LibC.mallocCString(text)
+            let cstr = LibC.mallocCString(text)
             qLabelSetText(ptr, cstr)
             LibC.free(cstr)
         }
     }
     
-    public func setAlignment(alignment: Int32) {
+    /// 设置对齐方式
+    public func setAlignment(alignment: Int32): Unit {
+        checkValid()
         unsafe {
             qLabelSetAlignment(ptr, alignment)
         }
     }
     
-    public func setPixmap(pixmapPtr: Int64) {
+    /// 设置图像
+    public func setPixmap(pixmapPtr: Int64): Unit {
+        checkValid()
         unsafe {
             qLabelSetPixmap(ptr, pixmapPtr)
         }
     }
     
-    public func resize(width: Int32, height: Int32) {
+    /// 调整大小
+    public func resize(width: Int32, height: Int32): Unit {
+        checkValid()
         unsafe {
             qWidgetResize(ptr, width, height)
         }
     }
     
+    /// 获取原生指针
     public func getPtr(): Int64 {
-        ptr
+        return ptr
     }
     
-    public func delete() {
-        if (ptr != 0) {
+    /// 是否已关闭
+    public func isClosed(): Bool {
+        return closed
+    }
+    
+    /// 检查对象有效性
+    public func isValid(): Bool {
+        return !closed && ptr != 0
+    }
+    
+    /// 检查有效性，无效时抛出异常
+    public func checkValid(): Unit {
+        if (closed) {
+            throw ResourceDisposedException("QLabel 已经被释放")
+        }
+        if (ptr == 0) {
+            throw NullPointerException("QLabel 指针为空")
+        }
+    }
+    
+    /// 关闭资源，释放Qt对象
+    public func close(): Unit {
+        if (!closed && ptr != 0) {
             unsafe {
                 qLabelDelete(ptr)
             }
+            closed = true
+            ptr = 0
+        }
+    }
+    
+    /// 删除标签（兼容旧API）
+    public func delete(): Unit {
+        close()
+    }
+    
+    /// 终结器 - 作为最后保障
+    ~init() {
+        if (!closed && ptr != 0) {
+            unsafe {
+                qLabelDelete(ptr)
+            }
+            closed = true
             ptr = 0
         }
     }
