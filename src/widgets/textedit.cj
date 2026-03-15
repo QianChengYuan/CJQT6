@@ -11,6 +11,29 @@ foreign func qTextEditCopy(ptr: Int64): Unit
 foreign func qTextEditPaste(ptr: Int64): Unit
 foreign func qTextEditSelectAll(ptr: Int64): Unit
 foreign func qTextEditCanPaste(ptr: Int64): Bool
+foreign func qTextEditUndo(ptr: Int64): Unit
+foreign func qTextEditRedo(ptr: Int64): Unit
+foreign func qTextEditCanUndo(ptr: Int64): Bool
+foreign func qTextEditCanRedo(ptr: Int64): Bool
+foreign func qTextEditIsModified(ptr: Int64): Bool
+foreign func qTextEditSetModified(ptr: Int64, modified: Bool): Unit
+foreign func qTextEditSetLineWrapMode(ptr: Int64, mode: Int32): Unit
+foreign func qTextEditLineWrapMode(ptr: Int64): Int32
+foreign func qTextEditSetFontFamily(ptr: Int64, family: CString): Unit
+foreign func qTextEditSetFontSize(ptr: Int64, size: Int32): Unit
+foreign func qTextEditSetFontBold(ptr: Int64, bold: Bool): Unit
+foreign func qTextEditSetFontItalic(ptr: Int64, italic: Bool): Unit
+foreign func qTextEditFind(ptr: Int64, text: CString, caseSensitive: Bool): Bool
+foreign func qTextEditFindNext(ptr: Int64, text: CString, caseSensitive: Bool): Unit
+foreign func qTextEditFindPrev(ptr: Int64, text: CString, caseSensitive: Bool): Unit
+foreign func qTextEditReplace(ptr: Int64, newText: CString): Unit
+foreign func qTextEditReplaceAll(ptr: Int64, oldText: CString, newText: CString, caseSensitive: Bool): Int32
+foreign func qTextEditLineCount(ptr: Int64): Int32
+foreign func qTextEditCurrentLine(ptr: Int64): Int32
+foreign func qTextEditCurrentColumn(ptr: Int64): Int32
+foreign func qTextEditCharacterCount(ptr: Int64): Int32
+foreign func qTextEditPrint(ptr: Int64, printerPtr: Int64): Unit
+foreign func qTextEditGoToLine(ptr: Int64, line: Int32): Unit
 foreign func qTextEditDelete(ptr: Int64): Unit
 
 public class QTextEdit {
@@ -90,6 +113,180 @@ public class QTextEdit {
     public func canPaste(): Bool {
         unsafe {
             qTextEditCanPaste(ptr)
+        }
+    }
+    
+    public func undo() {
+        unsafe {
+            qTextEditUndo(ptr)
+        }
+    }
+    
+    public func redo() {
+        unsafe {
+            qTextEditRedo(ptr)
+        }
+    }
+    
+    public func canUndo(): Bool {
+        unsafe {
+            qTextEditCanUndo(ptr)
+        }
+    }
+    
+    public func canRedo(): Bool {
+        unsafe {
+            qTextEditCanRedo(ptr)
+        }
+    }
+    
+    public func isModified(): Bool {
+        unsafe {
+            qTextEditIsModified(ptr)
+        }
+    }
+    
+    public func setModified(modified: Bool) {
+        unsafe {
+            qTextEditSetModified(ptr, modified)
+        }
+    }
+    
+    // LineWrapMode: 0 = NoWrap, 1 = WidgetWidth, 2 = ManualWidth
+    public func setLineWrapMode(mode: Int32) {
+        unsafe {
+            qTextEditSetLineWrapMode(ptr, mode)
+        }
+    }
+    
+    public func lineWrapMode(): Int32 {
+        unsafe {
+            qTextEditLineWrapMode(ptr)
+        }
+    }
+    
+    public func setFontFamily(family: String) {
+        unsafe {
+            var cstr = LibC.mallocCString(family)
+            qTextEditSetFontFamily(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+    
+    public func setFontSize(size: Int32) {
+        unsafe {
+            qTextEditSetFontSize(ptr, size)
+        }
+    }
+    
+    public func setFontBold(bold: Bool) {
+        unsafe {
+            qTextEditSetFontBold(ptr, bold)
+        }
+    }
+    
+    public func setFontItalic(italic: Bool) {
+        unsafe {
+            qTextEditSetFontItalic(ptr, italic)
+        }
+    }
+    
+    // ==================== 查找功能 ====================
+    
+    // 查找文本，返回是否找到
+    public func find(text: String, caseSensitive: Bool): Bool {
+        unsafe {
+            var cstr = LibC.mallocCString(text)
+            let result = qTextEditFind(ptr, cstr, caseSensitive)
+            LibC.free(cstr)
+            return result
+        }
+    }
+    
+    // 查找下一个
+    public func findNext(text: String, caseSensitive: Bool) {
+        unsafe {
+            var cstr = LibC.mallocCString(text)
+            qTextEditFindNext(ptr, cstr, caseSensitive)
+            LibC.free(cstr)
+        }
+    }
+    
+    // 查找上一个
+    public func findPrev(text: String, caseSensitive: Bool) {
+        unsafe {
+            var cstr = LibC.mallocCString(text)
+            qTextEditFindPrev(ptr, cstr, caseSensitive)
+            LibC.free(cstr)
+        }
+    }
+    
+    // ==================== 替换功能 ====================
+    
+    // 替换当前选中内容
+    public func replace(newText: String) {
+        unsafe {
+            var cstr = LibC.mallocCString(newText)
+            qTextEditReplace(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+    
+    // 替换所有匹配项，返回替换数量
+    public func replaceAll(oldText: String, newText: String, caseSensitive: Bool): Int32 {
+        unsafe {
+            var oldCstr = LibC.mallocCString(oldText)
+            var newCstr = LibC.mallocCString(newText)
+            let count = qTextEditReplaceAll(ptr, oldCstr, newCstr, caseSensitive)
+            LibC.free(oldCstr)
+            LibC.free(newCstr)
+            return count
+        }
+    }
+    
+    // ==================== 光标位置 ====================
+    
+    // 获取总行数
+    public func lineCount(): Int32 {
+        unsafe {
+            qTextEditLineCount(ptr)
+        }
+    }
+    
+    // 获取当前行号 (1-based)
+    public func currentLine(): Int32 {
+        unsafe {
+            qTextEditCurrentLine(ptr)
+        }
+    }
+    
+    // 获取当前列号 (1-based)
+    public func currentColumn(): Int32 {
+        unsafe {
+            qTextEditCurrentColumn(ptr)
+        }
+    }
+    
+    // 获取字符总数
+    public func characterCount(): Int32 {
+        unsafe {
+            qTextEditCharacterCount(ptr)
+        }
+    }
+    
+    // 跳转到指定行
+    public func goToLine(line: Int32) {
+        unsafe {
+            qTextEditGoToLine(ptr, line)
+        }
+    }
+    
+    // ==================== 打印功能 ====================
+    
+    // 打印文档
+    public func print(printerPtr: Int64) {
+        unsafe {
+            qTextEditPrint(ptr, printerPtr)
         }
     }
     

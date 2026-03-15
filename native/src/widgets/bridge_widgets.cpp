@@ -1,3 +1,4 @@
+
 /**
  * @file bridge_widgets.cpp
  * @brief 基础部件桥接函数 - QLabel, QPushButton, QToolButton, QLineEdit, QTextEdit
@@ -12,6 +13,7 @@
 #include <QStyle>
 #include <QLineEdit>
 #include <QTextEdit>
+#include <QPrinter>
 #include <functional>
 #include <unordered_map>
 
@@ -606,6 +608,235 @@ bool qTextEditCanPaste(int64_t ptr) {
         return textEdit->canPaste();
     }
     return false;
+}
+
+void qTextEditUndo(int64_t ptr) {
+    QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
+    if (textEdit) {
+        textEdit->undo();
+    }
+}
+
+void qTextEditRedo(int64_t ptr) {
+    QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
+    if (textEdit) {
+        textEdit->redo();
+    }
+}
+
+bool qTextEditCanUndo(int64_t ptr) {
+    QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
+    if (textEdit) {
+        return textEdit->document()->isUndoAvailable();
+    }
+    return false;
+}
+
+bool qTextEditCanRedo(int64_t ptr) {
+    QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
+    if (textEdit) {
+        return textEdit->document()->isRedoAvailable();
+    }
+    return false;
+}
+
+bool qTextEditIsModified(int64_t ptr) {
+    QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
+    if (textEdit) {
+        return textEdit->document()->isModified();
+    }
+    return false;
+}
+
+void qTextEditSetModified(int64_t ptr, bool modified) {
+    QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
+    if (textEdit) {
+        textEdit->document()->setModified(modified);
+    }
+}
+
+void qTextEditSetLineWrapMode(int64_t ptr, int mode) {
+    QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
+    if (textEdit) {
+        textEdit->setLineWrapMode(static_cast<QTextEdit::LineWrapMode>(mode));
+    }
+}
+
+int qTextEditLineWrapMode(int64_t ptr) {
+    QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
+    if (textEdit) {
+        return static_cast<int>(textEdit->lineWrapMode());
+    }
+    return 0;
+}
+
+void qTextEditSetFontFamily(int64_t ptr, const char* family) {
+    QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
+    if (textEdit) {
+        QFont font = textEdit->font();
+        font.setFamily(QString::fromUtf8(family));
+        textEdit->setFont(font);
+    }
+}
+
+void qTextEditSetFontSize(int64_t ptr, int size) {
+    QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
+    if (textEdit) {
+        QFont font = textEdit->font();
+        font.setPointSize(size);
+        textEdit->setFont(font);
+    }
+}
+
+void qTextEditSetFontBold(int64_t ptr, bool bold) {
+    QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
+    if (textEdit) {
+        QFont font = textEdit->font();
+        font.setBold(bold);
+        textEdit->setFont(font);
+    }
+}
+
+void qTextEditSetFontItalic(int64_t ptr, bool italic) {
+    QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
+    if (textEdit) {
+        QFont font = textEdit->font();
+        font.setItalic(italic);
+        textEdit->setFont(font);
+    }
+}
+
+// 查找功能
+bool qTextEditFind(int64_t ptr, const char* text, bool caseSensitive) {
+    QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
+    if (textEdit) {
+        QTextDocument::FindFlags flags;
+        if (caseSensitive) {
+            flags |= QTextDocument::FindCaseSensitively;
+        }
+        return textEdit->find(QString::fromUtf8(text), flags);
+    }
+    return false;
+}
+
+void qTextEditFindNext(int64_t ptr, const char* text, bool caseSensitive) {
+    QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
+    if (textEdit) {
+        QTextDocument::FindFlags flags;
+        if (caseSensitive) {
+            flags |= QTextDocument::FindCaseSensitively;
+        }
+        textEdit->find(QString::fromUtf8(text), flags);
+    }
+}
+
+void qTextEditFindPrev(int64_t ptr, const char* text, bool caseSensitive) {
+    QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
+    if (textEdit) {
+        QTextDocument::FindFlags flags = QTextDocument::FindBackward;
+        if (caseSensitive) {
+            flags |= QTextDocument::FindCaseSensitively;
+        }
+        textEdit->find(QString::fromUtf8(text), flags);
+    }
+}
+
+// 替换功能
+void qTextEditReplace(int64_t ptr, const char* newText) {
+    QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
+    if (textEdit) {
+        QTextCursor cursor = textEdit->textCursor();
+        if (cursor.hasSelection()) {
+            cursor.insertText(QString::fromUtf8(newText));
+        }
+    }
+}
+
+int qTextEditReplaceAll(int64_t ptr, const char* oldText, const char* newText, bool caseSensitive) {
+    QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
+    if (!textEdit) return 0;
+    
+    int count = 0;
+    QTextDocument::FindFlags flags;
+    if (caseSensitive) {
+        flags |= QTextDocument::FindCaseSensitively;
+    }
+    
+    // 移动到文档开头
+    QTextCursor cursor = textEdit->textCursor();
+    cursor.movePosition(QTextCursor::Start);
+    textEdit->setTextCursor(cursor);
+    
+    QString oldStr = QString::fromUtf8(oldText);
+    QString newStr = QString::fromUtf8(newText);
+    
+    while (textEdit->find(oldStr, flags)) {
+        QTextCursor cur = textEdit->textCursor();
+        if (cur.hasSelection()) {
+            cur.insertText(newStr);
+            count++;
+        }
+    }
+    
+    return count;
+}
+
+// 光标位置
+int qTextEditLineCount(int64_t ptr) {
+    QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
+    if (textEdit) {
+        return textEdit->document()->lineCount();
+    }
+    return 0;
+}
+
+int qTextEditCurrentLine(int64_t ptr) {
+    QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
+    if (textEdit) {
+        QTextCursor cursor = textEdit->textCursor();
+        return cursor.blockNumber() + 1;  // 返回1-based行号
+    }
+    return 1;
+}
+
+int qTextEditCurrentColumn(int64_t ptr) {
+    QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
+    if (textEdit) {
+        QTextCursor cursor = textEdit->textCursor();
+        return cursor.columnNumber() + 1;  // 返回1-based列号
+    }
+    return 1;
+}
+
+int qTextEditCharacterCount(int64_t ptr) {
+    QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
+    if (textEdit) {
+        return textEdit->document()->characterCount();
+    }
+    return 0;
+}
+
+// 打印功能
+void qTextEditPrint(int64_t ptr, int64_t printerPtr) {
+    QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
+    QPrinter* printer = reinterpret_cast<QPrinter*>(printerPtr);
+    if (textEdit && printer) {
+        textEdit->print(printer);
+    }
+}
+
+// 跳转到指定行
+void qTextEditGoToLine(int64_t ptr, int line) {
+    QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
+    if (textEdit) {
+        QTextCursor cursor = textEdit->textCursor();
+        cursor.movePosition(QTextCursor::Start);
+        for (int i = 1; i < line && !cursor.atEnd(); ++i) {
+            cursor.movePosition(QTextCursor::Down);
+        }
+        textEdit->setTextCursor(cursor);
+        textEdit->setFocus();
+    }
 }
 
 } // extern "C"

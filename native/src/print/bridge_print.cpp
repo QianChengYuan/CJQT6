@@ -9,6 +9,9 @@
 #include <QPainter>
 #include <QPageSize>
 #include <QPageLayout>
+#include <QTextEdit>
+#include <functional>
+#include <unordered_map>
 
 extern "C" {
 
@@ -313,6 +316,22 @@ void qPrintDialogDelete(int64_t ptr) {
 int64_t qPrintPreviewDialogCreate(int64_t printerPtr) {
     QPrinter* printer = reinterpret_cast<QPrinter*>(printerPtr);
     QPrintPreviewDialog* dialog = new QPrintPreviewDialog(printer);
+    return reinterpret_cast<int64_t>(dialog);
+}
+
+// 创建打印预览对话框并设置文本编辑器打印回调
+int64_t qPrintPreviewDialogCreateWithTextEdit(int64_t printerPtr, int64_t textEditPtr) {
+    QPrinter* printer = reinterpret_cast<QPrinter*>(printerPtr);
+    QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(textEditPtr);
+    QPrintPreviewDialog* dialog = new QPrintPreviewDialog(printer);
+    
+    if (textEdit) {
+        QObject::connect(dialog, &QPrintPreviewDialog::paintRequested, 
+            [textEdit](QPrinter* printer) {
+                textEdit->print(printer);
+            });
+    }
+    
     return reinterpret_cast<int64_t>(dialog);
 }
 

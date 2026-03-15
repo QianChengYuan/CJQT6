@@ -1,5 +1,7 @@
 package CJQT6.print
 
+import CJQT6.widgets.QTextEdit
+
 // QPrinter - 打印机
 foreign func qPrinterCreate(): Int64
 foreign func qPrinterCreateWithMode(mode: Int32): Int64
@@ -44,6 +46,7 @@ foreign func qPrintDialogDelete(ptr: Int64): Unit
 
 // QPrintPreviewDialog - 打印预览对话框
 foreign func qPrintPreviewDialogCreate(printerPtr: Int64): Int64
+foreign func qPrintPreviewDialogCreateWithTextEdit(printerPtr: Int64, textEditPtr: Int64): Int64
 foreign func qPrintPreviewDialogExec(ptr: Int64): Int32
 foreign func qPrintPreviewDialogPrinter(ptr: Int64): Int64
 foreign func qPrintPreviewDialogDelete(ptr: Int64): Unit
@@ -281,6 +284,11 @@ public class QPrintPreviewDialog {
     
     public init(printer: QPrinter) {
         unsafe { ptr = qPrintPreviewDialogCreate(printer.getPtr()) }
+    }
+    
+    // 创建打印预览对话框并设置文本编辑器打印回调
+    public init(printer: QPrinter, textEdit: QTextEdit) {
+        unsafe { ptr = qPrintPreviewDialogCreateWithTextEdit(printer.getPtr(), textEdit.getPtr()) }
     }
     
     public func exec(): Int32 {

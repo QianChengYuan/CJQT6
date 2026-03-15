@@ -7,11 +7,19 @@
 #include <QWidget>
 #include <QTimer>
 #include <QDebug>
+#include <QTranslator>
+#include <QLocale>
+#include <QDir>
+#include <QLibraryInfo>
 #include <functional>
 #include <unordered_map>
 
 // 全局应用程序指针
 static QApplication* g_app = nullptr;
+
+// 全局翻译器
+static QTranslator* g_qtTranslator = nullptr;
+static QTranslator* g_appTranslator = nullptr;
 
 // 回调函数映射 - 非static，供其他模块使用
 std::unordered_map<int64_t, std::function<void(int64_t)>> g_buttonCallbacks;
@@ -259,6 +267,136 @@ void qWidgetRepaint(int64_t ptr) {
     if (widget) {
         widget->repaint();
     }
+}
+
+// ============================================================
+// 翻译/语言相关函数
+// ============================================================
+
+// 加载Qt内置翻译（用于对话框等）
+bool qApplicationLoadQtTranslation(const char* locale) {
+    if (!g_app) return false;
+    
+    // 删除旧的翻译器
+    if (g_qtTranslator) {
+        g_app->removeTranslator(g_qtTranslator);
+        delete g_qtTranslator;
+    }
+    
+    g_qtTranslator = new QTranslator();
+    
+    QString localeStr = QString::fromUtf8(locale);
+    if (localeStr.isEmpty()) {
+        localeStr = QLocale::system().name();  // 例如 "zh_CN"
+    }
+    
+    // 尝试从多个路径加载Qt翻译文件
+    QStringList searchPaths;
+    
+    // 常见的Qt翻译文件路径
+    searchPaths << "/usr/share/qt6/translations"
+                << "/usr/share/qt/translations"
+                << "/usr/lib/qt6/translations"
+                << "/usr/lib/qt/translations"
+                << "/opt/qt6/translations"
+                << QLibraryInfo::path(QLibraryInfo::TranslationsPath);
+    
+    // 尝试多种文件名格式
+    QStringList filePatterns;
+    filePatterns << QString("qtbase_%1").arg(localeStr)           // qtbase_zh_CN
+                 << QString("qtbase_%1").arg(localeStr.left(2))   // qtbase_zh
+                 << QString("qt_%1").arg(localeStr)               // qt_zh_CN
+                 << QString("qt_%1").arg(localeStr.left(2));      // qt_zh
+    
+    for (const QString& path : searchPaths) {
+        for (const QString& pattern : filePatterns) {
+            QString qmFile = QString("%1.qm").arg(pattern);
+            QString fullPath = QString("%1/%2").arg(path).arg(qmFile);
+            if (QFile::exists(fullPath)) {
+                if (g_qtTranslator->load(qmFile, path)) {
+                    g_app->installTranslator(g_qtTranslator);
+                    return true;
+                }
+            }
+        }
+    }
+    
+    // 尝试直接加载（从系统路径）
+    for (const QString& pattern : filePatterns) {
+        QString qmFile = QString("%1.qm").arg(pattern);
+        if (g_qtTranslator->load(qmFile)) {
+            g_app->installTranslator(g_qtTranslator);
+            return true;
+        }
+    }
+    
+    delete g_qtTranslator;
+    g_qtTranslator = nullptr;
+    return false;
+}
+
+// 加载应用程序翻译
+bool qApplicationLoadAppTranslation(const char* qmFile, const char* directory) {
+    if (!g_app) return false;
+    
+    // 删除旧的翻译器
+    if (g_appTranslator) {
+        g_app->removeTranslator(g_appTranslator);
+        delete g_appTranslator;
+    }
+    
+    g_appTranslator = new QTranslator();
+    
+    QString qmPath = QString::fromUtf8(qmFile);
+    QString dir = QString::fromUtf8(directory);
+    
+    if (g_appTranslator->load(qmPath, dir.isEmpty() ? QString() : dir)) {
+        g_app->installTranslator(g_appTranslator);
+        return true;
+    }
+    
+    delete g_appTranslator;
+    g_appTranslator = nullptr;
+    return false;
+}
+
+// 设置应用程序语言环境
+void qApplicationSetLocale(const char* locale) {
+    QString localeStr = QString::fromUtf8(locale);
+    if (localeStr.isEmpty()) {
+        QLocale::setDefault(QLocale::system());
+    } else {
+        QLocale::setDefault(QLocale(localeStr));
+    }
+}
+
+// 获取当前语言环境
+const char* qApplicationLocale() {
+    static QByteArray buffer;
+    buffer = QLocale().name().toUtf8();  // 例如 "zh_CN"
+    return buffer.constData();
+}
+
+// 获取系统语言环境
+const char* qApplicationSystemLocale() {
+    static QByteArray buffer;
+    buffer = QLocale::system().name().toUtf8();
+    return buffer.constData();
+}
+
+// 切换语言（同时加载Qt翻译）
+bool qApplicationSwitchLanguage(const char* locale) {
+    QString localeStr = QString::fromUtf8(locale);
+    
+    if (localeStr.isEmpty()) {
+        // 恢复系统默认
+        QLocale::setDefault(QLocale::system());
+    } else {
+        QLocale::setDefault(QLocale(localeStr));
+    }
+    
+    // 加载Qt翻译
+    return qApplicationLoadQtTranslation(locale);
 }
 
 } // extern "C"
