@@ -356,6 +356,12 @@ int64_t qPainterCreate(int64_t devicePtr) {
     return reinterpret_cast<int64_t>(painter);
 }
 
+// 从现有QPainter指针创建（不拥有指针）
+int64_t qPainterFromPtr(int64_t ptr) {
+    // 直接返回指针，不创建新对象
+    return ptr;
+}
+
 void qPainterDelete(int64_t ptr) {
     QPainter* painter = reinterpret_cast<QPainter*>(ptr);
     if (painter) {

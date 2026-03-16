@@ -1,11 +1,13 @@
 /**
  * @file bridge_events.cpp
- * @brief 事件处理桥接函数 - 鼠标事件、键盘事件、选择事件
+ * @brief 事件处理桥接函数 - 鼠标事件、键盘事件、绘制事件、选择事件
  */
 
 #include <QWidget>
 #include <QMouseEvent>
 #include <QKeyEvent>
+#include <QPaintEvent>
+#include <QPainter>
 #include <QApplication>
 #include <functional>
 #include <unordered_map>
@@ -16,6 +18,7 @@ static std::unordered_map<int64_t, std::function<void(int32_t, int32_t, int32_t)
 static std::unordered_map<int64_t, std::function<void(int32_t, int32_t, int32_t)>> g_mouseReleaseCallbacks;
 static std::unordered_map<int64_t, std::function<void(int32_t, int32_t, int32_t)>> g_keyPressCallbacks;
 static std::unordered_map<int64_t, std::function<void(int32_t, int32_t, int32_t)>> g_keyReleaseCallbacks;
+static std::unordered_map<int64_t, std::function<void(int64_t)>> g_paintCallbacks;
 
 // 全局widget映射
 static std::unordered_map<int64_t, QWidget*> g_eventWidgets;
@@ -79,6 +82,15 @@ protected:
         }
         QWidget::keyReleaseEvent(event);
     }
+    
+    void paintEvent(QPaintEvent* event) override {
+        auto it = g_paintCallbacks.find(m_id);
+        if (it != g_paintCallbacks.end()) {
+            // 传递QWidget指针，让仓颉侧创建QPainter
+            it->second(reinterpret_cast<int64_t>(this));
+        }
+        QWidget::paintEvent(event);
+    }
 };
 
 extern "C" {
@@ -108,6 +120,7 @@ void qEventWidgetDelete(int64_t ptr) {
         g_mouseReleaseCallbacks.erase(widget->id());
         g_keyPressCallbacks.erase(widget->id());
         g_keyReleaseCallbacks.erase(widget->id());
+        g_paintCallbacks.erase(widget->id());
         delete widget;
     }
 }
@@ -152,6 +165,24 @@ void qEventWidgetSetOnKeyRelease(int64_t ptr, void (*callback)(int32_t, int32_t,
     EventWidget* widget = reinterpret_cast<EventWidget*>(ptr);
     if (widget) {
         g_keyReleaseCallbacks[widget->id()] = callback;
+    }
+}
+
+// ============================================================
+// 绘制事件回调设置
+// ============================================================
+
+void qEventWidgetSetOnPaint(int64_t ptr, void (*callback)(int64_t)) {
+    EventWidget* widget = reinterpret_cast<EventWidget*>(ptr);
+    if (widget) {
+        g_paintCallbacks[widget->id()] = callback;
+    }
+}
+
+void qEventWidgetClearPaintCallback(int64_t ptr) {
+    EventWidget* widget = reinterpret_cast<EventWidget*>(ptr);
+    if (widget) {
+        g_paintCallbacks.erase(widget->id());
     }
 }
 

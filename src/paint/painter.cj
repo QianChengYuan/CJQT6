@@ -321,6 +321,7 @@ public class QImage {
 
 public class QPainter {
     private var ptr: Int64 = 0
+    private var owned: Bool = true  // 是否拥有这个指针（需要释放）
     
     public init() {
         unsafe { ptr = qPainterCreate(0) }
@@ -328,6 +329,15 @@ public class QPainter {
     
     public init(device: Int64) {
         unsafe { ptr = qPainterCreate(device) }
+    }
+    
+    /// 从现有指针创建QPainter（不拥有指针，不负责释放）
+    /// 用于paintEvent回调中接收现有的QPainter
+    public static func fromPtr(ptr: Int64): QPainter {
+        let p = QPainter()
+        p.ptr = unsafe { qPainterFromPtr(ptr) }
+        p.owned = false
+        return p
     }
     
     public func begin(device: Int64): Bool { unsafe { qPainterBegin(ptr, device) != 0 } }
@@ -444,6 +454,7 @@ foreign func qFontSetBold(p: Int64, b: Int32): Unit
 foreign func qFontSetItalic(p: Int64, i: Int32): Unit
 
 foreign func qPainterCreate(d: Int64): Int64
+foreign func qPainterFromPtr(ptr: Int64): Int64
 foreign func qPainterBegin(p: Int64, d: Int64): Int32
 foreign func qPainterEnd(p: Int64): Int32
 foreign func qPainterIsActive(p: Int64): Int32

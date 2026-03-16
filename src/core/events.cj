@@ -18,6 +18,10 @@ foreign func qEventWidgetSetOnMouseRelease(ptr: Int64, callback: CFunc<(Int32, I
 foreign func qEventWidgetSetOnKeyPress(ptr: Int64, callback: CFunc<(Int32, Int32, Int32) -> Unit>): Unit
 foreign func qEventWidgetSetOnKeyRelease(ptr: Int64, callback: CFunc<(Int32, Int32, Int32) -> Unit>): Unit
 
+// 绘制事件回调 (painterPtr)
+foreign func qEventWidgetSetOnPaint(ptr: Int64, callback: CFunc<(Int64) -> Unit>): Unit
+foreign func qEventWidgetClearPaintCallback(ptr: Int64): Unit
+
 // 鼠标按钮常量
 foreign func qMouseButtonLeft(): Int32
 foreign func qMouseButtonRight(): Int32
@@ -312,6 +316,32 @@ public class QEventWidget {
     public func setOnKeyRelease(callback: CFunc<(Int32, Int32, Int32) -> Unit>) {
         unsafe {
             qEventWidgetSetOnKeyRelease(ptr, callback)
+        }
+    }
+    
+    // ========== 绘制事件 ==========
+    
+    // 设置绘制回调
+    // callback参数: (painterPtr) - QPainter指针
+    public func setOnPaint(callback: CFunc<(Int64) -> Unit>) {
+        unsafe {
+            qEventWidgetSetOnPaint(ptr, callback)
+        }
+    }
+    
+    // 清除绘制回调
+    public func clearPaintCallback(): Unit {
+        unsafe {
+            qEventWidgetClearPaintCallback(ptr)
+        }
+    }
+    
+    // ========== 更新重绘 ==========
+    
+    // 请求重绘
+    public func update(): Unit {
+        unsafe {
+            qWidgetUpdate(ptr)
         }
     }
 }
