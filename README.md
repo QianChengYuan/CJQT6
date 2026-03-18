@@ -530,6 +530,12 @@ ibus engine pinyin
 
 MIT License
 
+## 联系方式
+
+QQ群：1023882445
+
+欢迎加入QQ群交流讨论！
+
 ## 贡献
 
 欢迎提交Issue和Pull Request!
