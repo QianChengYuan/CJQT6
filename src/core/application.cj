@@ -14,6 +14,13 @@ foreign func qApplicationLocale(): CString
 foreign func qApplicationSystemLocale(): CString
 foreign func qApplicationSwitchLanguage(locale: CString): Bool
 
+/// 静态方法
+public class QApp {
+    public static func quit(): Unit {
+        unsafe { qApplicationQuit() }
+    }
+}
+
 /// 语言类型
 public class Language {
     public static func chinese(): String { "zh_CN" }

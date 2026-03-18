@@ -78,6 +78,13 @@ const char* qFileDialogGetExistingDirectory(int64_t parentPtr, const char* title
     return safeCopyString(result);
 }
 
+// 获取多个打开文件路径（用\n分隔）
+const char* qFileDialogGetOpenFileNames(int64_t parentPtr, const char* title, const char* filter) {
+    QWidget* parent = reinterpret_cast<QWidget*>(parentPtr);
+    QStringList files = QFileDialog::getOpenFileNames(parent, QString::fromUtf8(title), QString(), QString::fromUtf8(filter));
+    return safeCopyString(files.join("\n"));
+}
+
 // ============================================================
 // QInputDialog 桥接函数 (简化版，直接返回值)
 // ============================================================

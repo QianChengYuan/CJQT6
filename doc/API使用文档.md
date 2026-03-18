@@ -18,8 +18,10 @@
 14. [绘图模块](#绘图模块)
 15. [进程管理](#进程管理)
 16. [QML模块](#qml模块)
-17. [信号与槽](#信号与槽)
-18. [资源管理](#资源管理)
+17. [多媒体模块](#多媒体模块)
+18. [打印模块](#打印模块)
+19. [信号与槽](#信号与槽)
+20. [资源管理](#资源管理)
 
 ---
 
@@ -113,6 +115,13 @@ import CJQT6.core.*
 main(): Int32 {
     let app = QApplication()
     
+    // 加载Qt内置翻译（中文）
+    app.loadQtTranslation("zh_CN")
+    
+    // 或切换语言
+    app.switchLanguage("zh_CN")  // 中文
+    // app.switchLanguage("en_US")  // 英文
+    
     // 创建窗口和控件...
     
     let result = app.exec()  // 进入事件循环
@@ -128,6 +137,38 @@ main(): Int32 {
 | `exec(): Int32` | 进入事件循环，返回退出码 |
 | `quit()` | 退出应用程序 |
 | `close()` | 释放资源（实现 QtResource 接口） |
+| `loadQtTranslation(locale: String)` | 加载Qt内置翻译文件 |
+| `switchLanguage(locale: String)` | 切换语言环境 |
+| `locale(): String` | 获取当前语言环境 |
+| `systemLocale(): String` | 获取系统语言环境 |
+
+**常用语言代码** (Language类):
+```cangjie
+Language.ChineseSimplified   // "zh_CN" - 简体中文
+Language.ChineseTraditional  // "zh_TW" - 繁体中文
+Language.English             // "en_US" - 英语
+Language.Japanese            // "ja_JP" - 日语
+Language.Korean              // "ko_KR" - 韩语
+Language.German              // "de_DE" - 德语
+Language.French              // "fr_FR" - 法语
+Language.Spanish             // "es_ES" - 西班牙语
+```
+
+### QApp 静态类
+
+提供静态方法访问应用程序功能。
+
+```cangjie
+import CJQT6.core.*
+
+// 静态退出应用
+QApp.quit()
+```
+
+**方法**:
+| 方法 | 说明 |
+|------|------|
+| `quit()` | 静态方法退出应用程序 |
 
 ### QWidget
 
@@ -375,13 +416,66 @@ textEdit.setText("多行文本\n第二行")
 textEdit.setReadOnly(true)
 ```
 
-**方法**:
+**基础方法**:
 | 方法 | 说明 |
 |------|------|
 | `setText(text: String)` | 设置文本 |
 | `text(): String` | 获取文本 |
 | `setReadOnly(readonly: Bool)` | 设置只读 |
 | `clear()` | 清空 |
+
+**扩展功能** (2026-03-18新增):
+| 方法 | 说明 |
+|------|------|
+| `find(text: String, caseSensitive: Bool): Bool` | 查找文本 |
+| `findNext(text: String, caseSensitive: Bool): Bool` | 查找下一个 |
+| `findPrev(text: String, caseSensitive: Bool): Bool` | 查找上一个 |
+| `replace(text: String)` | 替换当前选中 |
+| `replaceAll(oldText: String, newText: String, caseSensitive: Bool): Int32` | 替换全部，返回替换数量 |
+| `currentLine(): Int32` | 获取当前行号 |
+| `currentColumn(): Int32` | 获取当前列号 |
+| `lineCount(): Int32` | 获取总行数 |
+| `characterCount(): Int64` | 获取总字符数 |
+| `goToLine(line: Int32): Bool` | 跳转到指定行 |
+| `print(printerPtr: Int64)` | 打印文档 |
+| `undo()` | 撤销 |
+| `redo()` | 重做 |
+| `canUndo(): Bool` | 是否可撤销 |
+| `canRedo(): Bool` | 是否可重做 |
+| `isModified(): Bool` | 文档是否已修改 |
+| `setModified(modified: Bool)` | 设置修改状态 |
+| `setLineWrapMode(mode: Int32)` | 设置自动换行模式 |
+| `lineWrapMode(): Int32` | 获取自动换行模式 |
+| `setFontFamily(family: String)` | 设置字体 |
+| `setFontSize(size: Int32)` | 设置字号 |
+| `setFontBold(bold: Bool)` | 设置粗体 |
+| `setFontItalic(italic: Bool)` | 设置斜体 |
+
+**自动换行模式常量**:
+```cangjie
+NoWrap        // 不换行
+WidgetWidth   // 按控件宽度换行
+```
+
+**查找替换示例**:
+```cangjie
+// 查找
+if (textEdit.find("关键词", false)) {
+    println("找到!")
+}
+
+// 替换全部
+let count = textEdit.replaceAll("old", "new", false)
+println("替换了 ${count} 处")
+
+// 跳转到行
+textEdit.goToLine(100)
+
+// 获取光标位置
+let line = textEdit.currentLine()
+let col = textEdit.currentColumn()
+println("位置: 第${line}行, 第${col}列")
+```
 
 ---
 
@@ -1101,12 +1195,26 @@ if (filePath.isNotEmpty()) {
     println("选择了: ${filePath}")
 }
 
+// 打开多个文件
+let filePaths = QFileDialog.getOpenFileNames(0, "选择文件", "音频文件 (*.mp3 *.wav)")
+for (path in filePaths) {
+    println("文件: ${path}")
+}
+
 // 保存文件
 let savePath = QFileDialog.getSaveFileName(0, "保存文件", "*.txt")
 
 // 选择目录
 let dirPath = QFileDialog.getExistingDirectory(0, "选择目录")
 ```
+
+**方法**:
+| 方法 | 说明 |
+|------|------|
+| `getOpenFileName(parent, title, filter): String` | 选择单个文件 |
+| `getOpenFileNames(parent, title, filter): Array<String>` | 选择多个文件 |
+| `getSaveFileName(parent, title, filter): String` | 保存文件对话框 |
+| `getExistingDirectory(parent, title): String` | 选择目录 |
 
 ### QInputDialog - 输入对话框
 
@@ -2315,6 +2423,277 @@ timer.start()
 timer.stop()
 timer.disconnect()
 ```
+
+---
+
+## 多媒体模块
+
+多媒体模块提供音频播放功能。
+
+```cangjie
+import CJQT6.multimedia.*
+```
+
+### QMediaPlayer - 媒体播放器
+
+```cangjie
+let player = QMediaPlayer()
+let audioOutput = QAudioOutput()
+
+// 设置音频输出
+player.setAudioOutput(audioOutput.getPtr())
+
+// 加载文件
+player.setSourceFile("/path/to/music.mp3")
+
+// 播放控制
+player.play()
+player.pause()
+player.stop()
+
+// 音量控制
+audioOutput.setVolume(50)  // 0-100
+
+// 播放速度
+player.setPlaybackRate(1.5)  // 1.5倍速
+```
+
+**播放控制方法**:
+| 方法 | 说明 |
+|------|------|
+| `play()` | 播放 |
+| `pause()` | 暂停 |
+| `stop()` | 停止 |
+| `setSource(url: String)` | 设置媒体源（URL） |
+| `setSourceFile(path: String)` | 设置本地文件 |
+
+**播放状态**:
+| 方法 | 说明 |
+|------|------|
+| `isPlaying(): Bool` | 是否正在播放 |
+| `isPaused(): Bool` | 是否暂停 |
+| `isStopped(): Bool` | 是否停止 |
+| `position(): Int64` | 获取播放位置（毫秒） |
+| `duration(): Int64` | 获取总时长（毫秒） |
+| `setPosition(pos: Int64)` | 设置播放位置 |
+| `playbackRate(): Float64` | 获取播放速度 |
+| `setPlaybackRate(rate: Float64)` | 设置播放速度 |
+
+**媒体信息**:
+| 方法 | 说明 |
+|------|------|
+| `title(): String` | 获取标题 |
+| `artist(): String` | 获取艺术家 |
+| `album(): String` | 获取专辑 |
+| `metaData(key: String): String` | 获取元数据 |
+
+**状态查询**:
+| 方法 | 说明 |
+|------|------|
+| `isSeekable(): Bool` | 是否可跳转 |
+| `hasAudio(): Bool` | 是否有音频 |
+| `mediaStatus(): Int32` | 媒体状态 |
+| `error(): Int32` | 错误类型 |
+| `errorString(): String` | 错误描述 |
+
+**信号回调**:
+```cangjie
+// 播放状态变化
+player.setOnPlayingChanged({ =>
+    if (player.isPlaying()) {
+        println("开始播放")
+    }
+})
+
+// 位置变化
+player.setOnPositionChanged({ pos: Int64 =>
+    println("播放位置: ${pos}ms")
+})
+
+// 时长变化
+player.setOnDurationChanged({ dur: Int64 =>
+    println("总时长: ${dur}ms")
+})
+
+// 播放结束
+player.setOnMediaStatusChanged({ status: Int32 =>
+    if (status == MediaStatus.EndOfMedia) {
+        println("播放结束")
+    }
+})
+```
+
+**媒体状态常量** (MediaStatus):
+```cangjie
+NoMedia         // 无媒体
+LoadingMedia    // 加载中
+LoadedMedia     // 已加载
+BufferingMedia  // 缓冲中
+StalledMedia    // 停滞
+BufferedMedia   // 已缓冲
+EndOfMedia      // 播放结束
+InvalidMedia    // 无效媒体
+```
+
+### QAudioOutput - 音频输出
+
+```cangjie
+let audioOutput = QAudioOutput()
+audioOutput.setVolume(80)  // 音量 0-100
+audioOutput.setMuted(true) // 静音
+
+if (audioOutput.isMuted()) {
+    audioOutput.setMuted(false)
+}
+```
+
+**方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` | 创建音频输出 |
+| `setVolume(volume: Int32)` | 设置音量（0-100） |
+| `volume(): Int32` | 获取音量 |
+| `setMuted(muted: Bool)` | 设置静音 |
+| `isMuted(): Bool` | 是否静音 |
+| `getPtr(): Int64` | 获取指针 |
+
+---
+
+## 打印模块
+
+打印模块提供打印和打印预览功能。
+
+```cangjie
+import CJQT6.print.*
+```
+
+### QPrinter - 打印机
+
+```cangjie
+let printer = QPrinter()
+
+// 设置输出格式
+printer.setOutputFormat(OutputFormat.NativeFormat)  // 打印到打印机
+printer.setOutputFormat(OutputFormat.PdfFormat)     // 输出PDF
+
+// 设置PDF文件名
+printer.setOutputFileName("/path/to/output.pdf")
+
+// 页面设置
+printer.setPageSize(PageSize.A4)
+printer.setOrientation(PageOrientation.Portrait)
+
+// 打印份数
+printer.setNumCopies(2)
+
+// 双面打印
+printer.setDoubleSidedPrinting(true)
+```
+
+**方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` | 创建打印机 |
+| `init(mode: Int32)` | 创建打印机（高分辨率/屏幕分辨率） |
+| `setOutputFormat(format: Int32)` | 设置输出格式 |
+| `outputFormat(): Int32` | 获取输出格式 |
+| `setOutputFileName(name: String)` | 设置输出文件名 |
+| `outputFileName(): String` | 获取输出文件名 |
+| `setPageSize(size: Int32)` | 设置页面大小 |
+| `pageSize(): Int32` | 获取页面大小 |
+| `setOrientation(orientation: Int32)` | 设置页面方向 |
+| `orientation(): Int32` | 获取页面方向 |
+| `setPageMargins(left, top, right, bottom)` | 设置页边距 |
+| `setNumCopies(copies: Int32)` | 设置打印份数 |
+| `numCopies(): Int32` | 获取打印份数 |
+| `setDoubleSidedPrinting(enabled: Bool)` | 设置双面打印 |
+| `doubleSidedPrinting(): Bool` | 是否双面打印 |
+| `setColorMode(mode: Int32)` | 设置颜色模式 |
+| `colorMode(): Int32` | 获取颜色模式 |
+| `setResolution(dpi: Int32)` | 设置分辨率 |
+| `resolution(): Int32` | 获取分辨率 |
+| `setPrinterName(name: String)` | 设置打印机名称 |
+| `printerName(): String` | 获取打印机名称 |
+| `setDocName(name: String)` | 设置文档名称 |
+| `docName(): String` | 获取文档名称 |
+| `setFromTo(from, to)` | 设置打印页范围 |
+| `fromPage(): Int32` | 获取起始页 |
+| `toPage(): Int32` | 获取结束页 |
+| `newPage(): Bool` | 新建一页 |
+| `width(): Int32` | 获取页面宽度 |
+| `height(): Int32` | 获取页面高度 |
+
+**输出格式常量** (OutputFormat):
+```cangjie
+NativeFormat   // 打印机
+PdfFormat      // PDF文件
+```
+
+**页面大小常量** (PageSize):
+```cangjie
+A3      // A3
+A4      // A4
+A5      // A5
+Letter  // Letter
+Legal   // Legal
+B4      // B4
+B5      // B5
+```
+
+**页面方向常量** (PageOrientation):
+```cangjie
+Portrait   // 纵向
+Landscape  // 横向
+```
+
+**颜色模式常量** (ColorMode):
+```cangjie
+GrayScale  // 灰度
+Color      // 彩色
+```
+
+### QPrintDialog - 打印对话框
+
+```cangjie
+let printer = QPrinter()
+let dialog = QPrintDialog(printer)
+
+let result = dialog.exec()
+if (result == 1) {  // Accepted
+    // 用户点击了打印
+    textEdit.print(printer.getPtr())
+}
+
+dialog.delete()
+printer.delete()
+```
+
+**方法**:
+| 方法 | 说明 |
+|------|------|
+| `init(printer: QPrinter)` | 创建打印对话框 |
+| `exec(): Int32` | 执行对话框（1=接受，0=取消） |
+| `printer(): QPrinter` | 获取关联的打印机 |
+
+### QPrintPreviewDialog - 打印预览对话框
+
+```cangjie
+let printer = QPrinter()
+
+// 创建预览对话框（关联QTextEdit）
+let previewDialog = QPrintPreviewDialog(printer, textEdit)
+previewDialog.exec()
+
+previewDialog.delete()
+printer.delete()
+```
+
+**方法**:
+| 方法 | 说明 |
+|------|------|
+| `init(printer: QPrinter)` | 创建预览对话框 |
+| `init(printer: QPrinter, textEdit: QTextEdit)` | 创建预览对话框（关联文本编辑器） |
+| `exec(): Int32` | 执行预览对话框 |
 
 ---
 

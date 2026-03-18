@@ -14,6 +14,7 @@ foreign func qMessageBoxQuestion(parentPtr: Int64, title: CString, text: CString
 foreign func qFileDialogGetOpenFileName(parentPtr: Int64, title: CString, filter: CString): CString
 foreign func qFileDialogGetSaveFileName(parentPtr: Int64, title: CString, filter: CString): CString
 foreign func qFileDialogGetExistingDirectory(parentPtr: Int64, title: CString): CString
+foreign func qFileDialogGetOpenFileNames(parentPtr: Int64, title: CString, filter: CString): CString
 
 // QInputDialog (简化版，直接返回值)
 foreign func qInputDialogGetTextValue(parentPtr: Int64, title: CString, label: CString, text: CString): CString
@@ -114,6 +115,20 @@ public class QFileDialog {
             let cstr = qFileDialogGetExistingDirectory(parent, titleCstr)
             let result = cstr.toString()
             LibC.free(titleCstr)
+            // 注意：cstr指向静态缓冲区，不要free
+            return result
+        }
+    }
+    
+    // 获取多个打开文件路径（用\n分隔）
+    public static func getOpenFileNames(parent: Int64, title: String, filter: String): String {
+        unsafe {
+            var titleCstr = LibC.mallocCString(title)
+            var filterCstr = LibC.mallocCString(filter)
+            let cstr = qFileDialogGetOpenFileNames(parent, titleCstr, filterCstr)
+            let result = cstr.toString()
+            LibC.free(titleCstr)
+            LibC.free(filterCstr)
             // 注意：cstr指向静态缓冲区，不要free
             return result
         }
