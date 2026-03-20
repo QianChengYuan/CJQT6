@@ -33,6 +33,10 @@ extern "C" {
 
 int64_t qApplicationCreate() {
     if (!g_app) {
+        // 注释掉软件渲染，尝试使用 OpenGL
+        // qputenv("QSG_RHI_BACKEND", "software");
+        // qputenv("QT_QUICK_BACKEND", "software");
+        
         int argc = 0;
         g_app = new QApplication(argc, nullptr);
     }
@@ -62,13 +66,18 @@ void qApplicationDelete(int64_t ptr) {
 
 int64_t qWidgetCreate() {
     QWidget* widget = new QWidget();
+    qDebug() << "qWidgetCreate, ptr:" << (void*)widget;
     return reinterpret_cast<int64_t>(widget);
 }
 
 void qWidgetShow(int64_t ptr) {
     QWidget* widget = reinterpret_cast<QWidget*>(ptr);
+    qDebug() << "qWidgetShow called, ptr:" << (void*)widget;
     if (widget) {
         widget->show();
+        widget->activateWindow();
+        widget->raise();
+        qDebug() << "Widget shown, visible:" << widget->isVisible();
     }
 }
 

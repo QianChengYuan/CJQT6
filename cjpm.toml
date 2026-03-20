@@ -1,5 +1,5 @@
 [package]
-  cjc-version = "1.0.5"
+  cjc-version = "1.1.0"
   name = "CJQT6"
   description = "仓颉语言的Qt6封装库"
   version = "1.0.0"
@@ -7,7 +7,7 @@
   output-type = "static"
   compile-option = ""
   override-compile-option = ""
-  link-option = "-L/home/yuan123/cangjiecode/CJQT6/native/build/lib -lcjqt6_bridge"
+  link-option = "-LC:/CodeTools/cangjie_git/CJQT6/test_deploy -lcjqt6_bridge"
   package-configuration = {}
 
 [dependencies]

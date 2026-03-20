@@ -215,6 +215,62 @@ const char* qMediaPlayerErrorString(int64_t ptr) {
     return "";
 }
 
+// ============================================================
+// 信号回调注册函数
+// ============================================================
+
+// 播放位置变化回调类型
+typedef void (*PositionCallback)(int64_t position);
+
+// 播放时长变化回调类型
+typedef void (*DurationCallback)(int64_t duration);
+
+// 播放状态变化回调类型
+typedef void (*StateCallback)(int32_t state);
+
+// 媒体状态变化回调类型
+typedef void (*MediaStatusCallback)(int32_t status);
+
+// 注册位置变化回调
+void qMediaPlayerOnPositionChanged(int64_t ptr, PositionCallback callback) {
+    QMediaPlayer* player = reinterpret_cast<QMediaPlayer*>(ptr);
+    if (player && callback) {
+        QObject::connect(player, &QMediaPlayer::positionChanged, [callback](qint64 position) {
+            callback(position);
+        });
+    }
+}
+
+// 注册时长变化回调
+void qMediaPlayerOnDurationChanged(int64_t ptr, DurationCallback callback) {
+    QMediaPlayer* player = reinterpret_cast<QMediaPlayer*>(ptr);
+    if (player && callback) {
+        QObject::connect(player, &QMediaPlayer::durationChanged, [callback](qint64 duration) {
+            callback(duration);
+        });
+    }
+}
+
+// 注册播放状态变化回调
+void qMediaPlayerOnPlaybackStateChanged(int64_t ptr, StateCallback callback) {
+    QMediaPlayer* player = reinterpret_cast<QMediaPlayer*>(ptr);
+    if (player && callback) {
+        QObject::connect(player, &QMediaPlayer::playbackStateChanged, [callback](QMediaPlayer::PlaybackState state) {
+            callback(static_cast<int32_t>(state));
+        });
+    }
+}
+
+// 注册媒体状态变化回调
+void qMediaPlayerOnMediaStatusChanged(int64_t ptr, MediaStatusCallback callback) {
+    QMediaPlayer* player = reinterpret_cast<QMediaPlayer*>(ptr);
+    if (player && callback) {
+        QObject::connect(player, &QMediaPlayer::mediaStatusChanged, [callback](QMediaPlayer::MediaStatus status) {
+            callback(static_cast<int32_t>(status));
+        });
+    }
+}
+
 void qMediaPlayerDelete(int64_t ptr) {
     QMediaPlayer* player = reinterpret_cast<QMediaPlayer*>(ptr);
     if (player) {

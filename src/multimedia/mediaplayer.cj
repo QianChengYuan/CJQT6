@@ -23,6 +23,10 @@ foreign func qMediaPlayerHasAudio(ptr: Int64): Bool
 foreign func qMediaPlayerMediaStatus(ptr: Int64): Int32
 foreign func qMediaPlayerError(ptr: Int64): Int32
 foreign func qMediaPlayerErrorString(ptr: Int64): CString
+foreign func qMediaPlayerOnPositionChanged(ptr: Int64, callback: CFunc<(Int64) -> Unit>): Unit
+foreign func qMediaPlayerOnDurationChanged(ptr: Int64, callback: CFunc<(Int64) -> Unit>): Unit
+foreign func qMediaPlayerOnPlaybackStateChanged(ptr: Int64, callback: CFunc<(Int32) -> Unit>): Unit
+foreign func qMediaPlayerOnMediaStatusChanged(ptr: Int64, callback: CFunc<(Int32) -> Unit>): Unit
 foreign func qMediaPlayerDelete(ptr: Int64): Unit
 
 // QAudioOutput - 音频输出
@@ -203,6 +207,23 @@ public class QMediaPlayer {
     
     public func errorString(): String {
         unsafe { qMediaPlayerErrorString(ptr).toString() }
+    }
+    
+    // 信号回调注册
+    public func onPositionChanged(callback: CFunc<(Int64) -> Unit>): Unit {
+        unsafe { qMediaPlayerOnPositionChanged(ptr, callback) }
+    }
+    
+    public func onDurationChanged(callback: CFunc<(Int64) -> Unit>): Unit {
+        unsafe { qMediaPlayerOnDurationChanged(ptr, callback) }
+    }
+    
+    public func onPlaybackStateChanged(callback: CFunc<(Int32) -> Unit>): Unit {
+        unsafe { qMediaPlayerOnPlaybackStateChanged(ptr, callback) }
+    }
+    
+    public func onMediaStatusChanged(callback: CFunc<(Int32) -> Unit>): Unit {
+        unsafe { qMediaPlayerOnMediaStatusChanged(ptr, callback) }
     }
     
     public func getPtr(): Int64 { ptr }

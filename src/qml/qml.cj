@@ -18,6 +18,7 @@ foreign func qQmlEngineSetContextPropertyInt(ptr: Int64, name: CString, value: I
 foreign func qQmlEngineSetContextPropertyDouble(ptr: Int64, name: CString, value: Float64): Unit
 foreign func qQmlEngineSetContextPropertyBool(ptr: Int64, name: CString, value: Int32): Unit
 foreign func qQmlEngineAddImportPath(ptr: Int64, path: CString): Unit
+foreign func qQmlEngineShowRootWindow(ptr: Int64): Unit
 foreign func qQmlEngineDelete(ptr: Int64): Unit
 
 // QQuickView
@@ -210,6 +211,13 @@ public class QQmlApplicationEngine {
             let cstr = LibC.mallocCString(path)
             qQmlEngineAddImportPath(ptr, cstr)
             LibC.free(cstr)
+        }
+    }
+    
+    /// 显示根窗口（用于 QQmlApplicationEngine 加载 Window 类型的 QML）
+    public func showRootWindow(): Unit {
+        unsafe {
+            qQmlEngineShowRootWindow(ptr)
         }
     }
     

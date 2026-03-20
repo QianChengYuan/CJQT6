@@ -8,6 +8,7 @@ import CJQT6.gui.*
 import CJQT6.multimedia.*
 import CJQT6.views.*
 import std.fs.*
+import std.env.*
 import std.collection.*
 import std.random.*
 
@@ -65,6 +66,8 @@ var isMuted: Bool = false
 var currentVolume: Float32 = 0.7f32
 var currentSpeed: Float32 = 1.0f32
 var positionTimer: ?QTimer = None
+var isUpdatingSlider: Bool = false  // 防止 slider 更新循环
+let randomGen: Random = Random()
 
 // UI组件
 var titleLabel: ?QLabel = None
@@ -269,7 +272,6 @@ func play() {
                 }
                 p.play()
                 isPlaying = true
-                startPositionTimer()
                 updateUI()
                 updateStatus("正在播放: ${item.fileName}")
             }
@@ -283,7 +285,6 @@ func pause() {
     if (let Some(p) <- player) {
         p.pause()
         isPlaying = false
-        stopPositionTimer()
         updateUI()
         updateStatus("已暂停")
     }
@@ -293,7 +294,6 @@ func stop() {
     if (let Some(p) <- player) {
         p.stop()
         isPlaying = false
-        stopPositionTimer()
         if (let Some(slider) <- progressSlider) {
             slider.setValue(0)
         }
@@ -321,8 +321,7 @@ func prev() {
     match (playMode) {
         case PlayMode.Random =>
             // 随机选择
-            let rand = Random()
-            currentIndex = Int32(rand.nextFloat64() * Float64(playList.size))
+            currentIndex = Int32(randomGen.nextFloat64() * Float64(playList.size))
         case _ =>
             currentIndex--
             if (currentIndex < 0) {
@@ -344,8 +343,7 @@ func next() {
     
     match (playMode) {
         case PlayMode.Random =>
-            let rand = Random()
-            currentIndex = Int32(rand.nextFloat64() * Float64(playList.size))
+            currentIndex = Int32(randomGen.nextFloat64() * Float64(playList.size))
         case _ =>
             currentIndex++
             if (currentIndex >= Int32(playList.size)) {
@@ -367,7 +365,6 @@ func loadAndPlay() {
             p.setSourceFile(item.filePath)
             p.play()
             isPlaying = true
-            startPositionTimer()
             updateUI()
             updateStatus("正在播放: ${item.fileName}")
         }
@@ -384,12 +381,16 @@ func toggleMute() {
 
 func setVolume(value: Int32) {
     currentVolume = Float32(value) / 100.0f32
-    if (let Some(p) <- player) {
-        p.setVolume(currentVolume)
+    if (let Some(audio) <- audioOutput) {
+        audio.setVolume(currentVolume)
     }
 }
 
 func setPosition(value: Int32) {
+    // 如果正在从回调更新 slider，忽略此次调用
+    if (isUpdatingSlider) {
+        return
+    }
     if (let Some(p) <- player) {
         let duration = p.duration()
         if (duration > 0) {
@@ -446,7 +447,7 @@ func changeSpeed() {
 
 func startPositionTimer() {
     if (let Some(timer) <- positionTimer) {
-        timer.setInterval(100)
+        timer.setInterval(500)
         timer.start()
     }
 }
@@ -474,17 +475,11 @@ func updatePosition() {
                 lbl.setText("${formatTime(pos)} / ${formatTime(dur)}")
             }
         }
-        
-        // 检查是否播放结束
-        if (p.playbackState() == PlaybackState.stopped() && isPlaying) {
-            onPlaybackFinished()
-        }
     }
 }
 
 func onPlaybackFinished() {
     isPlaying = false
-    stopPositionTimer()
     
     match (playMode) {
         case PlayMode.Sequential =>
@@ -562,6 +557,62 @@ func about() {
 // 回调函数
 // ============================================================
 
+// CFunc 回调函数（必须是顶级函数，不能捕获外部变量，需要 @C 修饰）
+@C
+func cbPositionChanged(pos: Int64): Unit {
+    // 忽略位置为 0 的回调（可能是加载中）
+    if (pos <= 0) {
+        return
+    }
+    if (let Some(p) <- player) {
+        let dur = p.duration()
+        if (dur > 0) {
+            // 设置标志，防止 slider 的 valueChanged 回调触发 setPosition
+            isUpdatingSlider = true
+            if (let Some(slider) <- progressSlider) {
+                slider.setValue(Int32(pos * 100 / dur))
+            }
+            isUpdatingSlider = false
+            if (let Some(lbl) <- timeLabel) {
+                lbl.setText("${formatTime(pos)} / ${formatTime(dur)}")
+            }
+        }
+    }
+}
+
+@C
+func cbDurationChanged(dur: Int64): Unit {
+    if (dur > 0) {
+        if (let Some(lbl) <- timeLabel) {
+            if (let Some(p) <- player) {
+                lbl.setText("${formatTime(p.position())} / ${formatTime(dur)}")
+            }
+        }
+    }
+}
+
+@C
+func cbMediaStatusChanged(status: Int32): Unit {
+    // 暂时禁用此回调，改用 playbackStateChanged
+}
+
+@C
+func cbPlaybackStateChanged(state: Int32): Unit {
+    // state: 0=Stopped, 1=Playing, 2=Paused
+    // 只有在播放中状态变为 Stopped 且 isPlaying 为 true 时才认为是播放结束
+    if (state == 0 && isPlaying) {
+        if (let Some(p) <- player) {
+            let pos = p.position()
+            let dur = p.duration()
+            // 只有当位置接近结尾时才认为是真正结束
+            if (dur > 0 && pos >= dur - 1000) {
+                isPlaying = false
+                onPlaybackFinished()
+            }
+        }
+    }
+}
+
 let onTogglePlay: VoidCallback = { => togglePlay() }
 let onStop: VoidCallback = { => stop() }
 let onPrev: VoidCallback = { => prev() }
@@ -577,9 +628,15 @@ let onExit: VoidCallback = { =>
     if (let Some(p) <- player) {
         p.stop()
         p.delete()
+        player = None
     }
     if (let Some(out) <- audioOutput) {
         out.delete()
+        audioOutput = None
+    }
+    if (let Some(t) <- positionTimer) {
+        t.delete()
+        positionTimer = None
     }
     QApp.quit()
 }
@@ -589,22 +646,27 @@ let onAbout: VoidCallback = { => about() }
 // 主函数
 // ============================================================
 main(): Int32 {
+    // 设置音频相关环境变量
+    setVariable("QT_MEDIA_BACKEND", "windows")
+    setVariable("QT_QUICK_BACKEND", "software")
+    
     let app = QApplication()
     app.loadQtTranslation("zh_CN")
     
     // 创建媒体播放器和音频输出
     let mediaPlayer = QMediaPlayer()
     let audio = QAudioOutput()
-    mediaPlayer.setAudioOutput(audio)
-    mediaPlayer.setVolume(currentVolume)
+    audio.setVolume(currentVolume)  // 先设置音量
+    mediaPlayer.setAudioOutput(audio)  // 再设置输出
+    
+    // 注册信号回调（替代定时器轮询）
+    mediaPlayer.onPositionChanged(cbPositionChanged)
+    mediaPlayer.onDurationChanged(cbDurationChanged)
+    mediaPlayer.onMediaStatusChanged(cbMediaStatusChanged)
+    mediaPlayer.onPlaybackStateChanged(cbPlaybackStateChanged)
+    
     player = mediaPlayer
     audioOutput = audio
-    
-    // 创建位置更新定时器
-    let timer = QTimer()
-    timer.setInterval(100)
-    timer.setOnTimeout({ => updatePosition() })
-    positionTimer = timer
     
     // 创建主窗口
     let window = QWidget()
@@ -736,6 +798,7 @@ main(): Int32 {
     mainLayout.addWidget(listLabel.getPtr())
     
     let listWidget = QListWidget()
+    listWidget.setOnItemDoubleClicked({ row => onPlaylistDoubleClicked(row) })
     playlistWidget = listWidget
     mainLayout.addWidget(listWidget.getPtr())
     
@@ -837,7 +900,6 @@ main(): Int32 {
     let result = app.exec()
     
     // 清理
-    timer.delete()
     mediaPlayer.delete()
     audio.delete()
     

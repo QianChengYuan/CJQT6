@@ -12,6 +12,8 @@
 #include <QUrl>
 #include <QVariant>
 #include <QDebug>
+#include <QCoreApplication>
+#include <QSurfaceFormat>
 
 extern "C" {
 
@@ -21,13 +23,54 @@ extern "C" {
 
 int64_t qQmlEngineCreate() {
     QQmlApplicationEngine* engine = new QQmlApplicationEngine();
+    qDebug() << "QQmlApplicationEngine created:" << (void*)engine;
     return reinterpret_cast<int64_t>(engine);
 }
 
 void qQmlEngineLoadFile(int64_t ptr, const char* filePath) {
     QQmlApplicationEngine* engine = reinterpret_cast<QQmlApplicationEngine*>(ptr);
     if (engine && filePath) {
-        engine->load(QString::fromUtf8(filePath));
+        qDebug() << "Loading QML file:" << filePath;
+        QUrl url = QUrl::fromLocalFile(QString::fromUtf8(filePath));
+        qDebug() << "URL:" << url;
+        engine->load(url);
+        qDebug() << "Root objects after loadFile:" << engine->rootObjects().size();
+        if (!engine->rootObjects().isEmpty()) {
+            qDebug() << "First root object:" << engine->rootObjects().first();
+        }
+    }
+}
+
+void qQmlEngineShowRootWindow(int64_t ptr) {
+    QQmlApplicationEngine* engine = reinterpret_cast<QQmlApplicationEngine*>(ptr);
+    qDebug() << "qQmlEngineShowRootWindow called, engine:" << (void*)engine;
+    
+    if (!engine) {
+        qWarning() << "Engine is null";
+        return;
+    }
+    
+    qDebug() << "Root objects count:" << engine->rootObjects().size();
+    
+    if (engine->rootObjects().isEmpty()) {
+        qWarning() << "No root objects to show";
+        return;
+    }
+    
+    QObject* root = engine->rootObjects().first();
+    qDebug() << "Root object:" << root << "metaObject:" << (root ? root->metaObject()->className() : "null");
+    
+    QQuickWindow* window = qobject_cast<QQuickWindow*>(root);
+    qDebug() << "Cast to QQuickWindow:" << window;
+    
+    if (window) {
+        qDebug() << "Showing window...";
+        window->show();
+        window->raise();
+        window->requestActivate();
+        qDebug() << "Window shown, visible:" << window->isVisible();
+    } else {
+        qWarning() << "Root object is not a QQuickWindow";
     }
 }
 
@@ -41,8 +84,18 @@ void qQmlEngineLoadUrl(int64_t ptr, const char* url) {
 void qQmlEngineLoadData(int64_t ptr, const char* qmlData) {
     QQmlApplicationEngine* engine = reinterpret_cast<QQmlApplicationEngine*>(ptr);
     if (engine && qmlData) {
+        qDebug() << "Loading QML data, length:" << strlen(qmlData);
         QByteArray data(qmlData);
-        engine->loadData(data);
+        // 需要提供 URL 以便正确解析 import
+        QUrl url("qrc:/inline.qml");
+        qDebug() << "Calling loadData...";
+        engine->loadData(data, url);
+        qDebug() << "loadData returned";
+        qDebug() << "Root objects after loadData:" << engine->rootObjects().size();
+        if (!engine->rootObjects().isEmpty()) {
+            QObject* root = engine->rootObjects().first();
+            qDebug() << "First root object:" << root << "type:" << (root ? root->metaObject()->className() : "null");
+        }
     }
 }
 
@@ -124,21 +177,20 @@ void qQmlEngineDelete(int64_t ptr) {
 // ============================================================
 
 int64_t qQuickViewCreate() {
+    qDebug() << "qQuickViewCreate called";
+    
+    // 检查QApplication是否存在
+    if (!QCoreApplication::instance()) {
+        qWarning() << "QQuickView requires QApplication instance";
+        return 0;
+    }
+    
+    qDebug() << "QApplication exists, creating QQuickView...";
+    
+    QQuickView* view = nullptr;
     try {
-        // 检查QApplication是否存在
-        if (!QCoreApplication::instance()) {
-            qWarning() << "QQuickView requires QApplication instance";
-            return 0;
-        }
-        
-        QQuickView* view = new QQuickView();
-        if (!view) {
-            qWarning() << "Failed to create QQuickView";
-            return 0;
-        }
-        
-        qDebug() << "QQuickView created successfully:" << (void*)view;
-        return reinterpret_cast<int64_t>(view);
+        view = new QQuickView();
+        qDebug() << "QQuickView new returned:" << (void*)view;
     } catch (const std::exception& e) {
         qCritical() << "Exception creating QQuickView:" << e.what();
         return 0;
@@ -146,6 +198,14 @@ int64_t qQuickViewCreate() {
         qCritical() << "Unknown exception creating QQuickView";
         return 0;
     }
+    
+    if (!view) {
+        qWarning() << "Failed to create QQuickView (null pointer)";
+        return 0;
+    }
+    
+    qDebug() << "QQuickView created successfully:" << (void*)view;
+    return reinterpret_cast<int64_t>(view);
 }
 
 void qQuickViewSetSource(int64_t ptr, const char* source) {

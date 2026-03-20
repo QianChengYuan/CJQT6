@@ -2276,14 +2276,29 @@ ApplicationWindow {
 
 ### 已知限制
 
-**QQmlApplicationEngine**: 由于仓颉 FFI 与 Qt 虚函数机制的兼容性问题，QQmlApplicationEngine 在某些情况下可能会崩溃。建议使用 QQuickView 作为替代方案。
+**QML 模块状态**: ⚠️ 部分功能不可用（2026-03-20 测试）
 
-**QQuickView**: 推荐使用。QQuickView 需要以 Item 或 Rectangle 作为 QML 根元素，不能使用 Window 或 ApplicationWindow。
+**QQmlApplicationEngine**: 
+- ✅ 创建引擎成功
+- ❌ `loadFile()` 和 `loadData()` 调用后程序卡住无响应
+- 可能原因：Qt Quick 插件与仓颉运行时兼容性问题
+
+**QQuickView**: 
+- ❌ 创建时程序崩溃
+- 暂时不可用
+
+**QWidget**: ✅ 正常工作，可作为替代方案
 
 **运行环境**: 运行 QML 应用需要设置 `QML2_IMPORT_PATH` 环境变量：
 ```bash
+# Windows
+set QML2_IMPORT_PATH=C:\Qt\6.10.2\mingw_64\qml
+
+# Linux
 export QML2_IMPORT_PATH=/usr/lib/x86_64-linux-gnu/qt6/qml
 ```
+
+**临时解决方案**: 如需 QML 功能，建议使用 QWidget + QQuickWidget 嵌入方式，或等待后续修复。
 
 ---
 
@@ -2496,31 +2511,61 @@ player.setPlaybackRate(1.5)  // 1.5倍速
 | `error(): Int32` | 错误类型 |
 | `errorString(): String` | 错误描述 |
 
-**信号回调**:
+**信号回调**（使用 CFunc 回调函数）:
+
+回调函数必须是顶级函数，使用 `@C` 修饰，参数类型为 `CFunc<(参数类型) -> Unit>`:
+
 ```cangjie
-// 播放状态变化
-player.setOnPlayingChanged({ =>
-    if (player.isPlaying()) {
-        println("开始播放")
-    }
-})
-
-// 位置变化
-player.setOnPositionChanged({ pos: Int64 =>
+// 定义 @C 回调函数
+@C
+func onPositionChanged(pos: Int64): Unit {
     println("播放位置: ${pos}ms")
-})
+}
 
-// 时长变化
-player.setOnDurationChanged({ dur: Int64 =>
+@C
+func onDurationChanged(dur: Int64): Unit {
     println("总时长: ${dur}ms")
-})
+}
 
-// 播放结束
-player.setOnMediaStatusChanged({ status: Int32 =>
-    if (status == MediaStatus.EndOfMedia) {
+@C
+func onPlaybackStateChanged(state: Int32): Unit {
+    // state: 0=Stopped, 1=Playing, 2=Paused
+    match (state) {
+        case 1 => println("开始播放")
+        case 2 => println("已暂停")
+        case 0 => println("已停止")
+        case _ => ()
+    }
+}
+
+@C
+func onMediaStatusChanged(status: Int32): Unit {
+    // status == 6 表示 EndOfMedia
+    if (status == 6) {
         println("播放结束")
     }
-})
+}
+
+// 注册回调
+player.onPositionChanged(onPositionChanged)
+player.onDurationChanged(onDurationChanged)
+player.onPlaybackStateChanged(onPlaybackStateChanged)
+player.onMediaStatusChanged(onMediaStatusChanged)
+```
+
+**信号回调方法**:
+| 方法 | 回调类型 | 说明 |
+|------|----------|------|
+| `onPositionChanged(callback)` | `CFunc<(Int64) -> Unit>` | 播放位置变化 |
+| `onDurationChanged(callback)` | `CFunc<(Int64) -> Unit>` | 媒体时长变化 |
+| `onPlaybackStateChanged(callback)` | `CFunc<(Int32) -> Unit>` | 播放状态变化 |
+| `onMediaStatusChanged(callback)` | `CFunc<(Int32) -> Unit>` | 媒体状态变化 |
+
+**注意事项**:
+- 回调函数必须是顶级函数，不能是嵌套函数或类方法
+- 回调函数需要 `@C` 修饰符
+- 使用信号回调比定时器轮询更高效，避免音频卡顿
+- 更新 UI 控件时注意防止循环触发（如 slider.setValue 触发 valueChanged）
 ```
 
 **媒体状态常量** (MediaStatus):

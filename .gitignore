@@ -23,3 +23,6 @@ Thumbs.db
 .cjpm-cache
 .dep-cache
 .cjpm-history
+
+# LSP缓存
+.cache/
