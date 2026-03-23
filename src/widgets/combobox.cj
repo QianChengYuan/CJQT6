@@ -35,6 +35,12 @@ public class QComboBox {
         }
     }
     
+    public func resize(width: Int32, height: Int32) {
+        unsafe {
+            qWidgetResize(ptr, width, height)
+        }
+    }
+    
     public func addItem(text: String) {
         unsafe {
             let cstr = LibC.mallocCString(text)

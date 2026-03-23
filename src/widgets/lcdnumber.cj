@@ -61,6 +61,12 @@ public class QLCDNumber {
         }
     }
     
+    public func resize(width: Int32, height: Int32) {
+        unsafe {
+            qWidgetResize(ptr, width, height)
+        }
+    }
+    
     /// 显示浮点数值
     public func display(value: Float64) {
         unsafe {

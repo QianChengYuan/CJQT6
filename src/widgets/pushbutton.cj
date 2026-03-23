@@ -119,6 +119,16 @@ public class QPushButton <: QtResource {
         }
     }
     
+    /// 设置样式表
+    public func setStyleSheet(style: String): Unit {
+        checkValid()
+        unsafe {
+            let cstr = LibC.mallocCString(style)
+            qWidgetSetStyleSheet(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+    
     /// 设置点击回调
     public func setOnClick(callback: VoidCallback): Unit {
         checkValid()

@@ -29,6 +29,12 @@ public class QProgressBar {
         }
     }
     
+    public func resize(width: Int32, height: Int32) {
+        unsafe {
+            qWidgetResize(ptr, width, height)
+        }
+    }
+    
     public func setValue(value: Int32) {
         unsafe {
             qProgressBarSetValue(ptr, value)
@@ -60,6 +66,7 @@ public class QProgressBar {
     public func delete() {
         if (ptr != 0) {
             unsafe {
+                qSignalCleanup(ptr)
                 qProgressBarDelete(ptr)
             }
             ptr = 0

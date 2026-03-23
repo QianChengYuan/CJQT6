@@ -106,15 +106,18 @@ public class QTimer <: QtResource {
         close()
     }
     
-    /// 终结器 - 作为最后保障
-    ~init() {
-        if (!closed && ptr != 0) {
-            unsafe {
-                qSignalCleanup(ptr)
-                qTimerDelete(ptr)
-            }
-            closed = true
-            ptr = 0
-        }
-    }
+    /// 终结器 - 已禁用
+    /// 注意：仓颉运行时可能会在不正确的时机调用终结器（例如对象仍被全局变量引用时）。
+    /// 这会导致 Qt 对象被提前删除，引发崩溃。
+    /// 解决方案：请显式调用 delete() 或 close() 方法释放资源。
+    // ~init() {
+    //     if (!closed && ptr != 0) {
+    //         unsafe {
+    //             qSignalCleanup(ptr)
+    //             qTimerDelete(ptr)
+    //         }
+    //         closed = true
+    //         ptr = 0
+    //     }
+    // }
 }

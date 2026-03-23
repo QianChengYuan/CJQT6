@@ -17,7 +17,7 @@ public class QDate {
     
     public static func currentDate(): QDate {
         let d = QDate()
-        unsafe { d.ptr = qDateCurrentDate() }
+        unsafe { d.setPtr(qDateCurrentDate()) }
         return d
     }
     
@@ -88,7 +88,7 @@ public class QTime {
     
     public static func currentTime(): QTime {
         let t = QTime()
-        unsafe { t.ptr = qTimeCurrentTime() }
+        unsafe { t.setPtr(qTimeCurrentTime()) }
         return t
     }
     
@@ -161,7 +161,7 @@ public class QDateTime {
     
     public static func currentDateTime(): QDateTime {
         let dt = QDateTime()
-        unsafe { dt.ptr = qDateTimeCurrentDateTime() }
+        unsafe { dt.setPtr(qDateTimeCurrentDateTime()) }
         return dt
     }
     

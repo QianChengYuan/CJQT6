@@ -316,7 +316,9 @@ void qTimerConnectTimeout(int64_t ptr, void (*callback)()) {
                 }
             }
             if (cb) {
-                cb();
+                try {
+                    cb();
+                } catch (...) {}
             }
         });
     }

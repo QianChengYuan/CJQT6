@@ -36,6 +36,12 @@ public class QDoubleSpinBox {
         }
     }
     
+    public func resize(width: Int32, height: Int32) {
+        unsafe {
+            qWidgetResize(ptr, width, height)
+        }
+    }
+    
     public func setValue(value: Float64) {
         unsafe {
             qDoubleSpinBoxSetValue(ptr, value)

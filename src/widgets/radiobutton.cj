@@ -33,6 +33,12 @@ public class QRadioButton {
         }
     }
     
+    public func resize(width: Int32, height: Int32) {
+        unsafe {
+            qWidgetResize(ptr, width, height)
+        }
+    }
+    
     public func setText(text: String) {
         unsafe {
             let cstr = LibC.mallocCString(text)

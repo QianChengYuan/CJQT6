@@ -38,6 +38,12 @@ public class QDial {
         }
     }
     
+    public func resize(width: Int32, height: Int32) {
+        unsafe {
+            qWidgetResize(ptr, width, height)
+        }
+    }
+    
     public func setValue(value: Int32) {
         unsafe {
             qDialSetValue(ptr, value)

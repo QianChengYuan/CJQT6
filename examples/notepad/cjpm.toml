@@ -7,7 +7,7 @@
   output-type = "executable"
   compile-option = ""
   override-compile-option = ""
-  link-option = "-L/home/yuan123/cangjiecode/CJQT6/native/build/lib -lcjqt6_bridge"
+  link-option = "-L../../native/build-win64/lib -lcjqt6_bridge"
   package-configuration = {}
 
 [dependencies]

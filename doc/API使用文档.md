@@ -29,25 +29,44 @@
 
 ### 自动清理机制
 
-所有控件类都实现了终结器 `~init`，垃圾回收时会自动释放资源。**无需手动调用 `delete()`**。
+大部分控件类实现了终结器 `~init`，垃圾回收时会自动释放资源。
+
+**⚠️ 重要例外：QTimer 的终结器已被禁用**
+
+由于仓颉运行时可能在对象仍被引用时提前调用终结器，导致 Qt 对象被错误释放。为避免此问题，**QTimer 不再提供自动清理**，必须手动调用 `delete()`。
 
 ```cangjie
+// ❌ 错误：不手动释放 QTimer
 main(): Int32 {
     let app = QApplication()
-    let window = QWidget()
-    let label = QLabel()
-    let btn = QPushButton()
-    // ... 创建更多控件 ...
-    window.show()
+    let timer = QTimer()  // 终结器已禁用！
+    // ... 使用 timer ...
     let result = app.exec()
-    // 不需要手动清理，终结器自动处理
+    return result  // QTimer 资源泄漏！
+}
+
+// ✅ 正确：手动释放 QTimer
+main(): Int32 {
+    let app = QApplication()
+    let timer = QTimer()
+    // ... 使用 timer ...
+    let result = app.exec()
+    timer.delete()  // 手动释放
     return result
 }
 ```
 
-### 手动释放（可选）
+### 手动释放（推荐）
 
-如果需要**立即释放**资源，可以调用 `close()` 或 `delete()`：
+对于以下类，**强烈建议**手动调用 `delete()` 或 `close()`：
+
+| 类 | 原因 | 释放方法 |
+|---|-------|---------|
+| **QTimer** | 终结器已禁用 | `delete()` |
+| **QMediaPlayer** | 涉及底层资源 | `delete()` |
+| **QAudioOutput** | 涉及底层资源 | `delete()` |
+| **QProcess** | 涉及进程资源 | `delete()` |
+| **绘图类** (QColor/QPen/QBrush/QFont/QPixmap等) | 工厂方法可能泄漏 | `delete()` |
 
 ```cangjie
 // 方式1：close() - 实现 QtResource 接口
@@ -199,6 +218,10 @@ window.show()
 
 定时器，用于周期性执行任务。
 
+**⚠️ 重要：必须手动调用 delete()**
+
+QTimer 的终结器已被禁用。仓颉运行时可能在不正确的时机调用终结器（例如对象仍被全局变量引用时），导致 Qt 对象被提前删除并引发崩溃。
+
 ```cangjie
 let timer = QTimer()
 timer.setInterval(1000)  // 1秒
@@ -208,6 +231,38 @@ let timerCallback: VoidCallback = { =>
 }
 timer.setTimeout(timerCallback)
 timer.start()
+
+// 使用完毕后必须手动释放
+timer.delete()
+```
+
+**完整示例**：
+```cangjie
+var gTimer: ?QTimer = None
+
+main(): Int32 {
+    let app = QApplication()
+    let window = QWidget()
+    window.resize(400, 300)
+    
+    let timer = QTimer()
+    timer.setInterval(1000)
+    timer.setTimeout({ =>
+        println("定时器触发！")
+    })
+    timer.start()
+    gTimer = timer  // 保存到全局变量
+    
+    window.show()
+    let result = app.exec()
+    
+    // 手动释放资源
+    timer.delete()
+    window.delete()
+    app.delete()
+    
+    return result
+}
 ```
 
 **方法**:
@@ -218,7 +273,7 @@ timer.start()
 | `stop()` | 停止定时器 |
 | `setTimeout(callback: VoidCallback)` | 设置超时回调 |
 | `disconnect()` | 断开信号连接 |
-| `delete()` | 释放资源 |
+| `delete()` | **必须调用** - 释放资源 |
 
 ---
 
@@ -1232,12 +1287,37 @@ let age = QInputDialog.getInt(0, "输入年龄", "请输入年龄:", 18, 0, 150)
 let price = QInputDialog.getDouble(0, "输入价格", "请输入价格:", 0.0, 0.0, 10000.0)
 ```
 
+**推荐：使用带 Result 后缀的方法**
+
+旧方法无法区分"用户取消"和"用户输入了默认值/空值"。推荐使用带 `Result` 后缀的方法：
+
+```cangjie
+// getIntWithResult 返回 (value, ok)
+let (age, ok) = QInputDialog.getIntWithResult(0, "输入年龄", "请输入年龄:", 18, 0, 150)
+if (ok) {
+    println("用户输入: ${age}")
+} else {
+    println("用户取消了输入")
+}
+
+// getTextWithResult 返回 (text, ok)
+let (name, ok) = QInputDialog.getTextWithResult(0, "输入姓名", "请输入姓名:", "默认值")
+if (ok) {
+    println("用户输入: ${name}")
+} else {
+    println("用户取消了输入")
+}
+```
+
 **QInputDialog 方法**:
 | 方法 | 说明 |
 |------|------|
-| `getText(parent, title, label, defaultText): String` | 获取文本输入 |
-| `getInt(parent, title, label, value, min, max): Int32` | 获取整数输入 |
-| `getDouble(parent, title, label, value, min, max): Float64` | 获取浮点数输入 |
+| `getText(parent, title, label, defaultText): String` | 获取文本输入（空字符串可能表示取消） |
+| `getTextWithResult(parent, title, label, defaultText): (String, Bool)` | 获取文本输入，返回(text, ok) |
+| `getInt(parent, title, label, value, min, max): Int32` | 获取整数输入（Int32最小值表示取消） |
+| `getIntWithResult(parent, title, label, value, min, max): (Int32, Bool)` | 获取整数输入，返回(value, ok) |
+| `getDouble(parent, title, label, value, min, max): Float64` | 获取浮点数输入（NaN表示取消） |
+| `getDoubleWithResult(parent, title, label, value, min, max): (Float64, Bool)` | 获取浮点数输入，返回(value, ok) |
 
 ### QColorDialog - 颜色对话框
 
@@ -1247,6 +1327,89 @@ let color = QColorDialog.getColor(0, "选择颜色")
 if (color.size > 0) {
     println("选择了颜色: ${color}")
 }
+```
+
+---
+
+## 事件处理
+
+### QEventWidget - 事件窗口
+
+QEventWidget 是支持鼠标、键盘等事件的窗口部件。
+
+```cangjie
+import CJQT6.gui.*
+
+let eventWidget = QEventWidget()
+
+// 设置鼠标移动回调
+eventWidget.setOnMouseMove({ x: Int32, y: Int32 =>
+    println("鼠标移动: (${x}, ${y})")
+})
+
+// 设置鼠标按下回调
+eventWidget.setOnMousePress({ x: Int32, y: Int32, button: Int32 =>
+    println("鼠标按下: (${x}, ${y}), 按钮: ${button}")
+})
+
+// 设置键盘按下回调
+eventWidget.setOnKeyPress({ key: Int32, modifiers: Int32 =>
+    println("按键: ${key}, 修饰键: ${modifiers}")
+})
+```
+
+**事件回调方法**:
+| 方法 | 说明 |
+|------|------|
+| `setOnMouseMove(callback)` | 鼠标移动回调 |
+| `setOnMousePress(callback)` | 鼠标按下回调 |
+| `setOnMouseRelease(callback)` | 鼠标释放回调 |
+| `setOnMouseDoubleClick(callback)` | 鼠标双击回调 |
+| `setOnMouseEnter(callback)` | 鼠标进入回调 |
+| `setOnMouseLeave(callback)` | 鼠标离开回调 |
+| `setOnKeyPress(callback)` | 键盘按下回调 |
+| `setOnKeyRelease(callback)` | 键盘释放回调 |
+| `setOnResize(callback)` | 窗口大小变化回调 |
+| `setOnPaint(callback)` | 绘图事件回调 |
+
+**回调清除方法**:
+| 方法 | 说明 |
+|------|------|
+| `clearMouseMoveCallback()` | 清除鼠标移动回调 |
+| `clearMousePressCallback()` | 清除鼠标按下回调 |
+| `clearMouseReleaseCallback()` | 清除鼠标释放回调 |
+| `clearMouseDoubleClickCallback()` | 清除鼠标双击回调 |
+| `clearMouseEnterCallback()` | 清除鼠标进入回调 |
+| `clearMouseLeaveCallback()` | 清除鼠标离开回调 |
+| `clearKeyPressCallback()` | 清除键盘按下回调 |
+| `clearKeyReleaseCallback()` | 清除键盘释放回调 |
+| `clearResizeCallback()` | 清除大小变化回调 |
+| `clearPaintCallback()` | 清除绘图事件回调 |
+| `clearAllCallbacks()` | **清除所有回调** |
+
+**鼠标按钮常量**:
+```cangjie
+MouseButton.LeftButton    // 左键
+MouseButton.RightButton   // 右键
+MouseButton.MiddleButton  // 中键
+```
+
+**键盘修饰键常量**:
+```cangjie
+Modifier.NoModifier      // 无修饰
+Modifier.ShiftModifier   // Shift
+Modifier.ControlModifier // Ctrl
+Modifier.AltModifier     // Alt
+```
+
+**重要：释放资源前清除回调**
+
+在调用 `delete()` 释放 QEventWidget 前，应清除所有回调，避免悬空指针：
+
+```cangjie
+// 正确的资源释放顺序
+eventWidget.clearAllCallbacks()  // 先清除回调
+eventWidget.delete()             // 再释放资源
 ```
 
 ---
@@ -1297,6 +1460,7 @@ let transparent = Colors.transparent()
 | `setGreen(g)` | 设置绿色分量 |
 | `setBlue(b)` | 设置蓝色分量 |
 | `setAlpha(a)` | 设置透明度 |
+| `delete()` | 释放资源 |
 
 ### QPen - 画笔
 
@@ -1317,6 +1481,7 @@ pen.setStyle(PenStyle.DashLine)
 | `setWidth(w: Int32)` | 设置宽度 |
 | `width(): Int32` | 获取宽度 |
 | `setStyle(s: Int32)` | 设置样式 |
+| `delete()` | 释放资源 |
 
 **画笔样式常量** (PenStyle):
 ```cangjie
@@ -1348,6 +1513,7 @@ let gradientBrush = QBrush(gradient)
 | `init(gradient: QLinearGradient)` | 创建渐变画刷 |
 | `setColor(c: QColor)` | 设置颜色 |
 | `setStyle(s: Int32)` | 设置样式 |
+| `delete()` | 释放资源 |
 
 **画刷样式常量** (BrushStyle):
 ```cangjie
@@ -1370,6 +1536,7 @@ gradient.setColorAt(1.0, Colors.blue())    // 终点：蓝色
 | `init(x1, y1, x2, y2)` | 创建渐变（Float32坐标） |
 | `fromInt(x1, y1, x2, y2)` | 创建渐变（Int32坐标，静态方法） |
 | `setColorAt(pos, color)` | 设置位置颜色（pos: 0.0~1.0） |
+| `delete()` | 释放资源 |
 
 ### QFont - 绘图字体
 
@@ -1387,6 +1554,7 @@ font.setItalic(true)
 | `setPointSize(n: Int32)` | 设置字号 |
 | `setBold(b: Bool)` | 设置粗体 |
 | `setItalic(b: Bool)` | 设置斜体 |
+| `delete()` | 释放资源 |
 
 ### QPainterPath - 绘图路径
 
@@ -1417,6 +1585,7 @@ rectPath.addRect(20.0, 20.0, 150.0, 100.0)
 | `addEllipse(x, y, w, h)` | 添加椭圆 |
 | `closeSubpath()` | 闭合路径 |
 | `isEmpty(): Bool` | 是否为空 |
+| `delete()` | 释放资源 |
 
 ### QPixmap - 图像
 
@@ -1444,6 +1613,7 @@ let isNull = pixmap.isNull()
 | `height(): Int32` | 获取高度 |
 | `isNull(): Bool` | 是否为空 |
 | `fill(c: QColor)` | 填充颜色 |
+| `delete()` | 释放资源 |
 
 ### QPainter - 绘图器
 
@@ -2471,6 +2641,45 @@ audioOutput.setVolume(50)  // 0-100
 
 // 播放速度
 player.setPlaybackRate(1.5)  // 1.5倍速
+
+// 循环播放
+player.setLoops(-1)  // -1 表示无限循环，0 表示播放一次，n 表示循环 n 次
+```
+
+**背景音乐示例**:
+```cangjie
+// 全局变量保存播放器
+var gAudioOutput: ?QAudioOutput = None
+var gMusicPlayer: ?QMediaPlayer = None
+
+func setupBackgroundMusic(): Unit {
+    gAudioOutput = QAudioOutput()
+    gMusicPlayer = QMediaPlayer()
+    
+    if (let Some(audio) <- gAudioOutput) {
+        audio.setVolume(50)  // 50% 音量
+    }
+    
+    if (let Some(player) <- gMusicPlayer) {
+        if (let Some(audio) <- gAudioOutput) {
+            player.setAudioOutput(audio)
+        }
+        player.setSourceFile("background.mp3")
+        player.setLoops(-1)  // 无限循环
+        player.play()
+    }
+}
+
+// 在程序退出时释放资源
+func cleanupBackgroundMusic(): Unit {
+    if (let Some(player) <- gMusicPlayer) {
+        player.stop()
+        player.delete()
+    }
+    if (let Some(audio) <- gAudioOutput) {
+        audio.delete()
+    }
+}
 ```
 
 **播放控制方法**:
@@ -2481,6 +2690,8 @@ player.setPlaybackRate(1.5)  // 1.5倍速
 | `stop()` | 停止 |
 | `setSource(url: String)` | 设置媒体源（URL） |
 | `setSourceFile(path: String)` | 设置本地文件 |
+| `setLoops(count: Int32)` | 设置循环次数（-1=无限循环） |
+| `loops(): Int32` | 获取循环次数 |
 
 **播放状态**:
 | 方法 | 说明 |
@@ -2493,6 +2704,7 @@ player.setPlaybackRate(1.5)  // 1.5倍速
 | `setPosition(pos: Int64)` | 设置播放位置 |
 | `playbackRate(): Float64` | 获取播放速度 |
 | `setPlaybackRate(rate: Float64)` | 设置播放速度 |
+| `delete()` | **必须调用** - 释放资源 |
 
 **媒体信息**:
 | 方法 | 说明 |
@@ -2590,6 +2802,9 @@ audioOutput.setMuted(true) // 静音
 if (audioOutput.isMuted()) {
     audioOutput.setMuted(false)
 }
+
+// 使用完毕后释放资源
+audioOutput.delete()
 ```
 
 **方法**:
@@ -2601,6 +2816,7 @@ if (audioOutput.isMuted()) {
 | `setMuted(muted: Bool)` | 设置静音 |
 | `isMuted(): Bool` | 是否静音 |
 | `getPtr(): Int64` | 获取指针 |
+| `delete()` | **必须调用** - 释放资源 |
 
 ---
 

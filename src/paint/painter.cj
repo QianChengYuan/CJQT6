@@ -6,42 +6,51 @@ package CJQT6.paint
 
 public class QColor {
     private var ptr: Int64 = 0
-    
+
     public init() {
         unsafe { ptr = qColorCreate() }
     }
-    
+
     public init(r: Int32, g: Int32, b: Int32) {
         unsafe { ptr = qColorCreateRgb(r, g, b, 255) }
     }
-    
-    public static func rgba(r: Int32, g: Int32, b: Int32, a: Int32): QColor {
-        let c = QColor()
-        unsafe { c.ptr = qColorCreateRgb(r, g, b, a) }
-        return c
+
+    // 私有构造函数 - 用于工厂方法
+    private init(ptr: Int64) {
+        this.ptr = ptr
     }
-    
+
+    public static func rgba(r: Int32, g: Int32, b: Int32, a: Int32): QColor {
+        unsafe { QColor(qColorCreateRgb(r, g, b, a)) }
+    }
+
     public static func fromName(name: String): QColor {
-        let c = QColor()
         unsafe {
             var cstr = LibC.mallocCString(name)
-            c.ptr = qColorFromName(cstr)
+            let c = QColor(qColorFromName(cstr))
             LibC.free(cstr)
+            c
         }
-        return c
     }
-    
+
     public func red(): Int32 { unsafe { qColorRed(ptr) } }
     public func green(): Int32 { unsafe { qColorGreen(ptr) } }
     public func blue(): Int32 { unsafe { qColorBlue(ptr) } }
     public func alpha(): Int32 { unsafe { qColorAlpha(ptr) } }
-    
+
     public func setRed(r: Int32): Unit { unsafe { qColorSetRed(ptr, r) } }
     public func setGreen(g: Int32): Unit { unsafe { qColorSetGreen(ptr, g) } }
     public func setBlue(b: Int32): Unit { unsafe { qColorSetBlue(ptr, b) } }
     public func setAlpha(a: Int32): Unit { unsafe { qColorSetAlpha(ptr, a) } }
-    
+
     public func getPtr(): Int64 { ptr }
+
+    public func delete(): Unit {
+        if (ptr != 0) {
+            unsafe { qColorDelete(ptr) }
+            ptr = 0
+        }
+    }
 }
 
 // 预定义颜色
@@ -101,20 +110,27 @@ public class ImageFormat {
 
 public class QPen {
     private var ptr: Int64 = 0
-    
+
     public init() {
         unsafe { ptr = qPenCreate() }
     }
-    
+
     public init(color: QColor) {
         unsafe { ptr = qPenCreateColor(color.getPtr()) }
     }
-    
+
     public func setColor(c: QColor): QPen { unsafe { qPenSetColor(ptr, c.getPtr()) }; this }
     public func setWidth(w: Int32): QPen { unsafe { qPenSetWidth(ptr, w) }; this }
     public func width(): Int32 { unsafe { qPenWidth(ptr) } }
     public func setStyle(s: Int32): QPen { unsafe { qPenSetStyle(ptr, s) }; this }
     public func getPtr(): Int64 { ptr }
+
+    public func delete(): Unit {
+        if (ptr != 0) {
+            unsafe { qPenDelete(ptr) }
+            ptr = 0
+        }
+    }
 }
 
 // ============================================================
@@ -123,22 +139,29 @@ public class QPen {
 
 public class QBrush {
     private var ptr: Int64 = 0
-    
+
     public init() {
         unsafe { ptr = qBrushCreate() }
     }
-    
+
     public init(color: QColor) {
         unsafe { ptr = qBrushCreateColor(color.getPtr()) }
     }
-    
+
     public init(gradient: QLinearGradient) {
         unsafe { ptr = qBrushCreateGradient(gradient.getPtr()) }
     }
-    
+
     public func setColor(c: QColor): QBrush { unsafe { qBrushSetColor(ptr, c.getPtr()) }; this }
     public func setStyle(s: Int32): QBrush { unsafe { qBrushSetStyle(ptr, s) }; this }
     public func getPtr(): Int64 { ptr }
+
+    public func delete(): Unit {
+        if (ptr != 0) {
+            unsafe { qBrushDelete(ptr) }
+            ptr = 0
+        }
+    }
 }
 
 // ============================================================
@@ -147,25 +170,32 @@ public class QBrush {
 
 public class QLinearGradient {
     private var ptr: Int64 = 0
-    
+
     public init(x1: Float32, y1: Float32, x2: Float32, y2: Float32) {
         unsafe { ptr = qLinearGradientCreate(x1, y1, x2, y2) }
     }
-    
+
     public static func fromInt(x1: Int32, y1: Int32, x2: Int32, y2: Int32): QLinearGradient {
         QLinearGradient(Float32(x1), Float32(y1), Float32(x2), Float32(y2))
     }
-    
-    public func setColorAt(pos: Float32, c: QColor): QLinearGradient { 
-        unsafe { qGradientSetColorAt(ptr, pos, c.getPtr()) }; this 
+
+    public func setColorAt(pos: Float32, c: QColor): QLinearGradient {
+        unsafe { qGradientSetColorAt(ptr, pos, c.getPtr()) }; this
     }
     public func getPtr(): Int64 { ptr }
+
+    public func delete(): Unit {
+        if (ptr != 0) {
+            unsafe { qLinearGradientDelete(ptr) }
+            ptr = 0
+        }
+    }
 }
 
 /// 径向渐变
 public class QRadialGradient {
     private var ptr: Int64 = 0
-    
+
     /// 创建径向渐变
     /// cx, cy: 圆心坐标
     /// radius: 半径
@@ -173,36 +203,50 @@ public class QRadialGradient {
     public init(cx: Float32, cy: Float32, radius: Float32, fx: Float32, fy: Float32) {
         unsafe { ptr = qRadialGradientCreate(cx, cy, radius, fx, fy) }
     }
-    
+
     public static func fromInt(cx: Int32, cy: Int32, radius: Int32, fx: Int32, fy: Int32): QRadialGradient {
         QRadialGradient(Float32(cx), Float32(cy), Float32(radius), Float32(fx), Float32(fy))
     }
-    
-    public func setColorAt(pos: Float32, c: QColor): QRadialGradient { 
-        unsafe { qGradientSetColorAt(ptr, pos, c.getPtr()) }; this 
+
+    public func setColorAt(pos: Float32, c: QColor): QRadialGradient {
+        unsafe { qGradientSetColorAt(ptr, pos, c.getPtr()) }; this
     }
     public func getPtr(): Int64 { ptr }
+
+    public func delete(): Unit {
+        if (ptr != 0) {
+            unsafe { qRadialGradientDelete(ptr) }
+            ptr = 0
+        }
+    }
 }
 
 /// 锥形渐变
 public class QConicalGradient {
     private var ptr: Int64 = 0
-    
+
     /// 创建锥形渐变
     /// cx, cy: 中心坐标
     /// angle: 起始角度(度)
     public init(cx: Float32, cy: Float32, angle: Float32) {
         unsafe { ptr = qConicalGradientCreate(cx, cy, angle) }
     }
-    
+
     public static func fromInt(cx: Int32, cy: Int32, angle: Int32): QConicalGradient {
         QConicalGradient(Float32(cx), Float32(cy), Float32(angle))
     }
-    
-    public func setColorAt(pos: Float32, c: QColor): QConicalGradient { 
-        unsafe { qGradientSetColorAt(ptr, pos, c.getPtr()) }; this 
+
+    public func setColorAt(pos: Float32, c: QColor): QConicalGradient {
+        unsafe { qGradientSetColorAt(ptr, pos, c.getPtr()) }; this
     }
     public func getPtr(): Int64 { ptr }
+
+    public func delete(): Unit {
+        if (ptr != 0) {
+            unsafe { qConicalGradientDelete(ptr) }
+            ptr = 0
+        }
+    }
 }
 
 // ============================================================
@@ -211,7 +255,7 @@ public class QConicalGradient {
 
 public class QFont {
     private var ptr: Int64 = 0
-    
+
     public init(family: String) {
         unsafe {
             var cstr = LibC.mallocCString(family)
@@ -219,7 +263,7 @@ public class QFont {
             LibC.free(cstr)
         }
     }
-    
+
     public init(family: String, pointSize: Int32) {
         unsafe {
             var cstr = LibC.mallocCString(family)
@@ -227,11 +271,18 @@ public class QFont {
             LibC.free(cstr)
         }
     }
-    
+
     public func setPointSize(n: Int32): QFont { unsafe { qFontSetPointSize(ptr, n) }; this }
     public func setBold(b: Bool): QFont { unsafe { qFontSetBold(ptr, if (b) { 1 } else { 0 }) }; this }
     public func setItalic(b: Bool): QFont { unsafe { qFontSetItalic(ptr, if (b) { 1 } else { 0 }) }; this }
     public func getPtr(): Int64 { ptr }
+
+    public func delete(): Unit {
+        if (ptr != 0) {
+            unsafe { qFontDelete(ptr) }
+            ptr = 0
+        }
+    }
 }
 
 // ============================================================
@@ -240,16 +291,16 @@ public class QFont {
 
 public class QPainterPath {
     private var ptr: Int64 = 0
-    
+
     public init() {
         unsafe { ptr = qPainterPathCreate() }
     }
-    
-    public func moveTo(x: Float32, y: Float32): QPainterPath { 
-        unsafe { qPainterPathMoveTo(ptr, x, y) }; this 
+
+    public func moveTo(x: Float32, y: Float32): QPainterPath {
+        unsafe { qPainterPathMoveTo(ptr, x, y) }; this
     }
-    public func lineTo(x: Float32, y: Float32): QPainterPath { 
-        unsafe { qPainterPathLineTo(ptr, x, y) }; this 
+    public func lineTo(x: Float32, y: Float32): QPainterPath {
+        unsafe { qPainterPathLineTo(ptr, x, y) }; this
     }
     public func addRect(x: Float32, y: Float32, w: Float32, h: Float32): QPainterPath {
         unsafe { qPainterPathAddRect(ptr, x, y, w, h) }; this
@@ -260,6 +311,13 @@ public class QPainterPath {
     public func closeSubpath(): QPainterPath { unsafe { qPainterPathCloseSubpath(ptr) }; this }
     public func isEmpty(): Bool { unsafe { qPainterPathIsEmpty(ptr) != 0 } }
     public func getPtr(): Int64 { ptr }
+
+    public func delete(): Unit {
+        if (ptr != 0) {
+            unsafe { qPainterPathDelete(ptr) }
+            ptr = 0
+        }
+    }
 }
 
 // ============================================================
@@ -268,51 +326,70 @@ public class QPainterPath {
 
 public class QPixmap {
     private var ptr: Int64 = 0
-    
+
     public init() {
         unsafe { ptr = qPixmapCreate() }
     }
-    
-    public static func withSize(w: Int32, h: Int32): QPixmap {
-        let p = QPixmap()
-        unsafe { p.ptr = qPixmapCreateSize(w, h) }
-        return p
+
+    // 私有构造函数 - 用于工厂方法
+    private init(ptr: Int64) {
+        this.ptr = ptr
     }
-    
+
+    public static func withSize(w: Int32, h: Int32): QPixmap {
+        unsafe { QPixmap(qPixmapCreateSize(w, h)) }
+    }
+
     public static func load(path: String): QPixmap {
-        let p = QPixmap()
         unsafe {
             var cstr = LibC.mallocCString(path)
-            p.ptr = qPixmapLoad(cstr)
+            let p = QPixmap(qPixmapLoad(cstr))
             LibC.free(cstr)
+            p
         }
-        return p
     }
-    
+
     public func width(): Int32 { unsafe { qPixmapWidth(ptr) } }
     public func height(): Int32 { unsafe { qPixmapHeight(ptr) } }
     public func isNull(): Bool { unsafe { qPixmapIsNull(ptr) != 0 } }
     public func fill(c: QColor): Unit { unsafe { qPixmapFill(ptr, c.getPtr()) } }
     public func getPtr(): Int64 { ptr }
+
+    public func delete(): Unit {
+        if (ptr != 0) {
+            unsafe { qPixmapDelete(ptr) }
+            ptr = 0
+        }
+    }
 }
 
 public class QImage {
     private var ptr: Int64 = 0
-    
+
     public init() {
         unsafe { ptr = qImageCreate() }
     }
-    
-    public static func withSize(w: Int32, h: Int32): QImage {
-        let i = QImage()
-        unsafe { i.ptr = qImageCreateSize(w, h, ImageFormat.ARGB32) }
-        return i
+
+    // 私有构造函数 - 用于工厂方法
+    private init(ptr: Int64) {
+        this.ptr = ptr
     }
-    
+
+    public static func withSize(w: Int32, h: Int32): QImage {
+        unsafe { QImage(qImageCreateSize(w, h, ImageFormat.ARGB32)) }
+    }
+
     public func width(): Int32 { unsafe { qImageWidth(ptr) } }
     public func height(): Int32 { unsafe { qImageHeight(ptr) } }
     public func isNull(): Bool { unsafe { qImageIsNull(ptr) != 0 } }
     public func getPtr(): Int64 { ptr }
+
+    public func delete(): Unit {
+        if (ptr != 0) {
+            unsafe { qImageDelete(ptr) }
+            ptr = 0
+        }
+    }
 }
 
 // ============================================================
@@ -331,13 +408,16 @@ public class QPainter {
         unsafe { ptr = qPainterCreate(device) }
     }
     
+    /// 私有构造函数 - 用于 fromPtr 创建
+    private init(ptr: Int64, owned: Bool) {
+        this.ptr = ptr
+        this.owned = owned
+    }
+    
     /// 从现有指针创建QPainter（不拥有指针，不负责释放）
     /// 用于paintEvent回调中接收现有的QPainter
     public static func fromPtr(ptr: Int64): QPainter {
-        let p = QPainter()
-        p.ptr = unsafe { qPainterFromPtr(ptr) }
-        p.owned = false
-        return p
+        QPainter(ptr, false)  // 直接使用私有构造函数，无泄漏
     }
     
     public func begin(device: Int64): Bool { unsafe { qPainterBegin(ptr, device) != 0 } }
@@ -429,6 +509,7 @@ foreign func qColorSetRed(p: Int64, v: Int32): Unit
 foreign func qColorSetGreen(p: Int64, v: Int32): Unit
 foreign func qColorSetBlue(p: Int64, v: Int32): Unit
 foreign func qColorSetAlpha(p: Int64, v: Int32): Unit
+foreign func qColorDelete(p: Int64): Unit
 
 foreign func qPenCreate(): Int64
 foreign func qPenCreateColor(c: Int64): Int64
@@ -436,22 +517,28 @@ foreign func qPenSetColor(p: Int64, c: Int64): Unit
 foreign func qPenSetWidth(p: Int64, w: Int32): Unit
 foreign func qPenWidth(p: Int64): Int32
 foreign func qPenSetStyle(p: Int64, s: Int32): Unit
+foreign func qPenDelete(p: Int64): Unit
 
 foreign func qBrushCreate(): Int64
 foreign func qBrushCreateColor(c: Int64): Int64
 foreign func qBrushCreateGradient(g: Int64): Int64
 foreign func qBrushSetColor(p: Int64, c: Int64): Unit
 foreign func qBrushSetStyle(p: Int64, s: Int32): Unit
+foreign func qBrushDelete(p: Int64): Unit
 
 foreign func qLinearGradientCreate(x1: Float32, y1: Float32, x2: Float32, y2: Float32): Int64
 foreign func qRadialGradientCreate(cx: Float32, cy: Float32, radius: Float32, fx: Float32, fy: Float32): Int64
 foreign func qConicalGradientCreate(cx: Float32, cy: Float32, angle: Float32): Int64
 foreign func qGradientSetColorAt(p: Int64, pos: Float32, c: Int64): Unit
+foreign func qLinearGradientDelete(p: Int64): Unit
+foreign func qRadialGradientDelete(p: Int64): Unit
+foreign func qConicalGradientDelete(p: Int64): Unit
 
 foreign func qFontCreate(f: CString, s: Int32, b: Int32, i: Int32): Int64
 foreign func qFontSetPointSize(p: Int64, s: Int32): Unit
 foreign func qFontSetBold(p: Int64, b: Int32): Unit
 foreign func qFontSetItalic(p: Int64, i: Int32): Unit
+foreign func qFontDelete(p: Int64): Unit
 
 foreign func qPainterCreate(d: Int64): Int64
 foreign func qPainterFromPtr(ptr: Int64): Int64
@@ -490,6 +577,7 @@ foreign func qPainterPathAddRect(p: Int64, x: Float32, y: Float32, w: Float32, h
 foreign func qPainterPathAddEllipse(p: Int64, x: Float32, y: Float32, w: Float32, h: Float32): Unit
 foreign func qPainterPathCloseSubpath(p: Int64): Unit
 foreign func qPainterPathIsEmpty(p: Int64): Int32
+foreign func qPainterPathDelete(p: Int64): Unit
 foreign func qPainterDrawPath(p: Int64, path: Int64): Unit
 foreign func qPainterFillPath(p: Int64, path: Int64, b: Int64): Unit
 
@@ -500,9 +588,11 @@ foreign func qPixmapWidth(p: Int64): Int32
 foreign func qPixmapHeight(p: Int64): Int32
 foreign func qPixmapIsNull(p: Int64): Int32
 foreign func qPixmapFill(p: Int64, c: Int64): Unit
+foreign func qPixmapDelete(p: Int64): Unit
 
 foreign func qImageCreate(): Int64
 foreign func qImageCreateSize(w: Int32, h: Int32, fmt: Int32): Int64
 foreign func qImageWidth(p: Int64): Int32
 foreign func qImageHeight(p: Int64): Int32
 foreign func qImageIsNull(p: Int64): Int32
+foreign func qImageDelete(p: Int64): Unit

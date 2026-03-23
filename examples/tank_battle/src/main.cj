@@ -55,6 +55,8 @@ var gWidget: ?QEventWidget = None
 var gTimer: ?QTimer = None
 var gRenderer: ?GameRenderer = None
 var gRandom: Random = Random()
+var gAudioOutput: ?QAudioOutput = None
+var gMusicPlayer: ?QMediaPlayer = None
 
 // ============================================================
 // 方向常量
@@ -304,14 +306,14 @@ func spawnEnemies(): Unit {
 
 func updateBullets(): Unit {
     let toRemove = ArrayList<Int64>()
-    
+
     for (i in 0..gBullets.size) {
         let (x, y, dir, active, isPlayer) = gBullets[i]
         if (!active) {
             toRemove.add(i)
             continue
         }
-        
+
         var newX = x
         var newY = y
         match (dir) {
@@ -321,19 +323,19 @@ func updateBullets(): Unit {
             case 3 => newX = x + BULLET_SPEED
             case _ => ()
         }
-        
+
         // 出界检查
         if (newX < 0 || newX > WINDOW_WIDTH || newY < 0 || newY > WINDOW_HEIGHT) {
             gBullets[i] = (newX, newY, dir, false, isPlayer)
             toRemove.add(i)
             continue
         }
-        
+
         // 地图碰撞
         let tileX = Int64(newX / Int32(TILE_SIZE))
         let tileY = Int64(newY / Int32(TILE_SIZE))
         var bulletActive = true
-        
+
         if (tileX >= 0 && tileX < MAP_WIDTH && tileY >= 0 && tileY < MAP_HEIGHT) {
             let tile = gMap[tileY][tileX]
             if (tile == TILE_BRICK) {
@@ -350,7 +352,7 @@ func updateBullets(): Unit {
                 gExplosions.add((newX, newY, 0, true))
             }
         }
-        
+
         // 坦克碰撞
         if (bulletActive) {
             let ts = Int32(TILE_SIZE)
@@ -382,16 +384,18 @@ func updateBullets(): Unit {
                 }
             }
         }
-        
+
         gBullets[i] = (newX, newY, dir, bulletActive, isPlayer)
         if (!bulletActive) {
             toRemove.add(i)
         }
     }
-    
+
     // 移除无效子弹（倒序删除）
-    for (i in toRemove.size - 1..=0) {
-        gBullets.remove(at: toRemove[i])
+    if (!toRemove.isEmpty()) {
+        for (i in toRemove.size - 1..=0) {
+            gBullets.remove(at: toRemove[i])
+        }
     }
 }
 
@@ -413,9 +417,11 @@ func updateExplosions(): Unit {
             gExplosions[i] = (x, y, newFrame, true)
         }
     }
-    
-    for (i in toRemove.size - 1..=0) {
-        gExplosions.remove(at: toRemove[i])
+
+    if (!toRemove.isEmpty()) {
+        for (i in toRemove.size - 1..=0) {
+            gExplosions.remove(at: toRemove[i])
+        }
     }
 }
 
@@ -436,8 +442,10 @@ func checkGameState(): Unit {
             toRemove.add(i)
         }
     }
-    for (i in toRemove.size - 1..=0) {
-        gEnemies.remove(at: toRemove[i])
+    if (!toRemove.isEmpty()) {
+        for (i in toRemove.size - 1..=0) {
+            gEnemies.remove(at: toRemove[i])
+        }
     }
     
     // 检查通关
@@ -741,6 +749,24 @@ main() {
     gWidget = QEventWidget()
     gTimer = QTimer()
     gRenderer = GameRenderer()
+    
+    // 初始化音频播放器
+    gAudioOutput = QAudioOutput()
+    gMusicPlayer = QMediaPlayer()
+    
+    if (let Some(audio) <- gAudioOutput) {
+        audio.setVolume(0.5f32)  // 50% 音量
+    }
+    
+    if (let Some(player) <- gMusicPlayer) {
+        if (let Some(audio) <- gAudioOutput) {
+            player.setAudioOutput(audio)
+        }
+        // 尝试加载背景音乐（需要将音乐文件放在可执行文件同目录）
+        player.setSourceFile("background.mp3")
+        player.setLoops(-1)  // 无限循环
+        player.play()
+    }
     
     initMap()
     

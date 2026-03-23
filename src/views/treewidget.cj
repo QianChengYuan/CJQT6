@@ -92,12 +92,7 @@ public class QTreeWidgetItem {
     
     // 从指针创建（不拥有所有权）
     public static func fromPtr(ptr: Int64): QTreeWidgetItem {
-        let item = QTreeWidgetItem()
-        // 替换内部指针
-        unsafe {
-            // 释放之前创建的
-        }
-        return QTreeWidgetItem.__fromPtr(ptr)
+        QTreeWidgetItem(ptr, ())  // 直接使用私有构造函数，无泄漏
     }
     
     // 内部构造函数

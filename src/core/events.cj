@@ -21,6 +21,13 @@ foreign func qEventWidgetSetOnKeyRelease(ptr: Int64, callback: CFunc<(Int32, Int
 // 绘制事件回调 (painterPtr)
 foreign func qEventWidgetSetOnPaint(ptr: Int64, callback: CFunc<(Int64) -> Unit>): Unit
 foreign func qEventWidgetClearPaintCallback(ptr: Int64): Unit
+foreign func qEventWidgetClearMousePressCallback(ptr: Int64): Unit
+foreign func qEventWidgetClearMouseMoveCallback(ptr: Int64): Unit
+foreign func qEventWidgetClearMouseReleaseCallback(ptr: Int64): Unit
+foreign func qEventWidgetClearKeyPressCallback(ptr: Int64): Unit
+foreign func qEventWidgetClearKeyReleaseCallback(ptr: Int64): Unit
+foreign func qEventWidgetClearAllCallbacks(ptr: Int64): Unit
+foreign func qEventWidgetSetFocus(ptr: Int64): Unit
 
 // 鼠标按钮常量
 foreign func qMouseButtonLeft(): Int32
@@ -229,6 +236,7 @@ public class QEventWidget {
     public func delete() {
         if (ptr != 0) {
             unsafe {
+                qEventWidgetClearAllCallbacks(ptr)
                 qEventWidgetDelete(ptr)
             }
             ptr = 0
@@ -240,6 +248,7 @@ public class QEventWidget {
     public func show() {
         unsafe {
             qWidgetShow(ptr)
+            // qEventWidgetSetFocus(ptr)  // 暂时禁用以测试
         }
     }
     
@@ -333,6 +342,48 @@ public class QEventWidget {
     public func clearPaintCallback(): Unit {
         unsafe {
             qEventWidgetClearPaintCallback(ptr)
+        }
+    }
+
+    // 清除鼠标按下回调
+    public func clearMousePressCallback(): Unit {
+        unsafe {
+            qEventWidgetClearMousePressCallback(ptr)
+        }
+    }
+
+    // 清除鼠标移动回调
+    public func clearMouseMoveCallback(): Unit {
+        unsafe {
+            qEventWidgetClearMouseMoveCallback(ptr)
+        }
+    }
+
+    // 清除鼠标释放回调
+    public func clearMouseReleaseCallback(): Unit {
+        unsafe {
+            qEventWidgetClearMouseReleaseCallback(ptr)
+        }
+    }
+
+    // 清除键盘按下回调
+    public func clearKeyPressCallback(): Unit {
+        unsafe {
+            qEventWidgetClearKeyPressCallback(ptr)
+        }
+    }
+
+    // 清除键盘释放回调
+    public func clearKeyReleaseCallback(): Unit {
+        unsafe {
+            qEventWidgetClearKeyReleaseCallback(ptr)
+        }
+    }
+
+    // 清除所有回调
+    public func clearAllCallbacks(): Unit {
+        unsafe {
+            qEventWidgetClearAllCallbacks(ptr)
         }
     }
     

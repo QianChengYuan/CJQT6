@@ -18,7 +18,9 @@ foreign func qFileDialogGetOpenFileNames(parentPtr: Int64, title: CString, filte
 
 // QInputDialog (简化版，直接返回值)
 foreign func qInputDialogGetTextValue(parentPtr: Int64, title: CString, label: CString, text: CString): CString
+foreign func qInputDialogGetTextWithOk(parentPtr: Int64, title: CString, label: CString, text: CString, okPtr: CPointer<Int32>): CString
 foreign func qInputDialogGetIntValue(parentPtr: Int64, title: CString, label: CString, value: Int32, min: Int32, max: Int32): Int32
+foreign func qInputDialogGetIntWithOk(parentPtr: Int64, title: CString, label: CString, value: Int32, min: Int32, max: Int32, okPtr: CPointer<Int32>): Int32
 foreign func qInputDialogGetDoubleValue(parentPtr: Int64, title: CString, label: CString, value: Float64, min: Float64, max: Float64): Float64
 
 // QColorDialog
@@ -159,6 +161,26 @@ public class QInputDialog {
         }
     }
     
+    // 获取文本输入并返回确认状态 (推荐使用)
+    // 返回元组 (文本, 是否确认)，可以区分"取消"和"输入空字符串"
+    public static func getTextWithResult(parent: Int64, title: String, label: String, defaultText: String): (String, Bool) {
+        unsafe {
+            var titleCstr = LibC.mallocCString(title)
+            var labelCstr = LibC.mallocCString(label)
+            var textCstr = LibC.mallocCString(defaultText)
+            
+            var okValue: Int32 = 0
+            let cstr = qInputDialogGetTextWithOk(parent, titleCstr, labelCstr, textCstr, inout okValue)
+            let result = cstr.toString()
+            
+            LibC.free(titleCstr)
+            LibC.free(labelCstr)
+            LibC.free(textCstr)
+            
+            return (result, okValue != 0)
+        }
+    }
+    
     // 获取整数输入 (返回Int32最小值表示取消)
     public static func getInt(parent: Int64, title: String, label: String, value: Int32, min: Int32, max: Int32): Int32 {
         unsafe {
@@ -171,6 +193,22 @@ public class QInputDialog {
             LibC.free(labelCstr)
             
             return result
+        }
+    }
+    
+    // 获取整数输入（返回元组，可区分取消）
+    public static func getIntWithResult(parent: Int64, title: String, label: String, value: Int32, min: Int32, max: Int32): (Int32, Bool) {
+        unsafe {
+            var titleCstr = LibC.mallocCString(title)
+            var labelCstr = LibC.mallocCString(label)
+            var okValue: Int32 = 0
+            
+            let result = qInputDialogGetIntWithOk(parent, titleCstr, labelCstr, value, min, max, inout okValue)
+            
+            LibC.free(titleCstr)
+            LibC.free(labelCstr)
+            
+            return (result, okValue != 0)
         }
     }
     

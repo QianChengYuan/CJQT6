@@ -69,6 +69,10 @@ var positionTimer: ?QTimer = None
 var isUpdatingSlider: Bool = false  // 防止 slider 更新循环
 let randomGen: Random = Random()
 
+// 自定义图标路径
+var iconFolder: String = ""
+var useCustomIcons: Bool = false
+
 // UI组件
 var titleLabel: ?QLabel = None
 var artistLabel: ?QLabel = None
@@ -76,10 +80,70 @@ var timeLabel: ?QLabel = None
 var progressSlider: ?QSlider = None
 var volumeSlider: ?QSlider = None
 var playButton: ?QPushButton = None
+var prevButton: ?QPushButton = None
+var stopButton: ?QPushButton = None
+var nextButton: ?QPushButton = None
+var muteButton: ?QPushButton = None
 var playModeButton: ?QPushButton = None
 var speedLabel: ?QLabel = None
 var playlistWidget: ?QListWidget = None
 var statusLabel: ?QLabel = None
+
+// ============================================================
+// 图标辅助函数
+// ============================================================
+
+func setButtonIcon(btn: QPushButton, iconName: String, stdIcon: Int32) {
+    if (useCustomIcons && !iconFolder.isEmpty()) {
+        // 尝试加载自定义图标
+        let iconPath = "${iconFolder}/${iconName}.png"
+        try {
+            if (exists(Path(iconPath))) {
+                btn.setIcon(iconPath)
+                return
+            }
+        } catch (e: Exception) {
+            // 忽略错误，使用标准图标
+        }
+    }
+    // 使用标准图标
+    btn.setStandardIcon(stdIcon)
+}
+
+func loadCustomIcons() {
+    // 设置各按钮图标
+    if (let Some(btn) <- prevButton) {
+        setButtonIcon(btn, "prev", StandardIcon.MediaSkipBackward)
+    }
+    if (let Some(btn) <- playButton) {
+        setButtonIcon(btn, if (isPlaying) { "pause" } else { "play" }, 
+            if (isPlaying) { StandardIcon.MediaPause } else { StandardIcon.MediaPlay })
+    }
+    if (let Some(btn) <- stopButton) {
+        setButtonIcon(btn, "stop", StandardIcon.MediaStop)
+    }
+    if (let Some(btn) <- nextButton) {
+        setButtonIcon(btn, "next", StandardIcon.MediaSkipForward)
+    }
+    if (let Some(btn) <- muteButton) {
+        setButtonIcon(btn, "mute", StandardIcon.No)  // 使用 No 作为静音图标
+    }
+}
+
+func setIconFolder(path: String) {
+    iconFolder = path
+    useCustomIcons = !path.isEmpty()
+    loadCustomIcons()
+    updateStatus(if (useCustomIcons) { "已加载自定义图标: ${path}" } else { "使用标准图标" })
+}
+
+func chooseIconFolder() {
+    let parentPtr = if (let Some(w) <- mainWindow) { w.getPtr() } else { 0 }
+    let folder = QFileDialog.getExistingDirectory(parentPtr, "选择图标文件夹")
+    if (!folder.isEmpty()) {
+        setIconFolder(folder)
+    }
+}
 
 // ============================================================
 // 辅助函数
@@ -99,30 +163,31 @@ func formatTime(ms: Int64): String {
 func updateUI() {
     if (let Some(lbl) <- titleLabel) {
         if (let Some(item) <- getCurrentItem()) {
-            lbl.setText("<h2>${item.title}</h2>")
+            lbl.setText("<font size='4' color='#0066cc'><b>${item.title}</b></font>")
         } else {
-            lbl.setText("<h2>未选择音乐</h2>")
+            lbl.setText("<font size='4' color='#0066cc'><b>欢迎使用千千静听</b></font>")
         }
     }
     
     if (let Some(lbl) <- artistLabel) {
         if (let Some(item) <- getCurrentItem()) {
-            lbl.setText(item.artist)
+            lbl.setText("<font color='#666666'>${item.artist}</font>")
         } else {
-            lbl.setText("")
+            lbl.setText("<font color='#666666'>双击列表开始播放</font>")
         }
     }
     
+    // 播放按钮图标切换
     if (let Some(btn) <- playButton) {
         if (isPlaying) {
-            btn.setText("暂停")
+            btn.setStandardIcon(StandardIcon.MediaPause)
         } else {
-            btn.setText("播放")
+            btn.setStandardIcon(StandardIcon.MediaPlay)
         }
     }
     
     if (let Some(lbl) <- speedLabel) {
-        lbl.setText("速度: ${currentSpeed}x")
+        lbl.setText("${currentSpeed}x")
     }
     
     updatePlayModeButton()
@@ -131,10 +196,10 @@ func updateUI() {
 func updatePlayModeButton() {
     if (let Some(btn) <- playModeButton) {
         match (playMode) {
-            case PlayMode.Sequential => btn.setText("顺序")
-            case PlayMode.Loop => btn.setText("循环")
-            case PlayMode.LoopOne => btn.setText("单曲")
-            case PlayMode.Random => btn.setText("随机")
+            case PlayMode.Sequential => btn.setText(">")
+            case PlayMode.Loop => btn.setText("O")
+            case PlayMode.LoopOne => btn.setText("1")
+            case PlayMode.Random => btn.setText("?")
         }
     }
 }
@@ -641,6 +706,8 @@ let onExit: VoidCallback = { =>
     QApp.quit()
 }
 let onAbout: VoidCallback = { => about() }
+let onChooseIconFolder: VoidCallback = { => chooseIconFolder() }
+let onResetIcons: VoidCallback = { => setIconFolder("") }
 
 // ============================================================
 // 主函数
@@ -670,133 +737,192 @@ main(): Int32 {
     
     // 创建主窗口
     let window = QWidget()
-    window.setTitle("音乐播放器")
-    window.resize(700, 550)
+    window.setTitle("千千静听 - CJQT版")
+    window.resize(380, 520)
     mainWindow = window
+    
+    // 千千静听经典风格样式
+    window.setStyleSheet("QWidget { background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #e8f4fc, stop:1 #d0e8f8); color: #333; font-family: 'Microsoft YaHei', 'SimSun', sans-serif; font-size: 12px; } QLabel { background: transparent; color: #333; } QPushButton { background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #f8f8f8, stop:1 #e0e0e0); border: 1px solid #aaa; border-radius: 3px; padding: 5px 10px; color: #333; } QPushButton:hover { background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #fff, stop:1 #f0f0f0); border-color: #6699cc; } QPushButton:pressed { background: #c0d8f0; } QSlider::groove:horizontal { height: 6px; background: #c0c0c0; border-radius: 3px; } QSlider::handle:horizontal { width: 12px; height: 12px; margin: -3px 0; background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #fff, stop:1 #ddd); border: 1px solid #999; border-radius: 6px; } QSlider::sub-page:horizontal { background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #4a90d9, stop:1 #7eb8f0); border-radius: 3px; } QListWidget { background: #fff; border: 1px solid #aaa; border-radius: 3px; } QListWidget::item { padding: 3px 5px; } QListWidget::item:selected { background: #c0d8f0; color: #000; } QListWidget::item:hover { background: #e0f0ff; } QMenuBar { background: transparent; } QMenuBar::item { padding: 3px 8px; } QMenu { background: #fff; border: 1px solid #aaa; } QMenu::item { padding: 5px 20px; } QMenu::item:selected { background: #c0d8f0; }")
     
     // 主布局
     let mainLayout = QVBoxLayout()
-    mainLayout.setSpacing(10)
-    mainLayout.setMargin(15)
+    mainLayout.setSpacing(8)
+    mainLayout.setMargin(10)
     
-    // ========== 信息显示区域 ==========
-    let infoWidget = QWidget()
-    let infoLayout = QVBoxLayout()
+    // ========== 菜单栏（顶部） ==========
+    let menuBar = QMenuBar()
     
+    let fileMenu = menuBar.addMenu("文件")
+    let addFilesAction = fileMenu.addAction("添加文件")
+    addFilesAction.setShortcut("Ctrl+O")
+    addFilesAction.setOnTriggered(onAddFiles)
+    let addFolderAction = fileMenu.addAction("添加目录")
+    addFolderAction.setOnTriggered(onAddFolder)
+    fileMenu.addSeparator()
+    let exitAction = fileMenu.addAction("退出")
+    exitAction.setOnTriggered(onExit)
+    
+    let playMenu = menuBar.addMenu("播放")
+    let playAction = playMenu.addAction("播放/暂停")
+    playAction.setShortcut("Space")
+    playAction.setOnTriggered(onTogglePlay)
+    let stopAction = playMenu.addAction("停止")
+    stopAction.setOnTriggered(onStop)
+    playMenu.addSeparator()
+    let prevAction = playMenu.addAction("上一曲")
+    prevAction.setShortcut("Left")
+    prevAction.setOnTriggered(onPrev)
+    let nextAction = playMenu.addAction("下一曲")
+    nextAction.setShortcut("Right")
+    nextAction.setOnTriggered(onNext)
+    playMenu.addSeparator()
+    let modeAction = playMenu.addAction("播放模式")
+    modeAction.setOnTriggered(onChangePlayMode)
+    
+    // 设置菜单
+    let settingsMenu = menuBar.addMenu("设置")
+    let iconFolderAction = settingsMenu.addAction("图标文件夹...")
+    iconFolderAction.setOnTriggered(onChooseIconFolder)
+    let resetIconsAction = settingsMenu.addAction("重置为标准图标")
+    resetIconsAction.setOnTriggered(onResetIcons)
+    
+    let helpMenu = menuBar.addMenu("帮助")
+    let aboutAction = helpMenu.addAction("关于")
+    aboutAction.setOnTriggered(onAbout)
+    
+    mainLayout.addWidget(menuBar.getPtr())
+    
+    // ========== 歌曲信息区域 ==========
     let title = QLabel()
-    title.setText("<h2>未选择音乐</h2>")
-    title.setAlignment(0x04 | 0x01)  // AlignHCenter | AlignVCenter
+    title.setText("<font size='4' color='#0066cc'><b>欢迎使用千千静听</b></font>")
+    title.setAlignment(0x04 | 0x01)
     titleLabel = title
-    infoLayout.addWidget(title.getPtr())
+    mainLayout.addWidget(title.getPtr())
     
     let artist = QLabel()
-    artist.setText("")
-    artist.setAlignment(0x04)  // AlignHCenter
+    artist.setText("<font color='#666666'>双击列表开始播放</font>")
+    artist.setAlignment(0x04)
     artistLabel = artist
-    infoLayout.addWidget(artist.getPtr())
+    mainLayout.addWidget(artist.getPtr())
     
-    infoWidget.setLayout(infoLayout.getPtr())
-    mainLayout.addWidget(infoWidget.getPtr())
+    // ========== 歌词显示区域（预留） ==========
+    let lyricWidget = QWidget()
+    lyricWidget.setStyleSheet("background: #fff; border: 1px solid #aaa; border-radius: 3px;")
+    let lyricLayout = QVBoxLayout()
+    let lyricLabel = QLabel()
+    lyricLabel.setText("<font color='#999999'>&lt;歌词显示区域&gt;</font>")
+    lyricLabel.setAlignment(0x04 | 0x01)
+    lyricLayout.addWidget(lyricLabel.getPtr())
+    lyricWidget.setLayout(lyricLayout.getPtr())
+    mainLayout.addWidget(lyricWidget.getPtr())
     
     // ========== 进度条区域 ==========
     let progressWidget = QWidget()
-    let progressLayout = QHBoxLayout()
-    
-    let time = QLabel()
-    time.setText("0:00 / 0:00")
-    timeLabel = time
-    progressLayout.addWidget(time.getPtr())
+    progressWidget.setStyleSheet("background: transparent;")
+    let progressLayout = QVBoxLayout()
+    progressLayout.setSpacing(2)
     
     let slider = QSlider()
-    slider.setOrientation(0x01)  // Horizontal
+    slider.setOrientation(0x01)
     slider.setRange(0, 100)
     slider.setValue(0)
     slider.setOnValueChanged({ pos => setPosition(pos) })
     progressSlider = slider
     progressLayout.addWidget(slider.getPtr())
     
+    let time = QLabel()
+    time.setText("00:00 / 00:00")
+    time.setAlignment(0x04)
+    timeLabel = time
+    progressLayout.addWidget(time.getPtr())
+    
     progressWidget.setLayout(progressLayout.getPtr())
     mainLayout.addWidget(progressWidget.getPtr())
     
     // ========== 控制按钮区域 ==========
     let controlWidget = QWidget()
+    controlWidget.setStyleSheet("background: transparent;")
     let controlLayout = QHBoxLayout()
+    controlLayout.setSpacing(5)
     
-    // 上一曲
+    // 上一曲 - 使用标准图标
     let prevBtn = QPushButton()
-    prevBtn.setText("上一曲")
+    prevBtn.setStandardIcon(StandardIcon.MediaSkipBackward)
+    prevBtn.setIconSize(24, 24)
     prevBtn.setOnClick(onPrev)
+    prevButton = prevBtn
     controlLayout.addWidget(prevBtn.getPtr())
     
-    // 播放/暂停
+    // 播放/暂停 - 主按钮（切换状态）
     let playBtn = QPushButton()
-    playBtn.setText("播放")
+    playBtn.setStandardIcon(StandardIcon.MediaPlay)
+    playBtn.setIconSize(28, 28)
+    playBtn.setStyleSheet("min-width: 50px; min-height: 40px;")
     playBtn.setOnClick(onTogglePlay)
     playButton = playBtn
     controlLayout.addWidget(playBtn.getPtr())
     
     // 停止
     let stopBtn = QPushButton()
-    stopBtn.setText("停止")
+    stopBtn.setStandardIcon(StandardIcon.MediaStop)
+    stopBtn.setIconSize(24, 24)
     stopBtn.setOnClick(onStop)
+    stopButton = stopBtn
     controlLayout.addWidget(stopBtn.getPtr())
     
     // 下一曲
     let nextBtn = QPushButton()
-    nextBtn.setText("下一曲")
+    nextBtn.setStandardIcon(StandardIcon.MediaSkipForward)
+    nextBtn.setIconSize(24, 24)
     nextBtn.setOnClick(onNext)
+    nextButton = nextBtn
     controlLayout.addWidget(nextBtn.getPtr())
     
     // 播放模式
     let modeBtn = QPushButton()
-    modeBtn.setText("顺序")
+    modeBtn.setText(">")
+    modeBtn.setStyleSheet("min-width: 30px;")
     modeBtn.setOnClick(onChangePlayMode)
     playModeButton = modeBtn
     controlLayout.addWidget(modeBtn.getPtr())
     
     // 速度
     let speedBtn = QPushButton()
-    speedBtn.setText("速度")
+    speedBtn.setText("x1")
+    speedBtn.setStyleSheet("min-width: 30px;")
     speedBtn.setOnClick(onChangeSpeed)
     controlLayout.addWidget(speedBtn.getPtr())
     
-    let speed = QLabel()
-    speed.setText("速度: 1.0x")
-    speedLabel = speed
-    controlLayout.addWidget(speed.getPtr())
+    // 分隔
+    let sepLabel = QLabel()
+    sepLabel.setText("  ")
+    controlLayout.addWidget(sepLabel.getPtr())
     
-    controlWidget.setLayout(controlLayout.getPtr())
-    mainLayout.addWidget(controlWidget.getPtr())
-    
-    // ========== 音量控制区域 ==========
-    let volumeWidget = QWidget()
-    let volumeLayout = QHBoxLayout()
-    
-    let volumeIcon = QLabel()
-    volumeIcon.setText("音量:")
-    volumeLayout.addWidget(volumeIcon.getPtr())
+    // 音量图标
+    let volLabel = QLabel()
+    volLabel.setText("Vol:")
+    controlLayout.addWidget(volLabel.getPtr())
     
     let volSlider = QSlider()
-    volSlider.setOrientation(0x01)  // Horizontal
+    volSlider.setOrientation(0x01)
     volSlider.setRange(0, 100)
     volSlider.setValue(70)
     volSlider.setOnValueChanged({ value => setVolume(value) })
     volumeSlider = volSlider
-    volumeLayout.addWidget(volSlider.getPtr())
+    controlLayout.addWidget(volSlider.getPtr())
     
+    // 静音
     let muteBtn = QPushButton()
-    muteBtn.setText("静音")
+    muteBtn.setText("M")
+    muteBtn.setStyleSheet("min-width: 25px;")
     muteBtn.setOnClick(onToggleMute)
-    volumeLayout.addWidget(muteBtn.getPtr())
+    muteButton = muteBtn
+    controlLayout.addWidget(muteBtn.getPtr())
     
-    volumeWidget.setLayout(volumeLayout.getPtr())
-    mainLayout.addWidget(volumeWidget.getPtr())
+    controlWidget.setLayout(controlLayout.getPtr())
+    mainLayout.addWidget(controlWidget.getPtr())
     
     // ========== 播放列表 ==========
-    let listLabel = QLabel()
-    listLabel.setText("播放列表:")
-    mainLayout.addWidget(listLabel.getPtr())
-    
     let listWidget = QListWidget()
     listWidget.setOnItemDoubleClicked({ row => onPlaylistDoubleClicked(row) })
     playlistWidget = listWidget
@@ -804,95 +930,48 @@ main(): Int32 {
     
     // ========== 列表操作按钮 ==========
     let listBtnWidget = QWidget()
+    listBtnWidget.setStyleSheet("background: transparent;")
     let listBtnLayout = QHBoxLayout()
+    listBtnLayout.setSpacing(5)
     
     let addFilesBtn = QPushButton()
-    addFilesBtn.setText("添加文件")
+    addFilesBtn.setText("+ 添加")
     addFilesBtn.setOnClick(onAddFiles)
     listBtnLayout.addWidget(addFilesBtn.getPtr())
     
     let addFolderBtn = QPushButton()
-    addFolderBtn.setText("添加文件夹")
+    addFolderBtn.setText("+ 目录")
     addFolderBtn.setOnClick(onAddFolder)
     listBtnLayout.addWidget(addFolderBtn.getPtr())
     
     let removeBtn = QPushButton()
-    removeBtn.setText("移除选中")
+    removeBtn.setText("- 移除")
     removeBtn.setOnClick(onRemoveSelected)
     listBtnLayout.addWidget(removeBtn.getPtr())
     
     let clearBtn = QPushButton()
-    clearBtn.setText("清空列表")
+    clearBtn.setText("清空")
     clearBtn.setOnClick(onClearPlaylist)
     listBtnLayout.addWidget(clearBtn.getPtr())
+    
+    let speedBtn2 = QPushButton()
+    speedBtn2.setText("速度")
+    speedBtn2.setOnClick(onChangeSpeed)
+    listBtnLayout.addWidget(speedBtn2.getPtr())
+    
+    let speed = QLabel()
+    speed.setText("1.0x")
+    speedLabel = speed
+    listBtnLayout.addWidget(speed.getPtr())
     
     listBtnWidget.setLayout(listBtnLayout.getPtr())
     mainLayout.addWidget(listBtnWidget.getPtr())
     
     // ========== 状态栏 ==========
     let status = QLabel()
-    status.setText("就绪 - 点击\"添加文件\"添加音乐")
+    status.setText("就绪 - 点击「添加」添加音乐文件")
     statusLabel = status
     mainLayout.addWidget(status.getPtr())
-    
-    // ========== 菜单栏 ==========
-    let menuBar = QMenuBar()
-    
-    // 文件菜单
-    let fileMenu = menuBar.addMenu("文件(&F)")
-    
-    let addFilesAction = fileMenu.addAction("添加文件(&A)")
-    addFilesAction.setShortcut("Ctrl+O")
-    addFilesAction.setOnTriggered(onAddFiles)
-    
-    let addFolderAction = fileMenu.addAction("添加文件夹(&D)")
-    addFolderAction.setShortcut("Ctrl+Shift+O")
-    addFolderAction.setOnTriggered(onAddFolder)
-    
-    fileMenu.addSeparator()
-    
-    let exitAction = fileMenu.addAction("退出(&X)")
-    exitAction.setShortcut("Alt+F4")
-    exitAction.setOnTriggered(onExit)
-    
-    // 播放菜单
-    let playMenu = menuBar.addMenu("播放(&P)")
-    
-    let playAction = playMenu.addAction("播放/暂停(&P)")
-    playAction.setShortcut("Space")
-    playAction.setOnTriggered(onTogglePlay)
-    
-    let stopAction = playMenu.addAction("停止(&S)")
-    stopAction.setShortcut("Ctrl+S")
-    stopAction.setOnTriggered(onStop)
-    
-    playMenu.addSeparator()
-    
-    let prevAction = playMenu.addAction("上一曲(&P)")
-    prevAction.setShortcut("Ctrl+Left")
-    prevAction.setOnTriggered(onPrev)
-    
-    let nextAction = playMenu.addAction("下一曲(&N)")
-    nextAction.setShortcut("Ctrl+Right")
-    nextAction.setOnTriggered(onNext)
-    
-    playMenu.addSeparator()
-    
-    let modeAction = playMenu.addAction("切换播放模式(&M)")
-    modeAction.setShortcut("Ctrl+M")
-    modeAction.setOnTriggered(onChangePlayMode)
-    
-    let speedAction = playMenu.addAction("切换播放速度(&R)")
-    speedAction.setShortcut("Ctrl+R")
-    speedAction.setOnTriggered(onChangeSpeed)
-    
-    // 帮助菜单
-    let helpMenu = menuBar.addMenu("帮助(&H)")
-    
-    let aboutAction = helpMenu.addAction("关于(&A)")
-    aboutAction.setOnTriggered(onAbout)
-    
-    mainLayout.addWidget(menuBar.getPtr())
     
     window.setLayout(mainLayout.getPtr())
     window.show()

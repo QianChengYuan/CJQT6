@@ -102,6 +102,20 @@ const char* qInputDialogGetTextValue(int64_t parentPtr, const char* title, const
     return safeCopyString(QString()); // 空字符串表示取消
 }
 
+// 返回文本并通过 ok 指针返回确认状态
+const char* qInputDialogGetTextWithOk(int64_t parentPtr, const char* title, const char* label, const char* text, int32_t* okPtr) {
+    QWidget* parent = reinterpret_cast<QWidget*>(parentPtr);
+    bool ok = false;
+    QString input = QInputDialog::getText(parent, QString::fromUtf8(title), 
+                                           QString::fromUtf8(label), 
+                                           QLineEdit::Normal,
+                                           QString::fromUtf8(text), &ok);
+    if (okPtr != nullptr) {
+        *okPtr = ok ? 1 : 0;
+    }
+    return safeCopyString(input);
+}
+
 int32_t qInputDialogGetIntValue(int64_t parentPtr, const char* title, const char* label, int32_t value, int32_t min, int32_t max) {
     QWidget* parent = reinterpret_cast<QWidget*>(parentPtr);
     bool ok = false;
@@ -112,6 +126,16 @@ int32_t qInputDialogGetIntValue(int64_t parentPtr, const char* title, const char
         return input;
     }
     return std::numeric_limits<int32_t>::min(); // 返回最小值表示取消
+}
+
+int32_t qInputDialogGetIntWithOk(int64_t parentPtr, const char* title, const char* label, int32_t value, int32_t min, int32_t max, int32_t* ok) {
+    QWidget* parent = reinterpret_cast<QWidget*>(parentPtr);
+    bool okBool = false;
+    int input = QInputDialog::getInt(parent, QString::fromUtf8(title),
+                                      QString::fromUtf8(label),
+                                      value, min, max, 1, &okBool);
+    *ok = okBool ? 1 : 0;
+    return input;
 }
 
 double qInputDialogGetDoubleValue(int64_t parentPtr, const char* title, const char* label, double value, double min, double max) {
