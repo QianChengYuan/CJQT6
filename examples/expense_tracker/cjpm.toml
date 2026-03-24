@@ -1,0 +1,14 @@
+[package]
+  cjc-version = "1.0.5"
+  name = "expense_tracker"
+  description = "CJQT6 个人记账本示例"
+  version = "1.0.0"
+  target-dir = ""
+  output-type = "executable"
+  compile-option = ""
+  override-compile-option = ""
+  link-option = "-L../../native/build-win64/lib -lcjqt6_bridge"
+  package-configuration = {}
+
+[dependencies]
+  CJQT6 = { path = "../../" }

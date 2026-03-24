@@ -1,0 +1,14 @@
+[package]
+  cjc-version = "1.0.5"
+  name = "paint_app"
+  description = "CJQT6 画图板示例"
+  version = "1.0.0"
+  target-dir = ""
+  output-type = "executable"
+  compile-option = ""
+  override-compile-option = ""
+  link-option = "-L../../native/build-win64/lib -lcjqt6_bridge"
+  package-configuration = {}
+
+[dependencies]
+  CJQT6 = { path = "../../" }

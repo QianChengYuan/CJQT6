@@ -20,6 +20,8 @@ foreign func qEventWidgetSetOnKeyRelease(ptr: Int64, callback: CFunc<(Int32, Int
 
 // 绘制事件回调 (painterPtr)
 foreign func qEventWidgetSetOnPaint(ptr: Int64, callback: CFunc<(Int64) -> Unit>): Unit
+
+// 回调清理函数
 foreign func qEventWidgetClearPaintCallback(ptr: Int64): Unit
 foreign func qEventWidgetClearMousePressCallback(ptr: Int64): Unit
 foreign func qEventWidgetClearMouseMoveCallback(ptr: Int64): Unit
@@ -248,7 +250,6 @@ public class QEventWidget {
     public func show() {
         unsafe {
             qWidgetShow(ptr)
-            // qEventWidgetSetFocus(ptr)  // 暂时禁用以测试
         }
     }
     
@@ -286,24 +287,18 @@ public class QEventWidget {
     
     // ========== 鼠标事件 ==========
     
-    // 设置鼠标按下回调
-    // callback参数: (button, x, y)
     public func setOnMousePress(callback: CFunc<(Int32, Int32, Int32) -> Unit>) {
         unsafe {
             qEventWidgetSetOnMousePress(ptr, callback)
         }
     }
     
-    // 设置鼠标移动回调
-    // callback参数: (buttons, x, y)
     public func setOnMouseMove(callback: CFunc<(Int32, Int32, Int32) -> Unit>) {
         unsafe {
             qEventWidgetSetOnMouseMove(ptr, callback)
         }
     }
     
-    // 设置鼠标释放回调
-    // callback参数: (button, x, y)
     public func setOnMouseRelease(callback: CFunc<(Int32, Int32, Int32) -> Unit>) {
         unsafe {
             qEventWidgetSetOnMouseRelease(ptr, callback)
@@ -312,16 +307,12 @@ public class QEventWidget {
     
     // ========== 键盘事件 ==========
     
-    // 设置键盘按下回调
-    // callback参数: (key, modifiers, unicode)
     public func setOnKeyPress(callback: CFunc<(Int32, Int32, Int32) -> Unit>) {
         unsafe {
             qEventWidgetSetOnKeyPress(ptr, callback)
         }
     }
     
-    // 设置键盘释放回调
-    // callback参数: (key, modifiers, unicode)
     public func setOnKeyRelease(callback: CFunc<(Int32, Int32, Int32) -> Unit>) {
         unsafe {
             qEventWidgetSetOnKeyRelease(ptr, callback)
@@ -330,66 +321,44 @@ public class QEventWidget {
     
     // ========== 绘制事件 ==========
     
-    // 设置绘制回调
-    // callback参数: (painterPtr) - QPainter指针
     public func setOnPaint(callback: CFunc<(Int64) -> Unit>) {
         unsafe {
             qEventWidgetSetOnPaint(ptr, callback)
         }
     }
     
-    // 清除绘制回调
+    // ========== 清除回调方法 ==========
+
     public func clearPaintCallback(): Unit {
-        unsafe {
-            qEventWidgetClearPaintCallback(ptr)
-        }
+        unsafe { qEventWidgetClearPaintCallback(ptr) }
     }
 
-    // 清除鼠标按下回调
     public func clearMousePressCallback(): Unit {
-        unsafe {
-            qEventWidgetClearMousePressCallback(ptr)
-        }
+        unsafe { qEventWidgetClearMousePressCallback(ptr) }
     }
 
-    // 清除鼠标移动回调
     public func clearMouseMoveCallback(): Unit {
-        unsafe {
-            qEventWidgetClearMouseMoveCallback(ptr)
-        }
+        unsafe { qEventWidgetClearMouseMoveCallback(ptr) }
     }
 
-    // 清除鼠标释放回调
     public func clearMouseReleaseCallback(): Unit {
-        unsafe {
-            qEventWidgetClearMouseReleaseCallback(ptr)
-        }
+        unsafe { qEventWidgetClearMouseReleaseCallback(ptr) }
     }
 
-    // 清除键盘按下回调
     public func clearKeyPressCallback(): Unit {
-        unsafe {
-            qEventWidgetClearKeyPressCallback(ptr)
-        }
+        unsafe { qEventWidgetClearKeyPressCallback(ptr) }
     }
 
-    // 清除键盘释放回调
     public func clearKeyReleaseCallback(): Unit {
-        unsafe {
-            qEventWidgetClearKeyReleaseCallback(ptr)
-        }
+        unsafe { qEventWidgetClearKeyReleaseCallback(ptr) }
     }
 
-    // 清除所有回调
     public func clearAllCallbacks(): Unit {
-        unsafe {
-            qEventWidgetClearAllCallbacks(ptr)
-        }
+        unsafe { qEventWidgetClearAllCallbacks(ptr) }
     }
     
     // ========== 更新重绘 ==========
     
-    // 请求重绘
     public func update(): Unit {
         unsafe {
             qWidgetUpdate(ptr)
