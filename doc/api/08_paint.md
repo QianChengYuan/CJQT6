@@ -6,6 +6,28 @@
 import CJQT6.paint.*
 ```
 
+## 类型安全枚举
+
+绘图模块使用类型安全枚举替代原有的整型常量：
+
+```cangjie
+// PenStyle - 画笔样式
+let style = PenStyle.DashLine
+pen.setPenStyle(style)  // 推荐：类型安全
+
+// BrushStyle - 画刷样式  
+let brushStyle = BrushStyle.SolidPattern
+brush.setBrushStyle(brushStyle)
+
+// RenderHint - 渲染提示
+painter.setRenderHint(RenderHint.Antialiasing.value())
+
+// ImageFormat - 图像格式
+let format = ImageFormat.ARGB32
+```
+
+---
+
 ## QColor - 颜色
 
 ```cangjie
@@ -44,6 +66,7 @@ let transparent = Colors.transparent()
 | `setGreen(g)` | 设置绿色分量 |
 | `setBlue(b)` | 设置蓝色分量 |
 | `setAlpha(a)` | 设置透明度 |
+| `isValid(): Bool` | 检查是否有效 |
 | `delete()` | 释放资源 |
 
 ---
@@ -55,7 +78,7 @@ let transparent = Colors.transparent()
 ```cangjie
 let pen = QPen(Colors.black())
 pen.setWidth(2)
-pen.setStyle(PenStyle.DashLine)
+pen.setPenStyle(PenStyle.DashLine)  // 推荐：类型安全
 ```
 
 **QPen 方法**:
@@ -66,16 +89,21 @@ pen.setStyle(PenStyle.DashLine)
 | `setColor(c: QColor)` | 设置颜色 |
 | `setWidth(w: Int32)` | 设置宽度 |
 | `width(): Int32` | 获取宽度 |
-| `setStyle(s: Int32)` | 设置样式 |
+| `setStyle(s: Int32)` | 设置样式（整数值，兼容旧API） |
+| `setPenStyle(s: PenStyle)` | 设置样式（类型安全枚举，推荐） |
+| `isValid(): Bool` | 检查是否有效 |
 | `delete()` | 释放资源 |
 
-**画笔样式常量** (PenStyle):
-```cangjie
-NoPen      // 无线条
-SolidLine  // 实线
-DashLine   // 虚线
-DotLine    // 点线
-```
+**PenStyle 枚举值**:
+| 枚举值 | 说明 |
+|--------|------|
+| `NoPen` | 无线条 |
+| `SolidLine` | 实线 |
+| `DashLine` | 虚线 |
+| `DotLine` | 点线 |
+| `DashDotLine` | 点划线 |
+| `DashDotDotLine` | 双点划线 |
+| `CustomDashLine` | 自定义虚线 |
 
 ---
 
@@ -88,8 +116,8 @@ let brush = QBrush(Colors.red())
 
 // 渐变画刷
 let gradient = QLinearGradient.fromInt(0, 0, 100, 100)
-gradient.setColorAt(0.0, Colors.red())
-gradient.setColorAt(1.0, Colors.blue())
+gradient.setColorAt(0.0f32, Colors.red())
+gradient.setColorAt(1.0f32, Colors.blue())
 let gradientBrush = QBrush(gradient)
 ```
 
@@ -100,32 +128,57 @@ let gradientBrush = QBrush(gradient)
 | `init(color: QColor)` | 创建纯色画刷 |
 | `init(gradient: QLinearGradient)` | 创建渐变画刷 |
 | `setColor(c: QColor)` | 设置颜色 |
-| `setStyle(s: Int32)` | 设置样式 |
+| `setStyle(s: Int32)` | 设置样式（整数值，兼容旧API） |
+| `setBrushStyle(s: BrushStyle)` | 设置样式（类型安全枚举，推荐） |
+| `isValid(): Bool` | 检查是否有效 |
 | `delete()` | 释放资源 |
 
-**画刷样式常量** (BrushStyle):
-```cangjie
-NoBrush       // 无填充
-SolidPattern  // 纯色填充
-```
+**BrushStyle 枚举值**:
+| 枚举值 | 说明 |
+|--------|------|
+| `NoBrush` | 无填充 |
+| `SolidPattern` | 纯色填充 |
+| `LinearGradient` | 线性渐变 |
+| `RadialGradient` | 径向渐变 |
+| `ConicalGradient` | 锥形渐变 |
+| `HorPattern` | 水平线 |
+| `VerPattern` | 垂直线 |
+| `CrossPattern` | 十字线 |
 
 ---
 
-## QLinearGradient - 线性渐变
+## 渐变类
+
+### QLinearGradient - 线性渐变
 
 ```cangjie
 let gradient = QLinearGradient.fromInt(0, 0, 200, 0)  // 水平渐变
-gradient.setColorAt(0.0, Colors.red())     // 起点：红色
-gradient.setColorAt(0.5, Colors.yellow())  // 中间：黄色
-gradient.setColorAt(1.0, Colors.blue())    // 终点：蓝色
+gradient.setColorAt(0.0f32, Colors.red())
+gradient.setColorAt(0.5f32, Colors.yellow())
+gradient.setColorAt(1.0f32, Colors.blue())
 ```
 
-**QLinearGradient 方法**:
+### QRadialGradient - 径向渐变
+
+```cangjie
+let gradient = QRadialGradient.fromInt(cx, cy, radius, fx, fy)
+gradient.setColorAt(0.0f32, Colors.red())
+gradient.setColorAt(1.0f32, Colors.blue())
+```
+
+### QConicalGradient - 锥形渐变
+
+```cangjie
+let gradient = QConicalGradient.fromInt(cx, cy, angle)
+gradient.setColorAt(0.0f32, Colors.red())
+gradient.setColorAt(1.0f32, Colors.blue())
+```
+
+**渐变类通用方法**:
 | 方法 | 说明 |
 |------|------|
-| `init(x1, y1, x2, y2)` | 创建渐变（Float32坐标） |
-| `fromInt(x1, y1, x2, y2)` | 创建渐变（Int32坐标，静态方法） |
-| `setColorAt(pos, color)` | 设置位置颜色（pos: 0.0~1.0） |
+| `setColorAt(pos: Float32, color: QColor)` | 设置位置颜色（pos: 0.0~1.0） |
+| `isValid(): Bool` | 检查是否有效 |
 | `delete()` | 释放资源 |
 
 ---
@@ -146,6 +199,7 @@ font.setItalic(true)
 | `setPointSize(n: Int32)` | 设置字号 |
 | `setBold(b: Bool)` | 设置粗体 |
 | `setItalic(b: Bool)` | 设置斜体 |
+| `isValid(): Bool` | 检查是否有效 |
 | `delete()` | 释放资源 |
 
 ---
@@ -156,17 +210,14 @@ font.setItalic(true)
 
 ```cangjie
 let path = QPainterPath()
-path.moveTo(100.0, 20.0)
-path.lineTo(180.0, 80.0)
-path.lineTo(140.0, 160.0)
+path.moveTo(100.0f32, 20.0f32)
+path.lineTo(180.0f32, 80.0f32)
+path.lineTo(140.0f32, 160.0f32)
 path.closeSubpath()
 
 // 预定义形状
 let ellipsePath = QPainterPath()
-ellipsePath.addEllipse(50.0, 50.0, 100.0, 80.0)
-
-let rectPath = QPainterPath()
-rectPath.addRect(20.0, 20.0, 150.0, 100.0)
+ellipsePath.addEllipse(50.0f32, 50.0f32, 100.0f32, 80.0f32)
 ```
 
 **QPainterPath 方法**:
@@ -179,11 +230,12 @@ rectPath.addRect(20.0, 20.0, 150.0, 100.0)
 | `addEllipse(x, y, w, h)` | 添加椭圆 |
 | `closeSubpath()` | 闭合路径 |
 | `isEmpty(): Bool` | 是否为空 |
+| `isValid(): Bool` | 检查是否有效 |
 | `delete()` | 释放资源 |
 
 ---
 
-## QPixmap - 图像
+## QPixmap / QImage - 图像
 
 ```cangjie
 // 创建空白图像
@@ -196,10 +248,9 @@ let loadedPixmap = QPixmap.load("/path/to/image.png")
 // 获取信息
 let w = pixmap.width()
 let h = pixmap.height()
-let isNull = pixmap.isNull()
 ```
 
-**QPixmap 方法**:
+**QPixmap / QImage 方法**:
 | 方法 | 说明 |
 |------|------|
 | `init()` | 创建空图像 |
@@ -208,8 +259,17 @@ let isNull = pixmap.isNull()
 | `width(): Int32` | 获取宽度 |
 | `height(): Int32` | 获取高度 |
 | `isNull(): Bool` | 是否为空 |
+| `isValid(): Bool` | 检查是否有效 |
 | `fill(c: QColor)` | 填充颜色 |
 | `delete()` | 释放资源 |
+
+**ImageFormat 枚举值**:
+| 枚举值 | 说明 |
+|--------|------|
+| `Invalid` | 无效格式 |
+| `RGB32` | 32位RGB |
+| `ARGB32` | 32位ARGB |
+| `ARGB32_Premultiplied` | 预乘ARGB32 |
 
 ---
 
@@ -222,33 +282,29 @@ let pixmap = QPixmap.withSize(400, 300)
 pixmap.fill(Colors.white())
 
 let painter = QPainter(pixmap.getPtr())
-painter.setRenderHint(RenderHint.Antialiasing)
+painter.setRenderHint(RenderHint.Antialiasing.value())
 
 // 设置画笔和画刷
-painter.setPen(QPen(Colors.black()).setWidth(2))
-painter.setBrush(QBrush(Colors.cyan()))
+let pen = QPen(Colors.black())
+pen.setWidth(2)
+painter.setPen(pen)
+
+let brush = QBrush(Colors.cyan())
+painter.setBrush(brush)
 
 // 绘制形状
 painter.drawRect(20, 20, 100, 80)
 painter.drawCircle(200, 100, 40)
 painter.drawEllipse(280, 20, 100, 60)
 
-// 绘制线条
-painter.drawLine(20, 150, 380, 150)
-
 // 绘制文字
-let font = QFont("Arial", 16).setBold(true)
+let font = QFont("Arial", 16)
+font.setBold(true)
 painter.setFont(font)
 painter.setPenColor(Colors.black())
 painter.drawText(50, 250, "Hello QPainter!")
 
-// 绘制饼图
-painter.drawPie(20, 200, 100, 100, 0, 90*16)  // 90度
-
 painter.end()
-
-// 显示在标签上
-label.setPixmap(pixmap.getPtr())
 ```
 
 **QPainter 方法**:
@@ -256,6 +312,7 @@ label.setPixmap(pixmap.getPtr())
 |------|------|
 | `init()` | 创建绘图器 |
 | `init(device: Int64)` | 在设备上创建绘图器 |
+| `fromPtr(ptr: Int64)` | 从指针创建（静态方法） |
 | `begin(device: Int64): Bool` | 开始绘图 |
 | `end(): Bool` | 结束绘图 |
 | `isActive(): Bool` | 是否活动 |
@@ -284,19 +341,126 @@ label.setPixmap(pixmap.getPtr())
 | `save()` | 保存状态 |
 | `restore()` | 恢复状态 |
 
-**渲染提示常量** (RenderHint):
+**RenderHint 枚举值**:
+| 枚举值 | 说明 |
+|--------|------|
+| `Antialiasing` | 抗锯齿 |
+| `TextAntialiasing` | 文字抗锯齿 |
+| `SmoothPixmapTransform` | 平滑像素变换 |
+
+---
+
+## 文本对齐
+
+使用 `TextAlignment` 结构体（支持位运算组合）：
+
 ```cangjie
-Antialiasing       // 抗锯齿
-TextAntialiasing   // 文字抗锯齿
+// 预定义对齐方式
+let center = TextAlignment.Center        // 居中
+let topLeft = TextAlignment.TopLeft      // 左上
+let topRight = TextAlignment.TopRight    // 右上
+
+// 自定义组合
+let custom = TextAlignment.Left | TextAlignment.VCenter
 ```
 
-**文字对齐常量** (TextFlag):
+**TextAlignment 常量**:
+| 常量 | 值 | 说明 |
+|------|------|------|
+| `Left` | 0x0001 | 左对齐 |
+| `Right` | 0x0002 | 右对齐 |
+| `HCenter` | 0x0004 | 水平居中 |
+| `Top` | 0x0020 | 顶部对齐 |
+| `Bottom` | 0x0040 | 底部对齐 |
+| `VCenter` | 0x0080 | 垂直居中 |
+| `Center` | 0x0084 | 完全居中 |
+
+---
+
+## 内存管理最佳实践
+
+绘图类对象已实现终结器 `~init()`，但建议：
+
+1. **游戏/高频渲染场景**：手动释放，避免 GC 不确定时机
+   ```cangjie
+   let color = QColor(255, 0, 0)
+   // 使用 color...
+   color.delete()  // 手动释放
+   ```
+
+2. **缓存常用对象**：避免重复创建
+   ```cangjie
+   class MyRenderer {
+       let cachedColor: QColor
+       let cachedPen: QPen
+       
+       public init() {
+           cachedColor = QColor(255, 0, 0)
+           cachedPen = QPen(cachedColor)
+       }
+       
+       func render(painter: QPainter) {
+           painter.setPen(cachedPen)
+       }
+       
+       func cleanup() {
+           cachedColor.delete()
+           cachedPen.delete()
+       }
+   }
+   ```
+
+---
+
+## 完整示例
+
 ```cangjie
-AlignLeft      // 左对齐
-AlignRight     // 右对齐
-AlignHCenter   // 水平居中
-AlignTop       // 顶部对齐
-AlignBottom    // 底部对齐
-AlignVCenter   // 垂直居中
-AlignCenter    // 居中
+import CJQT6.paint.*
+import CJQT6.widgets.*
+
+main(): Int32 {
+    let app = QApplication()
+    let label = QLabel()
+    label.resize(400, 300)
+    
+    let pixmap = QPixmap.withSize(400, 300)
+    pixmap.fill(Colors.white())
+    
+    let painter = QPainter(pixmap.getPtr())
+    painter.setRenderHint(RenderHint.Antialiasing.value())
+    
+    // 绘制渐变背景
+    let gradient = QLinearGradient.fromInt(0, 0, 0, 300)
+    gradient.setColorAt(0.0f32, QColor(100, 150, 255))
+    gradient.setColorAt(1.0f32, QColor(255, 255, 255))
+    let brush = QBrush(gradient)
+    painter.fillRect(0, 0, 400, 300, brush)
+    gradient.delete()
+    
+    // 绘制图形
+    let pen = QPen(Colors.black())
+    pen.setWidth(2)
+    painter.setPen(pen)
+    painter.drawCircle(200, 150, 50)
+    
+    // 绘制文字
+    let font = QFont("Arial", 20)
+    painter.setFont(font)
+    painter.drawTextRect(100, 250, 200, 30, TextAlignment.Center.value, "Hello!")
+    
+    painter.end()
+    
+    label.setPixmap(pixmap.getPtr())
+    label.show()
+    
+    let result = app.exec()
+    
+    // 清理资源
+    pen.delete()
+    brush.delete()
+    font.delete()
+    pixmap.delete()
+    
+    return result
+}
 ```

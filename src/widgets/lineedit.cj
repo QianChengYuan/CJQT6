@@ -331,15 +331,17 @@ public class QLineEdit <: QtResource {
         close()
     }
     
-    /// 终结器 - 作为最后保障
-    ~init() {
-        if (!closed && ptr != 0) {
-            unsafe {
-                qSignalCleanup(ptr)
-                qLineEditDelete(ptr)
-            }
-            closed = true
-            ptr = 0
-        }
-    }
+    /// 终结器 - 已禁用
+    /// 注意：仓颉 GC 调用终结器的时机不确定，可能在 Qt 对象仍被使用时提前删除导致崩溃
+    /// 请在不需要时显式调用 delete() 或 close() 释放资源
+    // ~init() {
+    //     if (!closed && ptr != 0) {
+    //         unsafe {
+    //             qSignalCleanup(ptr)
+    //             qLineEditDelete(ptr)
+    //         }
+    //         closed = true
+    //         ptr = 0
+    //     }
+    // }
 }

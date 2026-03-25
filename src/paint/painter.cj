@@ -44,8 +44,19 @@ public class QColor {
     public func setAlpha(a: Int32): Unit { unsafe { qColorSetAlpha(ptr, a) } }
 
     public func getPtr(): Int64 { ptr }
+    
+    /// 是否有效
+    public func isValid(): Bool { ptr != 0 }
 
     public func delete(): Unit {
+        if (ptr != 0) {
+            unsafe { qColorDelete(ptr) }
+            ptr = 0
+        }
+    }
+    
+    /// 终结器 - 最后保障，防止内存泄漏
+    ~init() {
         if (ptr != 0) {
             unsafe { qColorDelete(ptr) }
             ptr = 0
@@ -70,38 +81,213 @@ public class Colors {
 }
 
 // ============================================================
-// 样式常量
+// 类型安全的枚举定义
 // ============================================================
 
-public class PenStyle {
-    public static let NoPen: Int32 = 0
-    public static let SolidLine: Int32 = 1
-    public static let DashLine: Int32 = 2
-    public static let DotLine: Int32 = 3
+/// 画笔样式
+public enum PenStyle {
+    | NoPen
+    | SolidLine
+    | DashLine
+    | DotLine
+    | DashDotLine
+    | DashDotDotLine
+    | CustomDashLine
+    
+    public func value(): Int32 {
+        match (this) {
+            case NoPen => 0
+            case SolidLine => 1
+            case DashLine => 2
+            case DotLine => 3
+            case DashDotLine => 4
+            case DashDotDotLine => 5
+            case CustomDashLine => 6
+        }
+    }
+    
+    public static func fromValue(v: Int32): PenStyle {
+        match (v) {
+            case 0 => NoPen
+            case 1 => SolidLine
+            case 2 => DashLine
+            case 3 => DotLine
+            case 4 => DashDotLine
+            case 5 => DashDotDotLine
+            case _ => SolidLine
+        }
+    }
+    
+    public operator func ==(other: PenStyle): Bool {
+        this.value() == other.value()
+    }
+    
+    public operator func !=(other: PenStyle): Bool {
+        this.value() != other.value()
+    }
 }
 
-public class BrushStyle {
-    public static let NoBrush: Int32 = 0
-    public static let SolidPattern: Int32 = 1
+/// 画刷样式
+public enum BrushStyle {
+    | NoBrush
+    | SolidPattern
+    | Dense1Pattern
+    | Dense2Pattern
+    | Dense3Pattern
+    | Dense4Pattern
+    | Dense5Pattern
+    | Dense6Pattern
+    | Dense7Pattern
+    | HorPattern
+    | VerPattern
+    | CrossPattern
+    | LinearGradient
+    | RadialGradient
+    | ConicalGradient
+    
+    public func value(): Int32 {
+        match (this) {
+            case NoBrush => 0
+            case SolidPattern => 1
+            case Dense1Pattern => 2
+            case Dense2Pattern => 3
+            case Dense3Pattern => 4
+            case Dense4Pattern => 5
+            case Dense5Pattern => 6
+            case Dense6Pattern => 7
+            case Dense7Pattern => 8
+            case HorPattern => 9
+            case VerPattern => 10
+            case CrossPattern => 11
+            case LinearGradient => 15
+            case RadialGradient => 16
+            case ConicalGradient => 17
+        }
+    }
+    
+    public static func fromValue(v: Int32): BrushStyle {
+        match (v) {
+            case 0 => NoBrush
+            case 1 => SolidPattern
+            case 15 => LinearGradient
+            case 16 => RadialGradient
+            case 17 => ConicalGradient
+            case _ => SolidPattern
+        }
+    }
+    
+    public operator func ==(other: BrushStyle): Bool {
+        this.value() == other.value()
+    }
+    
+    public operator func !=(other: BrushStyle): Bool {
+        this.value() != other.value()
+    }
 }
 
-public class RenderHint {
-    public static let Antialiasing: Int32 = 0x01
-    public static let TextAntialiasing: Int32 = 0x02
+/// 渲染提示标志（可组合）
+public enum RenderHint {
+    | Antialiasing
+    | TextAntialiasing
+    | SmoothPixmapTransform
+    | HighQualityAntialiasing
+    | NonCosmeticDefaultPen
+    
+    public func value(): Int32 {
+        match (this) {
+            case Antialiasing => 0x01
+            case TextAntialiasing => 0x02
+            case SmoothPixmapTransform => 0x04
+            case HighQualityAntialiasing => 0x08
+            case NonCosmeticDefaultPen => 0x10
+        }
+    }
+    
+    public operator func ==(other: RenderHint): Bool {
+        this.value() == other.value()
+    }
+    
+    public operator func !=(other: RenderHint): Bool {
+        this.value() != other.value()
+    }
 }
 
-public class TextFlag {
-    public static let AlignLeft: Int32 = 0x0001
-    public static let AlignRight: Int32 = 0x0002
-    public static let AlignHCenter: Int32 = 0x0004
-    public static let AlignTop: Int32 = 0x0020
-    public static let AlignBottom: Int32 = 0x0040
-    public static let AlignVCenter: Int32 = 0x0080
-    public static let AlignCenter: Int32 = 0x0004 | 0x0080
+/// 文本对齐标志（可组合）
+public struct TextAlignment {
+    public let value: Int32
+    
+    public init(v: Int32) { value = v }
+    
+    // 水平对齐
+    public static let Left: TextAlignment = TextAlignment(0x0001)
+    public static let Right: TextAlignment = TextAlignment(0x0002)
+    public static let HCenter: TextAlignment = TextAlignment(0x0004)
+    
+    // 垂直对齐
+    public static let Top: TextAlignment = TextAlignment(0x0020)
+    public static let Bottom: TextAlignment = TextAlignment(0x0040)
+    public static let VCenter: TextAlignment = TextAlignment(0x0080)
+    
+    // 组合对齐
+    public static let Center: TextAlignment = TextAlignment(0x0084)  // HCenter | VCenter
+    public static let Default: TextAlignment = TextAlignment(0x0081) // Left | VCenter
+    
+    public operator func |(other: TextAlignment): TextAlignment {
+        TextAlignment(value | other.value)
+    }
 }
 
-public class ImageFormat {
-    public static let ARGB32: Int32 = 5
+/// 图像格式
+public enum ImageFormat {
+    | Invalid
+    | Mono
+    | MonoLSB
+    | Indexed8
+    | RGB32
+    | ARGB32
+    | ARGB32_Premultiplied
+    | RGB16
+    | RGB888
+    | RGBA8888
+    
+    public func value(): Int32 {
+        match (this) {
+            case Invalid => 0
+            case Mono => 1
+            case MonoLSB => 2
+            case Indexed8 => 3
+            case RGB32 => 4
+            case ARGB32 => 5
+            case ARGB32_Premultiplied => 6
+            case RGB16 => 7
+            case RGB888 => 8
+            case RGBA8888 => 9
+        }
+    }
+    
+    public static func fromValue(v: Int32): ImageFormat {
+        match (v) {
+            case 0 => Invalid
+            case 1 => Mono
+            case 2 => MonoLSB
+            case 3 => Indexed8
+            case 4 => RGB32
+            case 5 => ARGB32
+            case 6 => ARGB32_Premultiplied
+            case 7 => RGB16
+            case 8 => RGB888
+            case 9 => RGBA8888
+            case _ => Invalid
+        }
+    }
+    
+    public operator func ==(other: ImageFormat): Bool {
+        this.value() == other.value()
+    }
+    
+    public operator func !=(other: ImageFormat): Bool {
+        this.value() != other.value()
+    }
 }
 
 // ============================================================
@@ -122,10 +308,22 @@ public class QPen {
     public func setColor(c: QColor): QPen { unsafe { qPenSetColor(ptr, c.getPtr()) }; this }
     public func setWidth(w: Int32): QPen { unsafe { qPenSetWidth(ptr, w) }; this }
     public func width(): Int32 { unsafe { qPenWidth(ptr) } }
+    /// 设置样式（整数值，兼容旧API）
     public func setStyle(s: Int32): QPen { unsafe { qPenSetStyle(ptr, s) }; this }
+    /// 设置样式（类型安全枚举）
+    public func setPenStyle(s: PenStyle): QPen { unsafe { qPenSetStyle(ptr, s.value()) }; this }
     public func getPtr(): Int64 { ptr }
+    public func isValid(): Bool { ptr != 0 }
 
     public func delete(): Unit {
+        if (ptr != 0) {
+            unsafe { qPenDelete(ptr) }
+            ptr = 0
+        }
+    }
+    
+    /// 终结器 - 最后保障
+    ~init() {
         if (ptr != 0) {
             unsafe { qPenDelete(ptr) }
             ptr = 0
@@ -153,10 +351,22 @@ public class QBrush {
     }
 
     public func setColor(c: QColor): QBrush { unsafe { qBrushSetColor(ptr, c.getPtr()) }; this }
+    /// 设置样式（整数值，兼容旧API）
     public func setStyle(s: Int32): QBrush { unsafe { qBrushSetStyle(ptr, s) }; this }
+    /// 设置样式（类型安全枚举）
+    public func setBrushStyle(s: BrushStyle): QBrush { unsafe { qBrushSetStyle(ptr, s.value()) }; this }
     public func getPtr(): Int64 { ptr }
+    public func isValid(): Bool { ptr != 0 }
 
     public func delete(): Unit {
+        if (ptr != 0) {
+            unsafe { qBrushDelete(ptr) }
+            ptr = 0
+        }
+    }
+    
+    /// 终结器 - 最后保障
+    ~init() {
         if (ptr != 0) {
             unsafe { qBrushDelete(ptr) }
             ptr = 0
@@ -183,8 +393,16 @@ public class QLinearGradient {
         unsafe { qGradientSetColorAt(ptr, pos, c.getPtr()) }; this
     }
     public func getPtr(): Int64 { ptr }
+    public func isValid(): Bool { ptr != 0 }
 
     public func delete(): Unit {
+        if (ptr != 0) {
+            unsafe { qLinearGradientDelete(ptr) }
+            ptr = 0
+        }
+    }
+    
+    ~init() {
         if (ptr != 0) {
             unsafe { qLinearGradientDelete(ptr) }
             ptr = 0
@@ -212,8 +430,16 @@ public class QRadialGradient {
         unsafe { qGradientSetColorAt(ptr, pos, c.getPtr()) }; this
     }
     public func getPtr(): Int64 { ptr }
+    public func isValid(): Bool { ptr != 0 }
 
     public func delete(): Unit {
+        if (ptr != 0) {
+            unsafe { qRadialGradientDelete(ptr) }
+            ptr = 0
+        }
+    }
+    
+    ~init() {
         if (ptr != 0) {
             unsafe { qRadialGradientDelete(ptr) }
             ptr = 0
@@ -240,8 +466,16 @@ public class QConicalGradient {
         unsafe { qGradientSetColorAt(ptr, pos, c.getPtr()) }; this
     }
     public func getPtr(): Int64 { ptr }
+    public func isValid(): Bool { ptr != 0 }
 
     public func delete(): Unit {
+        if (ptr != 0) {
+            unsafe { qConicalGradientDelete(ptr) }
+            ptr = 0
+        }
+    }
+    
+    ~init() {
         if (ptr != 0) {
             unsafe { qConicalGradientDelete(ptr) }
             ptr = 0
@@ -276,8 +510,16 @@ public class QFont {
     public func setBold(b: Bool): QFont { unsafe { qFontSetBold(ptr, if (b) { 1 } else { 0 }) }; this }
     public func setItalic(b: Bool): QFont { unsafe { qFontSetItalic(ptr, if (b) { 1 } else { 0 }) }; this }
     public func getPtr(): Int64 { ptr }
+    public func isValid(): Bool { ptr != 0 }
 
     public func delete(): Unit {
+        if (ptr != 0) {
+            unsafe { qFontDelete(ptr) }
+            ptr = 0
+        }
+    }
+    
+    ~init() {
         if (ptr != 0) {
             unsafe { qFontDelete(ptr) }
             ptr = 0
@@ -311,8 +553,16 @@ public class QPainterPath {
     public func closeSubpath(): QPainterPath { unsafe { qPainterPathCloseSubpath(ptr) }; this }
     public func isEmpty(): Bool { unsafe { qPainterPathIsEmpty(ptr) != 0 } }
     public func getPtr(): Int64 { ptr }
+    public func isValid(): Bool { ptr != 0 }
 
     public func delete(): Unit {
+        if (ptr != 0) {
+            unsafe { qPainterPathDelete(ptr) }
+            ptr = 0
+        }
+    }
+    
+    ~init() {
         if (ptr != 0) {
             unsafe { qPainterPathDelete(ptr) }
             ptr = 0
@@ -354,8 +604,16 @@ public class QPixmap {
     public func isNull(): Bool { unsafe { qPixmapIsNull(ptr) != 0 } }
     public func fill(c: QColor): Unit { unsafe { qPixmapFill(ptr, c.getPtr()) } }
     public func getPtr(): Int64 { ptr }
+    public func isValid(): Bool { ptr != 0 }
 
     public func delete(): Unit {
+        if (ptr != 0) {
+            unsafe { qPixmapDelete(ptr) }
+            ptr = 0
+        }
+    }
+    
+    ~init() {
         if (ptr != 0) {
             unsafe { qPixmapDelete(ptr) }
             ptr = 0
@@ -376,15 +634,23 @@ public class QImage {
     }
 
     public static func withSize(w: Int32, h: Int32): QImage {
-        unsafe { QImage(qImageCreateSize(w, h, ImageFormat.ARGB32)) }
+        unsafe { QImage(qImageCreateSize(w, h, ImageFormat.ARGB32.value())) }
     }
 
     public func width(): Int32 { unsafe { qImageWidth(ptr) } }
     public func height(): Int32 { unsafe { qImageHeight(ptr) } }
     public func isNull(): Bool { unsafe { qImageIsNull(ptr) != 0 } }
     public func getPtr(): Int64 { ptr }
+    public func isValid(): Bool { ptr != 0 }
 
     public func delete(): Unit {
+        if (ptr != 0) {
+            unsafe { qImageDelete(ptr) }
+            ptr = 0
+        }
+    }
+    
+    ~init() {
         if (ptr != 0) {
             unsafe { qImageDelete(ptr) }
             ptr = 0

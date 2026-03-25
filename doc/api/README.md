@@ -64,6 +64,12 @@ import CJQT6.sql.*       // 数据库
 
 ## 重要提示
 
-1. **QTimer 必须手动释放** - 调用 `timer.delete()`
-2. **CFunc 回调不能捕获局部变量** - 使用全局变量
-3. **绘图类建议手动释放** - QColor、QPen、QBrush 等
+1. **控件类终结器已禁用** - QWidget、QLabel、QPushButton 等控件的终结器已被禁用，因为仓颉 GC 可能在对象仍被引用时提前调用终结器。请使用 `close()` 或 `delete()` 显式释放。
+
+2. **QTimer 必须手动释放** - 调用 `timer.delete()`
+
+3. **CFunc 回调不能捕获局部变量** - 使用全局变量传递
+
+4. **绘图类已实现终结器** - QColor、QPen、QBrush、QFont 等绘图类已实现 `~init()` 终结器，但游戏/高频渲染场景建议手动释放以避免 GC 不确定时机
+
+5. **推荐缓存常用对象** - 在渲染循环中复用颜色、画笔、画刷等对象，避免重复创建

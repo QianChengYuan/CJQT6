@@ -135,3 +135,87 @@ dateEdit.setDisplayFormat("yyyy-MM-dd")
 dateEdit.setCalendarPopup(true)  // 启用日历弹出
 dateEdit.setDate(QDate.currentDate())
 ```
+
+---
+
+## 游戏示例：贪吃蛇
+
+```cangjie
+package snake_game
+
+import CJQT6.core.*
+import CJQT6.paint.*
+import CJQT6.widgets.*
+import std.random.*
+import std.collection.*
+
+// 游戏常量
+let CELL_SIZE: Int32 = 20
+let GRID_WIDTH: Int32 = 30
+let GRID_HEIGHT: Int32 = 25
+let GAME_SPEED: Int32 = 100
+
+// 全局状态
+var gSnake: ArrayList<(Int32, Int32)> = ArrayList<(Int32, Int32)>()
+var gDirection: Int32 = 3  // DIR_RIGHT
+var gFood: (Int32, Int32) = (10, 10)
+var gScore: Int32 = 0
+var gGameOver: Bool = false
+var gGameStarted: Bool = false
+
+// 渲染器（缓存资源避免内存泄漏）
+public class SnakeRenderer {
+    private let pen: QPen
+    private let brush: QBrush
+    private let colorSnakeHead: QColor
+    private let colorSnakeBody: QColor
+    private let colorFood: QColor
+    
+    public init() {
+        pen = QPen()
+        brush = QBrush()
+        colorSnakeHead = QColor(50, 205, 50)
+        colorSnakeBody = QColor(34, 139, 34)
+        colorFood = QColor(255, 69, 0)
+    }
+    
+    public func cleanup(): Unit {
+        pen.delete(); brush.delete()
+        colorSnakeHead.delete(); colorSnakeBody.delete(); colorFood.delete()
+    }
+    
+    public func render(painterPtr: Int64): Unit {
+        let painter = QPainter.fromPtr(painterPtr)
+        // 渲染蛇和食物...
+    }
+}
+
+main(): Int32 {
+    let app = QApplication()
+    let widget = QEventWidget()
+    let timer = QTimer()
+    let renderer = SnakeRenderer()
+    
+    widget.setOnKeyPress({ key, mods, unicode => onKeyPress(key, mods, unicode) })
+    widget.setOnPaint({ ptr => renderer.render(ptr) })
+    timer.setOnTimeout({ => updateGame() })
+    
+    widget.show()
+    timer.start(GAME_SPEED)
+    
+    let result = app.exec()
+    
+    // 清理资源
+    timer.stop(); timer.delete()
+    renderer.cleanup()
+    widget.delete()
+    
+    return result
+}
+```
+
+**关键点**：
+- 使用 `ArrayList` 存储蛇身坐标
+- 渲染器缓存颜色/画笔避免每帧创建
+- 程序退出时调用 `cleanup()` 释放资源
+- 方向键/WASD 控制，空格暂停

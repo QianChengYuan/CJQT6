@@ -63,8 +63,9 @@ func drawClockFace(painter: QPainter): Unit {
         if (let Some(faceColor) <- gFaceColor) {
             let brush = QBrush(faceColor)
             painter.setBrush(brush)
+            brush.delete()  // 释放临时画刷
         }
-        painter.drawEllipse(cx - radius, cy - radius, radius * 2, radius * 2)
+        pen.delete()  // 释放临时画笔
     }
     
     // 绘制刻度
@@ -102,6 +103,8 @@ func drawClockFace(painter: QPainter): Unit {
                 painter.drawLine(Int32(x1), Int32(y1), Int32(x2), Int32(y2))
             }
         }
+        
+        tickPen.delete()  // 释放临时画笔
     }
     
     // 绘制数字
@@ -113,6 +116,7 @@ func drawNumbers(painter: QPainter, cx: Int32, cy: Int32, radius: Int32): Unit {
     let font = QFont("Arial", 14)
     font.setBold(true)
     painter.setFont(font)
+    font.delete()  // 释放字体对象
     
     if (let Some(tickColor) <- gTickColor) {
         painter.setPenColor(tickColor)
@@ -155,6 +159,7 @@ func drawSingleHand(painter: QPainter, angle: Float32, length: Int32, width: Int
         let pen = QPen(c)
         pen.setWidth(width)
         painter.setPen(pen)
+        pen.delete()  // 释放画笔
     }
     
     let rad = angle * Float32(3.14159265) / 180.0
@@ -169,6 +174,7 @@ func drawCenter(painter: QPainter): Unit {
     if (let Some(c) <- gSecondHandColor) {
         let brush = QBrush(c)
         painter.setBrush(brush)
+        brush.delete()  // 释放画刷
     }
     painter.drawCircle(CENTER_X, CENTER_Y, 8)
 }
@@ -223,6 +229,13 @@ main(): Int32 {
     if (let Some(w) <- gWidget) {
         w.delete()
     }
+    // 释放颜色对象
+    if (let Some(c) <- gHourHandColor) { c.delete() }
+    if (let Some(c) <- gMinuteHandColor) { c.delete() }
+    if (let Some(c) <- gSecondHandColor) { c.delete() }
+    if (let Some(c) <- gTickColor) { c.delete() }
+    if (let Some(c) <- gFaceColor) { c.delete() }
+    if (let Some(c) <- gBorderColor) { c.delete() }
     
     return result
 }

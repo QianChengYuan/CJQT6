@@ -11,12 +11,31 @@ CJQT6/
 ├── cjpm.toml                   # 仓颉项目配置
 │
 ├── doc/                        # 文档目录
-│   ├── API使用文档.md          # 控件API使用说明
-│   ├── 封装进度.md             # 封装进度跟踪
-│   ├── CJQT6仓颉基础窗口.md
+│   ├── api/                    # API文档（已拆分）
+│   │   ├── README.md           # API索引
+│   │   ├── 01_core.md          # 核心模块
+│   │   ├── 02_widgets_basic.md # 基础控件
+│   │   ├── 03_widgets_selection.md
+│   │   ├── 04_containers_layout.md
+│   │   ├── 05_views.md
+│   │   ├── 06_menu_dialogs.md
+│   │   ├── 07_events.md
+│   │   ├── 08_paint.md         # 绘图模块
+│   │   ├── 09_process.md
+│   │   ├── 10_datetime.md
+│   │   ├── 11_qml.md
+│   │   ├── 12_signal_slot.md
+│   │   ├── 13_multimedia.md
+│   │   ├── 14_print.md
+│   │   └── 15_examples_faq.md  # 示例与FAQ
+│   ├── 封装进度.md
 │   ├── 环境检测报告.md
+│   ├── 项目规划.md
 │   ├── 重构总结.md
-│   └── 项目规划.md
+│   ├── cjpm_manual.md
+│   ├── CJQT6仓颉基础窗口.md
+│   ├── CODE_REVIEW.md
+│   └── EXAMPLE_IDEAS.md
 │
 ├── native/                     # C++原生桥接代码
 │   ├── build/                  # CMake构建输出
@@ -84,9 +103,17 @@ CJQT6/
 ├── examples/                   # 示例程序
 │   ├── run_example.sh          # 运行脚本
 │   ├── lib/                    # 共享库目录
-│   └── widgets_demo/           # 常用控件演示
-│       ├── cjpm.toml
-│       └── src/main.cj
+│   ├── widgets_demo/           # 常用控件演示
+│   ├── analog_clock/           # 模拟时钟
+│   ├── calculator/             # 计算器
+│   ├── notepad/                # 记事本
+│   ├── paint_app/              # 绘图应用
+│   ├── todo_list/              # 待办事项
+│   ├── expense_tracker/        # 记账应用
+│   ├── music_player/           # 音乐播放器
+│   ├── tank_battle/            # 坦克大战游戏
+│   ├── snake_game/             # 贪吃蛇游戏
+│   └── qml_test/               # QML测试
 │
 └── tests/                      # 测试代码
 ```
@@ -339,9 +366,9 @@ main(): Int32 {
 
 ## 资源管理
 
-### 自动清理
+### 控件类（终结器已禁用）
 
-所有控件类都实现了终结器 `~init`，垃圾回收时会自动释放资源：
+**重要**：QWidget、QLabel、QPushButton 等控件类的终结器已被禁用，因为仓颉 GC 可能在对象仍被引用时提前调用终结器，导致 Qt 对象被错误释放。
 
 ```cangjie
 main(): Int32 {
@@ -350,9 +377,26 @@ main(): Int32 {
     // ... 创建控件 ...
     window.show()
     let result = app.exec()
-    // 不需要手动清理，终结器自动处理
+    // 控件会随窗口关闭自动释放
     return result
 }
+```
+
+### 绘图类（已实现终结器）
+
+QColor、QPen、QBrush、QFont、QPixmap 等绘图类已实现 `~init()` 终结器：
+
+```cangjie
+// 自动释放
+{
+    let color = QColor(255, 0, 0)
+    // 使用 color...
+}  // 自动调用终结器
+
+// 手动释放（推荐用于游戏/高频渲染）
+let pen = QPen(Colors.black())
+// 使用 pen...
+pen.delete()
 ```
 
 ### 手动释放（可选）
@@ -365,17 +409,6 @@ widget.close()
 
 // 方式2：delete() - 直接释放
 widget.delete()
-```
-
-### try-with-resources
-
-对于需要精确控制资源生命周期的场景：
-
-```cangjie
-try (widget = QWidget()) {
-    widget.show()
-    // ... 使用 widget ...
-}  // 自动调用 close()
 ```
 
 ## 信号与槽

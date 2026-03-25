@@ -523,13 +523,96 @@ public class GameRenderer {
     private var brush: QBrush = QBrush()
     private let TS: Int32 = 32
     
-    public init() {}
+    // 缓存常用颜色（避免每帧创建）
+    private let colorBlack: QColor
+    private let colorWhite: QColor
+    private let colorYellow: QColor
+    private let colorRed: QColor
+    private let colorBrick: QColor
+    private let colorBrickDark: QColor
+    private let colorSteel: QColor
+    private let colorSteelDark: QColor
+    private let colorWaterLight: QColor
+    private let colorWaterDark: QColor
+    private let colorBase: QColor
+    private let colorBaseDark: QColor
+    private let colorGrass: QColor
+    private let colorPlayerBody: QColor
+    private let colorPlayerDark: QColor
+    private let colorEnemyBody: QColor
+    private let colorEnemyDark: QColor
+    private let colorBarBg: QColor
+    private let colorExplosionOuter: QColor
+    private let colorExplosionInner: QColor
+    
+    // 缓存字体
+    private let fontSmall: QFont
+    private let fontLarge: QFont
+    private let fontTitle: QFont
+    
+    public init() {
+        // 初始化所有缓存颜色
+        colorBlack = Colors.black()
+        colorWhite = Colors.white()
+        colorYellow = Colors.yellow()
+        colorRed = Colors.red()
+        colorBrick = QColor(139, 69, 19)
+        colorBrickDark = QColor(101, 67, 33)
+        colorSteel = QColor(169, 169, 169)
+        colorSteelDark = QColor(105, 105, 105)
+        colorWaterLight = QColor(0, 100, 200)
+        colorWaterDark = QColor(0, 50, 150)
+        colorBase = QColor(255, 215, 0)
+        colorBaseDark = QColor(184, 134, 11)
+        colorGrass = QColor(34, 139, 34)
+        colorPlayerBody = QColor(0, 150, 0)
+        colorPlayerDark = QColor(0, 100, 0)
+        colorEnemyBody = QColor(200, 50, 50)
+        colorEnemyDark = QColor(150, 30, 30)
+        colorBarBg = QColor(30, 30, 30)
+        colorExplosionOuter = QColor(255, 100, 0)
+        colorExplosionInner = QColor(255, 255, 0)
+        
+        // 初始化字体
+        fontSmall = QFont("Arial", 14)
+        fontLarge = QFont("Arial", 16)
+        fontTitle = QFont("Arial", 32)
+    }
+    
+    /// 释放缓存的资源
+    public func cleanup(): Unit {
+        colorBlack.delete()
+        colorWhite.delete()
+        colorYellow.delete()
+        colorRed.delete()
+        colorBrick.delete()
+        colorBrickDark.delete()
+        colorSteel.delete()
+        colorSteelDark.delete()
+        colorWaterLight.delete()
+        colorWaterDark.delete()
+        colorBase.delete()
+        colorBaseDark.delete()
+        colorGrass.delete()
+        colorPlayerBody.delete()
+        colorPlayerDark.delete()
+        colorEnemyBody.delete()
+        colorEnemyDark.delete()
+        colorBarBg.delete()
+        colorExplosionOuter.delete()
+        colorExplosionInner.delete()
+        fontSmall.delete()
+        fontLarge.delete()
+        fontTitle.delete()
+        pen.delete()
+        brush.delete()
+    }
     
     public func render(painterPtr: Int64): Unit {
         let painter = QPainter.fromPtr(painterPtr)
         painter.setRenderHint(RenderHint.Antialiasing)
         
-        painter.fillRectColor(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, Colors.black())
+        painter.fillRectColor(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, colorBlack)
         
         renderMap(painter)
         renderBullets(painter)
@@ -568,15 +651,15 @@ public class GameRenderer {
                 if (gMap[y][x] == TILE_GRASS) {
                     let px = Int32(x * TILE_SIZE)
                     let py = Int32(y * TILE_SIZE)
-                    painter.fillRectColor(px, py, TS, TS, QColor(34, 139, 34))
+                    painter.fillRectColor(px, py, TS, TS, colorGrass)
                 }
             }
         }
     }
     
     private func renderBrick(painter: QPainter, x: Int32, y: Int32): Unit {
-        painter.fillRectColor(x, y, TS, TS, QColor(139, 69, 19))
-        pen.setColor(QColor(101, 67, 33))
+        painter.fillRectColor(x, y, TS, TS, colorBrick)
+        pen.setColor(colorBrickDark)
         pen.setWidth(1)
         painter.setPen(pen)
         
@@ -588,8 +671,8 @@ public class GameRenderer {
     }
     
     private func renderSteel(painter: QPainter, x: Int32, y: Int32): Unit {
-        painter.fillRectColor(x, y, TS, TS, QColor(169, 169, 169))
-        pen.setColor(QColor(105, 105, 105))
+        painter.fillRectColor(x, y, TS, TS, colorSteel)
+        pen.setColor(colorSteelDark)
         pen.setWidth(2)
         painter.setPen(pen)
         painter.drawRect(x + 2, y + 2, TS - 4, TS - 4)
@@ -599,16 +682,17 @@ public class GameRenderer {
     
     private func renderWater(painter: QPainter, x: Int32, y: Int32): Unit {
         let gradient = QLinearGradient.fromInt(x, y, x, y + TS)
-        gradient.setColorAt(0.0f32, QColor(0, 100, 200))
-        gradient.setColorAt(1.0f32, QColor(0, 50, 150))
+        gradient.setColorAt(0.0f32, colorWaterLight)
+        gradient.setColorAt(1.0f32, colorWaterDark)
         brush = QBrush(gradient)
         painter.setBrush(brush)
         painter.fillRect(x, y, TS, TS, brush)
+        gradient.delete()  // 释放渐变
     }
     
     private func renderBase(painter: QPainter, x: Int32, y: Int32): Unit {
-        painter.fillRectColor(x, y, TS, TS, QColor(255, 215, 0))
-        pen.setColor(QColor(184, 134, 11))
+        painter.fillRectColor(x, y, TS, TS, colorBase)
+        pen.setColor(colorBaseDark)
         pen.setWidth(2)
         painter.setPen(pen)
         painter.drawRect(x + 4, y + 4, TS - 8, TS - 8)
@@ -619,15 +703,12 @@ public class GameRenderer {
     private func renderPlayer(painter: QPainter): Unit {
         if (!gPlayerAlive) { return }
         
-        let bodyColor = QColor(0, 150, 0)
-        let darkColor = QColor(0, 100, 0)
+        painter.fillRectColor(gPlayerX, gPlayerY, 6, TS, colorPlayerDark)
+        painter.fillRectColor(gPlayerX + TS - 6, gPlayerY, 6, TS, colorPlayerDark)
+        painter.fillRectColor(gPlayerX + 6, gPlayerY + 4, TS - 12, TS - 8, colorPlayerBody)
+        painter.fillRectColor(gPlayerX + 8, gPlayerY + 8, TS - 16, TS - 16, colorPlayerDark)
         
-        painter.fillRectColor(gPlayerX, gPlayerY, 6, TS, darkColor)
-        painter.fillRectColor(gPlayerX + TS - 6, gPlayerY, 6, TS, darkColor)
-        painter.fillRectColor(gPlayerX + 6, gPlayerY + 4, TS - 12, TS - 8, bodyColor)
-        painter.fillRectColor(gPlayerX + 8, gPlayerY + 8, TS - 16, TS - 16, darkColor)
-        
-        pen.setColor(darkColor)
+        pen.setColor(colorPlayerDark)
         pen.setWidth(4)
         painter.setPen(pen)
         
@@ -645,15 +726,12 @@ public class GameRenderer {
             let (x, y, dir, alive, _) = enemy
             if (!alive) { continue }
             
-            let bodyColor = QColor(200, 50, 50)
-            let darkColor = QColor(150, 30, 30)
+            painter.fillRectColor(x, y, 6, TS, colorEnemyDark)
+            painter.fillRectColor(x + TS - 6, y, 6, TS, colorEnemyDark)
+            painter.fillRectColor(x + 6, y + 4, TS - 12, TS - 8, colorEnemyBody)
+            painter.fillRectColor(x + 8, y + 8, TS - 16, TS - 16, colorEnemyDark)
             
-            painter.fillRectColor(x, y, 6, TS, darkColor)
-            painter.fillRectColor(x + TS - 6, y, 6, TS, darkColor)
-            painter.fillRectColor(x + 6, y + 4, TS - 12, TS - 8, bodyColor)
-            painter.fillRectColor(x + 8, y + 8, TS - 16, TS - 16, darkColor)
-            
-            pen.setColor(darkColor)
+            pen.setColor(colorEnemyDark)
             pen.setWidth(4)
             painter.setPen(pen)
             
@@ -672,8 +750,8 @@ public class GameRenderer {
             let (x, y, _, active, isPlayer) = bullet
             if (!active) { continue }
             
-            let color = if (isPlayer) { Colors.yellow() } else { Colors.red() }
-            brush = QBrush(color)
+            let color = if (isPlayer) { colorYellow } else { colorRed }
+            brush.setColor(color)
             painter.setBrush(brush)
             painter.drawCircle(x, y, 4)
         }
@@ -688,26 +766,28 @@ public class GameRenderer {
             let radius = Int32(Float32(20) * (1.0f32 - progress * 0.5f32))
             let alpha = Int32(255.0f32 * (1.0f32 - progress))
             
+            // 创建带透明度的临时颜色
             let outerColor = QColor.rgba(255, 100, 0, alpha)
-            brush = QBrush(outerColor)
+            brush.setColor(outerColor)
             painter.setBrush(brush)
             painter.drawCircle(x, y, radius)
+            outerColor.delete()  // 释放临时颜色
             
             let innerColor = QColor.rgba(255, 255, 0, alpha)
-            brush = QBrush(innerColor)
+            brush.setColor(innerColor)
             painter.setBrush(brush)
             painter.drawCircle(x, y, radius / 2)
+            innerColor.delete()  // 释放临时颜色
         }
     }
     
     private func renderStatusBar(painter: QPainter): Unit {
         let barY = WINDOW_HEIGHT - 55
         
-        painter.fillRectColor(0, barY, WINDOW_WIDTH, 55, QColor(30, 30, 30))
+        painter.fillRectColor(0, barY, WINDOW_WIDTH, 55, colorBarBg)
         
-        let font = QFont("Arial", 14)
-        painter.setFont(font)
-        pen.setColor(Colors.white())
+        painter.setFont(fontSmall)
+        pen.setColor(colorWhite)
         painter.setPen(pen)
         painter.drawText(10, barY + 20, "分数: ${gScore}")
         painter.drawText(10, barY + 40, "生命: ${gPlayerLives}")
@@ -723,18 +803,16 @@ public class GameRenderer {
     
     private func renderGameOver(painter: QPainter): Unit {
         painter.setOpacity(0.7f32)
-        painter.fillRectColor(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, Colors.black())
+        painter.fillRectColor(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, colorBlack)
         painter.setOpacity(1.0f32)
         
-        let font = QFont("Arial", 32)
-        painter.setFont(font)
-        pen.setColor(Colors.red())
+        painter.setFont(fontTitle)
+        pen.setColor(colorRed)
         painter.setPen(pen)
         painter.drawTextRect(WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2 - 50, 200, 50, TextFlag.AlignCenter, "游戏结束")
         
-        let font2 = QFont("Arial", 16)
-        painter.setFont(font2)
-        pen.setColor(Colors.white())
+        painter.setFont(fontLarge)
+        pen.setColor(colorWhite)
         painter.setPen(pen)
         painter.drawTextRect(WINDOW_WIDTH / 2 - 80, WINDOW_HEIGHT / 2 + 20, 160, 30, TextFlag.AlignCenter, "最终分数: ${gScore}")
         painter.drawTextRect(WINDOW_WIDTH / 2 - 80, WINDOW_HEIGHT / 2 + 50, 160, 30, TextFlag.AlignCenter, "按 R 重新开始")
@@ -744,7 +822,7 @@ public class GameRenderer {
 // ============================================================
 // 主函数
 // ============================================================
-main() {
+main(): Int32 {
     gApp = QApplication()
     gWidget = QEventWidget()
     gTimer = QTimer()
@@ -785,7 +863,29 @@ main() {
         t.start()
     }
     
+    var result: Int32 = 0
     if (let Some(a) <- gApp) {
-        a.exec()
+        result = a.exec()
     }
+    
+    // 清理资源
+    if (let Some(t) <- gTimer) {
+        t.stop()
+        t.delete()
+    }
+    if (let Some(r) <- gRenderer) {
+        r.cleanup()
+    }
+    if (let Some(w) <- gWidget) {
+        w.delete()
+    }
+    if (let Some(p) <- gMusicPlayer) {
+        p.stop()
+        p.delete()
+    }
+    if (let Some(ao) <- gAudioOutput) {
+        ao.delete()
+    }
+    
+    return result
 }
