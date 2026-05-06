@@ -35,14 +35,14 @@ jobs:
       - name: Verify build
         run: |
           cd native/build-linux-x64
-          file libcjfw_bridge.so
-          ldd libcjfw_bridge.so || true
+          file libCJQT6_bridge.so
+          ldd libCJQT6_bridge.so || true
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
           name: bridge-linux-x64
-          path: native/build-linux-x64/libcjfw_bridge.so
+          path: native/build-linux-x64/libCJQT6_bridge.so
 
   build-windows-x64:
     runs-on: windows-2022
@@ -67,13 +67,13 @@ jobs:
       - name: Verify build
         run: |
           cd native\build-windows-x64\Release
-          dumpbin /headers cjfw_bridge.dll || true
+          dumpbin /headers CJQT6_bridge.dll || true
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
           name: bridge-windows-x64
-          path: native/build-windows-x64/Release/cjfw_bridge.dll
+          path: native/build-windows-x64/Release/CJQT6_bridge.dll
 
   build-macos-x64:
     runs-on: macos-12
@@ -95,14 +95,14 @@ jobs:
       - name: Verify build
         run: |
           cd native/build-macos-x64
-          file libcjfw_bridge.dylib
-          otool -L libcjfw_bridge.dylib || true
+          file libCJQT6_bridge.dylib
+          otool -L libCJQT6_bridge.dylib || true
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
           name: bridge-macos-x64
-          path: native/build-macos-x64/libcjfw_bridge.dylib
+          path: native/build-macos-x64/libCJQT6_bridge.dylib
 
   build-macos-arm64:
     runs-on: macos-12
@@ -124,14 +124,14 @@ jobs:
       - name: Verify build
         run: |
           cd native/build-macos-arm64
-          file libcjfw_bridge.dylib
-          otool -L libcjfw_bridge.dylib || true
+          file libCJQT6_bridge.dylib
+          otool -L libCJQT6_bridge.dylib || true
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
           name: bridge-macos-arm64
-          path: native/build-macos-arm64/libcjfw_bridge.dylib
+          path: native/build-macos-arm64/libCJQT6_bridge.dylib
 
   collect-artifacts:
     needs: [build-linux-x64, build-windows-x64, build-macos-x64, build-macos-arm64]
