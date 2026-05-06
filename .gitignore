@@ -5,10 +5,12 @@ target/
 *.so
 *.a
 *.cjo
+lib/
 
 # IDE配置
 .vscode/
 .idea/
+.arts/
 
 # 系统文件
 .DS_Store
@@ -18,11 +20,50 @@ Thumbs.db
 *.log
 *.tmp
 *~
+*.bak
+*.txt
+!.gitignore
+!.gitattributes
+
+# 备份目录
+.backup/
 
 # cjpm缓存
 .cjpm-cache
 .dep-cache
 .cjpm-history
+cjpm.lock
 
 # LSP缓存
 .cache/
+
+# CodeArts Doer
+.codeartsdoer/
+
+# CMake构建
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+*.cmake
+!CMakeLists.txt
+
+# Visual Studio
+*.vcxproj
+*.vcxproj.filters
+*.sln
+*.slnx
+
+# Qt CMake
+.qt/
+native/build*/
+native/CMakeFiles/
+native/.qt/
+native/*.vcxproj*
+native/*.sln*
+native/*.cmake
+!native/CMakeLists.txt
+!native/cmake/
+
+# 测试目录
+test_deploy/
+test_paint/
