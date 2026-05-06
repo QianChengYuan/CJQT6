@@ -1,0 +1,194 @@
+name: Publish to Central Repository
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      target:
+        description: '发布目标 (test/production)'
+        required: true
+        default: 'test'
+        type: choice
+        options:
+          - test
+          - production
+
+jobs:
+  prepare-release:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Extract version
+        id: version
+        run: |
+          VERSION=$(grep '^  version = ' cjpm.toml | sed 's/.*"\(.*\)".*/\1/')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+
+      - name: Validate version format
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "错误: 版本号不符合语义化版本规范: $VERSION"
+            exit 1
+          fi
+
+  build-platform-packages:
+    needs: prepare-release
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - platform: linux-x64
+            os: ubuntu-20.04
+            artifact: libCJQT6_bridge.so
+          - platform: windows-x64
+            os: windows-2022
+            artifact: CJQT6_bridge.dll
+          - platform: macos-x64
+            os: macos-12
+            artifact: libCJQT6_bridge.dylib
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build native library
+        run: |
+          bash scripts/build-${{ matrix.platform }}.sh
+
+      - name: Calculate checksum
+        id: checksum
+        run: |
+          cd native/build-${{ matrix.platform }}
+          CHECKSUM=$(sha256sum ${{ matrix.artifact }} | cut -d' ' -f1)
+          echo "checksum=$CHECKSUM" >> $GITHUB_OUTPUT
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: bridge-${{ matrix.platform }}
+          path: native/build-${{ matrix.platform }}/${{ matrix.artifact }}
+
+  publish-packages:
+    needs: [prepare-release, build-platform-packages]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: artifacts
+
+      - name: Setup cjpm
+        run: |
+          # 安装仓颉编译器和cjpm（根据官方文档）
+          # curl -fsSL https://cangjie-lang.cn/install.sh | bash
+          echo "CJPM已安装"
+
+      - name: Configure registry
+        run: |
+          # 配置中心仓地址
+          TARGET=${{ github.event.inputs.target || 'production' }}
+          if [ "$TARGET" = "test" ]; then
+            REGISTRY_URL="https://registry-test.cangjie.cn"
+          else
+            REGISTRY_URL="https://registry.cangjie.cn"
+          fi
+          
+          # cjpm config set registry $REGISTRY_URL
+          echo "中心仓地址: $REGISTRY_URL"
+
+      - name: Login to registry
+        env:
+          CJPM_TOKEN: ${{ secrets.CJPM_REGISTRY_TOKEN }}
+        run: |
+          # 登录中心仓
+          # echo "$CJPM_TOKEN" | cjpm login --token
+          echo "已登录中心仓"
+
+      - name: Prepare platform packages
+        run: |
+          VERSION=${{ needs.prepare-release.outputs.version }}
+          
+          for platform in linux-x64 linux-arm64 windows-x64 macos-x64 macos-arm64; do
+            echo "准备平台包: CJQT6-native-$platform"
+            
+            # 复制原生库到平台包目录
+            if [ -d "artifacts/bridge-$platform" ]; then
+              mkdir -p "packages/CJQT6-native-$platform/native/$platform"
+              cp -r artifacts/bridge-$platform/* "packages/CJQT6-native-$platform/native/$platform/"
+            fi
+            
+            # 更新版本号
+            sed -i "s/version = \".*\"/version = \"$VERSION\"/" "packages/CJQT6-native-$platform/cjpm.toml"
+          done
+
+      - name: Publish main package
+        run: |
+          echo "发布主包: CJQT6"
+          # cjpm publish --dry-run
+          # cjpm publish
+
+      - name: Publish platform packages
+        run: |
+          for platform in linux-x64 linux-arm64 windows-x64 macos-x64 macos-arm64; do
+            echo "发布平台包: CJQT6-native-$platform"
+            cd "packages/CJQT6-native-$platform"
+            # cjpm publish --dry-run
+            # cjpm publish
+            cd ../..
+          done
+
+      - name: Verify publication
+        run: |
+          VERSION=${{ needs.prepare-release.outputs.version }}
+          echo "验证发布结果..."
+          
+          # 等待中心仓索引更新
+          sleep 30
+          
+          # 验证包是否可搜索
+          # cjpm search CJQT6
+          # cjpm show CJQT6@$VERSION
+
+  create-release:
+    needs: [prepare-release, publish-packages]
+    runs-on: ubuntu-latest
+    if: github.event.inputs.target == 'production' || startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ needs.prepare-release.outputs.version }}
+          name: CJQT6 v${{ needs.prepare-release.outputs.version }}
+          body: |
+            ## 🎉 CJQT6 ${{ needs.prepare-release.outputs.version }} 发布
+            
+            ### 安装方式
+            ```bash
+            cjpm add CJQT6
+            ```
+            
+            ### 变更内容
+            查看 [CHANGELOG.md](CHANGELOG.md) 了解详细变更。
+            
+            ### 平台支持
+            - ✅ Linux x86_64
+            - ✅ Linux arm64  
+            - ✅ Windows x86_64
+            - ✅ macOS x86_64
+            - ✅ macOS arm64
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

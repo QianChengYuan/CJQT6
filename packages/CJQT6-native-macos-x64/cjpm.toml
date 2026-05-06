@@ -1,0 +1,20 @@
+[package]
+  name = "CJQT6-native-macos-x64"
+  version = "1.0.0"
+  description = "CJQT6 FFI Bridge Library for macOS x86_64"
+  author = "CJQT6 Team"
+  license = "MIT"
+  
+  platform = "macos-x64"
+  cjc-version = ">=1.1.0"
+  output-type = "native"
+
+[native]
+  library = "libCJQT6_bridge.dylib"
+  path = "native/macos-x64"
+
+[metadata]
+  category = "native-library"
+  parent = "CJQT6"
+  architecture = "x86_64"
+  os = "macos"

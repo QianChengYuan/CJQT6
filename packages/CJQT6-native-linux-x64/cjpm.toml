@@ -1,0 +1,27 @@
+[package]
+  name = "CJQT6-native-linux-x64"
+  version = "1.0.0"
+  description = "CJQT6 FFI Bridge Library for Linux x86_64"
+  author = "CJQT6 Team"
+  license = "MIT"
+  
+  # 平台限制
+  platform = "linux-x64"
+  cjc-version = ">=1.1.0"
+  
+  # 包输出类型（原生库）
+  output-type = "native"
+
+[native]
+  # 原生库文件
+  library = "libCJQT6_bridge.so"
+  path = "native/linux-x64"
+  
+  # 校验和（构建时自动计算）
+  # checksum = ""
+
+[metadata]
+  category = "native-library"
+  parent = "CJQT6"
+  architecture = "x86_64"
+  os = "linux"
