@@ -1,13 +1,75 @@
 [package]
-  cjc-version = "1.1.0"
   name = "CJQT6"
-  description = "仓颉语言的Qt6封装库"
   version = "1.0.0"
-  target-dir = ""
+  description = "仓颉语言的Qt6封装库 - 让仓颉像Python使用PyQt一样便捷"
+  author = "CJQT6 Team"
+  license = "MIT"
+  
+  # 仓颉编译器版本要求
+  cjc-version = ">=1.1.0"
+  
+  # 包输出类型
   output-type = "static"
-  compile-option = ""
-  override-compile-option = ""
-  link-option = "-LC:/CodeTools/cangjie_git/CJQT6/test_deploy -lcjqt6_bridge"
-  package-configuration = {}
+  
+  # 编译选项
+  compile-option = "-Woff unused"
+  link-option = "-lcjfw_bridge"
+  
+  # 项目链接
+  homepage = "https://github.com/your-repo/CJQT6"
+  repository = "https://github.com/your-repo/CJQT6.git"
+  documentation = "https://your-repo.github.io/CJQT6/"
+  
+  # 关键词标签
+  keywords = ["qt", "gui", "ui", "widgets", "ffi", "cross-platform"]
 
 [dependencies]
+# 无仓颉运行时依赖
+
+# FFI桥接库配置
+[native]
+  bridge-name = "cjfw_bridge"
+  bridge-path = "lib/native"
+  
+  # 支持的平台列表
+  platforms = [
+    "linux-x64",
+    "linux-arm64",
+    "windows-x64",
+    "macos-x64",
+    "macos-arm64"
+  ]
+
+# 平台到二进制文件的映射
+[native.binaries]
+  linux-x64 = "lib/native/linux-x64/libcjfw_bridge.so"
+  linux-arm64 = "lib/native/linux-arm64/libcjfw_bridge.so"
+  windows-x64 = "lib/native/windows-x64/cjfw_bridge.dll"
+  macos-x64 = "lib/native/macos-x64/libcjfw_bridge.dylib"
+  macos-arm64 = "lib/native/macos-arm64/libcjfw_bridge.dylib"
+
+# 系统依赖要求
+[requirements]
+  qt6 = ">=6.2"
+  cmake = ">=3.16"
+
+# 平台特定要求
+[requirements.platform.linux]
+  glibc = ">=2.28"
+
+[requirements.platform.windows]
+  msvc = ">=2019"
+
+[requirements.platform.macos]
+  macos = ">=11.0"
+
+# 安装后脚本
+[install]
+  post-install = "scripts/post_install.cj"
+  verify-script = "scripts/verify_install.cj"
+
+# 包元数据
+[metadata]
+  category = "gui"
+  maturity = "stable"
+  tags = ["desktop", "cross-platform", "native"]
