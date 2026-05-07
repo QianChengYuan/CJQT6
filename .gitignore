@@ -71,6 +71,12 @@ native/*.cmake
 test_deploy/
 test_paint/
 
+# 示例媒体文件（太大）
+examples/music_player/music/*.mp3
+examples/multimedia_demo/*.mp3
+*.wav
+*.ogg
+
 # 打包文件（发行版使用）
 *.cjp
 
