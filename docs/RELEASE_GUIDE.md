@@ -1,130 +1,88 @@
-# CJQT6 发布操作指南
+# CJQT6 发布操作指南（更新版）
 
-## 发布流程概述
+## 正确的发布命令
 
-```
-本地测试发布 → 验证成功 → 发布到官网 → 最终验证
-```
+根据仓颉中心仓官方文档，发布流程如下：
 
-## 第一步：本地测试发布
+1. **打包**：`cjpm bundle`
+2. **发布**：`cjpm publish`
 
-### 1.1 配置中心仓Token
+## 发布前准备
 
-确认 `~/.cjpm/cangjie-repo.toml` 已配置token：
+### 1. 检查 cjpm.toml 必需字段
+
+确保包含以下字段：
+- `name` - 模块名 ✅
+- `version` - 版本号 ✅
+- `description` - 描述信息（必须）
+- `cjc-version` - 仓颉版本要求 ✅
+- `output-type` - 输出类型 ✅
+
+### 2. 检查文档文件
+
+根目录必须包含：
+- `README.md` 或 `README_zh.md` ✅
+
+### 3. 配置打包范围
+
+在 `cjpm.toml` 中添加：
 
 ```toml
-[repository.home]
-  registry = "https://pkg.cangjie-lang.cn/registry"
-  token = "your-token-here"  # ← 确认已填写
+[package]
+  # ... 其他配置
+  
+  # 打包范围
+  include = ["src", "doc", "docs"]
+  exclude = ["*.txt", "*.log", "*.bak"]
 ```
 
-### 1.2 验证包完整性
+## 发布流程
+
+### 第一步：验证包完整性
 
 ```bash
-# 运行包验证脚本
-bash scripts/verify-package.sh
-
-# 确认所有检查项通过
-```
-
-### 1.3 测试发布流程（dry-run）
-
-```bash
-# 打包但不发布（测试模式）
-cjpm pack --dry-run
-
-# 检查生成的包结构
-ls -lh *.cjpkg
-```
-
-### 1.4 发布到测试环境
-
-如果中心仓支持测试仓库：
-
-```bash
-# 修改配置指向测试仓库
-# 在 cangjie-repo.toml 中修改 registry
-
-# 发布
-cjpm pack
-cjpm publish
-
-# 验证测试发布
-cjpm search CJQT6
-cjpm show CJQT6@1.0.0
-```
-
-## 第二步：正式发布到官网
-
-### 2.1 最终检查
-
-```bash
-# 1. 确认版本号
-grep "version" cjpm.toml
-
-# 2. 确认所有文件已提交
-git status
-
-# 3. 确认文档已更新
-cat CHANGELOG.md | head -20
-
-# 4. 最后一次验证包
 bash scripts/verify-package.sh
 ```
 
-### 2.2 发布主包
+### 第二步：打包
 
 ```bash
-# 打包
-cjpm pack
+# 打包模块（生成 target/CJQT6-1.0.0.cjp）
+cjpm bundle
 
-# 发布
+# 查看生成的制品包
+ls -lh target/*.cjp
+ls -lh target/meta-data.json
+```
+
+打包流程会：
+1. 检查模块配置
+2. 编译检查
+3. 运行测试（除非 --skip-test）
+4. 代码静态检查（除非 --skip-lint）
+5. 生成制品包 `CJQT6-1.0.0.cjp`
+6. 生成元数据 `meta-data.json`
+
+### 第三步：发布到中心仓
+
+```bash
+# 发布到中心仓
 cjpm publish
-
-# 查看发布结果
-echo "主包发布完成"
 ```
 
-### 2.3 发布平台包（如需要）
+发布前会自动检查：
+- 编译产物目录中是否存在制品包
+- 元数据文件是否存在
+- 校验码是否匹配
+
+如不存在会自动重新执行 `bundle`
+
+### 第四步：验证发布结果
 
 ```bash
-# 发布各平台原生库包
-for platform in linux-x64 linux-arm64 windows-x64 macos-x64 macos-arm64; do
-    echo "发布平台包: $platform"
-    cd "packages/CJQT6-native-$platform"
-    cjpm pack
-    cjpm publish
-    cd ../..
-    echo "$platform 发布完成"
-    echo ""
-done
-```
-
-### 2.4 创建Git标签
-
-```bash
-# 创建版本标签
-git tag -a v1.0.0 -m "Release v1.0.0"
-
-# 推送标签
-git push origin v1.0.0
-
-# 验证标签
-git tag -l
-```
-
-## 第三步：发布后验证
-
-### 3.1 等待索引更新
-
-```bash
-# 等待5-10分钟，让中心仓索引更新
+# 等待几分钟让索引更新
 sleep 300
-```
 
-### 3.2 验证包可搜索
-
-```bash
 # 搜索包
 cjpm search CJQT6
 
@@ -132,145 +90,153 @@ cjpm search CJQT6
 cjpm show CJQT6@1.0.0
 ```
 
-### 3.3 测试安装
+### 第五步：测试安装
 
 ```bash
 # 创建测试项目
-cjpm init test-install
-cd test-install
+cjpm init test-cjqt6
+cd test-cjqt6
 
 # 安装CJQT6
 cjpm add CJQT6
 
-# 检查安装结果
-ls -lh .cjpm/repository/CJQT6/
-
-# 测试运行（如果有示例）
-cjpm run
+# 查看安装结果
+ls -la .cjpm/repository/
 ```
 
-## 第四步：发布公告
+## 打包范围说明
 
-### 4.1 更新GitHub Release
+### 默认打包的文件
 
-访问：https://gitcode.com/yuan_1992/CJQT6/-/releases
+- `cjpm.toml`
+- `README.md` 和 `README_zh.md`
 
-创建新Release，内容参考：
+### 默认不打包的文件
 
-```markdown
-## CJQT6 v1.0.0 发布
+- `cjpm.lock`
+- `cangjie-repo.toml`
+- 编译产物目录
+- 构建脚本产物目录
+- 所有二进制文件
 
-### 安装方式
-\`\`\`bash
+### 自定义打包范围
+
+在 `cjpm.toml` 中配置：
+
+```toml
+[package]
+  # 包含 src 和 doc 目录
+  include = ["src", "doc", "docs"]
+  
+  # 排除临时文件
+  exclude = ["*.txt", "*.log", "*.bak", "test_*"]
+```
+
+## 常用命令
+
+```bash
+# 打包（跳过测试和静态检查）
+cjpm bundle --skip-test --skip-lint
+
+# 完整打包（运行测试和静态检查）
+cjpm bundle
+
+# 发布
+cjpm publish
+
+# 搜索包
+cjpm search CJQT6
+
+# 查看包详情
+cjpm show CJQT6@1.0.0
+
+# 安装包
 cjpm add CJQT6
-\`\`\`
-
-### 主要特性
-- 完整的Qt6控件封装
-- FFI桥接技术
-- 跨平台支持（Linux/Windows/macOS）
-- 仓颉原生API风格
-
-### 平台支持
-- ✅ Linux x86_64/arm64
-- ✅ Windows x86_64
-- ✅ macOS x86_64/arm64
-
-### 文档
-- [快速开始](docs/quick-start.md)
-- [API文档](docs/api/)
-- [安装指南](docs/installation.md)
-
-### 更新日志
-查看 [CHANGELOG.md](CHANGELOG.md)
-```
-
-### 4.2 发布公告
-
-在社区或社交媒体发布公告（可选）
-
-## 常见问题处理
-
-### Q: 发布失败，提示认证错误
-
-```bash
-# 检查token配置
-cat ~/.cjpm/cangjie-repo.toml
-
-# 重新生成token
-# 访问中心仓 → 用户设置 → 生成新token
-```
-
-### Q: 发布成功但搜索不到
-
-```bash
-# 等待索引更新（5-10分钟）
-# 或手动刷新索引
-cjpm update
-```
-
-### Q: 如何发布新版本
-
-```bash
-# 1. 更新版本号
-# 修改 cjpm.toml 中的 version
-
-# 2. 更新CHANGELOG
-# 记录变更内容
-
-# 3. 提交代码
-git commit -am "chore: bump version to 1.0.1"
-
-# 4. 发布
-cjpm pack && cjpm publish
-
-# 5. 打标签
-git tag v1.0.1
-git push origin v1.0.1
 ```
 
 ## 发布检查清单
 
-### 发布前
-- [ ] Token已配置
-- [ ] 包验证通过
-- [ ] 文档已更新
-- [ ] CHANGELOG已更新
-- [ ] 本地测试通过
+### 打包前
+- [ ] cjpm.toml 包含 description 字段
+- [ ] README.md 存在
+- [ ] include/exclude 配置正确
+- [ ] 版本号已更新
 
-### 发布时
-- [ ] 主包打包成功
-- [ ] 主包发布成功
-- [ ] 平台包发布成功（如需）
-- [ ] Git标签已创建
+### 打包后
+- [ ] target/CJQT6-1.0.0.cjp 生成成功
+- [ ] target/meta-data.json 生成成功
+- [ ] 包大小合理
+
+### 发布前
+- [ ] token 已配置
+- [ ] 制品包完整
 
 ### 发布后
 - [ ] 包可搜索
 - [ ] 包详情正确
 - [ ] 安装测试成功
-- [ ] GitHub Release已创建
-- [ ] 发布公告已完成
 
-## 相关命令速查
+## 故障排查
+
+### Q: bundle 失败，提示缺少 description
 
 ```bash
-# 包管理
-cjpm pack              # 打包
-cjpm publish           # 发布
-cjpm search <name>     # 搜索包
-cjpm show <name>@<ver> # 查看包详情
-cjpm add <name>        # 安装包
-cjpm update            # 更新索引
+# 在 cjpm.toml 中添加 description
+[package]
+  description = "仓颉语言的Qt6封装库"
+```
 
-# 验证
-bash scripts/verify-package.sh  # 包验证
-bash scripts/test-publish.sh    # 测试发布
+### Q: bundle 失败，提示缺少 README
 
-# Git
-git tag v1.0.0         # 创建标签
-git push origin --tags # 推送标签
+```bash
+# 确保根目录有 README.md
+ls README.md
+```
+
+### Q: publish 失败，提示认证错误
+
+```bash
+# 检查 token 配置
+cat ~/.cjpm/cangjie-repo.toml
+```
+
+### Q: publish 失败，提示包已存在
+
+```bash
+# 更新版本号
+# 修改 cjpm.toml 中的 version
+
+# 重新打包和发布
+cjpm bundle
+cjpm publish
+```
+
+## 完整示例
+
+```bash
+# 1. 验证包
+bash scripts/verify-package.sh
+
+# 2. 打包
+cjpm bundle
+
+# 3. 检查制品包
+ls -lh target/CJQT6-1.0.0.cjp
+ls -lh target/meta-data.json
+
+# 4. 发布
+cjpm publish
+
+# 5. 验证
+sleep 300
+cjpm search CJQT6
+cjpm show CJQT6@1.0.0
+
+# 6. 测试安装
+cjpm init test-app && cd test-app
+cjpm add CJQT6
 ```
 
 ---
 
-*祝发布顺利！* 🎉
+*正确的命令：`cjpm bundle` 打包，`cjpm publish` 发布*

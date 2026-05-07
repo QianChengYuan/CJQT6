@@ -22,6 +22,10 @@
   
   # 关键词标签
   keywords = ["qt", "gui", "ui", "widgets", "ffi", "cross-platform"]
+  
+  # 打包范围
+  include = ["src", "doc", "docs", "examples", "native/includes"]
+  exclude = ["*.txt", "*.log", "*.bak", "*.tmp", "test_*", "build_*"]
 
 [dependencies]
 # 平台原生库包（条件依赖）
