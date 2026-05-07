@@ -46,7 +46,7 @@ echo %QTDIR%
 ### 1. 克隆项目
 
 ```bash
-git clone https://github.com/your-repo/CJQT6.git
+git clone https://gitcode.com/yuan_1992/CJQT6.git
 cd CJQT6
 ```
 
@@ -94,11 +94,11 @@ cjpm build
 
 ```bash
 # 验证FFI桥接库 (Linux/macOS)
-ls native/build/lib/libcjfw_bridge.so    # Linux
-ls native/build/lib/libcjfw_bridge.dylib # macOS
+ls build/lib/libcjqt6_bridge.so    # Linux
+ls build/lib/libcjqt6_bridge.dylib # macOS
 
 # 验证FFI桥接库 (Windows PowerShell)
-dir native\build_win64\bin\libjfw_bridge.dll
+dir build\bin\libcjqt6_bridge.dll
 ```
 
 ### 4. 运行示例
@@ -112,8 +112,8 @@ cjpm run --example hello_window
 ### 5分钟最小示例
 
 ```cangjie
-import CJQT6.core.*
-import CJQT6.widgets.*
+import cjqt6.core.*
+import cjqt6.widgets.*
 
 main() {
     let app = QApplication()
@@ -229,8 +229,11 @@ CJQT6/
 
 ## 联系方式
 
-- 项目主页：https://github.com/your-repo/CJQT6
-- 问题反馈：https://github.com/your-repo/CJQT6/issues
+- 项目主页：https://gitcode.com/yuan_1992/CJQT6
+- 问题反馈：https://gitcode.com/yuan_1992/CJQT6/-/issues
+- QQ群：1023882445
+
+欢迎加入QQ群交流讨论！
 
 ## 致谢
 
