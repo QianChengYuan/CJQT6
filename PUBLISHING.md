@@ -132,7 +132,7 @@ CJQT6采用**平台分包策略**，用户安装时自动下载对应平台的�
 
 配置步骤：
 
-1. 访问中心仓，生成发布token
+1. 访问中心仓 https://pkg.cangjie-lang.cn/index，生成发布token
 2. 在GitCode仓库设置中添加Secret
 3. 工作流会自动使用Secret
 
@@ -162,7 +162,7 @@ CJQT6采用**平台分包策略**，用户安装时自动下载对应平台的�
 
 ## 相关资源
 
-- [仓颉中心仓文档](https://cangjie-lang.cn/docs/package-manager)
+- [仓颉中心仓文档](https://pkgdocs.cangjie-lang.cn/docs/zh/1.0.0/central-repo/source_zh_cn/client/config.html)
 - [语义化版本规范](https://semver.org/lang/zh-CN/)
 - [GitHub Actions文档](https://docs.github.com/actions)
 

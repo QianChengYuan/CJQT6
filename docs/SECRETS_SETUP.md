@@ -9,14 +9,14 @@ GitHub Secrets用于安全地存储敏感信息，如发布token。工作流会�
 | Secret名称 | 说明 | 是否必需 | 默认值 |
 |-----------|------|---------|--------|
 | CJPM_REGISTRY_TOKEN | 仓颉中心仓发布token | ✅ 必需 | 无 |
-| CJPM_REGISTRY_URL | 中心仓地址 | ⭕ 可选 | https://registry.cangjie.cn |
+| CJPM_REGISTRY_URL | 中心仓地址 | ⭕ 可选 | https://pkg.cangjie-lang.cn/index |
 
 ## 配置步骤
 
 ### 步骤1：获取中心仓发布Token
 
 1. **登录仓颉中心仓**
-   - 访问：https://registry.cangjie.cn（或官方提供的地址）
+   - 访问：https://pkg.cangjie-lang.cn/index
    - 使用您的账号登录
 
 2. **生成发布Token**
@@ -126,7 +126,7 @@ GitHub Secrets不会自动复制到fork的仓库
 ## 参考链接
 
 - [GitHub Actions Secrets文档](https://docs.github.com/actions/security-guides/encrypted-secrets)
-- [仓颉中心仓API文档](https://cangjie-lang.cn/docs/registry-api)
+- [仓颉中心仓文档](https://pkgdocs.cangjie-lang.cn/docs/zh/1.0.0/central-repo/source_zh_cn/client/config.html)
 
 ---
 

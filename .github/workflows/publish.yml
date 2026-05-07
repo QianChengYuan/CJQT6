@@ -98,11 +98,7 @@ jobs:
         run: |
           # 配置中心仓地址
           TARGET=${{ github.event.inputs.target || 'production' }}
-          if [ "$TARGET" = "test" ]; then
-            REGISTRY_URL="https://registry-test.cangjie.cn"
-          else
-            REGISTRY_URL="https://registry.cangjie.cn"
-          fi
+          REGISTRY_URL="https://pkg.cangjie-lang.cn/index"
           
           # cjpm config set registry $REGISTRY_URL
           echo "中心仓地址: $REGISTRY_URL"
