@@ -1,5 +1,5 @@
-#ifndef CJQT6_CORE_H
-#define CJQT6_CORE_H
+#ifndef CJFW_CORE_H
+#define CJFW_CORE_H
 
 // 标准C库 - 必须放在所有其他头文件之前
 #include <cstddef>
@@ -22,7 +22,7 @@
 #include "types.h"
 #include "cj_string.h"
 
-namespace cjqt6 {
+namespace cjfw {
 
 // ============================================================
 // Application - 应用程序类
@@ -145,6 +145,6 @@ private:
     static QMap<QString, QString> s_config;
 };
 
-} // namespace cjqt6
+} // namespace cjfw
 
-#endif // CJQT6_CORE_H
+#endif // CJFW_CORE_H

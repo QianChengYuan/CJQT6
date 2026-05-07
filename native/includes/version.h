@@ -1,10 +1,10 @@
-#ifndef CJQT6_VERSION_H
-#define CJQT6_VERSION_H
+#ifndef CJFW_VERSION_H
+#define CJFW_VERSION_H
 
-namespace cjqt6 {
+namespace cjfw {
 
 /**
- * @brief 获取 CJQT6 库版本
+ * @brief 获取 CJFW 库版本
  * @return 版本字符串
  */
 inline const char* getVersion() {
@@ -12,7 +12,7 @@ inline const char* getVersion() {
 }
 
 /**
- * @brief 获取 CJQT6 库主版本号
+ * @brief 获取 CJFW 库主版本号
  * @return 主版本号
  */
 inline int getMajorVersion() {
@@ -20,7 +20,7 @@ inline int getMajorVersion() {
 }
 
 /**
- * @brief 获取 CJQT6 库次版本号
+ * @brief 获取 CJFW 库次版本号
  * @return 次版本号
  */
 inline int getMinorVersion() {
@@ -28,13 +28,13 @@ inline int getMinorVersion() {
 }
 
 /**
- * @brief 获取 CJQT6 库补丁版本号
+ * @brief 获取 CJFW 库补丁版本号
  * @return 补丁版本号
  */
 inline int getPatchVersion() {
     return 0;
 }
 
-} // namespace cjqt6
+} // namespace cjfw
 
-#endif // CJQT6_VERSION_H
+#endif // CJFW_VERSION_H

@@ -1,5 +1,5 @@
-#ifndef CJQT6_STRING_H
-#define CJQT6_STRING_H
+#ifndef CJFW_STRING_H
+#define CJFW_STRING_H
 
 // 标准C库 - 必须放在所有其他头文件之前
 #include <cstddef>
@@ -14,7 +14,7 @@
 #include <QString>
 #include <QStringList>
 
-namespace cjqt6 {
+namespace cjfw {
 
 /**
  * @brief 仓颉风格的字符串封装
@@ -103,6 +103,6 @@ private:
 // 类型别名
 using Text = String;
 
-} // namespace cjqt6
+} // namespace cjfw
 
-#endif // CJQT6_STRING_H
+#endif // CJFW_STRING_H

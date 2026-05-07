@@ -6,7 +6,7 @@
 #include <QToolBar>
 #include <QStatusBar>
 
-namespace cjqt6 {
+namespace cjfw {
 
 // ============================================================
 // Widget 实现
@@ -422,4 +422,4 @@ QLayout* HBoxLayout::toQtLayout() {
     return m_layout;
 }
 
-} // namespace cjqt6
+} // namespace cjfw

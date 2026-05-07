@@ -5,7 +5,7 @@
 #include <QStringList>
 #include <QRegularExpression>
 
-namespace cjqt6 {
+namespace cjfw {
 
 // ============================================================
 // String 实现
@@ -179,4 +179,4 @@ String String::fromBool(bool value) {
     return String(value ? "true" : "false");
 }
 
-} // namespace cjqt6
+} // namespace cjfw

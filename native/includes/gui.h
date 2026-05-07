@@ -1,5 +1,5 @@
-#ifndef CJQT6_GUI_H
-#define CJQT6_GUI_H
+#ifndef CJFW_GUI_H
+#define CJFW_GUI_H
 
 // 标准C库 - 必须放在所有其他头文件之前
 #include <cstddef>
@@ -32,7 +32,7 @@
 #include "types.h"
 #include "cj_string.h"
 
-namespace cjqt6 {
+namespace cjfw {
 
 // 前向声明
 class Layout;
@@ -320,6 +320,6 @@ private:
     QHBoxLayout* m_layout;
 };
 
-} // namespace cjqt6
+} // namespace cjfw
 
-#endif // CJQT6_GUI_H
+#endif // CJFW_GUI_H

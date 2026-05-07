@@ -1,5 +1,5 @@
-#ifndef CJQT6_TYPES_H
-#define CJQT6_TYPES_H
+#ifndef CJFW_TYPES_H
+#define CJFW_TYPES_H
 
 // 标准C库 - 必须放在所有其他头文件之前
 #include <cstddef>
@@ -15,7 +15,7 @@
 #include <functional>
 #include <stdexcept>
 
-namespace cjqt6 {
+namespace cjfw {
 
 // 前向声明 String 类
 class String;
@@ -365,6 +365,6 @@ const E& Result<T, E>::unwrapErr() const {
     throw std::runtime_error("Result is Ok");
 }
 
-} // namespace cjqt6
+} // namespace cjfw
 
-#endif // CJQT6_TYPES_H
+#endif // CJFW_TYPES_H

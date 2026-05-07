@@ -16,7 +16,7 @@ if [ -z "$QT6_WIN_PATH" ]; then
 fi
 
 echo "=========================================="
-echo "CJQT6 Windows x64 交叉编译"
+echo "CJFW Windows x64 交叉编译"
 echo "=========================================="
 echo "Qt6 路径: $QT6_WIN_PATH"
 echo "构建目录: $BUILD_DIR"
@@ -33,10 +33,10 @@ cmake ../.. \
     -DCMAKE_BUILD_TYPE=Release
 
 # 编译
-make cjqt6_bridge -j$(nproc)
+make cjfw_bridge -j$(nproc)
 
 echo ""
 echo "=========================================="
 echo "编译完成!"
-echo "输出文件: $BUILD_DIR/lib/cjqt6_bridge.dll"
+echo "输出文件: $BUILD_DIR/lib/cjfw_bridge.dll"
 echo "=========================================="

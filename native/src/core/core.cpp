@@ -5,7 +5,7 @@
 #include <QEventLoop>
 #include <QTimer>
 
-namespace cjqt6 {
+namespace cjfw {
 
 // ============================================================
 // Log 实现
@@ -112,4 +112,4 @@ void Application::callLater(int milliseconds, std::function<void()> callback) {
     });
 }
 
-} // namespace cjqt6
+} // namespace cjfw

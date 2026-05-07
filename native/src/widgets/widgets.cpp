@@ -10,7 +10,7 @@
 #include <QColorDialog>
 #include <QInputDialog>
 
-namespace cjqt6 {
+namespace cjfw {
 
 // ============================================================
 // CheckBox 实现
@@ -546,4 +546,4 @@ String Color::rgba(int r, int g, int b, int a) {
     return String(QString("rgba(%1,%2,%3,%4)").arg(r).arg(g).arg(b).arg(a));
 }
 
-} // namespace cjqt6
+} // namespace cjfw

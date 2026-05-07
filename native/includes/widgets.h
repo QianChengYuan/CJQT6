@@ -1,5 +1,5 @@
-#ifndef CJQT6_WIDGETS_H
-#define CJQT6_WIDGETS_H
+#ifndef CJFW_WIDGETS_H
+#define CJFW_WIDGETS_H
 
 // 标准C库 - 必须放在所有其他头文件之前
 #include <cstddef>
@@ -33,7 +33,7 @@
 #include "cj_string.h"
 #include "gui.h"
 
-namespace cjqt6 {
+namespace cjfw {
 
 // ============================================================
 // CheckBox - 复选框类
@@ -383,6 +383,6 @@ public:
     static String rgba(int r, int g, int b, int a = 255);
 };
 
-} // namespace cjqt6
+} // namespace cjfw
 
-#endif // CJQT6_WIDGETS_H
+#endif // CJFW_WIDGETS_H
