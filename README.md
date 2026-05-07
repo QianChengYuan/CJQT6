@@ -225,7 +225,29 @@ CJQT6/
 
 ## 许可证
 
-本项目采用 MIT 许可证，详见 [LICENSE](LICENSE) 文件。
+### CJQT6代码
+
+本项目采用MIT许可证，详见 [LICENSE](LICENSE) 文件。
+
+### 依赖库声明
+
+本项目依赖Qt6框架，Qt6采用LGPL v3许可证：
+- **Qt6版权所有**：The Qt Company Ltd
+- **Qt6许可证**：LGPL v3 或商业许可证
+- **Qt6源码**：https://code.qt.io/cgit/qt/
+- **Qt6许可详情**：https://www.gnu.org/licenses/lgpl-3.0.html
+
+**用户权利**：
+1. 自由使用、修改和分发本软件
+2. 替换Qt6库为其他版本（动态链接方式支持）
+3. 按LGPL v3要求获取Qt6源码
+
+**使用声明**：
+- 本项目是Qt6的FFI封装层，通过动态链接库（DLL/SO）使用Qt6
+- 未修改Qt6源代码，仅调用Qt6公开API
+- 本项目不归属Qt官方，由社区独立开发维护
+
+详见 [NOTICE](NOTICE) 文件和 [许可证分析](doc/LICENSE-ANALYSIS.md)。
 
 ## 联系方式
 

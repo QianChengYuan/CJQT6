@@ -1,0 +1,27 @@
+CJQT6 - Qt6 FFI Binding for Cangjie Language
+Copyright (c) 2024 CJQT6 Team
+Licensed under MIT License
+
+================================================================================
+
+This product includes software developed by third parties:
+
+--------------------------------------------------------------------------------
+Qt6 Framework
+Copyright (C) The Qt Company Ltd.
+Licensed under the GNU Lesser General Public License version 3 (LGPL v3)
+or under a commercial license.
+
+Website: https://www.qt.io/
+Source: https://code.qt.io/cgit/qt/
+License: https://www.gnu.org/licenses/lgpl-3.0.html
+
+Users have the right to:
+1. Use this software freely (under LGPL v3 or commercial license)
+2. Replace the Qt6 library with another version
+3. Obtain Qt6 source code (as required by LGPL v3)
+--------------------------------------------------------------------------------
+
+This software is provided "as is", without warranty of any kind.
+See the LICENSE file for the full MIT license text.
+For Qt6 license terms, see the Qt6 source distribution.
