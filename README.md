@@ -252,7 +252,7 @@ CJQT6/
 ## 联系方式
 
 - 项目主页：https://gitcode.com/yuan_1992/CJQT6
-- 问题反馈：https://gitcode.com/yuan_1992/CJQT6/-/issues
+- 问题反馈：https://gitcode.com/yuan_1992/CJQT6/issues
 - QQ群：1023882445
 
 欢迎加入QQ群交流讨论！
