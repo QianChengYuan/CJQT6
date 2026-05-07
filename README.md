@@ -103,9 +103,61 @@ dir build\bin\libcjqt6_bridge.dll
 
 ### 4. 运行示例
 
-```bash
-cjpm run --example hello_window
+**设置Qt6环境**：
+
+```powershell
+# Windows PowerShell
+.\scripts\setup-qt-env.ps1
+
+# 或手动设置
+$env:PATH = "C:\Qt\6.10.2\mingw_64\bin;C:\Qt\Tools\mingw1310_64\bin;$env:PATH"
 ```
+
+```bash
+# Linux/macOS
+./scripts/setup-qt-env.sh
+
+# 或手动设置
+export PATH="/path/to/qt6/bin:$PATH"
+```
+
+**运行示例**：
+
+```bash
+cd examples/notepad
+cjpm run
+```
+
+<details>
+<summary>❓ 运行时缺少Qt6 DLL？</summary>
+
+Qt应用需要Qt6动态库才能运行：
+
+**方案1：使用配置脚本（推荐）**
+```powershell
+# PowerShell
+.\scripts\setup-qt-env.ps1
+cjpm run
+```
+
+**方案2：手动设置环境变量**
+```powershell
+$env:PATH = "C:\Qt\6.10.2\mingw_64\bin;C:\Qt\Tools\mingw1310_64\bin;$env:PATH"
+cjpm run
+```
+
+**方案3：复制Qt DLL到exe目录**
+```powershell
+Copy-Item C:\Qt\6.10.2\mingw_64\bin\Qt6*.dll examples\notepad\target\release\bin\
+```
+
+**方案4：使用windeployqt自动部署**
+```powershell
+cd examples\notepad\target\release\bin
+C:\Qt\6.10.2\mingw_64\bin\windeployqt.exe main.exe
+```
+
+</details>
 
 预期结果：显示一个GUI窗口，可正常关闭。
 
