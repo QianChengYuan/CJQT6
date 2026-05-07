@@ -1,0 +1,20 @@
+[package]
+  name = "CJQT6-native-linux-arm64"
+  version = "1.0.0"
+  description = "CJQT6 FFI Bridge Library for Linux arm64"
+  author = "CJQT6 Team"
+  license = "MIT"
+  
+  platform = "linux-arm64"
+  cjc-version = ">=1.1.0"
+  output-type = "native"
+
+[native]
+  library = "libCJQT6_bridge.so"
+  path = "native/linux-arm64"
+
+[metadata]
+  category = "native-library"
+  parent = "CJQT6"
+  architecture = "arm64"
+  os = "linux"
