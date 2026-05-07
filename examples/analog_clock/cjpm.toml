@@ -11,4 +11,4 @@
   package-configuration = {}
 
 [dependencies]
-  CJQT6 = { path = "../../" }
+  cjqt6 = { path = "../../" }
