@@ -11,6 +11,10 @@ lib/
 .vscode/
 .idea/
 .arts/
+.agents/
+
+# AI工具配置（不上传）
+.codeartsdoer/
 
 # 系统文件
 .DS_Store
@@ -21,7 +25,6 @@ Thumbs.db
 *.tmp
 *~
 *.bak
-*.txt
 !.gitignore
 !.gitattributes
 
@@ -34,14 +37,11 @@ Thumbs.db
 .cjpm-history
 cjpm.lock
 
-# 中心仓配置（可能包含token）
+# 中心仓配置（包含token，不上传）
 cangjie-repo.toml
 
 # LSP缓存
 .cache/
-
-# CodeArts Doer
-.codeartsdoer/
 
 # CMake构建
 CMakeCache.txt
@@ -70,3 +70,9 @@ native/*.cmake
 # 测试目录
 test_deploy/
 test_paint/
+
+# 打包文件（发行版使用）
+*.cjp
+
+# 预编译库保留在releases目录供下载
+!releases/

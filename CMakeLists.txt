@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(CJQT6 VERSION 1.0.0 LANGUAGES CXX)
+project(CJFW VERSION 1.0.0 LANGUAGES CXX)
 
 # 设置 C++ 标准
 set(CMAKE_CXX_STANDARD 17)
@@ -34,7 +34,7 @@ include_directories(
 )
 
 # ============================================================
-# CJQT6 桥接库 (用于仓颉语言FFI)
+# CJFW 桥接库 (用于仓颉语言FFI)
 # ============================================================
 
 # 核心模块 - QApplication, QWidget, QTimer, Events, Signal/Slot, Drag&Drop
@@ -157,7 +157,7 @@ install(TARGETS cjqt6_bridge
 
 # 安装头文件
 install(DIRECTORY native/includes/
-    DESTINATION include/cjqt6
+    DESTINATION include/cjfw
     FILES_MATCHING PATTERN "*.h"
 )
 
@@ -166,7 +166,7 @@ install(DIRECTORY native/includes/
 # ============================================================
 
 message(STATUS "======================================")
-message(STATUS "CJQT6 Configuration")
+message(STATUS "CJFW Configuration")
 message(STATUS "======================================")
 message(STATUS "Version: ${PROJECT_VERSION}")
 message(STATUS "C++ Standard: ${CMAKE_CXX_STANDARD}")

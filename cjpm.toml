@@ -13,7 +13,7 @@
   
   # 编译选项
   compile-option = "-Woff unused"
-  link-option = "-lCJQT6_bridge"
+  link-option = "-lcjqt6_bridge"
   
   # 项目链接
   homepage = "https://gitcode.com/yuan_1992/CJQT6"
