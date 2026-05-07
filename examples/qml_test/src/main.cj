@@ -1,7 +1,7 @@
 package qml_test
 
-import CJQT6.core.*
-import CJQT6.qml.*
+import cjqt6.core.*
+import cjqt6.qml.*
 
 main(): Int32 {
     println("=== QML 测试开始 ===")

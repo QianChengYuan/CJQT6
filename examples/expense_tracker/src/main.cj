@@ -5,12 +5,12 @@
 
 package expense_tracker
 
-import CJQT6.core.*
-import CJQT6.widgets.*
-import CJQT6.gui.*
-import CJQT6.dialogs.*
-import CJQT6.sql.*
-import CJQT6.views.*
+import cjqt6.core.*
+import cjqt6.widgets.*
+import cjqt6.gui.*
+import cjqt6.dialogs.*
+import cjqt6.sql.*
+import cjqt6.views.*
 import std.collection.*
 
 // ============================================================

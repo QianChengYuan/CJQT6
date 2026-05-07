@@ -4,11 +4,11 @@
 
 package tank_battle
 
-import CJQT6.core.*
-import CJQT6.paint.*
-import CJQT6.gui.*
-import CJQT6.widgets.*
-import CJQT6.multimedia.*
+import cjqt6.core.*
+import cjqt6.paint.*
+import cjqt6.gui.*
+import cjqt6.widgets.*
+import cjqt6.multimedia.*
 import std.random.*
 import std.collection.*
 

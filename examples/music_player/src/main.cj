@@ -1,12 +1,12 @@
 package music_player
 
-import CJQT6.core.*
-import CJQT6.widgets.*
-import CJQT6.menu.*
-import CJQT6.dialogs.*
-import CJQT6.gui.*
-import CJQT6.multimedia.*
-import CJQT6.views.*
+import cjqt6.core.*
+import cjqt6.widgets.*
+import cjqt6.menu.*
+import cjqt6.dialogs.*
+import cjqt6.gui.*
+import cjqt6.multimedia.*
+import cjqt6.views.*
 import std.fs.*
 import std.env.*
 import std.collection.*
