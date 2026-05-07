@@ -1,5 +1,5 @@
 [package]
-  name = "CJQT6"
+  name = "cjqt6"
   version = "1.0.0"
   description = "仓颉语言的Qt6封装库 - 让仓颉像Python使用PyQt一样便捷"
   author = "CJQT6 Team"
@@ -29,12 +29,8 @@
 
 [dependencies]
 # 平台原生库包（条件依赖）
-# 用户安装时根据平台自动选择对应包
-CJQT6-native-linux-x64 = { version = "1.0.0", platform = "linux-x64", optional = true }
-CJQT6-native-linux-arm64 = { version = "1.0.0", platform = "linux-arm64", optional = true }
-CJQT6-native-windows-x64 = { version = "1.0.0", platform = "windows-x64", optional = true }
-CJQT6-native-macos-x64 = { version = "1.0.0", platform = "macos-x64", optional = true }
-CJQT6-native-macos-arm64 = { version = "1.0.0", platform = "macos-arm64", optional = true }
+# 注意：暂时移除平台分包，采用单包策略
+# 原生库将打包在主包内
 
 # FFI桥接库配置
 [native]
