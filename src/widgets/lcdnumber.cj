@@ -1,6 +1,4 @@
-package CJQT6.widgets
-
-import CJQT6.core.*
+package cjqt6.widgets
 
 // QLCDNumber - LCD数字显示
 foreign func qLCDNumberCreate(): Int64

@@ -1,4 +1,4 @@
-package CJQT6.views
+package cjqt6.views
 
 // ============================================================
 // QTableWidget - 表格控件 FFI声明

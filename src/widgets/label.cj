@@ -1,6 +1,6 @@
-package CJQT6.widgets
+package cjqt6.widgets
 
-import CJQT6.core.*
+import cjqt6.core.*
 
 // QLabel - 标签
 foreign func qLabelCreate(): Int64

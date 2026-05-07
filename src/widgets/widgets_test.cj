@@ -1,6 +1,6 @@
-package CJQT6.widgets
+package cjqt6.widgets
 
-import CJQT6.core.*
+import cjqt6.core.*
 
 // 测试模式下 unittest 和 unittest.testmacro 自动导入
 

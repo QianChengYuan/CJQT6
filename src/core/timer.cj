@@ -1,4 +1,4 @@
-package CJQT6.core
+package cjqt6.core
 
 // QTimer - 定时器
 foreign func qTimerCreate(): Int64

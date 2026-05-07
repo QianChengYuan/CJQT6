@@ -1,4 +1,4 @@
-package CJQT6.core
+package cjqt6.core
 
 // 测试模式下 unittest 和 unittest.testmacro 自动导入
 

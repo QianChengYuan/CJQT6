@@ -1,6 +1,6 @@
-package CJQT6.widgets
+package cjqt6.widgets
 
-import CJQT6.core.*
+import cjqt6.core.*
 
 // QDoubleSpinBox - 双精度旋转框
 foreign func qDoubleSpinBoxCreate(): Int64

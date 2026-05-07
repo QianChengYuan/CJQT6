@@ -1,4 +1,4 @@
-package CJQT6.core
+package cjqt6.core
 
 // QApplication - 应用程序主类
 foreign func qApplicationCreate(): Int64
@@ -46,7 +46,7 @@ public class QApplication {
         }
     }
     
-    public func quit() {
+    public func quit(): Unit {
         unsafe {
             qApplicationQuit()
         }

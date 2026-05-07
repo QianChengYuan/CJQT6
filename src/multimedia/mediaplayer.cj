@@ -1,4 +1,4 @@
-package CJQT6.multimedia
+package cjqt6.multimedia
 
 // QMediaPlayer - 媒体播放器
 foreign func qMediaPlayerCreate(): Int64

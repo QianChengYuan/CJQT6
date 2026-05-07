@@ -1,4 +1,4 @@
-package CJQT6.core
+package cjqt6.core
 
 // ============================================================
 // 信号与槽 - 统一回调机制
@@ -131,10 +131,25 @@ foreign func qSignalCleanup(ptr: Int64): Unit
 // SignalConnection - 信号连接句柄
 // ============================================================
 
+// 控件类型常量
+public const WIDGET_TYPE_BUTTON: String = "button"
+public const WIDGET_TYPE_TOOL_BUTTON: String = "toolbutton"
+public const WIDGET_TYPE_SLIDER: String = "slider"
+public const WIDGET_TYPE_SPINBOX: String = "spinbox"
+public const WIDGET_TYPE_DOUBLE_SPINBOX: String = "doublespinbox"
+public const WIDGET_TYPE_DIAL: String = "dial"
+public const WIDGET_TYPE_CHECKBOX: String = "checkbox"
+public const WIDGET_TYPE_RADIOBUTTON: String = "radiobutton"
+public const WIDGET_TYPE_COMBOBOX: String = "combobox"
+public const WIDGET_TYPE_LINEEDIT: String = "lineedit"
+public const WIDGET_TYPE_TIMER: String = "timer"
+public const WIDGET_TYPE_ACTION: String = "action"
+
 /// 信号连接句柄，用于管理和断开信号连接
 public class SignalConnection {
     private var ptr: Int64 = 0
     private var signalType: String = ""
+    private var widgetType: String = ""  // 新增：控件类型，用于正确断开信号
     private var connected: Bool = false
     
     private init() {}
@@ -148,30 +163,64 @@ public class SignalConnection {
         return conn
     }
     
+    /// 创建连接句柄（带控件类型）
+    public static func createWithWidgetType(ptr: Int64, signalType: String, widgetType: String): SignalConnection {
+        let conn = SignalConnection()
+        conn.ptr = ptr
+        conn.signalType = signalType
+        conn.widgetType = widgetType
+        conn.connected = true
+        return conn
+    }
+    
     /// 断开连接
     public func disconnect(): Unit {
         if (connected && ptr != 0) {
             unsafe {
-                match (signalType) {
-                    case SIGNAL_CLICKED =>
-                        qButtonDisconnectClicked(ptr)
-                    case SIGNAL_VALUE_CHANGED =>
-                        qSliderDisconnectValueChanged(ptr)
-                        qSpinBoxDisconnectValueChanged(ptr)
-                    case SIGNAL_STATE_CHANGED =>
-                        qCheckBoxDisconnectStateChanged(ptr)
-                    case SIGNAL_TOGGLED =>
-                        qRadioButtonDisconnectToggled(ptr)
-                    case SIGNAL_CURRENT_CHANGED =>
-                        qComboBoxDisconnectCurrentIndexChanged(ptr)
-                    case SIGNAL_TEXT_CHANGED =>
-                        qLineEditDisconnectTextChanged(ptr)
-                    case SIGNAL_TIMEOUT =>
-                        qTimerDisconnectTimeout(ptr)
-                    case SIGNAL_TRIGGERED =>
-                        qActionDisconnectTriggered(ptr)
-                    case _ =>
-                        qSignalCleanup(ptr)
+                // 优先根据控件类型断开，确保调用正确的断开函数
+                if (widgetType == WIDGET_TYPE_BUTTON) {
+                    qButtonDisconnectClicked(ptr)
+                } else if (widgetType == WIDGET_TYPE_TOOL_BUTTON) {
+                    qToolButtonDisconnectClicked(ptr)
+                } else if (widgetType == WIDGET_TYPE_SLIDER) {
+                    qSliderDisconnectValueChanged(ptr)
+                } else if (widgetType == WIDGET_TYPE_SPINBOX) {
+                    qSpinBoxDisconnectValueChanged(ptr)
+                } else if (widgetType == WIDGET_TYPE_DOUBLE_SPINBOX) {
+                    qDoubleSpinBoxDisconnectValueChanged(ptr)
+                } else if (widgetType == WIDGET_TYPE_DIAL) {
+                    qDialDisconnectValueChanged(ptr)
+                } else if (widgetType == WIDGET_TYPE_CHECKBOX) {
+                    qCheckBoxDisconnectStateChanged(ptr)
+                } else if (widgetType == WIDGET_TYPE_RADIOBUTTON) {
+                    qRadioButtonDisconnectToggled(ptr)
+                } else if (widgetType == WIDGET_TYPE_COMBOBOX) {
+                    qComboBoxDisconnectCurrentIndexChanged(ptr)
+                } else if (widgetType == WIDGET_TYPE_LINEEDIT) {
+                    qLineEditDisconnectTextChanged(ptr)
+                } else if (widgetType == WIDGET_TYPE_TIMER) {
+                    qTimerDisconnectTimeout(ptr)
+                } else if (widgetType == WIDGET_TYPE_ACTION) {
+                    qActionDisconnectTriggered(ptr)
+                } else if (signalType == SIGNAL_CLICKED) {
+                    // 兼容旧逻辑：根据信号类型断开
+                    qButtonDisconnectClicked(ptr)
+                } else if (signalType == SIGNAL_VALUE_CHANGED) {
+                    qSliderDisconnectValueChanged(ptr)
+                } else if (signalType == SIGNAL_STATE_CHANGED) {
+                    qCheckBoxDisconnectStateChanged(ptr)
+                } else if (signalType == SIGNAL_TOGGLED) {
+                    qRadioButtonDisconnectToggled(ptr)
+                } else if (signalType == SIGNAL_CURRENT_CHANGED) {
+                    qComboBoxDisconnectCurrentIndexChanged(ptr)
+                } else if (signalType == SIGNAL_TEXT_CHANGED) {
+                    qLineEditDisconnectTextChanged(ptr)
+                } else if (signalType == SIGNAL_TIMEOUT) {
+                    qTimerDisconnectTimeout(ptr)
+                } else if (signalType == SIGNAL_TRIGGERED) {
+                    qActionDisconnectTriggered(ptr)
+                } else {
+                    qSignalCleanup(ptr)
                 }
             }
             connected = false

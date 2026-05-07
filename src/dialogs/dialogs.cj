@@ -1,4 +1,4 @@
-package CJQT6.dialogs
+package cjqt6.dialogs
 
 // ============================================================
 // 对话框 FFI声明

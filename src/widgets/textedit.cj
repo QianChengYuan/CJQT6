@@ -1,4 +1,4 @@
-package CJQT6.widgets
+package cjqt6.widgets
 
 // QTextEdit - 多行文本编辑框
 foreign func qTextEditCreate(): Int64

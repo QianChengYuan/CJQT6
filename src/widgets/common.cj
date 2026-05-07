@@ -1,4 +1,4 @@
-package CJQT6.widgets
+package cjqt6.widgets
 
 // 公共FFI声明 - QWidget基础函数
 foreign func qWidgetShow(ptr: Int64): Unit

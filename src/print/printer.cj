@@ -1,6 +1,6 @@
-package CJQT6.print
+package cjqt6.print
 
-import CJQT6.widgets.QTextEdit
+import cjqt6.widgets.QTextEdit
 
 // QPrinter - 打印机
 foreign func qPrinterCreate(): Int64

@@ -1,4 +1,4 @@
-package CJQT6.qml
+package cjqt6.qml
 
 // ============================================================
 // QML/Qt Quick 模块 FFI 声明
@@ -426,17 +426,15 @@ public class QQuickWidget {
 /// QML项，QML中的可视元素基类
 /// 注意：QQuickItem 的指针由 Qt 管理，不应手动删除
 public class QQuickItem {
-    private var ptr: Int64 = 0
-    private var owned: Bool = false  // 是否拥有所有权（默认不拥有）
+    private let ptr: Int64  // 使用 let，指针不可变
     
-    private init() {}
+    private init(ptr: Int64) {
+        this.ptr = ptr
+    }
     
     /// 从指针创建（不拥有所有权，由 Qt 管理）
     public static func fromPtr(p: Int64): QQuickItem {
-        let item = QQuickItem()
-        item.ptr = p
-        item.owned = false  // Qt 管理的对象
-        return item
+        QQuickItem(p)
     }
     
     /// 检查指针是否有效

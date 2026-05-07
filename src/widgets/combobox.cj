@@ -1,6 +1,6 @@
-package CJQT6.widgets
+package cjqt6.widgets
 
-import CJQT6.core.*
+import cjqt6.core.*
 
 // QComboBox - 下拉框
 foreign func qComboBoxCreate(): Int64

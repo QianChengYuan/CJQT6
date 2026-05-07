@@ -1,4 +1,4 @@
-package CJQT6.widgets
+package cjqt6.widgets
 
 // ============================================================
 // 日期类 QDate

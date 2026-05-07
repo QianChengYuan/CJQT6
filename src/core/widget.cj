@@ -1,4 +1,4 @@
-package CJQT6.core
+package cjqt6.core
 
 // QWidget - 基础窗口部件
 foreign func qWidgetCreate(): Int64

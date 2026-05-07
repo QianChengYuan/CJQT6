@@ -1,4 +1,4 @@
-package CJQT6.widgets
+package cjqt6.widgets
 
 // ============================================================
 // 容器控件 FFI声明
@@ -391,7 +391,7 @@ public class QSplitter {
     }
     
     // 内部构造函数，用于静态工厂方法
-    private init(ptr: Int64, internal: Bool) {
+    private init(ptr: Int64, _: Bool) {
         this.ptr = ptr
     }
     

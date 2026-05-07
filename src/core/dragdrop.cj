@@ -1,4 +1,4 @@
-package CJQT6.core
+package cjqt6.core
 
 // ============================================================
 // 拖放支持 - QMimeData, QDrag

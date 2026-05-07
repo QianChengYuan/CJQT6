@@ -1,4 +1,4 @@
-package CJQT6.paint
+package cjqt6.paint
 
 // QTransform - 2D变换矩阵
 foreign func qTransformCreate(): Int64

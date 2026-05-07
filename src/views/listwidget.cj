@@ -1,4 +1,4 @@
-package CJQT6.views
+package cjqt6.views
 
 // ============================================================
 // QListWidget FFI声明

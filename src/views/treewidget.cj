@@ -1,4 +1,4 @@
-package CJQT6.views
+package cjqt6.views
 
 // ============================================================
 // QTreeWidget FFI声明
@@ -96,7 +96,7 @@ public class QTreeWidgetItem {
     }
     
     // 内部构造函数
-    private init(ptr: Int64, dummy: Unit) {
+    private init(ptr: Int64, _: Unit) {
         this.ptr = ptr
     }
     

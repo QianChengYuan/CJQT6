@@ -1,4 +1,4 @@
-package CJQT6.widgets
+package cjqt6.widgets
 
 // QProgressBar - 进度条
 foreign func qProgressBarCreate(): Int64

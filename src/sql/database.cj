@@ -1,4 +1,4 @@
-package CJQT6.sql
+package cjqt6.sql
 
 // QSqlDatabase - 数据库连接
 foreign func qSqlDatabaseAddDatabase(`type`: CString, name: CString): Int64

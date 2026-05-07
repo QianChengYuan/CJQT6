@@ -1,6 +1,6 @@
-package CJQT6.menu
+package cjqt6.menu
 
-import CJQT6.core.{VoidCallback}
+import cjqt6.core.{VoidCallback}
 
 // ============================================================
 // FFI 声明
