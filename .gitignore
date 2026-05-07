@@ -34,6 +34,9 @@ Thumbs.db
 .cjpm-history
 cjpm.lock
 
+# 中心仓配置（可能包含token）
+cangjie-repo.toml
+
 # LSP缓存
 .cache/
 
