@@ -11,5 +11,5 @@
   package-configuration = {}
 
 [dependencies]
-  CJQT6 = { path = "../../" }
-  CJQT6.print = { path = "../../" }
+  cjqt6 = { path = "../../" }
+  cjqt6.print = { path = "../../" }
