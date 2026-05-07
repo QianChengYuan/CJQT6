@@ -6,7 +6,7 @@
   license = "MIT"
   
   # 仓颉编译器版本要求
-  cjc-version = ">=1.1.0"
+  cjc-version = "1.1.0"
   
   # 包输出类型
   output-type = "static"
