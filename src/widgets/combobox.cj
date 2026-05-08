@@ -88,6 +88,21 @@ public class QComboBox {
         }
     }
     
+    /// 设置当前文本变化回调
+    public func setOnCurrentTextChanged(callback: CStringCallback) {
+        checkValid()
+        unsafe {
+            qComboBoxConnectCurrentTextChanged(ptr, callback)
+        }
+    }
+    
+    /// 断开当前文本变化回调
+    public func disconnectCurrentTextChanged() {
+        unsafe {
+            qComboBoxDisconnectCurrentTextChanged(ptr)
+        }
+    }
+    
     /// 获取对象指针
     public func getPtr(): Int64 {
         return ptr

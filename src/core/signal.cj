@@ -101,11 +101,32 @@ foreign func qComboBoxConnectCurrentIndexChanged(ptr: Int64, callback: Int32Call
 foreign func qComboBoxDisconnectCurrentIndexChanged(ptr: Int64): Unit
 
 // ============================================================
+// QComboBox::currentTextChanged 信号连接
+// ============================================================
+
+foreign func qComboBoxConnectCurrentTextChanged(ptr: Int64, callback: CStringCallback): Unit
+foreign func qComboBoxDisconnectCurrentTextChanged(ptr: Int64): Unit
+
+// ============================================================
 // QLineEdit 信号连接
 // ============================================================
 
 foreign func qLineEditConnectTextChanged(ptr: Int64, callback: CStringCallback): Unit
 foreign func qLineEditDisconnectTextChanged(ptr: Int64): Unit
+
+// ============================================================
+// QLineEdit::returnPressed 信号连接
+// ============================================================
+
+foreign func qLineEditConnectReturnPressed(ptr: Int64, callback: VoidCallback): Unit
+foreign func qLineEditDisconnectReturnPressed(ptr: Int64): Unit
+
+// ============================================================
+// QLineEdit::editingFinished 信号连接
+// ============================================================
+
+foreign func qLineEditConnectEditingFinished(ptr: Int64, callback: VoidCallback): Unit
+foreign func qLineEditDisconnectEditingFinished(ptr: Int64): Unit
 
 // ============================================================
 // QTimer 信号连接

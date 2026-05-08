@@ -86,11 +86,14 @@ lineEdit.setOnTextChanged(textCallback)
 |------|------|----------|------|
 | QPushButton | `setOnClick(callback)` | VoidCallback | 点击 |
 | QLineEdit | `setOnTextChanged(callback)` | CStringCallback | 文本变化 |
+| QLineEdit | `setOnReturnPressed(callback)` | VoidCallback | 回车键按下 |
+| QLineEdit | `setOnEditingFinished(callback)` | VoidCallback | 编辑完成（失焦或回车） |
 | QSpinBox | `setOnValueChanged(callback)` | Int32Callback | 值变化 |
 | QSlider | `setOnValueChanged(callback)` | Int32Callback | 值变化 |
 | QCheckBox | `setOnStateChanged(callback)` | Int32Callback | 状态变化 |
 | QRadioButton | `setOnToggled(callback)` | VoidCallback | 切换 |
 | QComboBox | `setOnCurrentIndexChanged(callback)` | Int32Callback | 索引变化 |
+| QComboBox | `setOnCurrentTextChanged(callback)` | CStringCallback | 文本变化 |
 | QAction | `setOnTriggered(callback)` | VoidCallback | 触发 |
 | QTimer | `setTimeout(callback)` | VoidCallback | 超时 |
 
@@ -98,16 +101,23 @@ lineEdit.setOnTextChanged(textCallback)
 
 ## 断开信号连接
 
-所有支持信号的控件都提供了 `disconnect()` 方法：
+所有支持信号的控件都提供了对应的 `disconnect*()` 方法：
 
 ```cangjie
-// 断开信号连接
-button.disconnect()
-slider.disconnect()
-checkBox.disconnect()
-radioButton.disconnect()
-comboBox.disconnect()
-lineEdit.disconnect()
+// QLineEdit
+lineEdit.disconnectTextChanged()
+lineEdit.disconnectReturnPressed()
+lineEdit.disconnectEditingFinished()
+
+// QComboBox
+comboBox.disconnectCurrentIndexChanged()
+comboBox.disconnectCurrentTextChanged()
+
+// 其他控件
+button.disconnectClick()
+slider.disconnectValueChanged()
+checkBox.disconnectStateChanged()
+radioButton.disconnectToggled()
 timer.disconnect()
 ```
 

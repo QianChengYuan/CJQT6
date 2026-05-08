@@ -181,6 +181,40 @@ public class QLineEdit <: QtResource {
         }
     }
     
+    /// 设置回车键按下回调
+    public func setOnReturnPressed(callback: VoidCallback): Unit {
+        checkValid()
+        unsafe {
+            qLineEditConnectReturnPressed(ptr, callback)
+        }
+    }
+    
+    /// 断开回车键按下回调
+    public func disconnectReturnPressed(): Unit {
+        if (ptr != 0) {
+            unsafe {
+                qLineEditDisconnectReturnPressed(ptr)
+            }
+        }
+    }
+    
+    /// 设置编辑完成回调（失去焦点或回车）
+    public func setOnEditingFinished(callback: VoidCallback): Unit {
+        checkValid()
+        unsafe {
+            qLineEditConnectEditingFinished(ptr, callback)
+        }
+    }
+    
+    /// 断开编辑完成回调
+    public func disconnectEditingFinished(): Unit {
+        if (ptr != 0) {
+            unsafe {
+                qLineEditDisconnectEditingFinished(ptr)
+            }
+        }
+    }
+    
     /// 添加密码可见性切换按钮到输入框右侧
     /// 点击按钮时会触发回调，用于切换密码显示/隐藏
     public func addPasswordToggleAction(callback: VoidCallback): Unit {

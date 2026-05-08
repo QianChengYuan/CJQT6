@@ -298,6 +298,66 @@ void qLineEditDisconnectTextChanged(int64_t ptr) {
 }
 
 // ============================================================
+// QLineEdit::returnPressed 信号
+// ============================================================
+
+void qLineEditConnectReturnPressed(int64_t ptr, void (*callback)()) {
+    QLineEdit* lineEdit = reinterpret_cast<QLineEdit*>(ptr);
+    if (lineEdit && callback) {
+        LOCK_CALLBACKS();
+        g_voidCallbacks[ptr] = callback;
+        QObject::connect(lineEdit, &QLineEdit::returnPressed, [ptr]() {
+            std::function<void()> cb;
+            {
+                LOCK_CALLBACKS();
+                auto it = g_voidCallbacks.find(ptr);
+                if (it != g_voidCallbacks.end()) {
+                    cb = it.value();
+                }
+            }
+            if (cb) {
+                cb();
+            }
+        });
+    }
+}
+
+void qLineEditDisconnectReturnPressed(int64_t ptr) {
+    LOCK_CALLBACKS();
+    g_voidCallbacks.remove(ptr);
+}
+
+// ============================================================
+// QLineEdit::editingFinished 信号
+// ============================================================
+
+void qLineEditConnectEditingFinished(int64_t ptr, void (*callback)()) {
+    QLineEdit* lineEdit = reinterpret_cast<QLineEdit*>(ptr);
+    if (lineEdit && callback) {
+        LOCK_CALLBACKS();
+        g_voidCallbacks[ptr] = callback;
+        QObject::connect(lineEdit, &QLineEdit::editingFinished, [ptr]() {
+            std::function<void()> cb;
+            {
+                LOCK_CALLBACKS();
+                auto it = g_voidCallbacks.find(ptr);
+                if (it != g_voidCallbacks.end()) {
+                    cb = it.value();
+                }
+            }
+            if (cb) {
+                cb();
+            }
+        });
+    }
+}
+
+void qLineEditDisconnectEditingFinished(int64_t ptr) {
+    LOCK_CALLBACKS();
+    g_voidCallbacks.remove(ptr);
+}
+
+// ============================================================
 // QTimer 信号
 // ============================================================
 
@@ -417,6 +477,36 @@ void qDialConnectValueChanged(int64_t ptr, void (*callback)(int32_t)) {
 void qDialDisconnectValueChanged(int64_t ptr) {
     LOCK_CALLBACKS();
     g_int32Callbacks.remove(ptr);
+}
+
+// ============================================================
+// QComboBox::currentTextChanged 信号
+// ============================================================
+
+void qComboBoxConnectCurrentTextChanged(int64_t ptr, void (*callback)(const char*)) {
+    QComboBox* comboBox = reinterpret_cast<QComboBox*>(ptr);
+    if (comboBox && callback) {
+        LOCK_CALLBACKS();
+        g_textChangedCallbacks[ptr] = callback;
+        QObject::connect(comboBox, &QComboBox::currentTextChanged, [ptr](const QString& text) {
+            std::function<void(const char*)> cb;
+            {
+                LOCK_CALLBACKS();
+                auto it = g_textChangedCallbacks.find(ptr);
+                if (it != g_textChangedCallbacks.end()) {
+                    cb = it.value();
+                }
+            }
+            if (cb) {
+                cb(text.toUtf8().constData());
+            }
+        });
+    }
+}
+
+void qComboBoxDisconnectCurrentTextChanged(int64_t ptr) {
+    LOCK_CALLBACKS();
+    g_textChangedCallbacks.remove(ptr);
 }
 
 // ============================================================
