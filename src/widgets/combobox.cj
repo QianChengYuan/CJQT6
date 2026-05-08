@@ -11,6 +11,8 @@ foreign func qComboBoxCurrentIndex(ptr: Int64): Int32
 foreign func qComboBoxClear(ptr: Int64): Unit
 foreign func qComboBoxConnectCurrentIndexChanged(ptr: Int64, callback: Int32Callback): Unit
 foreign func qComboBoxDisconnectCurrentIndexChanged(ptr: Int64): Unit
+foreign func qComboBoxConnectCurrentTextChanged(ptr: Int64, callback: CStringCallback): Unit
+foreign func qComboBoxDisconnectCurrentTextChanged(ptr: Int64): Unit
 foreign func qComboBoxDelete(ptr: Int64): Unit
 
 /// 下拉框部件
@@ -90,7 +92,6 @@ public class QComboBox {
     
     /// 设置当前文本变化回调
     public func setOnCurrentTextChanged(callback: CStringCallback) {
-        checkValid()
         unsafe {
             qComboBoxConnectCurrentTextChanged(ptr, callback)
         }

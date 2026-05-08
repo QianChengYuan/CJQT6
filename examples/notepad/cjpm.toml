@@ -7,7 +7,7 @@
   output-type = "executable"
   compile-option = ""
   override-compile-option = ""
-  link-option = "-L../../native/build-win64/lib -lcjqt6_bridge"
+  link-option = "-L../../releases/windows-x64 -lcjqt6_bridge"
   package-configuration = {}
 
 [dependencies]

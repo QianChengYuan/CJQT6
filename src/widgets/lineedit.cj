@@ -13,6 +13,10 @@ foreign func qLineEditSetEchoMode(ptr: Int64, mode: Int32): Unit
 foreign func qLineEditClear(ptr: Int64): Unit
 foreign func qLineEditConnectTextChanged(ptr: Int64, callback: CStringCallback): Unit
 foreign func qLineEditDisconnectTextChanged(ptr: Int64): Unit
+foreign func qLineEditConnectReturnPressed(ptr: Int64, callback: VoidCallback): Unit
+foreign func qLineEditDisconnectReturnPressed(ptr: Int64): Unit
+foreign func qLineEditConnectEditingFinished(ptr: Int64, callback: VoidCallback): Unit
+foreign func qLineEditDisconnectEditingFinished(ptr: Int64): Unit
 foreign func qLineEditAddPasswordToggleAction(ptr: Int64, callback: VoidCallback): Unit
 foreign func qLineEditSetPasswordToggleIcon(ptr: Int64, visible: Bool): Unit
 foreign func qLineEditSetInputMask(ptr: Int64, mask: CString): Unit

@@ -10,6 +10,8 @@ foreign func qSliderSetRange(ptr: Int64, min: Int32, max: Int32): Unit
 foreign func qSliderSetOrientation(ptr: Int64, orientation: Int32): Unit
 foreign func qSliderConnectValueChanged(ptr: Int64, callback: Int32Callback): Unit
 foreign func qSliderDisconnectValueChanged(ptr: Int64): Unit
+foreign func qSliderConnectSliderMoved(ptr: Int64, callback: Int32Callback): Unit
+foreign func qSliderDisconnectSliderMoved(ptr: Int64): Unit
 foreign func qSliderDelete(ptr: Int64): Unit
 
 /// 滑动条方向常量
