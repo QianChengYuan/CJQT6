@@ -38,6 +38,13 @@ public const SIGNAL_TRIGGERED: String = "triggered"
 public const SIGNAL_TOGGLED: String = "toggled"
 
 // ============================================================
+// QWidget::destroyed 信号连接
+// ============================================================
+
+foreign func qWidgetConnectDestroyed(ptr: Int64, callback: VoidCallback): Unit
+foreign func qWidgetDisconnectDestroyed(ptr: Int64): Unit
+
+// ============================================================
 // QPushButton 信号连接
 // ============================================================
 
@@ -57,6 +64,13 @@ foreign func qToolButtonDisconnectClicked(ptr: Int64): Unit
 
 foreign func qSliderConnectValueChanged(ptr: Int64, callback: Int32Callback): Unit
 foreign func qSliderDisconnectValueChanged(ptr: Int64): Unit
+
+// ============================================================
+// QSlider::sliderMoved 信号连接
+// ============================================================
+
+foreign func qSliderConnectSliderMoved(ptr: Int64, callback: Int32Callback): Unit
+foreign func qSliderDisconnectSliderMoved(ptr: Int64): Unit
 
 // ============================================================
 // QSpinBox 信号连接

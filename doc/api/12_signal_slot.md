@@ -84,12 +84,14 @@ lineEdit.setOnTextChanged(textCallback)
 
 | 控件 | 方法 | 回调类型 | 说明 |
 |------|------|----------|------|
+| QWidget | `setOnDestroyed(callback)` | VoidCallback | 控件销毁 |
 | QPushButton | `setOnClick(callback)` | VoidCallback | 点击 |
 | QLineEdit | `setOnTextChanged(callback)` | CStringCallback | 文本变化 |
 | QLineEdit | `setOnReturnPressed(callback)` | VoidCallback | 回车键按下 |
 | QLineEdit | `setOnEditingFinished(callback)` | VoidCallback | 编辑完成（失焦或回车） |
 | QSpinBox | `setOnValueChanged(callback)` | Int32Callback | 值变化 |
-| QSlider | `setOnValueChanged(callback)` | Int32Callback | 值变化 |
+| QSlider | `setOnValueChanged(callback)` | Int32Callback | 值变化（释放时） |
+| QSlider | `setOnSliderMoved(callback)` | Int32Callback | 滑块拖动中 |
 | QCheckBox | `setOnStateChanged(callback)` | Int32Callback | 状态变化 |
 | QRadioButton | `setOnToggled(callback)` | VoidCallback | 切换 |
 | QComboBox | `setOnCurrentIndexChanged(callback)` | Int32Callback | 索引变化 |

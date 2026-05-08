@@ -510,6 +510,66 @@ void qComboBoxDisconnectCurrentTextChanged(int64_t ptr) {
 }
 
 // ============================================================
+// QWidget::destroyed 信号
+// ============================================================
+
+void qWidgetConnectDestroyed(int64_t ptr, void (*callback)()) {
+    QObject* obj = reinterpret_cast<QObject*>(ptr);
+    if (obj && callback) {
+        LOCK_CALLBACKS();
+        g_voidCallbacks[ptr] = callback;
+        QObject::connect(obj, &QObject::destroyed, [ptr]() {
+            std::function<void()> cb;
+            {
+                LOCK_CALLBACKS();
+                auto it = g_voidCallbacks.find(ptr);
+                if (it != g_voidCallbacks.end()) {
+                    cb = it.value();
+                }
+            }
+            if (cb) {
+                cb();
+            }
+        });
+    }
+}
+
+void qWidgetDisconnectDestroyed(int64_t ptr) {
+    LOCK_CALLBACKS();
+    g_voidCallbacks.remove(ptr);
+}
+
+// ============================================================
+// QSlider::sliderMoved 信号
+// ============================================================
+
+void qSliderConnectSliderMoved(int64_t ptr, void (*callback)(int32_t)) {
+    QSlider* slider = reinterpret_cast<QSlider*>(ptr);
+    if (slider && callback) {
+        LOCK_CALLBACKS();
+        g_int32Callbacks[ptr] = callback;
+        QObject::connect(slider, &QSlider::sliderMoved, [ptr](int value) {
+            std::function<void(int32_t)> cb;
+            {
+                LOCK_CALLBACKS();
+                auto it = g_int32Callbacks.find(ptr);
+                if (it != g_int32Callbacks.end()) {
+                    cb = it.value();
+                }
+            }
+            if (cb) {
+                cb(value);
+            }
+        });
+    }
+}
+
+void qSliderDisconnectSliderMoved(int64_t ptr) {
+    LOCK_CALLBACKS();
+    g_int32Callbacks.remove(ptr);
+}
+
+// ============================================================
 // 清理函数
 // ============================================================
 

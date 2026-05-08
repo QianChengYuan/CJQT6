@@ -265,4 +265,21 @@ public class QWidget <: QtResource {
             qWidgetRepaint(ptr)
         }
     }
+    
+    /// 设置控件销毁回调
+    public func setOnDestroyed(callback: VoidCallback): Unit {
+        checkValid()
+        unsafe {
+            qWidgetConnectDestroyed(ptr, callback)
+        }
+    }
+    
+    /// 断开控件销毁信号
+    public func disconnectDestroyed(): Unit {
+        if (ptr != 0) {
+            unsafe {
+                qWidgetDisconnectDestroyed(ptr)
+            }
+        }
+    }
 }

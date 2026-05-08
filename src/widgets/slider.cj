@@ -82,6 +82,20 @@ public class QSlider {
         }
     }
     
+    /// 设置滑块拖动回调（拖动过程中实时触发）
+    public func setOnSliderMoved(callback: Int32Callback) {
+        unsafe {
+            qSliderConnectSliderMoved(ptr, callback)
+        }
+    }
+    
+    /// 断开滑块拖动信号
+    public func disconnectSliderMoved() {
+        unsafe {
+            qSliderDisconnectSliderMoved(ptr)
+        }
+    }
+    
     /// 获取对象指针
     public func getPtr(): Int64 {
         return ptr
