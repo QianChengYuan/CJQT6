@@ -12,7 +12,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 # 查找 Qt6 包
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Qml Quick QuickWidgets Sql PrintSupport)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Qml Quick QuickWidgets Sql PrintSupport Network)
 # Multimedia 是可选的
 find_package(Qt6 COMPONENTS Multimedia QUIET)
 
@@ -97,6 +97,11 @@ set(PRINT_SOURCES
     native/src/print/bridge_print.cpp
 )
 
+# Network模块 - 网络支持
+set(NETWORK_SOURCES
+    native/src/network/bridge_network.cpp
+)
+
 # Multimedia模块 - 多媒体支持 (可选)
 set(MULTIMEDIA_SOURCES)
 if(Qt6Multimedia_FOUND)
@@ -118,6 +123,7 @@ add_library(cjqt6_bridge SHARED
     ${MULTIMEDIA_SOURCES}
     ${SQL_SOURCES}
     ${PRINT_SOURCES}
+    ${NETWORK_SOURCES}
     # 头文件 (用于MOC处理)
     native/includes/gui.h
     native/includes/widgets.h
@@ -133,6 +139,7 @@ target_link_libraries(cjqt6_bridge PRIVATE
     Qt6::QuickWidgets
     Qt6::Sql
     Qt6::PrintSupport
+    Qt6::Network
 )
 
 # 可选链接 Multimedia
