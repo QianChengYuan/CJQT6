@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file bridge_core.cpp
  * @brief 核心模块桥接函数 - QApplication, QWidget, QTimer
  */
@@ -106,6 +106,14 @@ void qWidgetSetGeometry(int64_t ptr, int32_t x, int32_t y, int32_t width, int32_
     QWidget* widget = reinterpret_cast<QWidget*>(ptr);
     if (widget) {
         widget->setGeometry(x, y, width, height);
+    }
+}
+
+void qWidgetSetParent(int64_t ptr, int64_t parentPtr) {
+    QWidget* child = reinterpret_cast<QWidget*>(ptr);
+    QWidget* parent = reinterpret_cast<QWidget*>(parentPtr);
+    if (child && parent) {
+        child->setParent(parent);
     }
 }
 

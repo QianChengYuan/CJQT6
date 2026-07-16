@@ -1,4 +1,4 @@
-package cjqt6.core
+﻿package cjqt6.core
 
 // QWidget - 基础窗口部件
 foreign func qWidgetCreate(): Int64
@@ -7,8 +7,17 @@ foreign func qWidgetHide(ptr: Int64): Unit
 foreign func qWidgetSetTitle(ptr: Int64, title: CString): Unit
 foreign func qWidgetResize(ptr: Int64, width: Int32, height: Int32): Unit
 foreign func qWidgetSetGeometry(ptr: Int64, x: Int32, y: Int32, width: Int32, height: Int32): Unit
+foreign func qWidgetSetParent(ptr: Int64, parentPtr: Int64): Unit
 foreign func qWidgetSetLayout(widgetPtr: Int64, layoutPtr: Int64): Unit
 foreign func qWidgetDelete(ptr: Int64): Unit
+
+public func setWidgetGeometry(widgetPtr: Int64, x: Int32, y: Int32, width: Int32, height: Int32): Unit {
+    unsafe { qWidgetSetGeometry(widgetPtr, x, y, width, height) }
+}
+
+public func setWidgetParent(widgetPtr: Int64, parentPtr: Int64): Unit {
+    unsafe { qWidgetSetParent(widgetPtr, parentPtr) }
+}
 
 // QWidget 样式表和扩展功能
 foreign func qWidgetSetStyleSheet(ptr: Int64, styleSheet: CString): Unit
