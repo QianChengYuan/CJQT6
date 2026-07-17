@@ -473,4 +473,4 @@ file releases/macos-x64/libcjqt6_bridge.dylib
 
 ## 许可证
 
-本指南遵循 [MIT License](../LICENSE)。
+本指南遵循 [MIT License](LICENSE)。

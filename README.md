@@ -186,11 +186,6 @@ main() {
 ```
 CJQT6/
 ├── README.md                   # 项目说明文档
-├── PUBLISHING.md               # 中心仓发布指南
-├── LICENSE                     # 许可证
-├── NOTICE                      # 依赖声明
-├── CHANGELOG.md                # 变更日志
-├── CONTRIBUTING.md             # 贡献指南
 ├── cjpm.toml                   # 仓颉项目配置
 ├── CMakeLists.txt              # CMake构建配置
 ├── doc/                        # 文档目录
@@ -199,6 +194,10 @@ CJQT6/
 │   ├── resource/               # 资源管理指南
 │   ├── testing/                # 测试指南
 │   ├── internal/               # 内部开发笔记
+│   ├── CHANGELOG.md            # 变更日志
+│   ├── CONTRIBUTING.md         # 贡献指南
+│   ├── LICENSE                 # 许可证
+│   ├── NOTICE                  # 依赖声明
 │   ├── architecture.md         # 架构设计
 │   ├── build-guide.md          # 构建指南
 │   ├── installation.md         # 安装指南
@@ -294,7 +293,7 @@ CJQT6/
 
 ## 贡献指南
 
-欢迎贡献代码、文档或提出Issue。请参阅 [CONTRIBUTING.md](CONTRIBUTING.md) 了解详情。
+欢迎贡献代码、文档或提出Issue。请参阅 [doc/CONTRIBUTING.md](doc/CONTRIBUTING.md) 了解详情。
 
 ### 贡献流程
 
@@ -308,7 +307,7 @@ CJQT6/
 
 ### CJQT6代码
 
-本项目采用MIT许可证，详见 [LICENSE](LICENSE) 文件。
+本项目采用MIT许可证，详见 [doc/LICENSE](doc/LICENSE) 文件。
 
 ### 依赖库声明
 
@@ -328,7 +327,7 @@ CJQT6/
 - 未修改Qt6源代码，仅调用Qt6公开API
 - 本项目不归属Qt官方，由社区独立开发维护
 
-详见 [NOTICE](NOTICE) 文件和 [许可证分析](doc/LICENSE-ANALYSIS.md)。
+详见 [doc/NOTICE](doc/NOTICE) 文件和 [许可证分析](doc/LICENSE-ANALYSIS.md)。
 
 ## 联系方式
 

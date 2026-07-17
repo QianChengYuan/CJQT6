@@ -74,6 +74,9 @@ native/*.cmake
 # 废弃的平台分包
 packages/
 
+# 测试代码本地保留，不上传
+tests/
+
 # 测试和生成目录
 test_deploy/
 test_paint/

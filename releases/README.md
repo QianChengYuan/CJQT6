@@ -22,17 +22,17 @@ releases/
 
 ### 1. 下载对应平台的桥接库
 
-从 [Releases](https://gitcode.com/yuan_1992/CJQT6/-/releases) 页面下载对应平台的压缩包。
+从 [Releases](https://gitcode.com/yuan_1992/CJQT6/releases) 页面下载对应平台的压缩包。
 
 ### 2. 安装到系统路径
 
 **Windows:**
 ```powershell
 # 方式1: 复制到仓颉运行时目录
-copy libcjqt6_bridge.dll C:\CodeTools\cangjie\cangjie_1.1.0\runtime\lib\windows_x86_64_cjnative\
+copy libcjqt6_bridge.dll \path/to\cangjie\cangjie_1.1.0\runtime\lib\windows_x86_64_cjnative\
 
 # 方式2: 添加到PATH环境变量
-$env:PATH += ";C:\path\to\cjqt6_bridge"
+$env:PATH += ";\path\to\cjqt6_bridge"
 ```
 
 **Linux:**
@@ -84,8 +84,8 @@ cjpm update
 **Windows:**
 ```powershell
 # 设置Qt路径
-$env:PATH += ";C:\Qt\6.10.2\mingw_64\bin"
-$env:PATH += ";C:\Qt\Tools\mingw1310_64\bin"
+$env:PATH += ";\path\to\Qt\6.10.2\mingw_64\bin"
+$env:PATH += ";\path\to\Qt\Tools\mingw1310_64\bin"
 ```
 
 **Linux:**

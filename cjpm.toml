@@ -18,7 +18,7 @@
   # 项目链接
   homepage = "https://gitcode.com/yuan_1992/CJQT6"
   repository = "https://gitcode.com/yuan_1992/CJQT6.git"
-  documentation = "https://gitcode.com/yuan_1992/CJQT6/wikis/"
+  documentation = "https://gitcode.com/yuan_1992/CJQT6/blob/main/README.md"
   
   # 关键词标签
   keywords = ["qt", "gui", "ui", "widgets", "ffi", "cross-platform"]
