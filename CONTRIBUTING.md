@@ -155,7 +155,7 @@ cd examples/calculator && cjpm build && cjpm run
 ## 社区
 
 - QQ群：1023882445
-- Issues：https://gitcode.com/yuan_1992/CJQT6/-/issues
+- Issues：https://gitcode.com/yuan_1992/CJQT6/issues
 
 ## 许可证
 

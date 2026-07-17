@@ -15,6 +15,17 @@ lib/
 
 # AI工具配置（不上传）
 .codeartsdoer/
+skills-lock.json
+
+# 规划/设计/AI辅助文档（不上传）
+doc/封装进度.md
+doc/环境检测报告.md
+doc/项目规划.md
+doc/重构总结.md
+doc/CJQT6仓颉基础窗口.md
+doc/CODE_REVIEW.md
+doc/EXAMPLE_IDEAS.md
+doc/SIGNAL-SLOT-REVIEW.md
 
 # 系统文件
 .DS_Store
@@ -30,6 +41,8 @@ Thumbs.db
 
 # 备份目录
 .backup/
+cangjie-repo.toml.backup
+cangjie-repo.toml.template
 
 # cjpm缓存
 .cjpm-cache
@@ -59,6 +72,7 @@ cmake_install.cmake
 # Qt CMake
 .qt/
 native/build*/
+native/ALL_BUILD.dir/
 native/CMakeFiles/
 native/.qt/
 native/*.vcxproj*
@@ -67,18 +81,32 @@ native/*.cmake
 !native/CMakeLists.txt
 !native/cmake/
 
-# 测试目录
+# 测试和生成目录
 test_deploy/
 test_paint/
+examples/*uic2cj/
+examples/qml/
+examples/ui2cj_test/
+ui/
+native/src/tools/
 
 # 示例媒体文件（太大）
 examples/music_player/music/*.mp3
 examples/multimedia_demo/*.mp3
-*.wav
-*.ogg
+examples/**/*.wav
+examples/**/*.ogg
 
 # 打包文件（发行版使用）
 *.cjp
 
-# 预编译库保留在releases目录供下载
-!releases/
+# 操作系统伪设备/临时文件
+nul
+
+# 二进制文件不纳入版本控制
+*.dll
+*.exe
+*.lib
+*.pdb
+
+# 预编译包保留在releases目录供下载
+!releases/*.cjp

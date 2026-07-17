@@ -5,7 +5,7 @@ QML模块提供Qt Quick/QML支持，允许使用声明式QML语言构建现代UI
 ## QQmlApplicationEngine - QML应用引擎
 
 ```cangjie
-import CJQT6.qml.*
+import cjqt6.qml.*
 
 // 创建引擎
 let engine = QQmlApplicationEngine()

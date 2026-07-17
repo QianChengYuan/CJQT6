@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file bridge_selectors.cpp
  * @brief 选择部件桥接函数 - QCheckBox, QRadioButton, QComboBox
  */
@@ -138,6 +138,27 @@ void qComboBoxClear(int64_t ptr) {
     if (comboBox) {
         comboBox->clear();
     }
+}
+
+int32_t qComboBoxCount(int64_t ptr) {
+    QComboBox* cb = reinterpret_cast<QComboBox*>(ptr);
+    return cb ? cb->count() : 0;
+}
+const char* qComboBoxItemText(int64_t ptr, int32_t index) {
+    QComboBox* cb = reinterpret_cast<QComboBox*>(ptr);
+    if (!cb || index < 0 || index >= cb->count()) return nullptr;
+    QByteArray arr = cb->itemText(index).toUtf8();
+    char* result = (char*)malloc(arr.size() + 1);
+    if (result) memcpy(result, arr.constData(), arr.size() + 1);
+    return result;
+}
+void qComboBoxSetEditable(int64_t ptr, bool editable) {
+    QComboBox* cb = reinterpret_cast<QComboBox*>(ptr);
+    if (cb) cb->setEditable(editable);
+}
+void qComboBoxRemoveItem(int64_t ptr, int32_t index) {
+    QComboBox* cb = reinterpret_cast<QComboBox*>(ptr);
+    if (cb && index >= 0 && index < cb->count()) cb->removeItem(index);
 }
 
 void qComboBoxDelete(int64_t ptr) {

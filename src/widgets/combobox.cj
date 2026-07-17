@@ -1,4 +1,4 @@
-package cjqt6.widgets
+﻿package cjqt6.widgets
 
 import cjqt6.core.*
 
@@ -14,6 +14,10 @@ foreign func qComboBoxDisconnectCurrentIndexChanged(ptr: Int64): Unit
 foreign func qComboBoxConnectCurrentTextChanged(ptr: Int64, callback: CStringCallback): Unit
 foreign func qComboBoxDisconnectCurrentTextChanged(ptr: Int64): Unit
 foreign func qComboBoxDelete(ptr: Int64): Unit
+foreign func qComboBoxCount(ptr: Int64): Int32
+foreign func qComboBoxItemText(ptr: Int64, index: Int32): CString
+foreign func qComboBoxSetEditable(ptr: Int64, editable: Bool): Unit
+foreign func qComboBoxRemoveItem(ptr: Int64, index: Int32): Unit
 
 /// 下拉框部件
 public class QComboBox {

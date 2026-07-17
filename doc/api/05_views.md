@@ -7,7 +7,7 @@
 ### QTableWidget
 
 ```cangjie
-import CJQT6.views.*
+import cjqt6.views.*
 
 // 创建表格 (5行3列)
 let table = QTableWidget(5, 3)
@@ -89,7 +89,7 @@ ContiguousSelection  // 连续选择
 列表控件，用于显示一系列可选择的项。
 
 ```cangjie
-import CJQT6.views.*
+import cjqt6.views.*
 
 let listWidget = QListWidget()
 listWidget.setAlternatingRowColors(true)
@@ -167,7 +167,7 @@ Critical     // 错误图标
 树形控件，用于显示层次结构数据。
 
 ```cangjie
-import CJQT6.views.*
+import cjqt6.views.*
 
 let treeWidget = QTreeWidget()
 treeWidget.setColumnCount(3)

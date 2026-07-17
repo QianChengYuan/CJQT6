@@ -1,6 +1,6 @@
 [package]
   name = "cjqt6"
-  version = "1.0.0"
+  version = "1.1.0"
   description = "仓颉语言的Qt6封装库 - 让仓颉像Python使用PyQt一样便捷"
   author = "CJQT6 Team"
   license = "MIT"
@@ -9,11 +9,11 @@
   cjc-version = "1.1.0"
   
   # 包输出类型
-  output-type = "static"
+  output-type = "dynamic"
   
   # 编译选项
   compile-option = "-Woff unused"
-  link-option = "-lcjqt6_bridge"
+  link-option = "build/lib/libcjqt6_bridge.dll.a"
   
   # 项目链接
   homepage = "https://gitcode.com/yuan_1992/CJQT6"
@@ -35,7 +35,7 @@
 # FFI桥接库配置
 [native]
   bridge-name = "CJQT6_bridge"
-  bridge-path = "lib/native"
+  bridge-path = "native/build/bin"
   
   # 支持的平台列表
   platforms = [
@@ -79,3 +79,4 @@
   category = "gui"
   maturity = "stable"
   tags = ["desktop", "cross-platform", "native"]
+

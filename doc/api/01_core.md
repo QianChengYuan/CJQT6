@@ -4,58 +4,60 @@
 
 ## 资源管理
 
-### 自动清理机制
+### ⚠️ 终结器已全局禁用
 
-大部分控件类实现了终结器 `~init`，垃圾回收时会自动释放资源。
+**所有控件类的终结器（`~init`）已全部禁用**，包括 QWidget、QLabel、QPushButton、QTimer 等所有控件。原因如下：
 
-**⚠️ 重要例外：QTimer 的终结器已被禁用**
-
-由于仓颉运行时可能在对象仍被引用时提前调用终结器，导致 Qt 对象被错误释放。为避免此问题，**QTimer 不再提供自动清理**，必须手动调用 `delete()`。
+仓颉 GC 可能在对象仍被全局变量或其他引用指向时提前调用终结器，导致 Qt 对象被错误释放并引发崩溃。为此，所有依赖 Qt 原生资源的类**不再提供自动清理**，必须显式释放。
 
 ```cangjie
-// ❌ 错误：不手动释放 QTimer
+// ❌ 错误：依赖自动释放
 main(): Int32 {
     let app = QApplication()
-    let timer = QTimer()  // 终结器已禁用！
-    // ... 使用 timer ...
+    let window = QWidget()
+    window.show()
     let result = app.exec()
-    return result  // QTimer 资源泄漏！
+    return result  // window 和 app 资源泄漏！
 }
 
-// ✅ 正确：手动释放 QTimer
+// ✅ 正确：显式释放资源
 main(): Int32 {
     let app = QApplication()
-    let timer = QTimer()
-    // ... 使用 timer ...
+    let window = QWidget()
+    window.show()
     let result = app.exec()
-    timer.delete()  // 手动释放
+    window.delete()
+    app.delete()
     return result
 }
 ```
 
 ### 手动释放（推荐）
 
-对于以下类，**强烈建议**手动调用 `delete()` 或 `close()`：
+所有 Qt 资源类都应手动调用 `delete()` 释放：
 
 | 类 | 原因 | 释放方法 |
 |---|-------|---------|
+| **QWidget** 及其子类 | 终结器已禁用 | `delete()` |
+| **QApplication** | 终结器已禁用 | `delete()` |
 | **QTimer** | 终结器已禁用 | `delete()` |
-| **QMediaPlayer** | 涉及底层资源 | `delete()` |
-| **QAudioOutput** | 涉及底层资源 | `delete()` |
-| **QProcess** | 涉及进程资源 | `delete()` |
-| **绘图类** (QColor/QPen/QBrush/QFont/QPixmap等) | 工厂方法可能泄漏 | `delete()` |
+| **QMediaPlayer** | 终结器已禁用 | `delete()` |
+| **QAudioOutput** | 终结器已禁用 | `delete()` |
+| **QProcess** | 终结器已禁用 | `delete()` |
+| **绘图类** (QColor/QPen/QBrush/QFont/QPixmap等) | 终结器已禁用 | `delete()` |
 
 ```cangjie
-// 方式1：close() - 实现 QtResource 接口
+// 方式1：close() - 实现 QtResource 接口的类
 widget.close()
 
-// 方式2：delete() - 直接释放
+// 方式2：delete() - 所有资源类通用
 widget.delete()
+app.delete()
 ```
 
 ### try-with-resources 模式
 
-对于需要精确控制资源生命周期的场景：
+对于实现了 `QtResource` 接口的类（如 QWidget），可以使用 try-with-resources 语句自动调用 `close()`：
 
 ```cangjie
 try (widget = QWidget()) {
@@ -65,6 +67,8 @@ try (widget = QWidget()) {
 ```
 
 ### QtResource 接口
+
+实现了 QtResource 接口的类支持 `close()` 和 `isClosed()` 方法。
 
 ```cangjie
 interface QtResource {
@@ -76,7 +80,7 @@ interface QtResource {
 ### 异常处理
 
 ```cangjie
-import CJQT6.core.*
+import cjqt6.core.*
 
 // 安全执行操作
 let result = safeExecute(widget, { w =>
@@ -104,7 +108,7 @@ let success = safeRun({ =>
 应用程序主类，每个Qt程序必须有且仅有一个实例。
 
 ```cangjie
-import CJQT6.core.*
+import cjqt6.core.*
 
 main(): Int32 {
     let app = QApplication()
@@ -130,22 +134,24 @@ main(): Int32 {
 | `init()` | 创建应用程序实例 |
 | `exec(): Int32` | 进入事件循环，返回退出码 |
 | `quit()` | 退出应用程序 |
-| `close()` | 释放资源（实现 QtResource 接口） |
-| `loadQtTranslation(locale: String)` | 加载Qt内置翻译文件 |
-| `switchLanguage(locale: String)` | 切换语言环境 |
+| `loadQtTranslation(locale: String): Bool` | 加载Qt内置翻译文件 |
+| `loadAppTranslation(qmFile, directory: String): Bool` | 加载应用程序翻译文件 |
+| `setLocale(locale: String)` | 设置语言环境 |
 | `locale(): String` | 获取当前语言环境 |
 | `systemLocale(): String` | 获取系统语言环境 |
+| `switchLanguage(locale: String): Bool` | 切换语言（设置locale并加载Qt翻译） |
+| `delete()` | 释放资源 |
+
+> **注意**：QApplication **不实现** `QtResource` 接口，没有 `close()` 方法。请使用 `delete()` 释放资源。
 
 **常用语言代码** (Language类):
 ```cangjie
-Language.ChineseSimplified   // "zh_CN" - 简体中文
-Language.ChineseTraditional  // "zh_TW" - 繁体中文
-Language.English             // "en_US" - 英语
-Language.Japanese            // "ja_JP" - 日语
-Language.Korean              // "ko_KR" - 韩语
-Language.German              // "de_DE" - 德语
-Language.French              // "fr_FR" - 法语
-Language.Spanish             // "es_ES" - 西班牙语
+Language.chinese()             // "zh_CN" - 简体中文
+Language.chineseSimplified()   // "zh_CN" - 简体中文
+Language.chineseTraditional()  // "zh_TW" - 繁体中文
+Language.english()             // "en_US" - 英语
+Language.japanese()            // "ja_JP" - 日语
+Language.korean()              // "ko_KR" - 韩语
 ```
 
 ### QApp 静态类
@@ -153,7 +159,7 @@ Language.Spanish             // "es_ES" - 西班牙语
 提供静态方法访问应用程序功能。
 
 ```cangjie
-import CJQT6.core.*
+import cjqt6.core.*
 
 // 静态退出应用
 QApp.quit()
@@ -181,15 +187,33 @@ window.show()
 **方法**:
 | 方法 | 说明 |
 |------|------|
+| `init()` | 创建窗口部件 |
+| `show()` | 显示窗口 |
+| `hide()` | 隐藏窗口 |
 | `setTitle(title: String)` | 设置窗口标题 |
 | `resize(width: Int32, height: Int32)` | 设置窗口大小 |
 | `setGeometry(x, y, width, height)` | 设置位置和大小 |
 | `setLayout(layoutPtr: Int64)` | 设置布局 |
-| `show()` | 显示窗口 |
-| `hide()` | 隐藏窗口 |
+| `setStyleSheet(styleSheet: String)` | 设置样式表 |
+| `styleSheet(): String` | 获取样式表 |
+| `setEnabled(enabled: Bool)` | 设置启用状态 |
+| `isEnabled(): Bool` | 是否启用 |
+| `setVisible(visible: Bool)` | 设置可见性 |
+| `isVisible(): Bool` | 是否可见 |
+| `setToolTip(toolTip: String)` | 设置工具提示 |
+| `setMinimumSize(width: Int32, height: Int32)` | 设置最小尺寸 |
+| `setMaximumSize(width: Int32, height: Int32)` | 设置最大尺寸 |
+| `width(): Int32` | 获取宽度 |
+| `height(): Int32` | 获取高度 |
+| `update()` | 更新窗口 |
+| `repaint()` | 重绘窗口 |
 | `getPtr(): Int64` | 获取指针（用于布局） |
-| `close()` | 释放资源 |
+| `close()` | 释放资源（实现 QtResource 接口） |
+| `delete()` | 释放资源 |
 | `isClosed(): Bool` | 检查是否已释放 |
+| `isValid(): Bool` | 检查对象是否有效 |
+| `setOnDestroyed(callback: VoidCallback)` | 设置控件销毁回调 |
+| `disconnectDestroyed()` | 断开控件销毁信号 |
 
 ---
 

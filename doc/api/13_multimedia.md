@@ -3,7 +3,7 @@
 多媒体模块提供音频播放功能。
 
 ```cangjie
-import CJQT6.multimedia.*
+import cjqt6.multimedia.*
 ```
 
 ## QMediaPlayer - 媒体播放器

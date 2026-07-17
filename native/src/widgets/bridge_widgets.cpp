@@ -1,4 +1,4 @@
-
+﻿
 /**
  * @file bridge_widgets.cpp
  * @brief 基础部件桥接函数 - QLabel, QPushButton, QToolButton, QLineEdit, QTextEdit
@@ -147,6 +147,27 @@ void qButtonSetStandardIcon(int64_t ptr, int32_t iconType) {
         QIcon icon = button->style()->standardIcon(standardIcon);
         button->setIcon(icon);
     }
+}
+
+void qButtonSetCheckable(int64_t ptr, bool checkable) {
+    QPushButton* btn = reinterpret_cast<QPushButton*>(ptr);
+    if (btn) btn->setCheckable(checkable);
+}
+void qButtonSetChecked(int64_t ptr, bool checked) {
+    QPushButton* btn = reinterpret_cast<QPushButton*>(ptr);
+    if (btn) btn->setChecked(checked);
+}
+bool qButtonIsChecked(int64_t ptr) {
+    QPushButton* btn = reinterpret_cast<QPushButton*>(ptr);
+    return btn ? btn->isChecked() : false;
+}
+void qButtonSetDefault(int64_t ptr, bool isDefault) {
+    QPushButton* btn = reinterpret_cast<QPushButton*>(ptr);
+    if (btn) btn->setDefault(isDefault);
+}
+void qButtonSetFlat(int64_t ptr, bool flat) {
+    QPushButton* btn = reinterpret_cast<QPushButton*>(ptr);
+    if (btn) btn->setFlat(flat);
 }
 
 void qButtonDelete(int64_t ptr) {

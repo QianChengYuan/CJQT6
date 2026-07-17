@@ -57,7 +57,7 @@ cjpm install CJQT6@1.0.0
 
 ```bash
 # 克隆仓库
-git clone https://github.com/your-repo/CJQT6.git
+git clone https://gitcode.com/yuan_1992/CJQT6.git
 cd CJQT6
 
 # 构建FFI桥接库
@@ -190,6 +190,6 @@ cjpm run
 
 ## 获取帮助
 
-- 文档: https://your-repo.github.io/CJQT6/
-- 问题反馈: https://github.com/your-repo/CJQT6/issues
+- 文档: https://gitcode.com/yuan_1992/CJQT6
+- 问题反馈: https://gitcode.com/yuan_1992/CJQT6/issues
 - 示例代码: `examples/` 目录

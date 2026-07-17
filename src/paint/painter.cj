@@ -55,13 +55,17 @@ public class QColor {
         }
     }
     
-    /// 终结器 - 最后保障，防止内存泄漏
-    ~init() {
-        if (ptr != 0) {
-            unsafe { qColorDelete(ptr) }
-            ptr = 0
-        }
-    }
+    // 禁用终结器以避免仓颉GC过早释放Qt对象导致崩溃
+    // 对象生命周期由以下方式管理：
+    // 1. 显式调用delete()方法
+    // 2. 使用try-with-resources语句（需实现Resource接口）
+    // 3. 通过parent-child机制自动管理（如QWidget）
+    // ~init() {
+    //     if (ptr != 0) {
+    //         unsafe { qColorDelete(ptr) }
+    //         ptr = 0
+    //     }
+    // }
 }
 
 // 预定义颜色
@@ -322,13 +326,14 @@ public class QPen {
         }
     }
     
-    /// 终结器 - 最后保障
-    ~init() {
-        if (ptr != 0) {
-            unsafe { qPenDelete(ptr) }
-            ptr = 0
-        }
-    }
+    // 禁用终结器以避免仓颉GC过早释放Qt对象导致崩溃
+    // 对象生命周期管理：显式调用delete()方法
+    // ~init() {
+    //     if (ptr != 0) {
+    //         unsafe { qPenDelete(ptr) }
+    //         ptr = 0
+    //     }
+    // }
 }
 
 // ============================================================
@@ -365,13 +370,14 @@ public class QBrush {
         }
     }
     
-    /// 终结器 - 最后保障
-    ~init() {
-        if (ptr != 0) {
-            unsafe { qBrushDelete(ptr) }
-            ptr = 0
-        }
-    }
+    // 禁用终结器以避免仓颉GC过早释放Qt对象导致崩溃
+    // 对象生命周期管理：显式调用delete()方法
+    // ~init() {
+    //     if (ptr != 0) {
+    //         unsafe { qBrushDelete(ptr) }
+    //         ptr = 0
+    //     }
+    // }
 }
 
 // ============================================================
@@ -402,12 +408,14 @@ public class QLinearGradient {
         }
     }
     
-    ~init() {
-        if (ptr != 0) {
-            unsafe { qLinearGradientDelete(ptr) }
-            ptr = 0
-        }
-    }
+    // 禁用终结器以避免仓颉GC过早释放Qt对象导致崩溃
+    // 对象生命周期管理：显式调用delete()方法
+    // ~init() {
+    //     if (ptr != 0) {
+    //         unsafe { qLinearGradientDelete(ptr) }
+    //         ptr = 0
+    //     }
+    // }
 }
 
 /// 径向渐变
@@ -439,12 +447,14 @@ public class QRadialGradient {
         }
     }
     
-    ~init() {
-        if (ptr != 0) {
-            unsafe { qRadialGradientDelete(ptr) }
-            ptr = 0
-        }
-    }
+    // 禁用终结器以避免仓颉GC过早释放Qt对象导致崩溃
+    // 对象生命周期管理：显式调用delete()方法
+    // ~init() {
+    //     if (ptr != 0) {
+    //         unsafe { qRadialGradientDelete(ptr) }
+    //         ptr = 0
+    //     }
+    // }
 }
 
 /// 锥形渐变
@@ -475,12 +485,14 @@ public class QConicalGradient {
         }
     }
     
-    ~init() {
-        if (ptr != 0) {
-            unsafe { qConicalGradientDelete(ptr) }
-            ptr = 0
-        }
-    }
+    // 禁用终结器以避免仓颉GC过早释放Qt对象导致崩溃
+    // 对象生命周期管理：显式调用delete()方法
+    // ~init() {
+    //     if (ptr != 0) {
+    //         unsafe { qConicalGradientDelete(ptr) }
+    //         ptr = 0
+    //     }
+    // }
 }
 
 // ============================================================
@@ -519,12 +531,14 @@ public class QFont {
         }
     }
     
-    ~init() {
-        if (ptr != 0) {
-            unsafe { qFontDelete(ptr) }
-            ptr = 0
-        }
-    }
+    // 禁用终结器以避免仓颉GC过早释放Qt对象导致崩溃
+    // 对象生命周期管理：显式调用delete()方法
+    // ~init() {
+    //     if (ptr != 0) {
+    //         unsafe { qFontDelete(ptr) }
+    //         ptr = 0
+    //     }
+    // }
 }
 
 // ============================================================
@@ -562,12 +576,14 @@ public class QPainterPath {
         }
     }
     
-    ~init() {
-        if (ptr != 0) {
-            unsafe { qPainterPathDelete(ptr) }
-            ptr = 0
-        }
-    }
+    // 禁用终结器以避免仓颉GC过早释放Qt对象导致崩溃
+    // 对象生命周期管理：显式调用delete()方法
+    // ~init() {
+    //     if (ptr != 0) {
+    //         unsafe { qPainterPathDelete(ptr) }
+    //         ptr = 0
+    //     }
+    // }
 }
 
 // ============================================================
@@ -613,12 +629,14 @@ public class QPixmap {
         }
     }
     
-    ~init() {
-        if (ptr != 0) {
-            unsafe { qPixmapDelete(ptr) }
-            ptr = 0
-        }
-    }
+    // 禁用终结器以避免仓颉GC过早释放Qt对象导致崩溃
+    // 对象生命周期管理：显式调用delete()方法
+    // ~init() {
+    //     if (ptr != 0) {
+    //         unsafe { qPixmapDelete(ptr) }
+    //         ptr = 0
+    //     }
+    // }
 }
 
 public class QImage {
@@ -650,12 +668,14 @@ public class QImage {
         }
     }
     
-    ~init() {
-        if (ptr != 0) {
-            unsafe { qImageDelete(ptr) }
-            ptr = 0
-        }
-    }
+    // 禁用终结器以避免仓颉GC过早释放Qt对象导致崩溃
+    // 对象生命周期管理：显式调用delete()方法
+    // ~init() {
+    //     if (ptr != 0) {
+    //         unsafe { qImageDelete(ptr) }
+    //         ptr = 0
+    //     }
+    // }
 }
 
 // ============================================================

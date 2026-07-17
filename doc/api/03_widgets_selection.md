@@ -152,3 +152,66 @@ progress.setTextVisible(true)
 | `value(): Int32` | 获取值 |
 | `setRange(min: Int32, max: Int32)` | 设置范围 |
 | `setTextVisible(visible: Bool)` | 是否显示文本 |
+
+### QDial - 旋钮控件
+
+用于在圆形范围内选择数值，类似音量旋钮。
+
+```cangjie
+let dial = QDial()
+dial.setRange(0, 100)
+dial.setValue(50)
+dial.setSingleStep(5)
+dial.setWrapping(true)       // 允许循环旋转
+dial.setNotchesVisible(true) // 显示刻度
+```
+
+**方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` | 创建旋钮 |
+| `setValue(value: Int32)` | 设置值 |
+| `value(): Int32` | 获取值 |
+| `setRange(min: Int32, max: Int32)` | 设置范围 |
+| `setSingleStep(step: Int32)` | 设置步长 |
+| `setWrapping(wrapping: Bool)` | 设置是否循环 |
+| `wrapping(): Bool` | 获取是否循环 |
+| `setNotchesVisible(visible: Bool)` | 设置刻度是否可见 |
+| `notchesVisible(): Bool` | 获取刻度是否可见 |
+| `setOnValueChanged(callback: Int32Callback)` | 值变化回调 |
+| `disconnectValueChanged()` | 断开值变化信号 |
+| `show()` | 显示控件 |
+| `hide()` | 隐藏控件 |
+| `resize(width: Int32, height: Int32)` | 调整大小 |
+| `getPtr(): Int64` | 获取指针 |
+| `delete()` | 释放资源 |
+
+### QDoubleSpinBox - 双精度旋转框
+
+与 QSpinBox 类似，但支持浮点数值。
+
+```cangjie
+let doubleSpin = QDoubleSpinBox()
+doubleSpin.setRange(0.0, 100.0)
+doubleSpin.setValue(50.5)
+doubleSpin.setSingleStep(0.5)
+doubleSpin.setDecimals(2)  // 保留2位小数
+```
+
+**方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` | 创建双精度旋转框 |
+| `setValue(value: Float64)` | 设置值 |
+| `value(): Float64` | 获取值 |
+| `setRange(min: Float64, max: Float64)` | 设置范围 |
+| `setSingleStep(step: Float64)` | 设置步长 |
+| `setDecimals(decimals: Int32)` | 设置小数位数 |
+| `decimals(): Int32` | 获取小数位数 |
+| `setOnValueChanged(callback: Float64Callback)` | 值变化回调 |
+| `disconnectValueChanged()` | 断开值变化信号 |
+| `show()` | 显示控件 |
+| `hide()` | 隐藏控件 |
+| `resize(width: Int32, height: Int32)` | 调整大小 |
+| `getPtr(): Int64` | 获取指针 |
+| `delete()` | 释放资源 |

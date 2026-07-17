@@ -3,7 +3,7 @@
 本模块提供绑定Qt的绘图功能，包括颜色、画笔、画刷、渐变、绘图路径和绘图器。
 
 ```cangjie
-import CJQT6.paint.*
+import cjqt6.paint.*
 ```
 
 ## 类型安全枚举
@@ -155,22 +155,6 @@ let gradientBrush = QBrush(gradient)
 let gradient = QLinearGradient.fromInt(0, 0, 200, 0)  // 水平渐变
 gradient.setColorAt(0.0f32, Colors.red())
 gradient.setColorAt(0.5f32, Colors.yellow())
-gradient.setColorAt(1.0f32, Colors.blue())
-```
-
-### QRadialGradient - 径向渐变
-
-```cangjie
-let gradient = QRadialGradient.fromInt(cx, cy, radius, fx, fy)
-gradient.setColorAt(0.0f32, Colors.red())
-gradient.setColorAt(1.0f32, Colors.blue())
-```
-
-### QConicalGradient - 锥形渐变
-
-```cangjie
-let gradient = QConicalGradient.fromInt(cx, cy, angle)
-gradient.setColorAt(0.0f32, Colors.red())
 gradient.setColorAt(1.0f32, Colors.blue())
 ```
 
@@ -377,9 +361,11 @@ let custom = TextAlignment.Left | TextAlignment.VCenter
 
 ---
 
-## 内存管理最佳实践
+## ⚠️ 内存管理
 
-绘图类对象已实现终结器 `~init()`，但建议：
+**绘图类终结器已禁用** — QColor、QPen、QBrush、QFont、QPixmap 等绘图类的终结器已被禁用（原因同控件类：GC可能在不正确的时机调用终结器）。请在不再使用时显式调用 `delete()` 释放资源。
+
+最佳实践：
 
 1. **游戏/高频渲染场景**：手动释放，避免 GC 不确定时机
    ```cangjie
@@ -415,8 +401,8 @@ let custom = TextAlignment.Left | TextAlignment.VCenter
 ## 完整示例
 
 ```cangjie
-import CJQT6.paint.*
-import CJQT6.widgets.*
+import cjqt6.paint.*
+import cjqt6.widgets.*
 
 main(): Int32 {
     let app = QApplication()

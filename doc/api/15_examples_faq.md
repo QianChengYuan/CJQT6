@@ -5,11 +5,11 @@
 ```cangjie
 package demo
 
-import CJQT6.core.*
-import CJQT6.widgets.*
-import CJQT6.gui.*
-import CJQT6.views.*
-import CJQT6.dialogs.*
+import cjqt6.core.*
+import cjqt6.widgets.*
+import cjqt6.gui.*
+import cjqt6.views.*
+import cjqt6.dialogs.*
 
 // 全局变量（用于回调中访问，CFunc 闭包不能捕获局部变量）
 var label: ?QLabel = None
@@ -143,9 +143,9 @@ dateEdit.setDate(QDate.currentDate())
 ```cangjie
 package snake_game
 
-import CJQT6.core.*
-import CJQT6.paint.*
-import CJQT6.widgets.*
+import cjqt6.core.*
+import cjqt6.paint.*
+import cjqt6.widgets.*
 import std.random.*
 import std.collection.*
 

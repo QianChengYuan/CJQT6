@@ -1,4 +1,4 @@
-package cjqt6.widgets
+﻿package cjqt6.widgets
 
 import cjqt6.core.*
 
@@ -10,6 +10,11 @@ foreign func qButtonDisconnectClicked(ptr: Int64): Unit
 foreign func qButtonSetIcon(ptr: Int64, iconPath: CString): Unit
 foreign func qButtonSetIconSize(ptr: Int64, width: Int32, height: Int32): Unit
 foreign func qButtonSetStandardIcon(ptr: Int64, iconType: Int32): Unit
+foreign func qButtonSetCheckable(ptr: Int64, checkable: Bool): Unit
+foreign func qButtonSetChecked(ptr: Int64, checked: Bool): Unit
+foreign func qButtonIsChecked(ptr: Int64): Bool
+foreign func qButtonSetDefault(ptr: Int64, isDefault: Bool): Unit
+foreign func qButtonSetFlat(ptr: Int64, flat: Bool): Unit
 foreign func qButtonDelete(ptr: Int64): Unit
 
 /// 标准图标类型枚举

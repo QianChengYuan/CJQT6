@@ -416,5 +416,26 @@ bool qApplicationSwitchLanguage(const char* locale) {
     return qApplicationLoadQtTranslation(locale);
 }
 
+
+void qWidgetMove(int64_t ptr, int32_t x, int32_t y) {
+    QWidget* widget = reinterpret_cast<QWidget*>(ptr);
+    if (widget) widget->move(x, y);
+}
+int32_t qWidgetX(int64_t ptr) {
+    QWidget* widget = reinterpret_cast<QWidget*>(ptr);
+    return widget ? widget->x() : 0;
+}
+int32_t qWidgetY(int64_t ptr) {
+    QWidget* widget = reinterpret_cast<QWidget*>(ptr);
+    return widget ? widget->y() : 0;
+}
+void qWidgetSetFixedSize(int64_t ptr, int32_t width, int32_t height) {
+    QWidget* widget = reinterpret_cast<QWidget*>(ptr);
+    if (widget) widget->setFixedSize(width, height);
+}
+void qWidgetSetWindowIcon(int64_t ptr, const char* iconPath) {
+    QWidget* widget = reinterpret_cast<QWidget*>(ptr);
+    if (widget && iconPath) widget->setWindowIcon(QIcon(iconPath));
+}
 } // extern "C"
 

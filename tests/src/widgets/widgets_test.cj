@@ -1,15 +1,26 @@
-package cjqt6.widgets
+package cjqt6_test.widgets
 
+import cjqt6.widgets.*
 import cjqt6.core.*
-
-// 测试模式下 unittest 和 unittest.testmacro 自动导入
-
-// ============================================================
-// QPushButton 测试
-// ============================================================
+import std.unittest.*
 
 @Test
 class QPushButtonTests {
+    private static var guiEnv: ?GUITestEnvironment = None
+    
+    @BeforeAll
+    static func setupGUI(): Unit {
+        let env = GUITestEnvironment.getInstance()
+        env.setupEnvironment()
+        guiEnv = Some(env)
+    }
+    
+    @AfterAll
+    static func teardownGUI(): Unit {
+        if (let Some(env) <- guiEnv) {
+            env.teardownEnvironment()
+        }
+    }
     
     @TestCase
     func testCreate() {
@@ -33,7 +44,6 @@ class QPushButtonTests {
     func testSetText() {
         let btn = QPushButton()
         btn.setText("Click Me")
-        // 文本设置成功（无法直接验证，但不抛异常）
         @Assert(btn.isValid())
         btn.close()
     }
@@ -50,12 +60,23 @@ class QPushButtonTests {
     }
 }
 
-// ============================================================
-// QLabel 测试
-// ============================================================
-
 @Test
 class QLabelTests {
+    private static var guiEnv: ?GUITestEnvironment = None
+    
+    @BeforeAll
+    static func setupGUI(): Unit {
+        let env = GUITestEnvironment.getInstance()
+        env.setupEnvironment()
+        guiEnv = Some(env)
+    }
+    
+    @AfterAll
+    static func teardownGUI(): Unit {
+        if (let Some(env) <- guiEnv) {
+            env.teardownEnvironment()
+        }
+    }
     
     @TestCase
     func testCreate() {
@@ -76,7 +97,7 @@ class QLabelTests {
     @TestCase
     func testSetAlignment() {
         let label = QLabel()
-        label.setAlignment(0x0004)  // Qt.AlignCenter
+        label.setAlignment(0x0004)
         @Assert(label.isValid())
         label.close()
     }
@@ -90,10 +111,6 @@ class QLabelTests {
         @ExpectThrows[ResourceDisposedException](label.setText("test"))
     }
 }
-
-// ============================================================
-// QLineEdit 测试
-// ============================================================
 
 @Test
 class QLineEditTests {
@@ -151,10 +168,6 @@ class QLineEditTests {
         @ExpectThrows[ResourceDisposedException](edit.clear())
     }
 }
-
-// ============================================================
-// QSpinBox 测试
-// ============================================================
 
 @Test
 class QSpinBoxTests {

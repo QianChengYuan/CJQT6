@@ -1,10 +1,7 @@
-package cjqt6.core
+package cjqt6_test.core
 
-// 测试模式下 unittest 和 unittest.testmacro 自动导入
-
-// ============================================================
-// 异常类测试（不需要显示环境）
-// ============================================================
+import cjqt6.core.*
+import std.unittest.*
 
 @Test
 class ExceptionTests {
@@ -46,10 +43,6 @@ class ExceptionTests {
     }
 }
 
-// ============================================================
-// 辅助函数测试（不需要显示环境）
-// ============================================================
-
 @Test
 class HelperFunctionTests {
     
@@ -76,7 +69,6 @@ class HelperFunctionTests {
     
     @TestCase
     func testSafeRunSuccess() {
-        // safeRun 成功时返回 true
         let result = safeRun({ => })
         @Expect(result, true)
     }
@@ -90,13 +82,23 @@ class HelperFunctionTests {
     }
 }
 
-// ============================================================
-// QWidget 测试（需要显示环境）
-// 注意：在 CI 环境中使用 xvfb-run 运行测试
-// ============================================================
-
 @Test
 class QWidgetTests {
+    private static var guiEnv: ?GUITestEnvironment = None
+    
+    @BeforeAll
+    static func setupGUI(): Unit {
+        let env = GUITestEnvironment.getInstance()
+        env.setupEnvironment()
+        guiEnv = Some(env)
+    }
+    
+    @AfterAll
+    static func teardownGUI(): Unit {
+        if (let Some(env) <- guiEnv) {
+            env.teardownEnvironment()
+        }
+    }
     
     @TestCase
     func testCreate() {

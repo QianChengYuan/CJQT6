@@ -80,6 +80,51 @@ Raised  // 凸起
 Sunken  // 凹陷
 ```
 
+### QSplitter - 分割器
+
+可拖拽分割的子控件区域。支持水平和垂直两种方向。
+
+```cangjie
+// 水平分割器
+let splitter = QSplitter.createHorizontal(0)
+splitter.addWidget(leftWidget.getPtr())
+splitter.addWidget(rightWidget.getPtr())
+splitter.setStretchFactor(0, 1)  // 左侧拉伸因子
+splitter.setStretchFactor(1, 2)  // 右侧拉伸因子
+
+// 垂直分割器
+let vSplitter = QSplitter.createVertical(0)
+vSplitter.addWidget(topWidget.getPtr())
+vSplitter.addWidget(bottomWidget.getPtr())
+```
+
+**方法**:
+| 方法 | 说明 |
+|------|------|
+| `init(parent: Int64)` | 创建分割器 |
+| `createHorizontal(parent: Int64): QSplitter` | 创建水平分割器（静态方法） |
+| `createVertical(parent: Int64): QSplitter` | 创建垂直分割器（静态方法） |
+| `addWidget(widgetPtr: Int64)` | 添加子控件 |
+| `count(): Int32` | 获取子控件数量 |
+| `setStretchFactor(index: Int32, stretch: Int32)` | 设置拉伸因子 |
+| `setHandleWidth(width: Int32)` | 设置分割条宽度 |
+| `handleWidth(): Int32` | 获取分割条宽度 |
+| `setChildrenCollapsible(collapsible: Bool)` | 设置子控件是否可折叠 |
+| `childrenCollapsible(): Bool` | 子控件是否可折叠 |
+| `setOrientation(orientation: Int32)` | 设置方向 |
+| `orientation(): Int32` | 获取方向 |
+| `show()` | 显示分割器 |
+| `hide()` | 隐藏分割器 |
+| `resize(width: Int32, height: Int32)` | 调整大小 |
+| `getPtr(): Int64` | 获取指针 |
+| `delete()` | 释放资源 |
+
+**方向常量** (`SplitterOrientation`):
+```cangjie
+SplitterOrientation.Horizontal  // 水平（默认）
+SplitterOrientation.Vertical    // 垂直
+```
+
 ---
 
 ## 布局管理

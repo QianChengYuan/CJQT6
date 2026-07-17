@@ -168,7 +168,7 @@ main() {
 ## 下一步
 
 - 查看 [完整示例](../examples/) 目录
-- 阅读 [API文档](https://your-repo.github.io/CJQT6/api/)
+- 阅读 [API文档](../api/README.md)
 - 学习 [更多Qt控件](https://doc.qt.io/qt-6/qtwidgets-index.html)
 
 ## 常见问题

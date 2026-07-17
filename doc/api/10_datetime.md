@@ -3,7 +3,7 @@
 本模块提供日历、日期编辑、时间编辑和日期时间编辑控件。
 
 ```cangjie
-import CJQT6.widgets.*
+import cjqt6.widgets.*
 ```
 
 ## QDate - 日期类

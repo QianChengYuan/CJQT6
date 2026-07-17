@@ -752,7 +752,7 @@ cp native/build/lib/libcjfw_bridge.so /usr/lib/
    - 是否在正确目录执行命令
     ↓
 5. 搜索解决方案
-   - 项目Issue: https://github.com/your-repo/CJQT6/issues
+   - 项目Issue: https://gitcode.com/yuan_1992/CJQT6/issues
    - 仓颉社区
    - Qt论坛
     ↓
@@ -816,7 +816,7 @@ pkg-config --modversion Qt6
 
 ```bash
 # 完整构建流程
-git clone https://github.com/your-repo/CJQT6.git
+git clone https://gitcode.com/yuan_1992/CJQT6.git
 cd CJQT6
 
 # 构建FFI桥接库
@@ -887,7 +887,7 @@ setx PATH "%PATH%;%QTDIR%\bin;C:\Program Files\CMake\bin"
 
 ```powershell
 # 克隆项目
-git clone https://github.com/your-repo/CJQT6.git
+git clone https://gitcode.com/yuan_1992/CJQT6.git
 cd CJQT6
 
 # 构建FFI桥接库
@@ -958,7 +958,7 @@ brew install cmake qt
 
 ```bash
 # 克隆项目
-git clone https://github.com/your-repo/CJQT6.git
+git clone https://gitcode.com/yuan_1992/CJQT6.git
 cd CJQT6
 
 # 构建FFI桥接库

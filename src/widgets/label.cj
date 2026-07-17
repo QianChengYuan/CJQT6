@@ -1,4 +1,4 @@
-package cjqt6.widgets
+﻿package cjqt6.widgets
 
 import cjqt6.core.*
 
@@ -7,6 +7,9 @@ foreign func qLabelCreate(): Int64
 foreign func qLabelSetText(ptr: Int64, text: CString): Unit
 foreign func qLabelSetAlignment(ptr: Int64, alignment: Int32): Unit
 foreign func qLabelSetPixmap(ptr: Int64, pixmapPtr: Int64): Unit
+foreign func qLabelText(ptr: Int64): CString
+foreign func qLabelSetWordWrap(ptr: Int64, wrap: Bool): Unit
+foreign func qLabelWordWrap(ptr: Int64): Bool
 foreign func qLabelDelete(ptr: Int64): Unit
 
 /// 标签部件
@@ -119,6 +122,10 @@ public class QLabel <: QtResource {
     /// 终结器 - 已禁用
     /// 注意：仓颉 GC 调用终结器的时机不确定，可能在 Qt 对象仍被使用时提前删除导致崩溃
     /// 请在不需要时显式调用 delete() 或 close() 释放资源
+    public func text(): String { checkValid(); unsafe { qLabelText(ptr).toString() } }
+    public func setWordWrap(wrap: Bool): Unit { checkValid(); unsafe { qLabelSetWordWrap(ptr, wrap) } }
+    public func wordWrap(): Bool { checkValid(); unsafe { qLabelWordWrap(ptr) } }
+
     // ~init() {
     //     if (!closed && ptr != 0) {
     //         unsafe {

@@ -18,7 +18,7 @@ label.setAlignment(AlignCenter)
 | `setText(text: String)` | 设置文本 |
 | `setAlignment(alignment: Int32)` | 设置对齐方式 |
 
-**对齐常量** (CJQT6.gui):
+**对齐常量** (cjqt6.gui):
 ```cangjie
 AlignLeft      // 左对齐
 AlignRight     // 右对齐
@@ -174,3 +174,78 @@ LicenseKey  // ">AAAAA-AAAAA-AAAAA-AAAAA-AAAAA;#" - 软件密钥
 | `<` | 后续字符转小写 |
 | `!` | 取消大小写转换 |
 | `;` | 分隔符，后跟占位字符 |
+
+---
+
+## QTextEdit - 多行文本编辑器
+
+支持富文本编辑、查找替换、撤销/重做等功能。
+
+```cangjie
+let editor = QTextEdit()
+editor.setText("Hello,\nWorld!")
+editor.setReadOnly(false)
+
+// 编辑操作
+editor.undo()
+editor.redo()
+editor.cut()
+editor.copy()
+editor.paste()
+editor.selectAll()
+
+// 字体设置
+editor.setFontFamily("Arial")
+editor.setFontSize(14)
+editor.setFontBold(true)
+editor.setFontItalic(false)
+
+// 查找替换
+editor.find("Hello", false)
+editor.replace("Hi")
+
+// 打印
+editor.print(printerPtr)
+```
+
+**方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` | 创建文本编辑器 |
+| `setText(text: String)` | 设置文本 |
+| `text(): String` | 获取文本 |
+| `setReadOnly(readonly: Bool)` | 设置只读 |
+| `clear()` | 清空内容 |
+| `cut()` | 剪切选中文本 |
+| `copy()` | 复制选中文本 |
+| `paste()` | 粘贴文本 |
+| `selectAll()` | 全选文本 |
+| `canPaste(): Bool` | 是否可以粘贴 |
+| `undo()` | 撤销 |
+| `redo()` | 重做 |
+| `canUndo(): Bool` | 是否可以撤销 |
+| `canRedo(): Bool` | 是否可以重做 |
+| `isModified(): Bool` | 内容是否被修改 |
+| `setModified(modified: Bool)` | 设置修改状态 |
+| `setLineWrapMode(mode: Int32)` | 设置换行模式（0=NoWrap, 1=WidgetWidth, 2=ManualWidth） |
+| `lineWrapMode(): Int32` | 获取换行模式 |
+| `setFontFamily(family: String)` | 设置字体 |
+| `setFontSize(size: Int32)` | 设置字号 |
+| `setFontBold(bold: Bool)` | 设置粗体 |
+| `setFontItalic(italic: Bool)` | 设置斜体 |
+| `find(text: String, caseSensitive: Bool): Bool` | 查找文本 |
+| `findNext(text: String, caseSensitive: Bool)` | 查找下一个 |
+| `findPrev(text: String, caseSensitive: Bool)` | 查找上一个 |
+| `replace(newText: String)` | 替换选中文本 |
+| `replaceAll(oldText, newText, caseSensitive): Int32` | 替换所有匹配项 |
+| `lineCount(): Int32` | 获取总行数 |
+| `currentLine(): Int32` | 获取当前行号 |
+| `currentColumn(): Int32` | 获取当前列号 |
+| `characterCount(): Int32` | 获取字符总数 |
+| `goToLine(line: Int32)` | 跳转到指定行 |
+| `print(printerPtr: Int64)` | 打印文档 |
+| `show()` | 显示控件 |
+| `hide()` | 隐藏控件 |
+| `resize(width: Int32, height: Int32)` | 调整大小 |
+| `getPtr(): Int64` | 获取指针 |
+| `delete()` | 释放资源 |

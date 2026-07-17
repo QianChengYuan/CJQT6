@@ -21,12 +21,16 @@ CJQT6 是仓颉语言的 Qt6 封装库，提供跨平台 GUI 开发能力。
 | [13_multimedia.md](./13_multimedia.md) | 多媒体模块 - QMediaPlayer、QAudioOutput |
 | [14_print.md](./14_print.md) | 打印模块 - QPrinter、QPrintDialog |
 | [15_examples_faq.md](./15_examples_faq.md) | 示例与常见问题 |
+| [16_misc_widgets.md](./16_misc_widgets.md) | 其他控件 - QLCDNumber、QToolButton |
+| [17_dragdrop.md](./17_dragdrop.md) | 拖放支持 - QMimeData、QDrag |
+| [18_sql.md](./18_sql.md) | SQL数据库 - QSqlDatabase、QSqlQuery |
+| [19_network.md](./19_network.md) | 网络模块 - QTcpSocket、QUdpSocket、QHostAddress |
 
 ## 快速开始
 
 ```cangjie
-import CJQT6.core.*
-import CJQT6.widgets.*
+import cjqt6.core.*
+import cjqt6.widgets.*
 
 main(): Int32 {
     let app = QApplication()
@@ -49,17 +53,18 @@ main(): Int32 {
 ## 模块导入
 
 ```cangjie
-import CJQT6.core.*      // 核心类
-import CJQT6.widgets.*   // 控件
-import CJQT6.gui.*       // GUI相关
-import CJQT6.views.*     // 视图控件
-import CJQT6.dialogs.*   // 对话框
-import CJQT6.menu.*      // 菜单工具栏
-import CJQT6.paint.*     // 绘图
-import CJQT6.qml.*       // QML
-import CJQT6.multimedia.* // 多媒体
-import CJQT6.print.*     // 打印
-import CJQT6.sql.*       // 数据库
+import cjqt6.core.*      // 核心类
+import cjqt6.widgets.*   // 控件
+import cjqt6.gui.*       // GUI相关
+import cjqt6.views.*     // 视图控件
+import cjqt6.dialogs.*   // 对话框
+import cjqt6.menu.*      // 菜单工具栏
+import cjqt6.paint.*     // 绘图
+import cjqt6.qml.*       // QML
+import cjqt6.multimedia.* // 多媒体
+import cjqt6.print.*     // 打印
+import cjqt6.network.*   // 网络通信
+import cjqt6.sql.*       // 数据库
 ```
 
 ## 重要提示
@@ -70,6 +75,6 @@ import CJQT6.sql.*       // 数据库
 
 3. **CFunc 回调不能捕获局部变量** - 使用全局变量传递
 
-4. **绘图类已实现终结器** - QColor、QPen、QBrush、QFont 等绘图类已实现 `~init()` 终结器，但游戏/高频渲染场景建议手动释放以避免 GC 不确定时机
+4. **绘图类终结器已禁用** - QColor、QPen、QBrush、QFont、QPixmap 等绘图类的终结器已被禁用。请在不再使用时显式调用 `delete()` 释放资源
 
 5. **推荐缓存常用对象** - 在渲染循环中复用颜色、画笔、画刷等对象，避免重复创建

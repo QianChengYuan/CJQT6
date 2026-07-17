@@ -8,6 +8,11 @@ foreign func qWidgetSetTitle(ptr: Int64, title: CString): Unit
 foreign func qWidgetResize(ptr: Int64, width: Int32, height: Int32): Unit
 foreign func qWidgetSetGeometry(ptr: Int64, x: Int32, y: Int32, width: Int32, height: Int32): Unit
 foreign func qWidgetSetParent(ptr: Int64, parentPtr: Int64): Unit
+foreign func qWidgetMove(ptr: Int64, x: Int32, y: Int32): Unit
+foreign func qWidgetX(ptr: Int64): Int32
+foreign func qWidgetY(ptr: Int64): Int32
+foreign func qWidgetSetFixedSize(ptr: Int64, width: Int32, height: Int32): Unit
+foreign func qWidgetSetWindowIcon(ptr: Int64, iconPath: CString): Unit
 foreign func qWidgetSetLayout(widgetPtr: Int64, layoutPtr: Int64): Unit
 foreign func qWidgetDelete(ptr: Int64): Unit
 
@@ -108,6 +113,12 @@ public class QWidget <: QtResource {
         }
     }
     
+    public func move(x: Int32, y: Int32): Unit { checkValid(); unsafe { qWidgetMove(ptr, x, y) } }
+    public func x(): Int32 { checkValid(); unsafe { qWidgetX(ptr) } }
+    public func y(): Int32 { checkValid(); unsafe { qWidgetY(ptr) } }
+    public func setFixedSize(width: Int32, height: Int32): Unit { checkValid(); unsafe { qWidgetSetFixedSize(ptr, width, height) } }
+    public func setWindowIcon(iconPath: String): Unit { checkValid(); unsafe { let cstr = LibC.mallocCString(iconPath); qWidgetSetWindowIcon(ptr, cstr); LibC.free(cstr) } }
+
     /// 获取原生指针
     public func getPtr(): Int64 {
         return ptr

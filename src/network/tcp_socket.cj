@@ -116,7 +116,7 @@ public class QTcpSocket {
             
             var result: Array<Byte> = []
             for (i in 0..size) {
-                result.append(buffer.read(i))
+                result = result.concat([buffer.read(i)])
             }
             LibC.free(buffer)
             return result

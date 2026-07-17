@@ -7,7 +7,7 @@
 QEventWidget 是支持鼠标、键盘等事件的窗口部件。
 
 ```cangjie
-import CJQT6.gui.*
+import cjqt6.gui.*
 
 let eventWidget = QEventWidget()
 

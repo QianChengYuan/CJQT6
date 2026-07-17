@@ -123,10 +123,18 @@ public class QUdpSocket {
             
             var data: Array<Byte> = []
             for (i in 0..readSize) {
-                data.append(buffer.read(i))
+                data = data.concat([buffer.read(i)])
             }
             
-            let senderAddress = hostBuffer.readString(256)
+            var senderAddressRunes: Array<Rune> = []
+            var pos = 0
+            while (pos < 256) {
+                let b = hostBuffer.read(pos)
+                if (b == 0) { break }
+                senderAddressRunes = senderAddressRunes.concat([Rune(b)])
+                pos += 1
+            }
+            let senderAddress = String(senderAddressRunes)
             let senderPort = portPtr.read(0)
             
             LibC.free(buffer)

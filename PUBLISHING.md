@@ -39,7 +39,7 @@ git push origin v1.0.0
 **方式B：手动触发**
 
 访问 GitHub Actions 页面：
-https://gitcode.com/yuan_1992/CJQT6/-/pipelines
+https://gitcode.com/yuan_1992/CJQT6/pipelines
 
 选择 "Publish to Central Repository" 工作流，点击 "Run workflow"，选择目标：
 - `test` - 发布到测试仓

@@ -7,7 +7,7 @@
 QProcess 用于启动外部程序并与之通信。
 
 ```cangjie
-import CJQT6.core.*
+import cjqt6.core.*
 
 // 创建进程
 let process = QProcess()

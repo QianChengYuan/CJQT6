@@ -3,7 +3,7 @@
 打印模块提供打印和打印预览功能。
 
 ```cangjie
-import CJQT6.print.*
+import cjqt6.print.*
 ```
 
 ## QPrinter - 打印机
