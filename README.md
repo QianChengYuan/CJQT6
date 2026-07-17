@@ -186,14 +186,40 @@ main() {
 ```
 CJQT6/
 ├── README.md                   # 项目说明文档
+├── PUBLISHING.md               # 中心仓发布指南
+├── LICENSE                     # 许可证
+├── NOTICE                      # 依赖声明
+├── CHANGELOG.md                # 变更日志
+├── CONTRIBUTING.md             # 贡献指南
 ├── cjpm.toml                   # 仓颉项目配置
 ├── CMakeLists.txt              # CMake构建配置
 ├── doc/                        # 文档目录
 │   ├── api/                    # API参考文档
 │   ├── tutorial/               # 教程文档
-│   ├── guides/                 # 开发指南
+│   ├── resource/               # 资源管理指南
+│   ├── testing/                # 测试指南
+│   ├── internal/               # 内部开发笔记
 │   ├── architecture.md         # 架构设计
-│   └── resource-management.md  # 资源管理指南
+│   ├── build-guide.md          # 构建指南
+│   ├── installation.md         # 安装指南
+│   ├── cross-compile.md        # 交叉编译指南
+│   ├── resource-management.md  # 资源管理指南
+│   └── resource-utils-guide.md # 资源工具指南
+├── scripts/                    # 构建/辅助脚本
+│   ├── build-all-platforms.sh  # 全平台构建
+│   ├── build-linux-x64.sh      # Linux x64构建
+│   ├── build-macos-x64.sh      # macOS x64构建
+│   ├── build-windows-x64.ps1   # Windows x64构建
+│   ├── build-win64.sh          # Windows(备选)构建
+│   ├── run-test.sh             # 运行测试
+│   ├── setup-qt-env.ps1        # Windows Qt环境配置
+│   ├── setup-qt-env.sh         # Linux/macOS Qt环境配置
+│   ├── check_qt6.cj            # Qt6环境检测
+│   ├── detect_platform.cj      # 平台检测
+│   ├── post_install.cj         # 安装后脚本
+│   └── verify_install.cj       # 安装验证脚本
+├── cmake/                      # CMake配置
+│   └── win64-mingw.cmake       # Windows MinGW工具链
 ├── native/                     # C++原生桥接代码
 │   ├── includes/               # C++头文件
 │   ├── src/                    # C++实现
@@ -210,7 +236,9 @@ CJQT6/
 │   ├── calculator/             # 计算器
 │   ├── notepad/                # 记事本
 │   ├── paint_app/              # 绘图应用
-│   └── music_player/           # 音乐播放器
+│   ├── music_player/           # 音乐播放器
+│   └── ...
+├── releases/                   # 发行版目录
 └── tests/                      # 测试代码
 ```
 
@@ -219,11 +247,12 @@ CJQT6/
 | 文档类型 | 路径 | 说明 |
 |---------|------|------|
 | **构建指南** | [doc/build-guide.md](doc/build-guide.md) | 详细构建步骤和错误诊断 |
+| **发布指南** | [PUBLISHING.md](PUBLISHING.md) | 中心仓发布流程 |
 | 快速入门 | [doc/tutorial/01-quick-start.md](doc/tutorial/01-quick-start.md) | 15分钟入门教程 |
 | API参考 | [doc/api/](doc/api/) | 完整API文档 |
 | 架构设计 | [doc/architecture.md](doc/architecture.md) | 系统架构说明 |
 | 资源管理 | [doc/resource-management.md](doc/resource-management.md) | 内存管理指南 |
-| 常见问题 | [doc/faq.md](doc/faq.md) | FAQ |
+| 交叉编译 | [doc/cross-compile.md](doc/cross-compile.md) | 交叉编译说明 |
 
 ## 核心模块
 
