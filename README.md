@@ -14,13 +14,13 @@ CJQT6通过FFI（外部函数接口）技术，将Qt6的C++ API封装为仓颉�
 
 ## 环境要求
 
-> **首次构建？** 请参阅 [完整构建指南](doc/build-guide.md) 了解详细步骤和常见问题解决方法。
+> **首次构建？** 请参阅 [完整构建指南](docs/build-guide.md) 了解详细步骤和常见问题解决方法。
 
 | 依赖 | 版本要求 | 快速安装 |
 |------|----------|---------|
-| 仓颉编译器 | >= 1.0.0 (推荐 1.1.0) | [安装指南](doc/build-guide.md#21-安装仓颉编译器) |
-| Qt6 | >= 6.2 | [安装指南](doc/build-guide.md#22-安装qt6) |
-| CMake | >= 3.16 | [安装指南](doc/build-guide.md#23-安装cmake) |
+| 仓颉编译器 | >= 1.0.0 (推荐 1.1.0) | [安装指南](docs/build-guide.md#21-安装仓颉编译器) |
+| Qt6 | >= 6.2 | [安装指南](docs/build-guide.md#22-安装qt6) |
+| CMake | >= 3.16 | [安装指南](docs/build-guide.md#23-安装cmake) |
 | 操作系统 | Linux / Windows / macOS | - |
 
 <details>
@@ -83,11 +83,11 @@ cjpm build
 <summary>❓ 构建遇到问题?</summary>
 
 常见问题快速诊断:
-- `cjpm: command not found` → [安装仓颉编译器](doc/build-guide.md#21-安装仓颉编译器)
-- `Could not find Qt6` → [安装Qt6](doc/build-guide.md#22-安装qt6) 或设置 `CMAKE_PREFIX_PATH`
-- `cmake: command not found` → [安装CMake](doc/build-guide.md#23-安装cmake)
+- `cjpm: command not found` → [安装仓颉编译器](docs/build-guide.md#21-安装仓颉编译器)
+- `Could not find Qt6` → [安装Qt6](docs/build-guide.md#22-安装qt6) 或设置 `CMAKE_PREFIX_PATH`
+- `cmake: command not found` → [安装CMake](docs/build-guide.md#23-安装cmake)
 - `cannot find -lcjfw_bridge` → 桥接库未构建，请先执行步骤1
-- 其他问题 → [完整错误诊断指南](doc/build-guide.md#5-错误诊断)
+- 其他问题 → [完整错误诊断指南](docs/build-guide.md#5-错误诊断)
 </details>
 
 ### 3. 验证构建
@@ -188,7 +188,7 @@ CJQT6/
 ├── README.md                   # 项目说明文档
 ├── cjpm.toml                   # 仓颉项目配置
 ├── CMakeLists.txt              # CMake构建配置
-├── doc/                        # 文档目录
+├── docs/                        # 文档目录
 │   ├── api/                    # API参考文档
 │   ├── tutorial/               # 教程文档
 │   ├── resource/               # 资源管理指南
@@ -245,13 +245,13 @@ CJQT6/
 
 | 文档类型 | 路径 | 说明 |
 |---------|------|------|
-| **构建指南** | [doc/build-guide.md](doc/build-guide.md) | 详细构建步骤和错误诊断 |
+| **构建指南** | [docs/build-guide.md](docs/build-guide.md) | 详细构建步骤和错误诊断 |
 | **发布指南** | [PUBLISHING.md](PUBLISHING.md) | 中心仓发布流程 |
-| 快速入门 | [doc/tutorial/01-quick-start.md](doc/tutorial/01-quick-start.md) | 15分钟入门教程 |
-| API参考 | [doc/api/](doc/api/) | 完整API文档 |
-| 架构设计 | [doc/architecture.md](doc/architecture.md) | 系统架构说明 |
-| 资源管理 | [doc/resource-management.md](doc/resource-management.md) | 内存管理指南 |
-| 交叉编译 | [doc/cross-compile.md](doc/cross-compile.md) | 交叉编译说明 |
+| 快速入门 | [docs/tutorial/01-quick-start.md](docs/tutorial/01-quick-start.md) | 15分钟入门教程 |
+| API参考 | [docs/api/](docs/api/) | 完整API文档 |
+| 架构设计 | [docs/architecture.md](docs/architecture.md) | 系统架构说明 |
+| 资源管理 | [docs/resource-management.md](docs/resource-management.md) | 内存管理指南 |
+| 交叉编译 | [docs/cross-compile.md](docs/cross-compile.md) | 交叉编译说明 |
 
 ## 核心模块
 
@@ -293,7 +293,7 @@ CJQT6/
 
 ## 贡献指南
 
-欢迎贡献代码、文档或提出Issue。请参阅 [doc/CONTRIBUTING.md](doc/CONTRIBUTING.md) 了解详情。
+欢迎贡献代码、文档或提出Issue。请参阅 [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) 了解详情。
 
 ### 贡献流程
 
@@ -307,7 +307,7 @@ CJQT6/
 
 ### CJQT6代码
 
-本项目采用MIT许可证，详见 [doc/LICENSE](doc/LICENSE) 文件。
+本项目采用MIT许可证，详见 [docs/LICENSE](docs/LICENSE) 文件。
 
 ### 依赖库声明
 
@@ -327,7 +327,7 @@ CJQT6/
 - 未修改Qt6源代码，仅调用Qt6公开API
 - 本项目不归属Qt官方，由社区独立开发维护
 
-详见 [doc/NOTICE](doc/NOTICE) 文件和 [许可证分析](doc/LICENSE-ANALYSIS.md)。
+详见 [docs/NOTICE](docs/NOTICE) 文件和 [许可证分析](docs/LICENSE-ANALYSIS.md)。
 
 ## 联系方式
 

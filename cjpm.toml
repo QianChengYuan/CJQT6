@@ -24,7 +24,7 @@
   keywords = ["qt", "gui", "ui", "widgets", "ffi", "cross-platform"]
   
   # 打包范围
-  include = ["src", "doc", "examples", "native/includes"]
+  include = ["src", "docs", "examples", "native/includes"]
   exclude = ["*.txt", "*.log", "*.bak", "*.tmp", "test_*", "build_*"]
 
 [dependencies]

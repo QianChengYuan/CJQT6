@@ -18,7 +18,7 @@ lib/
 skills-lock.json
 
 # 规划/设计/AI辅助文档（不上传）
-doc/internal/
+docs/internal/
 PUBLISHING.md
 
 # 系统文件
