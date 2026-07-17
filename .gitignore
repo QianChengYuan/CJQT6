@@ -41,8 +41,6 @@ Thumbs.db
 
 # 备份目录
 .backup/
-cangjie-repo.toml.backup
-cangjie-repo.toml.template
 
 # cjpm缓存
 .cjpm-cache
@@ -50,8 +48,6 @@ cangjie-repo.toml.template
 .cjpm-history
 cjpm.lock
 
-# 中心仓配置（包含token，不上传）
-cangjie-repo.toml
 
 # LSP缓存
 .cache/
