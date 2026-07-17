@@ -5,55 +5,54 @@
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 并遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [1.0.1] - 2026-07-17
+
+### 新增
+
+**C++ 桥接层**
+- `qWidgetSetParent` — 设置控件父窗口，支持绝对坐标独立布局
+- `qWidgetMove`、`qWidgetX`、`qWidgetY` — 控件位置查询与移动
+- `qWidgetSetFixedSize` — 固定控件尺寸
+- `qWidgetSetWindowIcon` — 窗口图标设置
+- `qLabelText` — QLabel 文本获取
+- `qLabelSetWordWrap`、`qLabelWordWrap` — QLabel 自动换行
+- `qButtonSetCheckable`、`qButtonSetChecked`、`qButtonIsChecked` — QPushButton 开关模式
+- `qButtonSetDefault`、`qButtonSetFlat` — QPushButton 外观选项
+- `qComboBoxCount`、`qComboBoxItemText` — QComboBox 列表查询
+- `qComboBoxSetEditable`、`qComboBoxRemoveItem` — QComboBox 编辑与删除
+
+**仓颉公开 API**
+- `QWidget.setGeometry()` / `move()` / `x()` / `y()` / `setFixedSize()` / `setWindowIcon()`
+- `setWidgetGeometry()` / `setWidgetParent()` — 对任意控件设置几何与父窗口
+- `QLabel.text()` / `setWordWrap()` / `wordWrap()`
+- `QPushButton.setCheckable()` / `setChecked()` / `isChecked()` / `setDefault()` / `setFlat()`
+- `QComboBox.count()` / `itemText()` / `setEditable()` / `removeItem()`
+
+**工具链**
+- `scripts/update-bridge.ps1` — 一键重编译 bridge 并同步到 releases 目录
+- 用户 PATH 环境变量支持
+
+### 改进
+- README 中 Qt/DLL 路径改为 `/path/to/` 通用占位符
+- `Alignment` 冲突问题解决
+
+### 已知问题
+- QML 模块 `load/loadData()` 在仓颉运行时卡住（2026-03-20 已记录）
+- `cjpm run` 在新终端需要手动设 PATH 或重启终端
+- 缺少 `setFont` 等高级属性方法（下一版本计划）
+
+---
+
 ## [1.0.0] - 2026-05-07
 
 ### 新增
 - 首次发布到仓颉中心仓
 - 支持 Linux x86_64、Windows x86_64、macOS x86_64/arm64 多平台
-- 实现核心 Qt6 控件封装
-  - QApplication、QWidget、QPushButton、QLabel
-  - QVBoxLayout、QHBoxLayout
-  - QString、QSize、QPoint
-- 实现 Qt6 信号槽机制
-- 提供完整的安装和验证脚本
-- 提供平台自动检测功能
-- 提供 Qt6 依赖检测功能
-- CI/CD 多平台自动化构建流水线
-
-### 文档
-- 安装指南 (docs/installation.md)
-- 快速开始教程 (docs/quick-start.md)
-- 平台支持矩阵
-- API 参考文档（部分）
-
-### 示例
-- hello_window: 最简单的窗口示例
-
-### 已知问题
-- Linux arm64 平台尚未完全测试
-- 部分 Qt6 模块尚未封装 (QtNetwork, QtXml 等)
-- 文档仍在完善中
-
-## [未发布]
-
-### 计划新增
-- 更多 Qt6 控件封装
-  - QLineEdit 文本输入框
-  - QComboBox 下拉框
-  - QTableView 表格视图
-  - QTreeView 树形视图
-- Qt6 多媒体模块 (QtMultimedia)
-- Qt6 数据库模块 (QtSql)
-- 更多示例程序
-  - 计算器应用
-  - 记事本应用
-  - 控件演示
-
-### 计划改进
-- 优化 FFI 调用性能
-- 完善错误处理机制
-- 提供更多中英文档
-- 支持更多 Qt6 版本
+- 15 个模块：core、widgets、gui、dialogs、menu、views、paint、process、qml、multimedia、sql、print、resource、network
+- 100+ 控件/类封装
+- Qt6 信号槽机制（12 对 connect/disconnect，5 种回调类型）
+- 资源管理接口（QtResource + try-with-resources + 异常层级）
+- 11 个可编译示例程序（计算器、记事本、绘图、音乐播放器、贪吃蛇、坦克大战等）
 
 ---
 
