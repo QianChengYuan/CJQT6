@@ -1,4 +1,4 @@
-# CJQT6 - 仓颉语言的Qt6封装库
+﻿# CJQT6 - 仓颉语言的Qt6封装库
 
 CJQT6 是一个为仓颉(Cangjie)语言提供的Qt6封装库，通过FFI桥接技术让仓颉语言能够使用Qt6的GUI功能。
 
@@ -110,7 +110,7 @@ dir build\bin\libcjqt6_bridge.dll
 .\scripts\setup-qt-env.ps1
 
 # 或手动设置
-$env:PATH = "C:\Qt\6.10.2\mingw_64\bin;C:\Qt\Tools\mingw1310_64\bin;$env:PATH"
+$env:PATH = "/path/to/Qt/mingw_64/bin;/path/to/Qt/Tools/mingw_64/bin;$env:PATH"
 ```
 
 ```bash
@@ -142,19 +142,19 @@ cjpm run
 
 **方案2：手动设置环境变量**
 ```powershell
-$env:PATH = "C:\Qt\6.10.2\mingw_64\bin;C:\Qt\Tools\mingw1310_64\bin;$env:PATH"
+$env:PATH = "/path/to/Qt/mingw_64/bin;/path/to/Qt/Tools/mingw_64/bin;$env:PATH"
 cjpm run
 ```
 
 **方案3：复制Qt DLL到exe目录**
 ```powershell
-Copy-Item C:\Qt\6.10.2\mingw_64\bin\Qt6*.dll examples\notepad\target\release\bin\
+Copy-Item /path/to/Qt/mingw_64/bin/Qt6*.dll examples/notepad/target/release/bin/
 ```
 
 **方案4：使用windeployqt自动部署**
 ```powershell
 cd examples\notepad\target\release\bin
-C:\Qt\6.10.2\mingw_64\bin\windeployqt.exe main.exe
+/path/to/Qt/mingw_64/bin/windeployqt.exe main.exe
 ```
 
 </details>
