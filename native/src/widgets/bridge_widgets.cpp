@@ -57,6 +57,23 @@ void qLabelSetPixmap(int64_t ptr, int64_t pixmapPtr) {
     }
 }
 
+const char* qLabelText(int64_t ptr) {
+    QLabel* label = reinterpret_cast<QLabel*>(ptr);
+    if (!label) return nullptr;
+    QByteArray arr = label->text().toUtf8();
+    char* result = (char*)malloc(arr.size() + 1);
+    if (result) memcpy(result, arr.constData(), arr.size() + 1);
+    return result;
+}
+void qLabelSetWordWrap(int64_t ptr, bool wrap) {
+    QLabel* label = reinterpret_cast<QLabel*>(ptr);
+    if (label) label->setWordWrap(wrap);
+}
+bool qLabelWordWrap(int64_t ptr) {
+    QLabel* label = reinterpret_cast<QLabel*>(ptr);
+    return label ? label->wordWrap() : false;
+}
+
 void qLabelDelete(int64_t ptr) {
     QLabel* label = reinterpret_cast<QLabel*>(ptr);
     if (label) {
