@@ -1,0 +1,73 @@
+package cjqt6.core
+
+foreign func qFileSystemWatcherCreate(): Int64
+foreign func qFileSystemWatcherAddPath(ptr: Int64, path: CString): Unit
+foreign func qFileSystemWatcherRemovePath(ptr: Int64, path: CString): Unit
+foreign func qFileSystemWatcherDelete(ptr: Int64): Unit
+
+public class QFileSystemWatcher <: QtResource {
+    private var ptr: Int64 = 0
+    private var closed: Bool = false
+
+    public init() {
+        unsafe {
+            ptr = qFileSystemWatcherCreate()
+            if (ptr == 0) {
+                throw CreateFailedException("QFileSystemWatcher 创建失败")
+            }
+        }
+    }
+
+    public func addPath(path: String): Unit {
+        checkValid()
+        unsafe {
+            let cstr = LibC.mallocCString(path)
+            qFileSystemWatcherAddPath(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+
+    public func removePath(path: String): Unit {
+        checkValid()
+        unsafe {
+            let cstr = LibC.mallocCString(path)
+            qFileSystemWatcherRemovePath(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+
+    public func getPtr(): Int64 {
+        return ptr
+    }
+
+    public func isClosed(): Bool {
+        return closed
+    }
+
+    public func isValid(): Bool {
+        return !closed && ptr != 0
+    }
+
+    public func checkValid(): Unit {
+        if (closed) {
+            throw ResourceDisposedException("QFileSystemWatcher 已经被释放")
+        }
+        if (ptr == 0) {
+            throw NullPointerException("QFileSystemWatcher 指针为空")
+        }
+    }
+
+    public func close(): Unit {
+        if (!closed && ptr != 0) {
+            unsafe {
+                qFileSystemWatcherDelete(ptr)
+            }
+            closed = true
+            ptr = 0
+        }
+    }
+
+    public func delete(): Unit {
+        close()
+    }
+}

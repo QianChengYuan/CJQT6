@@ -5,6 +5,7 @@
 
 #include <QMediaPlayer>
 #include <QAudioOutput>
+#include <QSoundEffect>
 #include <QUrl>
 #include <QHash>
 #include <QTimer>
@@ -324,6 +325,111 @@ void qAudioOutputDelete(int64_t ptr) {
     QAudioOutput* output = reinterpret_cast<QAudioOutput*>(ptr);
     if (output) {
         delete output;
+    }
+}
+
+// ============================================================
+// QSoundEffect 桥接函数
+// ============================================================
+
+int64_t qSoundEffectCreate() {
+    QSoundEffect* effect = new QSoundEffect();
+    return reinterpret_cast<int64_t>(effect);
+}
+
+void qSoundEffectSetSource(int64_t ptr, const char* url) {
+    QSoundEffect* effect = reinterpret_cast<QSoundEffect*>(ptr);
+    if (effect) {
+        effect->setSource(QUrl(QString::fromUtf8(url)));
+    }
+}
+
+void qSoundEffectSetSourceFile(int64_t ptr, const char* filePath) {
+    QSoundEffect* effect = reinterpret_cast<QSoundEffect*>(ptr);
+    if (effect) {
+        effect->setSource(QUrl::fromLocalFile(QString::fromUtf8(filePath)));
+    }
+}
+
+void qSoundEffectSetVolume(int64_t ptr, double volume) {
+    QSoundEffect* effect = reinterpret_cast<QSoundEffect*>(ptr);
+    if (effect) {
+        effect->setVolume(volume);
+    }
+}
+
+double qSoundEffectVolume(int64_t ptr) {
+    QSoundEffect* effect = reinterpret_cast<QSoundEffect*>(ptr);
+    if (effect) {
+        return effect->volume();
+    }
+    return 0.0;
+}
+
+void qSoundEffectSetLoopCount(int64_t ptr, int32_t count) {
+    QSoundEffect* effect = reinterpret_cast<QSoundEffect*>(ptr);
+    if (effect) {
+        effect->setLoopCount(count);
+    }
+}
+
+int32_t qSoundEffectLoopCount(int64_t ptr) {
+    QSoundEffect* effect = reinterpret_cast<QSoundEffect*>(ptr);
+    if (effect) {
+        return effect->loopCount();
+    }
+    return 0;
+}
+
+void qSoundEffectSetMuted(int64_t ptr, bool muted) {
+    QSoundEffect* effect = reinterpret_cast<QSoundEffect*>(ptr);
+    if (effect) {
+        effect->setMuted(muted);
+    }
+}
+
+bool qSoundEffectIsMuted(int64_t ptr) {
+    QSoundEffect* effect = reinterpret_cast<QSoundEffect*>(ptr);
+    if (effect) {
+        return effect->isMuted();
+    }
+    return false;
+}
+
+bool qSoundEffectIsPlaying(int64_t ptr) {
+    QSoundEffect* effect = reinterpret_cast<QSoundEffect*>(ptr);
+    if (effect) {
+        return effect->isPlaying();
+    }
+    return false;
+}
+
+void qSoundEffectPlay(int64_t ptr) {
+    QSoundEffect* effect = reinterpret_cast<QSoundEffect*>(ptr);
+    if (effect) {
+        effect->play();
+    }
+}
+
+void qSoundEffectStop(int64_t ptr) {
+    QSoundEffect* effect = reinterpret_cast<QSoundEffect*>(ptr);
+    if (effect) {
+        effect->stop();
+    }
+}
+
+int32_t qSoundEffectStatus(int64_t ptr) {
+    QSoundEffect* effect = reinterpret_cast<QSoundEffect*>(ptr);
+    if (effect) {
+        return static_cast<int32_t>(effect->status());
+    }
+    return 0;
+}
+
+void qSoundEffectDelete(int64_t ptr) {
+    QSoundEffect* effect = reinterpret_cast<QSoundEffect*>(ptr);
+    if (effect) {
+        delete effect;
     }
 }
 

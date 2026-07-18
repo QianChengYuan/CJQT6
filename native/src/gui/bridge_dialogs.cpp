@@ -13,6 +13,9 @@
 #include <QFont>
 #include <limits>
 #include <cstring>
+#include <QErrorMessage>
+#include <QWizard>
+#include <QWizardPage>
 
 // 静态存储用于返回字符串（使用char数组避免悬空指针）
 static char g_stringBuffer[4096];
@@ -343,6 +346,196 @@ void qProgressDialogReset(int64_t ptr) {
     QProgressDialog* progress = reinterpret_cast<QProgressDialog*>(ptr);
     if (progress) {
         progress->reset();
+    }
+}
+
+
+// ============================================================
+// QWizard + QWizardPage 桥接函数
+// ============================================================
+
+int64_t qWizardCreate(int64_t parentPtr) {
+    QWidget* parent = reinterpret_cast<QWidget*>(parentPtr);
+    QWizard* wizard = new QWizard(parent);
+    return reinterpret_cast<int64_t>(wizard);
+}
+
+void qWizardDelete(int64_t ptr) {
+    QWizard* wizard = reinterpret_cast<QWizard*>(ptr);
+    if (wizard) {
+        delete wizard;
+    }
+}
+
+int32_t qWizardAddPage(int64_t ptr, int64_t pagePtr) {
+    QWizard* wizard = reinterpret_cast<QWizard*>(ptr);
+    QWizardPage* page = reinterpret_cast<QWizardPage*>(pagePtr);
+    if (wizard && page) {
+        return wizard->addPage(page);
+    }
+    return -1;
+}
+
+int64_t qWizardPage(int64_t ptr, int32_t index) {
+    QWizard* wizard = reinterpret_cast<QWizard*>(ptr);
+    if (wizard) {
+        return reinterpret_cast<int64_t>(wizard->page(index));
+    }
+    return 0;
+}
+
+int32_t qWizardCurrentId(int64_t ptr) {
+    QWizard* wizard = reinterpret_cast<QWizard*>(ptr);
+    if (wizard) {
+        return wizard->currentId();
+    }
+    return -1;
+}
+
+void qWizardNext(int64_t ptr) {
+    QWizard* wizard = reinterpret_cast<QWizard*>(ptr);
+    if (wizard) {
+        wizard->next();
+    }
+}
+
+void qWizardBack(int64_t ptr) {
+    QWizard* wizard = reinterpret_cast<QWizard*>(ptr);
+    if (wizard) {
+        wizard->back();
+    }
+}
+
+void qWizardRestart(int64_t ptr) {
+    QWizard* wizard = reinterpret_cast<QWizard*>(ptr);
+    if (wizard) {
+        wizard->restart();
+    }
+}
+
+void qWizardSetStartId(int64_t ptr, int32_t id) {
+    QWizard* wizard = reinterpret_cast<QWizard*>(ptr);
+    if (wizard) {
+        wizard->setStartId(id);
+    }
+}
+
+int32_t qWizardExec(int64_t ptr) {
+    QWizard* wizard = reinterpret_cast<QWizard*>(ptr);
+    if (wizard) {
+        return wizard->exec();
+    }
+    return 0;
+}
+
+void qWizardSetOption(int64_t ptr, int32_t option, int32_t enabled) {
+    QWizard* wizard = reinterpret_cast<QWizard*>(ptr);
+    if (wizard) {
+        wizard->setOption(static_cast<QWizard::WizardOption>(option), enabled != 0);
+    }
+}
+
+int32_t qWizardTestOption(int64_t ptr, int32_t option) {
+    QWizard* wizard = reinterpret_cast<QWizard*>(ptr);
+    if (wizard) {
+        return wizard->testOption(static_cast<QWizard::WizardOption>(option)) ? 1 : 0;
+    }
+    return 0;
+}
+
+void qWizardSetWindowTitle(int64_t ptr, const char* title) {
+    QWizard* wizard = reinterpret_cast<QWizard*>(ptr);
+    if (wizard) {
+        wizard->setWindowTitle(QString::fromUtf8(title));
+    }
+}
+
+void qWizardShow(int64_t ptr) {
+    QWizard* wizard = reinterpret_cast<QWizard*>(ptr);
+    if (wizard) {
+        wizard->show();
+    }
+}
+
+// QWizardPage
+
+int64_t qWizardPageCreate(int64_t parentPtr) {
+    QWidget* parent = reinterpret_cast<QWidget*>(parentPtr);
+    QWizardPage* page = new QWizardPage(parent);
+    return reinterpret_cast<int64_t>(page);
+}
+
+void qWizardPageDelete(int64_t ptr) {
+    QWizardPage* page = reinterpret_cast<QWizardPage*>(ptr);
+    if (page) {
+        delete page;
+    }
+}
+
+void qWizardPageSetTitle(int64_t ptr, const char* title) {
+    QWizardPage* page = reinterpret_cast<QWizardPage*>(ptr);
+    if (page) {
+        page->setTitle(QString::fromUtf8(title));
+    }
+}
+
+void qWizardPageSetSubTitle(int64_t ptr, const char* subTitle) {
+    QWizardPage* page = reinterpret_cast<QWizardPage*>(ptr);
+    if (page) {
+        page->setSubTitle(QString::fromUtf8(subTitle));
+    }
+}
+
+void qWizardPageSetCommitPage(int64_t ptr, int32_t isCommit) {
+    QWizardPage* page = reinterpret_cast<QWizardPage*>(ptr);
+    if (page) {
+        page->setCommitPage(isCommit != 0);
+    }
+}
+
+int32_t qWizardPageIsCommitPage(int64_t ptr) {
+    QWizardPage* page = reinterpret_cast<QWizardPage*>(ptr);
+    if (page) {
+        return page->isCommitPage() ? 1 : 0;
+    }
+    return 0;
+}
+
+// ============================================================
+// QErrorMessage 桥接函数
+// ============================================================
+
+int64_t qErrorMessageCreate(int64_t parentPtr) {
+    QWidget* parent = reinterpret_cast<QWidget*>(parentPtr);
+    QErrorMessage* errMsg = new QErrorMessage(parent);
+    return reinterpret_cast<int64_t>(errMsg);
+}
+
+void qErrorMessageDelete(int64_t ptr) {
+    QErrorMessage* errMsg = reinterpret_cast<QErrorMessage*>(ptr);
+    if (errMsg) {
+        delete errMsg;
+    }
+}
+
+void qErrorMessageShowMessage(int64_t ptr, const char* message) {
+    QErrorMessage* errMsg = reinterpret_cast<QErrorMessage*>(ptr);
+    if (errMsg) {
+        errMsg->showMessage(QString::fromUtf8(message));
+    }
+}
+
+void qErrorMessageSetWindowTitle(int64_t ptr, const char* title) {
+    QErrorMessage* errMsg = reinterpret_cast<QErrorMessage*>(ptr);
+    if (errMsg) {
+        errMsg->setWindowTitle(QString::fromUtf8(title));
+    }
+}
+
+void qErrorMessageShow(int64_t ptr) {
+    QErrorMessage* errMsg = reinterpret_cast<QErrorMessage*>(ptr);
+    if (errMsg) {
+        errMsg->show();
     }
 }
 

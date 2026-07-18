@@ -278,4 +278,24 @@ public class QListWidget {
             qWidgetResize(ptr, width, height)
         }
     }
+
+    public func setMinimumSize(minw: Int32, minh: Int32) {
+        unsafe {
+            qWidgetSetMinimumSize(ptr, minw, minh)
+        }
+    }
+
+    public func setMaximumSize(maxw: Int32, maxh: Int32) {
+        unsafe {
+            qWidgetSetMaximumSize(ptr, maxw, maxh)
+        }
+    }
+
+    public func setStyleSheet(style: String) {
+        unsafe {
+            let cstr = LibC.mallocCString(style)
+            qWidgetSetStyleSheet(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
 }

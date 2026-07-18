@@ -43,6 +43,9 @@ foreign func qTableWidgetDelete(ptr: Int64): Unit
 foreign func qWidgetShow(ptr: Int64): Unit
 foreign func qWidgetHide(ptr: Int64): Unit
 foreign func qWidgetResize(ptr: Int64, width: Int32, height: Int32): Unit
+foreign func qWidgetSetMinimumSize(ptr: Int64, minw: Int32, minh: Int32): Unit
+foreign func qWidgetSetMaximumSize(ptr: Int64, maxw: Int32, maxh: Int32): Unit
+foreign func qWidgetSetStyleSheet(ptr: Int64, styleSheet: CString): Unit
 
 // ============================================================
 // 选择行为常量
@@ -101,6 +104,13 @@ public class QTableWidget {
     public func resize(width: Int32, height: Int32) {
         unsafe {
             qWidgetResize(ptr, width, height)
+        }
+    }
+
+    /// 设置最小尺寸
+    public func setMinimumSize(minw: Int32, minh: Int32) {
+        unsafe {
+            qWidgetSetMinimumSize(ptr, minw, minh)
         }
     }
     

@@ -189,6 +189,12 @@ public class QTabWidget {
             qWidgetResize(ptr, width, height)
         }
     }
+
+    public func setMinimumSize(minw: Int32, minh: Int32) {
+        unsafe {
+            qWidgetSetMinimumSize(ptr, minw, minh)
+        }
+    }
     
     public func getPtr(): Int64 {
         ptr

@@ -14,6 +14,7 @@
 #include <QPainterPath>
 #include <QPixmap>
 #include <QImage>
+#include <QFontDatabase>
 
 extern "C" {
 
@@ -1292,6 +1293,48 @@ void qTransformDelete(int64_t ptr) {
     if (t) {
         delete t;
     }
+}
+
+// ============================================================
+// QFontDatabase 桥接函数
+// ============================================================
+
+const char* qFontDatabaseFamilies() {
+    static QByteArray arr;
+    QStringList families = QFontDatabase::families();
+    arr = families.join('\n').toUtf8();
+    return arr.constData();
+}
+
+int32_t qFontDatabaseStandardSizes() {
+    QList<int> sizes = QFontDatabase::standardSizes();
+    return sizes.isEmpty() ? 0 : static_cast<int32_t>(sizes.size());
+}
+
+bool qFontDatabaseIsFixedPitch(const char* family, const char* style) {
+    if (!family) return false;
+    QString f = QString::fromUtf8(family);
+    QString s = style ? QString::fromUtf8(style) : QString();
+    return QFontDatabase::isFixedPitch(f, s);
+}
+
+bool qFontDatabaseIsScalable(const char* family) {
+    if (!family) return false;
+    return QFontDatabase::isScalable(QString::fromUtf8(family));
+}
+
+const char* qFontDatabaseStyles(const char* family) {
+    static QByteArray arr;
+    if (!family) return "";
+    QStringList styles = QFontDatabase::styles(QString::fromUtf8(family));
+    arr = styles.join('\n').toUtf8();
+    return arr.constData();
+}
+
+int32_t qFontDatabasePointSizes(const char* family, const char* style) {
+    if (!family || !style) return 0;
+    QList<int> sizes = QFontDatabase::pointSizes(QString::fromUtf8(family), QString::fromUtf8(style));
+    return sizes.isEmpty() ? 0 : static_cast<int32_t>(sizes.size());
 }
 
 } // extern "C"

@@ -8,7 +8,12 @@
 #include <QScrollArea>
 #include <QFrame>
 #include <QSplitter>
+#include <QStackedWidget>
 #include <QVBoxLayout>
+#include <QToolBox>
+#include <QMdiArea>
+#include <QMdiSubWindow>
+#include <QDockWidget>
 
 extern "C" {
 
@@ -339,6 +344,335 @@ int32_t qSplitterRestoreState(int64_t ptr, const char* buffer, int32_t size) {
     if (splitter && buffer) {
         QByteArray state(buffer, size);
         return splitter->restoreState(state) ? 1 : 0;
+    }
+    return 0;
+}
+
+// ============================================================
+// QStackedWidget 桥接函数
+// ============================================================
+
+int64_t qStackedWidgetCreate() {
+    QStackedWidget* stacked = new QStackedWidget();
+    return reinterpret_cast<int64_t>(stacked);
+}
+
+int32_t qStackedWidgetAddWidget(int64_t ptr, int64_t widgetPtr) {
+    QStackedWidget* stacked = reinterpret_cast<QStackedWidget*>(ptr);
+    QWidget* widget = reinterpret_cast<QWidget*>(widgetPtr);
+    if (stacked && widget) {
+        return static_cast<int32_t>(stacked->addWidget(widget));
+    }
+    return -1;
+}
+
+int32_t qStackedWidgetInsertWidget(int64_t ptr, int32_t index, int64_t widgetPtr) {
+    QStackedWidget* stacked = reinterpret_cast<QStackedWidget*>(ptr);
+    QWidget* widget = reinterpret_cast<QWidget*>(widgetPtr);
+    if (stacked && widget) {
+        return static_cast<int32_t>(stacked->insertWidget(index, widget));
+    }
+    return -1;
+}
+
+void qStackedWidgetRemoveWidget(int64_t ptr, int64_t widgetPtr) {
+    QStackedWidget* stacked = reinterpret_cast<QStackedWidget*>(ptr);
+    QWidget* widget = reinterpret_cast<QWidget*>(widgetPtr);
+    if (stacked && widget) {
+        stacked->removeWidget(widget);
+    }
+}
+
+void qStackedWidgetSetCurrentIndex(int64_t ptr, int32_t index) {
+    QStackedWidget* stacked = reinterpret_cast<QStackedWidget*>(ptr);
+    if (stacked) {
+        stacked->setCurrentIndex(index);
+    }
+}
+
+int32_t qStackedWidgetCurrentIndex(int64_t ptr) {
+    QStackedWidget* stacked = reinterpret_cast<QStackedWidget*>(ptr);
+    return stacked ? stacked->currentIndex() : -1;
+}
+
+int64_t qStackedWidgetCurrentWidget(int64_t ptr) {
+    QStackedWidget* stacked = reinterpret_cast<QStackedWidget*>(ptr);
+    if (stacked) {
+        return reinterpret_cast<int64_t>(stacked->currentWidget());
+    }
+    return 0;
+}
+
+int32_t qStackedWidgetCount(int64_t ptr) {
+    QStackedWidget* stacked = reinterpret_cast<QStackedWidget*>(ptr);
+    return stacked ? stacked->count() : 0;
+}
+
+void qStackedWidgetDelete(int64_t ptr) {
+    QStackedWidget* stacked = reinterpret_cast<QStackedWidget*>(ptr);
+    if (stacked) {
+        delete stacked;
+    }
+}
+
+// ============================================================
+// QToolBox 桥接函数
+// ============================================================
+
+int64_t qToolBoxCreate() {
+    QToolBox* toolbox = new QToolBox();
+    return reinterpret_cast<int64_t>(toolbox);
+}
+
+void qToolBoxDelete(int64_t ptr) {
+    QToolBox* toolbox = reinterpret_cast<QToolBox*>(ptr);
+    if (toolbox) {
+        delete toolbox;
+    }
+}
+
+int32_t qToolBoxAddItem(int64_t ptr, int64_t widgetPtr, const char* title) {
+    QToolBox* toolbox = reinterpret_cast<QToolBox*>(ptr);
+    QWidget* widget = reinterpret_cast<QWidget*>(widgetPtr);
+    if (toolbox && widget) {
+        return static_cast<int32_t>(toolbox->addItem(widget, QString::fromUtf8(title)));
+    }
+    return -1;
+}
+
+int32_t qToolBoxInsertItem(int64_t ptr, int32_t index, int64_t widgetPtr, const char* title) {
+    QToolBox* toolbox = reinterpret_cast<QToolBox*>(ptr);
+    QWidget* widget = reinterpret_cast<QWidget*>(widgetPtr);
+    if (toolbox && widget) {
+        return static_cast<int32_t>(toolbox->insertItem(index, widget, QString::fromUtf8(title)));
+    }
+    return -1;
+}
+
+void qToolBoxRemoveItem(int64_t ptr, int32_t index) {
+    QToolBox* toolbox = reinterpret_cast<QToolBox*>(ptr);
+    if (toolbox) {
+        toolbox->removeItem(index);
+    }
+}
+
+int32_t qToolBoxCount(int64_t ptr) {
+    QToolBox* toolbox = reinterpret_cast<QToolBox*>(ptr);
+    return toolbox ? toolbox->count() : 0;
+}
+
+int32_t qToolBoxCurrentIndex(int64_t ptr) {
+    QToolBox* toolbox = reinterpret_cast<QToolBox*>(ptr);
+    return toolbox ? toolbox->currentIndex() : -1;
+}
+
+void qToolBoxSetCurrentIndex(int64_t ptr, int32_t index) {
+    QToolBox* toolbox = reinterpret_cast<QToolBox*>(ptr);
+    if (toolbox) {
+        toolbox->setCurrentIndex(index);
+    }
+}
+
+void qToolBoxSetItemText(int64_t ptr, int32_t index, const char* text) {
+    QToolBox* toolbox = reinterpret_cast<QToolBox*>(ptr);
+    if (toolbox) {
+        toolbox->setItemText(index, QString::fromUtf8(text));
+    }
+}
+
+const char* qToolBoxItemText(int64_t ptr, int32_t index) {
+    QToolBox* toolbox = reinterpret_cast<QToolBox*>(ptr);
+    if (toolbox) {
+        static QString text;
+        text = toolbox->itemText(index);
+        return text.toUtf8().constData();
+    }
+    return "";
+}
+
+void qToolBoxSetItemToolTip(int64_t ptr, int32_t index, const char* toolTip) {
+    QToolBox* toolbox = reinterpret_cast<QToolBox*>(ptr);
+    if (toolbox) {
+        toolbox->setItemToolTip(index, QString::fromUtf8(toolTip));
+    }
+}
+
+void qToolBoxSetItemEnabled(int64_t ptr, int32_t index, int32_t enabled) {
+    QToolBox* toolbox = reinterpret_cast<QToolBox*>(ptr);
+    if (toolbox) {
+        toolbox->setItemEnabled(index, enabled != 0);
+    }
+}
+
+int32_t qToolBoxIsItemEnabled(int64_t ptr, int32_t index) {
+    QToolBox* toolbox = reinterpret_cast<QToolBox*>(ptr);
+    if (toolbox) {
+        return toolbox->isItemEnabled(index) ? 1 : 0;
+    }
+    return 0;
+}
+
+// ============================================================
+// QMdiArea 桥接函数
+// ============================================================
+
+int64_t qMdiAreaCreate() {
+    QMdiArea* mdiArea = new QMdiArea();
+    return reinterpret_cast<int64_t>(mdiArea);
+}
+
+void qMdiAreaDelete(int64_t ptr) {
+    QMdiArea* mdiArea = reinterpret_cast<QMdiArea*>(ptr);
+    if (mdiArea) {
+        delete mdiArea;
+    }
+}
+
+int64_t qMdiAreaAddSubWindow(int64_t ptr, int64_t widgetPtr) {
+    QMdiArea* mdiArea = reinterpret_cast<QMdiArea*>(ptr);
+    QWidget* widget = reinterpret_cast<QWidget*>(widgetPtr);
+    if (mdiArea && widget) {
+        QMdiSubWindow* subWin = mdiArea->addSubWindow(widget);
+        return reinterpret_cast<int64_t>(subWin);
+    }
+    return 0;
+}
+
+void qMdiAreaRemoveSubWindow(int64_t ptr, int64_t subWinPtr) {
+    QMdiArea* mdiArea = reinterpret_cast<QMdiArea*>(ptr);
+    QMdiSubWindow* subWin = reinterpret_cast<QMdiSubWindow*>(subWinPtr);
+    if (mdiArea && subWin) {
+        mdiArea->removeSubWindow(subWin);
+    }
+}
+
+int64_t qMdiAreaCurrentSubWindow(int64_t ptr) {
+    QMdiArea* mdiArea = reinterpret_cast<QMdiArea*>(ptr);
+    if (mdiArea) {
+        return reinterpret_cast<int64_t>(mdiArea->currentSubWindow());
+    }
+    return 0;
+}
+
+void qMdiAreaCascadeSubWindows(int64_t ptr) {
+    QMdiArea* mdiArea = reinterpret_cast<QMdiArea*>(ptr);
+    if (mdiArea) {
+        mdiArea->cascadeSubWindows();
+    }
+}
+
+void qMdiAreaTileSubWindows(int64_t ptr) {
+    QMdiArea* mdiArea = reinterpret_cast<QMdiArea*>(ptr);
+    if (mdiArea) {
+        mdiArea->tileSubWindows();
+    }
+}
+
+void qMdiAreaCloseAllSubWindows(int64_t ptr) {
+    QMdiArea* mdiArea = reinterpret_cast<QMdiArea*>(ptr);
+    if (mdiArea) {
+        mdiArea->closeAllSubWindows();
+    }
+}
+
+void qMdiAreaSetViewMode(int64_t ptr, int32_t mode) {
+    QMdiArea* mdiArea = reinterpret_cast<QMdiArea*>(ptr);
+    if (mdiArea) {
+        mdiArea->setViewMode(static_cast<QMdiArea::ViewMode>(mode));
+    }
+}
+
+// ============================================================
+// QMdiSubWindow 桥接函数
+// ============================================================
+
+void qMdiSubWindowSetWidget(int64_t ptr, int64_t widgetPtr) {
+    QMdiSubWindow* subWin = reinterpret_cast<QMdiSubWindow*>(ptr);
+    QWidget* widget = reinterpret_cast<QWidget*>(widgetPtr);
+    if (subWin && widget) {
+        subWin->setWidget(widget);
+    }
+}
+
+int64_t qMdiSubWindowWidget(int64_t ptr) {
+    QMdiSubWindow* subWin = reinterpret_cast<QMdiSubWindow*>(ptr);
+    if (subWin) {
+        return reinterpret_cast<int64_t>(subWin->widget());
+    }
+    return 0;
+}
+
+void qMdiSubWindowDelete(int64_t ptr) {
+    QMdiSubWindow* subWin = reinterpret_cast<QMdiSubWindow*>(ptr);
+    if (subWin) {
+        delete subWin;
+    }
+}
+
+// ============================================================
+// QDockWidget 桥接函数
+// ============================================================
+
+int64_t qDockWidgetCreate(const char* title) {
+    QDockWidget* dock = new QDockWidget(QString::fromUtf8(title));
+    return reinterpret_cast<int64_t>(dock);
+}
+
+void qDockWidgetDelete(int64_t ptr) {
+    QDockWidget* dock = reinterpret_cast<QDockWidget*>(ptr);
+    if (dock) {
+        delete dock;
+    }
+}
+
+void qDockWidgetSetWidget(int64_t ptr, int64_t widgetPtr) {
+    QDockWidget* dock = reinterpret_cast<QDockWidget*>(ptr);
+    QWidget* widget = reinterpret_cast<QWidget*>(widgetPtr);
+    if (dock && widget) {
+        dock->setWidget(widget);
+    }
+}
+
+int64_t qDockWidgetWidget(int64_t ptr) {
+    QDockWidget* dock = reinterpret_cast<QDockWidget*>(ptr);
+    if (dock) {
+        return reinterpret_cast<int64_t>(dock->widget());
+    }
+    return 0;
+}
+
+void qDockWidgetSetWindowTitle(int64_t ptr, const char* title) {
+    QDockWidget* dock = reinterpret_cast<QDockWidget*>(ptr);
+    if (dock) {
+        dock->setWindowTitle(QString::fromUtf8(title));
+    }
+}
+
+void qDockWidgetSetAllowedAreas(int64_t ptr, int32_t areas) {
+    QDockWidget* dock = reinterpret_cast<QDockWidget*>(ptr);
+    if (dock) {
+        dock->setAllowedAreas(static_cast<Qt::DockWidgetAreas>(areas));
+    }
+}
+
+void qDockWidgetSetFeatures(int64_t ptr, int32_t features) {
+    QDockWidget* dock = reinterpret_cast<QDockWidget*>(ptr);
+    if (dock) {
+        dock->setFeatures(static_cast<QDockWidget::DockWidgetFeatures>(features));
+    }
+}
+
+void qDockWidgetSetFloating(int64_t ptr, int32_t floating) {
+    QDockWidget* dock = reinterpret_cast<QDockWidget*>(ptr);
+    if (dock) {
+        dock->setFloating(floating != 0);
+    }
+}
+
+int32_t qDockWidgetIsFloating(int64_t ptr) {
+    QDockWidget* dock = reinterpret_cast<QDockWidget*>(ptr);
+    if (dock) {
+        return dock->isFloating() ? 1 : 0;
     }
     return 0;
 }

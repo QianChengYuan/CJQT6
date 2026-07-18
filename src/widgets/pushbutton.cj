@@ -133,6 +133,22 @@ public class QPushButton <: QtResource {
             LibC.free(cstr)
         }
     }
+
+    /// 设置启用/禁用
+    public func setEnabled(enabled: Bool): Unit {
+        checkValid()
+        unsafe {
+            qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
+        }
+    }
+
+    /// 检查是否启用
+    public func isEnabled(): Bool {
+        checkValid()
+        unsafe {
+            qWidgetIsEnabled(ptr) == 1
+        }
+    }
     
     /// 设置点击回调
     public func setOnClick(callback: VoidCallback): Unit {

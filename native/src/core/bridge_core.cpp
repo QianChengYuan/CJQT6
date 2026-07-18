@@ -4,14 +4,24 @@
  */
 
 #include <QApplication>
-#include <QWidget>
-#include <QTimer>
+#include <QClipboard>
 #include <QDebug>
-#include <QTranslator>
-#include <QLocale>
+#include <QDesktopServices>
 #include <QDir>
-#include <QLibraryInfo>
+#include <QFileSystemWatcher>
+#include <QGuiApplication>
 #include <functional>
+#include <QLibraryInfo>
+#include <QLocale>
+#include <QPropertyAnimation>
+#include <QScreen>
+#include <QSettings>
+#include <QShortcut>
+#include <QStandardPaths>
+#include <QTimer>
+#include <QTranslator>
+#include <QUrl>
+#include <QWidget>
 #include <unordered_map>
 
 // 全局应用程序指针
@@ -437,5 +447,350 @@ void qWidgetSetWindowIcon(int64_t ptr, const char* iconPath) {
     QWidget* widget = reinterpret_cast<QWidget*>(ptr);
     if (widget && iconPath) widget->setWindowIcon(QIcon(iconPath));
 }
+
+// ============================================================
+// QClipboard 桥接函数
+// ============================================================
+
+const char* qClipboardText() {
+    QClipboard* clipboard = QApplication::clipboard();
+    if (clipboard) {
+        static QByteArray text;
+        text = clipboard->text().toUtf8();
+        return text.constData();
+    }
+    return "";
+}
+
+void qClipboardSetText(const char* text) {
+    QClipboard* clipboard = QApplication::clipboard();
+    if (clipboard) {
+        clipboard->setText(QString::fromUtf8(text));
+    }
+}
+
+bool qClipboardHasText() {
+    QClipboard* clipboard = QApplication::clipboard();
+    if (clipboard) {
+        return !clipboard->text().isEmpty();
+    }
+    return false;
+}
+
+void qClipboardClear() {
+    QClipboard* clipboard = QApplication::clipboard();
+    if (clipboard) {
+        clipboard->clear();
+    }
+}
+
+// ============================================================
+// QDesktopServices 桥接函数
+// ============================================================
+
+bool qDesktopServicesOpenUrl(const char* url) {
+    return QDesktopServices::openUrl(QUrl(QString::fromUtf8(url)));
+}
+
+bool qDesktopServicesOpenFile(const char* filePath) {
+    return QDesktopServices::openUrl(QUrl::fromLocalFile(QString::fromUtf8(filePath)));
+}
+
+// ============================================================
+// QShortcut 桥接函数
+// ============================================================
+
+int64_t qShortcutCreate(int64_t parentPtr) {
+    QWidget* parent = reinterpret_cast<QWidget*>(parentPtr);
+    if (parent) {
+        QShortcut* shortcut = new QShortcut(parent);
+        return reinterpret_cast<int64_t>(shortcut);
+    }
+    return 0;
+}
+
+void qShortcutSetKey(int64_t ptr, const char* keySequence) {
+    QShortcut* shortcut = reinterpret_cast<QShortcut*>(ptr);
+    if (shortcut) {
+        shortcut->setKey(QKeySequence(QString::fromUtf8(keySequence)));
+    }
+}
+
+void qShortcutSetEnabled(int64_t ptr, bool enabled) {
+    QShortcut* shortcut = reinterpret_cast<QShortcut*>(ptr);
+    if (shortcut) {
+        shortcut->setEnabled(enabled);
+    }
+}
+
+void qShortcutSetAutoRepeat(int64_t ptr, bool repeat) {
+    QShortcut* shortcut = reinterpret_cast<QShortcut*>(ptr);
+    if (shortcut) {
+        shortcut->setAutoRepeat(repeat);
+    }
+}
+
+void qShortcutDelete(int64_t ptr) {
+    QShortcut* shortcut = reinterpret_cast<QShortcut*>(ptr);
+    if (shortcut) {
+        delete shortcut;
+    }
+}
+
+// ============================================================
+// QStandardPaths 桥接函数
+// ============================================================
+
+const char* qStandardPathWritableLocation(int32_t type) {
+    static QByteArray path;
+    path = QStandardPaths::writableLocation(static_cast<QStandardPaths::StandardLocation>(type)).toUtf8();
+    return path.constData();
+}
+
+const char* qStandardPathLocate(int32_t type, const char* fileName) {
+    static QByteArray path;
+    path = QStandardPaths::locate(static_cast<QStandardPaths::StandardLocation>(type), QString::fromUtf8(fileName)).toUtf8();
+    return path.constData();
+}
+
+const char* qStandardPathDisplayName(int32_t type) {
+    static QByteArray name;
+    name = QStandardPaths::displayName(static_cast<QStandardPaths::StandardLocation>(type)).toUtf8();
+    return name.constData();
+}
+
+const char* qStandardPathTempDir() {
+    static QByteArray path;
+    path = QStandardPaths::writableLocation(QStandardPaths::TempLocation).toUtf8();
+    return path.constData();
+}
+
+// ============================================================
+// QFileSystemWatcher 桥接函数
+// ============================================================
+
+int64_t qFileSystemWatcherCreate() {
+    QFileSystemWatcher* watcher = new QFileSystemWatcher();
+    return reinterpret_cast<int64_t>(watcher);
+}
+
+void qFileSystemWatcherAddPath(int64_t ptr, const char* path) {
+    QFileSystemWatcher* watcher = reinterpret_cast<QFileSystemWatcher*>(ptr);
+    if (watcher) {
+        watcher->addPath(QString::fromUtf8(path));
+    }
+}
+
+void qFileSystemWatcherRemovePath(int64_t ptr, const char* path) {
+    QFileSystemWatcher* watcher = reinterpret_cast<QFileSystemWatcher*>(ptr);
+    if (watcher) {
+        watcher->removePath(QString::fromUtf8(path));
+    }
+}
+
+void qFileSystemWatcherDelete(int64_t ptr) {
+    QFileSystemWatcher* watcher = reinterpret_cast<QFileSystemWatcher*>(ptr);
+    if (watcher) {
+        delete watcher;
+    }
+}
+
+// ============================================================
+// QSettings 桥接函数
+// ============================================================
+
+int64_t qSettingsCreate(const char* appName) {
+    QSettings* settings = new QSettings(QString::fromUtf8(appName));
+    return reinterpret_cast<int64_t>(settings);
+}
+
+int64_t qSettingsCreateWithFile(const char* fileName) {
+    QSettings* settings = new QSettings(QString::fromUtf8(fileName), QSettings::IniFormat);
+    return reinterpret_cast<int64_t>(settings);
+}
+
+void qSettingsSetValue(int64_t ptr, const char* key, const char* value) {
+    QSettings* settings = reinterpret_cast<QSettings*>(ptr);
+    if (settings) {
+        settings->setValue(QString::fromUtf8(key), QString::fromUtf8(value));
+    }
+}
+
+const char* qSettingsValue(int64_t ptr, const char* key, const char* defaultValue) {
+    QSettings* settings = reinterpret_cast<QSettings*>(ptr);
+    if (settings) {
+        static QByteArray value;
+        value = settings->value(QString::fromUtf8(key), QString::fromUtf8(defaultValue)).toString().toUtf8();
+        return value.constData();
+    }
+    return defaultValue;
+}
+
+int32_t qSettingsValueInt(int64_t ptr, const char* key, int32_t defaultValue) {
+    QSettings* settings = reinterpret_cast<QSettings*>(ptr);
+    if (settings) {
+        return settings->value(QString::fromUtf8(key), defaultValue).toInt();
+    }
+    return defaultValue;
+}
+
+bool qSettingsValueBool(int64_t ptr, const char* key, bool defaultValue) {
+    QSettings* settings = reinterpret_cast<QSettings*>(ptr);
+    if (settings) {
+        return settings->value(QString::fromUtf8(key), defaultValue).toBool();
+    }
+    return defaultValue;
+}
+
+void qSettingsBeginGroup(int64_t ptr, const char* prefix) {
+    QSettings* settings = reinterpret_cast<QSettings*>(ptr);
+    if (settings) {
+        settings->beginGroup(QString::fromUtf8(prefix));
+    }
+}
+
+void qSettingsEndGroup(int64_t ptr) {
+    QSettings* settings = reinterpret_cast<QSettings*>(ptr);
+    if (settings) {
+        settings->endGroup();
+    }
+}
+
+void qSettingsSync(int64_t ptr) {
+    QSettings* settings = reinterpret_cast<QSettings*>(ptr);
+    if (settings) {
+        settings->sync();
+    }
+}
+
+bool qSettingsContains(int64_t ptr, const char* key) {
+    QSettings* settings = reinterpret_cast<QSettings*>(ptr);
+    if (settings) {
+        return settings->contains(QString::fromUtf8(key));
+    }
+    return false;
+}
+
+void qSettingsRemove(int64_t ptr, const char* key) {
+    QSettings* settings = reinterpret_cast<QSettings*>(ptr);
+    if (settings) {
+        settings->remove(QString::fromUtf8(key));
+    }
+}
+
+void qSettingsDelete(int64_t ptr) {
+    QSettings* settings = reinterpret_cast<QSettings*>(ptr);
+    if (settings) {
+        delete settings;
+    }
+}
+
+// ============================================================
+// QPropertyAnimation 桥接函数
+// ============================================================
+
+int64_t qPropertyAnimationCreate(int64_t targetPtr, const char* propertyName) {
+    QPropertyAnimation* anim = new QPropertyAnimation(
+        reinterpret_cast<QObject*>(targetPtr),
+        QByteArray(propertyName),
+        nullptr
+    );
+    return reinterpret_cast<int64_t>(anim);
+}
+
+void qPropertyAnimationSetDuration(int64_t ptr, int32_t duration) {
+    QPropertyAnimation* anim = reinterpret_cast<QPropertyAnimation*>(ptr);
+    if (anim) anim->setDuration(duration);
+}
+
+int32_t qPropertyAnimationDuration(int64_t ptr) {
+    QPropertyAnimation* anim = reinterpret_cast<QPropertyAnimation*>(ptr);
+    return anim ? anim->duration() : 0;
+}
+
+void qPropertyAnimationSetStartValue(int64_t ptr, double value) {
+    QPropertyAnimation* anim = reinterpret_cast<QPropertyAnimation*>(ptr);
+    if (anim) anim->setStartValue(QVariant(value));
+}
+
+void qPropertyAnimationSetEndValue(int64_t ptr, double value) {
+    QPropertyAnimation* anim = reinterpret_cast<QPropertyAnimation*>(ptr);
+    if (anim) anim->setEndValue(QVariant(value));
+}
+
+void qPropertyAnimationStart(int64_t ptr) {
+    QPropertyAnimation* anim = reinterpret_cast<QPropertyAnimation*>(ptr);
+    if (anim) anim->start();
+}
+
+void qPropertyAnimationStop(int64_t ptr) {
+    QPropertyAnimation* anim = reinterpret_cast<QPropertyAnimation*>(ptr);
+    if (anim) anim->stop();
+}
+
+void qPropertyAnimationSetLoopCount(int64_t ptr, int32_t count) {
+    QPropertyAnimation* anim = reinterpret_cast<QPropertyAnimation*>(ptr);
+    if (anim) anim->setLoopCount(count);
+}
+
+int32_t qPropertyAnimationLoopCount(int64_t ptr) {
+    QPropertyAnimation* anim = reinterpret_cast<QPropertyAnimation*>(ptr);
+    return anim ? anim->loopCount() : 1;
+}
+
+void qPropertyAnimationSetEasingCurve(int64_t ptr, int32_t curveType) {
+    QPropertyAnimation* anim = reinterpret_cast<QPropertyAnimation*>(ptr);
+    if (anim) anim->setEasingCurve(static_cast<QEasingCurve::Type>(curveType));
+}
+
+void qPropertyAnimationDelete(int64_t ptr) {
+    QPropertyAnimation* anim = reinterpret_cast<QPropertyAnimation*>(ptr);
+    if (anim) delete anim;
+}
+
+// ============================================================
+// QScreen 桥接函数
+// ============================================================
+
+double qScreenPrimaryDpiX() {
+    QScreen* screen = QGuiApplication::primaryScreen();
+    return screen ? screen->logicalDotsPerInchX() : 0.0;
+}
+
+double qScreenPrimaryDpiY() {
+    QScreen* screen = QGuiApplication::primaryScreen();
+    return screen ? screen->logicalDotsPerInchY() : 0.0;
+}
+
+double qScreenPrimaryPhysicalDpiX() {
+    QScreen* screen = QGuiApplication::primaryScreen();
+    return screen ? screen->physicalDotsPerInchX() : 0.0;
+}
+
+double qScreenPrimaryPhysicalDpiY() {
+    QScreen* screen = QGuiApplication::primaryScreen();
+    return screen ? screen->physicalDotsPerInchY() : 0.0;
+}
+
+double qScreenPrimaryDevicePixelRatio() {
+    QScreen* screen = QGuiApplication::primaryScreen();
+    return screen ? screen->devicePixelRatio() : 1.0;
+}
+
+int32_t qScreenPrimaryWidth() {
+    QScreen* screen = QGuiApplication::primaryScreen();
+    return screen ? screen->size().width() : 0;
+}
+
+int32_t qScreenPrimaryHeight() {
+    QScreen* screen = QGuiApplication::primaryScreen();
+    return screen ? screen->size().height() : 0;
+}
+
+double qScreenPrimaryRefreshRate() {
+    QScreen* screen = QGuiApplication::primaryScreen();
+    return screen ? screen->refreshRate() : 0.0;
+}
+
 } // extern "C"
 

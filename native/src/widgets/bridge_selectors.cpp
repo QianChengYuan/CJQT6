@@ -6,6 +6,7 @@
 #include <QCheckBox>
 #include <QRadioButton>
 #include <QComboBox>
+#include <QButtonGroup>
 #include <functional>
 #include <unordered_map>
 
@@ -13,6 +14,7 @@
 static std::unordered_map<int64_t, std::function<void(int64_t)>> g_checkBoxCallbacks;
 static std::unordered_map<int64_t, std::function<void(int64_t)>> g_radioButtonCallbacks;
 static std::unordered_map<int64_t, std::function<void(int64_t)>> g_comboBoxCallbacks;
+static std::unordered_map<int64_t, std::function<void(int64_t)>> g_buttonGroupCallbacks;
 
 extern "C" {
 
@@ -165,6 +167,83 @@ void qComboBoxDelete(int64_t ptr) {
     QComboBox* comboBox = reinterpret_cast<QComboBox*>(ptr);
     if (comboBox) {
         delete comboBox;
+    }
+}
+
+// ============================================================
+// QButtonGroup 桥接函数
+// ============================================================
+
+int64_t qButtonGroupCreate() {
+    QButtonGroup* group = new QButtonGroup();
+    return reinterpret_cast<int64_t>(group);
+}
+
+void qButtonGroupAddButton(int64_t ptr, int64_t btnPtr, int32_t id) {
+    QButtonGroup* group = reinterpret_cast<QButtonGroup*>(ptr);
+    QAbstractButton* btn = reinterpret_cast<QAbstractButton*>(btnPtr);
+    if (group && btn) {
+        group->addButton(btn, id);
+    }
+}
+
+void qButtonGroupRemoveButton(int64_t ptr, int64_t btnPtr) {
+    QButtonGroup* group = reinterpret_cast<QButtonGroup*>(ptr);
+    QAbstractButton* btn = reinterpret_cast<QAbstractButton*>(btnPtr);
+    if (group && btn) {
+        group->removeButton(btn);
+    }
+}
+
+void qButtonGroupSetExclusive(int64_t ptr, bool exclusive) {
+    QButtonGroup* group = reinterpret_cast<QButtonGroup*>(ptr);
+    if (group) {
+        group->setExclusive(exclusive);
+    }
+}
+
+bool qButtonGroupIsExclusive(int64_t ptr) {
+    QButtonGroup* group = reinterpret_cast<QButtonGroup*>(ptr);
+    return group ? group->exclusive() : false;
+}
+
+int32_t qButtonGroupCheckedId(int64_t ptr) {
+    QButtonGroup* group = reinterpret_cast<QButtonGroup*>(ptr);
+    return group ? group->checkedId() : -1;
+}
+
+int64_t qButtonGroupCheckedButton(int64_t ptr) {
+    QButtonGroup* group = reinterpret_cast<QButtonGroup*>(ptr);
+    if (group) {
+        QAbstractButton* btn = group->checkedButton();
+        return reinterpret_cast<int64_t>(btn);
+    }
+    return 0;
+}
+
+void qButtonGroupSetId(int64_t ptr, int64_t btnPtr, int32_t id) {
+    QButtonGroup* group = reinterpret_cast<QButtonGroup*>(ptr);
+    QAbstractButton* btn = reinterpret_cast<QAbstractButton*>(btnPtr);
+    if (group && btn) {
+        group->setId(btn, id);
+    }
+}
+
+int32_t qButtonGroupId(int64_t ptr, int64_t btnPtr) {
+    QButtonGroup* group = reinterpret_cast<QButtonGroup*>(ptr);
+    QAbstractButton* btn = reinterpret_cast<QAbstractButton*>(btnPtr);
+    return (group && btn) ? group->id(btn) : -1;
+}
+
+int32_t qButtonGroupButtonsCount(int64_t ptr) {
+    QButtonGroup* group = reinterpret_cast<QButtonGroup*>(ptr);
+    return group ? static_cast<int32_t>(group->buttons().size()) : 0;
+}
+
+void qButtonGroupDelete(int64_t ptr) {
+    QButtonGroup* group = reinterpret_cast<QButtonGroup*>(ptr);
+    if (group) {
+        delete group;
     }
 }
 

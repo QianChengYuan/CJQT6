@@ -499,3 +499,241 @@ public class QProgressDialog {
         }
     }
 }
+
+// ============================================================
+// QWizardPage - 向导页面
+// ============================================================
+foreign func qWizardPageCreate(parentPtr: Int64): Int64
+foreign func qWizardPageDelete(ptr: Int64): Unit
+foreign func qWizardPageSetTitle(ptr: Int64, title: CString): Unit
+foreign func qWizardPageSetSubTitle(ptr: Int64, subTitle: CString): Unit
+foreign func qWizardPageSetCommitPage(ptr: Int64, isCommit: Int32): Unit
+foreign func qWizardPageIsCommitPage(ptr: Int64): Int32
+
+public class QWizardPage {
+    private let ptr: Int64
+
+    public init(parent!: Int64 = 0) {
+        unsafe {
+            ptr = qWizardPageCreate(parent)
+        }
+    }
+
+    public func setTitle(title: String) {
+        unsafe {
+            var cstr = LibC.mallocCString(title)
+            qWizardPageSetTitle(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+
+    public func setSubTitle(subTitle: String) {
+        unsafe {
+            var cstr = LibC.mallocCString(subTitle)
+            qWizardPageSetSubTitle(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+
+    public func setCommitPage(isCommit: Bool) {
+        unsafe {
+            qWizardPageSetCommitPage(ptr, (if (isCommit) { 1 } else { 0 }))
+        }
+    }
+
+    public func isCommitPage(): Bool {
+        unsafe {
+            qWizardPageIsCommitPage(ptr) == 1
+        }
+    }
+
+    public func getPtr(): Int64 {
+        ptr
+    }
+
+    public func delete() {
+        if (ptr != 0) {
+            unsafe {
+                qWizardPageDelete(ptr)
+            }
+        }
+    }
+}
+
+// ============================================================
+// QWizardOption - QWizard 选项常量
+// ============================================================
+public class QWizardOption {
+    public static let HaveCustomButton1: Int32 = 1
+    public static let NoBackButtonOnStartPage: Int32 = 8
+    public static let NoCancelButton: Int32 = 256
+    public static let IndependentPages: Int32 = 32768
+    public static let NoDefaultButton: Int32 = 8192
+}
+
+// ============================================================
+// QWizard - 向导对话框
+// ============================================================
+foreign func qWizardCreate(parentPtr: Int64): Int64
+foreign func qWizardDelete(ptr: Int64): Unit
+foreign func qWizardAddPage(ptr: Int64, pagePtr: Int64): Int32
+foreign func qWizardPage(ptr: Int64, index: Int32): Int64
+foreign func qWizardCurrentId(ptr: Int64): Int32
+foreign func qWizardNext(ptr: Int64): Unit
+foreign func qWizardBack(ptr: Int64): Unit
+foreign func qWizardRestart(ptr: Int64): Unit
+foreign func qWizardSetStartId(ptr: Int64, id: Int32): Unit
+foreign func qWizardExec(ptr: Int64): Int32
+foreign func qWizardSetOption(ptr: Int64, option: Int32, enabled: Int32): Unit
+foreign func qWizardTestOption(ptr: Int64, option: Int32): Int32
+foreign func qWizardSetWindowTitle(ptr: Int64, title: CString): Unit
+foreign func qWizardShow(ptr: Int64): Unit
+
+public class QWizard {
+    private let ptr: Int64
+
+    public init(parent!: Int64 = 0) {
+        unsafe {
+            ptr = qWizardCreate(parent)
+        }
+    }
+
+    public func addPage(page: QWizardPage): Int32 {
+        unsafe {
+            qWizardAddPage(ptr, page.getPtr())
+        }
+    }
+
+    public func page(index: Int32): Int64 {
+        unsafe {
+            qWizardPage(ptr, index)
+        }
+    }
+
+    public func currentId(): Int32 {
+        unsafe {
+            qWizardCurrentId(ptr)
+        }
+    }
+
+    public func next() {
+        unsafe {
+            qWizardNext(ptr)
+        }
+    }
+
+    public func back() {
+        unsafe {
+            qWizardBack(ptr)
+        }
+    }
+
+    public func restart() {
+        unsafe {
+            qWizardRestart(ptr)
+        }
+    }
+
+    public func setStartId(id: Int32) {
+        unsafe {
+            qWizardSetStartId(ptr, id)
+        }
+    }
+
+    public func exec(): Int32 {
+        unsafe {
+            qWizardExec(ptr)
+        }
+    }
+
+    public func setOption(option: Int32, enabled: Bool) {
+        unsafe {
+            qWizardSetOption(ptr, option, (if (enabled) { 1 } else { 0 }))
+        }
+    }
+
+    public func testOption(option: Int32): Bool {
+        unsafe {
+            qWizardTestOption(ptr, option) == 1
+        }
+    }
+
+    public func setWindowTitle(title: String) {
+        unsafe {
+            var cstr = LibC.mallocCString(title)
+            qWizardSetWindowTitle(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+
+    public func show() {
+        unsafe {
+            qWizardShow(ptr)
+        }
+    }
+
+    public func getPtr(): Int64 {
+        ptr
+    }
+
+    public func delete() {
+        if (ptr != 0) {
+            unsafe {
+                qWizardDelete(ptr)
+            }
+        }
+    }
+}
+
+// ============================================================
+// QErrorMessage - 错误消息对话框
+// ============================================================
+foreign func qErrorMessageCreate(parentPtr: Int64): Int64
+foreign func qErrorMessageDelete(ptr: Int64): Unit
+foreign func qErrorMessageShowMessage(ptr: Int64, message: CString): Unit
+foreign func qErrorMessageSetWindowTitle(ptr: Int64, title: CString): Unit
+foreign func qErrorMessageShow(ptr: Int64): Unit
+
+public class QErrorMessage {
+    private let ptr: Int64
+
+    public init(parent!: Int64 = 0) {
+        unsafe {
+            ptr = qErrorMessageCreate(parent)
+        }
+    }
+
+    public func showMessage(message: String) {
+        unsafe {
+            var cstr = LibC.mallocCString(message)
+            qErrorMessageShowMessage(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+
+    public func setWindowTitle(title: String) {
+        unsafe {
+            var cstr = LibC.mallocCString(title)
+            qErrorMessageSetWindowTitle(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+
+    public func show() {
+        unsafe {
+            qErrorMessageShow(ptr)
+        }
+    }
+
+    public func getPtr(): Int64 {
+        ptr
+    }
+
+    public func delete() {
+        if (ptr != 0) {
+            unsafe {
+                qErrorMessageDelete(ptr)
+            }
+        }
+    }
+}

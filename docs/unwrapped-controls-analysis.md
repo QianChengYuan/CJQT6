@@ -1,0 +1,276 @@
+# CJQT6 未封装控件分析报告
+
+> 生成日期：2026-07-18
+> 最后更新：2026-07-18（P0/P1/P2 已完成）
+
+## 一、整体架构模式
+
+每个控件封装涉及 **3 层**：
+
+```
+C++ 桥接头文件  →  native/includes/*.h        (FFI导出函数签名)
+C++ 桥接实现    →  native/src/*/bridge_*.cpp   (extern "C" FFI函数实现)
+仓颉封装类      →  src/*/*.cj                  (foreign + class API)
+```
+
+构建涉及：
+- `native/CMakeLists.txt` + 重新编译 → 产出新 `CJQT6_bridge.dll`
+- `cjpm build` → 编译仓颉侧代码
+
+## 二、现状概览
+
+| 模块 | 已封装 | 常用未封装 | 覆盖率 |
+|------|--------|-----------|--------|
+| 基础控件 (widgets) | 34 | 1 (QFontDialog已移至dialogs) | ~97% |
+| 容器/布局 | 9 | 1 | ~90% |
+| 视图 (views) | 3 | 3 | ~50% |
+| 对话框 | 9 | 0 | 100% |
+| 菜单/工具栏 | 6 | 0 | 100% |
+| 绘图 | 9 | 0 | 100% |
+| 多媒体 | 3 | 3 | ~50% |
+| 网络 | 3 | 0 | 100% |
+| 核心/工具 | 17 | 3 | ~85% |
+| 动画/特效 | 5 | 2 | ~71% |
+| **合计** | **~92** | **~13** | **~88%** |
+
+## 三、已封装控件完整清单
+
+### core/ — 17 文件
+| 文件 | 控件/类 | 状态 |
+|------|---------|------|
+| application.cj | QApplication | ✅ 较完整（含多语言/翻译支持） |
+| widget.cj | QWidget | ✅ 较完整（几何/样式/启用/工具提示/父窗口） |
+| timer.cj | QTimer | ✅ 完整 |
+| process.cj | QProcess | ✅ 较完整 |
+| signal.cj | 回调类型系统 | ✅ 完整（5种回调类型） |
+| events.cj | 事件系统 | ✅ 较完整（鼠标/键盘/绘制事件） |
+| dragdrop.cj | 拖放支持 | ✅ 基础 |
+| resource.cj | 资源管理 | ✅ 较完整 |
+| gui_test_env.cj | 测试环境 | ✅ |
+| clipboard.cj | QClipboard | ✅ P2 新增 |
+| desktopservices.cj | QDesktopServices | ✅ P2 新增 |
+| shortcut.cj | QShortcut | ✅ P2 新增 |
+| standardpaths.cj | QStandardPaths | ✅ P2 新增 |
+| filewatcher.cj | QFileSystemWatcher | ✅ P2 新增 |
+| settings.cj | QSettings | ✅ P2 新增 |
+| propertyanimation.cj | QPropertyAnimation | ✅ P2 新增 |
+| screen.cj | QScreen | ✅ P2 新增 |
+
+### widgets/ — 30 文件
+| 文件 | 控件 | 状态 |
+|------|------|------|
+| label.cj | QLabel | ✅ 完整 |
+| pushbutton.cj | QPushButton | ✅ 完整 |
+| lineedit.cj | QLineEdit | ✅ 非常完整 |
+| textedit.cj | QTextEdit | ✅ 非常完整 |
+| checkbox.cj | QCheckBox | ✅ 完整 |
+| radiobutton.cj | QRadioButton | ✅ 完整 |
+| combobox.cj | QComboBox | ✅ 较完整 |
+| slider.cj | QSlider | ✅ 完整 |
+| spinbox.cj | QSpinBox | ✅ 完整 |
+| doublespinbox.cj | QDoubleSpinBox | ✅ 较完整 |
+| progressbar.cj | QProgressBar | ✅ 基础 |
+| toolbutton.cj | QToolButton | ✅ 较完整 |
+| dial.cj | QDial | ✅ 完整 |
+| lcdnumber.cj | QLCDNumber | ✅ 完整 |
+| datetime.cj | QCalendarWidget | ✅ 较完整 |
+| datetime.cj | QDateEdit/QTimeEdit/QDateTimeEdit | ✅ 较完整 |
+| containers.cj | QGroupBox/QTabWidget/QScrollArea/QFrame/QSplitter | ✅ 较完整 |
+| buttongroup.cj | QButtonGroup | ✅ P0 新增 |
+| stackedwidget.cj | QStackedWidget | ✅ P0 新增 |
+| plaintextedit.cj | QPlainTextEdit | ✅ P0 新增 |
+| completer.cj | QCompleter | ✅ P0 新增 |
+| textbrowser.cj | QTextBrowser | ✅ P1 新增 |
+| keysequenceedit.cj | QKeySequenceEdit | ✅ P1 新增 |
+| systemtrayicon.cj | QSystemTrayIcon | ✅ P1 新增 |
+| toolbox.cj | QToolBox | ✅ P1 新增 |
+| mdiarea.cj | QMdiArea/QMdiSubWindow | ✅ P1 新增 |
+| dockwidget.cj | QDockWidget | ✅ P1 新增 |
+| graphicsview.cj | QGraphicsView/QGraphicsScene | ✅ P1 新增 |
+| graphicseffect.cj | QGraphicsOpacityEffect / QGraphicsDropShadowEffect | ✅ P2 新增 |
+| fontcombobox.cj | QFontComboBox | ✅ P2 新增 |
+
+### views/ — 3 文件
+| 文件 | 控件 | 状态 |
+|------|------|------|
+| listwidget.cj | QListWidget | ✅ 较完整 |
+| tablewidget.cj | QTableWidget | ✅ 较完整 |
+| treewidget.cj | QTreeWidget + QTreeWidgetItem | ✅ 较完整 |
+
+### dialogs/ — 1 文件（9 个对话框）
+| 控件 | 状态 | 阶段 |
+|------|------|------|
+| QMessageBox | ✅ 完整 | 初始 |
+| QFileDialog | ✅ 较完整 | 初始 |
+| QInputDialog | ✅ 基础 | 初始 |
+| QColorDialog | ✅ 基础 | 初始 |
+| QFontDialog | ✅ P0 新增 | P0 |
+| QProgressDialog | ✅ P0 新增 | P0 |
+| QWizard/QWizardPage | ✅ P1 新增 | P1 |
+| QErrorMessage | ✅ P1 新增 | P1 |
+
+### menu/ — 1 文件
+| 控件 | 状态 |
+|------|------|
+| QMainWindow | ✅ 基础 |
+| QMenuBar | ✅ 基础 |
+| QMenu | ✅ 较完整 |
+| QAction | ✅ 较完整 |
+| QToolBar | ✅ 基础 |
+| QStatusBar | ✅ 基础 |
+
+### gui/ — 2 文件
+| 控件 | 状态 |
+|------|------|
+| QVBoxLayout/QHBoxLayout/QGridLayout | ✅ 较完整 |
+| 对齐/方向/边距类型 | ✅ 完整 |
+
+### paint/ — 3 文件
+| 控件 | 状态 |
+|------|------|
+| QColor/QPen/QBrush/QPainter/QImage/QPixmap/QFont | ✅ 基础-较完整 |
+| QTransform | ✅ 基础 |
+| QFontDatabase | ✅ P2 新增 |
+
+### multimedia/ — 2 文件
+| 控件 | 状态 |
+|------|------|
+| QMediaPlayer | ✅ 较完整 |
+| QAudioOutput | ✅ 基础 |
+| QSoundEffect | ✅ P2 新增 |
+
+### network/ — 3 文件
+| 控件 | 状态 |
+|------|------|
+| QTcpSocket | ✅ 较完整 |
+| QUdpSocket | ✅ 基础 |
+| QHostAddress | ✅ 基础 |
+
+### 其他
+| 模块 | 状态 |
+|------|------|
+| SQL (QSqlDatabase) | ✅ 基础 |
+| Print (QPrinter / QPrintDialog / QPrintPreviewDialog) | ✅ 基础 |
+| QML | ✅ 基础 |
+| Resource Management | ✅ 较完整 |
+
+## 四、已实施与剩余未封装控件
+
+### ✅ Phase 0：P0 高频缺失（已完成）
+
+| 控件 | 模块 | 复杂度 | 说明 |
+|------|------|-------|------|
+| QButtonGroup | widgets | ⭐ | 单选按钮互斥 |
+| QStackedWidget | widgets | ⭐ | 多页面切换 |
+| QPlainTextEdit | widgets | ⭐⭐ | 代码编辑器/日志 |
+| QCompleter | widgets | ⭐⭐ | 输入自动补全 |
+| QFormLayout | gui | ⭐ | 表单布局 — 已跳过（QFormLayout 可直接用 QGridLayout 替代） |
+| QFontDialog | dialogs | ⭐ | 字体选择 |
+| QProgressDialog | dialogs | ⭐ | 进度反馈 |
+
+### ✅ Phase 1：P1 重要但可替代（已完成）
+
+| 控件 | 模块 | 复杂度 |
+|------|------|-------|
+| QSystemTrayIcon | widgets | ⭐⭐ |
+| QDockWidget | widgets | ⭐⭐⭐ |
+| QToolBox | widgets | ⭐⭐ |
+| QMdiArea/QMdiSubWindow | widgets | ⭐⭐⭐ |
+| QTextBrowser | widgets | ⭐ |
+| QWizard/QWizardPage | dialogs | ⭐⭐ |
+| QKeySequenceEdit | widgets | ⭐ |
+| QGraphicsView/QGraphicsScene | widgets | ⭐⭐⭐⭐ |
+| QPrintDialog/QPrintPreviewDialog | print | ⭐⭐ — 已在 P0 前完成 |
+| QErrorMessage | dialogs | ⭐ |
+
+### ✅ Phase 2：P2 增强功能类（已完成）
+
+| 分类 | 控件/类 | 模块 | 复杂度 |
+|------|--------|------|-------|
+| 动画 | QPropertyAnimation | core | ⭐⭐ |
+| | QGraphicsOpacityEffect | widgets | ⭐ |
+| | QGraphicsDropShadowEffect | widgets | ⭐ |
+| 系统工具 | QSettings | core | ⭐⭐ |
+| | QStandardPaths | core | ⭐ |
+| | QFileSystemWatcher | core | ⭐⭐ |
+| | QClipboard | core | ⭐ |
+| | QDesktopServices | core | ⭐ |
+| | QShortcut | core | ⭐ |
+| | QScreen | core | ⭐ |
+| 多媒体增强 | QSoundEffect | multimedia | ⭐ |
+| 字体 | QFontComboBox | widgets | ⭐ |
+| | QFontDatabase | paint | ⭐⭐ |
+
+### 🔵 Phase 3：P3 待实施（按需）
+
+| 分类 | 控件/类 | 模块 | 复杂度 | 说明 |
+|------|--------|------|-------|------|
+| 动画 | QParallelAnimationGroup | core | ⭐⭐ | 依赖于 QAbstractAnimation |
+| Model/View | QSortFilterProxyModel | views | ⭐⭐⭐ | 排序过滤代理 |
+| | QStandardItemModel | views | ⭐⭐ | 标准数据模型 |
+| 高级工具 | QUndoStack/QUndoCommand | core | ⭐⭐ | 需要子类化支持 |
+| | QStyle | gui | ⭐⭐ | 样式查询 |
+| 多媒体增强 | QVideoWidget | multimedia | ⭐⭐ | 需要 Qt6::MultimediaWidgets 模块（CMake 修改） |
+| | QCamera | multimedia | ⭐⭐⭐ | 复杂度高 |
+| 其他 | QFormLayout（备选） | gui | ⭐ | 可以跳过，QGridLayout 已可替代 |
+
+## 五、实施路线图
+
+```
+Phase 0 (立即)          Phase 1 (1-2周)          Phase 2 (3-4周)
+┌──────────────────┐   ┌──────────────────┐    ┌──────────────────┐
+│ QButtonGroup     │   │ QSystemTrayIcon  │    │ Animation System │
+│ QStackedWidget   │   │ QGraphicsView    │    │ QSettings        │
+│ QPlainTextEdit   │   │ QDockWidget      │    │ QClipboard       │
+│ QCompleter       │   │ QWizard          │    │ QShortcut        │
+│ QFormLayout      │   │ QKeySequenceEdit │    │ QStandardPaths   │
+│ QFontDialog      │   │ QToolBox         │    │ QFileSystemWatcher│
+│ QProgressDialog  │   │ QTextBrowser     │    │ Model/View       │
+│                  │   │ QPrintDialog     │    │ Multimedia       │
+└──────────────────┘   └──────────────────┘    └──────────────────┘
+  7 个控件               8 个控件                10+ 个控件/类
+  ~4 天工期              ~6 天工期               ~5 天工期
+```
+
+## 六、实施模板（标准 3 层模式）
+
+### C++ 桥接头文件声明
+```cpp
+// native/includes/widgets.h 追加 extern "C" 函数声明
+```
+
+### C++ 桥接实现
+```cpp
+// native/src/widgets/bridge_*.cpp 追加 extern "C" 函数实现
+extern "C" {
+    int64_t qControlCreate() { ... }
+    void qControlSetSomething(int64_t ptr, ...) { ... }
+    void qControlDelete(int64_t ptr) { ... }
+}
+```
+
+### 仓颉封装类
+```cangjie
+// src/*/control.cj
+package cjqt6.xxx
+
+foreign func qControlCreate(): Int64
+foreign func qControlDelete(ptr: Int64): Unit
+
+public class QControl {
+    private var ptr: Int64 = 0
+    
+    public init() { unsafe { ptr = qControlCreate() } }
+    public func getPtr(): Int64 { ptr }
+    public func delete() { if (ptr != 0) { unsafe { qControlDelete(ptr) }; ptr = 0 } }
+}
+```
+
+### 构建命令
+```powershell
+# 重新编译桥接库
+cd native\build && cmake --build . --config Release && cd ..\..
+
+# 仓颉编译
+cjpm build
+```

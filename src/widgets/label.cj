@@ -44,6 +44,16 @@ public class QLabel <: QtResource {
         }
     }
     
+    /// 设置样式表
+    public func setStyleSheet(style: String): Unit {
+        checkValid()
+        unsafe {
+            let cstr = LibC.mallocCString(style)
+            qWidgetSetStyleSheet(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+
     /// 设置标签文本
     public func setText(text: String): Unit {
         checkValid()

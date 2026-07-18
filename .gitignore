@@ -42,7 +42,6 @@ Thumbs.db
 .cjpm-history
 cjpm.lock
 
-
 # LSP缓存
 .cache/
 
@@ -95,6 +94,9 @@ examples/**/*.ogg
 # 打包文件（发行版使用）
 *.cjp
 
+# Linux交叉编译输出
+build_linux/
+
 # 操作系统伪设备/临时文件
 nul
 
@@ -106,3 +108,6 @@ nul
 
 # 预编译包保留在releases目录供下载
 !releases/*.cjp
+!releases/**/*.so
+!releases/**/*.dll
+!releases/**/*.dll.a

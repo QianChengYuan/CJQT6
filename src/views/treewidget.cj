@@ -432,4 +432,10 @@ public class QTreeWidget {
             qWidgetResize(ptr, width, height)
         }
     }
+
+    public func setMinimumSize(minw: Int32, minh: Int32) {
+        unsafe {
+            qWidgetSetMinimumSize(ptr, minw, minh)
+        }
+    }
 }

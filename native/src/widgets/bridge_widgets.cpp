@@ -13,7 +13,22 @@
 #include <QStyle>
 #include <QLineEdit>
 #include <QTextEdit>
+#include <QPlainTextEdit>
+#include <QCompleter>
+#include <QStringListModel>
 #include <QPrinter>
+#include <QGraphicsView>
+#include <QGraphicsScene>
+#include <QGraphicsItem>
+#include <QGraphicsProxyWidget>
+#include <QPen>
+#include <QBrush>
+#include <QTextBrowser>
+#include <QKeySequenceEdit>
+#include <QSystemTrayIcon>
+#include <QGraphicsOpacityEffect>
+#include <QGraphicsDropShadowEffect>
+#include <QFontComboBox>
 #include <functional>
 #include <unordered_map>
 
@@ -875,6 +890,834 @@ void qTextEditGoToLine(int64_t ptr, int line) {
         textEdit->setTextCursor(cursor);
         textEdit->setFocus();
     }
+}
+
+// ============================================================
+// QPlainTextEdit 桥接函数
+// ============================================================
+
+int64_t qPlainTextEditCreate() {
+    QPlainTextEdit* editor = new QPlainTextEdit();
+    return reinterpret_cast<int64_t>(editor);
+}
+
+void qPlainTextEditSetPlainText(int64_t ptr, const char* text) {
+    QPlainTextEdit* editor = reinterpret_cast<QPlainTextEdit*>(ptr);
+    if (editor) {
+        editor->setPlainText(QString::fromUtf8(text));
+    }
+}
+
+const char* qPlainTextEditToPlainText(int64_t ptr) {
+    QPlainTextEdit* editor = reinterpret_cast<QPlainTextEdit*>(ptr);
+    if (!editor) return "";
+    static QByteArray arr;
+    arr = editor->toPlainText().toUtf8();
+    return arr.constData();
+}
+
+void qPlainTextEditSetReadOnly(int64_t ptr, bool readonly) {
+    QPlainTextEdit* editor = reinterpret_cast<QPlainTextEdit*>(ptr);
+    if (editor) {
+        editor->setReadOnly(readonly);
+    }
+}
+
+bool qPlainTextEditIsReadOnly(int64_t ptr) {
+    QPlainTextEdit* editor = reinterpret_cast<QPlainTextEdit*>(ptr);
+    return editor ? editor->isReadOnly() : false;
+}
+
+void qPlainTextEditClear(int64_t ptr) {
+    QPlainTextEdit* editor = reinterpret_cast<QPlainTextEdit*>(ptr);
+    if (editor) {
+        editor->clear();
+    }
+}
+
+void qPlainTextEditCut(int64_t ptr) {
+    QPlainTextEdit* editor = reinterpret_cast<QPlainTextEdit*>(ptr);
+    if (editor) editor->cut();
+}
+
+void qPlainTextEditCopy(int64_t ptr) {
+    QPlainTextEdit* editor = reinterpret_cast<QPlainTextEdit*>(ptr);
+    if (editor) editor->copy();
+}
+
+void qPlainTextEditPaste(int64_t ptr) {
+    QPlainTextEdit* editor = reinterpret_cast<QPlainTextEdit*>(ptr);
+    if (editor) editor->paste();
+}
+
+void qPlainTextEditSelectAll(int64_t ptr) {
+    QPlainTextEdit* editor = reinterpret_cast<QPlainTextEdit*>(ptr);
+    if (editor) editor->selectAll();
+}
+
+void qPlainTextEditUndo(int64_t ptr) {
+    QPlainTextEdit* editor = reinterpret_cast<QPlainTextEdit*>(ptr);
+    if (editor) editor->undo();
+}
+
+void qPlainTextEditRedo(int64_t ptr) {
+    QPlainTextEdit* editor = reinterpret_cast<QPlainTextEdit*>(ptr);
+    if (editor) editor->redo();
+}
+
+bool qPlainTextEditCanUndo(int64_t ptr) {
+    QPlainTextEdit* editor = reinterpret_cast<QPlainTextEdit*>(ptr);
+    return editor ? editor->document()->isUndoAvailable() : false;
+}
+
+bool qPlainTextEditCanRedo(int64_t ptr) {
+    QPlainTextEdit* editor = reinterpret_cast<QPlainTextEdit*>(ptr);
+    return editor ? editor->document()->isRedoAvailable() : false;
+}
+
+bool qPlainTextEditIsModified(int64_t ptr) {
+    QPlainTextEdit* editor = reinterpret_cast<QPlainTextEdit*>(ptr);
+    return editor ? editor->document()->isModified() : false;
+}
+
+void qPlainTextEditSetModified(int64_t ptr, bool modified) {
+    QPlainTextEdit* editor = reinterpret_cast<QPlainTextEdit*>(ptr);
+    if (editor) editor->document()->setModified(modified);
+}
+
+void qPlainTextEditSetLineWrapMode(int64_t ptr, int32_t mode) {
+    QPlainTextEdit* editor = reinterpret_cast<QPlainTextEdit*>(ptr);
+    if (editor) {
+        editor->setLineWrapMode(static_cast<QPlainTextEdit::LineWrapMode>(mode));
+    }
+}
+
+int32_t qPlainTextEditLineWrapMode(int64_t ptr) {
+    QPlainTextEdit* editor = reinterpret_cast<QPlainTextEdit*>(ptr);
+    return editor ? static_cast<int32_t>(editor->lineWrapMode()) : 0;
+}
+
+void qPlainTextEditSetTabStopDistance(int64_t ptr, double distance) {
+    QPlainTextEdit* editor = reinterpret_cast<QPlainTextEdit*>(ptr);
+    if (editor) {
+        editor->setTabStopDistance(distance);
+    }
+}
+
+int64_t qPlainTextEditLineCount(int64_t ptr) {
+    QPlainTextEdit* editor = reinterpret_cast<QPlainTextEdit*>(ptr);
+    return editor ? editor->blockCount() : 0;
+}
+
+void qPlainTextEditAppendPlainText(int64_t ptr, const char* text) {
+    QPlainTextEdit* editor = reinterpret_cast<QPlainTextEdit*>(ptr);
+    if (editor) {
+        editor->appendPlainText(QString::fromUtf8(text));
+    }
+}
+
+void qPlainTextEditSetMaximumBlockCount(int64_t ptr, int32_t maxBlocks) {
+    QPlainTextEdit* editor = reinterpret_cast<QPlainTextEdit*>(ptr);
+    if (editor) {
+        editor->setMaximumBlockCount(maxBlocks);
+    }
+}
+
+void qPlainTextEditDelete(int64_t ptr) {
+    QPlainTextEdit* editor = reinterpret_cast<QPlainTextEdit*>(ptr);
+    if (editor) {
+        delete editor;
+    }
+}
+
+// ============================================================
+// QCompleter 桥接函数
+// ============================================================
+
+int64_t qCompleterCreate() {
+    QCompleter* completer = new QCompleter();
+    return reinterpret_cast<int64_t>(completer);
+}
+
+int64_t qCompleterCreateWithStrings(const char* items) {
+    QStringList list = QString::fromUtf8(items).split('\n', Qt::SkipEmptyParts);
+    QStringListModel* model = new QStringListModel(list);
+    QCompleter* completer = new QCompleter(model);
+    // completer 拥有 model 的所有权
+    return reinterpret_cast<int64_t>(completer);
+}
+
+void qCompleterSetModel(int64_t ptr, const char* items) {
+    QCompleter* completer = reinterpret_cast<QCompleter*>(ptr);
+    if (completer) {
+        QStringList list = QString::fromUtf8(items).split('\n', Qt::SkipEmptyParts);
+        QStringListModel* model = new QStringListModel(list, completer);
+        completer->setModel(model);
+    }
+}
+
+void qCompleterSetCaseSensitivity(int64_t ptr, bool caseSensitive) {
+    QCompleter* completer = reinterpret_cast<QCompleter*>(ptr);
+    if (completer) {
+        completer->setCaseSensitivity(caseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive);
+    }
+}
+
+void qCompleterSetFilterMode(int64_t ptr, int32_t mode) {
+    QCompleter* completer = reinterpret_cast<QCompleter*>(ptr);
+    if (completer) {
+        completer->setFilterMode(static_cast<Qt::MatchFlag>(mode));
+    }
+}
+
+void qCompleterSetCompletionMode(int64_t ptr, int32_t mode) {
+    QCompleter* completer = reinterpret_cast<QCompleter*>(ptr);
+    if (completer) {
+        completer->setCompletionMode(static_cast<QCompleter::CompletionMode>(mode));
+    }
+}
+
+void qCompleterSetMaxVisibleItems(int64_t ptr, int32_t maxItems) {
+    QCompleter* completer = reinterpret_cast<QCompleter*>(ptr);
+    if (completer) {
+        completer->setMaxVisibleItems(maxItems);
+    }
+}
+
+int32_t qCompleterMaxVisibleItems(int64_t ptr) {
+    QCompleter* completer = reinterpret_cast<QCompleter*>(ptr);
+    return completer ? completer->maxVisibleItems() : 7;
+}
+
+void qCompleterSetCompletionPrefix(int64_t ptr, const char* prefix) {
+    QCompleter* completer = reinterpret_cast<QCompleter*>(ptr);
+    if (completer) {
+        completer->setCompletionPrefix(QString::fromUtf8(prefix));
+    }
+}
+
+const char* qCompleterCompletionPrefix(int64_t ptr) {
+    QCompleter* completer = reinterpret_cast<QCompleter*>(ptr);
+    if (!completer) return "";
+    static QByteArray arr;
+    arr = completer->completionPrefix().toUtf8();
+    return arr.constData();
+}
+
+int32_t qCompleterCompletionCount(int64_t ptr) {
+    QCompleter* completer = reinterpret_cast<QCompleter*>(ptr);
+    return completer ? completer->completionCount() : 0;
+}
+
+void qCompleterComplete(int64_t ptr) {
+    QCompleter* completer = reinterpret_cast<QCompleter*>(ptr);
+    if (completer) {
+        completer->complete();
+    }
+}
+
+void qCompleterDelete(int64_t ptr) {
+    QCompleter* completer = reinterpret_cast<QCompleter*>(ptr);
+    if (completer) {
+        delete completer;
+    }
+}
+
+// ============================================================
+// QTextBrowser 桥接函数
+// ============================================================
+
+int64_t qTextBrowserCreate() {
+    QTextBrowser* browser = new QTextBrowser();
+    return reinterpret_cast<int64_t>(browser);
+}
+
+void qTextBrowserSetText(int64_t ptr, const char* text) {
+    QTextBrowser* browser = reinterpret_cast<QTextBrowser*>(ptr);
+    if (browser) {
+        browser->setText(QString::fromUtf8(text));
+    }
+}
+
+const char* qTextBrowserToPlainText(int64_t ptr) {
+    QTextBrowser* browser = reinterpret_cast<QTextBrowser*>(ptr);
+    if (!browser) return "";
+    static QByteArray arr;
+    arr = browser->toPlainText().toUtf8();
+    return arr.constData();
+}
+
+void qTextBrowserSetHtml(int64_t ptr, const char* html) {
+    QTextBrowser* browser = reinterpret_cast<QTextBrowser*>(ptr);
+    if (browser) {
+        browser->setHtml(QString::fromUtf8(html));
+    }
+}
+
+const char* qTextBrowserToHtml(int64_t ptr) {
+    QTextBrowser* browser = reinterpret_cast<QTextBrowser*>(ptr);
+    if (!browser) return "";
+    static QByteArray arr;
+    arr = browser->toHtml().toUtf8();
+    return arr.constData();
+}
+
+void qTextBrowserSetSource(int64_t ptr, const char* url) {
+    QTextBrowser* browser = reinterpret_cast<QTextBrowser*>(ptr);
+    if (browser) {
+        browser->setSource(QUrl(QString::fromUtf8(url)));
+    }
+}
+
+void qTextBrowserBackward(int64_t ptr) {
+    QTextBrowser* browser = reinterpret_cast<QTextBrowser*>(ptr);
+    if (browser) browser->backward();
+}
+
+void qTextBrowserForward(int64_t ptr) {
+    QTextBrowser* browser = reinterpret_cast<QTextBrowser*>(ptr);
+    if (browser) browser->forward();
+}
+
+void qTextBrowserHome(int64_t ptr) {
+    QTextBrowser* browser = reinterpret_cast<QTextBrowser*>(ptr);
+    if (browser) browser->home();
+}
+
+void qTextBrowserReload(int64_t ptr) {
+    QTextBrowser* browser = reinterpret_cast<QTextBrowser*>(ptr);
+    if (browser) browser->reload();
+}
+
+void qTextBrowserSetOpenLinks(int64_t ptr, bool open) {
+    QTextBrowser* browser = reinterpret_cast<QTextBrowser*>(ptr);
+    if (browser) browser->setOpenLinks(open);
+}
+
+void qTextBrowserSetOpenExternalLinks(int64_t ptr, bool open) {
+    QTextBrowser* browser = reinterpret_cast<QTextBrowser*>(ptr);
+    if (browser) browser->setOpenExternalLinks(open);
+}
+
+void qTextBrowserClear(int64_t ptr) {
+    QTextBrowser* browser = reinterpret_cast<QTextBrowser*>(ptr);
+    if (browser) browser->clear();
+}
+
+void qTextBrowserSetPlainText(int64_t ptr, const char* text) {
+    QTextBrowser* browser = reinterpret_cast<QTextBrowser*>(ptr);
+    if (browser) {
+        browser->setPlainText(QString::fromUtf8(text));
+    }
+}
+
+void qTextBrowserDelete(int64_t ptr) {
+    QTextBrowser* browser = reinterpret_cast<QTextBrowser*>(ptr);
+    if (browser) {
+        delete browser;
+    }
+}
+
+// ============================================================
+// QKeySequenceEdit 桥接函数
+// ============================================================
+
+int64_t qKeySequenceEditCreate(int64_t parentPtr) {
+    QWidget* parent = reinterpret_cast<QWidget*>(parentPtr);
+    QKeySequenceEdit* edit = new QKeySequenceEdit(parent);
+    return reinterpret_cast<int64_t>(edit);
+}
+
+const char* qKeySequenceEditKeySequence(int64_t ptr) {
+    QKeySequenceEdit* edit = reinterpret_cast<QKeySequenceEdit*>(ptr);
+    if (!edit) return "";
+    static QByteArray arr;
+    arr = edit->keySequence().toString(QKeySequence::NativeText).toUtf8();
+    return arr.constData();
+}
+
+void qKeySequenceEditSetKeySequence(int64_t ptr, const char* text) {
+    QKeySequenceEdit* edit = reinterpret_cast<QKeySequenceEdit*>(ptr);
+    if (edit) {
+        edit->setKeySequence(QKeySequence(QString::fromUtf8(text)));
+    }
+}
+
+void qKeySequenceEditClear(int64_t ptr) {
+    QKeySequenceEdit* edit = reinterpret_cast<QKeySequenceEdit*>(ptr);
+    if (edit) edit->clear();
+}
+
+void qKeySequenceEditDelete(int64_t ptr) {
+    QKeySequenceEdit* edit = reinterpret_cast<QKeySequenceEdit*>(ptr);
+    if (edit) {
+        delete edit;
+    }
+}
+
+// ============================================================
+// QSystemTrayIcon 桥接函数
+// ============================================================
+
+int64_t qSystemTrayIconCreate(int64_t parentPtr) {
+    QObject* parent = reinterpret_cast<QObject*>(parentPtr);
+    QSystemTrayIcon* icon = new QSystemTrayIcon(parent);
+    return reinterpret_cast<int64_t>(icon);
+}
+
+void qSystemTrayIconDelete(int64_t ptr) {
+    QSystemTrayIcon* icon = reinterpret_cast<QSystemTrayIcon*>(ptr);
+    if (icon) {
+        delete icon;
+    }
+}
+
+void qSystemTrayIconSetIcon(int64_t ptr, const char* iconPath) {
+    QSystemTrayIcon* icon = reinterpret_cast<QSystemTrayIcon*>(ptr);
+    if (icon && iconPath) {
+        icon->setIcon(QIcon(QString::fromUtf8(iconPath)));
+    }
+}
+
+void qSystemTrayIconSetToolTip(int64_t ptr, const char* tip) {
+    QSystemTrayIcon* icon = reinterpret_cast<QSystemTrayIcon*>(ptr);
+    if (icon) {
+        icon->setToolTip(QString::fromUtf8(tip));
+    }
+}
+
+void qSystemTrayIconShow(int64_t ptr) {
+    QSystemTrayIcon* icon = reinterpret_cast<QSystemTrayIcon*>(ptr);
+    if (icon) icon->show();
+}
+
+void qSystemTrayIconHide(int64_t ptr) {
+    QSystemTrayIcon* icon = reinterpret_cast<QSystemTrayIcon*>(ptr);
+    if (icon) icon->hide();
+}
+
+bool qSystemTrayIconIsVisible(int64_t ptr) {
+    QSystemTrayIcon* icon = reinterpret_cast<QSystemTrayIcon*>(ptr);
+    return icon ? icon->isVisible() : false;
+}
+
+void qSystemTrayIconShowMessage(int64_t ptr, const char* title, const char* message, int32_t iconType, int32_t duration) {
+    QSystemTrayIcon* icon = reinterpret_cast<QSystemTrayIcon*>(ptr);
+    if (icon) {
+        icon->showMessage(
+            QString::fromUtf8(title),
+            QString::fromUtf8(message),
+            static_cast<QSystemTrayIcon::MessageIcon>(iconType),
+            duration
+        );
+    }
+}
+
+void qSystemTrayIconSetContextMenu(int64_t ptr, int64_t menuPtr) {
+    QSystemTrayIcon* icon = reinterpret_cast<QSystemTrayIcon*>(ptr);
+    QMenu* menu = reinterpret_cast<QMenu*>(menuPtr);
+    if (icon && menu) {
+        icon->setContextMenu(menu);
+    }
+}
+
+// ============================================================
+// QGraphicsView 桥接函数
+// ============================================================
+
+int64_t qGraphicsViewCreate(int64_t parentPtr) {
+    QWidget* parent = reinterpret_cast<QWidget*>(parentPtr);
+    QGraphicsView* view = new QGraphicsView(parent);
+    return reinterpret_cast<int64_t>(view);
+}
+
+void qGraphicsViewDelete(int64_t ptr) {
+    QGraphicsView* view = reinterpret_cast<QGraphicsView*>(ptr);
+    if (view) delete view;
+}
+
+void qGraphicsViewSetScene(int64_t ptr, int64_t scenePtr) {
+    QGraphicsView* view = reinterpret_cast<QGraphicsView*>(ptr);
+    QGraphicsScene* scene = reinterpret_cast<QGraphicsScene*>(scenePtr);
+    if (view) view->setScene(scene);
+}
+
+int64_t qGraphicsViewScene(int64_t ptr) {
+    QGraphicsView* view = reinterpret_cast<QGraphicsView*>(ptr);
+    return view ? reinterpret_cast<int64_t>(view->scene()) : 0;
+}
+
+void qGraphicsViewSetRenderHint(int64_t ptr, int32_t hint, bool enabled) {
+    QGraphicsView* view = reinterpret_cast<QGraphicsView*>(ptr);
+    if (view) view->setRenderHint(static_cast<QPainter::RenderHint>(hint), enabled);
+}
+
+void qGraphicsViewSetDragMode(int64_t ptr, int32_t mode) {
+    QGraphicsView* view = reinterpret_cast<QGraphicsView*>(ptr);
+    if (view) view->setDragMode(static_cast<QGraphicsView::DragMode>(mode));
+}
+
+int32_t qGraphicsViewDragMode(int64_t ptr) {
+    QGraphicsView* view = reinterpret_cast<QGraphicsView*>(ptr);
+    return view ? static_cast<int32_t>(view->dragMode()) : 0;
+}
+
+void qGraphicsViewCenterOn(int64_t ptr, double x, double y) {
+    QGraphicsView* view = reinterpret_cast<QGraphicsView*>(ptr);
+    if (view) view->centerOn(x, y);
+}
+
+void qGraphicsViewFitInView(int64_t ptr, double x, double y, double w, double h) {
+    QGraphicsView* view = reinterpret_cast<QGraphicsView*>(ptr);
+    if (view) view->fitInView(x, y, w, h, Qt::KeepAspectRatio);
+}
+
+void qGraphicsViewScale(int64_t ptr, double fx, double fy) {
+    QGraphicsView* view = reinterpret_cast<QGraphicsView*>(ptr);
+    if (view) view->scale(fx, fy);
+}
+
+void qGraphicsViewRotate(int64_t ptr, double angle) {
+    QGraphicsView* view = reinterpret_cast<QGraphicsView*>(ptr);
+    if (view) view->rotate(angle);
+}
+
+void qGraphicsViewTranslate(int64_t ptr, double dx, double dy) {
+    QGraphicsView* view = reinterpret_cast<QGraphicsView*>(ptr);
+    if (view) view->translate(dx, dy);
+}
+
+void qGraphicsViewResetTransform(int64_t ptr) {
+    QGraphicsView* view = reinterpret_cast<QGraphicsView*>(ptr);
+    if (view) view->resetTransform();
+}
+
+void qGraphicsViewSetInteractive(int64_t ptr, bool interactive) {
+    QGraphicsView* view = reinterpret_cast<QGraphicsView*>(ptr);
+    if (view) view->setInteractive(interactive);
+}
+
+bool qGraphicsViewIsInteractive(int64_t ptr) {
+    QGraphicsView* view = reinterpret_cast<QGraphicsView*>(ptr);
+    return view ? view->isInteractive() : false;
+}
+
+void qGraphicsViewSetSceneRect(int64_t ptr, double x, double y, double w, double h) {
+    QGraphicsView* view = reinterpret_cast<QGraphicsView*>(ptr);
+    if (view) view->setSceneRect(x, y, w, h);
+}
+
+void qGraphicsViewSetBackgroundBrush(int64_t ptr, int32_t r, int32_t g, int32_t b) {
+    QGraphicsView* view = reinterpret_cast<QGraphicsView*>(ptr);
+    if (view) view->setBackgroundBrush(QBrush(QColor(r, g, b)));
+}
+
+void qGraphicsViewSetForegroundBrush(int64_t ptr, int32_t r, int32_t g, int32_t b) {
+    QGraphicsView* view = reinterpret_cast<QGraphicsView*>(ptr);
+    if (view) view->setForegroundBrush(QBrush(QColor(r, g, b)));
+}
+
+const char* qGraphicsViewMapToScene(int64_t ptr, double x, double y) {
+    QGraphicsView* view = reinterpret_cast<QGraphicsView*>(ptr);
+    if (!view) return "0,0";
+    QPointF pt = view->mapToScene(static_cast<int>(x), static_cast<int>(y));
+    static thread_local std::string buf;
+    buf = QString("%1,%2").arg(pt.x(), 0, 'f', 4).arg(pt.y(), 0, 'f', 4).toStdString();
+    return buf.c_str();
+}
+
+// ============================================================
+// QGraphicsScene 桥接函数
+// ============================================================
+
+int64_t qGraphicsSceneCreate() {
+    QGraphicsScene* scene = new QGraphicsScene();
+    return reinterpret_cast<int64_t>(scene);
+}
+
+void qGraphicsSceneDelete(int64_t ptr) {
+    QGraphicsScene* scene = reinterpret_cast<QGraphicsScene*>(ptr);
+    if (scene) delete scene;
+}
+
+void qGraphicsSceneAddItem(int64_t ptr, int64_t itemPtr) {
+    QGraphicsScene* scene = reinterpret_cast<QGraphicsScene*>(ptr);
+    QGraphicsItem* item = reinterpret_cast<QGraphicsItem*>(itemPtr);
+    if (scene && item) scene->addItem(item);
+}
+
+void qGraphicsSceneRemoveItem(int64_t ptr, int64_t itemPtr) {
+    QGraphicsScene* scene = reinterpret_cast<QGraphicsScene*>(ptr);
+    QGraphicsItem* item = reinterpret_cast<QGraphicsItem*>(itemPtr);
+    if (scene && item) scene->removeItem(item);
+}
+
+void qGraphicsSceneClear(int64_t ptr) {
+    QGraphicsScene* scene = reinterpret_cast<QGraphicsScene*>(ptr);
+    if (scene) scene->clear();
+}
+
+const char* qGraphicsSceneItems(int64_t ptr) {
+    QGraphicsScene* scene = reinterpret_cast<QGraphicsScene*>(ptr);
+    if (!scene) return "";
+    QList<QGraphicsItem*> items = scene->items();
+    static thread_local std::string buf;
+    buf.clear();
+    for (int i = 0; i < items.size(); ++i) {
+        if (i > 0) buf += ",";
+        buf += std::to_string(reinterpret_cast<int64_t>(items[i]));
+    }
+    return buf.c_str();
+}
+
+int64_t qGraphicsSceneItemAt(int64_t ptr, double x, double y) {
+    QGraphicsScene* scene = reinterpret_cast<QGraphicsScene*>(ptr);
+    if (!scene) return 0;
+    QGraphicsItem* item = scene->itemAt(QPointF(x, y), QTransform());
+    return reinterpret_cast<int64_t>(item);
+}
+
+int64_t qGraphicsSceneAddRect(int64_t ptr, double x, double y, double w, double h,
+                               int32_t penR, int32_t penG, int32_t penB, double penW,
+                               int32_t brushR, int32_t brushG, int32_t brushB) {
+    QGraphicsScene* scene = reinterpret_cast<QGraphicsScene*>(ptr);
+    if (!scene) return 0;
+    QPen pen(QColor(penR, penG, penB), penW);
+    QBrush brush(QColor(brushR, brushG, brushB));
+    QGraphicsRectItem* item = scene->addRect(x, y, w, h, pen, brush);
+    return reinterpret_cast<int64_t>(item);
+}
+
+int64_t qGraphicsSceneAddEllipse(int64_t ptr, double x, double y, double w, double h,
+                                  int32_t penR, int32_t penG, int32_t penB, double penW,
+                                  int32_t brushR, int32_t brushG, int32_t brushB) {
+    QGraphicsScene* scene = reinterpret_cast<QGraphicsScene*>(ptr);
+    if (!scene) return 0;
+    QPen pen(QColor(penR, penG, penB), penW);
+    QBrush brush(QColor(brushR, brushG, brushB));
+    QGraphicsEllipseItem* item = scene->addEllipse(x, y, w, h, pen, brush);
+    return reinterpret_cast<int64_t>(item);
+}
+
+int64_t qGraphicsSceneAddLine(int64_t ptr, double x1, double y1, double x2, double y2,
+                               int32_t penR, int32_t penG, int32_t penB, double penW) {
+    QGraphicsScene* scene = reinterpret_cast<QGraphicsScene*>(ptr);
+    if (!scene) return 0;
+    QPen pen(QColor(penR, penG, penB), penW);
+    QGraphicsLineItem* item = scene->addLine(x1, y1, x2, y2, pen);
+    return reinterpret_cast<int64_t>(item);
+}
+
+int64_t qGraphicsSceneAddText(int64_t ptr, const char* text) {
+    QGraphicsScene* scene = reinterpret_cast<QGraphicsScene*>(ptr);
+    if (!scene || !text) return 0;
+    QGraphicsTextItem* item = scene->addText(QString::fromUtf8(text));
+    return reinterpret_cast<int64_t>(item);
+}
+
+void qGraphicsSceneSetSceneRect(int64_t ptr, double x, double y, double w, double h) {
+    QGraphicsScene* scene = reinterpret_cast<QGraphicsScene*>(ptr);
+    if (scene) scene->setSceneRect(x, y, w, h);
+}
+
+const char* qGraphicsSceneSceneRect(int64_t ptr) {
+    QGraphicsScene* scene = reinterpret_cast<QGraphicsScene*>(ptr);
+    if (!scene) return "0,0,0,0";
+    QRectF r = scene->sceneRect();
+    static thread_local std::string buf;
+    buf = QString("%1,%2,%3,%4").arg(r.x(), 0, 'f', 4).arg(r.y(), 0, 'f', 4)
+                                .arg(r.width(), 0, 'f', 4).arg(r.height(), 0, 'f', 4).toStdString();
+    return buf.c_str();
+}
+
+void qGraphicsSceneUpdate(int64_t ptr) {
+    QGraphicsScene* scene = reinterpret_cast<QGraphicsScene*>(ptr);
+    if (scene) scene->update();
+}
+
+void qGraphicsSceneSetBackgroundBrush(int64_t ptr, int32_t r, int32_t g, int32_t b) {
+    QGraphicsScene* scene = reinterpret_cast<QGraphicsScene*>(ptr);
+    if (scene) scene->setBackgroundBrush(QBrush(QColor(r, g, b)));
+}
+
+int64_t qGraphicsSceneAddWidget(int64_t ptr, int64_t widgetPtr) {
+    QGraphicsScene* scene = reinterpret_cast<QGraphicsScene*>(ptr);
+    QWidget* widget = reinterpret_cast<QWidget*>(widgetPtr);
+    if (scene && widget) {
+        QGraphicsProxyWidget* proxy = scene->addWidget(widget);
+        return reinterpret_cast<int64_t>(proxy);
+    }
+    return 0;
+}
+
+// ============================================================
+// QGraphicsItem 桥接函数 (最小化)
+// ============================================================
+
+void qGraphicsItemSetPos(int64_t ptr, double x, double y) {
+    QGraphicsItem* item = reinterpret_cast<QGraphicsItem*>(ptr);
+    if (item) item->setPos(x, y);
+}
+
+const char* qGraphicsItemPos(int64_t ptr) {
+    QGraphicsItem* item = reinterpret_cast<QGraphicsItem*>(ptr);
+    if (!item) return "0,0";
+    QPointF p = item->pos();
+    static thread_local std::string buf;
+    buf = QString("%1,%2").arg(p.x(), 0, 'f', 4).arg(p.y(), 0, 'f', 4).toStdString();
+    return buf.c_str();
+}
+
+void qGraphicsItemSetZValue(int64_t ptr, double z) {
+    QGraphicsItem* item = reinterpret_cast<QGraphicsItem*>(ptr);
+    if (item) item->setZValue(z);
+}
+
+void qGraphicsItemSetRotation(int64_t ptr, double angle) {
+    QGraphicsItem* item = reinterpret_cast<QGraphicsItem*>(ptr);
+    if (item) item->setRotation(angle);
+}
+
+void qGraphicsItemSetVisible(int64_t ptr, bool visible) {
+    QGraphicsItem* item = reinterpret_cast<QGraphicsItem*>(ptr);
+    if (item) item->setVisible(visible);
+}
+
+bool qGraphicsItemIsVisible(int64_t ptr) {
+    QGraphicsItem* item = reinterpret_cast<QGraphicsItem*>(ptr);
+    return item ? item->isVisible() : false;
+}
+
+void qGraphicsItemSetSelected(int64_t ptr, bool selected) {
+    QGraphicsItem* item = reinterpret_cast<QGraphicsItem*>(ptr);
+    if (item) item->setSelected(selected);
+}
+
+bool qGraphicsItemIsSelected(int64_t ptr) {
+    QGraphicsItem* item = reinterpret_cast<QGraphicsItem*>(ptr);
+    return item ? item->isSelected() : false;
+}
+
+void qGraphicsItemUpdate(int64_t ptr) {
+    QGraphicsItem* item = reinterpret_cast<QGraphicsItem*>(ptr);
+    if (item) item->update();
+}
+
+// ============================================================
+// QGraphicsOpacityEffect 桥接函数
+// ============================================================
+
+int64_t qGraphicsOpacityEffectCreate() {
+    QGraphicsOpacityEffect* effect = new QGraphicsOpacityEffect();
+    return reinterpret_cast<int64_t>(effect);
+}
+
+void qGraphicsOpacityEffectSetOpacity(int64_t ptr, double opacity) {
+    QGraphicsOpacityEffect* effect = reinterpret_cast<QGraphicsOpacityEffect*>(ptr);
+    if (effect) effect->setOpacity(opacity);
+}
+
+double qGraphicsOpacityEffectOpacity(int64_t ptr) {
+    QGraphicsOpacityEffect* effect = reinterpret_cast<QGraphicsOpacityEffect*>(ptr);
+    return effect ? effect->opacity() : 1.0;
+}
+
+void qGraphicsOpacityEffectSetEnabled(int64_t ptr, bool enabled) {
+    QGraphicsOpacityEffect* effect = reinterpret_cast<QGraphicsOpacityEffect*>(ptr);
+    if (effect) effect->setEnabled(enabled);
+}
+
+void qGraphicsOpacityEffectDelete(int64_t ptr) {
+    QGraphicsOpacityEffect* effect = reinterpret_cast<QGraphicsOpacityEffect*>(ptr);
+    if (effect) delete effect;
+}
+
+// ============================================================
+// QGraphicsDropShadowEffect 桥接函数
+// ============================================================
+
+int64_t qGraphicsDropShadowEffectCreate() {
+    QGraphicsDropShadowEffect* effect = new QGraphicsDropShadowEffect();
+    return reinterpret_cast<int64_t>(effect);
+}
+
+void qGraphicsDropShadowEffectSetOffset(int64_t ptr, double dx, double dy) {
+    QGraphicsDropShadowEffect* effect = reinterpret_cast<QGraphicsDropShadowEffect*>(ptr);
+    if (effect) effect->setOffset(dx, dy);
+}
+
+void qGraphicsDropShadowEffectSetBlurRadius(int64_t ptr, double radius) {
+    QGraphicsDropShadowEffect* effect = reinterpret_cast<QGraphicsDropShadowEffect*>(ptr);
+    if (effect) effect->setBlurRadius(radius);
+}
+
+double qGraphicsDropShadowEffectBlurRadius(int64_t ptr) {
+    QGraphicsDropShadowEffect* effect = reinterpret_cast<QGraphicsDropShadowEffect*>(ptr);
+    return effect ? effect->blurRadius() : 0.0;
+}
+
+void qGraphicsDropShadowEffectSetColor(int64_t ptr, int32_t r, int32_t g, int32_t b, int32_t a) {
+    QGraphicsDropShadowEffect* effect = reinterpret_cast<QGraphicsDropShadowEffect*>(ptr);
+    if (effect) effect->setColor(QColor(r, g, b, a));
+}
+
+void qGraphicsDropShadowEffectSetEnabled(int64_t ptr, bool enabled) {
+    QGraphicsDropShadowEffect* effect = reinterpret_cast<QGraphicsDropShadowEffect*>(ptr);
+    if (effect) effect->setEnabled(enabled);
+}
+
+void qGraphicsDropShadowEffectDelete(int64_t ptr) {
+    QGraphicsDropShadowEffect* effect = reinterpret_cast<QGraphicsDropShadowEffect*>(ptr);
+    if (effect) delete effect;
+}
+
+// ============================================================
+// QFontComboBox 桥接函数
+// ============================================================
+
+int64_t qFontComboBoxCreate() {
+    QFontComboBox* combo = new QFontComboBox();
+    return reinterpret_cast<int64_t>(combo);
+}
+
+int64_t qFontComboBoxCreateWithParent(int64_t parentPtr) {
+    QWidget* parent = reinterpret_cast<QWidget*>(parentPtr);
+    QFontComboBox* combo = new QFontComboBox(parent);
+    return reinterpret_cast<int64_t>(combo);
+}
+
+void qFontComboBoxSetCurrentFont(int64_t ptr, const char* family) {
+    QFontComboBox* combo = reinterpret_cast<QFontComboBox*>(ptr);
+    if (combo) {
+        combo->setCurrentFont(QFont(QString::fromUtf8(family)));
+    }
+}
+
+const char* qFontComboBoxCurrentFont(int64_t ptr) {
+    QFontComboBox* combo = reinterpret_cast<QFontComboBox*>(ptr);
+    if (!combo) return "";
+    static QByteArray arr;
+    arr = combo->currentFont().family().toUtf8();
+    return arr.constData();
+}
+
+void qFontComboBoxSetWritingSystem(int64_t ptr, int32_t ws) {
+    QFontComboBox* combo = reinterpret_cast<QFontComboBox*>(ptr);
+    if (combo) {
+        combo->setWritingSystem(static_cast<QFontDatabase::WritingSystem>(ws));
+    }
+}
+
+void qFontComboBoxSetFontFilters(int64_t ptr, int32_t filters) {
+    QFontComboBox* combo = reinterpret_cast<QFontComboBox*>(ptr);
+    if (combo) {
+        combo->setFontFilters(static_cast<QFontComboBox::FontFilter>(filters));
+    }
+}
+
+void qFontComboBoxDelete(int64_t ptr) {
+    QFontComboBox* combo = reinterpret_cast<QFontComboBox*>(ptr);
+    if (combo) delete combo;
 }
 
 } // extern "C"

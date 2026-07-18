@@ -7,6 +7,7 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QGridLayout>
+#include <QFormLayout>
 
 extern "C" {
 
@@ -24,6 +25,14 @@ void qVBoxLayoutAddWidget(int64_t layoutPtr, int64_t widgetPtr) {
     QWidget* widget = reinterpret_cast<QWidget*>(widgetPtr);
     if (layout && widget) {
         layout->addWidget(widget);
+    }
+}
+
+void qVBoxLayoutAddWidgetStretch(int64_t layoutPtr, int64_t widgetPtr, int32_t stretch) {
+    QVBoxLayout* layout = reinterpret_cast<QVBoxLayout*>(layoutPtr);
+    QWidget* widget = reinterpret_cast<QWidget*>(widgetPtr);
+    if (layout && widget) {
+        layout->addWidget(widget, stretch);
     }
 }
 
@@ -77,6 +86,14 @@ void qHBoxLayoutAddWidget(int64_t layoutPtr, int64_t widgetPtr) {
     QWidget* widget = reinterpret_cast<QWidget*>(widgetPtr);
     if (layout && widget) {
         layout->addWidget(widget);
+    }
+}
+
+void qHBoxLayoutAddWidgetStretch(int64_t layoutPtr, int64_t widgetPtr, int32_t stretch) {
+    QHBoxLayout* layout = reinterpret_cast<QHBoxLayout*>(layoutPtr);
+    QWidget* widget = reinterpret_cast<QWidget*>(widgetPtr);
+    if (layout && widget) {
+        layout->addWidget(widget, stretch);
     }
 }
 
@@ -157,6 +174,109 @@ void qGridLayoutSetMargin(int64_t ptr, int32_t margin) {
 
 void qGridLayoutDelete(int64_t ptr) {
     QGridLayout* layout = reinterpret_cast<QGridLayout*>(ptr);
+    if (layout) {
+        delete layout;
+    }
+}
+
+// ============================================================
+// QFormLayout 桥接函数
+// ============================================================
+
+int64_t qFormLayoutCreate() {
+    QFormLayout* layout = new QFormLayout();
+    return reinterpret_cast<int64_t>(layout);
+}
+
+void qFormLayoutAddRow(int64_t ptr, const char* label, int64_t widgetPtr) {
+    QFormLayout* layout = reinterpret_cast<QFormLayout*>(ptr);
+    QWidget* widget = reinterpret_cast<QWidget*>(widgetPtr);
+    if (layout && widget) {
+        layout->addRow(QString::fromUtf8(label), widget);
+    }
+}
+
+void qFormLayoutAddRowWidget(int64_t ptr, int64_t labelWidgetPtr, int64_t fieldWidgetPtr) {
+    QFormLayout* layout = reinterpret_cast<QFormLayout*>(ptr);
+    QWidget* labelWidget = reinterpret_cast<QWidget*>(labelWidgetPtr);
+    QWidget* fieldWidget = reinterpret_cast<QWidget*>(fieldWidgetPtr);
+    if (layout && labelWidget && fieldWidget) {
+        layout->addRow(labelWidget, fieldWidget);
+    }
+}
+
+void qFormLayoutAddRowLayout(int64_t ptr, const char* label, int64_t layoutPtr) {
+    QFormLayout* layout = reinterpret_cast<QFormLayout*>(ptr);
+    QLayout* childLayout = reinterpret_cast<QLayout*>(layoutPtr);
+    if (layout && childLayout) {
+        layout->addRow(QString::fromUtf8(label), childLayout);
+    }
+}
+
+void qFormLayoutInsertRow(int64_t ptr, int32_t row, const char* label, int64_t widgetPtr) {
+    QFormLayout* layout = reinterpret_cast<QFormLayout*>(ptr);
+    QWidget* widget = reinterpret_cast<QWidget*>(widgetPtr);
+    if (layout && widget) {
+        layout->insertRow(row, QString::fromUtf8(label), widget);
+    }
+}
+
+void qFormLayoutRemoveRow(int64_t ptr, int32_t row) {
+    QFormLayout* layout = reinterpret_cast<QFormLayout*>(ptr);
+    if (layout) {
+        layout->removeRow(row);
+    }
+}
+
+int32_t qFormLayoutRowCount(int64_t ptr) {
+    QFormLayout* layout = reinterpret_cast<QFormLayout*>(ptr);
+    return layout ? layout->rowCount() : 0;
+}
+
+void qFormLayoutSetSpacing(int64_t ptr, int32_t spacing) {
+    QFormLayout* layout = reinterpret_cast<QFormLayout*>(ptr);
+    if (layout) {
+        layout->setSpacing(spacing);
+    }
+}
+
+void qFormLayoutSetMargin(int64_t ptr, int32_t margin) {
+    QFormLayout* layout = reinterpret_cast<QFormLayout*>(ptr);
+    if (layout) {
+        layout->setContentsMargins(margin, margin, margin, margin);
+    }
+}
+
+void qFormLayoutSetLabelAlignment(int64_t ptr, int32_t alignment) {
+    QFormLayout* layout = reinterpret_cast<QFormLayout*>(ptr);
+    if (layout) {
+        layout->setLabelAlignment(static_cast<Qt::Alignment>(alignment));
+    }
+}
+
+void qFormLayoutSetFormAlignment(int64_t ptr, int32_t alignment) {
+    QFormLayout* layout = reinterpret_cast<QFormLayout*>(ptr);
+    if (layout) {
+        layout->setFormAlignment(static_cast<Qt::Alignment>(alignment));
+    }
+}
+
+void qFormLayoutSetFieldGrowthPolicy(int64_t ptr, int32_t policy) {
+    QFormLayout* layout = reinterpret_cast<QFormLayout*>(ptr);
+    if (layout) {
+        layout->setFieldGrowthPolicy(static_cast<QFormLayout::FieldGrowthPolicy>(policy));
+    }
+}
+
+void qFormLayoutSetRowWrapPolicy(int64_t ptr, int32_t policy) {
+    QFormLayout* layout = reinterpret_cast<QFormLayout*>(ptr);
+    if (layout) {
+        layout->setRowWrapPolicy(static_cast<QFormLayout::RowWrapPolicy>(policy));
+    }
+}
+
+void qFormLayoutDelete(int64_t ptr) {
+    QFormLayout* layout = reinterpret_cast<QFormLayout*>(ptr);
     if (layout) {
         delete layout;
     }
