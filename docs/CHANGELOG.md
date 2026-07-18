@@ -5,6 +5,46 @@
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 并遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [1.1.0] - 2026-07-18
+
+### 新增
+
+**C++ 桥接层**
+- `qVBoxLayoutAddWidgetStretch` / `qHBoxLayoutAddWidgetStretch` — 布局 addWidget 支持 stretch 权重参数
+- `qWidgetSetEnabled` / `qWidgetIsEnabled` — 控件启用/禁用
+- `qWidgetSetMinimumSize` / `qWidgetSetMaximumSize` — 控件最小/最大尺寸约束
+- `qWidgetSetVisible` / `qWidgetIsVisible` — 控件可见性控制
+- `qWidgetSetToolTip` — 控件工具提示
+- `qWidgetSetStyleSheet` — 控件级样式表
+
+**仓颉公开 API**
+- `QVBoxLayout.addWidget(ptr, stretch)` / `QHBoxLayout.addWidget(ptr, stretch)` — 带权重的 addWidget 重载
+- `QLabel.setStyleSheet()` — 标签样式表
+- `QPushButton.setEnabled()` / `isEnabled()` — 按钮开关控制
+- `QTabWidget.setMinimumSize()` / `QTextEdit.setMinimumSize()` / `QPlainTextEdit.setMinimumSize()`
+- `QTextBrowser.setMinimumSize()` / `QToolBox.setMinimumSize()` / `QFontComboBox.getPtr()`
+- `QTableView` / `QListWidget` / `QTreeWidget` — 补充 setMinimumSize/setMaximumSize/setStyleSheet
+
+**新模块文件**
+- `src/core/` — clipboard, desktopservices, filewatcher, propertyanimation, screen, settings, shortcut, standardpaths
+- `src/widgets/` — buttongroup, completer, dockwidget, fontcombobox, graphiceffect, graphicsview, keysequenceedit, mdiarea, plaintextedit, stackedwidget, systemtrayicon, textbrowser, toolbox
+- `src/multimedia/soundeffect.cj`
+- `src/paint/fontdb.cj`
+
+**示例程序**
+- `examples/all_controls_demo/` — 全控件演示示例（7 分类页面 + 侧边栏导航），覆盖基础控件、文本输入、数值控件、选择控件、容器布局、高级控件、对话框
+
+### 改进
+- 布局系统支持 stretch 权重，解决状态栏占窗口一半高度的问题
+- Linux x86_64 bridge 在 WSL Ubuntu 24.04 / Qt 6.4.2 / GCC 13.3 编译验证通过
+- `.gitignore` 排除 `build_linux/`，保留 releases/ 下 .so/.dll/.dll.a
+
+### 已知问题
+- QML 模块 `load/loadData()` 在仓颉运行时卡住（2026-03-20 已记录）
+- `cjpm run` 在新终端需要手动设 PATH 或重启终端
+
+---
+
 ## [1.0.1] - 2026-07-17
 
 ### 新增
