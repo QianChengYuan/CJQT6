@@ -239,17 +239,16 @@ qmake6 --version
 
 3. **选择组件**:
    - 勾选 Qt 6.x.x
-   - 勾选编译器:
-     - MSVC 2019 64-bit (如已安装Visual Studio)
-     - 或 MinGW 11.2.0 64-bit
-   - 建议选择"Qt 6.x.x"下的所有组件
+    - 勾选编译器:
+      - MSVC 2022 64-bit (推荐)
+    - 建议选择"Qt 6.x.x"下的所有组件
 
 4. **完成安装并配置环境变量**:
-   ```powershell
-   # 设置Qt6路径 (根据实际安装路径调整)
-   setx QTDIR "C:\Qt\6.5.3\msvc2019_64"
-   
-   # 添加到PATH
+    ```powershell
+    # 设置Qt6路径 (根据实际安装路径调整)
+    setx QTDIR "C:\Qt\6.10.3\msvc2022_64"
+    
+    # 添加到PATH
    setx PATH "%PATH%;%QTDIR%\bin"
    ```
 
@@ -497,7 +496,7 @@ cmake --build . --config Release
 | 平台 | 库文件位置 | 文件名 |
 |------|-----------|--------|
 | Linux | `native/build/lib/` | `libcjqt6_bridge.so` |
-| Windows | `native/build/bin/` 或 `native/build_win64/bin/` | `libjfw_bridge.dll` |
+| Windows | `native/build/bin/` | `libcjqt6_bridge.dll` |
 | macOS | `native/build/lib/` | `libcjqt6_bridge.dylib` |
 
 **验证库文件已生成**:
@@ -509,7 +508,7 @@ ls native/build/lib/libcjqt6_bridge.so
 ls native/build/lib/libcjqt6_bridge.dylib
 
 # Windows (PowerShell)
-dir native\build_win64\bin\libjfw_bridge.dll
+dir native\build\bin\libcjqt6_bridge.dll
 ```
 
 ### 3.4 构建仓颉项目
@@ -550,14 +549,23 @@ cjpm build
 
 **Windows (PowerShell)**:
 ```powershell
+# 步骤0: 设置 Qt6 路径环境变量（请将 path\to\Qt6 替换为实际路径）
+$env:QTDIR = "path\to\Qt6"
+
 # 步骤1: 构建FFI桥接库
 New-Item -ItemType Directory -Force -Path native\build
 cd native\build
-cmake .. -G "Visual Studio 17 2022" -A x64
+
+# MSVC 2022 构建（使用 $env:QTDIR 自动引用Qt路径）
+cmake ..\.. -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="$env:QTDIR"
 cmake --build . --config Release
 cd ..\..
 
-# 步骤2: 构建仓颉项目
+# 步骤2: 部署桥接库到 releases/（供 cjpm build 链接）
+Copy-Item native\build\bin\cjqt6_bridge.dll releases\windows-x64\ -Force
+Copy-Item native\build\lib\cjqt6_bridge.lib releases\windows-x64\ -Force
+
+# 步骤3: 构建仓颉项目
 cjpm build
 ```
 
@@ -577,7 +585,7 @@ ls -lh native/build/lib/libcjqt6_bridge.so
 
 **Windows**:
 ```powershell
-dir native\build_win64\bin\libjfw_bridge.dll
+dir native\build\bin\libcjqt6_bridge.dll
 # 应显示库文件信息
 ```
 
@@ -639,7 +647,7 @@ cjpm run --example hello_window
 | `cjpm: command not found` | 仓颉编译器未安装或PATH未配置 | 按[2.1 安装仓颉编译器](#21-安装仓颉编译器)安装 |
 | `CMake Error: Could not find Qt6` | Qt6未安装或路径未设置 | 按[2.2 安装Qt6](#22-安装qt6)安装，或设置`CMAKE_PREFIX_PATH` |
 | `cmake: command not found` | CMake未安装或PATH未配置 | 按[2.3 安装CMake](#23-安装cmake)安装 |
-| `CMake Error: CMake was not able to find a build program` | 缺少make或构建工具 | Linux: `sudo apt install build-essential`<br>Windows: 安装Visual Studio或MinGW |
+| `CMake Error: CMake was not able to find a build program` | 缺少make或构建工具 | Linux: `sudo apt install build-essential`<br>Windows: 安装Visual Studio 2022（使用C++的桌面开发） |
 
 **案例: Qt6路径未找到**
 
@@ -858,9 +866,8 @@ export QT_QPA_PLATFORM=xcb  # 使用X11后端
 
 #### 6.2.1 前置要求
 
-- Visual Studio 2019或2022 (推荐社区版，免费)
+- Visual Studio 2022 (推荐社区版，免费)
   - 安装时勾选"使用C++的桌面开发"
-- 或 MinGW-w64 (GCC for Windows)
 
 #### 6.2.2 依赖安装
 
@@ -872,12 +879,12 @@ export QT_QPA_PLATFORM=xcb  # 使用X11后端
 
 **Qt6安装**:
 - 参见[2.2 安装Qt6 - Windows](#22-安装qt6)
-- 建议安装路径: `C:\Qt\6.x.x\msvc2019_64`
+- 建议安装路径: `C:\Qt\6.10.3\msvc2022_64`
 
 **环境变量配置**:
 ```powershell
 # Qt6
-setx QTDIR "C:\Qt\6.5.3\msvc2019_64"
+setx QTDIR "C:\Qt\6.10.3\msvc2022_64"
 
 # PATH
 setx PATH "%PATH%;%QTDIR%\bin;C:\Program Files\CMake\bin"
@@ -890,17 +897,24 @@ setx PATH "%PATH%;%QTDIR%\bin;C:\Program Files\CMake\bin"
 git clone https://gitcode.com/yuan_1992/CJQT6.git
 cd CJQT6
 
+# 设置 Qt6 路径环境变量（请将 path\to\Qt6 替换为实际路径）
+$env:QTDIR = "path\to\Qt6"
+
 # 构建FFI桥接库
 New-Item -ItemType Directory -Force -Path native\build
 cd native\build
 
-# 生成Visual Studio项目
-cmake .. -G "Visual Studio 17 2022" -A x64
+# 配置 CMake（MSVC 2022）
+cmake ..\.. -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="$env:QTDIR"
 
 # 编译 (Release版本)
 cmake --build . --config Release
 
 cd ..\..
+
+# 部署桥接库到 releases/
+Copy-Item native\build\bin\cjqt6_bridge.dll releases\windows-x64\ -Force
+Copy-Item native\build\lib\cjqt6_bridge.lib releases\windows-x64\ -Force
 
 # 构建仓颉项目
 cjpm build --release

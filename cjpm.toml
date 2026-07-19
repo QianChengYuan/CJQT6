@@ -12,7 +12,7 @@
   output-type = "dynamic"
   
   # 编译选项
-  compile-option = "-Woff unused"
+  compile-option = "-Woff unused -L releases/windows-x64 -lcjqt6_bridge"
   
   # 项目链接
   homepage = "https://gitcode.com/yuan_1992/CJQT6"
@@ -33,7 +33,7 @@
 
 # FFI桥接库配置
 [native]
-  bridge-name = "CJQT6_bridge"
+  bridge-name = "cjqt6_bridge"
   bridge-path = "native/build/bin"
   
   # 支持的平台列表
@@ -47,11 +47,13 @@
 
 # 平台到二进制文件的映射
 [native.binaries]
-  linux-x64 = "lib/native/linux-x64/libCJQT6_bridge.so"
-  linux-arm64 = "lib/native/linux-arm64/libCJQT6_bridge.so"
-  windows-x64 = "lib/native/windows-x64/CJQT6_bridge.dll"
-  macos-x64 = "lib/native/macos-x64/libCJQT6_bridge.dylib"
-  macos-arm64 = "lib/native/macos-arm64/libCJQT6_bridge.dylib"
+  linux-x64 = "lib/native/linux-x64/libcjqt6_bridge.so"
+  linux-arm64 = "lib/native/linux-arm64/libcjqt6_bridge.so"
+  windows-x64 = "lib/native/windows-x64/cjqt6_bridge.dll"
+  macos-x64 = "lib/native/macos-x64/libcjqt6_bridge.dylib"
+  macos-arm64 = "lib/native/macos-arm64/libcjqt6_bridge.dylib"
+
+
 
 # 系统依赖要求
 [requirements]
@@ -75,6 +77,9 @@
 
 # 平台特定链接选项
 [target.x86_64-pc-windows-msvc]
+  link-option = "releases/windows-x64/cjqt6_bridge.lib"
+
+[target.x86_64-pc-windows-gnu]
   link-option = "releases/windows-x64/libcjqt6_bridge.dll.a"
 
 [target.x86_64-unknown-linux-gnu]

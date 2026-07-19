@@ -103,50 +103,48 @@ cp lib/libcjqt6_bridge.so ../releases/linux-arm64/
 
 ### 本地编译（x64）
 
-**使用MinGW：**
+**使用MSVC（推荐）：**
 
 ```powershell
-# 安装Qt6（从qt.io下载在线安装器）
-# 安装路径：C:\Qt\6.10.2\mingw_64
-
-# 设置环境
-$env:PATH = "C:\Qt\6.10.2\mingw_64\bin;C:\Qt\Tools\mingw1310_64\bin;$env:PATH"
-
-# 创建构建目录
-New-Item -ItemType Directory -Force -Path build
-cd build
+# 打开Visual Studio Developer Command Prompt
+# 或使用PowerShell（需要先运行vcvars64.bat）
 
 # 配置CMake
-cmake .. `
+cmake ..\.. -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="C:/Qt/6.10.3/msvc2022_64"
+
+# 编译
+cmake --build . --config Release
+
+# 安装到 releases/
+Copy-Item bin\Release\cjqt6_bridge.dll ..\..\releases\windows-x64\
+Copy-Item lib\Release\cjqt6_bridge.lib ..\..\releases\windows-x64\
+```
+
+**使用MinGW（备选）：**
+
+```powershell
+# 安装Qt6 MinGW版本（从qt.io下载在线安装器）
+# 安装路径：C:\Qt\6.10.3\mingw_64
+
+# 设置环境
+$env:PATH = "C:\Qt\6.10.3\mingw_64\bin;C:\Qt\Tools\mingw1310_64\bin;$env:PATH"
+
+# 在项目根目录创建构建目录
+New-Item -ItemType Directory -Force -Path native\build
+cd native\build
+
+# 配置CMake
+cmake ..\.. `
     -G "MinGW Makefiles" `
     -DCMAKE_BUILD_TYPE=Release `
-    -DCMAKE_PREFIX_PATH="C:/Qt/6.10.2/mingw_64" `
+    -DCMAKE_PREFIX_PATH="C:/Qt/6.10.3/mingw_64" `
     -DCMAKE_CXX_COMPILER="C:/Qt/Tools/mingw1310_64/bin/g++.exe"
 
 # 编译
 mingw32-make -j4
 
-# 安装
-New-Item -ItemType Directory -Force -Path ..\releases\windows-x64
-Copy-Item bin\libcjqt6_bridge.dll ..\releases\windows-x64\
-```
-
-**使用MSVC：**
-
-```powershell
-# 打开Visual Studio Developer Command Prompt
-
-# 配置CMake
-cmake .. `
-    -G "Visual Studio 17 2022" `
-    -A x64 `
-    -DCMAKE_PREFIX_PATH="C:/Qt/6.10.2/msvc2019_64"
-
-# 编译
-cmake --build . --config Release
-
-# 安装
-Copy-Item bin\Release\cjqt6_bridge.dll ..\releases\windows-x64\libcjqt6_bridge.dll
+# 安装到 releases/
+Copy-Item bin\libcjqt6_bridge.dll ..\..\releases\windows-x64\
 ```
 
 ### 交叉编译（从Linux到Windows）
@@ -277,45 +275,36 @@ ls -lh "$RELEASE_DIR/libcjqt6_bridge.so"
 
 ### Windows一键编译脚本
 
-创建 `scripts/build-windows.ps1`：
+创建 `scripts\build-windows-msvc.ps1`：
 
 ```powershell
 $ErrorActionPreference = "Stop"
 
 $ProjectRoot = Split-Path -Parent $PSScriptRoot
-$BuildDir = Join-Path $ProjectRoot "build"
+$BuildDir = Join-Path $ProjectRoot "native\build"
 $ReleaseDir = Join-Path $ProjectRoot "releases\windows-x64"
 
-Write-Host "=== 编译Windows x64桥接库 ===" -ForegroundColor Green
-
-# 清理旧构建
-if (Test-Path $BuildDir) {
-    Remove-Item -Recurse -Force $BuildDir
-}
-New-Item -ItemType Directory -Force -Path $BuildDir | Out-Null
+Write-Host "=== 编译Windows x64桥接库 (MSVC 2022) ===" -ForegroundColor Green
 
 # 设置Qt路径（根据实际安装路径调整）
-$QtPath = "C:\Qt\6.10.2\mingw_64"
-$MingwPath = "C:\Qt\Tools\mingw1310_64\bin"
-$env:PATH = "$QtPath\bin;$MingwPath;$env:PATH"
+$QtPath = "C:\Qt\6.10.3\msvc2022_64"
+$env:PATH = "$QtPath\bin;$env:PATH"
 
 # 配置
+New-Item -ItemType Directory -Force -Path $BuildDir | Out-Null
 Set-Location $BuildDir
-cmake .. `
-    -G "MinGW Makefiles" `
-    -DCMAKE_BUILD_TYPE=Release `
-    -DCMAKE_PREFIX_PATH=$QtPath `
-    -DCMAKE_CXX_COMPILER="$MingwPath\g++.exe"
+cmake ..\.. -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH=$QtPath
 
 # 编译
-mingw32-make -j4
+cmake --build . --config Release
 
-# 安装
+# 安装到 releases/
 New-Item -ItemType Directory -Force -Path $ReleaseDir | Out-Null
-Copy-Item "bin\libcjqt6_bridge.dll" $ReleaseDir
+Copy-Item "bin\cjqt6_bridge.dll" $ReleaseDir
+Copy-Item "lib\cjqt6_bridge.lib" $ReleaseDir
 
-Write-Host "✅ 编译完成: $ReleaseDir\libcjqt6_bridge.dll" -ForegroundColor Green
-Get-Item "$ReleaseDir\libcjqt6_bridge.dll" | Format-List Length, LastWriteTime
+Write-Host "✅ 编译完成: $ReleaseDir\cjqt6_bridge.dll" -ForegroundColor Green
+Get-Item "$ReleaseDir\cjqt6_bridge.dll" | Format-List Length, LastWriteTime
 ```
 
 ### macOS一键编译脚本

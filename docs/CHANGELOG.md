@@ -5,6 +5,35 @@
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 并遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [1.1.1] - 2026-07-19
+
+### 变更
+
+- **构建工具链**: Windows 编译工具链从 MinGW 切换为 MSVC 2022 (Qt 6.10.3 msvc2022_64)
+- **FFI 桥接库**: `native/build/` 构建输出改为 MSVC 风格的 `cjqt6_bridge.dll` + `.lib` (移除了 MinGW `lib` 前缀命名)
+- **`cjpm.toml`**: 添加 `compile-option = "-L releases/windows-x64 -lcjqt6_bridge"` 使链接标志传播到所有子包
+
+### 修复
+
+- **cjc 链接标志传播**: `link-option` 仅在主包生效，子包`--output-type=dylib` 链接失败。改用 `compile-option` 传递 `-L`/`-l`，所有 14 个子包编译通过
+- **Windows 运行时**: MinGW 构建的 `libcjqt6_bridge.dll` 与 MSVC Cangjie 运行时 ABI 不兼容，切换后 DLL 加载正常
+
+### 清理
+
+- 删除旧 MinGW 构建目录 `build/`
+- 清理 `releases/windows-x64/` 中旧的 MinGW DLL (`libcjqt6_bridge.dll`)
+- 文档中所有 MinGW 引用更新为 MSVC 或标记为交叉编译专用
+
+### 文档
+
+- README.md — Windows 构建命令改为 MSVC 2022，DLL 命名更新
+- releases/README.md — 重写（修复 GBK 编码损坏），更新为 MSVC 路径
+- docs/build-guide.md — 所有 Windows 构建步骤更新为 MSVC 2022
+- docs/cross-compile.md — MSVC 设为首选，MinGW 降为备选
+- scripts/setup-qt-env.ps1/sh — Qt 路径更新为 MSVC 2022
+- scripts/update-bridge.ps1 — 构建目录和 DLL 命名与 MSVC 同步
+- scripts/build-windows-x64.ps1 — 构建输出和 releases 同步更新
+
 ## [1.1.0] - 2026-07-19
 
 ### 新增

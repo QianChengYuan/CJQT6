@@ -1,4 +1,4 @@
-# CJQT6 发行版
+﻿# CJQT6 发行版
 
 本目录包含预编译的二进制文件，供不想自行编译的用户下载使用。
 
@@ -7,7 +7,7 @@
 ```
 releases/
 ├── windows-x64/           # Windows x64 平台
-│   └── libcjqt6_bridge.dll   # Qt桥接库 (3MB)
+│   └── cjqt6_bridge.dll      # Qt桥接库 (MSVC 2022)
 ├── linux-x64/             # Linux x64 平台
 │   └── libcjqt6_bridge.so
 ├── linux-arm64/           # Linux ARM64 平台
@@ -29,7 +29,7 @@ releases/
 **Windows:**
 ```powershell
 # 方式1: 复制到仓颉运行时目录
-copy libcjqt6_bridge.dll \path/to\cangjie\cangjie_1.1.0\runtime\lib\windows_x86_64_cjnative\
+copy cjqt6_bridge.dll \path\to\cangjie\cangjie_1.1.0\runtime\lib\windows_x86_64_cjnative\
 
 # 方式2: 添加到PATH环境变量
 $env:PATH += ";\path\to\cjqt6_bridge"
@@ -55,7 +55,7 @@ export DYLD_LIBRARY_PATH=/path/to/cjqt6_bridge:$DYLD_LIBRARY_PATH
 
 ### 3. 在项目中使用
 
-**方式1: 中心仓安装（推荐）**
+**方式1: 中心仓安装 (推荐)**
 ```bash
 cjpm update
 # 在cjpm.toml中添加
@@ -83,9 +83,8 @@ cjpm update
 
 **Windows:**
 ```powershell
-# 设置Qt路径
-$env:PATH += ";\path\to\Qt\6.10.2\mingw_64\bin"
-$env:PATH += ";\path\to\Qt\Tools\mingw1310_64\bin"
+# 设置Qt路径 (MSVC 2022)
+$env:PATH += ";\path\to\Qt\6.10.3\msvc2022_64\bin"
 ```
 
 **Linux:**
@@ -108,7 +107,7 @@ export QTDIR=/usr/local/opt/qt@6
 
 ## 自行编译
 
-如果预编译库不适用您的平台，可以自行编译：
+如果预编译库不适用于您的平台，可以自行编译：
 
 ```bash
 # 克隆项目
@@ -116,14 +115,14 @@ git clone https://gitcode.com/yuan_1992/CJQT6.git
 cd CJQT6
 
 # 编译桥接库
-mkdir build && cd build
+mkdir native/build && cd native/build
 cmake .. -DCMAKE_PREFIX_PATH=/path/to/qt6
 make -j$(nproc)
 
-# 编译产物位于 build/bin/ 或 build/lib/
+# 编译产物位于 native/build/bin/ 和 native/build/lib/
 ```
 
-详细编译指南请参阅 [构建文档](../doc/build-guide.md)。
+详细编译指南请参阅 [构建文档](../docs/build-guide.md)。
 
 ## 版本对应关系
 

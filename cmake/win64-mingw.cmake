@@ -1,4 +1,7 @@
 # Windows x64 交叉编译工具链 (MinGW-w64)
+# 注意: 本项目在 Windows 上的主要构建方式为 MSVC 2022。
+# 此文件仅用于在 Linux 上通过 MinGW-w64 交叉编译 Windows 桥接库的场景。
+# Windows 原生构建请直接在 native/build 目录中使用 MSVC 2022。
 # 使用方法: cmake -DCMAKE_TOOLCHAIN_FILE=cmake/win64-mingw.cmake ..
 
 set(CMAKE_SYSTEM_NAME Windows)
@@ -22,8 +25,10 @@ set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY BOTH)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE BOTH)
 set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE BOTH)
 
-# Qt6 路径 - Windows Qt 安装目录 (WSL 路径)
-set(QT6_WIN_PATH "/mnt/c/Qt/6.10.2/mingw_64")
+# Qt6 路径 - Windows Qt MinGW 安装目录 (WSL 路径)
+# 注意: 交叉编译需要 MinGW 版本的 Qt，不能使用 MSVC 版本的 Qt。
+# 请根据实际安装路径修改 Qt6_WIN_PATH。
+set(QT6_WIN_PATH "/mnt/c/Qt/6.10.3/mingw_64")
 set(CMAKE_PREFIX_PATH "${QT6_WIN_PATH}")
 set(Qt6_DIR "${QT6_WIN_PATH}/lib/cmake/Qt6")
 

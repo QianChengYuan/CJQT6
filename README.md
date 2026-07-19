@@ -57,25 +57,46 @@ cd CJQT6
 ```bash
 # 步骤1: 构建FFI桥接库(C++部分)
 mkdir -p native/build && cd native/build
-cmake ..                            # 配置构建系统
+cmake ../..                         # 配置构建系统（指定项目根目录的 CMakeLists.txt）
 make -j$(nproc)                     # 编译(使用多核加速)
 cd ../..
 
-# 步骤2: 构建仓颉项目
+# 步骤2: 部署桥接库到 releases/（供 cjpm build 链接）
+mkdir -p releases/linux-x64/
+cp native/build/lib/libcjqt6_bridge.so releases/linux-x64/
+
+# 验证桥接库
+ldd releases/linux-x64/libcjqt6_bridge.so
+
+# 步骤3: 构建仓颉项目
 cjpm build
 ```
 
 #### 快速构建 (Windows)
 
 ```powershell
+# 步骤0: 设置 Qt6 路径环境变量（请将 path\to\Qt6 替换为实际路径，如 C:\Qt\6.10.3\msvc2022_64）
+$env:QTDIR = "path\to\Qt6"
+
 # 步骤1: 构建FFI桥接库
+# 如果 native\build 已存在，先删除：Remove-Item -Recurse -Force native\build
 New-Item -ItemType Directory -Force -Path native\build
 cd native\build
-cmake .. -G "Visual Studio 17 2022" -A x64    # 生成VS项目
+
+# MSVC 2022 构建（Visual Studio 17 2022）
+cmake ..\.. -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="$env:QTDIR"
+
 cmake --build . --config Release               # 编译
 cd ..\..
 
-# 步骤2: 构建仓颉项目
+# 步骤2: 将编译好的桥接库部署到 releases/（供 cjpm build 链接使用）
+Copy-Item native\build\bin\cjqt6_bridge.dll releases\windows-x64\ -Force
+Copy-Item native\build\lib\cjqt6_bridge.lib releases\windows-x64\ -Force
+
+# 或使用脚本一键完成步骤1-2：
+# .\scripts\update-bridge.ps1
+
+# 步骤3: 构建仓颉项目
 cjpm build
 ```
 
@@ -86,7 +107,7 @@ cjpm build
 - `cjpm: command not found` → [安装仓颉编译器](docs/build-guide.md#21-安装仓颉编译器)
 - `Could not find Qt6` → [安装Qt6](docs/build-guide.md#22-安装qt6) 或设置 `CMAKE_PREFIX_PATH`
 - `cmake: command not found` → [安装CMake](docs/build-guide.md#23-安装cmake)
-- `cannot find -lcjfw_bridge` → 桥接库未构建，请先执行步骤1
+- `cannot find -lcjqt6_bridge` → 桥接库未构建或未部署到 releases/，请先执行步骤1-2
 - 其他问题 → [完整错误诊断指南](docs/build-guide.md#5-错误诊断)
 </details>
 
@@ -98,7 +119,7 @@ ls build/lib/libcjqt6_bridge.so    # Linux
 ls build/lib/libcjqt6_bridge.dylib # macOS
 
 # 验证FFI桥接库 (Windows PowerShell)
-dir build\bin\libcjqt6_bridge.dll
+dir native\build\bin\cjqt6_bridge.dll
 ```
 
 ### 4. 运行示例
@@ -110,7 +131,7 @@ dir build\bin\libcjqt6_bridge.dll
 .\scripts\setup-qt-env.ps1
 
 # 或手动设置
-$env:PATH = "/path/to/Qt/mingw_64/bin;/path/to/Qt/Tools/mingw_64/bin;$env:PATH"
+$env:PATH = "C:\Qt\6.10.3\msvc2022_64\bin;$env:PATH"
 ```
 
 ```bash
@@ -142,19 +163,19 @@ cjpm run
 
 **方案2：手动设置环境变量**
 ```powershell
-$env:PATH = "/path/to/Qt/mingw_64/bin;/path/to/Qt/Tools/mingw_64/bin;$env:PATH"
+$env:PATH = "C:\Qt\6.10.3\msvc2022_64\bin;$env:PATH"
 cjpm run
 ```
 
 **方案3：复制Qt DLL到exe目录**
 ```powershell
-Copy-Item /path/to/Qt/mingw_64/bin/Qt6*.dll examples/notepad/target/release/bin/
+Copy-Item C:\Qt\6.10.3\msvc2022_64\bin\Qt6*.dll examples\notepad\target\release\bin\
 ```
 
 **方案4：使用windeployqt自动部署**
 ```powershell
 cd examples\notepad\target\release\bin
-/path/to/Qt/mingw_64/bin/windeployqt.exe main.exe
+C:\Qt\6.10.3\msvc2022_64\bin\windeployqt.exe main.exe
 ```
 
 </details>
@@ -218,7 +239,7 @@ CJQT6/
 │   ├── post_install.cj         # 安装后脚本
 │   └── verify_install.cj       # 安装验证脚本
 ├── cmake/                      # CMake配置
-│   └── win64-mingw.cmake       # Windows MinGW工具链
+│   └── win64-mingw.cmake       # Linux→Windows MinGW交叉编译工具链
 ├── native/                     # C++原生桥接代码
 │   ├── includes/               # C++头文件
 │   ├── src/                    # C++实现

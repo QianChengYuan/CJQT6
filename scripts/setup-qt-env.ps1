@@ -2,10 +2,9 @@
 # CJQT6 运行环境配置脚本
 # 设置Qt6环境变量
 
-$QtPath = "C:\Qt\6.10.2\mingw_64"
-$MingwPath = "C:\Qt\Tools\mingw1310_64\bin"
+$QtPath = "C:\Qt\6.10.3\msvc2022_64"
 
-Write-Host "=== 配置Qt6运行环境 ===" -ForegroundColor Green
+Write-Host "=== 配置Qt6运行环境 (MSVC 2022) ===" -ForegroundColor Green
 
 # 检查Qt路径
 if (-not (Test-Path $QtPath)) {
@@ -15,15 +14,14 @@ if (-not (Test-Path $QtPath)) {
 }
 
 # 设置环境变量
-$env:PATH = "$QtPath\bin;$MingwPath;$env:PATH"
+$env:PATH = "$QtPath\bin;$env:PATH"
 $env:QTDIR = $QtPath
 
-Write-Host "✅ Qt6环境已配置" -ForegroundColor Green
+Write-Host "✅ Qt6 (MSVC 2022) 环境已配置" -ForegroundColor Green
 Write-Host "Qt路径: $QtPath" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "环境变量已设置：" -ForegroundColor Yellow
 Write-Host "PATH已添加: $QtPath\bin" -ForegroundColor White
-Write-Host "PATH已添加: $MingwPath" -ForegroundColor White
 Write-Host ""
 Write-Host "现在可以运行Qt应用：" -ForegroundColor Yellow
 Write-Host "  cjpm run" -ForegroundColor White

@@ -2,10 +2,9 @@
 # CJQT6 运行环境配置脚本
 # 设置Qt6环境变量
 
-QT_PATH="/c/Qt/6.10.2/mingw_64"
-MINGW_PATH="/c/Qt/Tools/mingw1310_64/bin"
+QT_PATH="/c/Qt/6.10.3/msvc2022_64"
 
-echo "=== 配置Qt6运行环境 ==="
+echo "=== 配置Qt6运行环境 (MSVC 2022) ==="
 
 # 检查Qt路径
 if [ ! -d "$QT_PATH" ]; then
@@ -15,15 +14,14 @@ if [ ! -d "$QT_PATH" ]; then
 fi
 
 # 设置环境变量
-export PATH="$QT_PATH/bin:$MINGW_PATH:$PATH"
+export PATH="$QT_PATH/bin:$PATH"
 export QTDIR="$QT_PATH"
 
-echo "✅ Qt6环境已配置"
+echo "✅ Qt6环境已配置 (MSVC 2022)"
 echo "Qt路径: $QT_PATH"
 echo ""
 echo "环境变量已设置："
 echo "PATH已添加: $QT_PATH/bin"
-echo "PATH已添加: $MINGW_PATH"
 echo ""
 echo "现在可以运行Qt应用："
 echo "  cjpm run"

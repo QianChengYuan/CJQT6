@@ -1,15 +1,26 @@
 cmake_minimum_required(VERSION 3.20)
 project(CJFW VERSION 1.0.0 LANGUAGES CXX)
 
+# MSVC 下自动导出所有符号（MinGW 默认导出，无需此选项）
+if(MSVC)
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+endif()
+
 # 设置 C++ 标准
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# 设置输出目录
+# 设置输出目录（使用生成器表达式确保单配置和多配置生成器行为一致）
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+# 多配置生成器（如 MSVC）默认追加配置子目录，在此覆盖为平级输出
+foreach(CONFIG RELEASE DEBUG MINSIZEREL RELWITHDEBINFO)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${CONFIG} ${CMAKE_BINARY_DIR}/bin)
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${CONFIG} ${CMAKE_BINARY_DIR}/lib)
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${CONFIG} ${CMAKE_BINARY_DIR}/lib)
+endforeach()
 
 # 查找 Qt6 包
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Qml Quick QuickWidgets Sql PrintSupport Network)
