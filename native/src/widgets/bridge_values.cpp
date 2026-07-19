@@ -15,6 +15,9 @@
 // 回调映射
 static std::unordered_map<int64_t, std::function<void(int64_t)>> g_spinBoxCallbacks;
 static std::unordered_map<int64_t, std::function<void(int64_t)>> g_sliderCallbacks;
+static std::unordered_map<int64_t, std::function<void(int64_t)>> g_sliderMovedCallbacks;
+static std::unordered_map<int64_t, std::function<void(int64_t)>> g_sliderPressedCallbacks;
+static std::unordered_map<int64_t, std::function<void(int64_t)>> g_sliderReleasedCallbacks;
 
 extern "C" {
 
@@ -54,6 +57,63 @@ void qSpinBoxSetSingleStep(int64_t ptr, int32_t step) {
     if (spinBox) {
         spinBox->setSingleStep(step);
     }
+}
+
+void qSpinBoxSetPrefix(int64_t ptr, const char* prefix) {
+    QSpinBox* spinBox = reinterpret_cast<QSpinBox*>(ptr);
+    if (spinBox && prefix) {
+        spinBox->setPrefix(QString::fromUtf8(prefix));
+    }
+}
+
+const char* qSpinBoxPrefix(int64_t ptr) {
+    QSpinBox* spinBox = reinterpret_cast<QSpinBox*>(ptr);
+    if (!spinBox) return "";
+    static QByteArray arr;
+    arr = spinBox->prefix().toUtf8();
+    return arr.constData();
+}
+
+void qSpinBoxSetSuffix(int64_t ptr, const char* suffix) {
+    QSpinBox* spinBox = reinterpret_cast<QSpinBox*>(ptr);
+    if (spinBox && suffix) {
+        spinBox->setSuffix(QString::fromUtf8(suffix));
+    }
+}
+
+const char* qSpinBoxSuffix(int64_t ptr) {
+    QSpinBox* spinBox = reinterpret_cast<QSpinBox*>(ptr);
+    if (!spinBox) return "";
+    static QByteArray arr;
+    arr = spinBox->suffix().toUtf8();
+    return arr.constData();
+}
+
+void qSpinBoxSetWrapping(int64_t ptr, bool wrapping) {
+    QSpinBox* spinBox = reinterpret_cast<QSpinBox*>(ptr);
+    if (spinBox) {
+        spinBox->setWrapping(wrapping);
+    }
+}
+
+bool qSpinBoxWrapping(int64_t ptr) {
+    QSpinBox* spinBox = reinterpret_cast<QSpinBox*>(ptr);
+    return spinBox ? spinBox->wrapping() : false;
+}
+
+void qSpinBoxSetSpecialValueText(int64_t ptr, const char* text) {
+    QSpinBox* spinBox = reinterpret_cast<QSpinBox*>(ptr);
+    if (spinBox && text) {
+        spinBox->setSpecialValueText(QString::fromUtf8(text));
+    }
+}
+
+const char* qSpinBoxCleanText(int64_t ptr) {
+    QSpinBox* spinBox = reinterpret_cast<QSpinBox*>(ptr);
+    if (!spinBox) return "";
+    static QByteArray arr;
+    arr = spinBox->cleanText().toUtf8();
+    return arr.constData();
 }
 
 void qSpinBoxSetOnValueChanged(int64_t ptr, void (*callback)(int64_t)) {
@@ -116,6 +176,126 @@ void qSliderSetOrientation(int64_t ptr, int32_t orientation) {
     }
 }
 
+void qSliderSetSingleStep(int64_t ptr, int32_t step) {
+    QSlider* slider = reinterpret_cast<QSlider*>(ptr);
+    if (slider) {
+        slider->setSingleStep(step);
+    }
+}
+
+int32_t qSliderSingleStep(int64_t ptr) {
+    QSlider* slider = reinterpret_cast<QSlider*>(ptr);
+    return slider ? slider->singleStep() : 1;
+}
+
+void qSliderSetPageStep(int64_t ptr, int32_t step) {
+    QSlider* slider = reinterpret_cast<QSlider*>(ptr);
+    if (slider) {
+        slider->setPageStep(step);
+    }
+}
+
+int32_t qSliderPageStep(int64_t ptr) {
+    QSlider* slider = reinterpret_cast<QSlider*>(ptr);
+    return slider ? slider->pageStep() : 10;
+}
+
+void qSliderSetTickPosition(int64_t ptr, int32_t position) {
+    QSlider* slider = reinterpret_cast<QSlider*>(ptr);
+    if (slider) {
+        slider->setTickPosition(static_cast<QSlider::TickPosition>(position));
+    }
+}
+
+int32_t qSliderTickPosition(int64_t ptr) {
+    QSlider* slider = reinterpret_cast<QSlider*>(ptr);
+    return slider ? static_cast<int32_t>(slider->tickPosition()) : 0;
+}
+
+void qSliderSetTickInterval(int64_t ptr, int32_t interval) {
+    QSlider* slider = reinterpret_cast<QSlider*>(ptr);
+    if (slider) {
+        slider->setTickInterval(interval);
+    }
+}
+
+int32_t qSliderTickInterval(int64_t ptr) {
+    QSlider* slider = reinterpret_cast<QSlider*>(ptr);
+    return slider ? slider->tickInterval() : 0;
+}
+
+void qSliderSetInvertedControls(int64_t ptr, bool inverted) {
+    QSlider* slider = reinterpret_cast<QSlider*>(ptr);
+    if (slider) {
+        slider->setInvertedControls(inverted);
+    }
+}
+
+bool qSliderInvertedControls(int64_t ptr) {
+    QSlider* slider = reinterpret_cast<QSlider*>(ptr);
+    return slider ? slider->invertedControls() : false;
+}
+
+void qSliderSetTracking(int64_t ptr, bool enable) {
+    QSlider* slider = reinterpret_cast<QSlider*>(ptr);
+    if (slider) {
+        slider->setTracking(enable);
+    }
+}
+
+bool qSliderHasTracking(int64_t ptr) {
+    QSlider* slider = reinterpret_cast<QSlider*>(ptr);
+    return slider ? slider->hasTracking() : true;
+}
+
+void qSliderSetOnSliderMoved(int64_t ptr, void (*callback)(int64_t)) {
+    QSlider* slider = reinterpret_cast<QSlider*>(ptr);
+    if (slider) {
+        int64_t widgetPtr = ptr;
+        g_sliderMovedCallbacks[ptr] = [callback, widgetPtr](int64_t) { callback(widgetPtr); };
+        QObject::connect(slider, &QSlider::sliderMoved, [widgetPtr](int) {
+            auto it = g_sliderMovedCallbacks.find(widgetPtr);
+            if (it != g_sliderMovedCallbacks.end()) {
+                it->second(widgetPtr);
+            }
+        });
+    }
+}
+
+void qSliderSetOnSliderPressed(int64_t ptr, void (*callback)(int64_t)) {
+    QSlider* slider = reinterpret_cast<QSlider*>(ptr);
+    if (slider) {
+        int64_t widgetPtr = ptr;
+        g_sliderPressedCallbacks[ptr] = [callback, widgetPtr](int64_t) { callback(widgetPtr); };
+        QObject::connect(slider, &QSlider::sliderPressed, [widgetPtr]() {
+            auto it = g_sliderPressedCallbacks.find(widgetPtr);
+            if (it != g_sliderPressedCallbacks.end()) {
+                it->second(widgetPtr);
+            }
+        });
+    }
+}
+
+void qSliderSetOnSliderReleased(int64_t ptr, void (*callback)(int64_t)) {
+    QSlider* slider = reinterpret_cast<QSlider*>(ptr);
+    if (slider) {
+        int64_t widgetPtr = ptr;
+        g_sliderReleasedCallbacks[ptr] = [callback, widgetPtr](int64_t) { callback(widgetPtr); };
+        QObject::connect(slider, &QSlider::sliderReleased, [widgetPtr]() {
+            auto it = g_sliderReleasedCallbacks.find(widgetPtr);
+            if (it != g_sliderReleasedCallbacks.end()) {
+                it->second(widgetPtr);
+            }
+        });
+    }
+}
+
+void qSliderDeleteCleanup(int64_t ptr) {
+    g_sliderMovedCallbacks.erase(ptr);
+    g_sliderPressedCallbacks.erase(ptr);
+    g_sliderReleasedCallbacks.erase(ptr);
+}
+
 void qSliderSetOnValueChanged(int64_t ptr, void (*callback)(int64_t)) {
     QSlider* slider = reinterpret_cast<QSlider*>(ptr);
     if (slider) {
@@ -134,6 +314,7 @@ void qSliderDelete(int64_t ptr) {
     QSlider* slider = reinterpret_cast<QSlider*>(ptr);
     if (slider) {
         g_sliderCallbacks.erase(ptr);
+        qSliderDeleteCleanup(ptr);
         delete slider;
     }
 }
@@ -173,6 +354,42 @@ void qProgressBarSetTextVisible(int64_t ptr, bool visible) {
     QProgressBar* progressBar = reinterpret_cast<QProgressBar*>(ptr);
     if (progressBar) {
         progressBar->setTextVisible(visible);
+    }
+}
+
+void qProgressBarSetFormat(int64_t ptr, const char* format) {
+    QProgressBar* progressBar = reinterpret_cast<QProgressBar*>(ptr);
+    if (progressBar && format) {
+        progressBar->setFormat(QString::fromUtf8(format));
+    }
+}
+
+const char* qProgressBarFormat(int64_t ptr) {
+    QProgressBar* progressBar = reinterpret_cast<QProgressBar*>(ptr);
+    if (!progressBar) return "";
+    static QByteArray arr;
+    arr = progressBar->format().toUtf8();
+    return arr.constData();
+}
+
+void qProgressBarSetOrientation(int64_t ptr, int32_t orientation) {
+    QProgressBar* progressBar = reinterpret_cast<QProgressBar*>(ptr);
+    if (progressBar) {
+        progressBar->setOrientation(static_cast<Qt::Orientation>(orientation));
+    }
+}
+
+void qProgressBarSetInvertedAppearance(int64_t ptr, bool invert) {
+    QProgressBar* progressBar = reinterpret_cast<QProgressBar*>(ptr);
+    if (progressBar) {
+        progressBar->setInvertedAppearance(invert);
+    }
+}
+
+void qProgressBarReset(int64_t ptr) {
+    QProgressBar* progressBar = reinterpret_cast<QProgressBar*>(ptr);
+    if (progressBar) {
+        progressBar->reset();
     }
 }
 

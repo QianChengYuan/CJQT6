@@ -63,7 +63,7 @@ FFI就像一个翻译官，让仓颉语言和C++语言能够"对话"。
 - macOS: `.dylib` (Dynamic Library)
 
 **本项目的动态库**: 
-`libcjfw_bridge.so` / `libjfw_bridge.dll` / `libcjfw_bridge.dylib`
+`libcjqt6_bridge.so` / `libcjqt6_bridge.dll` / `libcjqt6_bridge.dylib`
 - 这是FFI桥接库的编译产物
 - 包含C++编译的Qt6封装代码
 - 仓颉程序运行时加载此库
@@ -496,17 +496,17 @@ cmake --build . --config Release
 
 | 平台 | 库文件位置 | 文件名 |
 |------|-----------|--------|
-| Linux | `native/build/lib/` | `libcjfw_bridge.so` |
+| Linux | `native/build/lib/` | `libcjqt6_bridge.so` |
 | Windows | `native/build/bin/` 或 `native/build_win64/bin/` | `libjfw_bridge.dll` |
-| macOS | `native/build/lib/` | `libcjfw_bridge.dylib` |
+| macOS | `native/build/lib/` | `libcjqt6_bridge.dylib` |
 
 **验证库文件已生成**:
 ```bash
 # Linux
-ls native/build/lib/libcjfw_bridge.so
+ls native/build/lib/libcjqt6_bridge.so
 
 # macOS
-ls native/build/lib/libcjfw_bridge.dylib
+ls native/build/lib/libcjqt6_bridge.dylib
 
 # Windows (PowerShell)
 dir native\build_win64\bin\libjfw_bridge.dll
@@ -571,7 +571,7 @@ cjpm build
 
 **Linux**:
 ```bash
-ls -lh native/build/lib/libcjfw_bridge.so
+ls -lh native/build/lib/libcjqt6_bridge.so
 # 应显示库文件信息，文件大小应>0
 ```
 
@@ -583,7 +583,7 @@ dir native\build_win64\bin\libjfw_bridge.dll
 
 **macOS**:
 ```bash
-ls -lh native/build/lib/libcjfw_bridge.dylib
+ls -lh native/build/lib/libcjqt6_bridge.dylib
 # 应显示库文件信息
 ```
 
@@ -683,15 +683,15 @@ CMake Error at CMakeLists.txt:10 (find_package):
 
 | 错误信息 | 原因 | 解决方案 |
 |---------|------|---------|
-| `cannot find -lcjfw_bridge` | FFI桥接库未构建 | 先执行[3.3 编译桥接库](#33-编译桥接库) |
-| `error while loading shared libraries: libcjfw_bridge.so: cannot open shared object file` | 运行时找不到动态库 | 设置`LD_LIBRARY_PATH`:<br>`export LD_LIBRARY_PATH=native/build/lib:$LD_LIBRARY_PATH` |
+| `cannot find -lcjqt6_bridge` | FFI桥接库未构建 | 先执行[3.3 编译桥接库](#33-编译桥接库) |
+| `error while loading shared libraries: libcjqt6_bridge.so: cannot open shared object file` | 运行时找不到动态库 | 设置`LD_LIBRARY_PATH`:<br>`export LD_LIBRARY_PATH=native/build/lib:$LD_LIBRARY_PATH` |
 | `The specified module could not be found` (Windows) | DLL路径未在PATH中 | 将DLL目录加入PATH或复制到可执行文件目录 |
 
 **案例: 动态库加载失败**
 
 **错误输出 (Linux)**:
 ```
-error while loading shared libraries: libcjfw_bridge.so: 
+error while loading shared libraries: libcjqt6_bridge.so: 
 cannot open shared object file: No such file or directory
 ```
 
@@ -707,7 +707,7 @@ export LD_LIBRARY_PATH=$PWD/native/build/lib:$LD_LIBRARY_PATH
 
 **方法3: 复制库文件 (不推荐)**
 ```bash
-cp native/build/lib/libcjfw_bridge.so /usr/lib/
+cp native/build/lib/libcjqt6_bridge.so /usr/lib/
 ```
 
 ### 5.4 运行时错误

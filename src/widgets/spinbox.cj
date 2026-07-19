@@ -10,6 +10,14 @@ foreign func qSpinBoxSetRange(ptr: Int64, min: Int32, max: Int32): Unit
 foreign func qSpinBoxSetSingleStep(ptr: Int64, step: Int32): Unit
 foreign func qSpinBoxConnectValueChanged(ptr: Int64, callback: Int32Callback): Unit
 foreign func qSpinBoxDisconnectValueChanged(ptr: Int64): Unit
+foreign func qSpinBoxSetPrefix(ptr: Int64, prefix: CString): Unit
+foreign func qSpinBoxPrefix(ptr: Int64): CString
+foreign func qSpinBoxSetSuffix(ptr: Int64, suffix: CString): Unit
+foreign func qSpinBoxSuffix(ptr: Int64): CString
+foreign func qSpinBoxSetWrapping(ptr: Int64, wrapping: Bool): Unit
+foreign func qSpinBoxWrapping(ptr: Int64): Bool
+foreign func qSpinBoxSetSpecialValueText(ptr: Int64, text: CString): Unit
+foreign func qSpinBoxCleanText(ptr: Int64): CString
 foreign func qSpinBoxDelete(ptr: Int64): Unit
 
 /// 整数旋转框部件
@@ -73,6 +81,121 @@ public class QSpinBox <: QtResource {
         checkValid()
         unsafe {
             qSpinBoxSetSingleStep(ptr, step)
+        }
+    }
+    
+    /// 设置前缀
+    public func setPrefix(prefix: String): Unit {
+        checkValid()
+        unsafe {
+            let cstr = LibC.mallocCString(prefix)
+            qSpinBoxSetPrefix(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+    
+    /// 获取前缀
+    public func prefix(): String {
+        checkValid()
+        unsafe {
+            let cstr = qSpinBoxPrefix(ptr)
+            return cstr.toString()
+        }
+    }
+    
+    /// 设置后缀
+    public func setSuffix(suffix: String): Unit {
+        checkValid()
+        unsafe {
+            let cstr = LibC.mallocCString(suffix)
+            qSpinBoxSetSuffix(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+    
+    /// 获取后缀
+    public func suffix(): String {
+        checkValid()
+        unsafe {
+            let cstr = qSpinBoxSuffix(ptr)
+            return cstr.toString()
+        }
+    }
+    
+    /// 设置循环
+    public func setWrapping(wrapping: Bool): Unit {
+        checkValid()
+        unsafe {
+            qSpinBoxSetWrapping(ptr, wrapping)
+        }
+    }
+    
+    /// 是否循环
+    public func wrapping(): Bool {
+        checkValid()
+        unsafe {
+            return qSpinBoxWrapping(ptr)
+        }
+    }
+    
+    /// 设置特殊值文本（当值为最小值时显示）
+    public func setSpecialValueText(text: String): Unit {
+        checkValid()
+        unsafe {
+            let cstr = LibC.mallocCString(text)
+            qSpinBoxSetSpecialValueText(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+    
+    /// 获取纯净文本（无前缀后缀）
+    public func cleanText(): String {
+        checkValid()
+        unsafe {
+            let cstr = qSpinBoxCleanText(ptr)
+            return cstr.toString()
+        }
+    }
+    
+    /// 设置启用/禁用
+    public func setEnabled(enabled: Bool): Unit {
+        checkValid()
+        unsafe {
+            qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
+        }
+    }
+    
+    /// 检查是否启用
+    public func isEnabled(): Bool {
+        checkValid()
+        unsafe {
+            qWidgetIsEnabled(ptr) == 1
+        }
+    }
+    
+    /// 设置样式表
+    public func setStyleSheet(style: String): Unit {
+        checkValid()
+        unsafe {
+            let cstr = LibC.mallocCString(style)
+            qWidgetSetStyleSheet(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+    
+    /// 设置最小尺寸
+    public func setMinimumSize(minw: Int32, minh: Int32): Unit {
+        checkValid()
+        unsafe {
+            qWidgetSetMinimumSize(ptr, minw, minh)
+        }
+    }
+    
+    /// 设置最大尺寸
+    public func setMaximumSize(maxw: Int32, maxh: Int32): Unit {
+        checkValid()
+        unsafe {
+            qWidgetSetMaximumSize(ptr, maxw, maxh)
         }
     }
     

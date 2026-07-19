@@ -13,7 +13,6 @@
   
   # 编译选项
   compile-option = "-Woff unused"
-  link-option = "build/lib/libcjqt6_bridge.dll.a"
   
   # 项目链接
   homepage = "https://gitcode.com/yuan_1992/CJQT6"
@@ -24,7 +23,7 @@
   keywords = ["qt", "gui", "ui", "widgets", "ffi", "cross-platform"]
   
   # 打包范围
-  include = ["src", "docs", "examples", "native/includes"]
+  include = ["src", "docs", "examples", "native/includes", "releases"]
   exclude = ["*.txt", "*.log", "*.bak", "*.tmp", "test_*", "build_*"]
 
 [dependencies]
@@ -73,6 +72,13 @@
 [install]
   post-install = "scripts/post_install.cj"
   verify-script = "scripts/verify_install.cj"
+
+# 平台特定链接选项
+[target.x86_64-pc-windows-msvc]
+  link-option = "releases/windows-x64/libcjqt6_bridge.dll.a"
+
+[target.x86_64-unknown-linux-gnu]
+  link-option = "-Lreleases/linux-x64 -lcjqt6_bridge"
 
 # 包元数据
 [metadata]

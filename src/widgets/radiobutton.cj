@@ -5,6 +5,7 @@ import cjqt6.core.*
 // QRadioButton - 单选按钮
 foreign func qRadioButtonCreate(): Int64
 foreign func qRadioButtonSetText(ptr: Int64, text: CString): Unit
+foreign func qRadioButtonText(ptr: Int64): CString
 foreign func qRadioButtonSetChecked(ptr: Int64, checked: Bool): Unit
 foreign func qRadioButtonIsChecked(ptr: Int64): Bool
 foreign func qRadioButtonConnectToggled(ptr: Int64, callback: Int32Callback): Unit
@@ -47,6 +48,13 @@ public class QRadioButton {
         }
     }
     
+    public func text(): String {
+        unsafe {
+            let cstr = qRadioButtonText(ptr)
+            return cstr.toString()
+        }
+    }
+    
     public func setChecked(checked: Bool) {
         unsafe {
             qRadioButtonSetChecked(ptr, checked)
@@ -56,6 +64,43 @@ public class QRadioButton {
     public func isChecked(): Bool {
         unsafe {
             return qRadioButtonIsChecked(ptr)
+        }
+    }
+    
+    /// 设置启用/禁用
+    public func setEnabled(enabled: Bool) {
+        unsafe {
+            qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
+        }
+    }
+    
+    /// 检查是否启用
+    public func isEnabled(): Bool {
+        unsafe {
+            qWidgetIsEnabled(ptr) == 1
+        }
+    }
+    
+    /// 设置样式表
+    public func setStyleSheet(style: String) {
+        unsafe {
+            let cstr = LibC.mallocCString(style)
+            qWidgetSetStyleSheet(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+    
+    /// 设置最小尺寸
+    public func setMinimumSize(minw: Int32, minh: Int32) {
+        unsafe {
+            qWidgetSetMinimumSize(ptr, minw, minh)
+        }
+    }
+    
+    /// 设置最大尺寸
+    public func setMaximumSize(maxw: Int32, maxh: Int32) {
+        unsafe {
+            qWidgetSetMaximumSize(ptr, maxw, maxh)
         }
     }
     

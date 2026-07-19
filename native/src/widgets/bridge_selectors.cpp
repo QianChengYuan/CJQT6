@@ -34,6 +34,15 @@ void qCheckBoxSetText(int64_t ptr, const char* text) {
     }
 }
 
+const char* qCheckBoxText(int64_t ptr) {
+    QCheckBox* checkBox = reinterpret_cast<QCheckBox*>(ptr);
+    if (!checkBox) return "";
+    QByteArray arr = checkBox->text().toUtf8();
+    char* result = (char*)malloc(arr.size() + 1);
+    if (result) memcpy(result, arr.constData(), arr.size() + 1);
+    return result;
+}
+
 void qCheckBoxSetChecked(int64_t ptr, bool checked) {
     QCheckBox* checkBox = reinterpret_cast<QCheckBox*>(ptr);
     if (checkBox) {
@@ -70,6 +79,15 @@ void qRadioButtonSetText(int64_t ptr, const char* text) {
     if (radioButton) {
         radioButton->setText(QString::fromUtf8(text));
     }
+}
+
+const char* qRadioButtonText(int64_t ptr) {
+    QRadioButton* radioButton = reinterpret_cast<QRadioButton*>(ptr);
+    if (!radioButton) return "";
+    QByteArray arr = radioButton->text().toUtf8();
+    char* result = (char*)malloc(arr.size() + 1);
+    if (result) memcpy(result, arr.constData(), arr.size() + 1);
+    return result;
 }
 
 void qRadioButtonSetChecked(int64_t ptr, bool checked) {
@@ -161,6 +179,50 @@ void qComboBoxSetEditable(int64_t ptr, bool editable) {
 void qComboBoxRemoveItem(int64_t ptr, int32_t index) {
     QComboBox* cb = reinterpret_cast<QComboBox*>(ptr);
     if (cb && index >= 0 && index < cb->count()) cb->removeItem(index);
+}
+
+void qComboBoxAddItems(int64_t ptr, const char* items) {
+    QComboBox* cb = reinterpret_cast<QComboBox*>(ptr);
+    if (cb && items) {
+        QStringList list = QString::fromUtf8(items).split('\n', Qt::SkipEmptyParts);
+        cb->addItems(list);
+    }
+}
+
+void qComboBoxInsertItem(int64_t ptr, int32_t index, const char* text) {
+    QComboBox* cb = reinterpret_cast<QComboBox*>(ptr);
+    if (cb && text) {
+        cb->insertItem(index, QString::fromUtf8(text));
+    }
+}
+
+void qComboBoxSetItemText(int64_t ptr, int32_t index, const char* text) {
+    QComboBox* cb = reinterpret_cast<QComboBox*>(ptr);
+    if (cb && text) {
+        cb->setItemText(index, QString::fromUtf8(text));
+    }
+}
+
+void qComboBoxSetCurrentText(int64_t ptr, const char* text) {
+    QComboBox* cb = reinterpret_cast<QComboBox*>(ptr);
+    if (cb && text) {
+        cb->setCurrentText(QString::fromUtf8(text));
+    }
+}
+
+int32_t qComboBoxFindText(int64_t ptr, const char* text) {
+    QComboBox* cb = reinterpret_cast<QComboBox*>(ptr);
+    if (cb && text) {
+        return cb->findText(QString::fromUtf8(text));
+    }
+    return -1;
+}
+
+void qComboBoxSetPlaceholderText(int64_t ptr, const char* text) {
+    QComboBox* cb = reinterpret_cast<QComboBox*>(ptr);
+    if (cb && text) {
+        cb->setPlaceholderText(QString::fromUtf8(text));
+    }
 }
 
 void qComboBoxDelete(int64_t ptr) {

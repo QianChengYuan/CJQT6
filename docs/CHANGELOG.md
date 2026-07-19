@@ -5,7 +5,82 @@
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 并遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
-## [1.1.0] - 2026-07-18
+## [1.1.0] - 2026-07-19
+
+### 新增
+
+**C++ 桥接层**
+- `qCheckBoxCreate/SetText/Text/SetChecked/IsChecked/ConnectStateChanged/DisconnectStateChanged` — QCheckBox 完整 FFI
+- `qRadioButtonCreate/SetText/Text/SetChecked/IsChecked/ConnectToggled/DisconnectToggled` — QRadioButton 完整 FFI
+- `qComboBoxAddItems/InsertItem/SetItemText/SetCurrentText/FindText/SetPlaceholderText` — QComboBox 批量/搜索/占位文本 FFI
+- `qComboBoxConnectCurrentTextChanged/DisconnectCurrentTextChanged` — QComboBox 文本变化信号
+- `qSpinBoxSetPrefix/Prefix/SetSuffix/Suffix/SetWrapping/Wrapping/SetSpecialValueText/CleanText` — QSpinBox 格式化 FFI
+- `qSliderSetSingleStep/SingleStep/SetPageStep/PageStep/SetTickPosition/TickPosition` — QSlider 步长/刻度 FFI
+- `qSliderSetTickInterval/TickInterval/SetInvertedControls/InvertedControls/SetTracking/HasTracking` — QSlider 进阶属性 FFI
+- `qSliderConnectSliderMoved/DisconnectSliderMoved/SetOnSliderPressed/SetOnSliderReleased` — QSlider 拖动/按下/释放信号
+- `qSliderDeleteCleanup` — QSlider 清理辅助
+- `qDialCreate/SetValue/Value/SetRange/SetSingleStep/SetWrapping/Wrapping/SetNotchesVisible/NotchesVisible/ConnectValueChanged/DisconnectValueChanged` — QDial 完整 FFI
+- `qDoubleSpinBoxCreate/SetValue/Value/SetRange/SetSingleStep/SetDecimals/Decimals/ConnectValueChanged/DisconnectValueChanged` — QDoubleSpinBox 完整 FFI
+- `qProgressBarCreate/SetValue/Value/SetRange/SetTextVisible/SetFormat/Format/SetOrientation/SetInvertedAppearance/Reset` — QProgressBar 完整 FFI
+- `qLCDNumberCreate/CreateWithDigits/Display/DisplayInt/SetMode/Mode/SetSegmentStyle/SegmentStyle/SetSmallDecimalPoint/SmallDecimalPoint/DigitCount/SetDigitCount/CheckOverflow` — QLCDNumber 完整 FFI
+- `qToolButtonCreate/SetText/SetIcon/SetIconSize/SetToolButtonStyle/SetPopupMode/SetAutoRaise/AutoRaise/SetArrowType/SetMenu/ShowMenu/ConnectClicked/DisconnectClicked` — QToolButton 完整 FFI
+- `qFrameCreate/SetFrameShape/SetFrameShadow/SetLineWidth` — QFrame 容器 FFI
+- `qScrollAreaCreate/SetWidget/SetWidgetResizable/Widget` — QScrollArea FFI
+- `qTabWidgetSetTabText/TabText/SetTabToolTip/InsertTab/SetTabsClosable/SetMovable/Clear/ConnectCurrentChanged/DisconnectCurrentChanged` — QTabWidget 进阶 FFI
+- `qGroupBoxSetTitle/Title/SetCheckable/IsCheckable/SetChecked/IsChecked` — QGroupBox 完整 FFI
+- `qSplitterCreate/CreateHorizontal/CreateVertical/AddWidget/Count/Widget/SetStretchFactor/SetHandleWidth/HandleWidth/SetChildrenCollapsible/ChildrenCollapsible/SetOrientation/Orientation` — QSplitter 完整 FFI
+
+**仓颉公开 API — 新控件类**
+- `QCheckBox` — 复选框（含 text/setText/setChecked/isChecked/setEnabled/isEnabled/setStyleSheet/setMinimumSize/setMaximumSize/setOnStateChanged）
+- `QRadioButton` — 单选按钮（含 text/setText/setChecked/isChecked/setEnabled/isEnabled/setStyleSheet/setMinimumSize/setMaximumSize/setOnToggled）
+- `QDial` — 旋钮控件（含 value/setRange/setSingleStep/setWrapping/setNotchesVisible/setOnValueChanged）
+- `QDoubleSpinBox` — 双精度旋转框（含 value/setRange/setSingleStep/setDecimals/setOnValueChanged）
+- `QProgressBar` — 进度条（含 value/setRange/setFormat/setTextVisible/setOrientation/setInvertedAppearance/reset）
+- `QLCDNumber` — LCD数字显示（含 display/displayInt/setMode/setSegmentStyle/digitCount/checkOverflow）
+- `QToolButton` — 工具按钮（含 setIcon/setToolButtonStyle/setPopupMode/setAutoRaise/setArrowType/setMenu/setOnClick）
+- `QGroupBox` — 分组框（含 setTitle/title/setCheckable/isCheckable/setChecked/isChecked/setLayout）
+- `QTabWidget` — 标签页（含 addTab/removeTab/insertTab/setTabText/tabText/setTabToolTip/setTabsClosable/setMovable/clear/setOnCurrentChanged）
+- `QScrollArea` — 滚动区域（含 setWidget/setWidgetResizable/widget）
+- `QFrame` — 边框容器（含 setFrameShape/setFrameShadow/setLineWidth/setLayout）
+- `QSplitter` — 分割器（含 createHorizontal/createVertical/addWidget/setStretchFactor/setHandleWidth/setChildrenCollapsible/setOrientation）
+
+**仓颉公开 API — 已有控件补齐方法**
+- `QCheckBox` — 新增 `text()`, `setEnabled()`, `isEnabled()`, `setStyleSheet()`, `setMinimumSize()`, `setMaximumSize()`
+- `QRadioButton` — 新增 `text()`, `setEnabled()`, `isEnabled()`, `setStyleSheet()`, `setMinimumSize()`, `setMaximumSize()`
+- `QComboBox` — 新增 `addItems()`, `insertItem()`, `setItemText()`, `setCurrentText()`, `findText()`, `setPlaceholderText()`, `count()`, `itemText()`, `setEditable()`, `removeItem()`, `setEnabled()`, `isEnabled()`, `setStyleSheet()`, `setMinimumSize()`, `setMaximumSize()`, `setOnCurrentTextChanged()`
+- `QSpinBox` — 新增 `setPrefix()`, `prefix()`, `setSuffix()`, `suffix()`, `setWrapping()`, `wrapping()`, `setSpecialValueText()`, `cleanText()`, `setEnabled()`, `isEnabled()`, `setStyleSheet()`, `setMinimumSize()`, `setMaximumSize()`, QtResource (`close()`/`isClosed()`/`isValid()`/`checkValid()`)
+- `QSlider` — 新增 `setSingleStep()`, `singleStep()`, `setPageStep()`, `pageStep()`, `setTickPosition()`, `tickPosition()`, `setTickInterval()`, `tickInterval()`, `setInvertedControls()`, `invertedControls()`, `setTracking()`, `hasTracking()`, `setEnabled()`, `isEnabled()`, `setStyleSheet()`, `setMinimumSize()`, `setMaximumSize()`, `setOnSliderMoved()`, `setOnSliderPressed()`, `setOnSliderReleased()`
+- `QProgressBar` — 新增 `setFormat()`, `format()`, `setOrientation()`, `setInvertedAppearance()`, `reset()`, `setEnabled()`, `isEnabled()`, `setStyleSheet()`, `setMinimumSize()`, `setMaximumSize()`
+- `QTabWidget` — 新增 `setTabText()`, `tabText()`, `setTabToolTip()`, `insertTab()`, `setTabsClosable()`, `setMovable()`, `clear()`, `setOnCurrentChanged()`, `setEnabled()`, `isEnabled()`, `setStyleSheet()`, `setMinimumSize()`, `setMaximumSize()`
+- `QGroupBox` — 新增 `title()`, `setEnabled()`, `isEnabled()`, `setStyleSheet()`, `setMinimumSize()`, `setMaximumSize()`
+- `QScrollArea` — 新增 `setEnabled()`, `isEnabled()`, `setStyleSheet()`, `setMinimumSize()`, `setMaximumSize()`
+- `QFrame` — 新增 `setLayout()`, `setEnabled()`, `isEnabled()`, `setStyleSheet()`, `setMinimumSize()`, `setMaximumSize()`
+- `QToolButton` — 新增 `setEnabled()`, `isEnabled()`, `setStyleSheet()`, `setMinimumSize()`, `setMaximumSize()`
+- `QLCDNumber` — 新增 `setEnabled()`, `isEnabled()`, `setStyleSheet()`, `setMinimumSize()`, `setMaximumSize()`
+- `QPushButton` — 新增 `text()`, `setCheckable()`, `setChecked()`, `isChecked()`, `setDefault()`, `setFlat()`, `setEnabled()`, `isEnabled()`, `setStyleSheet()`, QtResource (`close()`/`isClosed()`/`isValid()`/`checkValid()`)
+
+**新模块文件**
+- `src/widgets/` — checkbox.cj, radiobutton.cj, combobox.cj (扩展), spinbox.cj (重写), doublespinbox.cj, slider.cj (扩展), progressbar.cj, dial.cj, lcdnumber.cj, toolbutton.cj, containers.cj (分组框/标签页/滚动区域/边框/分割器), textedit.cj
+
+### 修复
+- **cjpm.toml link-option 平台隔离**: 将默认 `link-option = "releases/windows-x64/libcjqt6_bridge.dll.a"` 移入 `[target.x86_64-pc-windows-msvc]` 平台作用域，消除 Linux 构建时错误链接 Windows 库的问题
+- **Linux (WSL) cjpm build 恢复**: 修复后 Linux x86_64 在 WSL Ubuntu 24.04 上 `cjpm build` 通过，全部 13 个包编译成功
+
+### 改进
+- 所有基础控件现已统一补齐 `setEnabled/isEnabled`、`setStyleSheet`、`setMinimumSize/setMaximumSize`
+- 构建系统: cjpm.toml 链接方式改为直接路径 (releases/windows-x64/libcjqt6_bridge.dll.a)
+- 构建系统: cjpm.toml 平台特定链接选项迁移到 `[target.xxx]` 分段，Windows 和 Linux 各自独立
+- 发布目录 releases/ 加入 cjpm include 列表，确保 DLL 随包分发
+- 原生桥接层: cmake --clean-first 重建所有 bridge 源文件
+- **Linux x86_64 原生桥接库**: 在 WSL Ubuntu 24.04 / GCC 13.3 编译 `libcjqt6_bridge.so` (1.16 MB) 并部署到 `releases/linux-x64/`
+
+### 文档
+- 更新 api-completeness.md 反映新增 API 后的覆盖度评估
+- 更新 03_widgets_selection.md、04_containers_layout.md、16_misc_widgets.md、02_widgets_basic.md 补齐新增方法
+
+---
+
+## [1.0.2] - 2026-07-18
 
 ### 新增
 

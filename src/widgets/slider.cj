@@ -12,11 +12,34 @@ foreign func qSliderConnectValueChanged(ptr: Int64, callback: Int32Callback): Un
 foreign func qSliderDisconnectValueChanged(ptr: Int64): Unit
 foreign func qSliderConnectSliderMoved(ptr: Int64, callback: Int32Callback): Unit
 foreign func qSliderDisconnectSliderMoved(ptr: Int64): Unit
+foreign func qSliderSetSingleStep(ptr: Int64, step: Int32): Unit
+foreign func qSliderSingleStep(ptr: Int64): Int32
+foreign func qSliderSetPageStep(ptr: Int64, step: Int32): Unit
+foreign func qSliderPageStep(ptr: Int64): Int32
+foreign func qSliderSetTickPosition(ptr: Int64, position: Int32): Unit
+foreign func qSliderTickPosition(ptr: Int64): Int32
+foreign func qSliderSetTickInterval(ptr: Int64, interval: Int32): Unit
+foreign func qSliderTickInterval(ptr: Int64): Int32
+foreign func qSliderSetInvertedControls(ptr: Int64, inverted: Bool): Unit
+foreign func qSliderInvertedControls(ptr: Int64): Bool
+foreign func qSliderSetTracking(ptr: Int64, enable: Bool): Unit
+foreign func qSliderHasTracking(ptr: Int64): Bool
+foreign func qSliderDeleteCleanup(ptr: Int64): Unit
+foreign func qSliderSetOnSliderPressed(ptr: Int64, callback: Int64Callback): Unit
+foreign func qSliderSetOnSliderReleased(ptr: Int64, callback: Int64Callback): Unit
 foreign func qSliderDelete(ptr: Int64): Unit
 
 /// 滑动条方向常量
 public const Horizontal: Int32 = 1
 public const Vertical: Int32 = 2
+
+/// 刻度位置常量
+public const NoTicks: Int32 = 0
+public const TicksAbove: Int32 = 1
+public const TicksBelow: Int32 = 2
+public const TicksLeft: Int32 = 3
+public const TicksRight: Int32 = 4
+public const TicksBothSides: Int32 = 5
 
 /// 滑动条部件
 public class QSlider {
@@ -70,6 +93,127 @@ public class QSlider {
         }
     }
     
+    /// 设置单步步长
+    public func setSingleStep(step: Int32) {
+        unsafe {
+            qSliderSetSingleStep(ptr, step)
+        }
+    }
+    
+    /// 获取单步步长
+    public func singleStep(): Int32 {
+        unsafe {
+            return qSliderSingleStep(ptr)
+        }
+    }
+    
+    /// 设置页步步长
+    public func setPageStep(step: Int32) {
+        unsafe {
+            qSliderSetPageStep(ptr, step)
+        }
+    }
+    
+    /// 获取页步步长
+    public func pageStep(): Int32 {
+        unsafe {
+            return qSliderPageStep(ptr)
+        }
+    }
+    
+    /// 设置刻度位置
+    public func setTickPosition(position: Int32) {
+        unsafe {
+            qSliderSetTickPosition(ptr, position)
+        }
+    }
+    
+    /// 获取刻度位置
+    public func tickPosition(): Int32 {
+        unsafe {
+            return qSliderTickPosition(ptr)
+        }
+    }
+    
+    /// 设置刻度间隔
+    public func setTickInterval(interval: Int32) {
+        unsafe {
+            qSliderSetTickInterval(ptr, interval)
+        }
+    }
+    
+    /// 获取刻度间隔
+    public func tickInterval(): Int32 {
+        unsafe {
+            return qSliderTickInterval(ptr)
+        }
+    }
+    
+    /// 设置反向控制
+    public func setInvertedControls(inverted: Bool) {
+        unsafe {
+            qSliderSetInvertedControls(ptr, inverted)
+        }
+    }
+    
+    /// 获取反向控制
+    public func invertedControls(): Bool {
+        unsafe {
+            return qSliderInvertedControls(ptr)
+        }
+    }
+    
+    /// 设置追踪模式（为true时拖动过程中实时触发valueChanged）
+    public func setTracking(enable: Bool) {
+        unsafe {
+            qSliderSetTracking(ptr, enable)
+        }
+    }
+    
+    /// 是否启用追踪模式
+    public func hasTracking(): Bool {
+        unsafe {
+            return qSliderHasTracking(ptr)
+        }
+    }
+    
+    /// 设置启用/禁用
+    public func setEnabled(enabled: Bool) {
+        unsafe {
+            qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
+        }
+    }
+    
+    /// 检查是否启用
+    public func isEnabled(): Bool {
+        unsafe {
+            qWidgetIsEnabled(ptr) == 1
+        }
+    }
+    
+    /// 设置样式表
+    public func setStyleSheet(style: String) {
+        unsafe {
+            let cstr = LibC.mallocCString(style)
+            qWidgetSetStyleSheet(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+    
+    /// 设置最小尺寸
+    public func setMinimumSize(minw: Int32, minh: Int32) {
+        unsafe {
+            qWidgetSetMinimumSize(ptr, minw, minh)
+        }
+    }
+    
+    /// 设置最大尺寸
+    public func setMaximumSize(maxw: Int32, maxh: Int32) {
+        unsafe {
+            qWidgetSetMaximumSize(ptr, maxw, maxh)
+        }
+    }
+    
     /// 设置值变化回调
     public func setOnValueChanged(callback: Int32Callback) {
         unsafe {
@@ -95,6 +239,20 @@ public class QSlider {
     public func disconnectSliderMoved() {
         unsafe {
             qSliderDisconnectSliderMoved(ptr)
+        }
+    }
+    
+    /// 设置滑块按下回调
+    public func setOnSliderPressed(callback: Int64Callback) {
+        unsafe {
+            qSliderSetOnSliderPressed(ptr, callback)
+        }
+    }
+    
+    /// 设置滑块释放回调
+    public func setOnSliderReleased(callback: Int64Callback) {
+        unsafe {
+            qSliderSetOnSliderReleased(ptr, callback)
         }
     }
     

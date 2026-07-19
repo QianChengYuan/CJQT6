@@ -45,6 +45,11 @@ lcd.setSegmentStyle(LCDSegmentStyle.filled())  // 填充样式
 | `digitCount(): Int32` | 获取数字位数 |
 | `setDigitCount(numDigits: Int32)` | 设置数字位数 |
 | `checkOverflow(value: Float64): Bool` | 检查是否溢出 |
+| `setEnabled(enabled: Bool)` | 设置启用/禁用 |
+| `isEnabled(): Bool` | 检查是否启用 |
+| `setStyleSheet(style: String)` | 设置样式表 |
+| `setMinimumSize(minw: Int32, minh: Int32)` | 设置最小尺寸 |
+| `setMaximumSize(maxw: Int32, maxh: Int32)` | 设置最大尺寸 |
 | `show()` | 显示控件 |
 | `hide()` | 隐藏控件 |
 | `resize(width: Int32, height: Int32)` | 调整大小 |
@@ -108,10 +113,16 @@ toolBtn.setAutoRaise(true)
 | `setArrowType(arrowType: Int32)` | 设置箭头类型 |
 | `setMenu(menuPtr: Int64)` | 设置关联菜单 |
 | `showMenu()` | 显示菜单 |
+| `setEnabled(enabled: Bool)` | 设置启用/禁用 |
+| `isEnabled(): Bool` | 检查是否启用 |
+| `setStyleSheet(style: String)` | 设置样式表 |
+| `setMinimumSize(minw: Int32, minh: Int32)` | 设置最小尺寸 |
+| `setMaximumSize(maxw: Int32, maxh: Int32)` | 设置最大尺寸 |
 | `setOnClick(callback: VoidCallback)` | 设置点击回调 |
 | `disconnectClicked()` | 断开点击信号 |
 | `show()` | 显示控件 |
 | `hide()` | 隐藏控件 |
+| `resize(width: Int32, height: Int32)` | 调整大小 |
 | `getPtr(): Int64` | 获取指针 |
 | `delete()` | 释放资源 |
 

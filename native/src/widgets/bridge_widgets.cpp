@@ -112,6 +112,15 @@ void qButtonSetText(int64_t ptr, const char* text) {
     }
 }
 
+const char* qButtonText(int64_t ptr) {
+    QPushButton* button = reinterpret_cast<QPushButton*>(ptr);
+    if (!button) return "";
+    QByteArray arr = button->text().toUtf8();
+    char* result = (char*)malloc(arr.size() + 1);
+    if (result) memcpy(result, arr.constData(), arr.size() + 1);
+    return result;
+}
+
 void qButtonSetOnClick(int64_t ptr, void (*callback)(int64_t)) {
     QPushButton* button = reinterpret_cast<QPushButton*>(ptr);
     if (button) {

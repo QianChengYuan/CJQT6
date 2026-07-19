@@ -13,6 +13,7 @@ foreign func qButtonSetStandardIcon(ptr: Int64, iconType: Int32): Unit
 foreign func qButtonSetCheckable(ptr: Int64, checkable: Bool): Unit
 foreign func qButtonSetChecked(ptr: Int64, checked: Bool): Unit
 foreign func qButtonIsChecked(ptr: Int64): Bool
+foreign func qButtonText(ptr: Int64): CString
 foreign func qButtonSetDefault(ptr: Int64, isDefault: Bool): Unit
 foreign func qButtonSetFlat(ptr: Int64, flat: Bool): Unit
 foreign func qButtonDelete(ptr: Int64): Unit
@@ -85,6 +86,15 @@ public class QPushButton <: QtResource {
             let cstr = LibC.mallocCString(text)
             qButtonSetText(ptr, cstr)
             LibC.free(cstr)
+        }
+    }
+    
+    /// 获取按钮文本
+    public func text(): String {
+        checkValid()
+        unsafe {
+            let cstr = qButtonText(ptr)
+            return cstr.toString()
         }
     }
     

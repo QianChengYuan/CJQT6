@@ -127,9 +127,83 @@ void qTabWidgetSetCurrentIndex(int64_t ptr, int32_t index) {
     }
 }
 
+void qTabWidgetSetTabText(int64_t ptr, int32_t index, const char* text) {
+    QTabWidget* tabWidget = reinterpret_cast<QTabWidget*>(ptr);
+    if (tabWidget && text) {
+        tabWidget->setTabText(index, QString::fromUtf8(text));
+    }
+}
+
+const char* qTabWidgetTabText(int64_t ptr, int32_t index) {
+    QTabWidget* tabWidget = reinterpret_cast<QTabWidget*>(ptr);
+    if (!tabWidget) return "";
+    static QByteArray arr;
+    arr = tabWidget->tabText(index).toUtf8();
+    return arr.constData();
+}
+
+void qTabWidgetSetTabToolTip(int64_t ptr, int32_t index, const char* toolTip) {
+    QTabWidget* tabWidget = reinterpret_cast<QTabWidget*>(ptr);
+    if (tabWidget && toolTip) {
+        tabWidget->setTabToolTip(index, QString::fromUtf8(toolTip));
+    }
+}
+
+int32_t qTabWidgetInsertTab(int64_t ptr, int32_t index, int64_t widgetPtr, const char* title) {
+    QTabWidget* tabWidget = reinterpret_cast<QTabWidget*>(ptr);
+    QWidget* widget = reinterpret_cast<QWidget*>(widgetPtr);
+    if (tabWidget && widget && title) {
+        return static_cast<int32_t>(tabWidget->insertTab(index, widget, QString::fromUtf8(title)));
+    }
+    return -1;
+}
+
+void qTabWidgetSetTabsClosable(int64_t ptr, bool closable) {
+    QTabWidget* tabWidget = reinterpret_cast<QTabWidget*>(ptr);
+    if (tabWidget) {
+        tabWidget->setTabsClosable(closable);
+    }
+}
+
+void qTabWidgetSetMovable(int64_t ptr, bool movable) {
+    QTabWidget* tabWidget = reinterpret_cast<QTabWidget*>(ptr);
+    if (tabWidget) {
+        tabWidget->setMovable(movable);
+    }
+}
+
+void qTabWidgetClear(int64_t ptr) {
+    QTabWidget* tabWidget = reinterpret_cast<QTabWidget*>(ptr);
+    if (tabWidget) {
+        tabWidget->clear();
+    }
+}
+
+// QTabWidget 回调映射
+static std::unordered_map<int64_t, std::function<void(int64_t)>> g_tabChangedCallbacks;
+
+void qTabWidgetConnectCurrentChanged(int64_t ptr, void (*callback)(int64_t)) {
+    QTabWidget* tabWidget = reinterpret_cast<QTabWidget*>(ptr);
+    if (tabWidget && callback) {
+        int64_t widgetPtr = ptr;
+        g_tabChangedCallbacks[ptr] = [callback, widgetPtr](int64_t) { callback(widgetPtr); };
+        QObject::connect(tabWidget, &QTabWidget::currentChanged, [widgetPtr](int) {
+            auto it = g_tabChangedCallbacks.find(widgetPtr);
+            if (it != g_tabChangedCallbacks.end()) {
+                it->second(widgetPtr);
+            }
+        });
+    }
+}
+
+void qTabWidgetDisconnectCurrentChanged(int64_t ptr) {
+    g_tabChangedCallbacks.erase(ptr);
+}
+
 void qTabWidgetDelete(int64_t ptr) {
     QTabWidget* tabWidget = reinterpret_cast<QTabWidget*>(ptr);
     if (tabWidget) {
+        g_tabChangedCallbacks.erase(ptr);
         delete tabWidget;
     }
 }

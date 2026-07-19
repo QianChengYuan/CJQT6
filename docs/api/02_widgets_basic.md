@@ -54,11 +54,24 @@ btn.setStandardIcon(StandardIcon.Save)
 | 方法 | 说明 |
 |------|------|
 | `setText(text: String)` | 设置按钮文本 |
+| `text(): String` | 获取按钮文本 |
 | `setOnClick(callback: VoidCallback)` | 设置点击回调 |
+| `disconnectClick()` | 断开点击信号 |
 | `setIcon(path: String)` | 从文件加载图标 |
 | `setIconSize(w: Int32, h: Int32)` | 设置图标大小 |
 | `setStandardIcon(type: Int32)` | 使用 Qt 标准图标 |
-| `disconnect()` | 断开信号连接 |
+| `setCheckable(checkable: Bool)` | 设置是否可切换（开关模式） |
+| `setChecked(checked: Bool)` | 设置选中状态（开关模式） |
+| `isChecked(): Bool` | 获取选中状态（开关模式） |
+| `setDefault(isDefault: Bool)` | 设置是否为默认按钮 |
+| `setFlat(flat: Bool)` | 设置是否为扁平按钮 |
+| `setEnabled(enabled: Bool)` | 设置启用/禁用 |
+| `isEnabled(): Bool` | 检查是否启用 |
+| `setStyleSheet(style: String)` | 设置样式表 |
+| `close()` | 释放资源（实现 QtResource） |
+| `isClosed(): Bool` | 是否已释放 |
+| `isValid(): Bool` | 对象是否有效 |
+| `resize(w: Int32, h: Int32)` | 调整按钮大小 |
 
 **标准图标常量** (StandardIcon):
 ```cangjie

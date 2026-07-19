@@ -1,5 +1,7 @@
 package cjqt6.widgets
 
+import cjqt6.core.*
+
 // QLCDNumber - LCD数字显示
 foreign func qLCDNumberCreate(): Int64
 foreign func qLCDNumberCreateWithDigits(numDigits: Int32): Int64
@@ -118,6 +120,43 @@ public class QLCDNumber {
     public func smallDecimalPoint(): Bool {
         unsafe {
             return qLCDNumberSmallDecimalPoint(ptr)
+        }
+    }
+    
+    /// 设置启用/禁用
+    public func setEnabled(enabled: Bool) {
+        unsafe {
+            qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
+        }
+    }
+    
+    /// 检查是否启用
+    public func isEnabled(): Bool {
+        unsafe {
+            qWidgetIsEnabled(ptr) == 1
+        }
+    }
+    
+    /// 设置样式表
+    public func setStyleSheet(style: String) {
+        unsafe {
+            let cstr = LibC.mallocCString(style)
+            qWidgetSetStyleSheet(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+    
+    /// 设置最小尺寸
+    public func setMinimumSize(minw: Int32, minh: Int32) {
+        unsafe {
+            qWidgetSetMinimumSize(ptr, minw, minh)
+        }
+    }
+    
+    /// 设置最大尺寸
+    public func setMaximumSize(maxw: Int32, maxh: Int32) {
+        unsafe {
+            qWidgetSetMaximumSize(ptr, maxw, maxh)
         }
     }
     

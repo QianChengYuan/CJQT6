@@ -1,5 +1,7 @@
 package cjqt6.widgets
 
+import cjqt6.core.*
+
 // ============================================================
 // 容器控件 FFI声明
 // ============================================================
@@ -21,6 +23,15 @@ foreign func qTabWidgetRemoveTab(ptr: Int64, index: Int32): Unit
 foreign func qTabWidgetCurrentIndex(ptr: Int64): Int32
 foreign func qTabWidgetSetCurrentIndex(ptr: Int64, index: Int32): Unit
 foreign func qTabWidgetCount(ptr: Int64): Int32
+foreign func qTabWidgetSetTabText(ptr: Int64, index: Int32, text: CString): Unit
+foreign func qTabWidgetTabText(ptr: Int64, index: Int32): CString
+foreign func qTabWidgetSetTabToolTip(ptr: Int64, index: Int32, toolTip: CString): Unit
+foreign func qTabWidgetInsertTab(ptr: Int64, index: Int32, widgetPtr: Int64, title: CString): Int32
+foreign func qTabWidgetSetTabsClosable(ptr: Int64, closable: Bool): Unit
+foreign func qTabWidgetSetMovable(ptr: Int64, movable: Bool): Unit
+foreign func qTabWidgetClear(ptr: Int64): Unit
+foreign func qTabWidgetConnectCurrentChanged(ptr: Int64, callback: Int64Callback): Unit
+foreign func qTabWidgetDisconnectCurrentChanged(ptr: Int64): Unit
 foreign func qTabWidgetDelete(ptr: Int64): Unit
 
 // QScrollArea - 滚动区域
@@ -114,6 +125,43 @@ public class QGroupBox {
         }
     }
     
+    /// 设置启用/禁用
+    public func setEnabled(enabled: Bool) {
+        unsafe {
+            qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
+        }
+    }
+    
+    /// 检查是否启用
+    public func isEnabled(): Bool {
+        unsafe {
+            qWidgetIsEnabled(ptr) == 1
+        }
+    }
+    
+    /// 设置样式表
+    public func setStyleSheet(style: String) {
+        unsafe {
+            let cstr = LibC.mallocCString(style)
+            qWidgetSetStyleSheet(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+    
+    /// 设置最小尺寸
+    public func setMinimumSize(minw: Int32, minh: Int32) {
+        unsafe {
+            qWidgetSetMinimumSize(ptr, minw, minh)
+        }
+    }
+    
+    /// 设置最大尺寸
+    public func setMaximumSize(maxw: Int32, maxh: Int32) {
+        unsafe {
+            qWidgetSetMaximumSize(ptr, maxw, maxh)
+        }
+    }
+    
     public func getPtr(): Int64 {
         ptr
     }
@@ -121,6 +169,7 @@ public class QGroupBox {
     public func delete() {
         if (ptr != 0) {
             unsafe {
+                qSignalCleanup(ptr)
                 qGroupBoxDelete(ptr)
             }
             ptr = 0
@@ -181,6 +230,107 @@ public class QTabWidget {
     public func count(): Int32 {
         unsafe {
             qTabWidgetCount(ptr)
+        }
+    }
+    
+    /// 设置指定标签页的文本
+    public func setTabText(index: Int32, text: String) {
+        unsafe {
+            let cstr = LibC.mallocCString(text)
+            qTabWidgetSetTabText(ptr, index, cstr)
+            LibC.free(cstr)
+        }
+    }
+    
+    /// 获取指定标签页的文本
+    public func tabText(index: Int32): String {
+        unsafe {
+            let cstr = qTabWidgetTabText(ptr, index)
+            return cstr.toString()
+        }
+    }
+    
+    /// 设置指定标签页的工具提示
+    public func setTabToolTip(index: Int32, toolTip: String) {
+        unsafe {
+            let cstr = LibC.mallocCString(toolTip)
+            qTabWidgetSetTabToolTip(ptr, index, cstr)
+            LibC.free(cstr)
+        }
+    }
+    
+    /// 在指定位置插入标签页
+    public func insertTab(index: Int32, widgetPtr: Int64, title: String): Int32 {
+        unsafe {
+            let cstr = LibC.mallocCString(title)
+            let result = qTabWidgetInsertTab(ptr, index, widgetPtr, cstr)
+            LibC.free(cstr)
+            return result
+        }
+    }
+    
+    /// 设置标签页是否可关闭
+    public func setTabsClosable(closable: Bool) {
+        unsafe {
+            qTabWidgetSetTabsClosable(ptr, closable)
+        }
+    }
+    
+    /// 设置标签页是否可移动
+    public func setMovable(movable: Bool) {
+        unsafe {
+            qTabWidgetSetMovable(ptr, movable)
+        }
+    }
+    
+    /// 清除所有标签页
+    public func clear() {
+        unsafe {
+            qTabWidgetClear(ptr)
+        }
+    }
+    
+    /// 设置当前标签页变化回调
+    public func setOnCurrentChanged(callback: Int64Callback) {
+        unsafe {
+            qTabWidgetConnectCurrentChanged(ptr, callback)
+        }
+    }
+    
+    /// 断开当前标签页变化信号
+    public func disconnectCurrentChanged() {
+        unsafe {
+            qTabWidgetDisconnectCurrentChanged(ptr)
+        }
+    }
+    
+    /// 设置启用/禁用
+    public func setEnabled(enabled: Bool) {
+        unsafe {
+            qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
+        }
+    }
+    
+    /// 检查是否启用
+    public func isEnabled(): Bool {
+        unsafe {
+            qWidgetIsEnabled(ptr) == 1
+        }
+    }
+    
+    /// 设置样式表
+    public func setStyleSheet(style: String) {
+        unsafe {
+            let cstr = LibC.mallocCString(style)
+            qWidgetSetStyleSheet(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+    
+    /// 设置最大尺寸
+    public func setMaximumSize(maxw: Int32, maxh: Int32) {
+        unsafe {
+            qWidgetSetMaximumSize(ptr, maxw, maxh)
         }
     }
     
@@ -258,6 +408,43 @@ public class QScrollArea {
         }
     }
     
+    /// 设置启用/禁用
+    public func setEnabled(enabled: Bool) {
+        unsafe {
+            qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
+        }
+    }
+    
+    /// 检查是否启用
+    public func isEnabled(): Bool {
+        unsafe {
+            qWidgetIsEnabled(ptr) == 1
+        }
+    }
+    
+    /// 设置样式表
+    public func setStyleSheet(style: String) {
+        unsafe {
+            let cstr = LibC.mallocCString(style)
+            qWidgetSetStyleSheet(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+    
+    /// 设置最小尺寸
+    public func setMinimumSize(minw: Int32, minh: Int32) {
+        unsafe {
+            qWidgetSetMinimumSize(ptr, minw, minh)
+        }
+    }
+    
+    /// 设置最大尺寸
+    public func setMaximumSize(maxw: Int32, maxh: Int32) {
+        unsafe {
+            qWidgetSetMaximumSize(ptr, maxw, maxh)
+        }
+    }
+    
     public func getPtr(): Int64 {
         ptr
     }
@@ -265,6 +452,7 @@ public class QScrollArea {
     public func delete() {
         if (ptr != 0) {
             unsafe {
+                qSignalCleanup(ptr)
                 qScrollAreaDelete(ptr)
             }
             ptr = 0
@@ -341,6 +529,43 @@ public class QFrame {
         }
     }
     
+    /// 设置启用/禁用
+    public func setEnabled(enabled: Bool) {
+        unsafe {
+            qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
+        }
+    }
+    
+    /// 检查是否启用
+    public func isEnabled(): Bool {
+        unsafe {
+            qWidgetIsEnabled(ptr) == 1
+        }
+    }
+    
+    /// 设置样式表
+    public func setStyleSheet(style: String) {
+        unsafe {
+            let cstr = LibC.mallocCString(style)
+            qWidgetSetStyleSheet(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+    
+    /// 设置最小尺寸
+    public func setMinimumSize(minw: Int32, minh: Int32) {
+        unsafe {
+            qWidgetSetMinimumSize(ptr, minw, minh)
+        }
+    }
+    
+    /// 设置最大尺寸
+    public func setMaximumSize(maxw: Int32, maxh: Int32) {
+        unsafe {
+            qWidgetSetMaximumSize(ptr, maxw, maxh)
+        }
+    }
+    
     public func getPtr(): Int64 {
         ptr
     }
@@ -348,6 +573,7 @@ public class QFrame {
     public func delete() {
         if (ptr != 0) {
             unsafe {
+                qSignalCleanup(ptr)
                 qFrameDelete(ptr)
             }
             ptr = 0

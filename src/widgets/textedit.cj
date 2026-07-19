@@ -307,6 +307,15 @@ public class QTextEdit {
     }
     
     // 样式表支持
+    public func setStyleSheet(style: String) {
+        unsafe {
+            var cstr = LibC.mallocCString(style)
+            qWidgetSetStyleSheet(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+    
+    // 兼容旧API
     public func setWidgetStyleSheet(style: String) {
         unsafe {
             var cstr = LibC.mallocCString(style)

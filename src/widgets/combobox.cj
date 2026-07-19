@@ -18,6 +18,12 @@ foreign func qComboBoxCount(ptr: Int64): Int32
 foreign func qComboBoxItemText(ptr: Int64, index: Int32): CString
 foreign func qComboBoxSetEditable(ptr: Int64, editable: Bool): Unit
 foreign func qComboBoxRemoveItem(ptr: Int64, index: Int32): Unit
+foreign func qComboBoxAddItems(ptr: Int64, items: CString): Unit
+foreign func qComboBoxInsertItem(ptr: Int64, index: Int32, text: CString): Unit
+foreign func qComboBoxSetItemText(ptr: Int64, index: Int32, text: CString): Unit
+foreign func qComboBoxSetCurrentText(ptr: Int64, text: CString): Unit
+foreign func qComboBoxFindText(ptr: Int64, text: CString): Int32
+foreign func qComboBoxSetPlaceholderText(ptr: Int64, text: CString): Unit
 
 /// 下拉框部件
 public class QComboBox {
@@ -77,6 +83,127 @@ public class QComboBox {
     public func clear() {
         unsafe {
             qComboBoxClear(ptr)
+        }
+    }
+    
+    /// 批量添加选项（使用换行符分隔）
+    public func addItems(items: String) {
+        unsafe {
+            let cstr = LibC.mallocCString(items)
+            qComboBoxAddItems(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+    
+    /// 在指定位置插入选项
+    public func insertItem(index: Int32, text: String) {
+        unsafe {
+            let cstr = LibC.mallocCString(text)
+            qComboBoxInsertItem(ptr, index, cstr)
+            LibC.free(cstr)
+        }
+    }
+    
+    /// 设置指定索引的文本
+    public func setItemText(index: Int32, text: String) {
+        unsafe {
+            let cstr = LibC.mallocCString(text)
+            qComboBoxSetItemText(ptr, index, cstr)
+            LibC.free(cstr)
+        }
+    }
+    
+    /// 通过文本设置当前选中项
+    public func setCurrentText(text: String) {
+        unsafe {
+            let cstr = LibC.mallocCString(text)
+            qComboBoxSetCurrentText(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+    
+    /// 查找文本的索引（未找到返回-1）
+    public func findText(text: String): Int32 {
+        unsafe {
+            let cstr = LibC.mallocCString(text)
+            let result = qComboBoxFindText(ptr, cstr)
+            LibC.free(cstr)
+            return result
+        }
+    }
+    
+    /// 设置占位文本
+    public func setPlaceholderText(text: String) {
+        unsafe {
+            let cstr = LibC.mallocCString(text)
+            qComboBoxSetPlaceholderText(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+    
+    /// 获取选项数量
+    public func count(): Int32 {
+        unsafe {
+            return qComboBoxCount(ptr)
+        }
+    }
+    
+    /// 获取指定索引的文本
+    public func itemText(index: Int32): String {
+        unsafe {
+            let cstr = qComboBoxItemText(ptr, index)
+            return cstr.toString()
+        }
+    }
+    
+    /// 设置是否可编辑
+    public func setEditable(editable: Bool) {
+        unsafe {
+            qComboBoxSetEditable(ptr, editable)
+        }
+    }
+    
+    /// 移除指定索引的选项
+    public func removeItem(index: Int32) {
+        unsafe {
+            qComboBoxRemoveItem(ptr, index)
+        }
+    }
+    
+    /// 设置启用/禁用
+    public func setEnabled(enabled: Bool) {
+        unsafe {
+            qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
+        }
+    }
+    
+    /// 检查是否启用
+    public func isEnabled(): Bool {
+        unsafe {
+            qWidgetIsEnabled(ptr) == 1
+        }
+    }
+    
+    /// 设置样式表
+    public func setStyleSheet(style: String) {
+        unsafe {
+            let cstr = LibC.mallocCString(style)
+            qWidgetSetStyleSheet(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+    
+    /// 设置最小尺寸
+    public func setMinimumSize(minw: Int32, minh: Int32) {
+        unsafe {
+            qWidgetSetMinimumSize(ptr, minw, minh)
+        }
+    }
+    
+    /// 设置最大尺寸
+    public func setMaximumSize(maxw: Int32, maxh: Int32) {
+        unsafe {
+            qWidgetSetMaximumSize(ptr, maxw, maxh)
         }
     }
     
