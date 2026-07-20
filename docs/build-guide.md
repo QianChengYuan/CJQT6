@@ -512,7 +512,7 @@ ls native/build_linux/lib/libcjqt6_bridge.so
 ls native/build_macos/lib/libcjqt6_bridge.dylib
 
 # Windows (PowerShell)
-dir native\build_windows\bin\cjqt6_bridge.dll
+dir native\build_windows\bin\Release\cjqt6_bridge.dll
 ```
 
 ### 3.4 构建仓颉项目
@@ -565,9 +565,11 @@ cmake ..\.. -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="$env:QTDIR"
 cmake --build . --config Release
 cd ..\..
 
+# ⚠️ MSVC 构建时，产物位于 bin\Release / lib\Release 目录
+#    编译后只有 DLL 文件，不会生成 .lib（MSVC 特性）
 # 步骤2: 部署桥接库到 releases/（供 cjpm build 链接）
-Copy-Item native\build_windows\bin\cjqt6_bridge.dll releases\windows-x64\ -Force
-Copy-Item native\build_windows\lib\cjqt6_bridge.lib releases\windows-x64\ -Force
+Copy-Item native\build_windows\bin\Release\cjqt6_bridge.dll releases\windows-x64\ -Force
+Copy-Item native\build_windows\lib\Release\cjqt6_bridge.lib releases\windows-x64\ -Force
 
 # 步骤3: 构建仓颉项目
 cjpm build
@@ -589,7 +591,7 @@ ls -lh native/build_linux/lib/libcjqt6_bridge.so
 
 **Windows**:
 ```powershell
-dir native\build_windows\bin\cjqt6_bridge.dll
+dir native\build_windows\bin\Release\cjqt6_bridge.dll
 # 应显示库文件信息
 ```
 
@@ -916,9 +918,10 @@ cmake --build . --config Release
 
 cd ..\..
 
+# ⚠️ MSVC 构建时，产物位于 bin\Release / lib\Release 目录
 # 部署桥接库到 releases/
-Copy-Item native\build_windows\bin\cjqt6_bridge.dll releases\windows-x64\ -Force
-Copy-Item native\build_windows\lib\cjqt6_bridge.lib releases\windows-x64\ -Force
+Copy-Item native\build_windows\bin\Release\cjqt6_bridge.dll releases\windows-x64\ -Force
+Copy-Item native\build_windows\lib\Release\cjqt6_bridge.lib releases\windows-x64\ -Force
 
 # 构建仓颉项目
 cjpm build --release
