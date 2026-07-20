@@ -96,7 +96,7 @@ FFI就像一个翻译官，让仓颉语言和C++语言能够"对话"。
 └── 安装CMake (>= 3.16)
 
 构建阶段
-├── 步骤1: 创建构建目录 (native/build)
+├── 步骤1: 创建构建目录 (native/build_linux / build_windows / build_macos)
 ├── 步骤2: 运行CMake配置 (cmake ..)
 │   ├── 检测Qt6路径
 │   ├── 检测编译器
@@ -388,22 +388,26 @@ cmake --version
 
 ### 3.1 创建构建目录
 
-**命令**:
-```bash
-mkdir native/build && cd native/build
-```
+根据目标平台创建对应的构建目录：
+
+| 平台 | 命令 |
+|------|------|
+| Linux | `mkdir -p native/build_linux && cd native/build_linux` |
+| Windows | `mkdir native\build_windows && cd native\build_windows` |
+| macOS | `mkdir -p native/build_macos && cd native/build_macos` |
 
 **详细说明**:
 
-**`mkdir native/build`**:
-- **作用**: 在`native`目录下创建`build`子目录
+**`mkdir native/build_linux`** (或对应平台目录):
+- **作用**: 在`native`目录下创建平台特定构建子目录
 - **原因**: CMake推荐在独立目录中进行构建(out-of-source build)
 - **好处**: 
   - 不污染源码目录
   - 易于清理构建产物(直接删除build目录)
   - 支持多种构建配置(Debug/Release)
+  - Linux/Windows/macOS 构建互不干扰
 
-**`cd native/build`**:
+**`cd native/build_linux`**:
 - **作用**: 进入构建目录
 - **原因**: 后续命令需在构建目录中执行
 
@@ -414,11 +418,11 @@ native/
 ├── includes/
 └── src/
 
-构建后:
+构建后 (以Linux为例):
 native/
 ├── includes/
 ├── src/
-└── build/  ← 新建目录
+└── build_linux/  ← 新建目录
 ```
 
 ### 3.2 配置构建系统
@@ -449,7 +453,7 @@ cmake ..
 
 -- Configuring done
 -- Generating done
--- Build files have been written to: /path/to/native/build
+-- Build files have been written to: /path/to/native/build_linux
 ✓ 配置成功，生成构建文件完成
 ```
 
@@ -495,20 +499,20 @@ cmake --build . --config Release
 
 | 平台 | 库文件位置 | 文件名 |
 |------|-----------|--------|
-| Linux | `native/build/lib/` | `libcjqt6_bridge.so` |
-| Windows | `native/build/bin/` | `libcjqt6_bridge.dll` |
-| macOS | `native/build/lib/` | `libcjqt6_bridge.dylib` |
+| Linux | `native/build_linux/lib/` | `libcjqt6_bridge.so` |
+| Windows | `native/build_windows/bin/` | `cjqt6_bridge.dll` |
+| macOS | `native/build_macos/lib/` | `libcjqt6_bridge.dylib` |
 
 **验证库文件已生成**:
 ```bash
 # Linux
-ls native/build/lib/libcjqt6_bridge.so
+ls native/build_linux/lib/libcjqt6_bridge.so
 
 # macOS
-ls native/build/lib/libcjqt6_bridge.dylib
+ls native/build_macos/lib/libcjqt6_bridge.dylib
 
 # Windows (PowerShell)
-dir native\build\bin\libcjqt6_bridge.dll
+dir native\build_windows\bin\cjqt6_bridge.dll
 ```
 
 ### 3.4 构建仓颉项目
@@ -538,7 +542,7 @@ cjpm build
 **Linux/macOS**:
 ```bash
 # 步骤1: 构建FFI桥接库
-mkdir -p native/build && cd native/build
+mkdir -p native/build_linux && cd native/build_linux
 cmake ..
 make -j$(nproc)
 cd ../..
@@ -553,8 +557,8 @@ cjpm build
 $env:QTDIR = "path\to\Qt6"
 
 # 步骤1: 构建FFI桥接库
-New-Item -ItemType Directory -Force -Path native\build
-cd native\build
+New-Item -ItemType Directory -Force -Path native\build_windows
+cd native\build_windows
 
 # MSVC 2022 构建（使用 $env:QTDIR 自动引用Qt路径）
 cmake ..\.. -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="$env:QTDIR"
@@ -562,8 +566,8 @@ cmake --build . --config Release
 cd ..\..
 
 # 步骤2: 部署桥接库到 releases/（供 cjpm build 链接）
-Copy-Item native\build\bin\cjqt6_bridge.dll releases\windows-x64\ -Force
-Copy-Item native\build\lib\cjqt6_bridge.lib releases\windows-x64\ -Force
+Copy-Item native\build_windows\bin\cjqt6_bridge.dll releases\windows-x64\ -Force
+Copy-Item native\build_windows\lib\cjqt6_bridge.lib releases\windows-x64\ -Force
 
 # 步骤3: 构建仓颉项目
 cjpm build
@@ -579,19 +583,19 @@ cjpm build
 
 **Linux**:
 ```bash
-ls -lh native/build/lib/libcjqt6_bridge.so
+ls -lh native/build_linux/lib/libcjqt6_bridge.so
 # 应显示库文件信息，文件大小应>0
 ```
 
 **Windows**:
 ```powershell
-dir native\build\bin\libcjqt6_bridge.dll
+dir native\build_windows\bin\cjqt6_bridge.dll
 # 应显示库文件信息
 ```
 
 **macOS**:
 ```bash
-ls -lh native/build/lib/libcjqt6_bridge.dylib
+ls -lh native/build_macos/lib/libcjqt6_bridge.dylib
 # 应显示库文件信息
 ```
 
@@ -692,7 +696,7 @@ CMake Error at CMakeLists.txt:10 (find_package):
 | 错误信息 | 原因 | 解决方案 |
 |---------|------|---------|
 | `cannot find -lcjqt6_bridge` | FFI桥接库未构建 | 先执行[3.3 编译桥接库](#33-编译桥接库) |
-| `error while loading shared libraries: libcjqt6_bridge.so: cannot open shared object file` | 运行时找不到动态库 | 设置`LD_LIBRARY_PATH`:<br>`export LD_LIBRARY_PATH=native/build/lib:$LD_LIBRARY_PATH` |
+| `error while loading shared libraries: libcjqt6_bridge.so: cannot open shared object file` | 运行时找不到动态库 | 设置`LD_LIBRARY_PATH`:<br>`export LD_LIBRARY_PATH=native/build_linux/lib:$LD_LIBRARY_PATH` |
 | `The specified module could not be found` (Windows) | DLL路径未在PATH中 | 将DLL目录加入PATH或复制到可执行文件目录 |
 
 **案例: 动态库加载失败**
@@ -707,7 +711,7 @@ cannot open shared object file: No such file or directory
 
 **方法1: 设置环境变量**
 ```bash
-export LD_LIBRARY_PATH=$PWD/native/build/lib:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=$PWD/native/build_linux/lib:$LD_LIBRARY_PATH
 ```
 
 **方法2: 使用rpath (编译时设置)**
@@ -715,7 +719,7 @@ export LD_LIBRARY_PATH=$PWD/native/build/lib:$LD_LIBRARY_PATH
 
 **方法3: 复制库文件 (不推荐)**
 ```bash
-cp native/build/lib/libcjqt6_bridge.so /usr/lib/
+cp native/build_linux/lib/libcjqt6_bridge.so /usr/lib/
 ```
 
 ### 5.4 运行时错误
@@ -828,7 +832,7 @@ git clone https://gitcode.com/yuan_1992/CJQT6.git
 cd CJQT6
 
 # 构建FFI桥接库
-mkdir -p native/build && cd native/build
+mkdir -p native/build_linux && cd native/build_linux
 cmake .. -DCMAKE_BUILD_TYPE=Release
 make -j$(nproc)
 cd ../..
@@ -901,8 +905,8 @@ cd CJQT6
 $env:QTDIR = "path\to\Qt6"
 
 # 构建FFI桥接库
-New-Item -ItemType Directory -Force -Path native\build
-cd native\build
+New-Item -ItemType Directory -Force -Path native\build_windows
+cd native\build_windows
 
 # 配置 CMake（MSVC 2022）
 cmake ..\.. -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="$env:QTDIR"
@@ -913,8 +917,8 @@ cmake --build . --config Release
 cd ..\..
 
 # 部署桥接库到 releases/
-Copy-Item native\build\bin\cjqt6_bridge.dll releases\windows-x64\ -Force
-Copy-Item native\build\lib\cjqt6_bridge.lib releases\windows-x64\ -Force
+Copy-Item native\build_windows\bin\cjqt6_bridge.dll releases\windows-x64\ -Force
+Copy-Item native\build_windows\lib\cjqt6_bridge.lib releases\windows-x64\ -Force
 
 # 构建仓颉项目
 cjpm build --release
@@ -927,7 +931,7 @@ cjpm run --example hello_window
 
 1. 打开CMake GUI
 2. 设置源码路径: `C:/path/to/CJQT6/native`
-3. 设置构建路径: `C:/path/to/CJQT6/native/build`
+3. 设置构建路径: `C:/path/to/CJQT6/native/build_windows`
 4. 点击"Configure"，选择Visual Studio生成器
 5. 点击"Generate"
 6. 点击"Open Project"打开VS
@@ -976,7 +980,7 @@ git clone https://gitcode.com/yuan_1992/CJQT6.git
 cd CJQT6
 
 # 构建FFI桥接库
-mkdir -p native/build && cd native/build
+mkdir -p native/build_macos && cd native/build_macos
 
 # 注意: 指定Qt6路径
 cmake .. -DCMAKE_PREFIX_PATH=$(brew --prefix qt)
@@ -1029,7 +1033,7 @@ cmake .. -DCMAKE_PREFIX_PATH="/path1;/path2;/path3"
 
 **FFI桥接库调试版本**:
 ```bash
-cd native/build
+cd native/build_linux
 cmake .. -DCMAKE_BUILD_TYPE=Debug
 make
 ```
@@ -1054,7 +1058,10 @@ cmake .. -DCMAKE_SYSTEM_NAME=Linux \
 
 **清理FFI桥接库**:
 ```bash
-rm -rf native/build
+# Linux/macOS
+rm -rf native/build_linux native/build_macos
+# Windows (PowerShell)
+# Remove-Item -Recurse -Force native\build_windows
 ```
 
 **清理仓颉构建**:
@@ -1064,13 +1071,17 @@ cjpm clean
 
 **完全清理**:
 ```bash
-rm -rf native/build target/
+# Linux/macOS
+rm -rf native/build_linux native/build_macos target/
+# Windows (PowerShell)
+# Remove-Item -Recurse -Force native\build_windows, target
 ```
 
 ### 7.5 查看构建选项
 
 ```bash
-cd native/build
+# Linux/macOS
+cd native/build_linux  # 或 native/build_macos
 cmake .. -L  # 列出所有CMake选项
 ```
 

@@ -115,11 +115,11 @@ git clone https://gitcode.com/yuan_1992/CJQT6.git
 cd CJQT6
 
 # 编译桥接库
-mkdir native/build && cd native/build
-cmake .. -DCMAKE_PREFIX_PATH=/path/to/qt6
+mkdir native/build_linux && cd native/build_linux
+cmake ../.. -DCMAKE_PREFIX_PATH=/path/to/qt6
 make -j$(nproc)
 
-# 编译产物位于 native/build/bin/ 和 native/build/lib/
+# 编译产物位于 native/build_linux/lib/
 ```
 
 详细编译指南请参阅 [构建文档](../docs/build-guide.md)。

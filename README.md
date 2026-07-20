@@ -56,14 +56,14 @@ cd CJQT6
 
 ```bash
 # 步骤1: 构建FFI桥接库(C++部分)
-mkdir -p native/build && cd native/build
+mkdir -p native/build_linux && cd native/build_linux
 cmake ../..                         # 配置构建系统（指定项目根目录的 CMakeLists.txt）
 make -j$(nproc)                     # 编译(使用多核加速)
 cd ../..
 
 # 步骤2: 部署桥接库到 releases/（供 cjpm build 链接）
 mkdir -p releases/linux-x64/
-cp native/build/lib/libcjqt6_bridge.so releases/linux-x64/
+cp native/build_linux/lib/libcjqt6_bridge.so releases/linux-x64/
 
 # 验证桥接库
 ldd releases/linux-x64/libcjqt6_bridge.so
@@ -79,9 +79,9 @@ cjpm build
 $env:QTDIR = "path\to\Qt6"
 
 # 步骤1: 构建FFI桥接库
-# 如果 native\build 已存在，先删除：Remove-Item -Recurse -Force native\build
-New-Item -ItemType Directory -Force -Path native\build
-cd native\build
+# 如果 native\build_windows 已存在，先删除：Remove-Item -Recurse -Force native\build_windows
+New-Item -ItemType Directory -Force -Path native\build_windows
+cd native\build_windows
 
 # MSVC 2022 构建（Visual Studio 17 2022）
 cmake ..\.. -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="$env:QTDIR"
@@ -90,8 +90,8 @@ cmake --build . --config Release               # 编译
 cd ..\..
 
 # 步骤2: 将编译好的桥接库部署到 releases/（供 cjpm build 链接使用）
-Copy-Item native\build\bin\cjqt6_bridge.dll releases\windows-x64\ -Force
-Copy-Item native\build\lib\cjqt6_bridge.lib releases\windows-x64\ -Force
+Copy-Item native\build_windows\bin\cjqt6_bridge.dll releases\windows-x64\ -Force
+Copy-Item native\build_windows\lib\cjqt6_bridge.lib releases\windows-x64\ -Force
 
 # 或使用脚本一键完成步骤1-2：
 # .\scripts\update-bridge.ps1
@@ -115,11 +115,11 @@ cjpm build
 
 ```bash
 # 验证FFI桥接库 (Linux/macOS)
-ls build/lib/libcjqt6_bridge.so    # Linux
-ls build/lib/libcjqt6_bridge.dylib # macOS
+ls native/build_linux/lib/libcjqt6_bridge.so    # Linux
+ls native/build_macos/lib/libcjqt6_bridge.dylib # macOS
 
 # 验证FFI桥接库 (Windows PowerShell)
-dir native\build\bin\cjqt6_bridge.dll
+dir native\build_windows\bin\cjqt6_bridge.dll
 ```
 
 ### 4. 运行示例

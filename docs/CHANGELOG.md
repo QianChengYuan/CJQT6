@@ -5,13 +5,14 @@
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 并遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
-## [1.1.1] - 2026-07-19
+## [1.1.1] - 2026-07-20
 
 ### 变更
 
 - **构建工具链**: Windows 编译工具链从 MinGW 切换为 MSVC 2022 (Qt 6.10.3 msvc2022_64)
-- **FFI 桥接库**: `native/build/` 构建输出改为 MSVC 风格的 `cjqt6_bridge.dll` + `.lib` (移除了 MinGW `lib` 前缀命名)
+- **FFI 桥接库**: `native/build_windows/` 构建输出改为 MSVC 风格的 `cjqt6_bridge.dll` + `.lib` (移除了 MinGW `lib` 前缀命名)
 - **`cjpm.toml`**: 添加 `compile-option = "-L releases/windows-x64 -lcjqt6_bridge"` 使链接标志传播到所有子包
+- **构建目录规范**: 统一使用平台专属构建目录名：`native/build_linux/`、`native/build_windows/`、`native/build_macos/`
 
 ### 修复
 
@@ -21,18 +22,24 @@
 ### 清理
 
 - 删除旧 MinGW 构建目录 `build/`
+- 删除 `native/.qt/` (CMake 过期产物)
+- 移动根目录 `build_linux/` → `native/build_linux/`
+- 重命名 `native/build/` → `native/build_windows/`
 - 清理 `releases/windows-x64/` 中旧的 MinGW DLL (`libcjqt6_bridge.dll`)
 - 文档中所有 MinGW 引用更新为 MSVC 或标记为交叉编译专用
+- 全面清理 10+ 个文件中 `native/build/` 的旧路径引用，统一为平台专属目录
 
 ### 文档
 
 - README.md — Windows 构建命令改为 MSVC 2022，DLL 命名更新
 - releases/README.md — 重写（修复 GBK 编码损坏），更新为 MSVC 路径
-- docs/build-guide.md — 所有 Windows 构建步骤更新为 MSVC 2022
+- docs/build-guide.md — 所有 Windows 构建步骤更新为 MSVC 2022，构建目录路径统一
 - docs/cross-compile.md — MSVC 设为首选，MinGW 降为备选
 - scripts/setup-qt-env.ps1/sh — Qt 路径更新为 MSVC 2022
 - scripts/update-bridge.ps1 — 构建目录和 DLL 命名与 MSVC 同步
 - scripts/build-windows-x64.ps1 — 构建输出和 releases 同步更新
+- docs/tutorial/01-quick-start.md — 构建目录路径更新
+- docs/unwrapped-controls-analysis.md — 构建目录路径更新
 
 ## [1.1.0] - 2026-07-19
 

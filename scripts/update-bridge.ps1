@@ -6,7 +6,7 @@ $base = Split-Path $PSScriptRoot -Parent
 Set-Location $base
 
 Write-Host "[1/3] 编译 C++ bridge (MSVC 2022)..."
-Set-Location native\build
+Set-Location native\build_windows
 cmake --build . --config Release 2>&1 | Select-Object -Last 2
 if ($LASTEXITCODE -ne 0) {
     Write-Host "❌ 编译失败"
@@ -15,8 +15,8 @@ if ($LASTEXITCODE -ne 0) {
 
 Set-Location $base
 Write-Host "[2/3] 同步到 releases/windows-x64..."
-Copy-Item native\build\bin\cjqt6_bridge.dll releases\windows-x64\ -Force
-Copy-Item native\build\lib\cjqt6_bridge.lib releases\windows-x64\ -Force
+Copy-Item native\build_windows\bin\cjqt6_bridge.dll releases\windows-x64\ -Force
+Copy-Item native\build_windows\lib\cjqt6_bridge.lib releases\windows-x64\ -Force
 Write-Host "  ✓ cjqt6_bridge.dll"
 Write-Host "  ✓ cjqt6_bridge.lib (MSVC 导入库)"
 

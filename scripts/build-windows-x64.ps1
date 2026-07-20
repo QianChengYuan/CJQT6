@@ -34,7 +34,7 @@ if ([string]::IsNullOrEmpty($QtDir)) {
 Write-Host "Qt6路径: $QtDir" -ForegroundColor Green
 
 # 创建构建目录
-$buildDir = "native\build"
+$buildDir = "native\build_windows"
 if (-not (Test-Path $buildDir)) {
     New-Item -ItemType Directory -Path $buildDir -Force | Out-Null
 }

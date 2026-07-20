@@ -1,7 +1,7 @@
 # Windows x64 交叉编译工具链 (MinGW-w64)
 # 注意: 本项目在 Windows 上的主要构建方式为 MSVC 2022。
 # 此文件仅用于在 Linux 上通过 MinGW-w64 交叉编译 Windows 桥接库的场景。
-# Windows 原生构建请直接在 native/build 目录中使用 MSVC 2022。
+# Windows 原生构建请直接在 native/build_windows 目录中使用 MSVC 2022。
 # 使用方法: cmake -DCMAKE_TOOLCHAIN_FILE=cmake/win64-mingw.cmake ..
 
 set(CMAKE_SYSTEM_NAME Windows)

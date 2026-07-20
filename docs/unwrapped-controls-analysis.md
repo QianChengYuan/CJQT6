@@ -269,7 +269,7 @@ public class QControl {
 ### 构建命令
 ```powershell
 # 重新编译桥接库
-cd native\build && cmake --build . --config Release && cd ..\..
+cd native\build_windows && cmake --build . --config Release && cd ..\..
 
 # 仓颉编译
 cjpm build

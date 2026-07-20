@@ -39,11 +39,11 @@ qmake6 --version  # Linux/macOS
 cd CJQT6
 
 # 检查FFI桥接库是否存在
-ls native/build/lib/libCJQT6_bridge.so  # Linux
-ls native/build/lib/CJQT6_bridge.dll    # Windows
+ls native/build_linux/lib/libCJQT6_bridge.so  # Linux
+dir native\build_windows\bin\CJQT6_bridge.dll # Windows
 
-# 如果不存在,先构建
-cd native/build
+# 如果不存在,先构建 (Linux)
+cd native/build_linux
 cmake ..
 make
 cd ../..

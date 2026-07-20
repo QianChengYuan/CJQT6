@@ -5,7 +5,7 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 LIB_PATH="$SCRIPT_DIR/lib"
-BRIDGE_LIB="$PROJECT_ROOT/native/build/lib/libcjqt6_bridge.so"
+BRIDGE_LIB="$PROJECT_ROOT/native/build_linux/lib/libcjqt6_bridge.so"
 
 # 如果lib目录不存在或库文件过期，自动复制
 if [ ! -f "$LIB_PATH/libcjqt6_bridge.so" ] || [ "$BRIDGE_LIB" -nt "$LIB_PATH/libcjqt6_bridge.so" ]; then

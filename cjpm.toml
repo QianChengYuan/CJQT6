@@ -1,93 +1,105 @@
+# ============================================================
+# cjpm.toml —— CJQT6（仓颉 Qt6 封装库）
+# 本文件仅包含仓颉官方 cjpm 认可的字段，确保 cjpm 解析零警告。
+# 非官方扩展配置请见同目录下的 cjqt6-ext.toml。
+# ============================================================
+
 [package]
-  name = "cjqt6"
-  version = "1.1.0"
-  description = "仓颉语言的Qt6封装库 - 让仓颉像Python使用PyQt一样便捷"
-  authors = ["CJQT6 Team"]
-  license = "MIT"
-  
-  # 仓颉编译器版本要求
-  cjc-version = "1.1.0"
-  
-  # 包输出类型
-  output-type = "dynamic"
-  
-  # 编译选项
-  compile-option = "-Woff unused -L releases/windows-x64 -lcjqt6_bridge"
-  
-  # 项目链接
-  homepage = "https://gitcode.com/yuan_1992/CJQT6"
-  repository = "https://gitcode.com/yuan_1992/CJQT6.git"
+  # ---- 必填字段 ----
+  cjc-version = "1.1.0"          # 所需 cjc 最低版本
+  name        = "cjqt6"          # 模块名（须与模块 root 包名一致）
+  version     = "1.1.0"         # 模块版本（语义化）
+  output-type = "dynamic"        # static / dynamic / executable
+
+  # ---- 选填字段 ----
+  description = "仓颉语言的 Qt6 封装库 - 让仓颉像 Python 使用 PyQt 一样便捷"
+  authors     = ["CJQT6 Team"]
+  license     = "MIT"            # 遵循 SPDX Identifier 规范
+
+  homepage      = "https://gitcode.com/yuan_1992/CJQT6"
+  repository    = "https://gitcode.com/yuan_1992/CJQT6.git"
   documentation = "https://gitcode.com/yuan_1992/CJQT6/blob/main/README.md"
-  
-  # 关键词标签
-  keywords = ["qt", "gui", "ui", "widgets", "ffi", "cross-platform"]
-  
-  # 打包范围
+
+  # 制品标签 / 分类（官方字段，原 [metadata] 内容合并至此）
+  tag      = ["qt", "gui", "ui", "widgets", "ffi", "cross-platform"]
+  category = "gui"
+
+  # 编译 / 链接选项
+  compile-option = "-Woff unused"
+  link-option    = "-L releases/windows-x64 -lcjqt6_bridge"
+
+  # 源码 / 产物路径（使用官方字段，替代原 src-dir 等自定义项）
+  src-dir    = "src"
+  target-dir = "target"
+
+  # 打包范围（gitignore 风格匹配规则）
   include = ["src", "docs", "examples", "native/includes", "releases"]
   exclude = ["*.txt", "*.log", "*.bak", "*.tmp", "test_*", "build_*"]
 
+# ============================================================
+# 依赖管理
+# ============================================================
 [dependencies]
-# 平台原生库包（条件依赖）
-# 注意：暂时移除平台分包，采用单包策略
-# 原生库将打包在主包内
+  # 当前无远程仓颉依赖；如使用中心仓 / git / 本地仓颉库，按官方格式声明：
+  # qt-helpers = "1.0.0"
+  # some-lib   = { git = "https://...", branch = "main" }
+  # local-lib  = { path = "./path/to/module" }
 
-# FFI桥接库配置
-[native]
-  bridge-name = "cjqt6_bridge"
-  bridge-path = "native/build/bin"
-  
-  # 支持的平台列表
-  platforms = [
-    "linux-x64",
-    "linux-arm64",
-    "windows-x64",
-    "macos-x64",
-    "macos-arm64"
-  ]
+# 测试期依赖（仅 cjpm test 时生效）
+[test-dependencies]
 
-# 平台到二进制文件的映射
-[native.binaries]
-  linux-x64 = "lib/native/linux-x64/libcjqt6_bridge.so"
-  linux-arm64 = "lib/native/linux-arm64/libcjqt6_bridge.so"
-  windows-x64 = "lib/native/windows-x64/cjqt6_bridge.dll"
-  macos-x64 = "lib/native/macos-x64/libcjqt6_bridge.dylib"
-  macos-arm64 = "lib/native/macos-arm64/libcjqt6_bridge.dylib"
+# 构建脚本依赖（供 build.cj 使用）
+[script-dependencies]
 
+# ============================================================
+# C 语言 FFI 依赖（官方原生库接入方式，替代原 [native] 表）
+# 注：桥接库 libcjqt6_bridge 的查找路径由下方 [target.*] 的
+#      link-option 控制；本表用于声明 C 库路径供 cjpm 识别。
+# ============================================================
+[ffi.c]
+  cjqt6_bridge.path = "native"
 
+# ============================================================
+# 平台特定编译 / 链接选项
+# 三元组可通过在对应平台执行 `cjc -v` 获取
+# ============================================================
 
-# 系统依赖要求
-[requirements]
-  qt6 = ">=6.2"
-  cmake = ">=3.16"
-
-# 平台特定要求
-[requirements.platform.linux]
-  glibc = ">=2.28"
-
-[requirements.platform.windows]
-  msvc = ">=2019"
-
-[requirements.platform.macos]
-  macos = ">=11.0"
-
-# 安装后脚本
-[install]
-  post-install = "scripts/post_install.cj"
-  verify-script = "scripts/verify_install.cj"
-
-# 平台特定链接选项
+# Windows + MSVC
 [target.x86_64-pc-windows-msvc]
-  link-option = "releases/windows-x64/cjqt6_bridge.lib"
+  compile-option = ""
+  link-option    = "releases/windows-x64/cjqt6_bridge.lib"
 
+# Windows + MinGW（交叉编译）
 [target.x86_64-pc-windows-gnu]
-  link-option = "releases/windows-x64/libcjqt6_bridge.dll.a"
+  compile-option = ""
+  link-option    = "releases/windows-x64/libcjqt6_bridge.dll.a"
 
+# Linux x86_64
 [target.x86_64-unknown-linux-gnu]
-  link-option = "-Lreleases/linux-x64 -lcjqt6_bridge"
+  compile-option = ""
+  link-option    = "-Lreleases/linux-x64 -lcjqt6_bridge"
 
-# 包元数据
-[metadata]
-  category = "gui"
-  maturity = "stable"
-  tags = ["desktop", "cross-platform", "native"]
+# macOS x86_64
+[target.x86_64-apple-darwin]
+  compile-option = ""
+  link-option    = "-Lreleases/macos-x64 -lcjqt6_bridge"
 
+# macOS Apple Silicon
+[target.aarch64-apple-darwin]
+  compile-option = ""
+  link-option    = "-Lreleases/macos-arm64 -lcjqt6_bridge"
+
+# Linux ARM64（交叉编译 / 原生）
+[target.aarch64-unknown-linux-gnu]
+  compile-option = ""
+  link-option    = "-Lreleases/linux-arm64 -lcjqt6_bridge"
+
+# ============================================================
+# 平台隔离的依赖项（示例，按需启用）
+# 语法：[target.<triple>[.<debug|release>].dependencies]
+# ============================================================
+# [target.x86_64-unknown-linux-gnu.dependencies]
+#   some-linux-only-lib = "1.0.0"
+#
+# [target.x86_64-pc-windows-msvc.dependencies]
+#   some-windows-only-lib = "1.0.0"
