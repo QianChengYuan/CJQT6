@@ -1,4 +1,4 @@
-# 编译输出
+﻿# 编译输出
 build/
 target/
 *.o
@@ -111,3 +111,4 @@ nul
 !releases/**/*.so
 !releases/**/*.dll
 !releases/**/*.dll.a
+!releases/**/*.lib
