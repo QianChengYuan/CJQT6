@@ -573,6 +573,35 @@ Copy-Item native\build_windows\lib\cjqt6_bridge.lib releases\windows-x64\ -Force
 cjpm build
 ```
 
+### 3.6 一键重建脚本（Windows 推荐）
+
+对于 Windows + MSVC 2022 环境，项目提供了一键重建脚本，避免手动配置 `vcvars`/Qt 路径以及遗漏运行时部署步骤。
+
+**`scripts/rebuild_all.ps1` — 完整重建并自包含部署：**
+```powershell
+cd C:\CodeTools\cangjie_git\CJQT6
+powershell -ExecutionPolicy Bypass -File scripts\rebuild_all.ps1
+cd examples\all_controls_demo
+cjpm run
+```
+脚本依次执行：清理旧构建 → `cjpm build`（cjqt6 子包）→ 重编原生 bridge（`build_bridge.bat`）→ `cjpm build`（示例）→ `deploy_qt.ps1`（部署 Qt 运行时 + 平台插件 + MSVC CRT + 各依赖 DLL 到 `target/release/bin`）。
+
+**`scripts/build_bridge.bat` — 仅重编原生 FFI 桥接库（修改 `native/src/**` 后使用）：**
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\build_bridge.bat
+```
+自动探测 `vcvars64.bat` 与已安装的 Qt6 msvc 目录，并将产物同步到 `releases/windows-x64/`。
+
+> ⚠️ **该脚本会删除 `native/build_windows/cjqt6_bridge.dir` 强制全量重编。** 仅删除 `cjqt6_bridge.dll` 只会触发 MSBuild 的增量 *relink*，已打补丁的 `bridge_qml.cpp` 不会被重新编译（stale 的 `.obj` 会被原样打进 DLL）。修改桥接源码后务必全量重编，否则运行时可能报"无法定位程序输入点"。
+
+**`examples/all_controls_demo/deploy_qt.ps1` — 仅部署运行时（示例已 build 后单独补部署）：**
+```powershell
+cd examples\all_controls_demo
+powershell -ExecutionPolicy Bypass -File deploy_qt.ps1
+```
+
+> ⚠️ **`.bat` 必须纯 ASCII：** `build_bridge.bat` 的注释必须为英文/ASCII。在中文（GBK）代码页的 `cmd.exe` 下，UTF-8 中文注释会被逐字节误读，导致脚本解析错乱、命令被拆碎。切勿在 `.bat` 中写中文。
+
 ---
 
 ## 4. 构建验证
@@ -738,6 +767,22 @@ cp native/build_linux/lib/libcjqt6_bridge.so /usr/lib/
 | `CMake Error: Could not find CMAKE_C_COMPILER` | Visual Studio未安装或未配置 | 安装Visual Studio 2019或2022，选择"使用C++的桌面开发" |
 | `LINK : fatal error LNK1181: cannot open input file 'Qt6.lib'` | Qt6库路径未设置 | 设置环境变量`QTDIR`，或在CMake中指定 |
 | `The code execution cannot proceed because Qt6Core.dll was not found` | 运行时Qt DLL未找到 | 将`%QTDIR%\bin`加入PATH，或复制DLL到程序目录 |
+
+#### 5.5.1 桥接库加载："无法定位程序输入点 qt_qFindChild_helper"
+
+**错误现象**：
+```
+无法定位程序输入点 qt_qFindChild_helper ... 于动态链接库 cjqt6_bridge.dll 上。
+```
+或示例启动即崩溃、窗口不出现。
+
+**原因**：旧版 bridge 源码用 `QObject::findChild<>()` 展开了对 Qt 内部符号 `qt_qFindChild_helper` 的 import，而 Qt 6.10.3 运行时已不再导出该符号。bridge DLL 在加载阶段解析导入表失败 → 整个 DLL 无法加载。
+
+**解决方案**：用已打补丁的 `native/src/qml/bridge_qml.cpp`（改为手动递归遍历 `QObject::children()` + `qobject_cast<QQuickItem*>` + `objectName()` 查找 `QQuickItem*`）**全量重编 bridge**。务必先删除 `native/build_windows/cjqt6_bridge.dir` 再重新 cmake/msbuild（或运行 `scripts/build_bridge.bat`），然后用以下命令确认导入表中已无该符号：
+```powershell
+objdump -p releases\windows-x64\cjqt6_bridge.dll | findstr qFindChild
+# 无输出即表示已修复
+```
 
 ### 5.6 错误诊断流程
 

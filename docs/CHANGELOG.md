@@ -1,4 +1,23 @@
 ﻿# 更新日志
+## [1.2.1] - 2026-07-22
+
+### 修复
+
+- **FFI 桥接库 (Windows) — Qt 6.10.3 加载兼容性**: 移除对 Qt 内部符号 `qt_qFindChild_helper` 的 import。`native/src/qml/bridge_qml.cpp` 中 `QQuickItem*` 的查找由 `QObject::findChild<>()` 改为手动递归遍历 `QObject::children()` + `qobject_cast<QQuickItem*>` + `objectName()` 匹配。Qt 6.10.3 运行时已不再导出该符号，旧 bridge DLL 在加载时会报"无法定位程序输入点 qt_qFindChild_helper"。
+  - ⚠️ **修复后必须全量重编 bridge**: 仅删除 `cjqt6_bridge.dll` 只会触发 MSBuild 的增量 *relink*，不会重编已打补丁的 `bridge_qml.cpp`（stale 的 `.obj` 会被原样打进 DLL）。须删除整个 `native/build_windows/cjqt6_bridge.dir` 后再重新 cmake/msbuild。`scripts/build_bridge.bat` 已内置此强制全量重编。
+- **示例运行时部署**: 新增 `examples/all_controls_demo/deploy_qt.ps1`，将 Qt6 运行时、平台插件(`qwindows`)、MSVC CRT(`vcruntime140`/`msvcp140`)、cjqt6 子包依赖 DLL 及原生 bridge DLL 一并拷入 `target/release/bin`，使示例运行时自包含，`cjpm run` 不再依赖 PATH 注入。
+
+### 新增
+
+- **Examples: all_controls_demo 第 8 页「新控件 v1.2.0」**: 集成展示 v1.2.0 新增的全部控件——QCommandLinkButton、QDialogButtonBox、QScrollBar、QSplashScreen、QSizeGrip、QRubberBand、QIntValidator/QDoubleValidator，以及 Model/View（QStandardItemModel + QListView / QTableView / QTreeView / QFileSystemModel / QHeaderView）。
+- **构建脚本**: 新增 `scripts/rebuild_all.ps1`（一键清理 → `cjpm build` 子包 → 重编 bridge → `cjpm build` 示例 → 自包含部署）与 `scripts/build_bridge.bat`（MSVC + 当前 Qt 一键重编 bridge，自动探测 `vcvars64.bat` 与 Qt 路径，强制全量重编避免 stale 对象）。
+
+### 文档
+
+- `docs/build-guide.md` — 新增「一键重建脚本」章节，说明 `rebuild_all.ps1` / `build_bridge.bat` / `deploy_qt.ps1` 用法，并记录 Qt 6.10.3 bridge 重编与 `.bat` 须纯 ASCII（避免 GBK 代码页下中文注释导致 cmd 乱码）的坑。
+
+---
+
 ## [1.2.0] - 2026-07-22
 
 ### Added

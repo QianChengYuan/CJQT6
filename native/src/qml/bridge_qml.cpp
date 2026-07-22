@@ -465,10 +465,32 @@ float qQuickItemHeight(int64_t ptr) {
     return 0;
 }
 
+// 递归在 QObject 子对象树中按 objectName 查找 QQuickItem。
+// 不使用 QObject::findChild，以避免对 Qt 内部符号 qt_qFindChild_helper 的依赖
+// （该符号在 Qt 6.10+ 运行时中已不再导出，会导致 bridge 加载失败）。
+static QQuickItem* findQuickChildByName(QObject* obj, const QString& name) {
+    if (!obj) return nullptr;
+    const QObjectList& children = obj->children();
+    for (QObject* child : children) {
+        if (child->objectName() == name) {
+            QQuickItem* qi = qobject_cast<QQuickItem*>(child);
+            if (qi) return qi;
+        }
+    }
+    for (QObject* child : children) {
+        QQuickItem* qi = qobject_cast<QQuickItem*>(child);
+        if (qi) {
+            QQuickItem* found = findQuickChildByName(qi, name);
+            if (found) return found;
+        }
+    }
+    return nullptr;
+}
+
 int64_t qQuickItemFindChild(int64_t ptr, const char* name) {
     QQuickItem* item = reinterpret_cast<QQuickItem*>(ptr);
     if (item) {
-        QQuickItem* child = item->findChild<QQuickItem*>(name);
+        QQuickItem* child = findQuickChildByName(item, QString::fromUtf8(name));
         return reinterpret_cast<int64_t>(child);
     }
     return 0;
