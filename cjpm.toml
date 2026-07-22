@@ -26,7 +26,7 @@
 
   # 编译 / 链接选项
   compile-option = "-Woff unused"
-  link-option    = "-L releases/windows-x64 -lcjqt6_bridge"
+  link-option    = "C:/CodeTools/cangjie_git/CJQT6/releases/windows-x64/cjqt6_bridge.dll"
 
   # 源码 / 产物路径（使用官方字段，替代原 src-dir 等自定义项）
   src-dir    = "src"
@@ -64,7 +64,7 @@
 # Windows + MinGW（交叉编译）
 [target.x86_64-pc-windows-gnu]
   compile-option = ""
-  link-option    = "releases/windows-x64/libcjqt6_bridge.dll.a"
+  link-option    = "C:/CodeTools/cangjie_git/CJQT6/releases/windows-x64/cjqt6_bridge.dll"
 
 # Linux x86_64
 [target.x86_64-unknown-linux-gnu]

@@ -1,7 +1,7 @@
-ï»¿
+
 /**
  * @file bridge_widgets.cpp
- * @brief åŸºç¡€éƒ¨ä»¶æ¡¥æ¥å‡½æ•° - QLabel, QPushButton, QToolButton, QLineEdit, QTextEdit
+ * @brief »ù´¡²¿¼şÇÅ½Óº¯Êı - QLabel, QPushButton, QToolButton, QLineEdit, QTextEdit
  */
 
 #include <QLabel>
@@ -29,20 +29,28 @@
 #include <QGraphicsOpacityEffect>
 #include <QGraphicsDropShadowEffect>
 #include <QFontComboBox>
+#include <QDialogButtonBox>
+#include <QCommandLinkButton>
+#include <QScrollBar>
+#include <QIntValidator>
+#include <QDoubleValidator>
+#include <QSplashScreen>
+#include <QSizeGrip>
+#include <QRubberBand>
 #include <functional>
 #include <unordered_map>
 
-// å¤–éƒ¨å›è°ƒæ˜ å°„å£°æ˜
+// Íâ²¿»Øµ÷Ó³ÉäÉùÃ÷
 extern std::unordered_map<int64_t, std::function<void(int64_t)>> g_buttonCallbacks;
 extern std::unordered_map<int64_t, std::function<void(int64_t)>> g_lineEditCallbacks;
 
-// æ–‡æœ¬å˜åŒ–å›è°ƒæ˜ å°„
+// ÎÄ±¾±ä»¯»Øµ÷Ó³Éä
 static std::unordered_map<int64_t, std::function<void(int64_t)>> g_textChangedCallbacks;
 
 extern "C" {
 
 // ============================================================
-// QLabel æ¡¥æ¥å‡½æ•°
+// QLabel ÇÅ½Óº¯Êı
 // ============================================================
 
 int64_t qLabelCreate() {
@@ -97,7 +105,7 @@ void qLabelDelete(int64_t ptr) {
 }
 
 // ============================================================
-// QPushButton æ¡¥æ¥å‡½æ•°
+// QPushButton ÇÅ½Óº¯Êı
 // ============================================================
 
 int64_t qButtonCreate() {
@@ -135,7 +143,7 @@ void qButtonSetOnClick(int64_t ptr, void (*callback)(int64_t)) {
     }
 }
 
-// è®¾ç½®æŒ‰é’®å›¾æ ‡ï¼ˆä»æ–‡ä»¶è·¯å¾„ï¼‰
+// ÉèÖÃ°´Å¥Í¼±ê£¨´ÓÎÄ¼şÂ·¾¶£©
 void qButtonSetIcon(int64_t ptr, const char* iconPath) {
     QPushButton* button = reinterpret_cast<QPushButton*>(ptr);
     if (button && iconPath) {
@@ -144,7 +152,7 @@ void qButtonSetIcon(int64_t ptr, const char* iconPath) {
     }
 }
 
-// è®¾ç½®æŒ‰é’®å›¾æ ‡å¤§å°
+// ÉèÖÃ°´Å¥Í¼±ê´óĞ¡
 void qButtonSetIconSize(int64_t ptr, int32_t width, int32_t height) {
     QPushButton* button = reinterpret_cast<QPushButton*>(ptr);
     if (button) {
@@ -152,7 +160,7 @@ void qButtonSetIconSize(int64_t ptr, int32_t width, int32_t height) {
     }
 }
 
-// è®¾ç½®æŒ‰é’®ä½¿ç”¨ Qt æ ‡å‡†å›¾æ ‡
+// ÉèÖÃ°´Å¥Ê¹ÓÃ Qt ±ê×¼Í¼±ê
 void qButtonSetStandardIcon(int64_t ptr, int32_t iconType) {
     QPushButton* button = reinterpret_cast<QPushButton*>(ptr);
     if (button) {
@@ -220,7 +228,7 @@ void qButtonDelete(int64_t ptr) {
 }
 
 // ============================================================
-// QToolButton æ¡¥æ¥å‡½æ•°
+// QToolButton ÇÅ½Óº¯Êı
 // ============================================================
 
 int64_t qToolButtonCreate() {
@@ -309,7 +317,7 @@ void qToolButtonDelete(int64_t ptr) {
 }
 
 // ============================================================
-// QLineEdit æ¡¥æ¥å‡½æ•°
+// QLineEdit ÇÅ½Óº¯Êı
 // ============================================================
 
 int64_t qLineEditCreate() {
@@ -383,21 +391,21 @@ void qLineEditSetOnTextChanged(int64_t ptr, void (*callback)(int64_t)) {
     }
 }
 
-// å¯†ç å¯è§æ€§åˆ‡æ¢æŒ‰é’®å­˜å‚¨
+// ÃÜÂë¿É¼ûĞÔÇĞ»»°´Å¥´æ´¢
 static std::unordered_map<int64_t, std::function<void()>> g_passwordToggleCallbacks;
 static std::unordered_map<int64_t, QToolButton*> g_passwordToggleButtons;
 
-// æ·»åŠ å¯†ç å¯è§æ€§åˆ‡æ¢æŒ‰é’®åˆ°è¾“å…¥æ¡†å³ä¾§
+// Ìí¼ÓÃÜÂë¿É¼ûĞÔÇĞ»»°´Å¥µ½ÊäÈë¿òÓÒ²à
 void qLineEditAddPasswordToggleAction(int64_t ptr, void (*callback)()) {
     QLineEdit* lineEdit = reinterpret_cast<QLineEdit*>(ptr);
     if (lineEdit && callback) {
-        // åˆ›å»ºä¸€ä¸ª QToolButton ä½œä¸ºåˆ‡æ¢æŒ‰é’®
+        // ´´½¨Ò»¸ö QToolButton ×÷ÎªÇĞ»»°´Å¥
         QToolButton* toggleBtn = new QToolButton(lineEdit);
         
-        // ä½¿ç”¨æ–‡æœ¬ç¬¦å·ï¼šâ— è¡¨ç¤ºéšè—çŠ¶æ€ï¼Œâ—‹ è¡¨ç¤ºæ˜¾ç¤ºçŠ¶æ€
-        toggleBtn->setText(QString::fromUtf8("\u25CF"));  // â— å®å¿ƒåœ†ç‚¹
+        // Ê¹ÓÃÎÄ±¾·ûºÅ£º¡ñ ±íÊ¾Òş²Ø×´Ì¬£¬¡ğ ±íÊ¾ÏÔÊ¾×´Ì¬
+        toggleBtn->setText(QString::fromUtf8("\u25CF"));  // ¡ñ ÊµĞÄÔ²µã
         toggleBtn->setCursor(Qt::PointingHandCursor);
-        toggleBtn->setFixedSize(20, 20);  // æ›´å°çš„æŒ‰é’®
+        toggleBtn->setFixedSize(20, 20);  // ¸üĞ¡µÄ°´Å¥
         toggleBtn->setStyleSheet(
             "QToolButton {"
             "  border: none;"
@@ -413,11 +421,11 @@ void qLineEditAddPasswordToggleAction(int64_t ptr, void (*callback)()) {
             "}"
         );
         
-        // å­˜å‚¨å›è°ƒå’ŒæŒ‰é’®
+        // ´æ´¢»Øµ÷ºÍ°´Å¥
         g_passwordToggleCallbacks[ptr] = callback;
         g_passwordToggleButtons[ptr] = toggleBtn;
         
-        // è¿æ¥ç‚¹å‡»ä¿¡å·
+        // Á¬½Óµã»÷ĞÅºÅ
         int64_t widgetPtr = ptr;
         QObject::connect(toggleBtn, &QToolButton::clicked, [widgetPtr]() {
             auto it = g_passwordToggleCallbacks.find(widgetPtr);
@@ -426,20 +434,20 @@ void qLineEditAddPasswordToggleAction(int64_t ptr, void (*callback)()) {
             }
         });
         
-        // è®¾ç½®è¾“å…¥æ¡†å³ä¾§å†…è¾¹è·
+        // ÉèÖÃÊäÈë¿òÓÒ²àÄÚ±ß¾à
         int frameWidth = lineEdit->style()->pixelMetric(QStyle::PM_DefaultFrameWidth);
         lineEdit->setStyleSheet(
             QString("QLineEdit { padding-right: %1px; }").arg(20 + frameWidth + 1)
         );
         
-        // å®šä½æŒ‰é’® - å‚ç›´å±…ä¸­ï¼Œå‘ä¸Šå¾®è°ƒ
+        // ¶¨Î»°´Å¥ - ´¹Ö±¾ÓÖĞ£¬ÏòÉÏÎ¢µ÷
         int editHeight = lineEdit->height();
-        int yPos = (editHeight - 20) / 2 - 1;  // å‘ä¸Šåç§»1åƒç´ 
-        int xPos = lineEdit->width() - 20 - frameWidth - 1;  // å‡å°‘å³è¾¹ç©ºéš™
+        int yPos = (editHeight - 20) / 2 - 1;  // ÏòÉÏÆ«ÒÆ1ÏñËØ
+        int xPos = lineEdit->width() - 20 - frameWidth - 1;  // ¼õÉÙÓÒ±ß¿ÕÏ¶
         toggleBtn->move(xPos, yPos);
         toggleBtn->show();
         
-        // ç›‘å¬æ–‡æœ¬å˜åŒ–é‡æ–°å®šä½
+        // ¼àÌıÎÄ±¾±ä»¯ÖØĞÂ¶¨Î»
         QObject::connect(lineEdit, &QLineEdit::textChanged, [lineEdit, toggleBtn]() {
             int frameWidth = lineEdit->style()->pixelMetric(QStyle::PM_DefaultFrameWidth);
             int editHeight = lineEdit->height();
@@ -450,42 +458,42 @@ void qLineEditAddPasswordToggleAction(int64_t ptr, void (*callback)()) {
     }
 }
 
-// è®¾ç½®å¯†ç åˆ‡æ¢æŒ‰é’®å›¾æ ‡ï¼ˆtrue=å¯è§ï¼Œfalse=éšè—ï¼‰
+// ÉèÖÃÃÜÂëÇĞ»»°´Å¥Í¼±ê£¨true=¿É¼û£¬false=Òş²Ø£©
 void qLineEditSetPasswordToggleIcon(int64_t ptr, bool visible) {
     auto it = g_passwordToggleButtons.find(ptr);
     if (it != g_passwordToggleButtons.end()) {
         QToolButton* btn = it->second;
         if (btn) {
             if (visible) {
-                // å¯†ç å¯è§æ—¶æ˜¾ç¤ºç©ºå¿ƒåœ†ç‚¹ï¼ˆè¡¨ç¤ºå¯ä»¥éšè—ï¼‰
-                btn->setText(QString::fromUtf8("\u25CB"));  // â—‹ ç©ºå¿ƒåœ†ç‚¹
+                // ÃÜÂë¿É¼ûÊ±ÏÔÊ¾¿ÕĞÄÔ²µã£¨±íÊ¾¿ÉÒÔÒş²Ø£©
+                btn->setText(QString::fromUtf8("\u25CB"));  // ¡ğ ¿ÕĞÄÔ²µã
             } else {
-                // å¯†ç éšè—æ—¶æ˜¾ç¤ºå®å¿ƒåœ†ç‚¹ï¼ˆè¡¨ç¤ºå¯ä»¥æ˜¾ç¤ºï¼‰
-                btn->setText(QString::fromUtf8("\u25CF"));  // â— å®å¿ƒåœ†ç‚¹
+                // ÃÜÂëÒş²ØÊ±ÏÔÊ¾ÊµĞÄÔ²µã£¨±íÊ¾¿ÉÒÔÏÔÊ¾£©
+                btn->setText(QString::fromUtf8("\u25CF"));  // ¡ñ ÊµĞÄÔ²µã
             }
         }
     }
 }
 
-// è®¾ç½®è¾“å…¥æ©ç ï¼ˆæ ¼å¼åŒ–è¾“å…¥ï¼‰
-// æ©ç å­—ç¬¦ï¼š
-// 0 - æ•°å­—ï¼ˆå¿…å¡«ï¼‰
-// 9 - æ•°å­—ï¼ˆå¯é€‰ï¼‰
-// # - æ•°å­—æˆ–æ­£è´Ÿå·ï¼ˆå¯é€‰ï¼‰
-// D - éé›¶æ•°å­—ï¼ˆå¿…å¡«ï¼‰
-// d - éé›¶æ•°å­—ï¼ˆå¯é€‰ï¼‰
-// A - å­—æ¯ï¼ˆå¿…å¡«ï¼‰
-// a - å­—æ¯ï¼ˆå¯é€‰ï¼‰
-// N - å­—æ¯æˆ–æ•°å­—ï¼ˆå¿…å¡«ï¼‰
-// n - å­—æ¯æˆ–æ•°å­—ï¼ˆå¯é€‰ï¼‰
-// H - åå…­è¿›åˆ¶å­—ç¬¦ï¼ˆå¿…å¡«ï¼‰
-// h - åå…­è¿›åˆ¶å­—ç¬¦ï¼ˆå¯é€‰ï¼‰
-// X - ä»»æ„å­—ç¬¦ï¼ˆå¿…å¡«ï¼‰
-// x - ä»»æ„å­—ç¬¦ï¼ˆå¯é€‰ï¼‰
-// > - è½¬æ¢ä¸ºå¤§å†™
-// < - è½¬æ¢ä¸ºå°å†™
-// ! - å…³é—­å¤§å°å†™è½¬æ¢
-// ;c - è®¾ç½®å ä½å­—ç¬¦ä¸º c
+// ÉèÖÃÊäÈëÑÚÂë£¨¸ñÊ½»¯ÊäÈë£©
+// ÑÚÂë×Ö·û£º
+// 0 - Êı×Ö£¨±ØÌî£©
+// 9 - Êı×Ö£¨¿ÉÑ¡£©
+// # - Êı×Ö»òÕı¸ººÅ£¨¿ÉÑ¡£©
+// D - ·ÇÁãÊı×Ö£¨±ØÌî£©
+// d - ·ÇÁãÊı×Ö£¨¿ÉÑ¡£©
+// A - ×ÖÄ¸£¨±ØÌî£©
+// a - ×ÖÄ¸£¨¿ÉÑ¡£©
+// N - ×ÖÄ¸»òÊı×Ö£¨±ØÌî£©
+// n - ×ÖÄ¸»òÊı×Ö£¨¿ÉÑ¡£©
+// H - Ê®Áù½øÖÆ×Ö·û£¨±ØÌî£©
+// h - Ê®Áù½øÖÆ×Ö·û£¨¿ÉÑ¡£©
+// X - ÈÎÒâ×Ö·û£¨±ØÌî£©
+// x - ÈÎÒâ×Ö·û£¨¿ÉÑ¡£©
+// > - ×ª»»Îª´óĞ´
+// < - ×ª»»ÎªĞ¡Ğ´
+// ! - ¹Ø±Õ´óĞ¡Ğ´×ª»»
+// ;c - ÉèÖÃÕ¼Î»×Ö·ûÎª c
 void qLineEditSetInputMask(int64_t ptr, const char* mask) {
     QLineEdit* lineEdit = reinterpret_cast<QLineEdit*>(ptr);
     if (lineEdit && mask) {
@@ -493,7 +501,7 @@ void qLineEditSetInputMask(int64_t ptr, const char* mask) {
     }
 }
 
-// è®¾ç½®æ˜¯å¦æ˜¾ç¤ºè¾¹æ¡†
+// ÉèÖÃÊÇ·ñÏÔÊ¾±ß¿ò
 void qLineEditSetFrame(int64_t ptr, bool enabled) {
     QLineEdit* lineEdit = reinterpret_cast<QLineEdit*>(ptr);
     if (lineEdit) {
@@ -501,7 +509,7 @@ void qLineEditSetFrame(int64_t ptr, bool enabled) {
     }
 }
 
-// è®¾ç½®æ–‡æœ¬å¯¹é½æ–¹å¼
+// ÉèÖÃÎÄ±¾¶ÔÆë·½Ê½
 // 0x01 = AlignLeft
 // 0x02 = AlignRight
 // 0x04 = AlignHCenter
@@ -516,7 +524,7 @@ void qLineEditSetAlignment(int64_t ptr, int32_t alignment) {
     }
 }
 
-// è·å–æ–‡æœ¬é•¿åº¦
+// »ñÈ¡ÎÄ±¾³¤¶È
 int32_t qLineEditLength(int64_t ptr) {
     QLineEdit* lineEdit = reinterpret_cast<QLineEdit*>(ptr);
     if (lineEdit) {
@@ -525,7 +533,7 @@ int32_t qLineEditLength(int64_t ptr) {
     return 0;
 }
 
-// è·å–æœ€å¤§é•¿åº¦
+// »ñÈ¡×î´ó³¤¶È
 int32_t qLineEditMaxLength(int64_t ptr) {
     QLineEdit* lineEdit = reinterpret_cast<QLineEdit*>(ptr);
     if (lineEdit) {
@@ -534,7 +542,7 @@ int32_t qLineEditMaxLength(int64_t ptr) {
     return 32767;
 }
 
-// æ˜¯å¦æœ‰é€‰ä¸­æ–‡æœ¬
+// ÊÇ·ñÓĞÑ¡ÖĞÎÄ±¾
 bool qLineEditHasSelectedText(int64_t ptr) {
     QLineEdit* lineEdit = reinterpret_cast<QLineEdit*>(ptr);
     if (lineEdit) {
@@ -543,7 +551,7 @@ bool qLineEditHasSelectedText(int64_t ptr) {
     return false;
 }
 
-// è·å–é€‰ä¸­çš„æ–‡æœ¬
+// »ñÈ¡Ñ¡ÖĞµÄÎÄ±¾
 const char* qLineEditSelectedText(int64_t ptr) {
     static thread_local std::string selectedTextStr;
     QLineEdit* lineEdit = reinterpret_cast<QLineEdit*>(ptr);
@@ -554,7 +562,7 @@ const char* qLineEditSelectedText(int64_t ptr) {
     return "";
 }
 
-// é€‰ä¸­æ‰€æœ‰æ–‡æœ¬
+// Ñ¡ÖĞËùÓĞÎÄ±¾
 void qLineEditSelectAll(int64_t ptr) {
     QLineEdit* lineEdit = reinterpret_cast<QLineEdit*>(ptr);
     if (lineEdit) {
@@ -562,7 +570,7 @@ void qLineEditSelectAll(int64_t ptr) {
     }
 }
 
-// è®¾ç½®ç„¦ç‚¹
+// ÉèÖÃ½¹µã
 void qLineEditSetFocus(int64_t ptr) {
     QLineEdit* lineEdit = reinterpret_cast<QLineEdit*>(ptr);
     if (lineEdit) {
@@ -581,7 +589,7 @@ void qLineEditDelete(int64_t ptr) {
 }
 
 // ============================================================
-// QTextEdit æ¡¥æ¥å‡½æ•°
+// QTextEdit ÇÅ½Óº¯Êı
 // ============================================================
 
 int64_t qTextEditCreate() {
@@ -599,7 +607,7 @@ void qTextEditSetText(int64_t ptr, const char* text) {
 const char* qTextEditText(int64_t ptr) {
     QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
     if (textEdit) {
-        // ä½¿ç”¨ç‹¬ç«‹çš„é™æ€ç¼“å†²åŒºï¼Œå¤§å°è¶³å¤Ÿå¤§
+        // Ê¹ÓÃ¶ÀÁ¢µÄ¾²Ì¬»º³åÇø£¬´óĞ¡×ã¹»´ó
         static QByteArray buffer;
         buffer = textEdit->toPlainText().toUtf8();
         return buffer.constData();
@@ -631,7 +639,7 @@ void qTextEditDelete(int64_t ptr) {
 } // extern "C"
 
 // ============================================================
-// QTextEdit æ‰©å±•æ–¹æ³•
+// QTextEdit À©Õ¹·½·¨
 // ============================================================
 
 extern "C" {
@@ -768,7 +776,7 @@ void qTextEditSetFontItalic(int64_t ptr, bool italic) {
     }
 }
 
-// æŸ¥æ‰¾åŠŸèƒ½
+// ²éÕÒ¹¦ÄÜ
 bool qTextEditFind(int64_t ptr, const char* text, bool caseSensitive) {
     QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
     if (textEdit) {
@@ -803,7 +811,7 @@ void qTextEditFindPrev(int64_t ptr, const char* text, bool caseSensitive) {
     }
 }
 
-// æ›¿æ¢åŠŸèƒ½
+// Ìæ»»¹¦ÄÜ
 void qTextEditReplace(int64_t ptr, const char* newText) {
     QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
     if (textEdit) {
@@ -824,7 +832,7 @@ int qTextEditReplaceAll(int64_t ptr, const char* oldText, const char* newText, b
         flags |= QTextDocument::FindCaseSensitively;
     }
     
-    // ç§»åŠ¨åˆ°æ–‡æ¡£å¼€å¤´
+    // ÒÆ¶¯µ½ÎÄµµ¿ªÍ·
     QTextCursor cursor = textEdit->textCursor();
     cursor.movePosition(QTextCursor::Start);
     textEdit->setTextCursor(cursor);
@@ -843,7 +851,7 @@ int qTextEditReplaceAll(int64_t ptr, const char* oldText, const char* newText, b
     return count;
 }
 
-// å…‰æ ‡ä½ç½®
+// ¹â±êÎ»ÖÃ
 int qTextEditLineCount(int64_t ptr) {
     QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
     if (textEdit) {
@@ -856,7 +864,7 @@ int qTextEditCurrentLine(int64_t ptr) {
     QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
     if (textEdit) {
         QTextCursor cursor = textEdit->textCursor();
-        return cursor.blockNumber() + 1;  // è¿”å›1-basedè¡Œå·
+        return cursor.blockNumber() + 1;  // ·µ»Ø1-basedĞĞºÅ
     }
     return 1;
 }
@@ -865,7 +873,7 @@ int qTextEditCurrentColumn(int64_t ptr) {
     QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
     if (textEdit) {
         QTextCursor cursor = textEdit->textCursor();
-        return cursor.columnNumber() + 1;  // è¿”å›1-basedåˆ—å·
+        return cursor.columnNumber() + 1;  // ·µ»Ø1-basedÁĞºÅ
     }
     return 1;
 }
@@ -878,7 +886,7 @@ int qTextEditCharacterCount(int64_t ptr) {
     return 0;
 }
 
-// æ‰“å°åŠŸèƒ½
+// ´òÓ¡¹¦ÄÜ
 void qTextEditPrint(int64_t ptr, int64_t printerPtr) {
     QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
     QPrinter* printer = reinterpret_cast<QPrinter*>(printerPtr);
@@ -887,7 +895,7 @@ void qTextEditPrint(int64_t ptr, int64_t printerPtr) {
     }
 }
 
-// è·³è½¬åˆ°æŒ‡å®šè¡Œ
+// Ìø×ªµ½Ö¸¶¨ĞĞ
 void qTextEditGoToLine(int64_t ptr, int line) {
     QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
     if (textEdit) {
@@ -902,7 +910,7 @@ void qTextEditGoToLine(int64_t ptr, int line) {
 }
 
 // ============================================================
-// QPlainTextEdit æ¡¥æ¥å‡½æ•°
+// QPlainTextEdit ÇÅ½Óº¯Êı
 // ============================================================
 
 int64_t qPlainTextEditCreate() {
@@ -1040,7 +1048,7 @@ void qPlainTextEditDelete(int64_t ptr) {
 }
 
 // ============================================================
-// QCompleter æ¡¥æ¥å‡½æ•°
+// QCompleter ÇÅ½Óº¯Êı
 // ============================================================
 
 int64_t qCompleterCreate() {
@@ -1052,7 +1060,7 @@ int64_t qCompleterCreateWithStrings(const char* items) {
     QStringList list = QString::fromUtf8(items).split('\n', Qt::SkipEmptyParts);
     QStringListModel* model = new QStringListModel(list);
     QCompleter* completer = new QCompleter(model);
-    // completer æ‹¥æœ‰ model çš„æ‰€æœ‰æƒ
+    // completer ÓµÓĞ model µÄËùÓĞÈ¨
     return reinterpret_cast<int64_t>(completer);
 }
 
@@ -1133,7 +1141,7 @@ void qCompleterDelete(int64_t ptr) {
 }
 
 // ============================================================
-// QTextBrowser æ¡¥æ¥å‡½æ•°
+// QTextBrowser ÇÅ½Óº¯Êı
 // ============================================================
 
 int64_t qTextBrowserCreate() {
@@ -1228,7 +1236,7 @@ void qTextBrowserDelete(int64_t ptr) {
 }
 
 // ============================================================
-// QKeySequenceEdit æ¡¥æ¥å‡½æ•°
+// QKeySequenceEdit ÇÅ½Óº¯Êı
 // ============================================================
 
 int64_t qKeySequenceEditCreate(int64_t parentPtr) {
@@ -1265,7 +1273,7 @@ void qKeySequenceEditDelete(int64_t ptr) {
 }
 
 // ============================================================
-// QSystemTrayIcon æ¡¥æ¥å‡½æ•°
+// QSystemTrayIcon ÇÅ½Óº¯Êı
 // ============================================================
 
 int64_t qSystemTrayIconCreate(int64_t parentPtr) {
@@ -1331,7 +1339,7 @@ void qSystemTrayIconSetContextMenu(int64_t ptr, int64_t menuPtr) {
 }
 
 // ============================================================
-// QGraphicsView æ¡¥æ¥å‡½æ•°
+// QGraphicsView ÇÅ½Óº¯Êı
 // ============================================================
 
 int64_t qGraphicsViewCreate(int64_t parentPtr) {
@@ -1436,7 +1444,7 @@ const char* qGraphicsViewMapToScene(int64_t ptr, double x, double y) {
 }
 
 // ============================================================
-// QGraphicsScene æ¡¥æ¥å‡½æ•°
+// QGraphicsScene ÇÅ½Óº¯Êı
 // ============================================================
 
 int64_t qGraphicsSceneCreate() {
@@ -1560,7 +1568,7 @@ int64_t qGraphicsSceneAddWidget(int64_t ptr, int64_t widgetPtr) {
 }
 
 // ============================================================
-// QGraphicsItem æ¡¥æ¥å‡½æ•° (æœ€å°åŒ–)
+// QGraphicsItem ÇÅ½Óº¯Êı (×îĞ¡»¯)
 // ============================================================
 
 void qGraphicsItemSetPos(int64_t ptr, double x, double y) {
@@ -1613,7 +1621,7 @@ void qGraphicsItemUpdate(int64_t ptr) {
 }
 
 // ============================================================
-// QGraphicsOpacityEffect æ¡¥æ¥å‡½æ•°
+// QGraphicsOpacityEffect ÇÅ½Óº¯Êı
 // ============================================================
 
 int64_t qGraphicsOpacityEffectCreate() {
@@ -1642,7 +1650,7 @@ void qGraphicsOpacityEffectDelete(int64_t ptr) {
 }
 
 // ============================================================
-// QGraphicsDropShadowEffect æ¡¥æ¥å‡½æ•°
+// QGraphicsDropShadowEffect ÇÅ½Óº¯Êı
 // ============================================================
 
 int64_t qGraphicsDropShadowEffectCreate() {
@@ -1681,7 +1689,7 @@ void qGraphicsDropShadowEffectDelete(int64_t ptr) {
 }
 
 // ============================================================
-// QFontComboBox æ¡¥æ¥å‡½æ•°
+// QFontComboBox ÇÅ½Óº¯Êı
 // ============================================================
 
 int64_t qFontComboBoxCreate() {
@@ -1728,5 +1736,333 @@ void qFontComboBoxDelete(int64_t ptr) {
     QFontComboBox* combo = reinterpret_cast<QFontComboBox*>(ptr);
     if (combo) delete combo;
 }
+
+
+
+// ============================================================
+// QDialogButtonBox æ¡¥æ¥å‡½æ•°
+// ============================================================
+
+int64_t qDialogButtonBoxCreate() {
+    QDialogButtonBox* box = new QDialogButtonBox();
+    return reinterpret_cast<int64_t>(box);
+}
+
+void qDialogButtonBoxAddButton(int64_t ptr, const char* text, int32_t role) {
+    QDialogButtonBox* box = reinterpret_cast<QDialogButtonBox*>(ptr);
+    if (box && text) {
+        box->addButton(QString::fromUtf8(text), static_cast<QDialogButtonBox::ButtonRole>(role));
+    }
+}
+
+void qDialogButtonBoxSetStandardButtons(int64_t ptr, int32_t buttons) {
+    QDialogButtonBox* box = reinterpret_cast<QDialogButtonBox*>(ptr);
+    if (box) {
+        box->setStandardButtons(static_cast<QDialogButtonBox::StandardButtons>(buttons));
+    }
+}
+
+// QDialogButtonBox å›è°ƒæ˜ å°„
+static std::unordered_map<int64_t, std::function<void()>> g_dialogBtnAcceptedCallbacks;
+static std::unordered_map<int64_t, std::function<void()>> g_dialogBtnRejectedCallbacks;
+
+void qDialogButtonBoxConnectAccepted(int64_t ptr, void (*callback)(void)) {
+    QDialogButtonBox* box = reinterpret_cast<QDialogButtonBox*>(ptr);
+    if (box && callback) {
+        int64_t widgetPtr = ptr;
+        g_dialogBtnAcceptedCallbacks[ptr] = [callback, widgetPtr]() { callback(); };
+        QObject::connect(box, &QDialogButtonBox::accepted, [widgetPtr]() {
+            auto it = g_dialogBtnAcceptedCallbacks.find(widgetPtr);
+            if (it != g_dialogBtnAcceptedCallbacks.end()) {
+                it->second();
+            }
+        });
+    }
+}
+
+void qDialogButtonBoxConnectRejected(int64_t ptr, void (*callback)(void)) {
+    QDialogButtonBox* box = reinterpret_cast<QDialogButtonBox*>(ptr);
+    if (box && callback) {
+        int64_t widgetPtr = ptr;
+        g_dialogBtnRejectedCallbacks[ptr] = [callback, widgetPtr]() { callback(); };
+        QObject::connect(box, &QDialogButtonBox::rejected, [widgetPtr]() {
+            auto it = g_dialogBtnRejectedCallbacks.find(widgetPtr);
+            if (it != g_dialogBtnRejectedCallbacks.end()) {
+                it->second();
+            }
+        });
+    }
+}
+
+void qDialogButtonBoxDelete(int64_t ptr) {
+    QDialogButtonBox* box = reinterpret_cast<QDialogButtonBox*>(ptr);
+    if (box) {
+        g_dialogBtnAcceptedCallbacks.erase(ptr);
+        g_dialogBtnRejectedCallbacks.erase(ptr);
+        delete box;
+    }
+}
+
+// ============================================================
+// QCommandLinkButton æ¡¥æ¥å‡½æ•°
+// ============================================================
+
+int64_t qCommandLinkButtonCreate() {
+    QCommandLinkButton* btn = new QCommandLinkButton();
+    return reinterpret_cast<int64_t>(btn);
+}
+
+int64_t qCommandLinkButtonCreateWithParent(int64_t parentPtr) {
+    QWidget* parent = reinterpret_cast<QWidget*>(parentPtr);
+    QCommandLinkButton* btn = new QCommandLinkButton(parent);
+    return reinterpret_cast<int64_t>(btn);
+}
+
+void qCommandLinkButtonSetText(int64_t ptr, const char* text) {
+    QCommandLinkButton* btn = reinterpret_cast<QCommandLinkButton*>(ptr);
+    if (btn && text) {
+        btn->setText(QString::fromUtf8(text));
+    }
+}
+
+void qCommandLinkButtonSetDescription(int64_t ptr, const char* description) {
+    QCommandLinkButton* btn = reinterpret_cast<QCommandLinkButton*>(ptr);
+    if (btn && description) {
+        btn->setDescription(QString::fromUtf8(description));
+    }
+}
+
+void qCommandLinkButtonDelete(int64_t ptr) {
+    QCommandLinkButton* btn = reinterpret_cast<QCommandLinkButton*>(ptr);
+    if (btn) delete btn;
+}
+
+// ============================================================
+// QScrollBar æ¡¥æ¥å‡½æ•°
+// ============================================================
+
+int64_t qScrollBarCreate(int32_t orientation) {
+    QScrollBar* bar = new QScrollBar(static_cast<Qt::Orientation>(orientation));
+    return reinterpret_cast<int64_t>(bar);
+}
+
+void qScrollBarSetRange(int64_t ptr, int32_t min, int32_t max) {
+    QScrollBar* bar = reinterpret_cast<QScrollBar*>(ptr);
+    if (bar) bar->setRange(min, max);
+}
+
+void qScrollBarSetValue(int64_t ptr, int32_t value) {
+    QScrollBar* bar = reinterpret_cast<QScrollBar*>(ptr);
+    if (bar) bar->setValue(value);
+}
+
+int32_t qScrollBarValue(int64_t ptr) {
+    QScrollBar* bar = reinterpret_cast<QScrollBar*>(ptr);
+    return bar ? bar->value() : 0;
+}
+
+void qScrollBarSetSingleStep(int64_t ptr, int32_t step) {
+    QScrollBar* bar = reinterpret_cast<QScrollBar*>(ptr);
+    if (bar) bar->setSingleStep(step);
+}
+
+void qScrollBarSetPageStep(int64_t ptr, int32_t step) {
+    QScrollBar* bar = reinterpret_cast<QScrollBar*>(ptr);
+    if (bar) bar->setPageStep(step);
+}
+
+void qScrollBarSetOrientation(int64_t ptr, int32_t orientation) {
+    QScrollBar* bar = reinterpret_cast<QScrollBar*>(ptr);
+    if (bar) bar->setOrientation(static_cast<Qt::Orientation>(orientation));
+}
+
+// QScrollBar å›è°ƒæ˜ å°„
+static std::unordered_map<int64_t, std::function<void(int32_t)>> g_scrollBarCallbacks;
+
+void qScrollBarConnectValueChanged(int64_t ptr, void (*callback)(int32_t)) {
+    QScrollBar* bar = reinterpret_cast<QScrollBar*>(ptr);
+    if (bar && callback) {
+        int64_t widgetPtr = ptr;
+        g_scrollBarCallbacks[ptr] = [callback, widgetPtr](int32_t v) { callback(v); };
+        QObject::connect(bar, &QScrollBar::valueChanged, [widgetPtr](int v) {
+            auto it = g_scrollBarCallbacks.find(widgetPtr);
+            if (it != g_scrollBarCallbacks.end()) {
+                it->second(static_cast<int32_t>(v));
+            }
+        });
+    }
+}
+
+void qScrollBarDelete(int64_t ptr) {
+    QScrollBar* bar = reinterpret_cast<QScrollBar*>(ptr);
+    if (bar) {
+        g_scrollBarCallbacks.erase(ptr);
+        delete bar;
+    }
+}
+
+// ============================================================
+// QValidator æ¡¥æ¥å‡½æ•° (QIntValidator, QDoubleValidator)
+// ============================================================
+
+int64_t qIntValidatorCreate(int32_t min, int32_t max) {
+    QIntValidator* validator = new QIntValidator(min, max);
+    return reinterpret_cast<int64_t>(validator);
+}
+
+void qIntValidatorSetRange(int64_t ptr, int32_t min, int32_t max) {
+    QIntValidator* v = reinterpret_cast<QIntValidator*>(ptr);
+    if (v) v->setRange(min, max);
+}
+
+int64_t qDoubleValidatorCreate(double min, double max, int32_t decimals) {
+    QDoubleValidator* validator = new QDoubleValidator(min, max, decimals);
+    return reinterpret_cast<int64_t>(validator);
+}
+
+void qDoubleValidatorSetRange(int64_t ptr, double min, double max, int32_t decimals) {
+    QDoubleValidator* v = reinterpret_cast<QDoubleValidator*>(ptr);
+    if (v) v->setRange(min, max, decimals);
+}
+
+void qLineEditSetValidator(int64_t lineEditPtr, int64_t validatorPtr) {
+    QLineEdit* lineEdit = reinterpret_cast<QLineEdit*>(lineEditPtr);
+    QValidator* validator = reinterpret_cast<QValidator*>(validatorPtr);
+    if (lineEdit && validator) {
+        lineEdit->setValidator(validator);
+    }
+}
+
+void qValidatorDelete(int64_t ptr) {
+    QValidator* v = reinterpret_cast<QValidator*>(ptr);
+    if (v) delete v;
+}
+
+
+
+// ============================================================
+// QSplashScreen ÇÅ½Óº¯Êı
+// ============================================================
+
+int64_t qSplashScreenCreate() {
+    QSplashScreen* splash = new QSplashScreen();
+    return reinterpret_cast<int64_t>(splash);
+}
+
+int64_t qSplashScreenCreateWithPixmap(int64_t pixmapPtr) {
+    QPixmap* pixmap = reinterpret_cast<QPixmap*>(pixmapPtr);
+    QSplashScreen* splash = new QSplashScreen(*pixmap);
+    return reinterpret_cast<int64_t>(splash);
+}
+
+void qSplashScreenShow(int64_t ptr) {
+    QSplashScreen* splash = reinterpret_cast<QSplashScreen*>(ptr);
+    if (splash) splash->show();
+}
+
+void qSplashScreenFinish(int64_t ptr, int64_t windowPtr) {
+    QSplashScreen* splash = reinterpret_cast<QSplashScreen*>(ptr);
+    QWidget* window = reinterpret_cast<QWidget*>(windowPtr);
+    if (splash && window) splash->finish(window);
+}
+
+void qSplashScreenShowMessage(int64_t ptr, const char* message) {
+    QSplashScreen* splash = reinterpret_cast<QSplashScreen*>(ptr);
+    if (splash && message) {
+        splash->showMessage(QString::fromUtf8(message), Qt::AlignBottom | Qt::AlignHCenter, Qt::white);
+    }
+}
+
+void qSplashScreenSetPixmap(int64_t ptr, int64_t pixmapPtr) {
+    QSplashScreen* splash = reinterpret_cast<QSplashScreen*>(ptr);
+    QPixmap* pixmap = reinterpret_cast<QPixmap*>(pixmapPtr);
+    if (splash && pixmap) splash->setPixmap(*pixmap);
+}
+
+void qSplashScreenDelete(int64_t ptr) {
+    QSplashScreen* splash = reinterpret_cast<QSplashScreen*>(ptr);
+    if (splash) delete splash;
+}
+
+// ============================================================
+// QSizeGrip ÇÅ½Óº¯Êı
+// ============================================================
+
+int64_t qSizeGripCreate(int64_t parentPtr) {
+    QWidget* parent = reinterpret_cast<QWidget*>(parentPtr);
+    QSizeGrip* grip = new QSizeGrip(parent);
+    return reinterpret_cast<int64_t>(grip);
+}
+
+void qSizeGripSetVisible(int64_t ptr, bool visible) {
+    QSizeGrip* grip = reinterpret_cast<QSizeGrip*>(ptr);
+    if (grip) grip->setVisible(visible);
+}
+
+void qSizeGripDelete(int64_t ptr) {
+    QSizeGrip* grip = reinterpret_cast<QSizeGrip*>(ptr);
+    if (grip) delete grip;
+}
+
+// ============================================================
+// QRubberBand ÇÅ½Óº¯Êı
+// ============================================================
+
+int64_t qRubberBandCreate(int32_t shape, int64_t parentPtr) {
+    QWidget* parent = reinterpret_cast<QWidget*>(parentPtr);
+    QRubberBand* band = new QRubberBand(static_cast<QRubberBand::Shape>(shape), parent);
+    return reinterpret_cast<int64_t>(band);
+}
+
+void qRubberBandSetGeometry(int64_t ptr, int32_t x, int32_t y, int32_t w, int32_t h) {
+    QRubberBand* band = reinterpret_cast<QRubberBand*>(ptr);
+    if (band) band->setGeometry(x, y, w, h);
+}
+
+void qRubberBandMove(int64_t ptr, int32_t x, int32_t y) {
+    QRubberBand* band = reinterpret_cast<QRubberBand*>(ptr);
+    if (band) band->move(x, y);
+}
+
+void qRubberBandResize(int64_t ptr, int32_t w, int32_t h) {
+    QRubberBand* band = reinterpret_cast<QRubberBand*>(ptr);
+    if (band) band->resize(w, h);
+}
+
+void qRubberBandShow(int64_t ptr) {
+    QRubberBand* band = reinterpret_cast<QRubberBand*>(ptr);
+    if (band) band->show();
+}
+
+void qRubberBandHide(int64_t ptr) {
+    QRubberBand* band = reinterpret_cast<QRubberBand*>(ptr);
+    if (band) band->hide();
+}
+
+int64_t qRubberBandGeometryX(int64_t ptr) {
+    QRubberBand* band = reinterpret_cast<QRubberBand*>(ptr);
+    return band ? static_cast<int64_t>(band->geometry().x()) : 0;
+}
+
+int64_t qRubberBandGeometryY(int64_t ptr) {
+    QRubberBand* band = reinterpret_cast<QRubberBand*>(ptr);
+    return band ? static_cast<int64_t>(band->geometry().y()) : 0;
+}
+
+int64_t qRubberBandGeometryWidth(int64_t ptr) {
+    QRubberBand* band = reinterpret_cast<QRubberBand*>(ptr);
+    return band ? static_cast<int64_t>(band->geometry().width()) : 0;
+}
+
+int64_t qRubberBandGeometryHeight(int64_t ptr) {
+    QRubberBand* band = reinterpret_cast<QRubberBand*>(ptr);
+    return band ? static_cast<int64_t>(band->geometry().height()) : 0;
+}
+
+void qRubberBandDelete(int64_t ptr) {
+    QRubberBand* band = reinterpret_cast<QRubberBand*>(ptr);
+    if (band) delete band;
+}
+
 
 } // extern "C"

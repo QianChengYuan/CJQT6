@@ -81,6 +81,7 @@ set(VIEWS_SOURCES
     native/src/views/bridge_table.cpp
     native/src/views/bridge_list.cpp
     native/src/views/bridge_tree.cpp
+    native/src/views/bridge_modelview.cpp
 )
 
 # Paint模块 - 绘图相关类

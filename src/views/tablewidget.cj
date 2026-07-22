@@ -46,6 +46,8 @@ foreign func qWidgetResize(ptr: Int64, width: Int32, height: Int32): Unit
 foreign func qWidgetSetMinimumSize(ptr: Int64, minw: Int32, minh: Int32): Unit
 foreign func qWidgetSetMaximumSize(ptr: Int64, maxw: Int32, maxh: Int32): Unit
 foreign func qWidgetSetStyleSheet(ptr: Int64, styleSheet: CString): Unit
+foreign func qWidgetSetEnabled(ptr: Int64, enabled: Int32): Unit
+foreign func qSignalCleanup(ptr: Int64): Unit
 
 // ============================================================
 // 选择行为常量

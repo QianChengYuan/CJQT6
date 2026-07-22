@@ -1,4 +1,24 @@
-# 更新日志
+﻿# 更新日志
+## [1.2.0] - 2026-07-22
+
+### Added
+
+- **Widgets: QDialogButtonBox** - Dialog standard button box (OK/Cancel/Yes/No) with Accepted/Rejected signals
+- **Widgets: QCommandLinkButton** - Vista-style command link button with title + description
+- **Widgets: QScrollBar** - Standalone scrollbar (horizontal/vertical), value changed callback
+- **Widgets: QSplashScreen** - Splash screen with pixmap and message display
+- **Widgets: QSizeGrip** - Window resize grip corner widget
+- **Widgets: QRubberBand** - Rubber band selection rectangle (Line/Rectangle shapes)
+- **Widgets: Input Validators** - QIntValidator, QDoubleValidator with QLineEdit binding
+- **Model/View Architecture** - QStandardItemModel, QListView, QTableView, QTreeView, QFileSystemModel, QHeaderView
+- **Views: bridge_modelview.cpp** - C++ FFI bridge for all Model/View classes
+- **Examples: widgets_demo_full** - Modular 5-tab demo (Basic/Selectors/Containers/New Widgets/Model-View)
+
+### Changed
+
+- **cjpm.toml** - DLL direct linking instead of .dll.a import library for Windows targets
+- **views/tablewidget.cj** - Added qWidgetSetEnabled/qSignalCleanup FFI declarations
+
 
 所有重要的变更都将记录在此文件中。
 
