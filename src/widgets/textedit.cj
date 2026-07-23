@@ -1,5 +1,7 @@
 package cjqt6.widgets
 
+import cjqt6.core.*
+
 // QTextEdit - 多行文本编辑框
 foreign func qTextEditCreate(): Int64
 foreign func qTextEditSetText(ptr: Int64, text: CString): Unit
@@ -35,6 +37,19 @@ foreign func qTextEditCharacterCount(ptr: Int64): Int32
 foreign func qTextEditPrint(ptr: Int64, printerPtr: Int64): Unit
 foreign func qTextEditGoToLine(ptr: Int64, line: Int32): Unit
 foreign func qTextEditDelete(ptr: Int64): Unit
+foreign func qTextEditSetHtml(ptr: Int64, html: CString): Unit
+foreign func qTextEditToHtml(ptr: Int64): CString
+foreign func qTextEditSetPlainText(ptr: Int64, text: CString): Unit
+foreign func qTextEditToPlainText(ptr: Int64): CString
+foreign func qTextEditAppend(ptr: Int64, text: CString): Unit
+foreign func qTextEditInsertHtml(ptr: Int64, html: CString): Unit
+foreign func qTextEditSetTextColor(ptr: Int64, r: Int32, g: Int32, b: Int32): Unit
+foreign func qTextEditZoomIn(ptr: Int64, range: Int32): Unit
+foreign func qTextEditZoomOut(ptr: Int64, range: Int32): Unit
+foreign func qTextEditConnectTextChanged(ptr: Int64, callback: VoidCallback): Unit
+foreign func qTextEditConnectUndoAvailable(ptr: Int64, callback: BoolCallback): Unit
+foreign func qTextEditConnectRedoAvailable(ptr: Int64, callback: BoolCallback): Unit
+foreign func qTextEditConnectCopyAvailable(ptr: Int64, callback: BoolCallback): Unit
 
 public class QTextEdit {
     private let ptr: Int64
@@ -188,6 +203,111 @@ public class QTextEdit {
     public func setFontItalic(italic: Bool) {
         unsafe {
             qTextEditSetFontItalic(ptr, italic)
+        }
+    }
+    
+    // ==================== HTML / 纯文本 ====================
+    
+    /// 设置 HTML 内容
+    public func setHtml(html: String) {
+        unsafe {
+            var cstr = LibC.mallocCString(html)
+            qTextEditSetHtml(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+    
+    /// 获取 HTML 内容
+    public func toHtml(): String {
+        unsafe {
+            let cstr = qTextEditToHtml(ptr)
+            return cstr.toString()
+        }
+    }
+    
+    /// 设置纯文本内容
+    public func setPlainText(text: String) {
+        unsafe {
+            var cstr = LibC.mallocCString(text)
+            qTextEditSetPlainText(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+    
+    /// 获取纯文本内容
+    public func toPlainText(): String {
+        unsafe {
+            let cstr = qTextEditToPlainText(ptr)
+            return cstr.toString()
+        }
+    }
+    
+    /// 追加文本（自动添加换行）
+    public func append(text: String) {
+        unsafe {
+            var cstr = LibC.mallocCString(text)
+            qTextEditAppend(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+    
+    /// 在光标处插入 HTML 片段
+    public func insertHtml(html: String) {
+        unsafe {
+            var cstr = LibC.mallocCString(html)
+            qTextEditInsertHtml(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+    
+    /// 设置当前文本颜色（RGB，0-255）
+    public func setTextColor(r: Int32, g: Int32, b: Int32) {
+        unsafe {
+            qTextEditSetTextColor(ptr, r, g, b)
+        }
+    }
+    
+    /// 放大字体
+    public func zoomIn(range: Int32) {
+        unsafe {
+            qTextEditZoomIn(ptr, range)
+        }
+    }
+    
+    /// 缩小字体
+    public func zoomOut(range: Int32) {
+        unsafe {
+            qTextEditZoomOut(ptr, range)
+        }
+    }
+    
+    // ==================== 信号 ====================
+    
+    /// 文本内容变化回调
+    public func setOnTextChanged(callback: VoidCallback) {
+        unsafe {
+            qTextEditConnectTextChanged(ptr, callback)
+        }
+    }
+    
+    /// 撤销可用性变化回调（参数: 是否可撤销）
+    public func setOnUndoAvailable(callback: BoolCallback) {
+        unsafe {
+            qTextEditConnectUndoAvailable(ptr, callback)
+        }
+    }
+    
+    /// 重做可用性变化回调（参数: 是否可重做）
+    public func setOnRedoAvailable(callback: BoolCallback) {
+        unsafe {
+            qTextEditConnectRedoAvailable(ptr, callback)
+        }
+    }
+    
+    /// 复制可用性变化回调（参数: 是否有选中内容可复制）
+    public func setOnCopyAvailable(callback: BoolCallback) {
+        unsafe {
+            qTextEditConnectCopyAvailable(ptr, callback)
         }
     }
     

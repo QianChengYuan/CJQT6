@@ -12,16 +12,32 @@ foreign func qMdiAreaCascadeSubWindows(ptr: Int64): Unit
 foreign func qMdiAreaTileSubWindows(ptr: Int64): Unit
 foreign func qMdiAreaCloseAllSubWindows(ptr: Int64): Unit
 foreign func qMdiAreaSetViewMode(ptr: Int64, mode: Int32): Unit
+foreign func qMdiAreaSubWindowCount(ptr: Int64): Int32
+foreign func qMdiAreaSetActiveSubWindow(ptr: Int64, subWinPtr: Int64): Unit
+foreign func qMdiAreaViewMode(ptr: Int64): Int32
+foreign func qMdiAreaSetActivationOrder(ptr: Int64, order: Int32): Unit
+foreign func qMdiAreaActivationOrder(ptr: Int64): Int32
+foreign func qMdiAreaSetBackground(ptr: Int64, path: CString): Unit
+foreign func qMdiAreaConnectSubWindowActivated(ptr: Int64, callback: Int64Callback): Unit
 
 // QMdiSubWindow
 foreign func qMdiSubWindowSetWidget(ptr: Int64, widgetPtr: Int64): Unit
 foreign func qMdiSubWindowWidget(ptr: Int64): Int64
 foreign func qMdiSubWindowDelete(ptr: Int64): Unit
+foreign func qMdiSubWindowShowShaded(ptr: Int64): Unit
+foreign func qMdiSubWindowIsShaded(ptr: Int64): Int32
 
 // QMdiArea ViewMode
 public class MdiAreaViewMode {
     public static let SubWindowView: Int32 = 0
     public static let TabbedView: Int32 = 1
+}
+
+// QMdiArea 激活顺序（对应 QMdiArea::WindowOrder）
+public class MdiAreaActivationOrder {
+    public static let CreationOrder: Int32 = 0
+    public static let StackingOrder: Int32 = 1
+    public static let ActivationHistoryOrder: Int32 = 2
 }
 
 public class QMdiArea {
@@ -96,6 +112,57 @@ public class QMdiArea {
         }
     }
 
+    /// 获取视图模式
+    public func viewMode(): Int32 {
+        unsafe {
+            qMdiAreaViewMode(ptr)
+        }
+    }
+
+    /// 获取当前子窗口数量
+    public func subWindowCount(): Int32 {
+        unsafe {
+            qMdiAreaSubWindowCount(ptr)
+        }
+    }
+
+    /// 设置当前激活的子窗口
+    public func setActiveSubWindow(subWinPtr: Int64) {
+        unsafe {
+            qMdiAreaSetActiveSubWindow(ptr, subWinPtr)
+        }
+    }
+
+    /// 设置子窗口激活顺序
+    public func setActivationOrder(order: Int32) {
+        unsafe {
+            qMdiAreaSetActivationOrder(ptr, order)
+        }
+    }
+
+    /// 获取子窗口激活顺序
+    public func activationOrder(): Int32 {
+        unsafe {
+            qMdiAreaActivationOrder(ptr)
+        }
+    }
+
+    /// 设置背景（按图片文件路径作为纹理笔刷）
+    public func setBackground(path: String) {
+        unsafe {
+            let cstr = LibC.mallocCString(path)
+            qMdiAreaSetBackground(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+
+    /// 子窗口激活回调（子窗口指针，未激活时为 0）
+    public func setOnSubWindowActivated(callback: Int64Callback) {
+        unsafe {
+            qMdiAreaConnectSubWindowActivated(ptr, callback)
+        }
+    }
+    
     public func setLayout(layoutPtr: Int64) {
         unsafe {
             qWidgetSetLayout(ptr, layoutPtr)
@@ -153,6 +220,20 @@ public class QMdiSubWindow {
         }
     }
 
+    /// 以折叠（阴影）状态显示
+    public func showShaded() {
+        unsafe {
+            qMdiSubWindowShowShaded(ptr)
+        }
+    }
+
+    /// 是否处于折叠（阴影）状态
+    public func isShaded(): Bool {
+        unsafe {
+            qMdiSubWindowIsShaded(ptr) != 0
+        }
+    }
+    
     public func getPtr(): Int64 {
         ptr
     }

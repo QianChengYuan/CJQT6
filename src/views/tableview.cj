@@ -19,6 +19,29 @@ foreign func qTableViewResizeRowsToContents(ptr: Int64): Unit
 foreign func qTableViewHorizontalHeaderSetStretchLastSection(ptr: Int64, stretch: Bool): Unit
 foreign func qTableViewDelete(ptr: Int64): Unit
 
+// 补充 API FFI（编辑/网格/布局/索引/信号）
+foreign func qTableViewSetEditTriggers(ptr: Int64, v: Int32): Unit
+foreign func qTableViewEditTriggers(ptr: Int64): Int32
+foreign func qTableViewIsShowGrid(ptr: Int64): Int32
+foreign func qTableViewSetGridStyle(ptr: Int64, v: Int32): Unit
+foreign func qTableViewGridStyle(ptr: Int64): Int32
+foreign func qTableViewSetCornerButtonEnabled(ptr: Int64, v: Int32): Unit
+foreign func qTableViewIsCornerButtonEnabled(ptr: Int64): Int32
+foreign func qTableViewIsSortingEnabled(ptr: Int64): Int32
+foreign func qTableViewResizeColumnToContents(ptr: Int64, col: Int32): Unit
+foreign func qTableViewSetHorizontalHeader(ptr: Int64, headerPtr: Int64): Unit
+foreign func qTableViewSetVerticalHeader(ptr: Int64, headerPtr: Int64): Unit
+foreign func qTableViewSetWordWrap(ptr: Int64, v: Int32): Unit
+foreign func qTableViewIsWordWrap(ptr: Int64): Int32
+foreign func qTableViewRowAt(ptr: Int64, y: Int32): Int32
+foreign func qTableViewColumnAt(ptr: Int64, x: Int32): Int32
+foreign func qTableViewSetCurrentIndex(ptr: Int64, indexPtr: Int64): Unit
+foreign func qTableViewCurrentIndex(ptr: Int64): Int64
+foreign func qTableViewConnectClicked(ptr: Int64, callback: Int64Callback): Unit
+foreign func qTableViewConnectDoubleClicked(ptr: Int64, callback: Int64Callback): Unit
+foreign func qTableViewConnectActivated(ptr: Int64, callback: Int64Callback): Unit
+foreign func qTableViewConnectPressed(ptr: Int64, callback: Int64Callback): Unit
+
 // ============================================================
 // SelectionBehavior constants
 // ============================================================
@@ -153,6 +176,153 @@ public class QTableView {
         checkValid()
         unsafe {
             qTableViewHorizontalHeaderSetStretchLastSection(ptr, stretch)
+        }
+    }
+
+    public func setEditTriggers(triggers: Int32): Unit {
+        checkValid()
+        unsafe {
+            qTableViewSetEditTriggers(ptr, triggers)
+        }
+    }
+
+    public func editTriggers(): Int32 {
+        checkValid()
+        unsafe {
+            qTableViewEditTriggers(ptr)
+        }
+    }
+
+    public func isShowGrid(): Bool {
+        checkValid()
+        unsafe {
+            qTableViewIsShowGrid(ptr) != 0
+        }
+    }
+
+    public func setGridStyle(style: Int32): Unit {
+        checkValid()
+        unsafe {
+            qTableViewSetGridStyle(ptr, style)
+        }
+    }
+
+    public func gridStyle(): Int32 {
+        checkValid()
+        unsafe {
+            qTableViewGridStyle(ptr)
+        }
+    }
+
+    public func setCornerButtonEnabled(enabled: Bool): Unit {
+        checkValid()
+        unsafe {
+            qTableViewSetCornerButtonEnabled(ptr, if (enabled) { 1 } else { 0 })
+        }
+    }
+
+    public func isCornerButtonEnabled(): Bool {
+        checkValid()
+        unsafe {
+            qTableViewIsCornerButtonEnabled(ptr) != 0
+        }
+    }
+
+    public func isSortingEnabled(): Bool {
+        checkValid()
+        unsafe {
+            qTableViewIsSortingEnabled(ptr) != 0
+        }
+    }
+
+    public func resizeColumnToContents(col: Int32): Unit {
+        checkValid()
+        unsafe {
+            qTableViewResizeColumnToContents(ptr, col)
+        }
+    }
+
+    public func setHorizontalHeader(header: QHeaderView): Unit {
+        checkValid()
+        unsafe {
+            qTableViewSetHorizontalHeader(ptr, header.getPtr())
+        }
+    }
+
+    public func setVerticalHeader(header: QHeaderView): Unit {
+        checkValid()
+        unsafe {
+            qTableViewSetVerticalHeader(ptr, header.getPtr())
+        }
+    }
+
+    public func setWordWrap(wordWrap: Bool): Unit {
+        checkValid()
+        unsafe {
+            qTableViewSetWordWrap(ptr, if (wordWrap) { 1 } else { 0 })
+        }
+    }
+
+    public func isWordWrap(): Bool {
+        checkValid()
+        unsafe {
+            qTableViewIsWordWrap(ptr) != 0
+        }
+    }
+
+    public func rowAt(y: Int32): Int32 {
+        checkValid()
+        unsafe {
+            qTableViewRowAt(ptr, y)
+        }
+    }
+
+    public func columnAt(x: Int32): Int32 {
+        checkValid()
+        unsafe {
+            qTableViewColumnAt(ptr, x)
+        }
+    }
+
+    public func setCurrentIndex(index: QModelIndex): Unit {
+        checkValid()
+        unsafe {
+            qTableViewSetCurrentIndex(ptr, index.ptr)
+        }
+    }
+
+    public func currentIndex(): Int64 {
+        checkValid()
+        unsafe {
+            qTableViewCurrentIndex(ptr)
+        }
+    }
+
+    public func setOnClicked(callback: Int64Callback): Unit {
+        checkValid()
+        unsafe {
+            qTableViewConnectClicked(ptr, callback)
+        }
+    }
+
+    public func setOnDoubleClicked(callback: Int64Callback): Unit {
+        checkValid()
+        unsafe {
+            qTableViewConnectDoubleClicked(ptr, callback)
+        }
+    }
+
+    public func setOnActivated(callback: Int64Callback): Unit {
+        checkValid()
+        unsafe {
+            qTableViewConnectActivated(ptr, callback)
+        }
+    }
+
+    public func setOnPressed(callback: Int64Callback): Unit {
+        checkValid()
+        unsafe {
+            qTableViewConnectPressed(ptr, callback)
         }
     }
 

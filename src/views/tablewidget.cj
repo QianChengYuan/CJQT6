@@ -49,6 +49,52 @@ foreign func qWidgetSetStyleSheet(ptr: Int64, styleSheet: CString): Unit
 foreign func qWidgetSetEnabled(ptr: Int64, enabled: Int32): Unit
 foreign func qSignalCleanup(ptr: Int64): Unit
 
+// 补充 API FFI（项/网格/索引/信号）
+foreign func qTableWidgetItem(ptr: Int64, row: Int32, col: Int32): Int64
+foreign func qTableWidgetTakeItem(ptr: Int64, row: Int32, col: Int32): Int64
+foreign func qTableWidgetSetItemPtr(ptr: Int64, row: Int32, col: Int32, itemPtr: Int64): Unit
+foreign func qTableWidgetSetHorizontalHeaderItem(ptr: Int64, col: Int32, itemPtr: Int64): Unit
+foreign func qTableWidgetSetVerticalHeaderItem(ptr: Int64, row: Int32, itemPtr: Int64): Unit
+foreign func qTableWidgetSetHorizontalHeaderLabels(ptr: Int64, labels: CString): Unit
+foreign func qTableWidgetSelectedRanges(ptr: Int64): Int32
+foreign func qTableWidgetFindItems(ptr: Int64, text: CString, flags: Int32): Int32
+foreign func qTableWidgetSetEditTriggers(ptr: Int64, v: Int32): Unit
+foreign func qTableWidgetEditTriggers(ptr: Int64): Int32
+foreign func qTableWidgetSetGridStyle(ptr: Int64, v: Int32): Unit
+foreign func qTableWidgetGridStyle(ptr: Int64): Int32
+foreign func qTableWidgetSetCornerButtonEnabled(ptr: Int64, v: Int32): Unit
+foreign func qTableWidgetIsCornerButtonEnabled(ptr: Int64): Int32
+foreign func qTableWidgetIsSortingEnabled(ptr: Int64): Int32
+foreign func qTableWidgetResizeColumnToContents(ptr: Int64, col: Int32): Unit
+foreign func qTableWidgetSetHorizontalHeader(ptr: Int64, headerPtr: Int64): Unit
+foreign func qTableWidgetSetVerticalHeader(ptr: Int64, headerPtr: Int64): Unit
+foreign func qTableWidgetSetWordWrap(ptr: Int64, v: Int32): Unit
+foreign func qTableWidgetIsWordWrap(ptr: Int64): Int32
+foreign func qTableWidgetRowAt(ptr: Int64, y: Int32): Int32
+foreign func qTableWidgetColumnAt(ptr: Int64, x: Int32): Int32
+foreign func qTableWidgetSetCurrentIndex(ptr: Int64, indexPtr: Int64): Unit
+foreign func qTableWidgetCurrentIndex(ptr: Int64): Int64
+foreign func qTableWidgetConnectCellClicked(ptr: Int64, callback: CFunc<(Int32, Int32) -> Unit>): Unit
+foreign func qTableWidgetConnectCellChanged(ptr: Int64, callback: CFunc<(Int32, Int32) -> Unit>): Unit
+foreign func qTableWidgetConnectCellDoubleClicked(ptr: Int64, callback: CFunc<(Int32, Int32) -> Unit>): Unit
+foreign func qTableWidgetConnectCurrentCellChanged(ptr: Int64, callback: CFunc<(Int32, Int32) -> Unit>): Unit
+foreign func qTableWidgetConnectItemSelectionChanged(ptr: Int64, callback: CFunc<() -> Unit>): Unit
+foreign func qTableWidgetConnectItemClicked(ptr: Int64, callback: CFunc<(Int64) -> Unit>): Unit
+
+// QTableWidgetItem 封装 FFI
+foreign func qTableWidgetItemCreate(): Int64
+foreign func qTableWidgetItemCreateWithText(text: CString): Int64
+foreign func qTableWidgetItemDelete(itemPtr: Int64): Unit
+foreign func qTableWidgetItemSetText(itemPtr: Int64, text: CString): Unit
+foreign func qTableWidgetItemGetText(itemPtr: Int64): CString
+foreign func qTableWidgetItemSetFlags(itemPtr: Int64, flags: Int32): Unit
+foreign func qTableWidgetItemFlags(itemPtr: Int64): Int32
+foreign func qTableWidgetItemSetCheckState(itemPtr: Int64, state: Int32): Unit
+foreign func qTableWidgetItemCheckState(itemPtr: Int64): Int32
+foreign func qTableWidgetItemSetData(itemPtr: Int64, role: Int32, value: Int64): Unit
+foreign func qTableWidgetItemData(itemPtr: Int64, role: Int32): Int64
+foreign func qTableWidgetItemSetBackground(itemPtr: Int64, r: Int32, g: Int32, b: Int32): Unit
+
 // ============================================================
 // 选择行为常量
 // ============================================================
@@ -333,6 +379,202 @@ public class QTableWidget {
         }
     }
     
+    // ========== 单元格项 API ==========
+
+    public func item(row: Int32, col: Int32): QTableWidgetItem {
+        unsafe {
+            return QTableWidgetItem.fromPtr(qTableWidgetItem(ptr, row, col))
+        }
+    }
+
+    public func takeItem(row: Int32, col: Int32): QTableWidgetItem {
+        unsafe {
+            return QTableWidgetItem.fromPtr(qTableWidgetTakeItem(ptr, row, col))
+        }
+    }
+
+    public func setItem(row: Int32, col: Int32, item: QTableWidgetItem) {
+        unsafe {
+            qTableWidgetSetItemPtr(ptr, row, col, item.getPtr())
+        }
+    }
+
+    public func setHorizontalHeaderItem(col: Int32, item: QTableWidgetItem) {
+        unsafe {
+            qTableWidgetSetHorizontalHeaderItem(ptr, col, item.getPtr())
+        }
+    }
+
+    public func setVerticalHeaderItem(row: Int32, item: QTableWidgetItem) {
+        unsafe {
+            qTableWidgetSetVerticalHeaderItem(ptr, row, item.getPtr())
+        }
+    }
+
+    public func setHorizontalHeaderLabels(labels: Array<String>) {
+        unsafe {
+            var joined = ""
+            for (i in 0..labels.size) {
+                if (i > 0) { joined += "\n" }
+                joined += labels[i]
+            }
+            let cstr = LibC.mallocCString(joined)
+            qTableWidgetSetHorizontalHeaderLabels(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+
+    public func selectedRanges(): Int32 {
+        unsafe {
+            qTableWidgetSelectedRanges(ptr)
+        }
+    }
+
+    public func findItems(text: String, flags: Int32): Int32 {
+        unsafe {
+            let cstr = LibC.mallocCString(text)
+            let result = qTableWidgetFindItems(ptr, cstr, flags)
+            LibC.free(cstr)
+            return result
+        }
+    }
+
+    // ========== 编辑/网格/布局 ==========
+
+    public func setEditTriggers(triggers: Int32): Unit {
+        unsafe {
+            qTableWidgetSetEditTriggers(ptr, triggers)
+        }
+    }
+
+    public func editTriggers(): Int32 {
+        unsafe {
+            qTableWidgetEditTriggers(ptr)
+        }
+    }
+
+    public func setGridStyle(style: Int32): Unit {
+        unsafe {
+            qTableWidgetSetGridStyle(ptr, style)
+        }
+    }
+
+    public func gridStyle(): Int32 {
+        unsafe {
+            qTableWidgetGridStyle(ptr)
+        }
+    }
+
+    public func setCornerButtonEnabled(enabled: Bool): Unit {
+        unsafe {
+            qTableWidgetSetCornerButtonEnabled(ptr, if (enabled) { 1 } else { 0 })
+        }
+    }
+
+    public func isCornerButtonEnabled(): Bool {
+        unsafe {
+            qTableWidgetIsCornerButtonEnabled(ptr) != 0
+        }
+    }
+
+    public func isSortingEnabled(): Bool {
+        unsafe {
+            qTableWidgetIsSortingEnabled(ptr) != 0
+        }
+    }
+
+    public func resizeColumnToContents(col: Int32): Unit {
+        unsafe {
+            qTableWidgetResizeColumnToContents(ptr, col)
+        }
+    }
+
+    public func setHorizontalHeader(header: QHeaderView): Unit {
+        unsafe {
+            qTableWidgetSetHorizontalHeader(ptr, header.getPtr())
+        }
+    }
+
+    public func setVerticalHeader(header: QHeaderView): Unit {
+        unsafe {
+            qTableWidgetSetVerticalHeader(ptr, header.getPtr())
+        }
+    }
+
+    public func setWordWrap(wordWrap: Bool): Unit {
+        unsafe {
+            qTableWidgetSetWordWrap(ptr, if (wordWrap) { 1 } else { 0 })
+        }
+    }
+
+    public func isWordWrap(): Bool {
+        unsafe {
+            qTableWidgetIsWordWrap(ptr) != 0
+        }
+    }
+
+    public func rowAt(y: Int32): Int32 {
+        unsafe {
+            qTableWidgetRowAt(ptr, y)
+        }
+    }
+
+    public func columnAt(x: Int32): Int32 {
+        unsafe {
+            qTableWidgetColumnAt(ptr, x)
+        }
+    }
+
+    public func setCurrentIndex(index: QModelIndex): Unit {
+        unsafe {
+            qTableWidgetSetCurrentIndex(ptr, index.ptr)
+        }
+    }
+
+    public func currentIndex(): Int64 {
+        unsafe {
+            qTableWidgetCurrentIndex(ptr)
+        }
+    }
+
+    // ========== 信号 ==========
+
+    public func setOnCellClicked(callback: CFunc<(Int32, Int32) -> Unit>) {
+        unsafe {
+            qTableWidgetConnectCellClicked(ptr, callback)
+        }
+    }
+
+    public func setOnCellChanged(callback: CFunc<(Int32, Int32) -> Unit>) {
+        unsafe {
+            qTableWidgetConnectCellChanged(ptr, callback)
+        }
+    }
+
+    public func setOnCellDoubleClicked(callback: CFunc<(Int32, Int32) -> Unit>) {
+        unsafe {
+            qTableWidgetConnectCellDoubleClicked(ptr, callback)
+        }
+    }
+
+    public func setOnCurrentCellChanged(callback: CFunc<(Int32, Int32) -> Unit>) {
+        unsafe {
+            qTableWidgetConnectCurrentCellChanged(ptr, callback)
+        }
+    }
+
+    public func setOnItemSelectionChanged(callback: CFunc<() -> Unit>) {
+        unsafe {
+            qTableWidgetConnectItemSelectionChanged(ptr, callback)
+        }
+    }
+
+    public func setOnItemClicked(callback: CFunc<(Int64) -> Unit>) {
+        unsafe {
+            qTableWidgetConnectItemClicked(ptr, callback)
+        }
+    }
+
     public func getPtr(): Int64 {
         ptr
     }
@@ -341,6 +583,106 @@ public class QTableWidget {
         if (ptr != 0) {
             unsafe {
                 qTableWidgetDelete(ptr)
+            }
+            ptr = 0
+        }
+    }
+}
+
+// ============================================================
+// QTableWidgetItem 最小封装（复用 listwidget.cj 的 ItemFlag、treewidget.cj 的 CheckState）
+// ============================================================
+public class QTableWidgetItem {
+    private var ptr: Int64 = 0
+
+    public init() {
+        unsafe {
+            ptr = qTableWidgetItemCreate()
+        }
+    }
+
+    public init(text: String) {
+        unsafe {
+            let cstr = LibC.mallocCString(text)
+            ptr = qTableWidgetItemCreateWithText(cstr)
+            LibC.free(cstr)
+        }
+    }
+
+    private init(ptr: Int64) {
+        this.ptr = ptr
+    }
+
+    // 从控件返回的指针构造（不拥有所有权，调用方不应 delete）
+    public static func fromPtr(ptr: Int64): QTableWidgetItem {
+        QTableWidgetItem(ptr)
+    }
+
+    public func getPtr(): Int64 {
+        ptr
+    }
+
+    public func text(): String {
+        unsafe {
+            let cstr = qTableWidgetItemGetText(ptr)
+            return cstr.toString()
+        }
+    }
+
+    public func setText(text: String) {
+        unsafe {
+            let cstr = LibC.mallocCString(text)
+            qTableWidgetItemSetText(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+
+    public func setFlags(flags: Int32): Unit {
+        unsafe {
+            qTableWidgetItemSetFlags(ptr, flags)
+        }
+    }
+
+    public func flags(): Int32 {
+        unsafe {
+            qTableWidgetItemFlags(ptr)
+        }
+    }
+
+    public func setCheckState(state: Int32): Unit {
+        unsafe {
+            qTableWidgetItemSetCheckState(ptr, state)
+        }
+    }
+
+    public func checkState(): Int32 {
+        unsafe {
+            qTableWidgetItemCheckState(ptr)
+        }
+    }
+
+    public func setData(role: Int32, value: Int64): Unit {
+        unsafe {
+            qTableWidgetItemSetData(ptr, role, value)
+        }
+    }
+
+    public func data(role: Int32): Int64 {
+        unsafe {
+            qTableWidgetItemData(ptr, role)
+        }
+    }
+
+    public func setBackground(r: Int32, g: Int32, b: Int32): Unit {
+        unsafe {
+            qTableWidgetItemSetBackground(ptr, r, g, b)
+        }
+    }
+
+    public func delete(): Unit {
+        if (ptr != 0) {
+            unsafe {
+                qTableWidgetItemDelete(ptr)
             }
             ptr = 0
         }

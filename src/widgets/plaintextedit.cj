@@ -25,6 +25,14 @@ foreign func qPlainTextEditSetTabStopDistance(ptr: Int64, distance: Float64): Un
 foreign func qPlainTextEditLineCount(ptr: Int64): Int64
 foreign func qPlainTextEditAppendPlainText(ptr: Int64, text: CString): Unit
 foreign func qPlainTextEditSetMaximumBlockCount(ptr: Int64, maxBlocks: Int32): Unit
+foreign func qPlainTextEditAppendHtml(ptr: Int64, html: CString): Unit
+foreign func qPlainTextEditZoomIn(ptr: Int64, range: Int32): Unit
+foreign func qPlainTextEditZoomOut(ptr: Int64, range: Int32): Unit
+foreign func qPlainTextEditBlockCount(ptr: Int64): Int32
+foreign func qPlainTextEditConnectTextChanged(ptr: Int64, callback: VoidCallback): Unit
+foreign func qPlainTextEditConnectBlockCountChanged(ptr: Int64, callback: Int32Callback): Unit
+foreign func qPlainTextEditConnectModificationChanged(ptr: Int64, callback: BoolCallback): Unit
+foreign func qPlainTextEditConnectCopyAvailable(ptr: Int64, callback: BoolCallback): Unit
 foreign func qPlainTextEditDelete(ptr: Int64): Unit
 
 /// 换行模式常量
@@ -180,6 +188,50 @@ public class QPlainTextEdit {
     /// 设置最大文本块数量（用于日志截断）
     public func setMaximumBlockCount(maxBlocks: Int32): Unit {
         unsafe { qPlainTextEditSetMaximumBlockCount(ptr, maxBlocks) }
+    }
+
+    /// 追加 HTML 片段
+    public func appendHtml(html: String): Unit {
+        unsafe {
+            let cstr = LibC.mallocCString(html)
+            qPlainTextEditAppendHtml(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+
+    /// 放大字体
+    public func zoomIn(range: Int32): Unit {
+        unsafe { qPlainTextEditZoomIn(ptr, range) }
+    }
+
+    /// 缩小字体
+    public func zoomOut(range: Int32): Unit {
+        unsafe { qPlainTextEditZoomOut(ptr, range) }
+    }
+
+    /// 获取文本块（行）数量
+    public func blockCount(): Int32 {
+        unsafe { return qPlainTextEditBlockCount(ptr) }
+    }
+
+    /// 文本内容变化回调
+    public func setOnTextChanged(callback: VoidCallback): Unit {
+        unsafe { qPlainTextEditConnectTextChanged(ptr, callback) }
+    }
+
+    /// 文本块数量变化回调（参数: 新的块数量）
+    public func setOnBlockCountChanged(callback: Int32Callback): Unit {
+        unsafe { qPlainTextEditConnectBlockCountChanged(ptr, callback) }
+    }
+
+    /// 修改状态变化回调（参数: 是否已修改）
+    public func setOnModificationChanged(callback: BoolCallback): Unit {
+        unsafe { qPlainTextEditConnectModificationChanged(ptr, callback) }
+    }
+
+    /// 复制可用性变化回调（参数: 是否有选中内容可复制）
+    public func setOnCopyAvailable(callback: BoolCallback): Unit {
+        unsafe { qPlainTextEditConnectCopyAvailable(ptr, callback) }
     }
 
     /// 设置最小尺寸

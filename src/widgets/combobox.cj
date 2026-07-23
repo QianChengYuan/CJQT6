@@ -24,6 +24,40 @@ foreign func qComboBoxSetItemText(ptr: Int64, index: Int32, text: CString): Unit
 foreign func qComboBoxSetCurrentText(ptr: Int64, text: CString): Unit
 foreign func qComboBoxFindText(ptr: Int64, text: CString): Int32
 foreign func qComboBoxSetPlaceholderText(ptr: Int64, text: CString): Unit
+foreign func qComboBoxIsEditable(ptr: Int64): Int32
+foreign func qComboBoxSetInsertPolicy(ptr: Int64, policy: Int32): Unit
+foreign func qComboBoxInsertPolicy(ptr: Int64): Int32
+foreign func qComboBoxSetMaxVisibleItems(ptr: Int64, max: Int32): Unit
+foreign func qComboBoxMaxVisibleItems(ptr: Int64): Int32
+foreign func qComboBoxSetMaxCount(ptr: Int64, max: Int32): Unit
+foreign func qComboBoxMaxCount(ptr: Int64): Int32
+foreign func qComboBoxSetFrame(ptr: Int64, frame: Int32): Unit
+foreign func qComboBoxHasFrame(ptr: Int64): Int32
+foreign func qComboBoxSetDuplicatesEnabled(ptr: Int64, enabled: Int32): Unit
+foreign func qComboBoxSetCurrentData(ptr: Int64, value: Int64): Unit
+foreign func qComboBoxSetCompleter(ptr: Int64, completerPtr: Int64): Unit
+foreign func qComboBoxSetSizeAdjustPolicy(ptr: Int64, policy: Int32): Unit
+foreign func qComboBoxConnectEditTextChanged(ptr: Int64, callback: CStringCallback): Unit
+foreign func qComboBoxConnectActivated(ptr: Int64, callback: Int32Callback): Unit
+foreign func qComboBoxConnectHighlighted(ptr: Int64, callback: Int32Callback): Unit
+
+/// 下拉框插入策略常量（对应 QComboBox::InsertPolicy）
+public class ComboBoxInsertPolicy {
+    public static let NoInsert: Int32 = 0
+    public static let InsertAtTop: Int32 = 1
+    public static let InsertAtCurrent: Int32 = 2
+    public static let InsertAtBottom: Int32 = 3
+    public static let InsertAfterCurrent: Int32 = 4
+    public static let InsertBeforeCurrent: Int32 = 5
+    public static let InsertAlphabetically: Int32 = 6
+}
+
+/// 下拉框尺寸自适应策略常量（对应 QComboBox::SizeAdjustPolicy）
+public class ComboBoxSizeAdjustPolicy {
+    public static let AdjustToContents: Int32 = 0
+    public static let AdjustToContentsOnFirstShow: Int32 = 1
+    public static let AdjustToMinimumContentsLengthWithIcon: Int32 = 2
+}
 
 /// 下拉框部件
 public class QComboBox {
@@ -167,6 +201,118 @@ public class QComboBox {
     public func removeItem(index: Int32) {
         unsafe {
             qComboBoxRemoveItem(ptr, index)
+        }
+    }
+    
+    /// 是否可编辑
+    public func isEditable(): Bool {
+        unsafe {
+            return qComboBoxIsEditable(ptr) != 0
+        }
+    }
+    
+    /// 设置插入策略（ComboBoxInsertPolicy.*）
+    public func setInsertPolicy(policy: Int32) {
+        unsafe {
+            qComboBoxSetInsertPolicy(ptr, policy)
+        }
+    }
+    
+    /// 获取插入策略
+    public func insertPolicy(): Int32 {
+        unsafe {
+            return qComboBoxInsertPolicy(ptr)
+        }
+    }
+    
+    /// 设置最大可见项数
+    public func setMaxVisibleItems(max: Int32) {
+        unsafe {
+            qComboBoxSetMaxVisibleItems(ptr, max)
+        }
+    }
+    
+    /// 获取最大可见项数
+    public func maxVisibleItems(): Int32 {
+        unsafe {
+            return qComboBoxMaxVisibleItems(ptr)
+        }
+    }
+    
+    /// 设置最大条目数
+    public func setMaxCount(max: Int32) {
+        unsafe {
+            qComboBoxSetMaxCount(ptr, max)
+        }
+    }
+    
+    /// 获取最大条目数
+    public func maxCount(): Int32 {
+        unsafe {
+            return qComboBoxMaxCount(ptr)
+        }
+    }
+    
+    /// 设置是否有边框
+    public func setFrame(frame: Bool) {
+        unsafe {
+            qComboBoxSetFrame(ptr, if (frame) { 1 } else { 0 })
+        }
+    }
+    
+    /// 是否有边框
+    public func hasFrame(): Bool {
+        unsafe {
+            return qComboBoxHasFrame(ptr) != 0
+        }
+    }
+    
+    /// 设置是否允许重复项
+    public func setDuplicatesEnabled(enabled: Bool) {
+        unsafe {
+            qComboBoxSetDuplicatesEnabled(ptr, if (enabled) { 1 } else { 0 })
+        }
+    }
+    
+    /// 通过用户数据设置当前项
+    public func setCurrentData(value: Int64) {
+        unsafe {
+            qComboBoxSetCurrentData(ptr, value)
+        }
+    }
+    
+    /// 设置补全器（传入 QCompleter.getPtr()）
+    public func setCompleter(completerPtr: Int64) {
+        unsafe {
+            qComboBoxSetCompleter(ptr, completerPtr)
+        }
+    }
+    
+    /// 设置尺寸自适应策略（ComboBoxSizeAdjustPolicy.*）
+    public func setSizeAdjustPolicy(policy: Int32) {
+        unsafe {
+            qComboBoxSetSizeAdjustPolicy(ptr, policy)
+        }
+    }
+    
+    /// 编辑文本变化回调（可编辑模式下触发）
+    public func setOnEditTextChanged(callback: CStringCallback) {
+        unsafe {
+            qComboBoxConnectEditTextChanged(ptr, callback)
+        }
+    }
+    
+    /// 用户激活（点击/回车）某项回调，参数为索引
+    public func setOnActivated(callback: Int32Callback) {
+        unsafe {
+            qComboBoxConnectActivated(ptr, callback)
+        }
+    }
+    
+    /// 高亮某项回调，参数为索引
+    public func setOnHighlighted(callback: Int32Callback) {
+        unsafe {
+            qComboBoxConnectHighlighted(ptr, callback)
         }
     }
     

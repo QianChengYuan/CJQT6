@@ -12,6 +12,13 @@ foreign func qDockWidgetSetAllowedAreas(ptr: Int64, areas: Int32): Unit
 foreign func qDockWidgetSetFeatures(ptr: Int64, features: Int32): Unit
 foreign func qDockWidgetSetFloating(ptr: Int64, floating: Int32): Unit
 foreign func qDockWidgetIsFloating(ptr: Int64): Int32
+foreign func qDockWidgetFeatures(ptr: Int64): Int32
+foreign func qDockWidgetAllowedAreas(ptr: Int64): Int32
+foreign func qDockWidgetSetVisible(ptr: Int64, visible: Int32): Unit
+foreign func qDockWidgetToggleViewAction(ptr: Int64): Int64
+foreign func qDockWidgetConnectTopLevelChanged(ptr: Int64, callback: BoolCallback): Unit
+foreign func qDockWidgetConnectVisibilityChanged(ptr: Int64, callback: BoolCallback): Unit
+foreign func qDockWidgetConnectDockLocationChanged(ptr: Int64, callback: Int32Callback): Unit
 
 // DockWidgetArea
 public class DockWidgetArea {
@@ -107,6 +114,55 @@ public class QDockWidget {
         }
     }
 
+    /// 获取停靠窗口特性（DockWidgetFeature 位或值）
+    public func features(): Int32 {
+        unsafe {
+            qDockWidgetFeatures(ptr)
+        }
+    }
+
+    /// 获取允许的停靠区域（DockWidgetArea 位或值）
+    public func allowedAreas(): Int32 {
+        unsafe {
+            qDockWidgetAllowedAreas(ptr)
+        }
+    }
+
+    /// 设置可见性
+    public func setVisible(visible: Bool) {
+        unsafe {
+            qDockWidgetSetVisible(ptr, if (visible) { 1 } else { 0 })
+        }
+    }
+
+    /// 返回切换视图动作指针（QAction*，用于加入工具栏）
+    public func toggleViewAction(): Int64 {
+        unsafe {
+            qDockWidgetToggleViewAction(ptr)
+        }
+    }
+
+    /// 顶层状态变化回调（是否变为浮动顶层窗口）
+    public func setOnTopLevelChanged(callback: BoolCallback) {
+        unsafe {
+            qDockWidgetConnectTopLevelChanged(ptr, callback)
+        }
+    }
+
+    /// 可见性变化回调
+    public func setOnVisibilityChanged(callback: BoolCallback) {
+        unsafe {
+            qDockWidgetConnectVisibilityChanged(ptr, callback)
+        }
+    }
+
+    /// 停靠位置变化回调（DockWidgetArea 值）
+    public func setOnDockLocationChanged(callback: Int32Callback) {
+        unsafe {
+            qDockWidgetConnectDockLocationChanged(ptr, callback)
+        }
+    }
+    
     public func setLayout(layoutPtr: Int64) {
         unsafe {
             qWidgetSetLayout(ptr, layoutPtr)

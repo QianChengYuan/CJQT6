@@ -6,7 +6,18 @@ import cjqt6.core.*
 foreign func qLabelCreate(): Int64
 foreign func qLabelSetText(ptr: Int64, text: CString): Unit
 foreign func qLabelSetAlignment(ptr: Int64, alignment: Int32): Unit
+foreign func qLabelAlignment(ptr: Int64): Int32
 foreign func qLabelSetPixmap(ptr: Int64, pixmapPtr: Int64): Unit
+foreign func qLabelSetPixmapByPath(ptr: Int64, path: CString): Unit
+foreign func qLabelSetScaledContents(ptr: Int64, scaled: Bool): Unit
+foreign func qLabelIsScaledContents(ptr: Int64): Bool
+foreign func qLabelSetIndent(ptr: Int64, indent: Int32): Unit
+foreign func qLabelIndent(ptr: Int64): Int32
+foreign func qLabelSetMargin(ptr: Int64, margin: Int32): Unit
+foreign func qLabelMargin(ptr: Int64): Int32
+foreign func qLabelSetOpenExternalLinks(ptr: Int64, open: Bool): Unit
+foreign func qLabelSetTextFormat(ptr: Int64, format: Int32): Unit
+foreign func qLabelSetBuddy(ptr: Int64, buddyPtr: Int64): Unit
 foreign func qLabelText(ptr: Int64): CString
 foreign func qLabelSetWordWrap(ptr: Int64, wrap: Bool): Unit
 foreign func qLabelWordWrap(ptr: Int64): Bool
@@ -80,6 +91,76 @@ public class QLabel <: QtResource {
         }
     }
     
+    /// 获取对齐方式
+    public func alignment(): Int32 {
+        checkValid()
+        unsafe { qLabelAlignment(ptr) }
+    }
+    
+    /// 通过文件路径设置图像
+    public func setPixmapByPath(path: String): Unit {
+        checkValid()
+        unsafe {
+            let cstr = LibC.mallocCString(path)
+            qLabelSetPixmapByPath(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+    
+    /// 设置是否缩放内容以填满标签
+    public func setScaledContents(scaled: Bool): Unit {
+        checkValid()
+        unsafe { qLabelSetScaledContents(ptr, scaled) }
+    }
+    
+    /// 是否缩放内容
+    public func isScaledContents(): Bool {
+        checkValid()
+        unsafe { qLabelIsScaledContents(ptr) }
+    }
+    
+    /// 设置缩进像素
+    public func setIndent(indent: Int32): Unit {
+        checkValid()
+        unsafe { qLabelSetIndent(ptr, indent) }
+    }
+    
+    /// 获取缩进像素（-1 表示未设置）
+    public func indent(): Int32 {
+        checkValid()
+        unsafe { qLabelIndent(ptr) }
+    }
+    
+    /// 设置边距像素
+    public func setMargin(margin: Int32): Unit {
+        checkValid()
+        unsafe { qLabelSetMargin(ptr, margin) }
+    }
+    
+    /// 获取边距像素（-1 表示未设置）
+    public func margin(): Int32 {
+        checkValid()
+        unsafe { qLabelMargin(ptr) }
+    }
+    
+    /// 设置是否允许打开外部链接
+    public func setOpenExternalLinks(open: Bool): Unit {
+        checkValid()
+        unsafe { qLabelSetOpenExternalLinks(ptr, open) }
+    }
+    
+    /// 设置文本格式（使用 LabelTextFormat 常量）
+    public func setTextFormat(format: Int32): Unit {
+        checkValid()
+        unsafe { qLabelSetTextFormat(ptr, format) }
+    }
+    
+    /// 设置伙伴控件（按 Alt+快捷键聚焦）
+    public func setBuddy(buddyPtr: Int64): Unit {
+        checkValid()
+        unsafe { qLabelSetBuddy(ptr, buddyPtr) }
+    }
+    
     /// 调整大小
     public func resize(width: Int32, height: Int32): Unit {
         checkValid()
@@ -145,4 +226,12 @@ public class QLabel <: QtResource {
     //         ptr = 0
     //     }
     // }
+}
+
+/// 标签文本格式常量（对应 Qt::TextFormat）
+public class LabelTextFormat {
+    public static let PlainText: Int32 = 0
+    public static let RichText: Int32 = 1
+    public static let AutoText: Int32 = 2
+    public static let MarkdownText: Int32 = 3
 }

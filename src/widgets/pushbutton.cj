@@ -17,6 +17,20 @@ foreign func qButtonText(ptr: Int64): CString
 foreign func qButtonSetDefault(ptr: Int64, isDefault: Bool): Unit
 foreign func qButtonSetFlat(ptr: Int64, flat: Bool): Unit
 foreign func qButtonDelete(ptr: Int64): Unit
+foreign func qButtonIconName(ptr: Int64): CString
+foreign func qButtonShortcut(ptr: Int64): CString
+foreign func qButtonSetShortcut(ptr: Int64, key: CString): Unit
+foreign func qButtonIsCheckable(ptr: Int64): Int32
+foreign func qButtonIsAutoDefault(ptr: Int64): Int32
+foreign func qButtonIsDefault(ptr: Int64): Int32
+foreign func qButtonIsFlat(ptr: Int64): Int32
+foreign func qButtonIsAutoRepeat(ptr: Int64): Int32
+foreign func qButtonSetAutoDefault(ptr: Int64, v: Int32): Unit
+foreign func qButtonSetAutoRepeat(ptr: Int64, v: Int32): Unit
+foreign func qButtonConnectPressed(ptr: Int64, callback: VoidCallback): Unit
+foreign func qButtonConnectReleased(ptr: Int64, callback: VoidCallback): Unit
+foreign func qButtonConnectToggled(ptr: Int64, callback: Int32Callback): Unit
+foreign func qButtonConnectClickedChecked(ptr: Int64, callback: Int32Callback): Unit
 
 /// 标准图标类型枚举
 public class StandardIcon {
@@ -174,6 +188,162 @@ public class QPushButton <: QtResource {
             unsafe {
                 qButtonDisconnectClicked(ptr)
             }
+        }
+    }
+    
+    /// 设置可勾选
+    public func setCheckable(checkable: Bool): Unit {
+        checkValid()
+        unsafe {
+            qButtonSetCheckable(ptr, checkable)
+        }
+    }
+    
+    /// 设置勾选状态
+    public func setChecked(checked: Bool): Unit {
+        checkValid()
+        unsafe {
+            qButtonSetChecked(ptr, checked)
+        }
+    }
+    
+    /// 是否勾选
+    public func isChecked(): Bool {
+        checkValid()
+        unsafe {
+            return qButtonIsChecked(ptr)
+        }
+    }
+    
+    /// 设置是否默认按钮（回车触发）
+    public func setDefault(isDefault: Bool): Unit {
+        checkValid()
+        unsafe {
+            qButtonSetDefault(ptr, isDefault)
+        }
+    }
+    
+    /// 设置扁平样式
+    public func setFlat(flat: Bool): Unit {
+        checkValid()
+        unsafe {
+            qButtonSetFlat(ptr, flat)
+        }
+    }
+    
+    /// 获取图标名称（主题名，文件图标可能为空）
+    public func iconName(): String {
+        checkValid()
+        unsafe {
+            let cstr = qButtonIconName(ptr)
+            return cstr.toString()
+        }
+    }
+    
+    /// 设置快捷键（如 "Ctrl+S"）
+    public func setShortcut(key: String): Unit {
+        checkValid()
+        unsafe {
+            let cstr = LibC.mallocCString(key)
+            qButtonSetShortcut(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+    
+    /// 获取快捷键字符串
+    public func shortcut(): String {
+        checkValid()
+        unsafe {
+            let cstr = qButtonShortcut(ptr)
+            return cstr.toString()
+        }
+    }
+    
+    /// 是否可勾选
+    public func isCheckable(): Bool {
+        checkValid()
+        unsafe {
+            return qButtonIsCheckable(ptr) != 0
+        }
+    }
+    
+    /// 是否自动默认按钮
+    public func isAutoDefault(): Bool {
+        checkValid()
+        unsafe {
+            return qButtonIsAutoDefault(ptr) != 0
+        }
+    }
+    
+    /// 设置自动默认按钮
+    public func setAutoDefault(autoDefault: Bool): Unit {
+        checkValid()
+        unsafe {
+            qButtonSetAutoDefault(ptr, if (autoDefault) { 1 } else { 0 })
+        }
+    }
+    
+    /// 是否默认按钮
+    public func isDefault(): Bool {
+        checkValid()
+        unsafe {
+            return qButtonIsDefault(ptr) != 0
+        }
+    }
+    
+    /// 是否扁平样式
+    public func isFlat(): Bool {
+        checkValid()
+        unsafe {
+            return qButtonIsFlat(ptr) != 0
+        }
+    }
+    
+    /// 是否自动重复触发（按下不松时持续触发）
+    public func isAutoRepeat(): Bool {
+        checkValid()
+        unsafe {
+            return qButtonIsAutoRepeat(ptr) != 0
+        }
+    }
+    
+    /// 设置自动重复触发
+    public func setAutoRepeat(autoRepeat: Bool): Unit {
+        checkValid()
+        unsafe {
+            qButtonSetAutoRepeat(ptr, if (autoRepeat) { 1 } else { 0 })
+        }
+    }
+    
+    /// 按下回调
+    public func setOnPressed(callback: VoidCallback): Unit {
+        checkValid()
+        unsafe {
+            qButtonConnectPressed(ptr, callback)
+        }
+    }
+    
+    /// 释放回调
+    public func setOnReleased(callback: VoidCallback): Unit {
+        checkValid()
+        unsafe {
+            qButtonConnectReleased(ptr, callback)
+        }
+    }
+    
+    /// 切换状态回调（checked: 0/1）
+    public func setOnToggled(callback: Int32Callback): Unit {
+        checkValid()
+        unsafe {
+            qButtonConnectToggled(ptr, callback)
+        }
+    }
+    
+    /// 点击回调（带 checked 状态，0/1）
+    public func setOnClickedChecked(callback: Int32Callback): Unit {
+        checkValid()
+        unsafe {
+            qButtonConnectClickedChecked(ptr, callback)
         }
     }
     

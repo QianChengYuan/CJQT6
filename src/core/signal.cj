@@ -23,6 +23,21 @@ public type Float64Callback = CFunc<(Float64) -> Unit>
 /// 字符串回调
 public type CStringCallback = CFunc<(CString) -> Unit>
 
+/// 双 Int32 参数回调（如 rangeChanged(min,max)）
+public type Int32Int32Callback = CFunc<(Int32, Int32) -> Unit>
+
+/// Int64 + Int32 参数回调（如 buttonToggled(button, checked)）
+public type Int64Int32Callback = CFunc<(Int64, Int32) -> Unit>
+
+/// Bool 参数回调
+public type BoolCallback = CFunc<(Bool) -> Unit>
+
+/// 字符串 + Int32 参数回调（如 currentTextChanged(text,index)）
+public type CStringInt32Callback = CFunc<(CString, Int32) -> Unit>
+
+/// Int32 + Bool 参数回调
+public type Int32BoolCallback = CFunc<(Int32, Bool) -> Unit>
+
 // ============================================================
 // 信号常量
 // ============================================================

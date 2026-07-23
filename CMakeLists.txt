@@ -45,7 +45,7 @@ include_directories(
 )
 
 # ============================================================
-# CJFW 桥接库 (用于仓颉语言FFI)
+# CJQT 桥接库 (用于仓颉语言FFI)
 # ============================================================
 
 # 核心模块 - QApplication, QWidget, QTimer, Events, Signal/Slot, Drag&Drop
@@ -74,6 +74,13 @@ set(WIDGETS_SOURCES
     native/src/widgets/bridge_values.cpp
     native/src/widgets/bridge_containers.cpp
     native/src/widgets/bridge_datetime.cpp
+    native/src/widgets/bridge_ext_new.cpp
+    native/src/widgets/bridge_ext_wcore.cpp
+    native/src/widgets/bridge_ext_wtext.cpp
+    native/src/widgets/bridge_ext_wselect.cpp
+    native/src/widgets/bridge_ext_wrange.cpp
+    native/src/widgets/bridge_ext_wlayout.cpp
+    native/src/widgets/bridge_ext_wmisc.cpp
 )
 
 # Views模块 - 表格视图、列表视图、树形视图
@@ -82,6 +89,7 @@ set(VIEWS_SOURCES
     native/src/views/bridge_list.cpp
     native/src/views/bridge_tree.cpp
     native/src/views/bridge_modelview.cpp
+    native/src/views/bridge_ext_views.cpp
 )
 
 # Paint模块 - 绘图相关类
@@ -185,7 +193,7 @@ install(DIRECTORY native/includes/
 # ============================================================
 
 message(STATUS "======================================")
-message(STATUS "CJFW Configuration")
+message(STATUS "CJQT6 Configuration")
 message(STATUS "======================================")
 message(STATUS "Version: ${PROJECT_VERSION}")
 message(STATUS "C++ Standard: ${CMAKE_CXX_STANDARD}")

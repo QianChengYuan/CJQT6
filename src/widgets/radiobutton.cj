@@ -11,6 +11,9 @@ foreign func qRadioButtonIsChecked(ptr: Int64): Bool
 foreign func qRadioButtonConnectToggled(ptr: Int64, callback: Int32Callback): Unit
 foreign func qRadioButtonDisconnectToggled(ptr: Int64): Unit
 foreign func qRadioButtonDelete(ptr: Int64): Unit
+foreign func qRadioButtonSetAutoExclusive(ptr: Int64, v: Int32): Unit
+foreign func qRadioButtonIsAutoExclusive(ptr: Int64): Int32
+foreign func qRadioButtonConnectClicked(ptr: Int64, callback: Int32Callback): Unit
 
 /// 单选按钮部件
 public class QRadioButton {
@@ -115,6 +118,27 @@ public class QRadioButton {
     public func disconnectToggled() {
         unsafe {
             qRadioButtonDisconnectToggled(ptr)
+        }
+    }
+    
+    /// 设置是否自动互斥（同父容器内自动排他）
+    public func setAutoExclusive(autoExclusive: Bool) {
+        unsafe {
+            qRadioButtonSetAutoExclusive(ptr, if (autoExclusive) { 1 } else { 0 })
+        }
+    }
+    
+    /// 是否自动互斥
+    public func isAutoExclusive(): Bool {
+        unsafe {
+            return qRadioButtonIsAutoExclusive(ptr) != 0
+        }
+    }
+    
+    /// 点击回调（带 checked 状态，0/1）
+    public func setOnClicked(callback: Int32Callback) {
+        unsafe {
+            qRadioButtonConnectClicked(ptr, callback)
         }
     }
     

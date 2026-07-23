@@ -13,8 +13,10 @@ foreign func qGraphicsViewSetScene(ptr: Int64, scenePtr: Int64): Unit
 foreign func qGraphicsViewScene(ptr: Int64): Int64
 
 foreign func qGraphicsViewSetRenderHint(ptr: Int64, hint: Int32, enabled: Bool): Unit
+foreign func qGraphicsViewSetRenderHints(ptr: Int64, hints: Int32): Unit
 foreign func qGraphicsViewSetDragMode(ptr: Int64, mode: Int32): Unit
 foreign func qGraphicsViewDragMode(ptr: Int64): Int32
+foreign func qGraphicsViewSetViewportUpdateMode(ptr: Int64, mode: Int32): Unit
 
 foreign func qGraphicsViewCenterOn(ptr: Int64, x: Float64, y: Float64): Unit
 foreign func qGraphicsViewFitInView(ptr: Int64, x: Float64, y: Float64, w: Float64, h: Float64): Unit
@@ -101,6 +103,15 @@ public class GraphicsViewRenderHint {
     public static let LosslessImageRendering: Int32 = 0x40
 }
 
+/// QGraphicsView::ViewportUpdateMode
+public class GraphicsViewViewportUpdateMode {
+    public static let FullViewportUpdate: Int32 = 0
+    public static let MinViewportUpdate: Int32 = 1
+    public static let SmartViewportUpdate: Int32 = 2
+    public static let BoundingRectViewportUpdate: Int32 = 3
+    public static let NoViewportUpdate: Int32 = 4
+}
+
 // ============================================================
 // QGraphicsView - 图形视图部件
 // ============================================================
@@ -153,10 +164,17 @@ public class QGraphicsView <: QtResource {
         }
     }
 
-    public func setRenderHint(hint: Int32, enabled!: Bool = true): Unit {
+    public func setRenderHint(hint: Int32, enabled!: Bool): Unit {
         checkValid()
         unsafe {
             qGraphicsViewSetRenderHint(ptr, hint, enabled)
+        }
+    }
+
+    public func setRenderHints(hints: Int32): Unit {
+        checkValid()
+        unsafe {
+            qGraphicsViewSetRenderHints(ptr, hints)
         }
     }
 
@@ -171,6 +189,13 @@ public class QGraphicsView <: QtResource {
         checkValid()
         unsafe {
             return qGraphicsViewDragMode(ptr)
+        }
+    }
+
+    public func setViewportUpdateMode(mode: Int32): Unit {
+        checkValid()
+        unsafe {
+            qGraphicsViewSetViewportUpdateMode(ptr, mode)
         }
     }
 

@@ -14,6 +14,17 @@ foreign func qFileSystemModelSetNameFilters(ptr: Int64, filters: CString): Unit
 foreign func qFileSystemModelSetFilter(ptr: Int64, filter: Int32): Unit
 foreign func qFileSystemModelDelete(ptr: Int64): Unit
 
+// 补充 API FFI
+foreign func qFileSystemModelSetReadOnly(ptr: Int64, v: Int32): Unit
+foreign func qFileSystemModelIsReadOnly(ptr: Int64): Int32
+foreign func qFileSystemModelSetNameFilterDisables(ptr: Int64, v: Int32): Unit
+foreign func qFileSystemModelSetResolveSymlinks(ptr: Int64, v: Int32): Unit
+foreign func qFileSystemModelIsResolveSymlinks(ptr: Int64): Int32
+foreign func qFileSystemModelFilePath(ptr: Int64, indexPtr: Int64): CString
+foreign func qFileSystemModelFileName(ptr: Int64, indexPtr: Int64): CString
+foreign func qFileSystemModelIsDir(ptr: Int64, indexPtr: Int64): Int32
+foreign func qFileSystemModelConnectDirectoryLoaded(ptr: Int64, callback: CStringCallback): Unit
+foreign func qFileSystemModelConnectRootPathChanged(ptr: Int64, callback: CStringCallback): Unit
 
 // ============================================================
 // QFileSystemModel
@@ -121,6 +132,78 @@ public class QFileSystemModel {
         checkValid()
         unsafe {
             qFileSystemModelSetFilter(ptr, filter)
+        }
+    }
+
+    public func setReadOnly(readOnly: Bool): Unit {
+        checkValid()
+        unsafe {
+            qFileSystemModelSetReadOnly(ptr, if (readOnly) { 1 } else { 0 })
+        }
+    }
+
+    public func isReadOnly(): Bool {
+        checkValid()
+        unsafe {
+            qFileSystemModelIsReadOnly(ptr) != 0
+        }
+    }
+
+    public func setNameFilterDisables(disables: Bool): Unit {
+        checkValid()
+        unsafe {
+            qFileSystemModelSetNameFilterDisables(ptr, if (disables) { 1 } else { 0 })
+        }
+    }
+
+    public func setResolveSymlinks(resolve: Bool): Unit {
+        checkValid()
+        unsafe {
+            qFileSystemModelSetResolveSymlinks(ptr, if (resolve) { 1 } else { 0 })
+        }
+    }
+
+    public func isResolveSymlinks(): Bool {
+        checkValid()
+        unsafe {
+            qFileSystemModelIsResolveSymlinks(ptr) != 0
+        }
+    }
+
+    public func filePath(index: QModelIndex): String {
+        checkValid()
+        unsafe {
+            let cstr = qFileSystemModelFilePath(ptr, index.ptr)
+            return cstr.toString()
+        }
+    }
+
+    public func fileName(index: QModelIndex): String {
+        checkValid()
+        unsafe {
+            let cstr = qFileSystemModelFileName(ptr, index.ptr)
+            return cstr.toString()
+        }
+    }
+
+    public func isDir(index: QModelIndex): Bool {
+        checkValid()
+        unsafe {
+            qFileSystemModelIsDir(ptr, index.ptr) != 0
+        }
+    }
+
+    public func setOnDirectoryLoaded(callback: CStringCallback): Unit {
+        checkValid()
+        unsafe {
+            qFileSystemModelConnectDirectoryLoaded(ptr, callback)
+        }
+    }
+
+    public func setOnRootPathChanged(callback: CStringCallback): Unit {
+        checkValid()
+        unsafe {
+            qFileSystemModelConnectRootPathChanged(ptr, callback)
         }
     }
 

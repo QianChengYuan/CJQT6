@@ -13,6 +13,16 @@ foreign func qProgressBarFormat(ptr: Int64): CString
 foreign func qProgressBarSetOrientation(ptr: Int64, orientation: Int32): Unit
 foreign func qProgressBarSetInvertedAppearance(ptr: Int64, invert: Bool): Unit
 foreign func qProgressBarReset(ptr: Int64): Unit
+foreign func qProgressBarSetMinimum(ptr: Int64, value: Int32): Unit
+foreign func qProgressBarMinimum(ptr: Int64): Int32
+foreign func qProgressBarSetMaximum(ptr: Int64, value: Int32): Unit
+foreign func qProgressBarMaximum(ptr: Int64): Int32
+foreign func qProgressBarSetTextDirection(ptr: Int64, direction: Int32): Unit
+foreign func qProgressBarTextDirection(ptr: Int64): Int32
+foreign func qProgressBarIsTextVisible(ptr: Int64): Int32
+foreign func qProgressBarInvertedAppearance(ptr: Int64): Int32
+foreign func qProgressBarSetAlignment(ptr: Int64, alignment: Int32): Unit
+foreign func qProgressBarConnectValueChanged(ptr: Int64, callback: Int32Callback): Unit
 foreign func qProgressBarDelete(ptr: Int64): Unit
 
 public class QProgressBar {
@@ -103,7 +113,77 @@ public class QProgressBar {
             qProgressBarReset(ptr)
         }
     }
-    
+
+    /// 设置最小值
+    public func setMinimum(value: Int32) {
+        unsafe {
+            qProgressBarSetMinimum(ptr, value)
+        }
+    }
+
+    /// 获取最小值
+    public func minimum(): Int32 {
+        unsafe {
+            return qProgressBarMinimum(ptr)
+        }
+    }
+
+    /// 设置最大值
+    public func setMaximum(value: Int32) {
+        unsafe {
+            qProgressBarSetMaximum(ptr, value)
+        }
+    }
+
+    /// 获取最大值
+    public func maximum(): Int32 {
+        unsafe {
+            return qProgressBarMaximum(ptr)
+        }
+    }
+
+    /// 设置文本方向
+    public func setTextDirection(direction: Int32) {
+        unsafe {
+            qProgressBarSetTextDirection(ptr, direction)
+        }
+    }
+
+    /// 获取文本方向
+    public func textDirection(): Int32 {
+        unsafe {
+            return qProgressBarTextDirection(ptr)
+        }
+    }
+
+    /// 文本是否可见
+    public func isTextVisible(): Bool {
+        unsafe {
+            return qProgressBarIsTextVisible(ptr) != 0
+        }
+    }
+
+    /// 是否反向外观
+    public func invertedAppearance(): Bool {
+        unsafe {
+            return qProgressBarInvertedAppearance(ptr) != 0
+        }
+    }
+
+    /// 设置文本对齐方式（Qt::Alignment 标志组合）
+    public func setAlignment(alignment: Int32) {
+        unsafe {
+            qProgressBarSetAlignment(ptr, alignment)
+        }
+    }
+
+    /// 设置值变化回调
+    public func setOnValueChanged(callback: Int32Callback) {
+        unsafe {
+            qProgressBarConnectValueChanged(ptr, callback)
+        }
+    }
+
     /// 设置启用/禁用
     public func setEnabled(enabled: Bool) {
         unsafe {
@@ -154,4 +234,10 @@ public class QProgressBar {
             ptr = 0
         }
     }
+}
+
+/// 进度条文本方向常量（对应 QProgressBar::Direction）
+public class ProgressBarDirection {
+    public static let TopToBottom: Int32 = 0
+    public static let BottomToTop: Int32 = 1
 }

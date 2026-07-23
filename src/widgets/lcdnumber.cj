@@ -16,6 +16,8 @@ foreign func qLCDNumberSmallDecimalPoint(ptr: Int64): Bool
 foreign func qLCDNumberDigitCount(ptr: Int64): Int32
 foreign func qLCDNumberSetDigitCount(ptr: Int64, numDigits: Int32): Unit
 foreign func qLCDNumberCheckOverflow(ptr: Int64, value: Float64): Bool
+foreign func qLCDNumberValue(ptr: Int64): Float64
+foreign func qLCDNumberDisplayString(ptr: Int64, value: CString): Unit
 foreign func qLCDNumberDelete(ptr: Int64): Unit
 
 // LCD显示模式常量
@@ -178,6 +180,22 @@ public class QLCDNumber {
     public func checkOverflow(value: Float64): Bool {
         unsafe {
             return qLCDNumberCheckOverflow(ptr, value)
+        }
+    }
+    
+    /// 获取当前显示的数值
+    public func value(): Float64 {
+        unsafe {
+            return qLCDNumberValue(ptr)
+        }
+    }
+    
+    /// 显示字符串
+    public func display(value: String) {
+        unsafe {
+            let cstr = LibC.mallocCString(value)
+            qLCDNumberDisplayString(ptr, cstr)
+            LibC.free(cstr)
         }
     }
     

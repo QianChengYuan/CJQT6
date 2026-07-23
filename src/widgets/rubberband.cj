@@ -13,6 +13,8 @@ foreign func qRubberBandGeometryX(ptr: Int64): Int32
 foreign func qRubberBandGeometryY(ptr: Int64): Int32
 foreign func qRubberBandGeometryWidth(ptr: Int64): Int32
 foreign func qRubberBandGeometryHeight(ptr: Int64): Int32
+foreign func qRubberBandSetShape(ptr: Int64, shape: Int32): Unit
+foreign func qRubberBandShape(ptr: Int64): Int32
 foreign func qRubberBandDelete(ptr: Int64): Unit
 
 public class QRubberBand {
@@ -58,6 +60,16 @@ public class QRubberBand {
     
     public func height(): Int32 {
         unsafe { return qRubberBandGeometryHeight(ptr) }
+    }
+
+    /// 设置形状（RubberBandShape.Line / .Rectangle）
+    public func setShape(shape: Int32) {
+        unsafe { qRubberBandSetShape(ptr, shape) }
+    }
+
+    /// 获取形状
+    public func shape(): Int32 {
+        unsafe { return qRubberBandShape(ptr) }
     }
     
     public func getPtr(): Int64 {

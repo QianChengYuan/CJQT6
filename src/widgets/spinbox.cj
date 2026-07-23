@@ -18,6 +18,19 @@ foreign func qSpinBoxSetWrapping(ptr: Int64, wrapping: Bool): Unit
 foreign func qSpinBoxWrapping(ptr: Int64): Bool
 foreign func qSpinBoxSetSpecialValueText(ptr: Int64, text: CString): Unit
 foreign func qSpinBoxCleanText(ptr: Int64): CString
+foreign func qSpinBoxSetButtonSymbols(ptr: Int64, symbols: Int32): Unit
+foreign func qSpinBoxButtonSymbols(ptr: Int64): Int32
+foreign func qSpinBoxSetCorrectionMode(ptr: Int64, mode: Int32): Unit
+foreign func qSpinBoxSetMinimum(ptr: Int64, value: Int32): Unit
+foreign func qSpinBoxMinimum(ptr: Int64): Int32
+foreign func qSpinBoxSetMaximum(ptr: Int64, value: Int32): Unit
+foreign func qSpinBoxMaximum(ptr: Int64): Int32
+foreign func qSpinBoxSetDisplayIntegerBase(ptr: Int64, base: Int32): Unit
+foreign func qSpinBoxDisplayIntegerBase(ptr: Int64): Int32
+foreign func qSpinBoxSetGroupSeparatorShown(ptr: Int64, shown: Int32): Unit
+foreign func qSpinBoxText(ptr: Int64): CString
+foreign func qSpinBoxConnectTextChanged(ptr: Int64, callback: CStringCallback): Unit
+foreign func qSpinBoxConnectEditingFinished(ptr: Int64, callback: VoidCallback): Unit
 foreign func qSpinBoxDelete(ptr: Int64): Unit
 
 /// 整数旋转框部件
@@ -157,6 +170,111 @@ public class QSpinBox <: QtResource {
         }
     }
     
+    /// 设置按钮符号（上下箭头 / 加减 / 无）
+    public func setButtonSymbols(symbols: Int32): Unit {
+        checkValid()
+        unsafe {
+            qSpinBoxSetButtonSymbols(ptr, symbols)
+        }
+    }
+    
+    /// 获取按钮符号
+    public func buttonSymbols(): Int32 {
+        checkValid()
+        unsafe {
+            return qSpinBoxButtonSymbols(ptr)
+        }
+    }
+    
+    /// 设置纠正模式
+    public func setCorrectionMode(mode: Int32): Unit {
+        checkValid()
+        unsafe {
+            qSpinBoxSetCorrectionMode(ptr, mode)
+        }
+    }
+    
+    /// 设置最小值
+    public func setMinimum(value: Int32): Unit {
+        checkValid()
+        unsafe {
+            qSpinBoxSetMinimum(ptr, value)
+        }
+    }
+    
+    /// 获取最小值
+    public func minimum(): Int32 {
+        checkValid()
+        unsafe {
+            return qSpinBoxMinimum(ptr)
+        }
+    }
+    
+    /// 设置最大值
+    public func setMaximum(value: Int32): Unit {
+        checkValid()
+        unsafe {
+            qSpinBoxSetMaximum(ptr, value)
+        }
+    }
+    
+    /// 获取最大值
+    public func maximum(): Int32 {
+        checkValid()
+        unsafe {
+            return qSpinBoxMaximum(ptr)
+        }
+    }
+    
+    /// 设置显示整数进制（如 16 显示十六进制）
+    public func setDisplayIntegerBase(base: Int32): Unit {
+        checkValid()
+        unsafe {
+            qSpinBoxSetDisplayIntegerBase(ptr, base)
+        }
+    }
+    
+    /// 获取显示整数进制
+    public func displayIntegerBase(): Int32 {
+        checkValid()
+        unsafe {
+            return qSpinBoxDisplayIntegerBase(ptr)
+        }
+    }
+    
+    /// 设置是否显示千位分隔符
+    public func setGroupSeparatorShown(shown: Bool): Unit {
+        checkValid()
+        unsafe {
+            qSpinBoxSetGroupSeparatorShown(ptr, if (shown) { 1 } else { 0 })
+        }
+    }
+    
+    /// 获取编辑器中的完整文本
+    public func text(): String {
+        checkValid()
+        unsafe {
+            let cstr = qSpinBoxText(ptr)
+            return cstr.toString()
+        }
+    }
+    
+    /// 文本变化回调（含前缀后缀的完整文本）
+    public func setOnTextChanged(callback: CStringCallback): Unit {
+        checkValid()
+        unsafe {
+            qSpinBoxConnectTextChanged(ptr, callback)
+        }
+    }
+    
+    /// 编辑结束回调（回车或失焦）
+    public func setOnEditingFinished(callback: VoidCallback): Unit {
+        checkValid()
+        unsafe {
+            qSpinBoxConnectEditingFinished(ptr, callback)
+        }
+    }
+    
     /// 设置启用/禁用
     public func setEnabled(enabled: Bool): Unit {
         checkValid()
@@ -271,4 +389,17 @@ public class QSpinBox <: QtResource {
     //         ptr = 0
     //     }
     // }
+}
+
+/// 旋转框按钮符号常量（对应 QAbstractSpinBox::ButtonSymbols）
+public class SpinBoxButtonSymbols {
+    public static let UpDownArrows: Int32 = 0
+    public static let PlusMinus: Int32 = 1
+    public static let NoButtons: Int32 = 2
+}
+
+/// 旋转框纠正模式常量（对应 QAbstractSpinBox::CorrectionMode）
+public class SpinBoxCorrectionMode {
+    public static let CorrectToPreviousValue: Int32 = 0
+    public static let CorrectToNearestValue: Int32 = 1
 }

@@ -10,6 +10,9 @@ foreign func qSplashScreenShow(ptr: Int64): Unit
 foreign func qSplashScreenFinish(ptr: Int64, windowPtr: Int64): Unit
 foreign func qSplashScreenShowMessage(ptr: Int64, message: CString): Unit
 foreign func qSplashScreenSetPixmap(ptr: Int64, pixmapPtr: Int64): Unit
+foreign func qSplashScreenClearMessage(ptr: Int64): Unit
+foreign func qSplashScreenMessage(ptr: Int64): CString
+foreign func qSplashScreenShowMessageAlign(ptr: Int64, message: CString, alignment: Int32): Unit
 foreign func qSplashScreenDelete(ptr: Int64): Unit
 
 public class QSplashScreen {
@@ -40,6 +43,28 @@ public class QSplashScreen {
             let cstr = LibC.mallocCString(message)
             qSplashScreenShowMessage(ptr, cstr)
             LibC.free(cstr)
+        }
+    }
+
+    /// 显示消息并指定对齐方式（alignment 使用 Qt.AlignmentFlag 位，如 AlignLeft|AlignBottom）
+    public func showMessage(message: String, alignment: Int32): Unit {
+        unsafe {
+            let cstr = LibC.mallocCString(message)
+            qSplashScreenShowMessageAlign(ptr, cstr, alignment)
+            LibC.free(cstr)
+        }
+    }
+
+    /// 清除已显示的消息
+    public func clearMessage(): Unit {
+        unsafe { qSplashScreenClearMessage(ptr) }
+    }
+
+    /// 获取当前显示的消息
+    public func message(): String {
+        unsafe {
+            let cstr = qSplashScreenMessage(ptr)
+            return cstr.toString()
         }
     }
     

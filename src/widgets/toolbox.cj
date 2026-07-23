@@ -16,6 +16,10 @@ foreign func qToolBoxItemText(ptr: Int64, index: Int32): CString
 foreign func qToolBoxSetItemToolTip(ptr: Int64, index: Int32, toolTip: CString): Unit
 foreign func qToolBoxSetItemEnabled(ptr: Int64, index: Int32, enabled: Int32): Unit
 foreign func qToolBoxIsItemEnabled(ptr: Int64, index: Int32): Int32
+foreign func qToolBoxSetItemIcon(ptr: Int64, index: Int32, path: CString): Unit
+foreign func qToolBoxSetCurrentWidget(ptr: Int64, widgetPtr: Int64): Unit
+foreign func qToolBoxIndexOf(ptr: Int64, widgetPtr: Int64): Int32
+foreign func qToolBoxConnectCurrentChanged(ptr: Int64, callback: Int32Callback): Unit
 
 public class QToolBox {
     private var ptr: Int64 = 0
@@ -130,6 +134,36 @@ public class QToolBox {
         }
     }
 
+    /// 设置指定项图标（按文件路径）
+    public func setItemIcon(index: Int32, path: String) {
+        unsafe {
+            let cstr = LibC.mallocCString(path)
+            qToolBoxSetItemIcon(ptr, index, cstr)
+            LibC.free(cstr)
+        }
+    }
+
+    /// 设置当前显示的子部件
+    public func setCurrentWidget(widgetPtr: Int64) {
+        unsafe {
+            qToolBoxSetCurrentWidget(ptr, widgetPtr)
+        }
+    }
+
+    /// 查找子部件所在的索引（未找到返回 -1）
+    public func indexOf(widgetPtr: Int64): Int32 {
+        unsafe {
+            qToolBoxIndexOf(ptr, widgetPtr)
+        }
+    }
+
+    /// 当前项切换回调（索引）
+    public func setOnCurrentChanged(callback: Int32Callback) {
+        unsafe {
+            qToolBoxConnectCurrentChanged(ptr, callback)
+        }
+    }
+    
     public func setLayout(layoutPtr: Int64) {
         unsafe {
             qWidgetSetLayout(ptr, layoutPtr)

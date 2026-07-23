@@ -15,6 +15,10 @@ foreign func qDialNotchesVisible(ptr: Int64): Bool
 foreign func qDialDelete(ptr: Int64): Unit
 foreign func qDialConnectValueChanged(ptr: Int64, callback: Int32Callback): Unit
 foreign func qDialDisconnectValueChanged(ptr: Int64): Unit
+foreign func qDialSetNotchTarget(ptr: Int64, target: Float64): Unit
+foreign func qDialNotchTarget(ptr: Int64): Float64
+foreign func qDialSetPageStep(ptr: Int64, step: Int32): Unit
+foreign func qDialPageStep(ptr: Int64): Int32
 
 /// 旋钮控件部件
 public class QDial {
@@ -100,6 +104,34 @@ public class QDial {
     public func setEnabled(enabled: Bool) {
         unsafe {
             qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
+        }
+    }
+
+    /// 设置刻度目标像素间距
+    public func setNotchTarget(target: Float64) {
+        unsafe {
+            qDialSetNotchTarget(ptr, target)
+        }
+    }
+
+    /// 获取刻度目标像素间距
+    public func notchTarget(): Float64 {
+        unsafe {
+            return qDialNotchTarget(ptr)
+        }
+    }
+
+    /// 设置翻页步长
+    public func setPageStep(step: Int32) {
+        unsafe {
+            qDialSetPageStep(ptr, step)
+        }
+    }
+
+    /// 获取翻页步长
+    public func pageStep(): Int32 {
+        unsafe {
+            return qDialPageStep(ptr)
         }
     }
     

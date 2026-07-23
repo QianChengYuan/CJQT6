@@ -1,4 +1,26 @@
 ﻿# 更新日志
+## [1.3.0] - 2026-07-23
+
+### 新增
+
+- **API 补全（全部 37 widgets + 9 views）**: 补齐大量此前缺失的 Qt 方法 / 属性 / 信号，覆盖 PushButton / ToolButton / CheckBox / RadioButton / Label / LineEdit / TextEdit / PlainTextEdit / TextBrowser / ComboBox / FontComboBox / Completer / KeySequenceEdit / Slider / SpinBox / DoubleSpinBox / Dial / LCDNumber / ProgressBar / CommandLinkButton / DialogButtonBox / ScrollBar / SplashScreen / SizeGrip / RubberBand / DateTimeEdit / GraphicEffect / GraphicsView / SystemTrayIcon / ButtonGroup，以及 Model/View（QListView / QTableView / QTreeView / QFileSystemModel / QHeaderView + QListWidgetItem / QTableWidgetItem / QStandardItem / QModelIndex）。
+- **新增 FFI 桥接文件（8 个，避免并发改动共享 bridge）**: `bridge_ext_new.cpp`（8 个新控件）、`bridge_ext_wcore.cpp`、`bridge_ext_wtext.cpp`、`bridge_ext_wselect.cpp`、`bridge_ext_wrange.cpp`、`bridge_ext_wlayout.cpp`、`bridge_ext_wmisc.cpp`、`bridge_ext_views.cpp`，均已注册进 `CMakeLists.txt`。
+- **回调类型**: `src/core/signal.cj` 新增 `Int32Int32Callback` / `BoolCallback` / `CStringInt32Callback` / `Int32BoolCallback` / `Int64Int32Callback`，供各控件信号复用。
+
+### 修复
+
+- **Qt 6.10.3 API 适配**: `QRegExpValidator` 在 Qt 6 已移除 → 改用 `QRegularExpressionValidator`；`QComboBox::setCurrentData` 本机不存在 → 改为 `findData()` + `setCurrentIndex()` 等价实现；`QListWidgetItem` / `QTableWidgetItem::setData` 参数顺序修正为 `(role, value)`。
+- **QAbstractSlider protected 成员**: `repeatAction()` / `setRepeatAction()` 位于 protected 段，新增 `QScrollBarAccess` 子类经 `this` 访问；枚举 `RepeatAction` → `SliderAction`。
+- **QRubberBand::setShape 不存在**: 改为 no-op（shape 仅构造时可指定），`setShape()` 调用保持链接兼容但不生效。
+- **Cangjie 1.1.0 默认参数**: 删除 6 处 `name: Type = 默认值` 非法写法（zoomIn / zoomOut / setRenderHint / showMessage）。
+- **链接顺序**: `scripts/rebuild_all.ps1` 将 bridge 重建（纯 C++）前置到 `cjpm build` 子包之前，避免子包链接时旧 DLL 缺新符号。
+
+### 改进
+
+- 全部 37 widgets + 9 views 的 API 广度与易用性显著提升；`examples/all_controls_demo` 第 8 页「新控件 v1.2.0」集成展示新增控件与 Model/View。
+
+---
+
 ## [1.2.1] - 2026-07-22
 
 ### 修复

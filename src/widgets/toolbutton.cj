@@ -17,6 +17,11 @@ foreign func qToolButtonShowMenu(ptr: Int64): Unit
 foreign func qToolButtonDelete(ptr: Int64): Unit
 foreign func qToolButtonConnectClicked(ptr: Int64, callback: VoidCallback): Unit
 foreign func qToolButtonDisconnectClicked(ptr: Int64): Unit
+foreign func qToolButtonSetIconPath(ptr: Int64, path: CString): Unit
+foreign func qToolButtonToolButtonStyle(ptr: Int64): Int32
+foreign func qToolButtonConnectPressed(ptr: Int64, callback: VoidCallback): Unit
+foreign func qToolButtonConnectReleased(ptr: Int64, callback: VoidCallback): Unit
+foreign func qToolButtonConnectClickedChecked(ptr: Int64, callback: Int32Callback): Unit
 
 /// 工具按钮样式
 public const ToolButtonIconOnly: Int32 = 0        // 只显示图标
@@ -178,6 +183,50 @@ public class QToolButton {
     public func disconnectClicked() {
         unsafe {
             qToolButtonDisconnectClicked(ptr)
+        }
+    }
+    
+    /// 从文件路径设置图标
+    public func setIconFromPath(path: String) {
+        unsafe {
+            let cstr = LibC.mallocCString(path)
+            qToolButtonSetIconPath(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+    
+    /// 获取工具按钮样式
+    public func toolButtonStyle(): Int32 {
+        unsafe {
+            return qToolButtonToolButtonStyle(ptr)
+        }
+    }
+    
+    /// 是否自动凸起
+    public func isAutoRaise(): Bool {
+        unsafe {
+            return qToolButtonAutoRaise(ptr)
+        }
+    }
+    
+    /// 按下回调
+    public func setOnPressed(callback: VoidCallback) {
+        unsafe {
+            qToolButtonConnectPressed(ptr, callback)
+        }
+    }
+    
+    /// 释放回调
+    public func setOnReleased(callback: VoidCallback) {
+        unsafe {
+            qToolButtonConnectReleased(ptr, callback)
+        }
+    }
+    
+    /// 点击回调（带 checked 状态，0/1）
+    public func setOnClickedChecked(callback: Int32Callback) {
+        unsafe {
+            qToolButtonConnectClickedChecked(ptr, callback)
         }
     }
     

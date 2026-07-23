@@ -6,7 +6,18 @@ foreign func qFontComboBoxSetCurrentFont(ptr: Int64, family: CString): Unit
 foreign func qFontComboBoxCurrentFont(ptr: Int64): CString
 foreign func qFontComboBoxSetWritingSystem(ptr: Int64, ws: Int32): Unit
 foreign func qFontComboBoxSetFontFilters(ptr: Int64, filters: Int32): Unit
+foreign func qFontComboBoxWritingSystem(ptr: Int64): Int32
+foreign func qFontComboBoxFontFilters(ptr: Int64): Int32
 foreign func qFontComboBoxDelete(ptr: Int64): Unit
+
+/// 字体筛选器标志位（对应 QFontComboBox::FontFilters，可按位或组合）
+public class FontFilters {
+    public static let None: Int32 = 0
+    public static let ScalableFonts: Int32 = 1
+    public static let NonScalableFonts: Int32 = 2
+    public static let MonospacedFonts: Int32 = 4
+    public static let ProportionalFonts: Int32 = 8
+}
 
 public class FontWritingSystem {
     public static let Any: Int32 = 0
@@ -70,6 +81,16 @@ public class QFontComboBox {
 
     public func setFontFilters(filters: Int32): Unit {
         unsafe { qFontComboBoxSetFontFilters(ptr, filters) }
+    }
+
+    /// 获取当前书写系统
+    public func writingSystem(): Int32 {
+        unsafe { qFontComboBoxWritingSystem(ptr) }
+    }
+
+    /// 获取当前字体筛选器标志位
+    public func fontFilters(): Int32 {
+        unsafe { qFontComboBoxFontFilters(ptr) }
     }
 
     public func getPtr(): Int64 {

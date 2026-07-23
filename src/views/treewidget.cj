@@ -63,6 +63,16 @@ foreign func qTreeWidgetSetOnItemExpanded(ptr: Int64, callback: CFunc<(Int64) ->
 foreign func qTreeWidgetSetOnItemCollapsed(ptr: Int64, callback: CFunc<(Int64) -> Unit>): Unit
 foreign func qTreeWidgetSetOnCurrentItemChanged(ptr: Int64, callback: CFunc<(Int64) -> Unit>): Unit
 
+// 补充 API FFI
+foreign func qTreeWidgetColumnCount(ptr: Int64): Int32
+foreign func qTreeWidgetSetHeaderItem(ptr: Int64, itemPtr: Int64): Unit
+foreign func qTreeWidgetIndexOfTopLevelItem(ptr: Int64, itemPtr: Int64): Int32
+foreign func qTreeWidgetSelectedItems(ptr: Int64): Int32
+foreign func qTreeWidgetSetSelectionMode(ptr: Int64, mode: Int32): Unit
+foreign func qTreeWidgetConnectItemClicked(ptr: Int64, callback: CFunc<(Int64, Int32) -> Unit>): Unit
+foreign func qTreeWidgetConnectItemDoubleClicked(ptr: Int64, callback: CFunc<(Int64, Int32) -> Unit>): Unit
+foreign func qTreeWidgetConnectItemChanged(ptr: Int64, callback: CFunc<(Int64, Int32) -> Unit>): Unit
+
 // 勾选状态常量
 public class CheckState {
     public static let Unchecked: Int32 = 0
@@ -413,6 +423,57 @@ public class QTreeWidget {
         }
     }
     
+    // ========== 补充 API ==========
+
+    public func columnCount(): Int32 {
+        unsafe {
+            qTreeWidgetColumnCount(ptr)
+        }
+    }
+
+    public func setHeaderItem(item: QTreeWidgetItem) {
+        unsafe {
+            qTreeWidgetSetHeaderItem(ptr, item.getPtr())
+        }
+    }
+
+    public func indexOfTopLevelItem(item: QTreeWidgetItem): Int32 {
+        unsafe {
+            qTreeWidgetIndexOfTopLevelItem(ptr, item.getPtr())
+        }
+    }
+
+    public func selectedItems(): Int32 {
+        unsafe {
+            qTreeWidgetSelectedItems(ptr)
+        }
+    }
+
+    public func setSelectionMode(mode: Int32) {
+        unsafe {
+            qTreeWidgetSetSelectionMode(ptr, mode)
+        }
+    }
+
+    // 带列号的点击回调（区别于已有的 setOnItemClicked 仅传项指针）
+    public func setOnItemClickedWithColumn(callback: CFunc<(Int64, Int32) -> Unit>) {
+        unsafe {
+            qTreeWidgetConnectItemClicked(ptr, callback)
+        }
+    }
+
+    public func setOnItemDoubleClickedWithColumn(callback: CFunc<(Int64, Int32) -> Unit>) {
+        unsafe {
+            qTreeWidgetConnectItemDoubleClicked(ptr, callback)
+        }
+    }
+
+    public func setOnItemChanged(callback: CFunc<(Int64, Int32) -> Unit>) {
+        unsafe {
+            qTreeWidgetConnectItemChanged(ptr, callback)
+        }
+    }
+
     // ========== 继承自QWidget的方法 ==========
     
     public func show() {

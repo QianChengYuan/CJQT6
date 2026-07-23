@@ -12,6 +12,8 @@ foreign func qSystemTrayIconHide(ptr: Int64): Unit
 foreign func qSystemTrayIconIsVisible(ptr: Int64): Bool
 foreign func qSystemTrayIconShowMessage(ptr: Int64, title: CString, message: CString, iconType: Int32, duration: Int32): Unit
 foreign func qSystemTrayIconSetContextMenu(ptr: Int64, menuPtr: Int64): Unit
+foreign func qSystemTrayIconConnectActivated(ptr: Int64, callback: Int32Callback): Unit
+foreign func qSystemTrayIconConnectMessageClicked(ptr: Int64, callback: VoidCallback): Unit
 
 /// 托盘消息图标类型
 public class MessageIcon {
@@ -64,7 +66,7 @@ public class QSystemTrayIcon {
     /// message: 消息内容
     /// iconType: 图标类型（0=Info, 1=Warning, 2=Critical）
     /// duration: 显示时长（毫秒，默认10000）
-    public func showMessage(title: String, message: String, iconType!: Int32 = MessageIcon.Info, duration!: Int32 = 10000): Unit {
+    public func showMessage(title: String, message: String, iconType!: Int32, duration!: Int32): Unit {
         unsafe {
             let cstrTitle = LibC.mallocCString(title)
             let cstrMsg = LibC.mallocCString(message)
@@ -78,6 +80,16 @@ public class QSystemTrayIcon {
     /// menuPtr: QMenu 对象指针
     public func setContextMenu(menuPtr: Int64): Unit {
         unsafe { qSystemTrayIconSetContextMenu(ptr, menuPtr) }
+    }
+
+    /// 激活回调（参数：0=Unknown,1=Context,2=DoubleClick,3=Trigger,4=MiddleClick）
+    public func setOnActivated(callback: Int32Callback): Unit {
+        unsafe { qSystemTrayIconConnectActivated(ptr, callback) }
+    }
+
+    /// 消息气泡被点击回调（无参数）
+    public func setOnMessageClicked(callback: VoidCallback): Unit {
+        unsafe { qSystemTrayIconConnectMessageClicked(ptr, callback) }
     }
 
     /// 获取原生指针

@@ -11,6 +11,10 @@ foreign func qStackedWidgetSetCurrentIndex(ptr: Int64, index: Int32): Unit
 foreign func qStackedWidgetCurrentIndex(ptr: Int64): Int32
 foreign func qStackedWidgetCurrentWidget(ptr: Int64): Int64
 foreign func qStackedWidgetCount(ptr: Int64): Int32
+foreign func qStackedWidgetSetCurrentWidget(ptr: Int64, widgetPtr: Int64): Unit
+foreign func qStackedWidgetWidget(ptr: Int64, index: Int32): Int64
+foreign func qStackedWidgetConnectCurrentChanged(ptr: Int64, callback: Int32Callback): Unit
+foreign func qStackedWidgetConnectWidgetRemoved(ptr: Int64, callback: Int32Callback): Unit
 foreign func qStackedWidgetDelete(ptr: Int64): Unit
 
 /// 堆叠窗口部件
@@ -94,6 +98,34 @@ public class QStackedWidget {
     public func count(): Int32 {
         unsafe {
             return qStackedWidgetCount(ptr)
+        }
+    }
+
+    /// 设置当前显示的子部件
+    public func setCurrentWidget(widgetPtr: Int64): Unit {
+        unsafe {
+            qStackedWidgetSetCurrentWidget(ptr, widgetPtr)
+        }
+    }
+
+    /// 获取指定索引处的子部件指针
+    public func widget(index: Int32): Int64 {
+        unsafe {
+            return qStackedWidgetWidget(ptr, index)
+        }
+    }
+
+    /// 当前页面切换回调（索引）
+    public func setOnCurrentChanged(callback: Int32Callback): Unit {
+        unsafe {
+            qStackedWidgetConnectCurrentChanged(ptr, callback)
+        }
+    }
+
+    /// 页面移除回调（索引）
+    public func setOnWidgetRemoved(callback: Int32Callback): Unit {
+        unsafe {
+            qStackedWidgetConnectWidgetRemoved(ptr, callback)
         }
     }
 

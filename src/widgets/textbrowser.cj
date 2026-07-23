@@ -17,6 +17,14 @@ foreign func qTextBrowserSetOpenLinks(ptr: Int64, open: Bool): Unit
 foreign func qTextBrowserSetOpenExternalLinks(ptr: Int64, open: Bool): Unit
 foreign func qTextBrowserClear(ptr: Int64): Unit
 foreign func qTextBrowserSetPlainText(ptr: Int64, text: CString): Unit
+foreign func qTextBrowserIsOpenExternalLinks(ptr: Int64): Bool
+foreign func qTextBrowserIsOpenLinks(ptr: Int64): Bool
+foreign func qTextBrowserSource(ptr: Int64): CString
+foreign func qTextBrowserClearHistory(ptr: Int64): Unit
+foreign func qTextBrowserConnectBackwardAvailable(ptr: Int64, callback: BoolCallback): Unit
+foreign func qTextBrowserConnectForwardAvailable(ptr: Int64, callback: BoolCallback): Unit
+foreign func qTextBrowserConnectSourceChanged(ptr: Int64, callback: CStringCallback): Unit
+foreign func qTextBrowserConnectTextChanged(ptr: Int64, callback: VoidCallback): Unit
 foreign func qTextBrowserDelete(ptr: Int64): Unit
 
 /// 富文本浏览器
@@ -117,6 +125,49 @@ public class QTextBrowser {
 
     /// 设置是否允许打开外部链接
     public func setOpenExternalLinks(open: Bool): Unit { unsafe { qTextBrowserSetOpenExternalLinks(ptr, open) } }
+
+    /// 是否允许打开外部链接
+    public func isOpenExternalLinks(): Bool { unsafe { qTextBrowserIsOpenExternalLinks(ptr) } }
+
+    /// 是否允许打开内部链接
+    public func isOpenLinks(): Bool { unsafe { qTextBrowserIsOpenLinks(ptr) } }
+
+    /// 获取当前源 URL
+    public func source(): String {
+        unsafe {
+            let cstr = qTextBrowserSource(ptr)
+            return cstr.toString()
+        }
+    }
+
+    /// 清空浏览历史
+    public func clearHistory(): Unit { unsafe { qTextBrowserClearHistory(ptr) } }
+
+    /// 后退（历史别名，等价 backward()）
+    public func historyBack(): Unit { unsafe { qTextBrowserBackward(ptr) } }
+
+    /// 前进（历史别名，等价 forward()）
+    public func historyForward(): Unit { unsafe { qTextBrowserForward(ptr) } }
+
+    /// 后退可用性变化回调（参数: 是否有历史可后退）
+    public func setOnBackwardAvailable(callback: BoolCallback): Unit {
+        unsafe { qTextBrowserConnectBackwardAvailable(ptr, callback) }
+    }
+
+    /// 前进可用性变化回调（参数: 是否有历史可前进）
+    public func setOnForwardAvailable(callback: BoolCallback): Unit {
+        unsafe { qTextBrowserConnectForwardAvailable(ptr, callback) }
+    }
+
+    /// 源变化回调（参数: 新的 URL 字符串）
+    public func setOnSourceChanged(callback: CStringCallback): Unit {
+        unsafe { qTextBrowserConnectSourceChanged(ptr, callback) }
+    }
+
+    /// 文本内容变化回调
+    public func setOnTextChanged(callback: VoidCallback): Unit {
+        unsafe { qTextBrowserConnectTextChanged(ptr, callback) }
+    }
 
     /// 清空内容
     public func clear(): Unit { unsafe { qTextBrowserClear(ptr) } }

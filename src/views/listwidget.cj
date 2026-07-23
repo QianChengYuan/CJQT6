@@ -37,6 +37,31 @@ foreign func qListWidgetSetOnItemClicked(ptr: Int64, callback: CFunc<(Int32) -> 
 foreign func qListWidgetSetOnItemDoubleClicked(ptr: Int64, callback: CFunc<(Int32) -> Unit>): Unit
 foreign func qListWidgetSetOnCurrentRowChanged(ptr: Int64, callback: CFunc<(Int32) -> Unit>): Unit
 
+// 补充 API FFI
+foreign func qListWidgetAddItems(ptr: Int64, items: CString): Unit
+foreign func qListWidgetItem(ptr: Int64, row: Int32): Int64
+foreign func qListWidgetTakeItem(ptr: Int64, row: Int32): Int64
+foreign func qListWidgetRemoveItemWidget(ptr: Int64, itemPtr: Int64): Unit
+foreign func qListWidgetSetCurrentItem(ptr: Int64, itemPtr: Int64): Unit
+foreign func qListWidgetSetViewMode(ptr: Int64, v: Int32): Unit
+foreign func qListWidgetConnectItemClicked(ptr: Int64, callback: CFunc<(Int64) -> Unit>): Unit
+foreign func qListWidgetConnectItemDoubleClicked(ptr: Int64, callback: CFunc<(Int64) -> Unit>): Unit
+foreign func qListWidgetConnectItemSelectionChanged(ptr: Int64, callback: CFunc<() -> Unit>): Unit
+foreign func qListWidgetConnectCurrentItemChanged(ptr: Int64, callback: CFunc<(Int64) -> Unit>): Unit
+
+// QListWidgetItem 封装 FFI
+foreign func qListWidgetItemCreate(): Int64
+foreign func qListWidgetItemCreateWithText(text: CString): Int64
+foreign func qListWidgetItemDelete(itemPtr: Int64): Unit
+foreign func qListWidgetItemSetText(itemPtr: Int64, text: CString): Unit
+foreign func qListWidgetItemGetText(itemPtr: Int64): CString
+foreign func qListWidgetItemSetFlags(itemPtr: Int64, flags: Int32): Unit
+foreign func qListWidgetItemFlags(itemPtr: Int64): Int32
+foreign func qListWidgetItemSetCheckState(itemPtr: Int64, state: Int32): Unit
+foreign func qListWidgetItemCheckState(itemPtr: Int64): Int32
+foreign func qListWidgetItemSetData(itemPtr: Int64, role: Int32, value: Int64): Unit
+foreign func qListWidgetItemData(itemPtr: Int64, role: Int32): Int64
+
 // 选择模式常量
 public class ListSelectionMode {
     public static let NoSelection: Int32 = 0        // 不可选择
@@ -259,6 +284,76 @@ public class QListWidget {
         }
     }
     
+    // ========== 批量项 API ==========
+
+    public func addItems(items: Array<String>) {
+        unsafe {
+            var joined = ""
+            for (i in 0..items.size) {
+                if (i > 0) { joined += "\n" }
+                joined += items[i]
+            }
+            let cstr = LibC.mallocCString(joined)
+            qListWidgetAddItems(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+
+    public func item(row: Int32): QListWidgetItem {
+        unsafe {
+            return QListWidgetItem.fromPtr(qListWidgetItem(ptr, row))
+        }
+    }
+
+    public func takeItem(row: Int32): QListWidgetItem {
+        unsafe {
+            return QListWidgetItem.fromPtr(qListWidgetTakeItem(ptr, row))
+        }
+    }
+
+    public func removeItemWidget(item: QListWidgetItem) {
+        unsafe {
+            qListWidgetRemoveItemWidget(ptr, item.getPtr())
+        }
+    }
+
+    public func setCurrentItem(item: QListWidgetItem) {
+        unsafe {
+            qListWidgetSetCurrentItem(ptr, item.getPtr())
+        }
+    }
+
+    public func setViewMode(mode: Int32) {
+        unsafe {
+            qListWidgetSetViewMode(ptr, mode)
+        }
+    }
+
+    // 项指针形式点击回调（区别于已有的行号形式 setOnItemClicked）
+    public func setOnItemClickedItem(callback: CFunc<(Int64) -> Unit>) {
+        unsafe {
+            qListWidgetConnectItemClicked(ptr, callback)
+        }
+    }
+
+    public func setOnItemDoubleClickedItem(callback: CFunc<(Int64) -> Unit>) {
+        unsafe {
+            qListWidgetConnectItemDoubleClicked(ptr, callback)
+        }
+    }
+
+    public func setOnItemSelectionChanged(callback: CFunc<() -> Unit>) {
+        unsafe {
+            qListWidgetConnectItemSelectionChanged(ptr, callback)
+        }
+    }
+
+    public func setOnCurrentItemChanged(callback: CFunc<(Int64) -> Unit>) {
+        unsafe {
+            qListWidgetConnectCurrentItemChanged(ptr, callback)
+        }
+    }
+
     // ========== 继承自QWidget的方法 ==========
     
     public func show() {
@@ -296,6 +391,112 @@ public class QListWidget {
             let cstr = LibC.mallocCString(style)
             qWidgetSetStyleSheet(ptr, cstr)
             LibC.free(cstr)
+        }
+    }
+}
+
+// 项标志（对应 Qt::ItemFlag 标志位，可位或组合）
+public class ItemFlag {
+    public static let NoItemFlags: Int32 = 0
+    public static let ItemIsSelectable: Int32 = 1
+    public static let ItemIsEditable: Int32 = 2
+    public static let ItemIsDragEnabled: Int32 = 4
+    public static let ItemIsDropEnabled: Int32 = 8
+    public static let ItemIsUserCheckable: Int32 = 16
+    public static let ItemIsEnabled: Int32 = 32
+    public static let ItemIsTristate: Int32 = 64
+}
+
+// ============================================================
+// QListWidgetItem 最小封装
+// ============================================================
+public class QListWidgetItem {
+    private var ptr: Int64 = 0
+
+    public init() {
+        unsafe {
+            ptr = qListWidgetItemCreate()
+        }
+    }
+
+    public init(text: String) {
+        unsafe {
+            let cstr = LibC.mallocCString(text)
+            ptr = qListWidgetItemCreateWithText(cstr)
+            LibC.free(cstr)
+        }
+    }
+
+    private init(ptr: Int64) {
+        this.ptr = ptr
+    }
+
+    // 从控件返回的指针构造（不拥有所有权，调用方不应 delete）
+    public static func fromPtr(ptr: Int64): QListWidgetItem {
+        QListWidgetItem(ptr)
+    }
+
+    public func getPtr(): Int64 {
+        ptr
+    }
+
+    public func text(): String {
+        unsafe {
+            let cstr = qListWidgetItemGetText(ptr)
+            return cstr.toString()
+        }
+    }
+
+    public func setText(text: String) {
+        unsafe {
+            let cstr = LibC.mallocCString(text)
+            qListWidgetItemSetText(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+
+    public func setFlags(flags: Int32): Unit {
+        unsafe {
+            qListWidgetItemSetFlags(ptr, flags)
+        }
+    }
+
+    public func flags(): Int32 {
+        unsafe {
+            qListWidgetItemFlags(ptr)
+        }
+    }
+
+    public func setCheckState(state: Int32): Unit {
+        unsafe {
+            qListWidgetItemSetCheckState(ptr, state)
+        }
+    }
+
+    public func checkState(): Int32 {
+        unsafe {
+            qListWidgetItemCheckState(ptr)
+        }
+    }
+
+    public func setData(role: Int32, value: Int64): Unit {
+        unsafe {
+            qListWidgetItemSetData(ptr, role, value)
+        }
+    }
+
+    public func data(role: Int32): Int64 {
+        unsafe {
+            qListWidgetItemData(ptr, role)
+        }
+    }
+
+    public func delete(): Unit {
+        if (ptr != 0) {
+            unsafe {
+                qListWidgetItemDelete(ptr)
+            }
+            ptr = 0
         }
     }
 }

@@ -27,6 +27,34 @@ foreign func qStandardItemModelSetItemChecked(ptr: Int64, row: Int32, col: Int32
 foreign func qStandardItemModelIsItemChecked(ptr: Int64, row: Int32, col: Int32): Int32
 foreign func qStandardItemModelDelete(ptr: Int64): Unit
 
+// 补充 API FFI
+foreign func qStandardItemModelSetHeaderData(ptr: Int64, section: Int32, orientation: Int32, value: Int64, role: Int32): Int32
+foreign func qStandardItemModelSetItemPtr(ptr: Int64, row: Int32, col: Int32, itemPtr: Int64): Unit
+foreign func qStandardItemModelItem(ptr: Int64, row: Int32, col: Int32): Int64
+foreign func qStandardItemModelSetHorizontalHeaderItem(ptr: Int64, col: Int32, itemPtr: Int64): Unit
+foreign func qStandardItemModelSetVerticalHeaderItem(ptr: Int64, row: Int32, itemPtr: Int64): Unit
+foreign func qStandardItemModelAppendRow(ptr: Int64, itemPtr: Int64): Unit
+foreign func qStandardItemModelInsertRowItem(ptr: Int64, row: Int32, itemPtr: Int64): Unit
+foreign func qStandardItemModelFindItems(ptr: Int64, text: CString, flags: Int32): Int32
+foreign func qStandardItemModelItemFromIndex(ptr: Int64, indexPtr: Int64): Int64
+foreign func qStandardItemModelIndexFromItem(ptr: Int64, itemPtr: Int64): Int64
+
+// QStandardItem 封装 FFI
+foreign func qStandardItemCreate(): Int64
+foreign func qStandardItemCreateWithText(text: CString): Int64
+foreign func qStandardItemDelete(itemPtr: Int64): Unit
+foreign func qStandardItemSetText(itemPtr: Int64, text: CString): Unit
+foreign func qStandardItemGetText(itemPtr: Int64): CString
+foreign func qStandardItemSetFlags(itemPtr: Int64, flags: Int32): Unit
+foreign func qStandardItemFlags(itemPtr: Int64): Int32
+foreign func qStandardItemSetCheckState(itemPtr: Int64, state: Int32): Unit
+foreign func qStandardItemCheckState(itemPtr: Int64): Int32
+foreign func qStandardItemSetData(itemPtr: Int64, role: Int32, value: Int64): Unit
+foreign func qStandardItemData(itemPtr: Int64, role: Int32): Int64
+foreign func qStandardItemSetEditable(itemPtr: Int64, v: Int32): Unit
+foreign func qStandardItemIsEditable(itemPtr: Int64): Int32
+foreign func qStandardItemAppendRow(itemPtr: Int64, childPtr: Int64): Unit
+foreign func qStandardItemSetForeground(itemPtr: Int64, r: Int32, g: Int32, b: Int32): Unit
 
 // ============================================================
 // SelectionMode constants
@@ -231,6 +259,81 @@ public class QStandardItemModel {
         }
     }
 
+    // ========== 项 / 表头 API ==========
+
+    public func setHeaderData(section: Int32, orientation: Int32, value: Int64, role: Int32): Bool {
+        checkValid()
+        unsafe {
+            qStandardItemModelSetHeaderData(ptr, section, orientation, value, role) != 0
+        }
+    }
+
+    public func setItem(row: Int32, col: Int32, item: QStandardItem): Unit {
+        checkValid()
+        unsafe {
+            qStandardItemModelSetItemPtr(ptr, row, col, item.getPtr())
+        }
+    }
+
+    public func item(row: Int32, col: Int32): QStandardItem {
+        checkValid()
+        unsafe {
+            return QStandardItem.fromPtr(qStandardItemModelItem(ptr, row, col))
+        }
+    }
+
+    public func setHorizontalHeaderItem(col: Int32, item: QStandardItem): Unit {
+        checkValid()
+        unsafe {
+            qStandardItemModelSetHorizontalHeaderItem(ptr, col, item.getPtr())
+        }
+    }
+
+    public func setVerticalHeaderItem(row: Int32, item: QStandardItem): Unit {
+        checkValid()
+        unsafe {
+            qStandardItemModelSetVerticalHeaderItem(ptr, row, item.getPtr())
+        }
+    }
+
+    public func appendRow(item: QStandardItem): Unit {
+        checkValid()
+        unsafe {
+            qStandardItemModelAppendRow(ptr, item.getPtr())
+        }
+    }
+
+    public func insertRow(row: Int32, item: QStandardItem): Unit {
+        checkValid()
+        unsafe {
+            qStandardItemModelInsertRowItem(ptr, row, item.getPtr())
+        }
+    }
+
+    public func findItems(text: String, flags: Int32): Int32 {
+        checkValid()
+        unsafe {
+            let cstr = LibC.mallocCString(text)
+            let result = qStandardItemModelFindItems(ptr, cstr, flags)
+            LibC.free(cstr)
+            return result
+        }
+    }
+
+    public func itemFromIndex(index: QModelIndex): QStandardItem {
+        checkValid()
+        unsafe {
+            return QStandardItem.fromPtr(qStandardItemModelItemFromIndex(ptr, index.ptr))
+        }
+    }
+
+    public func indexFromItem(item: QStandardItem): Int64 {
+        checkValid()
+        unsafe {
+            return qStandardItemModelIndexFromItem(ptr, item.getPtr())
+        }
+    }
+
     public func getPtr(): Int64 {
         ptr
     }
@@ -240,6 +343,124 @@ public class QStandardItemModel {
             unsafe {
                 qSignalCleanup(ptr)
                 qStandardItemModelDelete(ptr)
+            }
+            ptr = 0
+        }
+    }
+}
+
+// ============================================================
+// QStandardItem 最小封装（复用 listwidget.cj 的 ItemFlag、treewidget.cj 的 CheckState）
+// ============================================================
+public class QStandardItem {
+    private var ptr: Int64 = 0
+
+    public init() {
+        unsafe {
+            ptr = qStandardItemCreate()
+        }
+    }
+
+    public init(text: String) {
+        unsafe {
+            let cstr = LibC.mallocCString(text)
+            ptr = qStandardItemCreateWithText(cstr)
+            LibC.free(cstr)
+        }
+    }
+
+    private init(ptr: Int64) {
+        this.ptr = ptr
+    }
+
+    // 从模型返回的指针构造（不拥有所有权，调用方不应 delete）
+    public static func fromPtr(ptr: Int64): QStandardItem {
+        QStandardItem(ptr)
+    }
+
+    public func getPtr(): Int64 {
+        ptr
+    }
+
+    public func text(): String {
+        unsafe {
+            let cstr = qStandardItemGetText(ptr)
+            return cstr.toString()
+        }
+    }
+
+    public func setText(text: String) {
+        unsafe {
+            let cstr = LibC.mallocCString(text)
+            qStandardItemSetText(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+
+    public func setFlags(flags: Int32): Unit {
+        unsafe {
+            qStandardItemSetFlags(ptr, flags)
+        }
+    }
+
+    public func flags(): Int32 {
+        unsafe {
+            qStandardItemFlags(ptr)
+        }
+    }
+
+    public func setCheckState(state: Int32): Unit {
+        unsafe {
+            qStandardItemSetCheckState(ptr, state)
+        }
+    }
+
+    public func checkState(): Int32 {
+        unsafe {
+            qStandardItemCheckState(ptr)
+        }
+    }
+
+    public func setData(role: Int32, value: Int64): Unit {
+        unsafe {
+            qStandardItemSetData(ptr, role, value)
+        }
+    }
+
+    public func data(role: Int32): Int64 {
+        unsafe {
+            qStandardItemData(ptr, role)
+        }
+    }
+
+    public func setEditable(editable: Bool): Unit {
+        unsafe {
+            qStandardItemSetEditable(ptr, if (editable) { 1 } else { 0 })
+        }
+    }
+
+    public func isEditable(): Bool {
+        unsafe {
+            qStandardItemIsEditable(ptr) != 0
+        }
+    }
+
+    public func appendRow(child: QStandardItem): Unit {
+        unsafe {
+            qStandardItemAppendRow(ptr, child.getPtr())
+        }
+    }
+
+    public func setForeground(r: Int32, g: Int32, b: Int32): Unit {
+        unsafe {
+            qStandardItemSetForeground(ptr, r, g, b)
+        }
+    }
+
+    public func delete(): Unit {
+        if (ptr != 0) {
+            unsafe {
+                qStandardItemDelete(ptr)
             }
             ptr = 0
         }

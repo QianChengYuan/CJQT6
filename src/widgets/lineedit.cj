@@ -28,6 +28,19 @@ foreign func qLineEditHasSelectedText(ptr: Int64): Bool
 foreign func qLineEditSelectedText(ptr: Int64): CString
 foreign func qLineEditSelectAll(ptr: Int64): Unit
 foreign func qLineEditSetFocus(ptr: Int64): Unit
+foreign func qLineEditEchoMode(ptr: Int64): Int32
+foreign func qLineEditIsReadOnly(ptr: Int64): Bool
+foreign func qLineEditCursorPosition(ptr: Int64): Int32
+foreign func qLineEditSetCursorPosition(ptr: Int64, pos: Int32): Unit
+foreign func qLineEditSetSelection(ptr: Int64, start: Int32, length: Int32): Unit
+foreign func qLineEditHasFrame(ptr: Int64): Bool
+foreign func qLineEditSetClearButtonEnabled(ptr: Int64, enabled: Bool): Unit
+foreign func qLineEditIsClearButtonEnabled(ptr: Int64): Bool
+foreign func qLineEditSetCompleter(ptr: Int64, completerPtr: Int64): Unit
+foreign func qLineEditDisplayText(ptr: Int64): CString
+foreign func qLineEditConnectCursorPositionChanged(ptr: Int64, callback: Int32Int32Callback): Unit
+foreign func qLineEditConnectSelectionChanged(ptr: Int64, callback: VoidCallback): Unit
+foreign func qLineEditConnectInputRejected(ptr: Int64, callback: VoidCallback): Unit
 foreign func qLineEditDelete(ptr: Int64): Unit
 
 /// 输入掩码预设模板
@@ -55,6 +68,14 @@ public class Alignment {
     public static let Bottom: Int32 = 0x40
     public static let VCenter: Int32 = 0x80
     public static let Center: Int32 = 0x84  // HCenter | VCenter
+}
+
+/// 单行文本框回显模式常量（对应 QLineEdit::EchoMode）
+public class LineEditEchoMode {
+    public static let Normal: Int32 = 0
+    public static let NoEcho: Int32 = 1
+    public static let Password: Int32 = 2
+    public static let PasswordEchoOnEdit: Int32 = 3
 }
 
 /// 单行文本输入框部件
@@ -325,6 +346,87 @@ public class QLineEdit <: QtResource {
         unsafe {
             qLineEditSetFocus(ptr)
         }
+    }
+    
+    /// 获取回显模式
+    public func echoMode(): Int32 {
+        checkValid()
+        unsafe { qLineEditEchoMode(ptr) }
+    }
+    
+    /// 是否只读
+    public func isReadOnly(): Bool {
+        checkValid()
+        unsafe { qLineEditIsReadOnly(ptr) }
+    }
+    
+    /// 获取光标位置
+    public func cursorPosition(): Int32 {
+        checkValid()
+        unsafe { qLineEditCursorPosition(ptr) }
+    }
+    
+    /// 设置光标位置
+    public func setCursorPosition(pos: Int32): Unit {
+        checkValid()
+        unsafe { qLineEditSetCursorPosition(ptr, pos) }
+    }
+    
+    /// 选中 [start, start+length) 区间文本
+    public func setSelection(start: Int32, length: Int32): Unit {
+        checkValid()
+        unsafe { qLineEditSetSelection(ptr, start, length) }
+    }
+    
+    /// 是否显示边框
+    public func hasFrame(): Bool {
+        checkValid()
+        unsafe { qLineEditHasFrame(ptr) }
+    }
+    
+    /// 设置是否显示清除按钮
+    public func setClearButtonEnabled(enabled: Bool): Unit {
+        checkValid()
+        unsafe { qLineEditSetClearButtonEnabled(ptr, enabled) }
+    }
+    
+    /// 清除按钮是否启用
+    public func isClearButtonEnabled(): Bool {
+        checkValid()
+        unsafe { qLineEditIsClearButtonEnabled(ptr) }
+    }
+    
+    /// 设置自动补全器（传入 QCompleter 指针）
+    public func setCompleter(completerPtr: Int64): Unit {
+        checkValid()
+        unsafe { qLineEditSetCompleter(ptr, completerPtr) }
+    }
+    
+    /// 获取显示文本（受 echoMode 影响）
+    public func displayText(): String {
+        checkValid()
+        unsafe {
+            let cstr = qLineEditDisplayText(ptr)
+            return cstr.toString()
+        }
+    }
+    
+    /// 光标位置变化回调 (oldPos, newPos)
+    public func setOnCursorPositionChanged(callback: Int32Int32Callback): Unit {
+        checkValid()
+        unsafe { qLineEditConnectCursorPositionChanged(ptr, callback) }
+    }
+    
+    /// 选区变化回调
+    public func setOnSelectionChanged(callback: VoidCallback): Unit {
+        checkValid()
+        unsafe { qLineEditConnectSelectionChanged(ptr, callback) }
+    }
+    
+    /// 输入被拒绝回调（超出输入掩码/验证器）
+    public func setOnInputRejected(callback: VoidCallback): Unit {
+        checkValid()
+        unsafe { qLineEditConnectInputRejected(ptr, callback) }
     }
     
     /// 获取原生指针

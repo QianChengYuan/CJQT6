@@ -7,6 +7,7 @@ foreign func qKeySequenceEditCreate(parentPtr: Int64): Int64
 foreign func qKeySequenceEditKeySequence(ptr: Int64): CString
 foreign func qKeySequenceEditSetKeySequence(ptr: Int64, text: CString): Unit
 foreign func qKeySequenceEditClear(ptr: Int64): Unit
+foreign func qKeySequenceEditConnectKeySequenceChanged(ptr: Int64, callback: CStringCallback): Unit
 foreign func qKeySequenceEditDelete(ptr: Int64): Unit
 
 /// 快捷键输入控件
@@ -59,6 +60,11 @@ public class QKeySequenceEdit {
 
     /// 清空快捷键
     public func clear(): Unit { unsafe { qKeySequenceEditClear(ptr) } }
+
+    /// 快捷键序列变化回调（参数为快捷键文本，如 "Ctrl+C"）
+    public func setOnKeySequenceChanged(callback: CStringCallback): Unit {
+        unsafe { qKeySequenceEditConnectKeySequenceChanged(ptr, callback) }
+    }
 
     /// 获取原生指针
     public func getPtr(): Int64 {

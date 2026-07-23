@@ -14,6 +14,10 @@ foreign func qGroupBoxSetCheckable(ptr: Int64, checkable: Bool): Unit
 foreign func qGroupBoxIsCheckable(ptr: Int64): Bool
 foreign func qGroupBoxSetChecked(ptr: Int64, checked: Bool): Unit
 foreign func qGroupBoxIsChecked(ptr: Int64): Bool
+foreign func qGroupBoxSetAlignment(ptr: Int64, alignment: Int32): Unit
+foreign func qGroupBoxAlignment(ptr: Int64): Int32
+foreign func qGroupBoxConnectClicked(ptr: Int64, callback: BoolCallback): Unit
+foreign func qGroupBoxConnectToggled(ptr: Int64, callback: BoolCallback): Unit
 foreign func qGroupBoxDelete(ptr: Int64): Unit
 
 // QTabWidget - 标签页
@@ -39,6 +43,13 @@ foreign func qScrollAreaCreate(): Int64
 foreign func qScrollAreaSetWidget(ptr: Int64, widgetPtr: Int64): Unit
 foreign func qScrollAreaSetWidgetResizable(ptr: Int64, resizable: Bool): Unit
 foreign func qScrollAreaWidget(ptr: Int64): Int64
+foreign func qScrollAreaTakeWidget(ptr: Int64): Int64
+foreign func qScrollAreaWidgetResizable(ptr: Int64): Int32
+foreign func qScrollAreaSetHorizontalScrollBarPolicy(ptr: Int64, policy: Int32): Unit
+foreign func qScrollAreaSetVerticalScrollBarPolicy(ptr: Int64, policy: Int32): Unit
+foreign func qScrollAreaEnsureVisible(ptr: Int64, x: Int32, y: Int32, w: Int32, h: Int32): Unit
+foreign func qScrollAreaSetAlignment(ptr: Int64, alignment: Int32): Unit
+foreign func qScrollAreaAlignment(ptr: Int64): Int32
 foreign func qScrollAreaDelete(ptr: Int64): Unit
 
 // QFrame - 边框容器
@@ -46,6 +57,13 @@ foreign func qFrameCreate(): Int64
 foreign func qFrameSetFrameShape(ptr: Int64, shape: Int32): Unit
 foreign func qFrameSetFrameShadow(ptr: Int64, shadow: Int32): Unit
 foreign func qFrameSetLineWidth(ptr: Int64, width: Int32): Unit
+foreign func qFrameSetFrameStyle(ptr: Int64, style: Int32): Unit
+foreign func qFrameFrameStyle(ptr: Int64): Int32
+foreign func qFrameFrameShape(ptr: Int64): Int32
+foreign func qFrameFrameShadow(ptr: Int64): Int32
+foreign func qFrameSetMidLineWidth(ptr: Int64, width: Int32): Unit
+foreign func qFrameMidLineWidth(ptr: Int64): Int32
+foreign func qFrameSetFrameRect(ptr: Int64, x: Int32, y: Int32, w: Int32, h: Int32): Unit
 foreign func qFrameDelete(ptr: Int64): Unit
 
 // ============================================================
@@ -110,6 +128,34 @@ public class QGroupBox {
     public func isChecked(): Bool {
         unsafe {
             qGroupBoxIsChecked(ptr)
+        }
+    }
+    
+    /// 设置对齐方式（Qt::Alignment 位或值）
+    public func setAlignment(alignment: Int32) {
+        unsafe {
+            qGroupBoxSetAlignment(ptr, alignment)
+        }
+    }
+    
+    /// 获取对齐方式
+    public func alignment(): Int32 {
+        unsafe {
+            qGroupBoxAlignment(ptr)
+        }
+    }
+    
+    /// 点击（带选中态）回调
+    public func setOnClicked(callback: BoolCallback) {
+        unsafe {
+            qGroupBoxConnectClicked(ptr, callback)
+        }
+    }
+    
+    /// 勾选状态变化回调
+    public func setOnToggled(callback: BoolCallback) {
+        unsafe {
+            qGroupBoxConnectToggled(ptr, callback)
         }
     }
     
@@ -402,6 +448,55 @@ public class QScrollArea {
         }
     }
     
+    /// 取出内部部件并返回其指针（之后不再由 QScrollArea 管理）
+    public func takeWidget(): Int64 {
+        unsafe {
+            qScrollAreaTakeWidget(ptr)
+        }
+    }
+    
+    /// 是否自动调整内部部件尺寸
+    public func widgetResizable(): Bool {
+        unsafe {
+            qScrollAreaWidgetResizable(ptr) != 0
+        }
+    }
+    
+    /// 设置水平滚动条策略
+    public func setHorizontalScrollBarPolicy(policy: Int32) {
+        unsafe {
+            qScrollAreaSetHorizontalScrollBarPolicy(ptr, policy)
+        }
+    }
+    
+    /// 设置垂直滚动条策略
+    public func setVerticalScrollBarPolicy(policy: Int32) {
+        unsafe {
+            qScrollAreaSetVerticalScrollBarPolicy(ptr, policy)
+        }
+    }
+    
+    /// 滚动以确保 (x,y) 处可见（w,h 为边距）
+    public func ensureVisible(x: Int32, y: Int32, w: Int32, h: Int32) {
+        unsafe {
+            qScrollAreaEnsureVisible(ptr, x, y, w, h)
+        }
+    }
+    
+    /// 设置内容对齐方式
+    public func setAlignment(alignment: Int32) {
+        unsafe {
+            qScrollAreaSetAlignment(ptr, alignment)
+        }
+    }
+    
+    /// 获取内容对齐方式
+    public func alignment(): Int32 {
+        unsafe {
+            qScrollAreaAlignment(ptr)
+        }
+    }
+    
     public func resize(width: Int32, height: Int32) {
         unsafe {
             qWidgetResize(ptr, width, height)
@@ -478,6 +573,13 @@ public const Plain: Int32 = 16
 public const Raised: Int32 = 32
 public const Sunken: Int32 = 48
 
+// 滚动条策略（对应 Qt::ScrollBarPolicy）
+public class ScrollBarPolicy {
+    public static let ScrollBarAsNeeded: Int32 = 0
+    public static let ScrollBarAlwaysOff: Int32 = 1
+    public static let ScrollBarAlwaysOn: Int32 = 2
+}
+
 public class QFrame {
     private var ptr: Int64 = 0
     
@@ -514,6 +616,55 @@ public class QFrame {
     public func setLineWidth(width: Int32) {
         unsafe {
             qFrameSetLineWidth(ptr, width)
+        }
+    }
+    
+    /// 设置整体边框样式（形状 | 阴影 的组合值）
+    public func setFrameStyle(style: Int32) {
+        unsafe {
+            qFrameSetFrameStyle(ptr, style)
+        }
+    }
+    
+    /// 获取整体边框样式
+    public func frameStyle(): Int32 {
+        unsafe {
+            qFrameFrameStyle(ptr)
+        }
+    }
+    
+    /// 获取边框形状
+    public func frameShape(): Int32 {
+        unsafe {
+            qFrameFrameShape(ptr)
+        }
+    }
+    
+    /// 获取边框阴影
+    public func frameShadow(): Int32 {
+        unsafe {
+            qFrameFrameShadow(ptr)
+        }
+    }
+    
+    /// 设置中线宽度
+    public func setMidLineWidth(width: Int32) {
+        unsafe {
+            qFrameSetMidLineWidth(ptr, width)
+        }
+    }
+    
+    /// 获取中线宽度
+    public func midLineWidth(): Int32 {
+        unsafe {
+            qFrameMidLineWidth(ptr)
+        }
+    }
+    
+    /// 设置边框矩形
+    public func setFrameRect(x: Int32, y: Int32, w: Int32, h: Int32) {
+        unsafe {
+            qFrameSetFrameRect(ptr, x, y, w, h)
         }
     }
     

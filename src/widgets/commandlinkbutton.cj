@@ -7,6 +7,10 @@ foreign func qCommandLinkButtonCreate(): Int64
 foreign func qCommandLinkButtonCreateWithParent(parentPtr: Int64): Int64
 foreign func qCommandLinkButtonSetText(ptr: Int64, text: CString): Unit
 foreign func qCommandLinkButtonSetDescription(ptr: Int64, description: CString): Unit
+foreign func qCommandLinkButtonDescription(ptr: Int64): CString
+foreign func qCommandLinkButtonSetIcon(ptr: Int64, path: CString): Unit
+foreign func qCommandLinkButtonSetFlat(ptr: Int64, flat: Int32): Unit
+foreign func qCommandLinkButtonIsFlat(ptr: Int64): Int32
 foreign func qCommandLinkButtonDelete(ptr: Int64): Unit
 
 /// 命令链接按钮（Vista 风格大按钮，带标题 + 描述文字）
@@ -53,6 +57,33 @@ public class QCommandLinkButton {
             qCommandLinkButtonSetDescription(ptr, cstr)
             LibC.free(cstr)
         }
+    }
+
+    /// 获取描述文字
+    public func description(): String {
+        unsafe {
+            let cstr = qCommandLinkButtonDescription(ptr)
+            return cstr.toString()
+        }
+    }
+
+    /// 设置图标（按文件路径）
+    public func setIcon(path: String) {
+        unsafe {
+            let cstr = LibC.mallocCString(path)
+            qCommandLinkButtonSetIcon(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+
+    /// 设置扁平样式
+    public func setFlat(flat: Bool) {
+        unsafe { qCommandLinkButtonSetFlat(ptr, if (flat) { 1 } else { 0 }) }
+    }
+
+    /// 是否扁平样式
+    public func isFlat(): Bool {
+        unsafe { return qCommandLinkButtonIsFlat(ptr) != 0 }
     }
     
     /// 设置启用/禁用

@@ -16,8 +16,20 @@ foreign func qCompleterCompletionPrefix(ptr: Int64): CString
 foreign func qCompleterCompletionCount(ptr: Int64): Int32
 foreign func qCompleterComplete(ptr: Int64): Unit
 foreign func qCompleterDelete(ptr: Int64): Unit
+foreign func qCompleterCaseSensitivity(ptr: Int64): Int32
+foreign func qCompleterCompletionMode(ptr: Int64): Int32
+foreign func qCompleterSetModelSorting(ptr: Int64, sorting: Int32): Unit
+foreign func qCompleterSetCompletionColumn(ptr: Int64, column: Int32): Unit
+foreign func qCompleterSetCompletionRole(ptr: Int64, role: Int32): Unit
 
 /// 补全模式常量
+/// 模型排序常量（对应 QCompleter::ModelSorting）
+public class ModelSorting {
+    public static let UnsortedModel: Int32 = 0
+    public static let CaseSensitivelySortedModel: Int32 = 1
+    public static let CaseInsensitivelySortedModel: Int32 = 2
+}
+
 public class CompletionMode {
     /// 弹出补全列表
     public static let Popup: Int32 = 0
@@ -146,6 +158,41 @@ public class QCompleter {
     public func complete(): Unit {
         unsafe {
             qCompleterComplete(ptr)
+        }
+    }
+
+    /// 获取大小写敏感策略（0=不敏感, 1=敏感）
+    public func caseSensitivity(): Int32 {
+        unsafe {
+            return qCompleterCaseSensitivity(ptr)
+        }
+    }
+
+    /// 获取补全模式
+    public func completionMode(): Int32 {
+        unsafe {
+            return qCompleterCompletionMode(ptr)
+        }
+    }
+
+    /// 设置模型排序方式（ModelSorting.*）
+    public func setModelSorting(sorting: Int32): Unit {
+        unsafe {
+            qCompleterSetModelSorting(ptr, sorting)
+        }
+    }
+
+    /// 设置用于匹配的列
+    public func setCompletionColumn(column: Int32): Unit {
+        unsafe {
+            qCompleterSetCompletionColumn(ptr, column)
+        }
+    }
+
+    /// 设置用于匹配的 data role
+    public func setCompletionRole(role: Int32): Unit {
+        unsafe {
+            qCompleterSetCompletionRole(ptr, role)
         }
     }
 

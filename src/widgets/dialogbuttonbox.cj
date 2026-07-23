@@ -8,6 +8,10 @@ foreign func qDialogButtonBoxAddButton(ptr: Int64, text: CString, role: Int32): 
 foreign func qDialogButtonBoxSetStandardButtons(ptr: Int64, buttons: Int32): Unit
 foreign func qDialogButtonBoxConnectAccepted(ptr: Int64, callback: VoidCallback): Unit
 foreign func qDialogButtonBoxConnectRejected(ptr: Int64, callback: VoidCallback): Unit
+foreign func qDialogButtonBoxStandardButtons(ptr: Int64): Int32
+foreign func qDialogButtonBoxButton(ptr: Int64, which: Int32): Int64
+foreign func qDialogButtonBoxButtonRole(ptr: Int64, buttonPtr: Int64): Int32
+foreign func qDialogButtonBoxConnectClicked(ptr: Int64, callback: Int64Callback): Unit
 foreign func qDialogButtonBoxDelete(ptr: Int64): Unit
 
 /// 标准按钮组合辅助函数
@@ -53,6 +57,26 @@ public class QDialogButtonBox {
     /// 设置标准按钮组合（使用 makeStandardButtons 组合 StandardButtons 值）
     public func setStandardButtons(buttons: Int32) {
         unsafe { qDialogButtonBoxSetStandardButtons(ptr, buttons) }
+    }
+
+    /// 获取当前标准按钮组合位掩码
+    public func standardButtons(): Int32 {
+        unsafe { return qDialogButtonBoxStandardButtons(ptr) }
+    }
+
+    /// 按标准按钮枚举值取对应按钮的对象指针（QAbstractButton*，0 表示不存在）
+    public func button(which: Int32): Int64 {
+        unsafe { return qDialogButtonBoxButton(ptr, which) }
+    }
+
+    /// 查询某按钮的角色（ButtonRole 枚举值，-1 表示无效）
+    public func buttonRole(buttonPtr: Int64): Int32 {
+        unsafe { return qDialogButtonBoxButtonRole(ptr, buttonPtr) }
+    }
+
+    /// 任意标准按钮被点击回调（回调参数为被点击按钮的对象指针）
+    public func setOnClicked(callback: Int64Callback) {
+        unsafe { qDialogButtonBoxConnectClicked(ptr, callback) }
     }
     
     /// 设置接受信号回调

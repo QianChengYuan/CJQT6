@@ -13,6 +13,10 @@ foreign func qGraphicsDropShadowEffectBlurRadius(ptr: Int64): Float64
 foreign func qGraphicsDropShadowEffectSetColor(ptr: Int64, r: Int32, g: Int32, b: Int32, a: Int32): Unit
 foreign func qGraphicsDropShadowEffectSetEnabled(ptr: Int64, enabled: Bool): Unit
 foreign func qGraphicsDropShadowEffectDelete(ptr: Int64): Unit
+foreign func qGraphicsDropShadowEffectXOffset(ptr: Int64): Float64
+foreign func qGraphicsDropShadowEffectSetXOffset(ptr: Int64, v: Float64): Unit
+foreign func qGraphicsDropShadowEffectYOffset(ptr: Int64): Float64
+foreign func qGraphicsDropShadowEffectSetYOffset(ptr: Int64, v: Float64): Unit
 
 public class QGraphicsOpacityEffect {
     private var ptr: Int64 = 0
@@ -66,6 +70,24 @@ public class QGraphicsDropShadowEffect {
 
     public func setColor(r: Int32, g: Int32, b: Int32, a: Int32): QGraphicsDropShadowEffect {
         unsafe { qGraphicsDropShadowEffectSetColor(ptr, r, g, b, a) }
+        this
+    }
+
+    public func xOffset(): Float64 {
+        unsafe { qGraphicsDropShadowEffectXOffset(ptr) }
+    }
+
+    public func setXOffset(v: Float64): QGraphicsDropShadowEffect {
+        unsafe { qGraphicsDropShadowEffectSetXOffset(ptr, v) }
+        this
+    }
+
+    public func yOffset(): Float64 {
+        unsafe { qGraphicsDropShadowEffectYOffset(ptr) }
+    }
+
+    public func setYOffset(v: Float64): QGraphicsDropShadowEffect {
+        unsafe { qGraphicsDropShadowEffectSetYOffset(ptr, v) }
         this
     }
 

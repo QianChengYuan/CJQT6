@@ -1,5 +1,7 @@
 package cjqt6.widgets
 
+import cjqt6.core.*
+
 // ============================================================
 // 日期类 QDate
 // ============================================================
@@ -415,6 +417,24 @@ public class QDateEdit {
     
     public func calendarPopup(): Bool { unsafe { qDateEditCalendarPopup(ptr) != 0 } }
     
+    /// 按年/月/日设置日期（便捷方法，内部构造 QDate）
+    public func setDateFromParts(year: Int32, month: Int32, day: Int32): QDateEdit {
+        unsafe { qDateEditSetDateFromParts(ptr, year, month, day) }
+        this
+    }
+    
+    /// 日期变化回调（参数格式 "yyyy-MM-dd"）
+    public func setOnDateChanged(callback: CStringCallback): QDateEdit {
+        unsafe { qDateEditConnectDateChanged(ptr, callback) }
+        this
+    }
+    
+    /// 日期时间变化回调（参数格式 "yyyy-MM-dd hh:mm:ss"）
+    public func setOnDateTimeChanged(callback: CStringCallback): QDateEdit {
+        unsafe { qDateEditConnectDateTimeChanged(ptr, callback) }
+        this
+    }
+    
     public func show() { unsafe { qWidgetShow(ptr) } }
     public func hide() { unsafe { qWidgetHide(ptr) } }
     public func resize(width: Int32, height: Int32) { unsafe { qWidgetResize(ptr, width, height) } }
@@ -478,6 +498,24 @@ public class QTimeEdit {
     
     public func displayFormat(): String {
         unsafe { qTimeEditDisplayFormat(ptr).toString() }
+    }
+    
+    /// 按时/分/秒设置时间（便捷方法，内部构造 QTime）
+    public func setTimeFromParts(hour: Int32, minute: Int32, second: Int32): QTimeEdit {
+        unsafe { qTimeEditSetTimeFromParts(ptr, hour, minute, second) }
+        this
+    }
+    
+    /// 时间变化回调（参数格式 "hh:mm:ss"）
+    public func setOnTimeChanged(callback: CStringCallback): QTimeEdit {
+        unsafe { qTimeEditConnectTimeChanged(ptr, callback) }
+        this
+    }
+    
+    /// 日期时间变化回调（参数格式 "yyyy-MM-dd hh:mm:ss"）
+    public func setOnDateTimeChanged(callback: CStringCallback): QTimeEdit {
+        unsafe { qTimeEditConnectDateTimeChanged(ptr, callback) }
+        this
     }
     
     public func show() { unsafe { qWidgetShow(ptr) } }
@@ -587,6 +625,31 @@ public class QDateTimeEdit {
     
     public func timeSpec(): Int32 { unsafe { qDateTimeEditTimeSpec(ptr) } }
     
+    /// 按年/月/日/时/分/秒设置日期时间（便捷方法）
+    public func setDateTimeFromParts(year: Int32, month: Int32, day: Int32,
+                                     hour: Int32, minute: Int32, second: Int32): QDateTimeEdit {
+        unsafe { qDateTimeEditSetDateTimeFromParts(ptr, year, month, day, hour, minute, second) }
+        this
+    }
+    
+    /// 日期变化回调（参数格式 "yyyy-MM-dd"）
+    public func setOnDateChanged(callback: CStringCallback): QDateTimeEdit {
+        unsafe { qDateTimeEditConnectDateChanged(ptr, callback) }
+        this
+    }
+    
+    /// 时间变化回调（参数格式 "hh:mm:ss"）
+    public func setOnTimeChanged(callback: CStringCallback): QDateTimeEdit {
+        unsafe { qDateTimeEditConnectTimeChanged(ptr, callback) }
+        this
+    }
+    
+    /// 日期时间变化回调（参数格式 "yyyy-MM-dd hh:mm:ss"）
+    public func setOnDateTimeChanged(callback: CStringCallback): QDateTimeEdit {
+        unsafe { qDateTimeEditConnectDateTimeChanged(ptr, callback) }
+        this
+    }
+    
     public func show() { unsafe { qWidgetShow(ptr) } }
     public func hide() { unsafe { qWidgetHide(ptr) } }
     public func resize(width: Int32, height: Int32) { unsafe { qWidgetResize(ptr, width, height) } }
@@ -670,6 +733,9 @@ foreign func qDateEditSetDisplayFormat(ptr: Int64, format: CString): Unit
 foreign func qDateEditDisplayFormat(ptr: Int64): CString
 foreign func qDateEditSetCalendarPopup(ptr: Int64, enable: Int32): Unit
 foreign func qDateEditCalendarPopup(ptr: Int64): Int32
+foreign func qDateEditSetDateFromParts(ptr: Int64, year: Int32, month: Int32, day: Int32): Unit
+foreign func qDateEditConnectDateChanged(ptr: Int64, callback: CStringCallback): Unit
+foreign func qDateEditConnectDateTimeChanged(ptr: Int64, callback: CStringCallback): Unit
 
 // QTimeEdit
 foreign func qTimeEditCreate(): Int64
@@ -681,6 +747,9 @@ foreign func qTimeEditSetMinimumTime(ptr: Int64, timePtr: Int64): Unit
 foreign func qTimeEditSetMaximumTime(ptr: Int64, timePtr: Int64): Unit
 foreign func qTimeEditSetDisplayFormat(ptr: Int64, format: CString): Unit
 foreign func qTimeEditDisplayFormat(ptr: Int64): CString
+foreign func qTimeEditSetTimeFromParts(ptr: Int64, hour: Int32, minute: Int32, second: Int32): Unit
+foreign func qTimeEditConnectTimeChanged(ptr: Int64, callback: CStringCallback): Unit
+foreign func qTimeEditConnectDateTimeChanged(ptr: Int64, callback: CStringCallback): Unit
 
 // QDateTimeEdit
 foreign func qDateTimeEditCreate(): Int64
@@ -700,3 +769,7 @@ foreign func qDateTimeEditSetCalendarPopup(ptr: Int64, enable: Int32): Unit
 foreign func qDateTimeEditCalendarPopup(ptr: Int64): Int32
 foreign func qDateTimeEditSetTimeSpec(ptr: Int64, spec: Int32): Unit
 foreign func qDateTimeEditTimeSpec(ptr: Int64): Int32
+foreign func qDateTimeEditSetDateTimeFromParts(ptr: Int64, year: Int32, month: Int32, day: Int32, hour: Int32, minute: Int32, second: Int32): Unit
+foreign func qDateTimeEditConnectDateChanged(ptr: Int64, callback: CStringCallback): Unit
+foreign func qDateTimeEditConnectTimeChanged(ptr: Int64, callback: CStringCallback): Unit
+foreign func qDateTimeEditConnectDateTimeChanged(ptr: Int64, callback: CStringCallback): Unit

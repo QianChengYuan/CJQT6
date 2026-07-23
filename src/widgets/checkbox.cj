@@ -11,6 +11,18 @@ foreign func qCheckBoxIsChecked(ptr: Int64): Bool
 foreign func qCheckBoxConnectStateChanged(ptr: Int64, callback: Int32Callback): Unit
 foreign func qCheckBoxDisconnectStateChanged(ptr: Int64): Unit
 foreign func qCheckBoxDelete(ptr: Int64): Unit
+foreign func qCheckBoxSetCheckState(ptr: Int64, state: Int32): Unit
+foreign func qCheckBoxCheckState(ptr: Int64): Int32
+foreign func qCheckBoxSetTristate(ptr: Int64, v: Int32): Unit
+foreign func qCheckBoxIsTristate(ptr: Int64): Int32
+foreign func qCheckBoxConnectClicked(ptr: Int64, callback: Int32Callback): Unit
+
+/// 复选框三态枚举（对应 Qt::CheckState）
+public class CheckState {
+    public static let Unchecked: Int32 = 0
+    public static let PartiallyChecked: Int32 = 1
+    public static let Checked: Int32 = 2
+}
 
 /// 复选框部件
 public class QCheckBox {
@@ -115,6 +127,41 @@ public class QCheckBox {
     public func disconnectStateChanged() {
         unsafe {
             qCheckBoxDisconnectStateChanged(ptr)
+        }
+    }
+    
+    /// 设置三态勾选状态（使用 CheckState 常量）
+    public func setCheckState(state: Int32) {
+        unsafe {
+            qCheckBoxSetCheckState(ptr, state)
+        }
+    }
+    
+    /// 获取勾选状态（CheckState 枚举值）
+    public func checkState(): Int32 {
+        unsafe {
+            return qCheckBoxCheckState(ptr)
+        }
+    }
+    
+    /// 设置是否三态
+    public func setTristate(tristate: Bool) {
+        unsafe {
+            qCheckBoxSetTristate(ptr, if (tristate) { 1 } else { 0 })
+        }
+    }
+    
+    /// 是否三态
+    public func isTristate(): Bool {
+        unsafe {
+            return qCheckBoxIsTristate(ptr) != 0
+        }
+    }
+    
+    /// 点击回调（带 checked 状态，0/1）
+    public func setOnClicked(callback: Int32Callback) {
+        unsafe {
+            qCheckBoxConnectClicked(ptr, callback)
         }
     }
     
