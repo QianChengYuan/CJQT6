@@ -16,6 +16,7 @@ lib/
 # AI工具配置（不上传）
 .codeartsdoer/
 skills-lock.json
+.workbuddy/
 
 # 规划/设计/AI辅助文档（不上传）
 docs/internal/
@@ -112,3 +113,9 @@ nul
 !releases/**/*.dll
 !releases/**/*.dll.a
 !releases/**/*.lib
+
+# 实验性合并产物（非发布内容，勿提交；放置在否定规则之后以重新忽略）
+releases/windows-x64/libcjqt6_bridge_merged.dll.a
+releases/windows-x64/libcjqt6_bridge_new.lib
+releases/windows-x64/libcjqt6_bridge.dll.a.bak
+releases/windows-x64/tmp_merge/

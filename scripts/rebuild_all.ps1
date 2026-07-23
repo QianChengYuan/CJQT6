@@ -1,5 +1,11 @@
-# rebuild_all.ps1 - rebuild CJQT6 subpackages + native bridge
+# rebuild_all.ps1 - rebuild native FFI bridge + CJQT6 subpackages + example
 # Run from CJQT6 root: powershell -ExecutionPolicy Bypass -File scripts\rebuild_all.ps1
+#
+# IMPORTANT ORDER: the native bridge MUST be rebuilt BEFORE `cjpm build`
+# links the Cangjie subpackages. The subpackage DLLs link against
+# releases/windows-x64/cjqt6_bridge.dll, so any NEW `foreign func qXxx`
+# added to the bindings needs the freshly compiled bridge first, or the
+# link step fails with "undefined symbol: qXxx".
 
 $ErrorActionPreference = "Stop"
 
@@ -34,19 +40,19 @@ if (Test-Path "target") {
     Remove-Item -Recurse -Force "target"
 }
 
-# ---- Step 3: build cjqt6 subpackages ----
+# ---- Step 3: rebuild native FFI bridge FIRST (subpackages link against it) ----
+Write-Host "Building native FFI bridge (must precede cjpm build)..."
+& "cmd.exe" /c "call `"$RootDir\scripts\build_bridge.bat`""
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "ERROR: bridge build failed"
+    exit 1
+}
+
+# ---- Step 4: build cjqt6 subpackages (now links against fresh bridge) ----
 Write-Host "Building cjqt6 subpackages..."
 & $cjpm build
 if ($LASTEXITCODE -ne 0) {
     Write-Host "ERROR: cjpm build failed"
-    exit 1
-}
-
-# ---- Step 4: rebuild native FFI bridge (via .bat) ----
-Write-Host "Building native FFI bridge..."
-& "cmd.exe" /c "call `"$RootDir\scripts\build_bridge.bat`""
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "ERROR: bridge build failed"
     exit 1
 }
 
