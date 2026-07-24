@@ -119,3 +119,18 @@ releases/windows-x64/libcjqt6_bridge_merged.dll.a
 releases/windows-x64/libcjqt6_bridge_new.lib
 releases/windows-x64/libcjqt6_bridge.dll.a.bak
 releases/windows-x64/tmp_merge/
+
+# ============================================================
+# CJQT6 skill 例外：仅 .agents/skills/cjqt6/SKILL.md 纳入版本控制
+# ============================================================
+# 上文已有 `.agents/` 整目录忽略。git 规则：父目录被忽略时无法直接
+# re-include 其子文件，必须从 .agents 起逐层放开，再兜底忽略其余内容。
+!.agents/
+!.agents/skills/
+# 忽略 skills 下所有子项（其余 30+ 个 cangjie 技能不提交）
+.agents/skills/*
+!.agents/skills/cjqt6/
+!.agents/skills/cjqt6/SKILL.md
+# 兜底：忽略 .agents 下除 skills 外的临时内容（tmp-cangjie-skills/、tmp-docs-03.md 等）
+.agents/*
+!.agents/skills/

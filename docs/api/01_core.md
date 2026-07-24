@@ -82,14 +82,17 @@ interface QtResource {
 ```cangjie
 import cjqt6.core.*
 
-// 安全执行操作
-let result = safeExecute(widget, { w =>
-    w.setText("Hello")  // 如果 widget 已释放，返回 false
+// 安全执行操作，返回 Option<T>
+let result = safeExecute({ =>
+    let widget = QWidget()
+    widget.setTitle("Hello")
+    widget
 })
 
 // 安全运行代码块
 let success = safeRun({ =>
-    // 可能抛出异常的代码
+    let widget = QWidget()
+    widget.show()
 })
 ```
 
@@ -232,7 +235,7 @@ timer.setInterval(1000)  // 1秒
 let timerCallback: VoidCallback = { =>
     println("定时器触发！")
 }
-timer.setTimeout(timerCallback)
+timer.setOnTimeout(timerCallback)
 timer.start()
 
 // 使用完毕后必须手动释放
@@ -250,7 +253,7 @@ main(): Int32 {
     
     let timer = QTimer()
     timer.setInterval(1000)
-    timer.setTimeout({ =>
+    timer.setOnTimeout({ =>
         println("定时器触发！")
     })
     timer.start()
@@ -274,6 +277,6 @@ main(): Int32 {
 | `setInterval(ms: Int32)` | 设置间隔（毫秒） |
 | `start()` | 启动定时器 |
 | `stop()` | 停止定时器 |
-| `setTimeout(callback: VoidCallback)` | 设置超时回调 |
-| `disconnect()` | 断开信号连接 |
+| `setOnTimeout(callback: VoidCallback)` | 设置超时回调 |
+| `disconnectTimeout()` | 断开超时信号连接 |
 | `delete()` | **必须调用** - 释放资源 |

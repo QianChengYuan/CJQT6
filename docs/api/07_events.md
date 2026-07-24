@@ -1,82 +1,88 @@
 # CJQT6 事件处理模块
 
-本模块包含事件处理相关的类和方法。
-
-## QEventWidget - 事件窗口
-
-QEventWidget 是支持鼠标、键盘等事件的窗口部件。
+本模块提供基于 Qt 事件系统的轻量封装，当前核心类型是 QEventWidget。它位于 core 包中，使用方式与普通 QWidget 相似，但额外支持鼠标、键盘和绘制事件回调。
 
 ```cangjie
-import cjqt6.gui.*
+import cjqt6.core.*
 
-let eventWidget = QEventWidget()
-
-// 设置鼠标移动回调
-eventWidget.setOnMouseMove({ x: Int32, y: Int32 =>
-    println("鼠标移动: (${x}, ${y})")
+let widget = QEventWidget()
+widget.setOnMouseMove({ x: Int32, y: Int32, buttons: Int32 =>
+    println("鼠标移动: (${x}, ${y})，按钮: ${buttons}")
 })
 
-// 设置鼠标按下回调
-eventWidget.setOnMousePress({ x: Int32, y: Int32, button: Int32 =>
-    println("鼠标按下: (${x}, ${y}), 按钮: ${button}")
+widget.setOnKeyPress({ key: Int32, modifiers: Int32, unicode: Int32 =>
+    println("按键: ${key}, 修饰键: ${modifiers}, unicode: ${unicode}")
 })
 
-// 设置键盘按下回调
-eventWidget.setOnKeyPress({ key: Int32, modifiers: Int32 =>
-    println("按键: ${key}, 修饰键: ${modifiers}")
-})
+widget.show()
 ```
 
-**事件回调方法**:
+## QEventWidget
+
+### 常用方法
+
 | 方法 | 说明 |
 |------|------|
-| `setOnMouseMove(callback)` | 鼠标移动回调 |
+| `show()` / `hide()` | 显示或隐藏控件 |
+| `setTitle(title: String)` | 设置标题 |
+| `resize(width, height)` | 调整大小 |
+| `setGeometry(x, y, width, height)` | 设置位置和尺寸 |
+| `setLayout(layoutPtr: Int64)` | 绑定布局 |
 | `setOnMousePress(callback)` | 鼠标按下回调 |
+| `setOnMouseMove(callback)` | 鼠标移动回调 |
 | `setOnMouseRelease(callback)` | 鼠标释放回调 |
-| `setOnMouseDoubleClick(callback)` | 鼠标双击回调 |
-| `setOnMouseEnter(callback)` | 鼠标进入回调 |
-| `setOnMouseLeave(callback)` | 鼠标离开回调 |
 | `setOnKeyPress(callback)` | 键盘按下回调 |
 | `setOnKeyRelease(callback)` | 键盘释放回调 |
-| `setOnResize(callback)` | 窗口大小变化回调 |
-| `setOnPaint(callback)` | 绘图事件回调 |
-
-**回调清除方法**:
-| 方法 | 说明 |
-|------|------|
-| `clearMouseMoveCallback()` | 清除鼠标移动回调 |
+| `setOnPaint(callback)` | 绘制事件回调 |
 | `clearMousePressCallback()` | 清除鼠标按下回调 |
+| `clearMouseMoveCallback()` | 清除鼠标移动回调 |
 | `clearMouseReleaseCallback()` | 清除鼠标释放回调 |
-| `clearMouseDoubleClickCallback()` | 清除鼠标双击回调 |
-| `clearMouseEnterCallback()` | 清除鼠标进入回调 |
-| `clearMouseLeaveCallback()` | 清除鼠标离开回调 |
 | `clearKeyPressCallback()` | 清除键盘按下回调 |
 | `clearKeyReleaseCallback()` | 清除键盘释放回调 |
-| `clearResizeCallback()` | 清除大小变化回调 |
-| `clearPaintCallback()` | 清除绘图事件回调 |
-| `clearAllCallbacks()` | **清除所有回调** |
+| `clearPaintCallback()` | 清除绘制回调 |
+| `clearAllCallbacks()` | 清除所有回调 |
+| `delete()` | 释放资源 |
 
-**鼠标按钮常量**:
-```cangjie
-MouseButton.LeftButton    // 左键
-MouseButton.RightButton   // 右键
-MouseButton.MiddleButton  // 中键
-```
+### 释放资源
 
-**键盘修饰键常量**:
-```cangjie
-Modifier.NoModifier      // 无修饰
-Modifier.ShiftModifier   // Shift
-Modifier.ControlModifier // Ctrl
-Modifier.AltModifier     // Alt
-```
-
-**重要：释放资源前清除回调**
-
-在调用 `delete()` 释放 QEventWidget 前，应清除所有回调，避免悬空指针：
+在释放前建议先清空回调，避免回调仍引用已销毁的对象：
 
 ```cangjie
-// 正确的资源释放顺序
-eventWidget.clearAllCallbacks()  // 先清除回调
-eventWidget.delete()             // 再释放资源
+widget.clearAllCallbacks()
+widget.delete()
 ```
+
+## 常量辅助类
+
+### MouseButton
+
+```cangjie
+MouseButton.left()    // 左键
+MouseButton.right()   // 右键
+MouseButton.middle()  // 中键
+```
+
+### Modifier
+
+```cangjie
+Modifier.shift()    // Shift
+Modifier.control()  // Ctrl
+Modifier.alt()      // Alt
+Modifier.meta()     // Meta
+
+Modifier.hasShift(modifiers)
+Modifier.hasControl(modifiers)
+Modifier.hasAlt(modifiers)
+Modifier.hasMeta(modifiers)
+```
+
+### Key
+
+```cangjie
+Key.escape()
+Key.enter()
+Key.space()
+Key.f1()
+```
+
+> 说明：当前实现中的事件回调签名使用 C 回调风格，调用时需要传入与源码保持一致的参数个数。

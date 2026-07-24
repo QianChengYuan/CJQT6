@@ -259,7 +259,7 @@ let h = pixmap.height()
 
 ## QPainter - 绘图器
 
-核心绘图类，用于在设备上绘图。
+QPainter 是当前封装中最核心的绘图入口，主要用于把绘制命令提交给一个已有的设备对象，例如 QPixmap 或 QWidget 的绘制上下文。
 
 ```cangjie
 let pixmap = QPixmap.withSize(400, 300)
@@ -268,7 +268,6 @@ pixmap.fill(Colors.white())
 let painter = QPainter(pixmap.getPtr())
 painter.setRenderHint(RenderHint.Antialiasing.value())
 
-// 设置画笔和画刷
 let pen = QPen(Colors.black())
 pen.setWidth(2)
 painter.setPen(pen)
@@ -276,12 +275,10 @@ painter.setPen(pen)
 let brush = QBrush(Colors.cyan())
 painter.setBrush(brush)
 
-// 绘制形状
 painter.drawRect(20, 20, 100, 80)
 painter.drawCircle(200, 100, 40)
 painter.drawEllipse(280, 20, 100, 60)
 
-// 绘制文字
 let font = QFont("Arial", 16)
 font.setBold(true)
 painter.setFont(font)
@@ -294,17 +291,17 @@ painter.end()
 **QPainter 方法**:
 | 方法 | 说明 |
 |------|------|
-| `init()` | 创建绘图器 |
-| `init(device: Int64)` | 在设备上创建绘图器 |
-| `fromPtr(ptr: Int64)` | 从指针创建（静态方法） |
-| `begin(device: Int64): Bool` | 开始绘图 |
-| `end(): Bool` | 结束绘图 |
-| `isActive(): Bool` | 是否活动 |
-| `setPen(pen: QPen)` | 设置画笔 |
+| `init()` | 创建空绘图器对象 |
+| `init(device: Int64)` | 基于设备指针创建绘图器 |
+| `fromPtr(ptr: Int64)` | 从现有指针创建 QPainter（不拥有所有权） |
+| `begin(device: Int64): Bool` | 开始对指定设备绘制 |
+| `end(): Bool` | 结束当前绘制 |
+| `isActive(): Bool` | 是否处于绘制活跃状态 |
+| `setPen(p: QPen)` | 设置画笔 |
 | `setPenColor(c: QColor)` | 设置画笔颜色 |
 | `setBrush(b: QBrush)` | 设置画刷 |
 | `setFont(f: QFont)` | 设置字体 |
-| `setRenderHint(h: Int32)` | 设置渲染提示 |
+| `setRenderHint(h: Int32)` | 设置渲染提示，当前使用整数值 |
 | `setOpacity(o: Float32)` | 设置透明度 |
 | `drawLine(x1, y1, x2, y2)` | 绘制线条 |
 | `drawRect(x, y, w, h)` | 绘制矩形 |
@@ -312,18 +309,21 @@ painter.end()
 | `drawCircle(cx, cy, r)` | 绘制圆 |
 | `drawArc(x, y, w, h, start, span)` | 绘制弧 |
 | `drawPie(x, y, w, h, start, span)` | 绘制饼 |
-| `drawText(x, y, text)` | 绘制文字 |
-| `drawTextRect(x, y, w, h, flags, text)` | 在矩形内绘制文字 |
-| `drawPixmap(x, y, pixmap)` | 绘制图像 |
-| `drawPath(path)` | 绘制路径 |
-| `fillPath(path, brush)` | 填充路径 |
-| `fillRect(x, y, w, h, brush)` | 填充矩形 |
-| `fillRectColor(x, y, w, h, color)` | 用颜色填充矩形 |
-| `translate(dx, dy)` | 平移 |
-| `scale(sx, sy)` | 缩放 |
-| `rotate(a)` | 旋转（角度） |
-| `save()` | 保存状态 |
-| `restore()` | 恢复状态 |
+| `drawText(x, y, s)` | 在指定位置绘制文本 |
+| `drawTextRect(x, y, w, h, flags, s)` | 在矩形区域内绘制文本，`flags` 传入文本对齐位标志 |
+| `drawPixmap(x, y, p)` | 绘制 QPixmap |
+| `drawImage(x, y, i)` | 绘制 QImage |
+| `drawPath(p)` | 绘制路径 |
+| `fillPath(p, b)` | 使用画刷填充路径 |
+| `fillRect(x, y, w, h, b)` | 使用画刷填充矩形 |
+| `fillRectColor(x, y, w, h, c)` | 使用颜色填充矩形 |
+| `translate(dx, dy)` | 平移坐标系 |
+| `scale(sx, sy)` | 缩放坐标系 |
+| `rotate(a)` | 旋转坐标系 |
+| `save()` | 保存当前状态 |
+| `restore()` | 恢复上一次保存的状态 |
+| `device(): Int64` | 返回当前设备指针 |
+| `getPtr(): Int64` | 返回原生指针 |
 
 **RenderHint 枚举值**:
 | 枚举值 | 说明 |
@@ -331,7 +331,10 @@ painter.end()
 | `Antialiasing` | 抗锯齿 |
 | `TextAntialiasing` | 文字抗锯齿 |
 | `SmoothPixmapTransform` | 平滑像素变换 |
+| `HighQualityAntialiasing` | 高质量抗锯齿 |
+| `NonCosmeticDefaultPen` | 非装饰默认笔 |
 
+> 说明：当前封装里的 `QPainter` 不是通过终结器自动释放的；如果你是从外部指针创建，通常只需直接使用，不要手动 `delete()`。在普通场景下，仍应在不再使用时显式释放像 `QPen`、`QBrush`、`QFont`、`QPixmap` 这类对象。
 ---
 
 ## 文本对齐

@@ -1,6 +1,6 @@
 # CJQT6 日期时间模块
 
-本模块提供日历、日期编辑、时间编辑和日期时间编辑控件。
+本模块提供日期、时间、日期时间以及对应的编辑控件封装，当前实现位于 widgets 包下。
 
 ```cangjie
 import cjqt6.widgets.*
@@ -9,211 +9,189 @@ import cjqt6.widgets.*
 ## QDate - 日期类
 
 ```cangjie
-// 创建日期
-let date = QDate(2026, 3, 11)  // 年、月、日
-let today = QDate.currentDate()  // 当前日期
-
-// 获取日期信息
-let year = date.year()      // 2026
-let month = date.month()    // 3
-let day = date.day()        // 11
-let str = date.toString()   // "2026-03-11"
-
-// 日期运算
-let tomorrow = date.addDays(1)
-let nextMonth = date.addMonths(1)
-let nextYear = date.addYears(1)
+let date = QDate(2026, 3, 11)
+println(date.year())
+println(date.month())
+println(date.day())
+println(date.toString())
 ```
 
-**QDate 方法**:
 | 方法 | 说明 |
 |------|------|
-| `init(year, month, day)` | 创建日期 |
-| `currentDate()` | 获取当前日期（静态方法） |
+| `init(year: Int32, month: Int32, day: Int32)` | 创建日期 |
+| `currentDate(): QDate` | 获取当前日期 |
 | `year(): Int32` | 获取年份 |
 | `month(): Int32` | 获取月份 |
 | `day(): Int32` | 获取日期 |
-| `toString(): String` | 转为字符串 |
-| `addDays(days: Int32): QDate` | 添加天数 |
-| `addMonths(months: Int32): QDate` | 添加月份 |
-| `addYears(years: Int32): QDate` | 添加年份 |
+| `dayOfWeek(): Int32` | 获取星期几 |
+| `setDate(year, month, day)` | 修改日期 |
+| `toString(): String` | 转字符串，默认格式 `yyyy-MM-dd` |
+| `toString(format: String): String` | 按格式转字符串 |
 | `isValid(): Bool` | 是否有效 |
-
----
+| `delete()` | 释放资源 |
 
 ## QTime - 时间类
 
 ```cangjie
-// 创建时间
-let time = QTime(14, 30, 0)  // 时、分、秒
-let now = QTime.currentTime()  // 当前时间
-
-// 获取时间信息
-let hour = time.hour()       // 14
-let minute = time.minute()   // 30
-let second = time.second()   // 0
-let str = time.toString()    // "14:30:00"
-
-// 时间运算
-let later = time.addSecs(3600)  // 加1小时
+let time = QTime(14, 30, 0)
+println(time.hour())
+println(time.minute())
+println(time.second())
+println(time.toString())
 ```
 
-**QTime 方法**:
 | 方法 | 说明 |
 |------|------|
-| `init(h, m, s)` | 创建时间（时、分、秒） |
-| `init(h, m, s, ms)` | 创建时间（时、分、秒、毫秒） |
-| `currentTime()` | 获取当前时间（静态方法） |
+| `init(hour: Int32, minute: Int32, second: Int32)` | 创建时间 |
+| `init(hour, minute, second, msec)` | 创建带毫秒的时间 |
+| `currentTime(): QTime` | 获取当前时间 |
 | `hour(): Int32` | 获取小时 |
 | `minute(): Int32` | 获取分钟 |
 | `second(): Int32` | 获取秒 |
 | `msec(): Int32` | 获取毫秒 |
-| `toString(): String` | 转为字符串 |
-| `addSecs(secs: Int32): QTime` | 添加秒数 |
-| `addMSecs(ms: Int32): QTime` | 添加毫秒 |
+| `setHMS(hour, minute, second)` | 设置时间 |
+| `setHMS(hour, minute, second, msec)` | 设置时间（含毫秒） |
+| `toString(): String` | 转字符串，默认格式 `hh:mm:ss` |
+| `toString(format: String): String` | 按格式转字符串 |
 | `isValid(): Bool` | 是否有效 |
-
----
+| `delete()` | 释放资源 |
 
 ## QDateTime - 日期时间类
 
 ```cangjie
-// 创建日期时间
-let dt = QDateTime(2026, 3, 11, 14, 30, 0)
-let now = QDateTime.currentDateTime()  // 当前日期时间
-
-// 获取日期时间信息
-let date = dt.date()        // QDate
-let time = dt.time()        // QTime
-let str = dt.toString()     // "2026-03-11 14:30:00"
-
-// 日期时间运算
-let tomorrow = dt.addDays(1)
-let later = dt.addSecs(3600)
+let dt = QDateTime(QDate(2026, 3, 11), QTime(14, 30, 0))
+println(dt.toString())
 ```
 
-**QDateTime 方法**:
 | 方法 | 说明 |
 |------|------|
-| `init(year, month, day, h, m, s)` | 创建日期时间 |
-| `currentDateTime()` | 获取当前日期时间（静态方法） |
+| `init(date: QDate, time: QTime)` | 根据日期和时间创建 |
+| `currentDateTime(): QDateTime` | 获取当前日期时间 |
 | `date(): QDate` | 获取日期部分 |
 | `time(): QTime` | 获取时间部分 |
-| `toString(): String` | 转为字符串 |
-| `addDays(days: Int32): QDateTime` | 添加天数 |
-| `addMonths(months: Int32): QDateTime` | 添加月份 |
-| `addSecs(secs: Int32): QDateTime` | 添加秒数 |
-| `isValid(): Bool` | 是否有效 |
-
----
+| `setDate(d: QDate)` | 设置日期 |
+| `setTime(t: QTime)` | 设置时间 |
+| `toString(): String` | 转字符串，默认格式 `yyyy-MM-dd hh:mm:ss` |
+| `toString(format: String): String` | 按格式转字符串 |
+| `delete()` | 释放资源 |
 
 ## QCalendarWidget - 日历部件
 
 ```cangjie
 let calendar = QCalendarWidget()
-calendar.setGridVisible(true)           // 显示网格
-calendar.setFirstDayOfWeek(DayOfWeek.Monday)  // 周一为每周首日
-
-let today = QDate.currentDate()
-calendar.setSelectedDate(today)         // 设置选中日期
-
-// 获取选中的日期
-let selected = calendar.selectedDate()
+calendar.setGridVisible(true)
+calendar.setFirstDayOfWeek(DayOfWeek.Monday)
+calendar.setSelectedDate(QDate.currentDate())
 ```
 
-**QCalendarWidget 方法**:
 | 方法 | 说明 |
 |------|------|
 | `init()` | 创建日历部件 |
-| `setGridVisible(visible: Bool)` | 设置网格可见 |
-| `setFirstDayOfWeek(day: Int32)` | 设置每周首日 |
+| `selectedDate(): QDate` | 获取当前选中日期 |
 | `setSelectedDate(date: QDate)` | 设置选中日期 |
-| `selectedDate(): QDate` | 获取选中日期 |
 | `setMinimumDate(date: QDate)` | 设置最小日期 |
 | `setMaximumDate(date: QDate)` | 设置最大日期 |
+| `minimumDate(): QDate` | 获取最小日期 |
+| `maximumDate(): QDate` | 获取最大日期 |
+| `setGridVisible(visible: Bool)` | 设置网格显示 |
+| `isGridVisible(): Bool` | 是否显示网格 |
+| `setNavigationBarVisible(visible: Bool)` | 设置导航栏可见性 |
+| `setFirstDayOfWeek(day: Int32)` | 设置每周首日 |
+| `firstDayOfWeek(): Int32` | 获取每周首日 |
+| `setSelectionMode(mode: Int32)` | 设置选择模式 |
+| `selectionMode(): Int32` | 获取选择模式 |
+| `showToday()` / `showSelectedDate()` | 显示当前日期或选中日期 |
+| `delete()` | 释放资源 |
 
-**DayOfWeek 常量**:
+### 常量
+
 ```cangjie
-DayOfWeek.Monday     // 周一
-DayOfWeek.Tuesday    // 周二
-DayOfWeek.Wednesday  // 周三
-DayOfWeek.Thursday   // 周四
-DayOfWeek.Friday     // 周五
-DayOfWeek.Saturday   // 周六
-DayOfWeek.Sunday     // 周日
-```
+DayOfWeek.Monday
+DayOfWeek.Tuesday
+DayOfWeek.Wednesday
+DayOfWeek.Thursday
+DayOfWeek.Friday
+DayOfWeek.Saturday
+DayOfWeek.Sunday
 
----
+TimeSpec.LocalTime
+TimeSpec.UTC
+TimeSpec.OffsetFromUTC
+TimeSpec.TimeZone
+```
 
 ## QDateEdit - 日期编辑器
 
 ```cangjie
-let dateEdit = QDateEdit()
-dateEdit.setDisplayFormat("yyyy-MM-dd")  // 显示格式
-dateEdit.setCalendarPopup(true)           // 允许弹出日历
-
-let today = QDate.currentDate()
-dateEdit.setDate(today)                   // 设置日期
-
-// 获取日期
-let date = dateEdit.date()
+let edit = QDateEdit(QDate.currentDate())
+edit.setDisplayFormat("yyyy-MM-dd")
+edit.setCalendarPopup(true)
 ```
 
-**QDateEdit 方法**:
 | 方法 | 说明 |
 |------|------|
-| `init()` | 创建日期编辑器 |
+| `init()` / `init(date: QDate)` | 创建日期编辑器 |
+| `date(): QDate` | 获取当前日期 |
 | `setDate(date: QDate)` | 设置日期 |
-| `date(): QDate` | 获取日期 |
-| `setDisplayFormat(format: String)` | 设置显示格式 |
-| `setCalendarPopup(enable: Bool)` | 设置日历弹出 |
 | `setMinimumDate(date: QDate)` | 设置最小日期 |
 | `setMaximumDate(date: QDate)` | 设置最大日期 |
-
----
+| `setDisplayFormat(format: String)` | 设置显示格式 |
+| `displayFormat(): String` | 获取显示格式 |
+| `setCalendarPopup(enable: Bool)` | 开启/关闭日历弹出 |
+| `calendarPopup(): Bool` | 是否启用日历弹出 |
+| `setDateFromParts(year, month, day)` | 按部件设置日期 |
+| `setOnDateChanged(callback)` | 日期变化回调 |
+| `setOnDateTimeChanged(callback)` | 日期时间变化回调 |
+| `delete()` | 释放资源 |
 
 ## QTimeEdit - 时间编辑器
 
 ```cangjie
-let timeEdit = QTimeEdit()
-timeEdit.setDisplayFormat("hh:mm:ss")  // 显示格式
-
-let now = QTime.currentTime()
-timeEdit.setTime(now)                   // 设置时间
-
-// 获取时间
-let time = timeEdit.time()
+let edit = QTimeEdit(QTime(14, 30, 0))
+edit.setDisplayFormat("hh:mm:ss")
 ```
 
-**QTimeEdit 方法**:
 | 方法 | 说明 |
 |------|------|
-| `init()` | 创建时间编辑器 |
+| `init()` / `init(time: QTime)` | 创建时间编辑器 |
+| `time(): QTime` | 获取当前时间 |
 | `setTime(time: QTime)` | 设置时间 |
-| `time(): QTime` | 获取时间 |
+| `setMinimumTime(time: QTime)` | 设置最小时间 |
+| `setMaximumTime(time: QTime)` | 设置最大时间 |
 | `setDisplayFormat(format: String)` | 设置显示格式 |
-
----
+| `displayFormat(): String` | 获取显示格式 |
+| `setTimeFromParts(hour, minute, second)` | 按部件设置时间 |
+| `setOnTimeChanged(callback)` | 时间变化回调 |
+| `setOnDateTimeChanged(callback)` | 日期时间变化回调 |
+| `delete()` | 释放资源 |
 
 ## QDateTimeEdit - 日期时间编辑器
 
 ```cangjie
-let datetimeEdit = QDateTimeEdit()
-datetimeEdit.setDisplayFormat("yyyy-MM-dd hh:mm:ss")  // 显示格式
-datetimeEdit.setCalendarPopup(true)                    // 允许弹出日历
-
-let now = QDateTime.currentDateTime()
-datetimeEdit.setDateTime(now)  // 设置日期时间
-
-// 获取日期时间
-let dt = datetimeEdit.dateTime()
+let edit = QDateTimeEdit(QDateTime.currentDateTime())
+edit.setDisplayFormat("yyyy-MM-dd hh:mm:ss")
+edit.setCalendarPopup(true)
 ```
 
-**QDateTimeEdit 方法**:
 | 方法 | 说明 |
 |------|------|
-| `init()` | 创建日期时间编辑器 |
+| `init()` / `init(dateTime: QDateTime)` | 创建日期时间编辑器 |
+| `dateTime(): QDateTime` | 获取当前日期时间 |
 | `setDateTime(dt: QDateTime)` | 设置日期时间 |
-| `dateTime(): QDateTime` | 获取日期时间 |
+| `date(): QDate` | 获取日期 |
+| `setDate(date: QDate)` | 设置日期 |
+| `time(): QTime` | 获取时间 |
+| `setTime(time: QTime)` | 设置时间 |
+| `setMinimumDateTime(dt: QDateTime)` | 设置最小日期时间 |
+| `setMaximumDateTime(dt: QDateTime)` | 设置最大日期时间 |
 | `setDisplayFormat(format: String)` | 设置显示格式 |
-| `setCalendarPopup(enable: Bool)` | 设置日历弹出 |
+| `displayFormat(): String` | 获取显示格式 |
+| `setCalendarPopup(enable: Bool)` | 开启/关闭日历弹出 |
+| `calendarPopup(): Bool` | 获取日历弹出状态 |
+| `setTimeSpec(spec: Int32)` | 设置时间规范 |
+| `timeSpec(): Int32` | 获取时间规范 |
+| `setDateTimeFromParts(year, month, day, hour, minute, second)` | 按部件设置日期时间 |
+| `setOnDateChanged(callback)` | 日期变化回调 |
+| `setOnTimeChanged(callback)` | 时间变化回调 |
+| `setOnDateTimeChanged(callback)` | 日期时间变化回调 |
+| `delete()` | 释放资源 |
