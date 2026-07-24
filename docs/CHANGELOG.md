@@ -1,4 +1,45 @@
 ﻿# 更新日志
+## [1.4.0] - 2026-07-24
+
+### 新增
+
+- **core/common.cj**: 新建公共FFI声明模块，集中管理core包内共享的QWidget基础FFI声明，消除包内重复定义
+- **QScreen DPI辅助方法**: `scaleFactor()`、`logicalToPhysical()`、`physicalToLogical()`，支持逻辑像素与物理像素互转
+- **QWidget DPI感知方法**: `resizeDp()`、`setMinimumSizeDp()`、`setMaximumSizeDp()`，自动按设备像素比缩放尺寸
+- **TickPosition 类**: 刻度位置常量封装（NoTicks/TicksAbove/TicksBelow/TicksLeft/TicksRight/TicksBothSides），替代slider.cj裸露`public const`
+- **FrameShape 类**: 边框形状常量封装（NoFrame/Box/Panel/WinPanel/HLine/VLine/StyledPanel），替代containers.cj裸露`public const`
+- **FrameShadow 类**: 边框阴影常量封装（Plain/Raised/Sunken），替代containers.cj裸露`public const`
+- **4个布局类QLayout接口实现**: QVBoxLayout/QHBoxLayout/QGridLayout/QFormLayout 均实现 `<: QLayout`，添加 `closed` 字段、`checkValid()` 守卫、`setMargins(Margins)` 方法
+- **9个控件QtResource实现**: QCheckBox/QProgressBar/QSlider/QComboBox/QGroupBox/QTabWidget/QScrollArea/QFrame/QSplitter 均实现 `<: QtResource`，添加 `closed` 字段、`isClosed()`/`isValid()`/`checkValid()`/`close()` 方法，所有public方法添加 `checkValid()` 守卫
+
+### 修复
+
+- **QLabel.close() 缺失 qSignalCleanup**: 资源释放时未断开信号连接，可能导致悬空回调崩溃
+- **QTextEdit.delete() 缺失 qSignalCleanup**: 同上，且 `ptr` 声明为 `let` 导致无法置零，现已改为 `var`
+- **QTabWidget.delete() 缺失 qSignalCleanup**: 资源释放时未断开信号连接
+- **QSplitter.delete() 缺失 qSignalCleanup**: 同上，且删除后未将 `ptr` 置零
+
+### 变更
+
+- **Alignment去重**: 删除 `lineedit.cj` 中重复的 `Alignment` 类定义，统一使用 `gui/types.cj` 中的 `Alignment` 结构体
+- **裸露常量封装**: `slider.cj` 中 `Horizontal/Vertical/NoTicks/TicksAbove` 等6个 `public const` 替换为 `TickPosition` 类静态常量；`containers.cj` 中 `NoFrame/Box/Panel` 等10个 `public const` 替换为 `FrameShape`/`FrameShadow` 类静态常量
+- **core/widget.cj FFI精简**: 移除与 `common.cj` 重复的FFI声明，仅保留控件专属FFI
+
+### 补全
+
+- **QLabel**: 补全 `setToolTip()`、`setVisible()`、`isVisible()`、`setEnabled()`、`isEnabled()`、`setMinimumSize()`、`setMaximumSize()`、`width()`、`height()` 共9个方法
+- **QTextEdit**: 补全 `setEnabled()`、`isEnabled()`、`setToolTip()`、`setVisible()`、`isVisible()`、`setMaximumSize()`、`width()`、`height()` 共8个方法，并添加 `QtResource` 实现
+- **QFrame**: 补全 `setToolTip()` 方法
+
+### 文档
+
+- 为 `core/common.cj`、`core/widget.cj`、`widgets/common.cj` 中所有FFI声明添加 `// QClassName::methodName() - 中文功能说明` 注释
+- 为 `gui/types.cj` 中 `TickPosition`/`FrameShape`/`FrameShadow` 类及常量添加中文文档注释
+- 为 `checkbox.cj`/`progressbar.cj`/`slider.cj`/`combobox.cj`/`containers.cj`/`textedit.cj`/`layout.cj` 中所有FFI声明添加中文注释
+- 更新全部14篇API文档
+
+---
+
 ## [1.3.0] - 2026-07-23
 
 ### 新增
