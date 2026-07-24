@@ -1,43 +1,38 @@
 ﻿package cjqt6.core
 
-// QWidget - 基础窗口部件
+// QWidget - 基础窗口部件FFI声明
+// QWidget::create() - 创建控件实例
 foreign func qWidgetCreate(): Int64
-foreign func qWidgetShow(ptr: Int64): Unit
-foreign func qWidgetHide(ptr: Int64): Unit
-foreign func qWidgetSetTitle(ptr: Int64, title: CString): Unit
-foreign func qWidgetResize(ptr: Int64, width: Int32, height: Int32): Unit
+// QWidget::setGeometry() - 设置位置和大小
 foreign func qWidgetSetGeometry(ptr: Int64, x: Int32, y: Int32, width: Int32, height: Int32): Unit
+// QWidget::setParent() - 设置父控件
 foreign func qWidgetSetParent(ptr: Int64, parentPtr: Int64): Unit
+// QWidget::move() - 移动控件位置
 foreign func qWidgetMove(ptr: Int64, x: Int32, y: Int32): Unit
+// QWidget::x() - 获取X坐标
 foreign func qWidgetX(ptr: Int64): Int32
+// QWidget::y() - 获取Y坐标
 foreign func qWidgetY(ptr: Int64): Int32
+// QWidget::setFixedSize() - 设置固定大小
 foreign func qWidgetSetFixedSize(ptr: Int64, width: Int32, height: Int32): Unit
+// QWidget::setWindowIcon() - 设置窗口图标
 foreign func qWidgetSetWindowIcon(ptr: Int64, iconPath: CString): Unit
-foreign func qWidgetSetLayout(widgetPtr: Int64, layoutPtr: Int64): Unit
-foreign func qWidgetDelete(ptr: Int64): Unit
+// QWidget::update() - 请求重绘
+foreign func qWidgetUpdate(ptr: Int64): Unit
+// QWidget::repaint() - 立即重绘
+foreign func qWidgetRepaint(ptr: Int64): Unit
 
+/// 设置控件位置和大小
 public func setWidgetGeometry(widgetPtr: Int64, x: Int32, y: Int32, width: Int32, height: Int32): Unit {
     unsafe { qWidgetSetGeometry(widgetPtr, x, y, width, height) }
 }
 
+/// 设置父控件
 public func setWidgetParent(widgetPtr: Int64, parentPtr: Int64): Unit {
     unsafe { qWidgetSetParent(widgetPtr, parentPtr) }
 }
 
-// QWidget 样式表和扩展功能
-foreign func qWidgetSetStyleSheet(ptr: Int64, styleSheet: CString): Unit
-foreign func qWidgetStyleSheet(ptr: Int64): CString
-foreign func qWidgetSetEnabled(ptr: Int64, enabled: Int32): Unit
-foreign func qWidgetIsEnabled(ptr: Int64): Int32
-foreign func qWidgetSetVisible(ptr: Int64, visible: Int32): Unit
-foreign func qWidgetIsVisible(ptr: Int64): Int32
-foreign func qWidgetSetToolTip(ptr: Int64, toolTip: CString): Unit
-foreign func qWidgetSetMinimumSize(ptr: Int64, width: Int32, height: Int32): Unit
-foreign func qWidgetSetMaximumSize(ptr: Int64, width: Int32, height: Int32): Unit
-foreign func qWidgetWidth(ptr: Int64): Int32
-foreign func qWidgetHeight(ptr: Int64): Int32
-foreign func qWidgetUpdate(ptr: Int64): Unit
-foreign func qWidgetRepaint(ptr: Int64): Unit
+// QWidget 样式表和扩展功能（公共FFI声明在common.cj中集中管理，信号FFI在signal.cj中声明）
 
 /// 基础窗口部件
 /// 支持资源管理，可使用 try-with-resources 自动释放
@@ -113,10 +108,15 @@ public class QWidget <: QtResource {
         }
     }
     
+    /// 移动控件到指定位置
     public func move(x: Int32, y: Int32): Unit { checkValid(); unsafe { qWidgetMove(ptr, x, y) } }
+    /// 获取X坐标
     public func x(): Int32 { checkValid(); unsafe { qWidgetX(ptr) } }
+    /// 获取Y坐标
     public func y(): Int32 { checkValid(); unsafe { qWidgetY(ptr) } }
+    /// 设置固定大小
     public func setFixedSize(width: Int32, height: Int32): Unit { checkValid(); unsafe { qWidgetSetFixedSize(ptr, width, height) } }
+    /// 设置窗口图标
     public func setWindowIcon(iconPath: String): Unit { checkValid(); unsafe { let cstr = LibC.mallocCString(iconPath); qWidgetSetWindowIcon(ptr, cstr); LibC.free(cstr) } }
 
     /// 获取原生指针
@@ -283,6 +283,30 @@ public class QWidget <: QtResource {
         checkValid()
         unsafe {
             qWidgetRepaint(ptr)
+        }
+    }
+    
+    /// DPI感知的调整窗口大小（逻辑像素）
+    public func resizeDp(logicalWidth: Int32, logicalHeight: Int32): Unit {
+        checkValid()
+        unsafe {
+            qWidgetResize(ptr, QScreen.logicalToPhysical(logicalWidth), QScreen.logicalToPhysical(logicalHeight))
+        }
+    }
+    
+    /// DPI感知的设置最小尺寸（逻辑像素）
+    public func setMinimumSizeDp(logicalWidth: Int32, logicalHeight: Int32): Unit {
+        checkValid()
+        unsafe {
+            qWidgetSetMinimumSize(ptr, QScreen.logicalToPhysical(logicalWidth), QScreen.logicalToPhysical(logicalHeight))
+        }
+    }
+    
+    /// DPI感知的设置最大尺寸（逻辑像素）
+    public func setMaximumSizeDp(logicalWidth: Int32, logicalHeight: Int32): Unit {
+        checkValid()
+        unsafe {
+            qWidgetSetMaximumSize(ptr, QScreen.logicalToPhysical(logicalWidth), QScreen.logicalToPhysical(logicalHeight))
         }
     }
     

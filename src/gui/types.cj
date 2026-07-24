@@ -136,3 +136,52 @@ public struct Rect {
     public func bottom(): Int32 { y + height }
     public func center(): Point { Point(x + width / 2, y + height / 2) }
 }
+
+/// 刻度位置常量（对应 QSlider::TickPosition）
+/// NoTicks=0 无刻度, TicksAbove=1 上方, TicksBelow=2 下方,
+/// TicksLeft=3 左侧, TicksRight=4 右侧, TicksBothSides=5 两侧
+public class TickPosition {
+    /// 无刻度
+    public static let NoTicks: Int32 = 0
+    /// 刻度在上方（水平滑动条）或右侧（垂直滑动条）
+    public static let TicksAbove: Int32 = 1
+    /// 刻度在下方（水平滑动条）或左侧（垂直滑动条）
+    public static let TicksBelow: Int32 = 2
+    /// 刻度在左侧（垂直滑动条）
+    public static let TicksLeft: Int32 = 3
+    /// 刻度在右侧（垂直滑动条）
+    public static let TicksRight: Int32 = 4
+    /// 刻度在两侧
+    public static let TicksBothSides: Int32 = 5
+}
+
+/// 边框形状常量（对应 QFrame::Shape）
+/// NoFrame=0 无边框, Box=1 矩形框, Panel=2 面板,
+/// WinPanel=3 Windows风格面板, HLine=4 水平线, VLine=5 垂直线, StyledPanel=6 样式面板
+public class FrameShape {
+    /// 无边框
+    public static let NoFrame: Int32 = 0
+    /// 矩形边框
+    public static let Box: Int32 = 1
+    /// 面板边框
+    public static let Panel: Int32 = 2
+    /// Windows风格面板边框
+    public static let WinPanel: Int32 = 3
+    /// 水平分隔线
+    public static let HLine: Int32 = 4
+    /// 垂直分隔线
+    public static let VLine: Int32 = 5
+    /// 样式化面板边框
+    public static let StyledPanel: Int32 = 6
+}
+
+/// 边框阴影常量（对应 QFrame::Shadow）
+/// Plain=16 平面, Raised=32 凸起, Sunken=48 凹陷
+public class FrameShadow {
+    /// 平面（无边框阴影效果）
+    public static let Plain: Int32 = 16
+    /// 凸起效果
+    public static let Raised: Int32 = 32
+    /// 凹陷效果
+    public static let Sunken: Int32 = 48
+}

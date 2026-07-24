@@ -1,6 +1,7 @@
 package cjqt6.widgets
 
 import cjqt6.core.*
+import cjqt6.gui.Alignment
 
 // QLineEdit - 单行文本输入框
 foreign func qLineEditCreate(): Int64
@@ -59,16 +60,6 @@ public class InputMask {
     public static let LicenseKey: String = ">AAAAA-AAAAA-AAAAA-AAAAA-AAAAA;#"
 }
 
-/// 对齐方式常量
-public class Alignment {
-    public static let Left: Int32 = 0x01
-    public static let Right: Int32 = 0x02
-    public static let HCenter: Int32 = 0x04
-    public static let Top: Int32 = 0x20
-    public static let Bottom: Int32 = 0x40
-    public static let VCenter: Int32 = 0x80
-    public static let Center: Int32 = 0x84  // HCenter | VCenter
-}
 
 /// 单行文本框回显模式常量（对应 QLineEdit::EchoMode）
 public class LineEditEchoMode {

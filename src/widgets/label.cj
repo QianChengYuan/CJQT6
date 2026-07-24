@@ -198,6 +198,7 @@ public class QLabel <: QtResource {
     public func close(): Unit {
         if (!closed && ptr != 0) {
             unsafe {
+                qSignalCleanup(ptr)
                 qLabelDelete(ptr)
             }
             closed = true
@@ -208,6 +209,80 @@ public class QLabel <: QtResource {
     /// 删除标签（兼容旧API）
     public func delete(): Unit {
         close()
+    }
+    
+    /// 设置工具提示
+    public func setToolTip(toolTip: String): Unit {
+        checkValid()
+        unsafe {
+            let cstr = LibC.mallocCString(toolTip)
+            qWidgetSetToolTip(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+    
+    /// 设置可见性
+    public func setVisible(visible: Bool): Unit {
+        checkValid()
+        unsafe {
+            qWidgetSetVisible(ptr, if (visible) { 1 } else { 0 })
+        }
+    }
+    
+    /// 是否可见
+    public func isVisible(): Bool {
+        checkValid()
+        unsafe {
+            return qWidgetIsVisible(ptr) == 1
+        }
+    }
+    
+    /// 设置启用状态
+    public func setEnabled(enabled: Bool): Unit {
+        checkValid()
+        unsafe {
+            qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
+        }
+    }
+    
+    /// 是否启用
+    public func isEnabled(): Bool {
+        checkValid()
+        unsafe {
+            return qWidgetIsEnabled(ptr) == 1
+        }
+    }
+    
+    /// 设置最小尺寸
+    public func setMinimumSize(width: Int32, height: Int32): Unit {
+        checkValid()
+        unsafe {
+            qWidgetSetMinimumSize(ptr, width, height)
+        }
+    }
+    
+    /// 设置最大尺寸
+    public func setMaximumSize(width: Int32, height: Int32): Unit {
+        checkValid()
+        unsafe {
+            qWidgetSetMaximumSize(ptr, width, height)
+        }
+    }
+    
+    /// 获取宽度
+    public func width(): Int32 {
+        checkValid()
+        unsafe {
+            return qWidgetWidth(ptr)
+        }
+    }
+    
+    /// 获取高度
+    public func height(): Int32 {
+        checkValid()
+        unsafe {
+            return qWidgetHeight(ptr)
+        }
     }
     
     /// 终结器 - 已禁用

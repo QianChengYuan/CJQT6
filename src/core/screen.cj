@@ -41,4 +41,19 @@ public class QScreen {
     public static func primaryRefreshRate(): Float64 {
         unsafe { return qScreenPrimaryRefreshRate() }
     }
+
+    /// DPI缩放因子（primaryDevicePixelRatio的语义化别名）
+    public static func scaleFactor(): Float64 {
+        primaryDevicePixelRatio()
+    }
+
+    /// 逻辑像素转物理像素
+    public static func logicalToPhysical(logical: Int32): Int32 {
+        Int32(Float64(logical) * scaleFactor())
+    }
+
+    /// 物理像素转逻辑像素
+    public static func physicalToLogical(physical: Int32): Int32 {
+        Int32(Float64(physical) / scaleFactor())
+    }
 }

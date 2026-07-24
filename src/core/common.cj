@@ -1,8 +1,9 @@
-package cjqt6.widgets
+package cjqt6.core
 
 // ============================================================
 // 公共FFI声明 - QWidget基础函数
-// 供widgets包内各控件共享，避免在每个控件文件中重复声明
+// 集中管理core包内共享的QWidget FFI声明，避免在多个文件中重复声明
+// 注意：qSignalCleanup在signal.cj中声明，不在此处重复
 // ============================================================
 
 // QWidget::show() - 显示控件
@@ -25,20 +26,17 @@ foreign func qWidgetStyleSheet(ptr: Int64): CString
 foreign func qWidgetSetEnabled(ptr: Int64, enabled: Int32): Unit
 // QWidget::isEnabled() - 获取启用状态
 foreign func qWidgetIsEnabled(ptr: Int64): Int32
-// QWidget::setMinimumSize() - 设置最小尺寸
-foreign func qWidgetSetMinimumSize(ptr: Int64, minw: Int32, minh: Int32): Unit
-// QWidget::setMaximumSize() - 设置最大尺寸
-foreign func qWidgetSetMaximumSize(ptr: Int64, maxw: Int32, maxh: Int32): Unit
 // QWidget::setVisible() - 设置可见性
 foreign func qWidgetSetVisible(ptr: Int64, visible: Int32): Unit
 // QWidget::isVisible() - 获取可见性
 foreign func qWidgetIsVisible(ptr: Int64): Int32
 // QWidget::setToolTip() - 设置工具提示
 foreign func qWidgetSetToolTip(ptr: Int64, toolTip: CString): Unit
+// QWidget::setMinimumSize() - 设置最小尺寸
+foreign func qWidgetSetMinimumSize(ptr: Int64, width: Int32, height: Int32): Unit
+// QWidget::setMaximumSize() - 设置最大尺寸
+foreign func qWidgetSetMaximumSize(ptr: Int64, width: Int32, height: Int32): Unit
 // QWidget::width() - 获取宽度
 foreign func qWidgetWidth(ptr: Int64): Int32
 // QWidget::height() - 获取高度
 foreign func qWidgetHeight(ptr: Int64): Int32
-
-// 信号清理 - 断开所有信号连接
-foreign func qSignalCleanup(ptr: Int64): Unit
