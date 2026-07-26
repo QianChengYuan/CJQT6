@@ -1,7 +1,0 @@
-[package]
-  name = "network_example"
-  version = "1.0.0"
-  description = "UDP网络通信示例"
-
-[dependencies]
-  cjqt6 = { path = "../.." }
