@@ -65,4 +65,12 @@ public class GUITestEnvironment {
     public func isReady(): Bool {
         return ready
     }
+    
+    /// 运行 Qt 事件循环（阻塞），直到某处调用 QApp.quit()
+    /// 供信号槽测试确定性触发定时器/信号使用
+    public func exec(): Unit {
+        if (let Some(app) <- qappInstance) {
+            app.exec()
+        }
+    }
 }

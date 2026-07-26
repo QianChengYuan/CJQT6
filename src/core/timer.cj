@@ -47,12 +47,23 @@ public class QTimer <: QtResource {
         }
     }
     
-    /// 设置超时回调
-    public func setOnTimeout(callback: VoidCallback): Unit {
+    /// 设置超时回调，返回 SignalConnection 句柄（可 disconnect）
+    public func setOnTimeout(callback: VoidCallback): SignalConnection {
         checkValid()
         unsafe {
             qTimerConnectTimeout(ptr, callback)
         }
+        return SignalConnection.createWithWidgetType(ptr, SIGNAL_TIMEOUT, WIDGET_TYPE_TIMER)
+    }
+
+    /// 设置超时回调（可捕获局部变量；P1c 闭包捕获），返回 SignalConnection 句柄
+    public func setOnTimeoutCapture(callback: () -> Unit): SignalConnection {
+        checkValid()
+        let id = registerVoidCallback(callback)
+        unsafe {
+            qTimerConnectTimeoutId(ptr, id)
+        }
+        return SignalConnection.createCapturing(ptr, SIGNAL_TIMEOUT, WIDGET_TYPE_TIMER, id)
     }
     
     /// 断开超时信号
@@ -62,6 +73,11 @@ public class QTimer <: QtResource {
                 qTimerDisconnectTimeout(ptr)
             }
         }
+    }
+    
+    /// 断开该定时器的全部信号（timeout）
+    public func disconnect(): Unit {
+        disconnectTimeout()
     }
     
     /// 获取原生指针

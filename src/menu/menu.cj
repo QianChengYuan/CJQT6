@@ -1,6 +1,6 @@
 package cjqt6.menu
 
-import cjqt6.core.{VoidCallback}
+import cjqt6.core.{VoidCallback, SignalConnection, registerVoidCallback, WIDGET_TYPE_ACTION, SIGNAL_TRIGGERED}
 
 // ============================================================
 // FFI 声明
@@ -42,6 +42,9 @@ foreign func qActionIsVisible(ptr: Int64): Bool
 foreign func qActionConnectTriggered(ptr: Int64, callback: VoidCallback): Unit
 foreign func qActionDisconnectTriggered(ptr: Int64): Unit
 foreign func qActionDelete(ptr: Int64): Unit
+
+// P1c：闭包捕获 id 版连接（native 仅保存 id，信号触发时回调顶层调度器）
+foreign func qActionConnectTriggeredId(ptr: Int64, id: Int64): Unit
 
 // QToolBar
 foreign func qToolBarCreate(title: CString): Int64
@@ -163,6 +166,15 @@ public class QAction {
         unsafe {
             qActionConnectTriggered(ptr, callback)
         }
+    }
+
+    /// 设置触发回调（可捕获局部变量；P1c 闭包捕获），返回 SignalConnection 句柄
+    public func setOnTriggeredCapture(callback: () -> Unit): SignalConnection {
+        let id = registerVoidCallback(callback)
+        unsafe {
+            qActionConnectTriggeredId(ptr, id)
+        }
+        return SignalConnection.createCapturing(ptr, SIGNAL_TRIGGERED, WIDGET_TYPE_ACTION, id)
     }
     
     public func disconnect() {

@@ -317,6 +317,15 @@ public class QWidget <: QtResource {
             qWidgetConnectDestroyed(ptr, callback)
         }
     }
+
+    /// 设置控件销毁回调（可捕获局部变量；P1c 闭包捕获）
+    public func setOnDestroyedCapture(callback: () -> Unit): Unit {
+        checkValid()
+        let id = registerVoidCallback(callback)
+        unsafe {
+            qWidgetConnectDestroyedId(ptr, id)
+        }
+    }
     
     /// 断开控件销毁信号
     public func disconnectDestroyed(): Unit {
@@ -325,5 +334,10 @@ public class QWidget <: QtResource {
                 qWidgetDisconnectDestroyed(ptr)
             }
         }
+    }
+    
+    /// 断开该控件的全部信号（destroyed）
+    public func disconnect(): Unit {
+        disconnectDestroyed()
     }
 }

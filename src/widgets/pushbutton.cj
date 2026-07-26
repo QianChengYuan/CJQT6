@@ -31,6 +31,15 @@ foreign func qButtonConnectPressed(ptr: Int64, callback: VoidCallback): Unit
 foreign func qButtonConnectReleased(ptr: Int64, callback: VoidCallback): Unit
 foreign func qButtonConnectToggled(ptr: Int64, callback: Int32Callback): Unit
 foreign func qButtonConnectClickedChecked(ptr: Int64, callback: Int32Callback): Unit
+foreign func qButtonDisconnectPressed(ptr: Int64): Unit
+foreign func qButtonDisconnectReleased(ptr: Int64): Unit
+
+// P1c：闭包捕获 id 版连接（native 仅保存 id，信号触发时回调顶层调度器）
+foreign func qButtonConnectClickedId(ptr: Int64, id: Int64): Unit
+foreign func qButtonConnectPressedId(ptr: Int64, id: Int64): Unit
+foreign func qButtonConnectReleasedId(ptr: Int64, id: Int64): Unit
+foreign func qButtonDisconnectToggled(ptr: Int64): Unit
+foreign func qButtonDisconnectClickedChecked(ptr: Int64): Unit
 
 /// 标准图标类型枚举
 public class StandardIcon {
@@ -181,6 +190,16 @@ public class QPushButton <: QtResource {
             qButtonConnectClicked(ptr, callback)
         }
     }
+
+    /// 设置点击回调（可捕获局部变量；P1c 闭包捕获），返回 SignalConnection 句柄
+    public func setOnClickCapture(callback: () -> Unit): SignalConnection {
+        checkValid()
+        let id = registerVoidCallback(callback)
+        unsafe {
+            qButtonConnectClickedId(ptr, id)
+        }
+        return SignalConnection.createCapturing(ptr, SIGNAL_CLICKED, WIDGET_TYPE_BUTTON, id)
+    }
     
     /// 断开点击信号
     public func disconnectClick(): Unit {
@@ -315,36 +334,105 @@ public class QPushButton <: QtResource {
         }
     }
     
-    /// 按下回调
-    public func setOnPressed(callback: VoidCallback): Unit {
+    /// 按下回调，返回 SignalConnection 句柄（可 disconnect）
+    public func setOnPressed(callback: VoidCallback): SignalConnection {
         checkValid()
         unsafe {
             qButtonConnectPressed(ptr, callback)
         }
+        return SignalConnection.createWithWidgetType(ptr, SIGNAL_PRESSED, WIDGET_TYPE_BUTTON)
+    }
+
+    /// 按下回调（可捕获局部变量；P1c 闭包捕获），返回 SignalConnection 句柄
+    public func setOnPressedCapture(callback: () -> Unit): SignalConnection {
+        checkValid()
+        let id = registerVoidCallback(callback)
+        unsafe {
+            qButtonConnectPressedId(ptr, id)
+        }
+        return SignalConnection.createCapturing(ptr, SIGNAL_PRESSED, WIDGET_TYPE_BUTTON, id)
     }
     
-    /// 释放回调
-    public func setOnReleased(callback: VoidCallback): Unit {
+    /// 断开按下信号
+    public func disconnectPressed(): Unit {
+        if (ptr != 0) {
+            unsafe {
+                qButtonDisconnectPressed(ptr)
+            }
+        }
+    }
+    
+    /// 释放回调，返回 SignalConnection 句柄
+    public func setOnReleased(callback: VoidCallback): SignalConnection {
         checkValid()
         unsafe {
             qButtonConnectReleased(ptr, callback)
         }
+        return SignalConnection.createWithWidgetType(ptr, SIGNAL_RELEASED, WIDGET_TYPE_BUTTON)
+    }
+
+    /// 释放回调（可捕获局部变量；P1c 闭包捕获），返回 SignalConnection 句柄
+    public func setOnReleasedCapture(callback: () -> Unit): SignalConnection {
+        checkValid()
+        let id = registerVoidCallback(callback)
+        unsafe {
+            qButtonConnectReleasedId(ptr, id)
+        }
+        return SignalConnection.createCapturing(ptr, SIGNAL_RELEASED, WIDGET_TYPE_BUTTON, id)
     }
     
-    /// 切换状态回调（checked: 0/1）
-    public func setOnToggled(callback: Int32Callback): Unit {
+    /// 断开释放信号
+    public func disconnectReleased(): Unit {
+        if (ptr != 0) {
+            unsafe {
+                qButtonDisconnectReleased(ptr)
+            }
+        }
+    }
+    
+    /// 切换状态回调（checked: 0/1），返回 SignalConnection 句柄
+    public func setOnToggled(callback: Int32Callback): SignalConnection {
         checkValid()
         unsafe {
             qButtonConnectToggled(ptr, callback)
         }
+        return SignalConnection.createWithWidgetType(ptr, SIGNAL_BTN_TOGGLED, WIDGET_TYPE_BUTTON)
     }
     
-    /// 点击回调（带 checked 状态，0/1）
-    public func setOnClickedChecked(callback: Int32Callback): Unit {
+    /// 断开切换信号
+    public func disconnectToggled(): Unit {
+        if (ptr != 0) {
+            unsafe {
+                qButtonDisconnectToggled(ptr)
+            }
+        }
+    }
+    
+    /// 点击回调（带 checked 状态，0/1），返回 SignalConnection 句柄
+    public func setOnClickedChecked(callback: Int32Callback): SignalConnection {
         checkValid()
         unsafe {
             qButtonConnectClickedChecked(ptr, callback)
         }
+        return SignalConnection.createWithWidgetType(ptr, SIGNAL_CLICKED_CHECKED, WIDGET_TYPE_BUTTON)
+    }
+    
+    /// 断开带 checked 的点击信号
+    public func disconnectClickedChecked(): Unit {
+        if (ptr != 0) {
+            unsafe {
+                qButtonDisconnectClickedChecked(ptr)
+            }
+        }
+    }
+    
+    /// 断开该按钮的全部信号（clicked/pressed/released/toggled/clickedChecked）
+    public func disconnect(): Unit {
+        disconnectClick()
+        disconnectPressed()
+        disconnectReleased()
+        disconnectToggled()
+        disconnectClickedChecked()
     }
     
     /// 获取原生指针

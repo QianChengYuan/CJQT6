@@ -12,6 +12,7 @@
 #include <QWidget>
 #include <QString>
 #include <QPushButton>
+#include <QObject>
 #include <QToolButton>
 #include <QCheckBox>
 #include <QRadioButton>
@@ -20,6 +21,10 @@
 #include <QKeySequence>
 #include <functional>
 #include <unordered_map>
+
+// 扩展信号槽存储（C++ 类型，必须位于 extern "C" 之外）
+template <typename Fn>
+struct ExtSlot { QMetaObject::Connection conn; Fn cb; };
 
 extern "C" {
 
@@ -90,53 +95,91 @@ void qButtonSetAutoRepeat(int64_t ptr, int32_t v) {
     if (btn) btn->setAutoRepeat(v != 0);
 }
 
-// QPushButton 信号回调映射
-static std::unordered_map<int64_t, std::function<void()>> g_btnPressed;
-static std::unordered_map<int64_t, std::function<void()>> g_btnReleased;
-static std::unordered_map<int64_t, std::function<void(int32_t)>> g_btnToggled;
-static std::unordered_map<int64_t, std::function<void(int32_t)>> g_btnClickedChecked;
+// QPushButton 信号回调映射（P1 改进：保存 QMetaObject::Connection，支持真正断开 + 替换式连接）
+
+static std::unordered_map<int64_t, ExtSlot<std::function<void()>>>         g_btnPressed;
+static std::unordered_map<int64_t, ExtSlot<std::function<void()>>>         g_btnReleased;
+static std::unordered_map<int64_t, ExtSlot<std::function<void(int32_t)>>> g_btnToggled;
+static std::unordered_map<int64_t, ExtSlot<std::function<void(int32_t)>>> g_btnClickedChecked;
+
+// 声明 bridge_signal.cpp 中的捕获路径断开函数（P1c）
+void qButtonPressedIdDisconnect(int64_t ptr);
+void qButtonReleasedIdDisconnect(int64_t ptr);
+void qToolButtonPressedIdDisconnect(int64_t ptr);
+void qToolButtonReleasedIdDisconnect(int64_t ptr);
+
+void qButtonDisconnectPressed(int64_t ptr) {
+    auto it = g_btnPressed.find(ptr);
+    if (it != g_btnPressed.end()) { QObject::disconnect(it->second.conn); g_btnPressed.erase(it); }
+    qButtonPressedIdDisconnect(ptr);  // P1c：同步清理捕获路径
+}
+void qButtonDisconnectReleased(int64_t ptr) {
+    auto it = g_btnReleased.find(ptr);
+    if (it != g_btnReleased.end()) { QObject::disconnect(it->second.conn); g_btnReleased.erase(it); }
+    qButtonReleasedIdDisconnect(ptr);  // P1c：同步清理捕获路径
+}
+void qButtonDisconnectToggled(int64_t ptr) {
+    auto it = g_btnToggled.find(ptr);
+    if (it != g_btnToggled.end()) { QObject::disconnect(it->second.conn); g_btnToggled.erase(it); }
+}
+void qButtonDisconnectClickedChecked(int64_t ptr) {
+    auto it = g_btnClickedChecked.find(ptr);
+    if (it != g_btnClickedChecked.end()) { QObject::disconnect(it->second.conn); g_btnClickedChecked.erase(it); }
+}
 
 void qButtonConnectPressed(int64_t ptr, void (*cb)()) {
     QPushButton* btn = reinterpret_cast<QPushButton*>(ptr);
-    if (btn && cb && g_btnPressed.find(ptr) == g_btnPressed.end()) {
-        g_btnPressed[ptr] = [cb]() { cb(); };
-        QObject::connect(btn, &QPushButton::pressed, [ptr]() {
+    if (btn && cb) {
+        qButtonDisconnectPressed(ptr);  // 替换式：先断开旧连接
+        ExtSlot<std::function<void()>> s;
+        s.cb = [cb]() { cb(); };
+        s.conn = QObject::connect(btn, &QPushButton::pressed, [ptr]() {
             auto it = g_btnPressed.find(ptr);
-            if (it != g_btnPressed.end()) it->second();
+            if (it != g_btnPressed.end() && it->second.cb) it->second.cb();
         });
+        g_btnPressed[ptr] = std::move(s);
     }
 }
 
 void qButtonConnectReleased(int64_t ptr, void (*cb)()) {
     QPushButton* btn = reinterpret_cast<QPushButton*>(ptr);
-    if (btn && cb && g_btnReleased.find(ptr) == g_btnReleased.end()) {
-        g_btnReleased[ptr] = [cb]() { cb(); };
-        QObject::connect(btn, &QPushButton::released, [ptr]() {
+    if (btn && cb) {
+        qButtonDisconnectReleased(ptr);
+        ExtSlot<std::function<void()>> s;
+        s.cb = [cb]() { cb(); };
+        s.conn = QObject::connect(btn, &QPushButton::released, [ptr]() {
             auto it = g_btnReleased.find(ptr);
-            if (it != g_btnReleased.end()) it->second();
+            if (it != g_btnReleased.end() && it->second.cb) it->second.cb();
         });
+        g_btnReleased[ptr] = std::move(s);
     }
 }
 
 void qButtonConnectToggled(int64_t ptr, void (*cb)(int32_t)) {
     QPushButton* btn = reinterpret_cast<QPushButton*>(ptr);
-    if (btn && cb && g_btnToggled.find(ptr) == g_btnToggled.end()) {
-        g_btnToggled[ptr] = [cb](int32_t v) { cb(v); };
-        QObject::connect(btn, &QPushButton::toggled, [ptr](bool checked) {
+    if (btn && cb) {
+        qButtonDisconnectToggled(ptr);
+        ExtSlot<std::function<void(int32_t)>> s;
+        s.cb = [cb](int32_t v) { cb(v); };
+        s.conn = QObject::connect(btn, &QPushButton::toggled, [ptr](bool checked) {
             auto it = g_btnToggled.find(ptr);
-            if (it != g_btnToggled.end()) it->second(checked ? 1 : 0);
+            if (it != g_btnToggled.end() && it->second.cb) it->second.cb(checked ? 1 : 0);
         });
+        g_btnToggled[ptr] = std::move(s);
     }
 }
 
 void qButtonConnectClickedChecked(int64_t ptr, void (*cb)(int32_t)) {
     QPushButton* btn = reinterpret_cast<QPushButton*>(ptr);
-    if (btn && cb && g_btnClickedChecked.find(ptr) == g_btnClickedChecked.end()) {
-        g_btnClickedChecked[ptr] = [cb](int32_t v) { cb(v); };
-        QObject::connect(btn, &QPushButton::clicked, [ptr](bool checked) {
+    if (btn && cb) {
+        qButtonDisconnectClickedChecked(ptr);
+        ExtSlot<std::function<void(int32_t)>> s;
+        s.cb = [cb](int32_t v) { cb(v); };
+        s.conn = QObject::connect(btn, &QPushButton::clicked, [ptr](bool checked) {
             auto it = g_btnClickedChecked.find(ptr);
-            if (it != g_btnClickedChecked.end()) it->second(checked ? 1 : 0);
+            if (it != g_btnClickedChecked.end() && it->second.cb) it->second.cb(checked ? 1 : 0);
         });
+        g_btnClickedChecked[ptr] = std::move(s);
     }
 }
 
@@ -154,41 +197,65 @@ int32_t qToolButtonToolButtonStyle(int64_t ptr) {
     return btn ? static_cast<int32_t>(btn->toolButtonStyle()) : 0;
 }
 
-// QToolButton 信号回调映射
-static std::unordered_map<int64_t, std::function<void()>> g_tbPressed;
-static std::unordered_map<int64_t, std::function<void()>> g_tbReleased;
-static std::unordered_map<int64_t, std::function<void(int32_t)>> g_tbClickedChecked;
+// QToolButton 信号回调映射（P1 改进：保存 QMetaObject::Connection，支持真正断开 + 替换式连接）
+static std::unordered_map<int64_t, ExtSlot<std::function<void()>>>         g_tbPressed;
+static std::unordered_map<int64_t, ExtSlot<std::function<void()>>>         g_tbReleased;
+static std::unordered_map<int64_t, ExtSlot<std::function<void(int32_t)>>> g_tbClickedChecked;
+
+void qToolButtonDisconnectPressed(int64_t ptr) {
+    auto it = g_tbPressed.find(ptr);
+    if (it != g_tbPressed.end()) { QObject::disconnect(it->second.conn); g_tbPressed.erase(it); }
+    qToolButtonPressedIdDisconnect(ptr);  // P1c：同步清理捕获路径
+}
+void qToolButtonDisconnectReleased(int64_t ptr) {
+    auto it = g_tbReleased.find(ptr);
+    if (it != g_tbReleased.end()) { QObject::disconnect(it->second.conn); g_tbReleased.erase(it); }
+    qToolButtonReleasedIdDisconnect(ptr);  // P1c：同步清理捕获路径
+}
+void qToolButtonDisconnectClickedChecked(int64_t ptr) {
+    auto it = g_tbClickedChecked.find(ptr);
+    if (it != g_tbClickedChecked.end()) { QObject::disconnect(it->second.conn); g_tbClickedChecked.erase(it); }
+}
 
 void qToolButtonConnectPressed(int64_t ptr, void (*cb)()) {
     QToolButton* btn = reinterpret_cast<QToolButton*>(ptr);
-    if (btn && cb && g_tbPressed.find(ptr) == g_tbPressed.end()) {
-        g_tbPressed[ptr] = [cb]() { cb(); };
-        QObject::connect(btn, &QToolButton::pressed, [ptr]() {
+    if (btn && cb) {
+        qToolButtonDisconnectPressed(ptr);
+        ExtSlot<std::function<void()>> s;
+        s.cb = [cb]() { cb(); };
+        s.conn = QObject::connect(btn, &QToolButton::pressed, [ptr]() {
             auto it = g_tbPressed.find(ptr);
-            if (it != g_tbPressed.end()) it->second();
+            if (it != g_tbPressed.end() && it->second.cb) it->second.cb();
         });
+        g_tbPressed[ptr] = std::move(s);
     }
 }
 
 void qToolButtonConnectReleased(int64_t ptr, void (*cb)()) {
     QToolButton* btn = reinterpret_cast<QToolButton*>(ptr);
-    if (btn && cb && g_tbReleased.find(ptr) == g_tbReleased.end()) {
-        g_tbReleased[ptr] = [cb]() { cb(); };
-        QObject::connect(btn, &QToolButton::released, [ptr]() {
+    if (btn && cb) {
+        qToolButtonDisconnectReleased(ptr);
+        ExtSlot<std::function<void()>> s;
+        s.cb = [cb]() { cb(); };
+        s.conn = QObject::connect(btn, &QToolButton::released, [ptr]() {
             auto it = g_tbReleased.find(ptr);
-            if (it != g_tbReleased.end()) it->second();
+            if (it != g_tbReleased.end() && it->second.cb) it->second.cb();
         });
+        g_tbReleased[ptr] = std::move(s);
     }
 }
 
 void qToolButtonConnectClickedChecked(int64_t ptr, void (*cb)(int32_t)) {
     QToolButton* btn = reinterpret_cast<QToolButton*>(ptr);
-    if (btn && cb && g_tbClickedChecked.find(ptr) == g_tbClickedChecked.end()) {
-        g_tbClickedChecked[ptr] = [cb](int32_t v) { cb(v); };
-        QObject::connect(btn, &QToolButton::clicked, [ptr](bool checked) {
+    if (btn && cb) {
+        qToolButtonDisconnectClickedChecked(ptr);
+        ExtSlot<std::function<void(int32_t)>> s;
+        s.cb = [cb](int32_t v) { cb(v); };
+        s.conn = QObject::connect(btn, &QToolButton::clicked, [ptr](bool checked) {
             auto it = g_tbClickedChecked.find(ptr);
-            if (it != g_tbClickedChecked.end()) it->second(checked ? 1 : 0);
+            if (it != g_tbClickedChecked.end() && it->second.cb) it->second.cb(checked ? 1 : 0);
         });
+        g_tbClickedChecked[ptr] = std::move(s);
     }
 }
 

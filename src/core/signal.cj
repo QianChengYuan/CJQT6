@@ -52,6 +52,15 @@ public const SIGNAL_CLOSE: String = "close"
 public const SIGNAL_TRIGGERED: String = "triggered"
 public const SIGNAL_TOGGLED: String = "toggled"
 
+// P1 新增：按钮/工具按钮扩展信号（与 SIGNAL_TOGGLED 区分，用于精确路由断开）
+public const SIGNAL_PRESSED: String = "pressed"
+public const SIGNAL_RELEASED: String = "released"
+public const SIGNAL_BTN_TOGGLED: String = "buttonToggled"
+public const SIGNAL_CLICKED_CHECKED: String = "clickedChecked"
+// P1c：QLineEdit 扩展信号（用于路由断开）
+public const SIGNAL_RETURN_PRESSED: String = "returnPressed"
+public const SIGNAL_EDITING_FINISHED: String = "editingFinished"
+
 // ============================================================
 // QWidget::destroyed 信号连接
 // ============================================================
@@ -65,6 +74,11 @@ foreign func qWidgetDisconnectDestroyed(ptr: Int64): Unit
 
 foreign func qButtonConnectClicked(ptr: Int64, callback: VoidCallback): Unit
 foreign func qButtonDisconnectClicked(ptr: Int64): Unit
+// P1：按钮扩展信号断开（native 侧已实现真正的 QObject::disconnect）
+foreign func qButtonDisconnectPressed(ptr: Int64): Unit
+foreign func qButtonDisconnectReleased(ptr: Int64): Unit
+foreign func qButtonDisconnectToggled(ptr: Int64): Unit
+foreign func qButtonDisconnectClickedChecked(ptr: Int64): Unit
 
 // ============================================================
 // QToolButton 信号连接
@@ -72,6 +86,10 @@ foreign func qButtonDisconnectClicked(ptr: Int64): Unit
 
 foreign func qToolButtonConnectClicked(ptr: Int64, callback: VoidCallback): Unit
 foreign func qToolButtonDisconnectClicked(ptr: Int64): Unit
+// P1：工具按钮扩展信号断开
+foreign func qToolButtonDisconnectPressed(ptr: Int64): Unit
+foreign func qToolButtonDisconnectReleased(ptr: Int64): Unit
+foreign func qToolButtonDisconnectClickedChecked(ptr: Int64): Unit
 
 // ============================================================
 // QSlider 信号连接
@@ -172,6 +190,19 @@ foreign func qActionConnectTriggered(ptr: Int64, callback: VoidCallback): Unit
 foreign func qActionDisconnectTriggered(ptr: Int64): Unit
 
 // ============================================================
+// P1c：闭包捕获 —— native 注册表调度器入口 + void 信号 id 版连接
+// 约定：本文件（cjqt6.core）只放「同包调用方」用到的声明；其余控件各自的
+//       id 版连接声明放在对应控件文件（与既有「每控件文件自带 foreign 声明」
+//       的约定一致），避免跨包可见性（非 public foreign 不可被其他包引用）。
+// ============================================================
+
+foreign func qSetCallbackDispatcher(disp: CFunc<(Int64) -> Unit>): Unit
+
+// 以下两个供同包 cjqt6.core 内的 timer.cj / widget.cj 使用
+foreign func qTimerConnectTimeoutId(ptr: Int64, id: Int64): Unit
+foreign func qWidgetConnectDestroyedId(ptr: Int64, id: Int64): Unit
+
+// ============================================================
 // 清理函数
 // ============================================================
 
@@ -201,6 +232,7 @@ public class SignalConnection {
     private var signalType: String = ""
     private var widgetType: String = ""  // 新增：控件类型，用于正确断开信号
     private var connected: Bool = false
+    private var callbackId: Int64 = 0     // P1c：捕获路径的注册表 id（0 表示非捕获路径）
     
     private init() {}
     
@@ -222,6 +254,17 @@ public class SignalConnection {
         conn.connected = true
         return conn
     }
+
+    /// 创建连接句柄（P1c 捕获路径：附带注册表 callbackId，disconnect 时一并注销闭包）
+    public static func createCapturing(ptr: Int64, signalType: String, widgetType: String, callbackId: Int64): SignalConnection {
+        let conn = SignalConnection()
+        conn.ptr = ptr
+        conn.signalType = signalType
+        conn.widgetType = widgetType
+        conn.callbackId = callbackId
+        conn.connected = true
+        return conn
+    }
     
     /// 断开连接
     public func disconnect(): Unit {
@@ -229,9 +272,27 @@ public class SignalConnection {
             unsafe {
                 // 优先根据控件类型断开，确保调用正确的断开函数
                 if (widgetType == WIDGET_TYPE_BUTTON) {
-                    qButtonDisconnectClicked(ptr)
+                    if (signalType == SIGNAL_PRESSED) {
+                        qButtonDisconnectPressed(ptr)
+                    } else if (signalType == SIGNAL_RELEASED) {
+                        qButtonDisconnectReleased(ptr)
+                    } else if (signalType == SIGNAL_BTN_TOGGLED) {
+                        qButtonDisconnectToggled(ptr)
+                    } else if (signalType == SIGNAL_CLICKED_CHECKED) {
+                        qButtonDisconnectClickedChecked(ptr)
+                    } else {
+                        qButtonDisconnectClicked(ptr)
+                    }
                 } else if (widgetType == WIDGET_TYPE_TOOL_BUTTON) {
-                    qToolButtonDisconnectClicked(ptr)
+                    if (signalType == SIGNAL_PRESSED) {
+                        qToolButtonDisconnectPressed(ptr)
+                    } else if (signalType == SIGNAL_RELEASED) {
+                        qToolButtonDisconnectReleased(ptr)
+                    } else if (signalType == SIGNAL_CLICKED_CHECKED) {
+                        qToolButtonDisconnectClickedChecked(ptr)
+                    } else {
+                        qToolButtonDisconnectClicked(ptr)
+                    }
                 } else if (widgetType == WIDGET_TYPE_SLIDER) {
                     qSliderDisconnectValueChanged(ptr)
                 } else if (widgetType == WIDGET_TYPE_SPINBOX) {
@@ -247,11 +308,29 @@ public class SignalConnection {
                 } else if (widgetType == WIDGET_TYPE_COMBOBOX) {
                     qComboBoxDisconnectCurrentIndexChanged(ptr)
                 } else if (widgetType == WIDGET_TYPE_LINEEDIT) {
-                    qLineEditDisconnectTextChanged(ptr)
+                    if (signalType == SIGNAL_RETURN_PRESSED) {
+                        qLineEditDisconnectReturnPressed(ptr)
+                    } else if (signalType == SIGNAL_EDITING_FINISHED) {
+                        qLineEditDisconnectEditingFinished(ptr)
+                    } else {
+                        qLineEditDisconnectTextChanged(ptr)
+                    }
                 } else if (widgetType == WIDGET_TYPE_TIMER) {
                     qTimerDisconnectTimeout(ptr)
                 } else if (widgetType == WIDGET_TYPE_ACTION) {
                     qActionDisconnectTriggered(ptr)
+                } else if (widgetType == WIDGET_TYPE_EMITTER) {
+                    if (signalType == SIGNAL_EMIT_VOID) {
+                        qEmitterDisconnectVoid(ptr)
+                    } else if (signalType == SIGNAL_EMIT_INT) {
+                        qEmitterDisconnectInt(ptr)
+                    } else if (signalType == SIGNAL_EMIT_DOUBLE) {
+                        qEmitterDisconnectDouble(ptr)
+                    } else if (signalType == SIGNAL_EMIT_STRING) {
+                        qEmitterDisconnectString(ptr)
+                    } else {
+                        qEmitterDisconnectVoid(ptr)
+                    }
                 } else if (signalType == SIGNAL_CLICKED) {
                     // 兼容旧逻辑：根据信号类型断开
                     qButtonDisconnectClicked(ptr)
@@ -274,6 +353,10 @@ public class SignalConnection {
                 }
             }
             connected = false
+            // P1c：捕获路径断开时一并注销 Cangjie 侧闭包，避免注册表泄漏
+            if (callbackId != 0) {
+                unregisterVoidCallback(callbackId)
+            }
         }
     }
     

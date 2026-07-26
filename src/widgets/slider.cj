@@ -290,6 +290,12 @@ public class QSlider <: QtResource {
         }
     }
     
+    /// 断开该滑块的全部信号（valueChanged/sliderMoved）
+    public func disconnect(): Unit {
+        disconnectValueChanged()
+        disconnectSliderMoved()
+    }
+    
     /// 设置滑块按下回调
     public func setOnSliderPressed(callback: Int64Callback) {
         checkValid()

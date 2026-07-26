@@ -147,6 +147,7 @@ add_library(cjqt6_bridge SHARED
     # 头文件 (用于MOC处理)
     native/includes/gui.h
     native/includes/widgets.h
+    native/includes/signalemitter.h
 )
 
 # 链接 Qt6 库

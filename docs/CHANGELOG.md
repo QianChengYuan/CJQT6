@@ -1,4 +1,31 @@
 ﻿# 更新日志
+## [1.5.0] - 2026-07-25
+
+### 新增
+
+- **通用信号发射器 `cjfw::SignalEmitter`**：`native/includes/signalemitter.h`（`Q_OBJECT` + `signalVoid/signalInt/signalDouble/signalString`），`bridge_signal.cpp` 内建 `qEmitter*` 桥接；Cangjie 侧 `src/core/emitter.cj` 提供 `SignalEmitter <: QtResource` + `ConnectionType{Auto/Direct/Queued/BlockingQueued}` + `setOnVoid/Int/Double/String`（含 `connType` 重载）+ `setOnVoidCapture` + `emitXxx` + `disconnectXxx` + `disconnect()`。实现自定义信号与 `emit`，并支持跨线程 `QueuedConnection`（以 emitter 自身作 context 投递到 GUI 线程）。
+- **P1c 闭包捕获 API**：`src/core/callback.cj` 全局闭包注册表（`HashMap<Int64,()->Unit>`）+ 顶层 `CFunc` 调度器；各控件新增非破坏性 `setOnXxxCapture(callback:()->Unit):SignalConnection`（改名避免与现有 `VoidCallback` 内联 lambda 二义），`SignalConnection.disconnect()` 时注销注册表项。
+- **`SignalConnection` 真实句柄返回**：`pushbutton.cj`/`toolbutton.cj` 的 `setOnPressed/Released/Toggled/ClickedChecked`、`timer.cj` 的 `setOnTimeout` 现返回真实 `SignalConnection`（含 `isConnected()` + `disconnect()` 路由）。
+
+### 修复
+
+- **P0 信号索引与断开（核心）**：`bridge_signal.cpp` 由共享 `g_voidCallbacks[ptr]` 改为复合键 `(ptr, signalId)` 索引，保存 `QMetaObject::Connection` 句柄；`disconnect` 真正调用 `QObject::disconnect` 并清回调表（旧版仅清哈希、lambda 泄漏）；连接语义统一为**替换式**（重复 `setOnXxx` 先断旧再连新）。修复共享哈希碰撞/假断开/重复叠加三类 Bug。
+- **P1a 按钮扩展信号真断开**：`bridge_ext_wcore.cpp` 按钮 `pressed/released/toggled/clickedChecked` 改为保存 `QMetaObject::Connection`，新增 `qButton/qToolButton DisconnectPressed/Released/Toggled/ClickedChecked`，连接语义为替换式。
+- **统一 `disconnect()` 断全部信号**：覆盖 QWidget/QTimer/QComboBox/QCheckBox/QRadioButton/QSlider/QSpinBox/QDoubleSpinBox/QDial/QLineEdit/QPushButton/QToolButton/QTabWidget（QAction 已有），保留 `disconnectXxx()`；native 走 `disconnectByKey` 真断开（含捕获路径）。
+- **CString 生命周期**：native `textChanged`/`currentTextChanged` 回调内改为 `std::string s = text.toUtf8().constData(); cb(s.c_str());`，消除 `toUtf8().constData()` 悬垂风险。
+- **Cangjie 1.1.0 语法核对**：确认默认参数**仅支持命名参数** `name!: Type = 默认值`；普通参数 `name: Type = 默认值` 非法（改用 arity 重载，保留位置式 `connType: X` 调用）。`spawn` 为关键字表达式 `spawn { => ... }` 而非函数调用。
+
+### 测试
+
+- **`examples/signal_smoke` 无头冒烟测试（offscreen）phase1~8 全 PASS**：替换式连接、真断开（`ΔcountB==0`）、按钮 `pressed` 句柄 `connect→disconnect→重连`（isConnected true→false→true）、P1c 捕获闭包驱动、P2 自定义信号 void/int/double/string 正确派发 + 跨线程 `QueuedConnection` 接收=5（GUI 线程收满后本线程 `QApp.quit()`）。
+- **`tests` 包编译**：修复预存 `pen_test.cj`（`QPen(color,5)` 构造不存在）、`lifecycle_test.cj`（`QColor(i,i*2,i*3)` Int64/Int32 不匹配）编译错误，`cjpm test` 现可编译全部测试模块（运行时 `TOTAL:0` 为预存框架发现机制问题，与信号改动无关）。
+
+### 文档
+
+- `docs/internal/SIGNAL-SLOT-REVIEW.md`：全面更新架构现状 / 已修复 / 运行时验证（phase1~8）/ 仍待推进，P0/P1/P2 结论与代码一致。
+
+---
+
 ## [1.4.0] - 2026-07-24
 
 ### 新增

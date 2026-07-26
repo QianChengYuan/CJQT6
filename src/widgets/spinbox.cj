@@ -334,6 +334,11 @@ public class QSpinBox <: QtResource {
         }
     }
     
+    /// 断开该数值框的全部信号（valueChanged）
+    public func disconnect(): Unit {
+        disconnectValueChanged()
+    }
+    
     /// 获取原生指针
     public func getPtr(): Int64 {
         return ptr

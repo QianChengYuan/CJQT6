@@ -1,0 +1,14 @@
+[package]
+  cjc-version = "1.1.0"
+  name = "signal_smoke"
+  description = "CJQT6 信号桥接 P0 修复 无头冒烟测试"
+  version = "1.0.0"
+  target-dir = ""
+  output-type = "executable"
+  compile-option = ""
+  override-compile-option = ""
+  link-option = "-L../../releases/windows-x64 -lcjqt6_bridge"
+  package-configuration = {}
+
+[dependencies]
+  cjqt6 = { path = "../../" }

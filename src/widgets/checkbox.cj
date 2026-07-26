@@ -160,6 +160,11 @@ public class QCheckBox <: QtResource {
         }
     }
     
+    /// 断开该复选框的全部信号（stateChanged）
+    public func disconnect(): Unit {
+        disconnectStateChanged()
+    }
+    
     /// 设置三态勾选状态（使用 CheckState 常量）
     public func setCheckState(state: Int32) {
         checkValid()

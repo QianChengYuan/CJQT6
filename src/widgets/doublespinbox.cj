@@ -259,6 +259,11 @@ public class QDoubleSpinBox {
         }
     }
     
+    /// 断开该双精度数值框的全部信号（valueChanged）
+    public func disconnect(): Unit {
+        disconnectValueChanged()
+    }
+    
     /// 获取对象指针
     public func getPtr(): Int64 {
         return ptr

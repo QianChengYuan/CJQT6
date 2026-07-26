@@ -472,6 +472,11 @@ public class QTabWidget <: QtResource {
         }
     }
     
+    /// 断开该标签控件的全部信号（currentChanged）
+    public func disconnect(): Unit {
+        disconnectCurrentChanged()
+    }
+    
     /// 设置启用/禁用
     public func setEnabled(enabled: Bool) {
         checkValid()

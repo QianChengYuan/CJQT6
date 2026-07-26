@@ -18,6 +18,10 @@ foreign func qLineEditConnectReturnPressed(ptr: Int64, callback: VoidCallback): 
 foreign func qLineEditDisconnectReturnPressed(ptr: Int64): Unit
 foreign func qLineEditConnectEditingFinished(ptr: Int64, callback: VoidCallback): Unit
 foreign func qLineEditDisconnectEditingFinished(ptr: Int64): Unit
+
+// P1c：闭包捕获 id 版连接（native 仅保存 id，信号触发时回调顶层调度器）
+foreign func qLineEditConnectReturnPressedId(ptr: Int64, id: Int64): Unit
+foreign func qLineEditConnectEditingFinishedId(ptr: Int64, id: Int64): Unit
 foreign func qLineEditAddPasswordToggleAction(ptr: Int64, callback: VoidCallback): Unit
 foreign func qLineEditSetPasswordToggleIcon(ptr: Int64, visible: Bool): Unit
 foreign func qLineEditSetInputMask(ptr: Int64, mask: CString): Unit
@@ -204,6 +208,16 @@ public class QLineEdit <: QtResource {
             qLineEditConnectReturnPressed(ptr, callback)
         }
     }
+
+    /// 设置回车键按下回调（可捕获局部变量；P1c 闭包捕获），返回 SignalConnection 句柄
+    public func setOnReturnPressedCapture(callback: () -> Unit): SignalConnection {
+        checkValid()
+        let id = registerVoidCallback(callback)
+        unsafe {
+            qLineEditConnectReturnPressedId(ptr, id)
+        }
+        return SignalConnection.createCapturing(ptr, SIGNAL_RETURN_PRESSED, WIDGET_TYPE_LINEEDIT, id)
+    }
     
     /// 断开回车键按下回调
     public func disconnectReturnPressed(): Unit {
@@ -221,6 +235,16 @@ public class QLineEdit <: QtResource {
             qLineEditConnectEditingFinished(ptr, callback)
         }
     }
+
+    /// 设置编辑完成回调（可捕获局部变量；P1c 闭包捕获），返回 SignalConnection 句柄
+    public func setOnEditingFinishedCapture(callback: () -> Unit): SignalConnection {
+        checkValid()
+        let id = registerVoidCallback(callback)
+        unsafe {
+            qLineEditConnectEditingFinishedId(ptr, id)
+        }
+        return SignalConnection.createCapturing(ptr, SIGNAL_EDITING_FINISHED, WIDGET_TYPE_LINEEDIT, id)
+    }
     
     /// 断开编辑完成回调
     public func disconnectEditingFinished(): Unit {
@@ -229,6 +253,13 @@ public class QLineEdit <: QtResource {
                 qLineEditDisconnectEditingFinished(ptr)
             }
         }
+    }
+    
+    /// 断开该输入框的全部信号（textChanged/returnPressed/editingFinished）
+    public func disconnect(): Unit {
+        disconnectTextChanged()
+        disconnectReturnPressed()
+        disconnectEditingFinished()
     }
     
     /// 添加密码可见性切换按钮到输入框右侧

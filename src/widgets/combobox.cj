@@ -428,6 +428,12 @@ public class QComboBox <: QtResource {
         }
     }
     
+    /// 断开该组合框的全部信号（currentIndexChanged/currentTextChanged）
+    public func disconnect(): Unit {
+        disconnectCurrentIndexChanged()
+        disconnectCurrentTextChanged()
+    }
+    
     /// 获取对象指针
     public func getPtr(): Int64 {
         return ptr

@@ -22,6 +22,14 @@ foreign func qToolButtonToolButtonStyle(ptr: Int64): Int32
 foreign func qToolButtonConnectPressed(ptr: Int64, callback: VoidCallback): Unit
 foreign func qToolButtonConnectReleased(ptr: Int64, callback: VoidCallback): Unit
 foreign func qToolButtonConnectClickedChecked(ptr: Int64, callback: Int32Callback): Unit
+foreign func qToolButtonDisconnectPressed(ptr: Int64): Unit
+foreign func qToolButtonDisconnectReleased(ptr: Int64): Unit
+foreign func qToolButtonDisconnectClickedChecked(ptr: Int64): Unit
+
+// P1c：闭包捕获 id 版连接（native 仅保存 id，信号触发时回调顶层调度器）
+foreign func qToolButtonConnectClickedId(ptr: Int64, id: Int64): Unit
+foreign func qToolButtonConnectPressedId(ptr: Int64, id: Int64): Unit
+foreign func qToolButtonConnectReleasedId(ptr: Int64, id: Int64): Unit
 
 /// 工具按钮样式
 public const ToolButtonIconOnly: Int32 = 0        // 只显示图标
@@ -178,6 +186,15 @@ public class QToolButton {
             qToolButtonConnectClicked(ptr, callback)
         }
     }
+
+    /// 设置点击回调（可捕获局部变量；P1c 闭包捕获），返回 SignalConnection 句柄
+    public func setOnClickCapture(callback: () -> Unit): SignalConnection {
+        let id = registerVoidCallback(callback)
+        unsafe {
+            qToolButtonConnectClickedId(ptr, id)
+        }
+        return SignalConnection.createCapturing(ptr, SIGNAL_CLICKED, WIDGET_TYPE_TOOL_BUTTON, id)
+    }
     
     /// 断开点击信号
     public func disconnectClicked() {
@@ -209,25 +226,81 @@ public class QToolButton {
         }
     }
     
-    /// 按下回调
-    public func setOnPressed(callback: VoidCallback) {
+    /// 按下回调，返回 SignalConnection 句柄（可 disconnect）
+    public func setOnPressed(callback: VoidCallback): SignalConnection {
         unsafe {
             qToolButtonConnectPressed(ptr, callback)
         }
+        return SignalConnection.createWithWidgetType(ptr, SIGNAL_PRESSED, WIDGET_TYPE_TOOL_BUTTON)
+    }
+
+    /// 按下回调（可捕获局部变量；P1c 闭包捕获），返回 SignalConnection 句柄
+    public func setOnPressedCapture(callback: () -> Unit): SignalConnection {
+        let id = registerVoidCallback(callback)
+        unsafe {
+            qToolButtonConnectPressedId(ptr, id)
+        }
+        return SignalConnection.createCapturing(ptr, SIGNAL_PRESSED, WIDGET_TYPE_TOOL_BUTTON, id)
     }
     
-    /// 释放回调
-    public func setOnReleased(callback: VoidCallback) {
+    /// 断开按下信号
+    public func disconnectPressed(): Unit {
+        if (ptr != 0) {
+            unsafe {
+                qToolButtonDisconnectPressed(ptr)
+            }
+        }
+    }
+    
+    /// 释放回调，返回 SignalConnection 句柄
+    public func setOnReleased(callback: VoidCallback): SignalConnection {
         unsafe {
             qToolButtonConnectReleased(ptr, callback)
         }
+        return SignalConnection.createWithWidgetType(ptr, SIGNAL_RELEASED, WIDGET_TYPE_TOOL_BUTTON)
+    }
+
+    /// 释放回调（可捕获局部变量；P1c 闭包捕获），返回 SignalConnection 句柄
+    public func setOnReleasedCapture(callback: () -> Unit): SignalConnection {
+        let id = registerVoidCallback(callback)
+        unsafe {
+            qToolButtonConnectReleasedId(ptr, id)
+        }
+        return SignalConnection.createCapturing(ptr, SIGNAL_RELEASED, WIDGET_TYPE_TOOL_BUTTON, id)
     }
     
-    /// 点击回调（带 checked 状态，0/1）
-    public func setOnClickedChecked(callback: Int32Callback) {
+    /// 断开释放信号
+    public func disconnectReleased(): Unit {
+        if (ptr != 0) {
+            unsafe {
+                qToolButtonDisconnectReleased(ptr)
+            }
+        }
+    }
+    
+    /// 点击回调（带 checked 状态，0/1），返回 SignalConnection 句柄
+    public func setOnClickedChecked(callback: Int32Callback): SignalConnection {
         unsafe {
             qToolButtonConnectClickedChecked(ptr, callback)
         }
+        return SignalConnection.createWithWidgetType(ptr, SIGNAL_CLICKED_CHECKED, WIDGET_TYPE_TOOL_BUTTON)
+    }
+    
+    /// 断开带 checked 的点击信号
+    public func disconnectClickedChecked(): Unit {
+        if (ptr != 0) {
+            unsafe {
+                qToolButtonDisconnectClickedChecked(ptr)
+            }
+        }
+    }
+    
+    /// 断开该工具按钮的全部信号（clicked/pressed/released/clickedChecked）
+    public func disconnect(): Unit {
+        disconnectClicked()
+        disconnectPressed()
+        disconnectReleased()
+        disconnectClickedChecked()
     }
     
     /// 获取对象指针

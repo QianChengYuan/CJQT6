@@ -121,6 +121,11 @@ public class QRadioButton {
         }
     }
     
+    /// 断开该单选按钮的全部信号（toggled）
+    public func disconnect(): Unit {
+        disconnectToggled()
+    }
+    
     /// 设置是否自动互斥（同父容器内自动排他）
     public func setAutoExclusive(autoExclusive: Bool) {
         unsafe {
