@@ -787,8 +787,8 @@ func createPageContainers(): QScrollArea {
     let frameRow = QHBoxLayout()
     frameRow.setSpacing(8)
     let frame1 = QFrame()
-    frame1.setFrameShape(StyledPanel)
-    frame1.setFrameShadow(Raised)
+    frame1.setFrameShape(FrameShape.StyledPanel)
+    frame1.setFrameShadow(FrameShadow.Raised)
     frame1.setLineWidth(2)
     let frame1Layout = QVBoxLayout()
     let frame1Label = QLabel()
@@ -799,8 +799,8 @@ func createPageContainers(): QScrollArea {
     frameRow.addWidget(frame1.getPtr())
 
     let frame2 = QFrame()
-    frame2.setFrameShape(StyledPanel)
-    frame2.setFrameShadow(Sunken)
+    frame2.setFrameShape(FrameShape.StyledPanel)
+    frame2.setFrameShadow(FrameShadow.Sunken)
     frame2.setLineWidth(2)
     let frame2Layout = QVBoxLayout()
     let frame2Label = QLabel()
@@ -812,7 +812,7 @@ func createPageContainers(): QScrollArea {
 
     let frame3 = QFrame()
     frame3.setFrameShape(1)  // Box
-    frame3.setFrameShadow(Plain)
+    frame3.setFrameShadow(FrameShadow.Plain)
     frame3.setLineWidth(1)
     let frame3Layout = QVBoxLayout()
     let frame3Label = QLabel()

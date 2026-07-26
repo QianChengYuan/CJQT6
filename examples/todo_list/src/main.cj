@@ -29,7 +29,7 @@ func refreshList(): Unit {
         tree.clear()
         for (task in gTasks) {
             let item = tree.addTopLevelItem(task)
-            item.setCheckState(0, CheckState.Unchecked)
+            item.setCheckState(0, 0)  // 0 = CheckState.Unchecked (Qt::Unchecked)
         }
         updateTaskCount()
     }
@@ -74,7 +74,7 @@ let onDeleteClick: VoidCallback = { =>
 let onClearCompletedClick: VoidCallback = { =>
     if (let Some(tree) <- gTreeWidget) {
         let newTasks = ArrayList<String>()
-        let checkedValue = CheckState.Checked
+        let checkedValue: Int32 = 2  // 2 = CheckState.Checked (Qt::Checked)
         var i: Int32 = 0
         while (i < Int32(gTasks.size)) {
             let item = tree.topLevelItem(i)
@@ -134,7 +134,7 @@ main(): Int32 {
     // ========== 标题 ==========
     let titleLabel = QLabel()
     titleLabel.setText("待办事项")
-    titleLabel.setAlignment(Alignment.Center)
+    titleLabel.setAlignment(Alignment.Center.value)
     mainLayout.addWidget(titleLabel.getPtr())
     
     // ========== 输入区域 ==========

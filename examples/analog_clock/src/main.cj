@@ -31,7 +31,7 @@ let onPaintCallback: CFunc<(Int64) -> Unit> = { painterPtr: Int64 =>
     let painter = QPainter.fromPtr(painterPtr)
     
     // 设置抗锯齿
-    painter.setRenderHint(RenderHint.Antialiasing)
+    painter.setRenderHint(RenderHint.Antialiasing.value())
     
     // 绘制时钟表盘
     drawClockFace(painter)
@@ -130,7 +130,7 @@ func drawNumbers(painter: QPainter, cx: Int32, cy: Int32, radius: Int32): Unit {
         let y = Float32(cy) + textR * sin(rad)
         
         let numStr = "${i}"
-        painter.drawTextRect(Int32(x) - 10, Int32(y) - 10, 20, 20, TextFlag.AlignCenter, numStr)
+        painter.drawTextRect(Int32(x) - 10, Int32(y) - 10, 20, 20, TextAlignment.Center.value, numStr)
     }
 }
 

@@ -22,7 +22,9 @@ main(): Int32 {
     }
 
     // 最简单的 QML - 使用 QtObject 作为根，不需要 import
-    let qmlCode = """QtObject { property string test: "hello" }"""
+    let qmlCode = """
+QtObject { property string test: "hello" }
+"""
 
     println("加载内联 QML...")
     engine.loadData(qmlCode)

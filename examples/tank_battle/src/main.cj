@@ -610,7 +610,7 @@ public class GameRenderer {
     
     public func render(painterPtr: Int64): Unit {
         let painter = QPainter.fromPtr(painterPtr)
-        painter.setRenderHint(RenderHint.Antialiasing)
+        painter.setRenderHint(RenderHint.Antialiasing.value())
         
         painter.fillRectColor(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, colorBlack)
         
@@ -809,13 +809,13 @@ public class GameRenderer {
         painter.setFont(fontTitle)
         pen.setColor(colorRed)
         painter.setPen(pen)
-        painter.drawTextRect(WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2 - 50, 200, 50, TextFlag.AlignCenter, "游戏结束")
+        painter.drawTextRect(WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2 - 50, 200, 50, TextAlignment.Center.value, "游戏结束")
         
         painter.setFont(fontLarge)
         pen.setColor(colorWhite)
         painter.setPen(pen)
-        painter.drawTextRect(WINDOW_WIDTH / 2 - 80, WINDOW_HEIGHT / 2 + 20, 160, 30, TextFlag.AlignCenter, "最终分数: ${gScore}")
-        painter.drawTextRect(WINDOW_WIDTH / 2 - 80, WINDOW_HEIGHT / 2 + 50, 160, 30, TextFlag.AlignCenter, "按 R 重新开始")
+        painter.drawTextRect(WINDOW_WIDTH / 2 - 80, WINDOW_HEIGHT / 2 + 20, 160, 30, TextAlignment.Center.value, "最终分数: ${gScore}")
+        painter.drawTextRect(WINDOW_WIDTH / 2 - 80, WINDOW_HEIGHT / 2 + 50, 160, 30, TextAlignment.Center.value, "按 R 重新开始")
     }
 }
 

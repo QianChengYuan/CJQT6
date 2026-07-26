@@ -352,7 +352,7 @@ main(): Int32 {
     // ========== 显示屏 ==========
     let displayEdit = QLineEdit()
     displayEdit.setText("0")
-    displayEdit.setAlignment(Alignment.Right)
+    displayEdit.setAlignment(Alignment.Right.value)
     displayEdit.setReadOnly(true)
     displayEdit.setStyleSheet("font-size: 28px; padding: 10px; background-color: #f5f5f5; min-height: 40px;")
     display = displayEdit
