@@ -62,11 +62,9 @@ cjpm --version
 
 ### 步骤一：安装仓颉源码包
 
-CJQT6 通过 GitCode 分发，支持两种方式安装源码：
+CJQT6 通过 GitCode 分发，作为项目依赖安装源码：
 
-**方式 A：作为项目依赖（推荐）**
-
-在项目的 `cjpm.toml` 中添加：
+在项目的 `cjpm.toml` 的 `[dependencies]` 中添加：
 
 ```toml
 [dependencies]
@@ -84,13 +82,13 @@ cjqt6 = { git = "https://gitcode.com/yuan_1992/CJQT6.git", branch = "main" }
 cjqt6 = { git = "https://gitcode.com/yuan_1992/CJQT6.git", commitId = "abc123" }
 ```
 
-**方式 B：全局安装**
+添加后执行以下命令下载依赖：
 
 ```bash
-cjpm install --git "https://gitcode.com/yuan_1992/CJQT6.git" --tag v1.6.0
+cjpm update
 ```
 
-安装后，CJQT6 的仓颉源码和 C++ 桥接源码会被下载到本地缓存。
+CJQT6 的仓颉源码和 C++ 桥接源码会被下载到本地缓存。
 
 ### 步骤二：下载 FFI 桥接库
 
@@ -139,7 +137,32 @@ CJQT6 需要 FFI 桥接库才能调用 Qt6。预编译的桥接库在 GitCode Re
 
 ```bash
 cjpm build
+```
+
+运行前需要确保运行时库路径正确配置：
+
+**运行时 PATH 配置**
+
+`cjpm run` 不会自动添加 CJQT6 的编译产物（`libcjqt6.*.dll`）和桥接库（`cjqt6_bridge.dll`）到系统 PATH。运行前需要手动设置：
+
+```bash
+# Windows PowerShell
+$env:PATH = "target\release\cjqt6;releases\windows-x64;$env:PATH"
 cjpm run
+
+# Linux
+export LD_LIBRARY_PATH=target/release/cjqt6:releases/linux-x64:$LD_LIBRARY_PATH
+cjpm run
+```
+
+或者将桥接库部署到仓颉运行时目录（只需一次，后续无需手动设 PATH）：
+
+```bash
+# Windows PowerShell
+copy releases\windows-x64\cjqt6_bridge.dll <cangjie-sdk>\runtime\lib\windows_x86_64_cjnative\
+
+# Linux
+cp releases/linux-x64/libcjqt6_bridge.so <cangjie-sdk>/runtime/lib/linux_x86_64_cjnative/
 ```
 
 ### 方式二：从源码构建（开发者）
@@ -194,7 +217,7 @@ cjc scripts/verify_install.cj
 ### 1. 创建新项目
 
 ```bash
-cjpm init my-qt-app
+cjpm init --name my-qt-app
 cd my-qt-app
 ```
 
@@ -207,27 +230,29 @@ cd my-qt-app
   version = "1.0.0"
 
 [dependencies]
-  CJQT6 = "1.0.0"
+  cjqt6 = { git = "https://gitcode.com/yuan_1992/CJQT6.git", tag = "v1.6.0" }
 ```
 
 ### 3. 编写代码
 
 创建 `main.cj`:
 ```cangjie
-import CJQT6.core.*
-import CJQT6.widgets.*
+import cjqt6.core.*
+import cjqt6.widgets.*
+import cjqt6.gui.*
 
 main() {
     let app = QApplication()
-    
     let window = QWidget()
-    window.setWindowTitle("我的第一个CJQT6应用")
+    window.setTitle("我的第一个CJQT6应用")
     window.resize(400, 300)
-    
-    let button = QPushButton("点击我", window)
-    button.resize(100, 30)
-    button.move(150, 135)
-    
+
+    let button = QPushButton()
+    button.setText("点击我")
+    let layout = QVBoxLayout()
+    layout.addWidget(button.getPtr())
+    window.setLayout(layout.getPtr())
+
     window.show()
     app.exec()
 }
@@ -237,6 +262,19 @@ main() {
 
 ```bash
 cjpm build
+```
+
+运行前配置运行时库路径：
+
+```powershell
+# Windows PowerShell
+$env:PATH = "target\release\cjqt6;releases\windows-x64;$env:PATH"
+cjpm run
+```
+
+```bash
+# Linux
+export LD_LIBRARY_PATH=target/release/cjqt6:releases/linux-x64:$LD_LIBRARY_PATH
 cjpm run
 ```
 

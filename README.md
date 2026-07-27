@@ -187,16 +187,22 @@ C:\Qt\6.10.3\msvc2022_64\bin\windeployqt.exe main.exe
 ```cangjie
 import cjqt6.core.*
 import cjqt6.widgets.*
+import cjqt6.gui.*
 
 main() {
     let app = QApplication()
     let window = QWidget()
-    window.setWindowTitle("Hello CJQT6")
+    window.setTitle("Hello CJQT6")
     window.resize(400, 300)
-    
-    let label = QLabel("欢迎使用CJQT6!", window)
-    label.setAlignment(QtAlignment.AlignCenter)
-    
+
+    let label = QLabel()
+    label.setText("欢迎使用CJQT6!")
+    label.setAlignment(Alignment.Center.value)
+
+    let layout = QVBoxLayout()
+    layout.addWidget(label.getPtr())
+    window.setLayout(layout.getPtr())
+
     window.show()
     app.exec()
 }
