@@ -43,17 +43,85 @@ export QTDIR=$(brew --prefix qt@6)
 
 ## 安装CJQT6
 
-### 方式一：通过仓颉中心仓安装（推荐）
+> CJQT6 由两部分组成：**仓颉源码包**（通过中心仓安装）+ **FFI 桥接库**（原生编译产物，需单独下载）。
+> 
+> `cjpm bundle` 打包的是源码包，**不包含**编译好的桥接库。桥接库通过 GitCode Releases 分平台分发。
+> 参见[发布指南](PUBLISHING.md#4-ffi-原生库分发说明)了解原因。
+
+### 前置准备
+
+```bash
+# 确认仓颉编译器已安装
+cjpm --version
+
+# 确认 Qt6 已安装（版本 ≥ 6.2）
+# Linux:  qmake6 --version
+# macOS:  qmake --version
+# Windows: echo %QTDIR%
+```
+
+### 步骤一：安装仓颉源码包
 
 ```bash
 # 安装最新版本
-cjpm install CJQT6
-
-# 安装指定版本
-cjpm install CJQT6@1.0.0
+cjpm install cjqt6
 ```
 
-### 方式二：从源码构建
+安装后，CJQT6 的仓颉源码和 C++ 桥接源码会被下载到本地缓存。
+
+### 步骤二：下载 FFI 桥接库
+
+CJQT6 需要 FFI 桥接库才能调用 Qt6。预编译的桥接库在 GitCode Releases 分平台提供：
+
+| 平台 | 下载资源 |
+|------|---------|
+| Windows x86_64 | `cjqt6-bridge-windows-x64.zip` |
+| Linux x86_64 | `cjqt6-bridge-linux-x64.zip` |
+| macOS x86_64 | `cjqt6-bridge-macos-x64.zip` |
+| macOS ARM64 | `cjqt6-bridge-macos-arm64.zip` |
+| Linux ARM64 | `cjqt6-bridge-linux-arm64.zip` |
+
+**下载地址**：https://gitcode.com/yuan_1992/CJQT6/releases
+
+下载对应平台的 zip 包后，解压到项目的 `releases/<platform>/` 目录：
+
+```bash
+# 示例：Windows x64
+# 解压 cjqt6-bridge-windows-x64.zip 到项目根目录
+# 确保 releases/windows-x64/ 下包含:
+#   cjqt6_bridge.dll
+#   cjqt6_bridge.lib
+```
+
+### 步骤三：在项目中使用
+
+在 `cjpm.toml` 中添加依赖并配置链接：
+
+```toml
+[package]
+  name = "my-qt-app"
+  version = "1.0.0"
+  cjc-version = "1.1.0"
+  output-type = "executable"
+
+[dependencies]
+  cjqt6 = "1.4.0"
+
+# Windows MSVC 链接桥接库
+[target.x86_64-pc-windows-msvc]
+  link-option = "releases/windows-x64/cjqt6_bridge.lib"
+```
+
+然后构建：
+
+```bash
+cjpm build
+cjpm run
+```
+
+### 方式二：从源码构建（开发者）
+
+如果需要自行编译桥接库（如修改了 C++ 桥接代码），可以直接克隆完整仓库：
 
 ```bash
 # 克隆仓库
@@ -66,6 +134,8 @@ bash scripts/build-all-platforms.sh
 # 本地安装
 cjpm install --local
 ```
+
+完整的构建说明参见 [构建指南](build-guide.md)。
 
 ## 验证安装
 

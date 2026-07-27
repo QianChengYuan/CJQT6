@@ -21,7 +21,7 @@
   documentation = "https://gitcode.com/yuan_1992/CJQT6/blob/main/README.md"
 
   # 制品标签 / 分类（官方字段，原 [metadata] 内容合并至此）
-  tag      = ["qt", "gui", "ui", "widgets", "ffi", "cross-platform"]
+  tag      = ["qt", "gui", "widgets", "ffi", "cross-platform"]
   category = "gui"
 
   # 编译 / 链接选项

@@ -23,6 +23,8 @@
 #include <QUrl>
 #include <QWidget>
 #include <unordered_map>
+#include <exception>
+#include <cstdio>
 
 // 全局应用程序指针
 static QApplication* g_app = nullptr;
@@ -46,9 +48,24 @@ int64_t qApplicationCreate() {
         // 注释掉软件渲染，尝试使用 OpenGL
         // qputenv("QSG_RHI_BACKEND", "software");
         // qputenv("QT_QUICK_BACKEND", "software");
-        
-        int argc = 0;
-        g_app = new QApplication(argc, nullptr);
+
+        // 注意：QApplication(int&, char**) 不能传 argv=nullptr，否则 Qt 在解析
+        // 命令行/初始化平台插件时可能越界访问 argv[0]，触发 /GS 栈保护
+        // (__fastfail STATUS_FAIL_FAST_FATAL_STACK_BUFFER_OVERRUN = 0xC0000409)。
+        // 必须给出合法的 argv[0]。
+        static int s_argc = 1;
+        static char s_arg0[] = "cjqt6";
+        static char* s_argv[] = { s_arg0, nullptr };
+
+        try {
+            g_app = new QApplication(s_argc, s_argv);
+        } catch (const std::exception& e) {
+            fprintf(stderr, "[cjqt6_bridge] qApplicationCreate failed: %s\n", e.what());
+            g_app = nullptr;
+        } catch (...) {
+            fprintf(stderr, "[cjqt6_bridge] qApplicationCreate failed: unknown C++ exception\n");
+            g_app = nullptr;
+        }
     }
     return reinterpret_cast<int64_t>(g_app);
 }
