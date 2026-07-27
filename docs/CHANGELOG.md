@@ -3,7 +3,8 @@
 
 ### 新增
 
-- **FFI 桥接库分平台发布包**: 新增 `releases/cjqt6-bridge-linux-x64.zip`（`libcjqt6_bridge.so`）和 `releases/cjqt6-bridge-windows-x64.zip`（`cjqt6_bridge.dll` + `cjqt6_bridge.lib`），通过 GitCode Releases 分平台分发，`docs/installation.md` 更新为三步安装流程（中心仓源码 → 下载桥接库 → 项目配置）
+- **FFI 桥接库分平台发布包**: 新增 `releases/cjqt6-bridge-linux-x64.zip`（`libcjqt6_bridge.so`）和 `releases/cjqt6-bridge-windows-x64.zip`（`cjqt6_bridge.dll` + `cjqt6_bridge.lib`），通过 GitCode Releases 分平台分发
+- **Git 依赖安装**: 文档改为推荐 Git 方式安装（`cjpm.toml` 中 `git = "..."`, `tag = "..."`），`docs/installation.md` 更新安装流程（Git 源码 → 下载桥接库 → 项目配置），`docs/PUBLISHING.md` 同步更新分发策略
 
 ### 修复
 

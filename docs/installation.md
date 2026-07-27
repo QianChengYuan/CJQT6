@@ -43,10 +43,10 @@ export QTDIR=$(brew --prefix qt@6)
 
 ## 安装CJQT6
 
-> CJQT6 由两部分组成：**仓颉源码包**（通过中心仓安装）+ **FFI 桥接库**（原生编译产物，需单独下载）。
+> CJQT6 由两部分组成：**仓颉源码包**（通过 GitCode Git 方式安装）+ **FFI 桥接库**（原生编译产物，需单独下载）。
 > 
-> `cjpm bundle` 打包的是源码包，**不包含**编译好的桥接库。桥接库通过 GitCode Releases 分平台分发。
-> 参见[发布指南](PUBLISHING.md#4-ffi-原生库分发说明)了解原因。
+> `cjpm bundle` 打包的源码包 **不包含** 编译好的桥接库。桥接库通过 GitCode Releases 分平台分发。
+> 参见[发布指南](PUBLISHING.md)了解分发策略。
 
 ### 前置准备
 
@@ -62,9 +62,32 @@ cjpm --version
 
 ### 步骤一：安装仓颉源码包
 
+CJQT6 通过 GitCode 分发，支持两种方式安装源码：
+
+**方式 A：作为项目依赖（推荐）**
+
+在项目的 `cjpm.toml` 中添加：
+
+```toml
+[dependencies]
+cjqt6 = { git = "https://gitcode.com/yuan_1992/CJQT6.git", tag = "v1.6.0" }
+```
+
+支持的引用方式（优先级：`commitId` > `tag` > `branch`）：
+
+```toml
+# 固定版本（推荐）
+cjqt6 = { git = "https://gitcode.com/yuan_1992/CJQT6.git", tag = "v1.6.0" }
+# 最新提交
+cjqt6 = { git = "https://gitcode.com/yuan_1992/CJQT6.git", branch = "main" }
+# 指定 commit
+cjqt6 = { git = "https://gitcode.com/yuan_1992/CJQT6.git", commitId = "abc123" }
+```
+
+**方式 B：全局安装**
+
 ```bash
-# 安装最新版本
-cjpm install cjqt6
+cjpm install --git "https://gitcode.com/yuan_1992/CJQT6.git" --tag v1.6.0
 ```
 
 安装后，CJQT6 的仓颉源码和 C++ 桥接源码会被下载到本地缓存。
@@ -105,7 +128,7 @@ CJQT6 需要 FFI 桥接库才能调用 Qt6。预编译的桥接库在 GitCode Re
   output-type = "executable"
 
 [dependencies]
-  cjqt6 = "1.4.0"
+  cjqt6 = { git = "https://gitcode.com/yuan_1992/CJQT6.git", tag = "v1.6.0" }
 
 # Windows MSVC 链接桥接库
 [target.x86_64-pc-windows-msvc]
