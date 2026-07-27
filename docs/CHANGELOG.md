@@ -1,4 +1,29 @@
 ﻿# 更新日志
+## [1.6.0] - 2026-07-27
+
+### 新增
+
+- **FFI 桥接库分平台发布包**: 新增 `releases/cjqt6-bridge-linux-x64.zip`（`libcjqt6_bridge.so`）和 `releases/cjqt6-bridge-windows-x64.zip`（`cjqt6_bridge.dll` + `cjqt6_bridge.lib`），通过 GitCode Releases 分平台分发，`docs/installation.md` 更新为三步安装流程（中心仓源码 → 下载桥接库 → 项目配置）
+
+### 修复
+
+- **QApplication 空指针崩溃**: `bridge_core.cpp` 中 `QApplication` 构造传 `argv=nullptr` 导致 `__fastfail` 栈保护崩溃（`STATUS_FAIL_FAST_FATAL_STACK_BUFFER_OVERRUN`），改为传入合法空参数 `s_argv = {"cjqt6", nullptr}`，并添加 try-catch 异常处理
+
+### 构建
+
+- **Linux x86_64 桥接库**: 在 WSL (Ubuntu 24.04) 下用 GCC 13.3 + Qt6 6.4.2 编译通过，完整链接 Core/Gui/Widgets/Qml/Quick/QuickWidgets/Network/Sql/PrintSupport/Multimedia 模块
+- **Windows 桥接库更新**: `releases/windows-x64/cjqt6_bridge.dll` 重新编译
+
+### 文档
+
+- **双通道安装指南**: `docs/installation.md` 重写安装说明，区分中心仓源码安装与 Releases 桥接库下载
+- **FFI 原生库分发说明**: `docs/PUBLISHING.md` 新增第4节，解释 `cjpm bundle` 不包含 FFI 原生库的原因及双通道分发策略
+
+### 杂项
+
+- **`cjpm.toml`**: 移除 tags 中的冗余标签 "ui"
+- **`cjqt6_bridge.def`**: 删除已废弃的模块定义文件
+
 ## [1.5.0] - 2026-07-25
 
 ### 新增
