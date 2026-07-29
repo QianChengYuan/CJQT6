@@ -37,16 +37,26 @@ if not defined VSVARS (
 )
 
 REM --- Find Qt6 msvc dir ---
-set "QTDIR="
-for %%q in (C:\Qt\6.10.3\msvc2022_64 C:\Qt\6.10.2\msvc2022_64 C:\Qt\6.7.0\msvc2019_64) do (
-    if exist "%%q\bin\Qt6Core.dll" (
-        if not defined QTDIR set "QTDIR=%%q"
+REM 优先使用环境变量 QTDIR（由 rebuild_all.ps1 -QtDir 传入）
+set "QTDIR_FOUND="
+if defined QTDIR (
+    if exist "%QTDIR%\bin\Qt6Core.dll" (
+        set "QTDIR_FOUND=%QTDIR%"
     )
 )
-if not defined QTDIR (
+REM 未设置或无效时尝试常见路径
+if not defined QTDIR_FOUND (
+    for %%q in (C:\Qt\6.10.3\msvc2022_64 C:\Qt\6.10.2\msvc2022_64 C:\Qt\6.7.0\msvc2019_64) do (
+        if exist "%%q\bin\Qt6Core.dll" (
+            if not defined QTDIR_FOUND set "QTDIR_FOUND=%%q"
+        )
+    )
+)
+if not defined QTDIR_FOUND (
     echo ERROR: Qt6 msvc not found
     exit /b 1
 )
+set "QTDIR=%QTDIR_FOUND%"
 echo Qt: %QTDIR%
 
 REM --- Setup MSVC env and build ---

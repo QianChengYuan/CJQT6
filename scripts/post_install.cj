@@ -1,8 +1,6 @@
-#!/usr/bin/env cjc
 // 安装后脚本
 
-import std.os.*
-import std.io.*
+// print/println 是内置函数，无需导入
 
 main() {
     println("执行CJQT6安装后配置...")

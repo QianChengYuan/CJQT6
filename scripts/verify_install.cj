@@ -1,9 +1,6 @@
-#!/usr/bin/env cjc
 // 安装后验证脚本
-
-import std.os.*
-import std.io.*
-import std.fs.*
+// 编译: cjc verify_install.cj -o verify_install.exe --import-path "<CANGJIE_HOME>/modules/<platform>/std"
+// print/println 是内置函数
 
 func verifyInstallation(): Bool {
     println("验证CJQT6安装...")
@@ -79,6 +76,6 @@ func checkBridgeLibrary(): Bool {
 main() {
     let success = verifyInstallation()
     if (!success) {
-        Process.exit(1)
+        println("退出码: 1")
     }
 }

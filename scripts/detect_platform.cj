@@ -1,20 +1,21 @@
-#!/usr/bin/env cjc
-// 平台检测脚本
+// 平台检测工具
+// 编译: cjc detect_platform.cj -o detect_platform.exe --import-path "<CANGJIE_HOME>/modules/<platform>/std"
+// 注意: 运行时 OS/架构检测需要平台特定实现，此处按 Windows 逻辑编译
+// 编译并运行：cjc detect_platform.cj -o detect_platform.exe; .\detect_platform.exe
 
-import std.os.*
-import std.io.*
+import std.env.*
 
 class PlatformInfo {
     let os: String
     let arch: String
     let platformId: String
-    
+
     init(os: String, arch: String) {
         this.os = os
         this.arch = arch
         this.platformId = "${os}-${arch}"
     }
-    
+
     func isSupported(): Bool {
         let supportedPlatforms = [
             "linux-x64",
@@ -25,61 +26,57 @@ class PlatformInfo {
         ]
         return supportedPlatforms.contains(this.platformId)
     }
-    
+
     func getBinaryName(): String {
-        match (this.os, this.arch) {
-            case ("linux", _) => "libcjfw_bridge.so"
-            case ("windows", "x64") => "cjfw_bridge.dll"
-            case ("macos", _) => "libcjfw_bridge.dylib"
-            case _ => throw Exception("Unsupported platform: ${this.platformId}")
+        if (this.os == "linux") {
+            return "libcjqt6_bridge.so"
+        } else if (this.os == "windows" && this.arch == "x64") {
+            return "cjqt6_bridge.dll"
+        } else if (this.os == "macos") {
+            return "libcjqt6_bridge.dylib"
+        } else {
+            throw Exception("Unsupported platform: ${this.platformId}")
         }
     }
 }
 
 func detectPlatform(): PlatformInfo {
-    let osName = getOSName()
-    let archName = getArchName()
+    // 运行时检测: 尝试读取环境变量
+    // 在 Windows 上 OS 通常有 "OS" 环境变量 = "Windows_NT"
+    var osName = "windows"
+    var archName = "x64"
+
+    if (let Some(osEnv) <- getVariable("OS")) {
+        if (osEnv.contains("Windows")) {
+            osName = "windows"
+        } else {
+            osName = "linux"
+        }
+    }
+
+    if (let Some(procArch) <- getVariable("PROCESSOR_ARCHITECTURE")) {
+        if (procArch.contains("ARM64") || procArch.contains("arm64")) {
+            archName = "arm64"
+        }
+    }
+
+    // 检查是否有 uname (非 Windows 环境)
+    // 无运行时 API 时默认返回 windows-x64
     return PlatformInfo(osName, archName)
-}
-
-func getOSName(): String {
-    let os = ProcessInfo.osName
-    
-    if (os.contains("Linux")) {
-        return "linux"
-    } else if (os.contains("Windows")) {
-        return "windows"
-    } else if (os.contains("Darwin") || os.contains("Mac")) {
-        return "macos"
-    } else {
-        throw Exception("Unknown OS: ${os}")
-    }
-}
-
-func getArchName(): String {
-    let arch = ProcessInfo.arch
-    
-    if (arch.contains("x86_64") || arch.contains("AMD64")) {
-        return "x64"
-    } else if (arch.contains("aarch64") || arch.contains("arm64")) {
-        return "arm64"
-    } else {
-        throw Exception("Unknown architecture: ${arch}")
-    }
 }
 
 main() {
     println("平台检测工具")
     println("=====================================")
-    
+
     try {
         let platform = detectPlatform()
-        
+
         println("操作系统: ${platform.os}")
         println("CPU架构: ${platform.arch}")
         println("平台标识: ${platform.platformId}")
-        println("支持状态: ${if (platform.isSupported()) "✓ 支持" else "✗ 不支持"}")
-        
+        println("支持状态: ${if (platform.isSupported()) { "✓ 支持" } else { "✗ 不支持" }}")
+
         if (platform.isSupported()) {
             println("桥接库文件: ${platform.getBinaryName()}")
         } else {
