@@ -83,7 +83,7 @@ void qApplicationQuit() {
     }
 }
 
-void qApplicationDelete(int64_t ptr) {
+void qApplicationDelete(int64_t) {
     // 不删除全局 QApplication
 }
 
@@ -93,18 +93,17 @@ void qApplicationDelete(int64_t ptr) {
 
 int64_t qWidgetCreate() {
     QWidget* widget = new QWidget();
-    qDebug() << "qWidgetCreate, ptr:" << (void*)widget;
     return reinterpret_cast<int64_t>(widget);
 }
 
 void qWidgetShow(int64_t ptr) {
     QWidget* widget = reinterpret_cast<QWidget*>(ptr);
-    qDebug() << "qWidgetShow called, ptr:" << (void*)widget;
     if (widget) {
         widget->show();
         widget->activateWindow();
         widget->raise();
-        qDebug() << "Widget shown, visible:" << widget->isVisible();
+    } else {
+        fprintf(stderr, "[cjqt6_bridge] qWidgetShow ERROR: widget is NULL\n");
     }
 }
 

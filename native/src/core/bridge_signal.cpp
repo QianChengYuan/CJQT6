@@ -29,7 +29,8 @@
 #include <QHash>
 #include <functional>
 #include <unordered_map>
-#include <mutex>
+#include <atomic>
+#include <thread>
 #include <cstdint>
 #include <vector>
 #include <QDebug>
@@ -83,9 +84,21 @@ enum SigId {
     SIG_EMIT_STRING
 };
 
-// 线程安全
-static std::mutex g_callbackMutex;
-#define LOCK_CALLBACKS() std::lock_guard<std::mutex> lock(g_callbackMutex)
+// 线程安全 - atomic_flag spinlock (无 CRT/OS 原始锁依赖，避免 DLL 加载时的死锁)
+static std::atomic_flag g_callbackLock = ATOMIC_FLAG_INIT;
+
+class CallbackSpinLock {
+public:
+    CallbackSpinLock() {
+        while (g_callbackLock.test_and_set(std::memory_order_acquire)) {
+            std::this_thread::yield();
+        }
+    }
+    ~CallbackSpinLock() {
+        g_callbackLock.clear(std::memory_order_release);
+    }
+};
+#define LOCK_CALLBACKS() CallbackSpinLock _lock
 
 // 回调表（按签名分桶，键含信号编号，故各信号互不干扰）
 static std::unordered_map<ConnKey, std::function<void()>>            g_voidCbs;

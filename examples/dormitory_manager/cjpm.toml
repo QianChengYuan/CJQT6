@@ -1,0 +1,18 @@
+[package]
+  cjc-version = "1.1.0"
+  name = "dormitory_manager"
+  description = "CJQT6 宿舍管理系统 - 包含登录管理（宿管与学生）与权限管理"
+  version = "1.0.0"
+  target-dir = ""
+  output-type = "executable"
+  compile-option = ""
+  override-compile-option = ""
+  link-option = "-L../../releases/windows-x64 -lcjqt6_bridge"
+  package-configuration = {}
+
+[dependencies]
+  cjqt6 = { path = "../../" }
+  cjqt6.views = { path = "../../" }
+  cjqt6.sql = { path = "../../" }
+  cjqt6.dialogs = { path = "../../" }
+  cjqt6.menu = { path = "../../" }
