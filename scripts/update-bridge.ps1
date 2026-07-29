@@ -49,7 +49,7 @@ if (-not (Test-Path "$buildDir\CMakeCache.txt")) {
 # ---- Step 2: build ----
 Write-Host "[2/4] 编译 C++ bridge (MSVC 2022)..."
 Push-Location $buildDir
-cmake --build . --config Release 2>&1 | Select-Object -Last 5
+cmake --build . --config Release
 if ($LASTEXITCODE -ne 0) {
     Write-Host "❌ 编译失败" -ForegroundColor Red
     Pop-Location; exit 1
