@@ -53,9 +53,9 @@ if (Test-Path "target") {
 
 # ---- Step 3: rebuild native FFI bridge FIRST (subpackages link against it) ----
 Write-Host "Building native FFI bridge (must precede cjpm build)..."
-# Pass QTDIR to build_bridge.bat if specified
-if ($QtDir) { $env:QTDIR = $QtDir; Write-Host "QtDir: $QtDir" }
-& "cmd.exe" /c "call `"$RootDir\scripts\build_bridge.bat`""
+$updateArgs = @()
+if ($QtDir) { $updateArgs += "-QtDir"; $updateArgs += $QtDir }
+& "$RootDir\scripts\update-bridge.ps1" $updateArgs
 if ($LASTEXITCODE -ne 0) {
     Write-Host "ERROR: bridge build failed"
     exit 1
