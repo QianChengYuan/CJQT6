@@ -278,7 +278,7 @@ CJQT6/
 | 快速入门 | [docs/tutorial/01-quick-start.md](docs/tutorial/01-quick-start.md) | 15分钟入门教程 |
 | API参考 | [docs/api/](docs/api/) | 完整API文档 |
 | 架构设计 | [docs/architecture.md](docs/architecture.md) | 系统架构说明 |
-| 资源管理 | [docs/resource-management.md](docs/resource-management.md) | 内存管理指南 |
+| 资源管理 | [docs/resource/](docs/resource/) | 内存管理指南 |
 | 交叉编译 | [docs/cross-compile.md](docs/cross-compile.md) | 交叉编译说明 |
 
 ## 核心模块

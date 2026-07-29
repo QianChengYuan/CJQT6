@@ -584,23 +584,19 @@ powershell -ExecutionPolicy Bypass -File scripts\rebuild_all.ps1
 cd examples\all_controls_demo
 cjpm run
 ```
-脚本依次执行：清理旧构建 → `cjpm build`（cjqt6 子包）→ 重编原生 bridge（`build_bridge.bat`）→ `cjpm build`（示例）→ `deploy_qt.ps1`（部署 Qt 运行时 + 平台插件 + MSVC CRT + 各依赖 DLL 到 `target/release/bin`）。
+脚本依次执行：清理旧构建 → 重编原生 bridge（调用 `update-bridge.ps1`）→ `cjpm build`（cjqt6 子包）→ `cjpm build`（示例）→ `deploy_qt.ps1`（部署 Qt 运行时 + 平台插件 + MSVC CRT + 各依赖 DLL 到 `target/release/bin`）。
 
-**`scripts/build_bridge.bat` — 仅重编原生 FFI 桥接库（修改 `native/src/**` 后使用）：**
+**`scripts/update-bridge.ps1` — 仅重编原生 FFI 桥接库并同步到 releases（修改 `native/src/**` 后使用）：**
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts\build_bridge.bat
+powershell -ExecutionPolicy Bypass -File scripts\update-bridge.ps1
 ```
-自动探测 `vcvars64.bat` 与已安装的 Qt6 msvc 目录，并将产物同步到 `releases/windows-x64/`。
-
-> ⚠️ **该脚本会删除 `native/build_windows/cjqt6_bridge.dir` 强制全量重编。** 仅删除 `cjqt6_bridge.dll` 只会触发 MSBuild 的增量 *relink*，已打补丁的 `bridge_qml.cpp` 不会被重新编译（stale 的 `.obj` 会被原样打进 DLL）。修改桥接源码后务必全量重编，否则运行时可能报"无法定位程序输入点"。
+自动探测 Qt6 msvc 安装路径（环境变量 `QTDIR` → 常见路径 → 扫描 `C:\Qt\6.*\`），首次运行自动执行 cmake configure，后续跳过已配置缓存，构建后同步产物到 `releases/windows-x64/`。
 
 **`examples/all_controls_demo/deploy_qt.ps1` — 仅部署运行时（示例已 build 后单独补部署）：**
 ```powershell
 cd examples\all_controls_demo
 powershell -ExecutionPolicy Bypass -File deploy_qt.ps1
 ```
-
-> ⚠️ **`.bat` 必须纯 ASCII：** `build_bridge.bat` 的注释必须为英文/ASCII。在中文（GBK）代码页的 `cmd.exe` 下，UTF-8 中文注释会被逐字节误读，导致脚本解析错乱、命令被拆碎。切勿在 `.bat` 中写中文。
 
 ---
 
