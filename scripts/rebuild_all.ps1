@@ -1,16 +1,15 @@
-# rebuild_all.ps1 - rebuild native FFI bridge + CJQT6 subpackages + example
-# Run from CJQT6 root: powershell -ExecutionPolicy Bypass -File scripts\rebuild_all.ps1
+# rebuild_all.ps1 - 完整构建：FFI 桥接库 + CJQT6 子包 + 示例
+# 在 CJQT6 根目录运行: powershell -ExecutionPolicy Bypass -File scripts\rebuild_all.ps1
 #
-# Usage:
-#   .\scripts\rebuild_all.ps1                          # build all_controls_demo (default)
-#   .\scripts\rebuild_all.ps1 -Example dormitory_manager  # build specific example
-#   .\scripts\rebuild_all.ps1 -SkipExample              # skip example build
+# 用法:
+#   .\scripts\rebuild_all.ps1                          # 构建 all_controls_demo（默认）
+#   .\scripts\rebuild_all.ps1 -Example dormitory_manager  # 构建指定示例
+#   .\scripts\rebuild_all.ps1 -SkipExample              # 跳过示例构建
 #
-# IMPORTANT ORDER: the native bridge MUST be rebuilt BEFORE `cjpm build`
-# links the Cangjie subpackages. The subpackage DLLs link against
-# releases/windows-x64/cjqt6_bridge.dll, so any NEW `foreign func qXxx`
-# added to the bindings needs the freshly compiled bridge first, or the
-# link step fails with "undefined symbol: qXxx".
+# 重要顺序: 必须先构建桥接库，再执行 `cjpm build`。
+# 子包的 DLL 链接到 releases/windows-x64/cjqt6_bridge.dll，
+# 新增的任何 `foreign func qXxx` 绑定都需要先编译新桥接库，
+# 否则链接阶段会报 "undefined symbol: qXxx"。
 
 param(
     [string]$Example = "all_controls_demo",
@@ -23,9 +22,9 @@ $ErrorActionPreference = "Stop"
 $RootDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $RootDir = Split-Path -Parent $RootDir
 Set-Location $RootDir
-Write-Host "Working dir: $RootDir"
+Write-Host "工作目录: $RootDir"
 
-# ---- Step 1: find cjpm ----
+# ---- 第1步: 查找 cjpm ----
 $cjpm = Get-Command cjpm -ErrorAction SilentlyContinue
 if (-not $cjpm) {
     $candidates = @(
@@ -37,13 +36,13 @@ if (-not $cjpm) {
     }
 }
 if (-not $cjpm) {
-    Write-Host "ERROR: cjpm not found in PATH"
+    Write-Host "错误: 未在 PATH 中找到 cjpm" -ForegroundColor Red
     exit 1
 }
-Write-Host "cjpm found: $($cjpm.Source)"
+Write-Host "找到 cjpm: $($cjpm.Source)"
 
-# ---- Step 2: clean old build artifacts ----
-Write-Host "Cleaning old builds..."
+# ---- 第2步: 清理旧构建产物 ----
+Write-Host "清理旧构建..."
 if (Test-Path "examples\$Example\target") {
     Remove-Item -Recurse -Force "examples\$Example\target"
 }
@@ -51,41 +50,41 @@ if (Test-Path "target") {
     Remove-Item -Recurse -Force "target"
 }
 
-# ---- Step 3: rebuild native FFI bridge FIRST (subpackages link against it) ----
-Write-Host "Building native FFI bridge (must precede cjpm build)..."
+# ---- 第3步: 先构建原生 FFI 桥接库（子包链接依赖它） ----
+Write-Host "构建原生 FFI 桥接库（必须在 cjpm build 之前）..."
 $updateArgs = @()
 if ($QtDir) { $updateArgs += "-QtDir"; $updateArgs += $QtDir }
 & "$RootDir\scripts\update-bridge.ps1" $updateArgs
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "ERROR: bridge build failed"
+    Write-Host "错误: 桥接库构建失败" -ForegroundColor Red
     exit 1
 }
 
-# ---- Step 4: build cjqt6 subpackages (now links against fresh bridge) ----
-Write-Host "Building cjqt6 subpackages..."
+# ---- 第4步: 构建 cjqt6 子包（链接到新桥接库） ----
+Write-Host "构建 cjqt6 子包..."
 & $cjpm build
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "ERROR: cjpm build failed"
+    Write-Host "错误: cjpm 构建失败" -ForegroundColor Red
     exit 1
 }
 
-# ---- Step 5: build example + deploy Qt ----
+# ---- 第5步: 构建示例 + 部署 Qt ----
 if ($SkipExample) {
-    Write-Host "Skipping example build ( -SkipExample specified )"
+    Write-Host "跳过示例构建（已指定 -SkipExample）"
 } else {
-    Write-Host "Building example $Example..."
+    Write-Host "构建示例 $Example..."
     Set-Location "examples\$Example"
     & $cjpm build
     if ($LASTEXITCODE -ne 0) {
-        Write-Host "ERROR: example build failed"
+        Write-Host "错误: 示例构建失败" -ForegroundColor Red
         exit 1
     }
 
-    # Deploy Qt runtime
+    # 部署 Qt 运行时
     $deployScript = "$RootDir\examples\$Example\deploy_qt.ps1"
     if (Test-Path $deployScript) {
         & $deployScript
     }
 }
 
-Write-Host "DONE. Now run: cjpm run"
+Write-Host "完成。运行: cjpm run"
