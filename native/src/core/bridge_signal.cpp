@@ -170,7 +170,7 @@ void qButtonConnectClicked(int64_t ptr, void (*callback)()) {
                 auto i = g_voidCbs.find(key);
                 if (i != g_voidCbs.end()) cb = i->second;
             }
-            if (cb) cb();
+            if (cb) { try { cb(); } catch (...) {} }
         });
     }
 }
@@ -197,7 +197,7 @@ void qToolButtonConnectClicked(int64_t ptr, void (*callback)()) {
                 auto i = g_voidCbs.find(key);
                 if (i != g_voidCbs.end()) cb = i->second;
             }
-            if (cb) cb();
+            if (cb) { try { cb(); } catch (...) {} }
         });
     }
 }
@@ -224,7 +224,7 @@ void qSliderConnectValueChanged(int64_t ptr, void (*callback)(int32_t)) {
                 auto i = g_int32Cbs.find(key);
                 if (i != g_int32Cbs.end()) cb = i->second;
             }
-            if (cb) cb(static_cast<int32_t>(value));
+            if (cb) { try { cb(static_cast<int32_t>(value)); } catch (...) {} }
         });
     }
 }
@@ -251,7 +251,7 @@ void qSliderConnectSliderMoved(int64_t ptr, void (*callback)(int32_t)) {
                 auto i = g_int32Cbs.find(key);
                 if (i != g_int32Cbs.end()) cb = i->second;
             }
-            if (cb) cb(static_cast<int32_t>(value));
+            if (cb) { try { cb(static_cast<int32_t>(value)); } catch (...) {} }
         });
     }
 }
@@ -278,7 +278,7 @@ void qSpinBoxConnectValueChanged(int64_t ptr, void (*callback)(int32_t)) {
                 auto i = g_int32Cbs.find(key);
                 if (i != g_int32Cbs.end()) cb = i->second;
             }
-            if (cb) cb(static_cast<int32_t>(value));
+            if (cb) { try { cb(static_cast<int32_t>(value)); } catch (...) {} }
         });
     }
 }
@@ -305,7 +305,7 @@ void qDoubleSpinBoxConnectValueChanged(int64_t ptr, void (*callback)(double)) {
                 auto i = g_float64Cbs.find(key);
                 if (i != g_float64Cbs.end()) cb = i->second;
             }
-            if (cb) cb(value);
+            if (cb) { try { cb(value); } catch (...) {} }
         });
     }
 }
@@ -332,7 +332,7 @@ void qDialConnectValueChanged(int64_t ptr, void (*callback)(int32_t)) {
                 auto i = g_int32Cbs.find(key);
                 if (i != g_int32Cbs.end()) cb = i->second;
             }
-            if (cb) cb(static_cast<int32_t>(value));
+            if (cb) { try { cb(static_cast<int32_t>(value)); } catch (...) {} }
         });
     }
 }
@@ -359,7 +359,7 @@ void qCheckBoxConnectStateChanged(int64_t ptr, void (*callback)(int32_t)) {
                 auto i = g_int32Cbs.find(key);
                 if (i != g_int32Cbs.end()) cb = i->second;
             }
-            if (cb) cb(static_cast<int32_t>(state));
+            if (cb) { try { cb(static_cast<int32_t>(state)); } catch (...) {} }
         });
     }
 }
@@ -386,7 +386,7 @@ void qRadioButtonConnectToggled(int64_t ptr, void (*callback)(int32_t)) {
                 auto i = g_int32Cbs.find(key);
                 if (i != g_int32Cbs.end()) cb = i->second;
             }
-            if (cb) cb(checked ? 1 : 0);
+            if (cb) { try { cb(checked ? 1 : 0); } catch (...) {} }
         });
     }
 }
@@ -413,7 +413,7 @@ void qComboBoxConnectCurrentIndexChanged(int64_t ptr, void (*callback)(int32_t))
                 auto i = g_int32Cbs.find(key);
                 if (i != g_int32Cbs.end()) cb = i->second;
             }
-            if (cb) cb(static_cast<int32_t>(index));
+            if (cb) { try { cb(static_cast<int32_t>(index)); } catch (...) {} }
         });
     }
 }
@@ -443,7 +443,7 @@ void qComboBoxConnectCurrentTextChanged(int64_t ptr, void (*callback)(const char
             if (cb) {
                 // P2 生命周期修复：用 std::string 持有，确保回调调用期间 const char* 有效
                 std::string s = text.toUtf8().constData();
-                cb(s.c_str());
+                try { cb(s.c_str()); } catch (...) {}
             }
         });
     }
@@ -474,7 +474,7 @@ void qLineEditConnectTextChanged(int64_t ptr, void (*callback)(const char*)) {
             if (cb) {
                 // P2 生命周期修复：用 std::string 持有，确保回调调用期间 const char* 有效
                 std::string s = text.toUtf8().constData();
-                cb(s.c_str());
+                try { cb(s.c_str()); } catch (...) {}
             }
         });
     }
@@ -502,7 +502,7 @@ void qLineEditConnectReturnPressed(int64_t ptr, void (*callback)()) {
                 auto i = g_voidCbs.find(key);
                 if (i != g_voidCbs.end()) cb = i->second;
             }
-            if (cb) cb();
+            if (cb) { try { cb(); } catch (...) {} }
         });
     }
 }
@@ -529,7 +529,7 @@ void qLineEditConnectEditingFinished(int64_t ptr, void (*callback)()) {
                 auto i = g_voidCbs.find(key);
                 if (i != g_voidCbs.end()) cb = i->second;
             }
-            if (cb) cb();
+            if (cb) { try { cb(); } catch (...) {} }
         });
     }
 }
@@ -587,7 +587,7 @@ void qActionConnectTriggered(int64_t ptr, void (*callback)()) {
                 auto i = g_voidCbs.find(key);
                 if (i != g_voidCbs.end()) cb = i->second;
             }
-            if (cb) cb();
+            if (cb) { try { cb(); } catch (...) {} }
         });
     }
 }
@@ -614,7 +614,7 @@ void qWidgetConnectDestroyed(int64_t ptr, void (*callback)()) {
                 auto i = g_voidCbs.find(key);
                 if (i != g_voidCbs.end()) cb = i->second;
             }
-            if (cb) cb();
+            if (cb) { try { cb(); } catch (...) {} }
         });
     }
 }
@@ -803,7 +803,7 @@ void qEmitterConnectVoid(int64_t ptr, void (*callback)(), int32_t connType) {
                 auto i = g_voidCbs.find(key);
                 if (i != g_voidCbs.end()) cb = i->second;
             }
-            if (cb) cb();
+            if (cb) { try { cb(); } catch (...) {} }
         }, (Qt::ConnectionType)connType);
     }
 }
@@ -836,7 +836,7 @@ void qEmitterConnectInt(int64_t ptr, void (*callback)(int32_t), int32_t connType
                 auto i = g_int32Cbs.find(key);
                 if (i != g_int32Cbs.end()) cb = i->second;
             }
-            if (cb) cb((int32_t)v);
+            if (cb) { try { cb((int32_t)v); } catch (...) {} }
         }, (Qt::ConnectionType)connType);
     }
 }
@@ -855,7 +855,7 @@ void qEmitterConnectDouble(int64_t ptr, void (*callback)(double), int32_t connTy
                 auto i = g_float64Cbs.find(key);
                 if (i != g_float64Cbs.end()) cb = i->second;
             }
-            if (cb) cb(v);
+            if (cb) { try { cb(v); } catch (...) {} }
         }, (Qt::ConnectionType)connType);
     }
 }
@@ -878,7 +878,7 @@ void qEmitterConnectString(int64_t ptr, void (*callback)(const char*), int32_t c
                 if (cb) {
                     // P2 生命周期修复：用 std::string 持有，确保回调调用期间 const char* 有效
                     std::string s = text.toUtf8().constData();
-                    cb(s.c_str());
+                    try { cb(s.c_str()); } catch (...) {}
                 }
             }, (Qt::ConnectionType)connType);
     }

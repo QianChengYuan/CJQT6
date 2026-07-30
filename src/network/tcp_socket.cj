@@ -57,13 +57,18 @@ public class SocketError {
 
 /// TCP套接字
 /// 提供TCP客户端功能，支持连接、读写、断开等操作
-public class QTcpSocket {
+/// 支持资源管理，可使用 try-with-resources 自动释放
+public class QTcpSocket <: QtResource {
     private var ptr: Int64 = 0
+    private var closed: Bool = false
     
     /// 创建TCP套接字
     public init() {
         unsafe {
             ptr = qTcpSocketCreate()
+            if (ptr == 0) {
+                throw CreateFailedException("QTcpSocket 创建失败")
+            }
         }
     }
     
@@ -71,6 +76,7 @@ public class QTcpSocket {
     /// host: 主机地址（IP或域名）
     /// port: 端口号
     public func connectToHost(host: String, port: UInt16): Unit {
+        checkValid()
         unsafe {
             let cstr = LibC.mallocCString(host)
             qTcpSocketConnectToHost(ptr, cstr, port)
@@ -80,14 +86,24 @@ public class QTcpSocket {
     
     /// 断开连接
     public func disconnectFromHost(): Unit {
+        checkValid()
         unsafe {
             qTcpSocketDisconnectFromHost(ptr)
+        }
+    }
+    
+    /// 立即关闭套接字连接（不等待数据传输完成）
+    public func abort(): Unit {
+        checkValid()
+        unsafe {
+            qTcpSocketClose(ptr)
         }
     }
     
     /// 写入数据
     /// 返回实际写入的字节数，-1表示错误
     public func write(data: Array<Byte>): Int64 {
+        checkValid()
         unsafe {
             var handle = acquireArrayRawData(data)
             let result = qTcpSocketWrite(ptr, CPointer<Int8>(handle.pointer), Int64(data.size))
@@ -98,6 +114,7 @@ public class QTcpSocket {
     
     /// 写入字符串数据
     public func writeString(text: String): Int64 {
+        checkValid()
         let bytes = text.toArray()
         return write(bytes)
     }
@@ -106,6 +123,7 @@ public class QTcpSocket {
     /// maxSize: 最大读取字节数
     /// 返回读取到的字节数组
     public func read(maxSize: Int64): Array<Byte> {
+        checkValid()
         unsafe {
             let buffer = LibC.malloc<Byte>(count: maxSize)
             let size = qTcpSocketRead(ptr, CPointer<Int8>(buffer), maxSize)
@@ -125,6 +143,7 @@ public class QTcpSocket {
     
     /// 读取所有可用数据
     public func readAll(): Array<Byte> {
+        checkValid()
         let available = bytesAvailable()
         if (available <= 0) {
             return []
@@ -134,12 +153,14 @@ public class QTcpSocket {
     
     /// 读取为字符串
     public func readString(maxSize: Int64): String {
+        checkValid()
         let bytes = read(maxSize)
         return String.fromUtf8(bytes)
     }
     
     /// 可读取字节数
     public func bytesAvailable(): Int64 {
+        checkValid()
         unsafe {
             return qTcpSocketBytesAvailable(ptr)
         }
@@ -147,6 +168,7 @@ public class QTcpSocket {
     
     /// 待写入字节数
     public func bytesToWrite(): Int64 {
+        checkValid()
         unsafe {
             return qTcpSocketBytesToWrite(ptr)
         }
@@ -154,6 +176,7 @@ public class QTcpSocket {
     
     /// 刷新缓冲区
     public func flush(): Bool {
+        checkValid()
         unsafe {
             return qTcpSocketFlush(ptr)
         }
@@ -161,6 +184,7 @@ public class QTcpSocket {
     
     /// 是否到达末尾
     public func atEnd(): Bool {
+        checkValid()
         unsafe {
             return qTcpSocketAtEnd(ptr)
         }
@@ -168,6 +192,7 @@ public class QTcpSocket {
     
     /// 获取套接字状态
     public func state(): Int32 {
+        checkValid()
         unsafe {
             return qTcpSocketState(ptr)
         }
@@ -175,6 +200,7 @@ public class QTcpSocket {
     
     /// 获取错误码
     public func error(): Int32 {
+        checkValid()
         unsafe {
             return qTcpSocketError(ptr)
         }
@@ -182,28 +208,24 @@ public class QTcpSocket {
     
     /// 获取错误描述
     public func errorString(): String {
+        checkValid()
         unsafe {
             let cstr = qTcpSocketErrorString(ptr)
             return cstr.toString()
         }
     }
     
-    /// 是否有效
-    public func isValid(): Bool {
+    /// Qt资源管理：检查底层套接字是否有效
+    public func isSocketValid(): Bool {
+        checkValid()
         unsafe {
             return qTcpSocketIsValid(ptr)
         }
     }
     
-    /// 关闭套接字
-    public func close(): Unit {
-        unsafe {
-            qTcpSocketClose(ptr)
-        }
-    }
-    
     /// 设置连接成功回调
     public func setOnConnected(callback: VoidCallback): Unit {
+        checkValid()
         unsafe {
             qTcpSocketConnectConnected(ptr, callback)
         }
@@ -211,6 +233,7 @@ public class QTcpSocket {
     
     /// 设置断开连接回调
     public func setOnDisconnected(callback: VoidCallback): Unit {
+        checkValid()
         unsafe {
             qTcpSocketConnectDisconnected(ptr, callback)
         }
@@ -218,6 +241,7 @@ public class QTcpSocket {
     
     /// 设置数据就绪回调
     public func setOnReadyRead(callback: VoidCallback): Unit {
+        checkValid()
         unsafe {
             qTcpSocketConnectReadyRead(ptr, callback)
         }
@@ -225,6 +249,7 @@ public class QTcpSocket {
     
     /// 设置错误回调
     public func setOnError(callback: VoidCallback): Unit {
+        checkValid()
         unsafe {
             qTcpSocketConnectError(ptr, callback)
         }
@@ -232,6 +257,7 @@ public class QTcpSocket {
     
     /// 断开所有信号连接
     public func disconnectCallbacks(): Unit {
+        checkValid()
         unsafe {
             qTcpSocketDisconnectCallbacks(ptr)
         }
@@ -242,14 +268,41 @@ public class QTcpSocket {
         return ptr
     }
     
-    /// 删除套接字
-    public func delete(): Unit {
-        if (ptr != 0) {
+    /// 是否已关闭（资源已释放）
+    public func isClosed(): Bool {
+        return closed
+    }
+    
+    /// 检查对象有效性（未关闭且指针有效）
+    public func isValid(): Bool {
+        return !closed && ptr != 0
+    }
+    
+    /// 检查有效性，无效时抛出异常
+    public func checkValid(): Unit {
+        if (closed) {
+            throw ResourceDisposedException("QTcpSocket 已经被释放")
+        }
+        if (ptr == 0) {
+            throw NullPointerException("QTcpSocket 指针为空")
+        }
+    }
+    
+    /// 关闭资源，释放Qt对象
+    public func close(): Unit {
+        if (!closed && ptr != 0) {
             unsafe {
+                qTcpSocketClose(ptr)
                 qTcpSocketDisconnectCallbacks(ptr)
                 qTcpSocketDelete(ptr)
             }
+            closed = true
             ptr = 0
         }
+    }
+    
+    /// 删除套接字（兼容旧API）
+    public func delete(): Unit {
+        close()
     }
 }

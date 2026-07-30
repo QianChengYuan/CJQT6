@@ -1,5 +1,7 @@
 package cjqt6.dialogs
 
+import cjqt6.core.*
+
 // ============================================================
 // 对话框 FFI声明
 // ============================================================
@@ -388,8 +390,11 @@ foreign func qProgressDialogHide(ptr: Int64): Unit
 foreign func qProgressDialogCancel(ptr: Int64): Unit
 foreign func qProgressDialogReset(ptr: Int64): Unit
 
-public class QProgressDialog {
-    private let ptr: Int64
+/// 进度对话框
+/// 支持资源管理，可使用 try-with-resources 自动释放
+public class QProgressDialog <: QtResource {
+    private var ptr: Int64 = 0
+    private var closed: Bool = false
     
     public init(parent: Int64, labelText: String, cancelButtonText: String, minimum: Int32, maximum: Int32) {
         unsafe {
@@ -398,34 +403,42 @@ public class QProgressDialog {
             ptr = qProgressDialogCreate(parent, labelCstr, cancelCstr, minimum, maximum)
             LibC.free(labelCstr)
             LibC.free(cancelCstr)
+            if (ptr == 0) {
+                throw CreateFailedException("QProgressDialog 创建失败")
+            }
         }
     }
     
     public func setValue(value: Int32) {
+        checkValid()
         unsafe {
             qProgressDialogSetValue(ptr, value)
         }
     }
     
     public func value(): Int32 {
+        checkValid()
         unsafe {
             qProgressDialogValue(ptr)
         }
     }
     
     public func setMinimum(minimum: Int32) {
+        checkValid()
         unsafe {
             qProgressDialogSetMinimum(ptr, minimum)
         }
     }
     
     public func setMaximum(maximum: Int32) {
+        checkValid()
         unsafe {
             qProgressDialogSetMaximum(ptr, maximum)
         }
     }
     
     public func setLabelText(text: String) {
+        checkValid()
         unsafe {
             var cstr = LibC.mallocCString(text)
             qProgressDialogSetLabelText(ptr, cstr)
@@ -434,6 +447,7 @@ public class QProgressDialog {
     }
     
     public func setCancelButtonText(text: String) {
+        checkValid()
         unsafe {
             var cstr = LibC.mallocCString(text)
             qProgressDialogSetCancelButtonText(ptr, cstr)
@@ -442,6 +456,7 @@ public class QProgressDialog {
     }
     
     public func setWindowTitle(title: String) {
+        checkValid()
         unsafe {
             var cstr = LibC.mallocCString(title)
             qProgressDialogSetWindowTitle(ptr, cstr)
@@ -450,53 +465,89 @@ public class QProgressDialog {
     }
     
     public func setAutoClose(autoClose: Bool) {
+        checkValid()
         unsafe {
             qProgressDialogSetAutoClose(ptr, (if (autoClose) { 1 } else { 0 }))
         }
     }
     
     public func setAutoReset(autoReset: Bool) {
+        checkValid()
         unsafe {
             qProgressDialogSetAutoReset(ptr, (if (autoReset) { 1 } else { 0 }))
         }
     }
     
     public func wasCanceled(): Bool {
+        checkValid()
         unsafe {
             qProgressDialogWasCanceled(ptr) == 1
         }
     }
     
     public func show() {
+        checkValid()
         unsafe {
             qProgressDialogShow(ptr)
         }
     }
     
     public func hide() {
+        checkValid()
         unsafe {
             qProgressDialogHide(ptr)
         }
     }
     
     public func cancel() {
+        checkValid()
         unsafe {
             qProgressDialogCancel(ptr)
         }
     }
     
     public func reset() {
+        checkValid()
         unsafe {
             qProgressDialogReset(ptr)
         }
     }
     
-    public func delete() {
-        if (ptr != 0) {
+    public func getPtr(): Int64 {
+        return ptr
+    }
+    
+    public func isClosed(): Bool {
+        return closed
+    }
+    
+    public func isValid(): Bool {
+        return !closed && ptr != 0
+    }
+    
+    public func checkValid(): Unit {
+        if (closed) {
+            throw ResourceDisposedException("QProgressDialog 已经被释放")
+        }
+        if (ptr == 0) {
+            throw NullPointerException("QProgressDialog 指针为空")
+        }
+    }
+    
+    /// 关闭资源，释放Qt对象
+    public func close(): Unit {
+        if (!closed && ptr != 0) {
             unsafe {
                 qProgressDialogDelete(ptr)
             }
+            closed = true
+            ptr = 0
         }
+    }
+    
+    /// 删除进度对话框（兼容旧API）
+    public func delete(): Unit {
+        close()
     }
 }
 

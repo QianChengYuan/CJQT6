@@ -1,7 +1,7 @@
 
 /**
  * @file bridge_widgets.cpp
- * @brief »ù´¡²¿¼þÇÅ½Óº¯Êý - QLabel, QPushButton, QToolButton, QLineEdit, QTextEdit
+ * @brief ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å½Óºï¿½ï¿½ï¿½ - QLabel, QPushButton, QToolButton, QLineEdit, QTextEdit
  */
 
 #include <QLabel>
@@ -40,17 +40,17 @@
 #include <functional>
 #include <unordered_map>
 
-// Íâ²¿»Øµ÷Ó³ÉäÉùÃ÷
+// ï¿½â²¿ï¿½Øµï¿½Ó³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 extern std::unordered_map<int64_t, std::function<void(int64_t)>> g_buttonCallbacks;
 extern std::unordered_map<int64_t, std::function<void(int64_t)>> g_lineEditCallbacks;
 
-// ÎÄ±¾±ä»¯»Øµ÷Ó³Éä
+// ï¿½Ä±ï¿½ï¿½ä»¯ï¿½Øµï¿½Ó³ï¿½ï¿½
 static std::unordered_map<int64_t, std::function<void(int64_t)>> g_textChangedCallbacks;
 
 extern "C" {
 
 // ============================================================
-// QLabel ÇÅ½Óº¯Êý
+// QLabel ï¿½Å½Óºï¿½ï¿½ï¿½
 // ============================================================
 
 int64_t qLabelCreate() {
@@ -105,7 +105,7 @@ void qLabelDelete(int64_t ptr) {
 }
 
 // ============================================================
-// QPushButton ÇÅ½Óº¯Êý
+// QPushButton ï¿½Å½Óºï¿½ï¿½ï¿½
 // ============================================================
 
 int64_t qButtonCreate() {
@@ -143,7 +143,7 @@ void qButtonSetOnClick(int64_t ptr, void (*callback)(int64_t)) {
     }
 }
 
-// ÉèÖÃ°´Å¥Í¼±ê£¨´ÓÎÄ¼þÂ·¾¶£©
+// ï¿½ï¿½ï¿½Ã°ï¿½Å¥Í¼ï¿½ê£¨ï¿½ï¿½ï¿½Ä¼ï¿½Â·ï¿½ï¿½ï¿½ï¿½
 void qButtonSetIcon(int64_t ptr, const char* iconPath) {
     QPushButton* button = reinterpret_cast<QPushButton*>(ptr);
     if (button && iconPath) {
@@ -152,7 +152,7 @@ void qButtonSetIcon(int64_t ptr, const char* iconPath) {
     }
 }
 
-// ÉèÖÃ°´Å¥Í¼±ê´óÐ¡
+// ï¿½ï¿½ï¿½Ã°ï¿½Å¥Í¼ï¿½ï¿½ï¿½Ð¡
 void qButtonSetIconSize(int64_t ptr, int32_t width, int32_t height) {
     QPushButton* button = reinterpret_cast<QPushButton*>(ptr);
     if (button) {
@@ -160,7 +160,7 @@ void qButtonSetIconSize(int64_t ptr, int32_t width, int32_t height) {
     }
 }
 
-// ÉèÖÃ°´Å¥Ê¹ÓÃ Qt ±ê×¼Í¼±ê
+// ï¿½ï¿½ï¿½Ã°ï¿½Å¥Ê¹ï¿½ï¿½ Qt ï¿½ï¿½×¼Í¼ï¿½ï¿½
 void qButtonSetStandardIcon(int64_t ptr, int32_t iconType) {
     QPushButton* button = reinterpret_cast<QPushButton*>(ptr);
     if (button) {
@@ -228,7 +228,7 @@ void qButtonDelete(int64_t ptr) {
 }
 
 // ============================================================
-// QToolButton ÇÅ½Óº¯Êý
+// QToolButton ï¿½Å½Óºï¿½ï¿½ï¿½
 // ============================================================
 
 int64_t qToolButtonCreate() {
@@ -317,7 +317,7 @@ void qToolButtonDelete(int64_t ptr) {
 }
 
 // ============================================================
-// QLineEdit ÇÅ½Óº¯Êý
+// QLineEdit ï¿½Å½Óºï¿½ï¿½ï¿½
 // ============================================================
 
 int64_t qLineEditCreate() {
@@ -334,12 +334,11 @@ void qLineEditSetText(int64_t ptr, const char* text) {
 
 const char* qLineEditText(int64_t ptr) {
     QLineEdit* lineEdit = reinterpret_cast<QLineEdit*>(ptr);
-    if (lineEdit) {
-        static QString text;
-        text = lineEdit->text();
-        return text.toUtf8().constData();
-    }
-    return "";
+    if (!lineEdit) return nullptr;
+    QByteArray arr = lineEdit->text().toUtf8();
+    char* result = (char*)malloc(arr.size() + 1);
+    if (result) memcpy(result, arr.constData(), arr.size() + 1);
+    return result;
 }
 
 void qLineEditSetPlaceholder(int64_t ptr, const char* text) {
@@ -391,21 +390,21 @@ void qLineEditSetOnTextChanged(int64_t ptr, void (*callback)(int64_t)) {
     }
 }
 
-// ÃÜÂë¿É¼ûÐÔÇÐ»»°´Å¥´æ´¢
+// ï¿½ï¿½ï¿½ï¿½É¼ï¿½ï¿½ï¿½ï¿½Ð»ï¿½ï¿½ï¿½Å¥ï¿½æ´¢
 static std::unordered_map<int64_t, std::function<void()>> g_passwordToggleCallbacks;
 static std::unordered_map<int64_t, QToolButton*> g_passwordToggleButtons;
 
-// Ìí¼ÓÃÜÂë¿É¼ûÐÔÇÐ»»°´Å¥µ½ÊäÈë¿òÓÒ²à
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É¼ï¿½ï¿½ï¿½ï¿½Ð»ï¿½ï¿½ï¿½Å¥ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò²ï¿½
 void qLineEditAddPasswordToggleAction(int64_t ptr, void (*callback)()) {
     QLineEdit* lineEdit = reinterpret_cast<QLineEdit*>(ptr);
     if (lineEdit && callback) {
-        // ´´½¨Ò»¸ö QToolButton ×÷ÎªÇÐ»»°´Å¥
+        // ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ QToolButton ï¿½ï¿½Îªï¿½Ð»ï¿½ï¿½ï¿½Å¥
         QToolButton* toggleBtn = new QToolButton(lineEdit);
         
-        // Ê¹ÓÃÎÄ±¾·ûºÅ£º¡ñ ±íÊ¾Òþ²Ø×´Ì¬£¬¡ð ±íÊ¾ÏÔÊ¾×´Ì¬
-        toggleBtn->setText(QString::fromUtf8("\u25CF"));  // ¡ñ ÊµÐÄÔ²µã
+        // Ê¹ï¿½ï¿½ï¿½Ä±ï¿½ï¿½ï¿½ï¿½Å£ï¿½ï¿½ï¿½ ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ê¾ï¿½ï¿½Ê¾×´Ì¬
+        toggleBtn->setText(QString::fromUtf8("\u25CF"));  // ï¿½ï¿½ Êµï¿½ï¿½Ô²ï¿½ï¿½
         toggleBtn->setCursor(Qt::PointingHandCursor);
-        toggleBtn->setFixedSize(20, 20);  // ¸üÐ¡µÄ°´Å¥
+        toggleBtn->setFixedSize(20, 20);  // ï¿½ï¿½Ð¡ï¿½Ä°ï¿½Å¥
         toggleBtn->setStyleSheet(
             "QToolButton {"
             "  border: none;"
@@ -421,11 +420,11 @@ void qLineEditAddPasswordToggleAction(int64_t ptr, void (*callback)()) {
             "}"
         );
         
-        // ´æ´¢»Øµ÷ºÍ°´Å¥
+        // ï¿½æ´¢ï¿½Øµï¿½ï¿½Í°ï¿½Å¥
         g_passwordToggleCallbacks[ptr] = callback;
         g_passwordToggleButtons[ptr] = toggleBtn;
         
-        // Á¬½Óµã»÷ÐÅºÅ
+        // ï¿½ï¿½ï¿½Óµï¿½ï¿½ï¿½Åºï¿½
         int64_t widgetPtr = ptr;
         QObject::connect(toggleBtn, &QToolButton::clicked, [widgetPtr]() {
             auto it = g_passwordToggleCallbacks.find(widgetPtr);
@@ -434,20 +433,20 @@ void qLineEditAddPasswordToggleAction(int64_t ptr, void (*callback)()) {
             }
         });
         
-        // ÉèÖÃÊäÈë¿òÓÒ²àÄÚ±ß¾à
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò²ï¿½ï¿½Ú±ß¾ï¿½
         int frameWidth = lineEdit->style()->pixelMetric(QStyle::PM_DefaultFrameWidth);
         lineEdit->setStyleSheet(
             QString("QLineEdit { padding-right: %1px; }").arg(20 + frameWidth + 1)
         );
         
-        // ¶¨Î»°´Å¥ - ´¹Ö±¾ÓÖÐ£¬ÏòÉÏÎ¢µ÷
+        // ï¿½ï¿½Î»ï¿½ï¿½Å¥ - ï¿½ï¿½Ö±ï¿½ï¿½ï¿½Ð£ï¿½ï¿½ï¿½ï¿½ï¿½Î¢ï¿½ï¿½
         int editHeight = lineEdit->height();
-        int yPos = (editHeight - 20) / 2 - 1;  // ÏòÉÏÆ«ÒÆ1ÏñËØ
-        int xPos = lineEdit->width() - 20 - frameWidth - 1;  // ¼õÉÙÓÒ±ß¿ÕÏ¶
+        int yPos = (editHeight - 20) / 2 - 1;  // ï¿½ï¿½ï¿½ï¿½Æ«ï¿½ï¿½1ï¿½ï¿½ï¿½ï¿½
+        int xPos = lineEdit->width() - 20 - frameWidth - 1;  // ï¿½ï¿½ï¿½ï¿½ï¿½Ò±ß¿ï¿½Ï¶
         toggleBtn->move(xPos, yPos);
         toggleBtn->show();
         
-        // ¼àÌýÎÄ±¾±ä»¯ÖØÐÂ¶¨Î»
+        // ï¿½ï¿½ï¿½ï¿½ï¿½Ä±ï¿½ï¿½ä»¯ï¿½ï¿½ï¿½Â¶ï¿½Î»
         QObject::connect(lineEdit, &QLineEdit::textChanged, [lineEdit, toggleBtn]() {
             int frameWidth = lineEdit->style()->pixelMetric(QStyle::PM_DefaultFrameWidth);
             int editHeight = lineEdit->height();
@@ -458,42 +457,42 @@ void qLineEditAddPasswordToggleAction(int64_t ptr, void (*callback)()) {
     }
 }
 
-// ÉèÖÃÃÜÂëÇÐ»»°´Å¥Í¼±ê£¨true=¿É¼û£¬false=Òþ²Ø£©
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð»ï¿½ï¿½ï¿½Å¥Í¼ï¿½ê£¨true=ï¿½É¼ï¿½ï¿½ï¿½false=ï¿½ï¿½ï¿½Ø£ï¿½
 void qLineEditSetPasswordToggleIcon(int64_t ptr, bool visible) {
     auto it = g_passwordToggleButtons.find(ptr);
     if (it != g_passwordToggleButtons.end()) {
         QToolButton* btn = it->second;
         if (btn) {
             if (visible) {
-                // ÃÜÂë¿É¼ûÊ±ÏÔÊ¾¿ÕÐÄÔ²µã£¨±íÊ¾¿ÉÒÔÒþ²Ø£©
-                btn->setText(QString::fromUtf8("\u25CB"));  // ¡ð ¿ÕÐÄÔ²µã
+                // ï¿½ï¿½ï¿½ï¿½É¼ï¿½Ê±ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½Ô²ï¿½ã£¨ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø£ï¿½
+                btn->setText(QString::fromUtf8("\u25CB"));  // ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ô²ï¿½ï¿½
             } else {
-                // ÃÜÂëÒþ²ØÊ±ÏÔÊ¾ÊµÐÄÔ²µã£¨±íÊ¾¿ÉÒÔÏÔÊ¾£©
-                btn->setText(QString::fromUtf8("\u25CF"));  // ¡ñ ÊµÐÄÔ²µã
+                // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½Ê¾Êµï¿½ï¿½Ô²ï¿½ã£¨ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½
+                btn->setText(QString::fromUtf8("\u25CF"));  // ï¿½ï¿½ Êµï¿½ï¿½Ô²ï¿½ï¿½
             }
         }
     }
 }
 
-// ÉèÖÃÊäÈëÑÚÂë£¨¸ñÊ½»¯ÊäÈë£©
-// ÑÚÂë×Ö·û£º
-// 0 - Êý×Ö£¨±ØÌî£©
-// 9 - Êý×Ö£¨¿ÉÑ¡£©
-// # - Êý×Ö»òÕý¸ººÅ£¨¿ÉÑ¡£©
-// D - ·ÇÁãÊý×Ö£¨±ØÌî£©
-// d - ·ÇÁãÊý×Ö£¨¿ÉÑ¡£©
-// A - ×ÖÄ¸£¨±ØÌî£©
-// a - ×ÖÄ¸£¨¿ÉÑ¡£©
-// N - ×ÖÄ¸»òÊý×Ö£¨±ØÌî£©
-// n - ×ÖÄ¸»òÊý×Ö£¨¿ÉÑ¡£©
-// H - Ê®Áù½øÖÆ×Ö·û£¨±ØÌî£©
-// h - Ê®Áù½øÖÆ×Ö·û£¨¿ÉÑ¡£©
-// X - ÈÎÒâ×Ö·û£¨±ØÌî£©
-// x - ÈÎÒâ×Ö·û£¨¿ÉÑ¡£©
-// > - ×ª»»Îª´óÐ´
-// < - ×ª»»ÎªÐ¡Ð´
-// ! - ¹Ø±Õ´óÐ¡Ð´×ª»»
-// ;c - ÉèÖÃÕ¼Î»×Ö·ûÎª c
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ë£¨ï¿½ï¿½Ê½ï¿½ï¿½ï¿½ï¿½ï¿½ë£©
+// ï¿½ï¿½ï¿½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½
+// 0 - ï¿½ï¿½ï¿½Ö£ï¿½ï¿½ï¿½ï¿½î£©
+// 9 - ï¿½ï¿½ï¿½Ö£ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½
+// # - ï¿½ï¿½ï¿½Ö»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å£ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½
+// D - ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö£ï¿½ï¿½ï¿½ï¿½î£©
+// d - ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö£ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½
+// A - ï¿½ï¿½Ä¸ï¿½ï¿½ï¿½ï¿½ï¿½î£©
+// a - ï¿½ï¿½Ä¸ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½
+// N - ï¿½ï¿½Ä¸ï¿½ï¿½ï¿½ï¿½ï¿½Ö£ï¿½ï¿½ï¿½ï¿½î£©
+// n - ï¿½ï¿½Ä¸ï¿½ï¿½ï¿½ï¿½ï¿½Ö£ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½
+// H - Ê®ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½î£©
+// h - Ê®ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½
+// X - ï¿½ï¿½ï¿½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½î£©
+// x - ï¿½ï¿½ï¿½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½
+// > - ×ªï¿½ï¿½Îªï¿½ï¿½Ð´
+// < - ×ªï¿½ï¿½ÎªÐ¡Ð´
+// ! - ï¿½Ø±Õ´ï¿½Ð¡Ð´×ªï¿½ï¿½
+// ;c - ï¿½ï¿½ï¿½ï¿½Õ¼Î»ï¿½Ö·ï¿½Îª c
 void qLineEditSetInputMask(int64_t ptr, const char* mask) {
     QLineEdit* lineEdit = reinterpret_cast<QLineEdit*>(ptr);
     if (lineEdit && mask) {
@@ -501,7 +500,7 @@ void qLineEditSetInputMask(int64_t ptr, const char* mask) {
     }
 }
 
-// ÉèÖÃÊÇ·ñÏÔÊ¾±ß¿ò
+// ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½Ê¾ï¿½ß¿ï¿½
 void qLineEditSetFrame(int64_t ptr, bool enabled) {
     QLineEdit* lineEdit = reinterpret_cast<QLineEdit*>(ptr);
     if (lineEdit) {
@@ -509,7 +508,7 @@ void qLineEditSetFrame(int64_t ptr, bool enabled) {
     }
 }
 
-// ÉèÖÃÎÄ±¾¶ÔÆë·½Ê½
+// ï¿½ï¿½ï¿½ï¿½ï¿½Ä±ï¿½ï¿½ï¿½ï¿½ë·½Ê½
 // 0x01 = AlignLeft
 // 0x02 = AlignRight
 // 0x04 = AlignHCenter
@@ -524,7 +523,7 @@ void qLineEditSetAlignment(int64_t ptr, int32_t alignment) {
     }
 }
 
-// »ñÈ¡ÎÄ±¾³¤¶È
+// ï¿½ï¿½È¡ï¿½Ä±ï¿½ï¿½ï¿½ï¿½ï¿½
 int32_t qLineEditLength(int64_t ptr) {
     QLineEdit* lineEdit = reinterpret_cast<QLineEdit*>(ptr);
     if (lineEdit) {
@@ -533,7 +532,7 @@ int32_t qLineEditLength(int64_t ptr) {
     return 0;
 }
 
-// »ñÈ¡×î´ó³¤¶È
+// ï¿½ï¿½È¡ï¿½ï¿½ó³¤¶ï¿½
 int32_t qLineEditMaxLength(int64_t ptr) {
     QLineEdit* lineEdit = reinterpret_cast<QLineEdit*>(ptr);
     if (lineEdit) {
@@ -542,7 +541,7 @@ int32_t qLineEditMaxLength(int64_t ptr) {
     return 32767;
 }
 
-// ÊÇ·ñÓÐÑ¡ÖÐÎÄ±¾
+// ï¿½Ç·ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½Ä±ï¿½
 bool qLineEditHasSelectedText(int64_t ptr) {
     QLineEdit* lineEdit = reinterpret_cast<QLineEdit*>(ptr);
     if (lineEdit) {
@@ -551,18 +550,17 @@ bool qLineEditHasSelectedText(int64_t ptr) {
     return false;
 }
 
-// »ñÈ¡Ñ¡ÖÐµÄÎÄ±¾
+// ï¿½ï¿½È¡Ñ¡ï¿½Ðµï¿½ï¿½Ä±ï¿½
 const char* qLineEditSelectedText(int64_t ptr) {
-    static thread_local std::string selectedTextStr;
     QLineEdit* lineEdit = reinterpret_cast<QLineEdit*>(ptr);
-    if (lineEdit) {
-        selectedTextStr = lineEdit->selectedText().toStdString();
-        return selectedTextStr.c_str();
-    }
-    return "";
+    if (!lineEdit) return nullptr;
+    QByteArray arr = lineEdit->selectedText().toUtf8();
+    char* result = (char*)malloc(arr.size() + 1);
+    if (result) memcpy(result, arr.constData(), arr.size() + 1);
+    return result;
 }
 
-// Ñ¡ÖÐËùÓÐÎÄ±¾
+// Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä±ï¿½
 void qLineEditSelectAll(int64_t ptr) {
     QLineEdit* lineEdit = reinterpret_cast<QLineEdit*>(ptr);
     if (lineEdit) {
@@ -570,7 +568,7 @@ void qLineEditSelectAll(int64_t ptr) {
     }
 }
 
-// ÉèÖÃ½¹µã
+// ï¿½ï¿½ï¿½Ã½ï¿½ï¿½ï¿½
 void qLineEditSetFocus(int64_t ptr) {
     QLineEdit* lineEdit = reinterpret_cast<QLineEdit*>(ptr);
     if (lineEdit) {
@@ -589,7 +587,7 @@ void qLineEditDelete(int64_t ptr) {
 }
 
 // ============================================================
-// QTextEdit ÇÅ½Óº¯Êý
+// QTextEdit ï¿½Å½Óºï¿½ï¿½ï¿½
 // ============================================================
 
 int64_t qTextEditCreate() {
@@ -606,14 +604,13 @@ void qTextEditSetText(int64_t ptr, const char* text) {
 
 const char* qTextEditText(int64_t ptr) {
     QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
-    if (textEdit) {
-        // Ê¹ÓÃ¶ÀÁ¢µÄ¾²Ì¬»º³åÇø£¬´óÐ¡×ã¹»´ó
-        static QByteArray buffer;
-        buffer = textEdit->toPlainText().toUtf8();
-        return buffer.constData();
-    }
-    return "";
+    if (!textEdit) return nullptr;
+    QByteArray arr = textEdit->toPlainText().toUtf8();
+    char* result = (char*)malloc(arr.size() + 1);
+    if (result) memcpy(result, arr.constData(), arr.size() + 1);
+    return result;
 }
+
 
 void qTextEditSetReadOnly(int64_t ptr, bool readonly) {
     QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
@@ -639,7 +636,7 @@ void qTextEditDelete(int64_t ptr) {
 } // extern "C"
 
 // ============================================================
-// QTextEdit À©Õ¹·½·¨
+// QTextEdit ï¿½ï¿½Õ¹ï¿½ï¿½ï¿½ï¿½
 // ============================================================
 
 extern "C" {
@@ -776,7 +773,7 @@ void qTextEditSetFontItalic(int64_t ptr, bool italic) {
     }
 }
 
-// ²éÕÒ¹¦ÄÜ
+// ï¿½ï¿½ï¿½Ò¹ï¿½ï¿½ï¿½
 bool qTextEditFind(int64_t ptr, const char* text, bool caseSensitive) {
     QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
     if (textEdit) {
@@ -811,7 +808,7 @@ void qTextEditFindPrev(int64_t ptr, const char* text, bool caseSensitive) {
     }
 }
 
-// Ìæ»»¹¦ÄÜ
+// ï¿½æ»»ï¿½ï¿½ï¿½ï¿½
 void qTextEditReplace(int64_t ptr, const char* newText) {
     QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
     if (textEdit) {
@@ -832,7 +829,7 @@ int qTextEditReplaceAll(int64_t ptr, const char* oldText, const char* newText, b
         flags |= QTextDocument::FindCaseSensitively;
     }
     
-    // ÒÆ¶¯µ½ÎÄµµ¿ªÍ·
+    // ï¿½Æ¶ï¿½ï¿½ï¿½ï¿½Äµï¿½ï¿½ï¿½Í·
     QTextCursor cursor = textEdit->textCursor();
     cursor.movePosition(QTextCursor::Start);
     textEdit->setTextCursor(cursor);
@@ -851,7 +848,7 @@ int qTextEditReplaceAll(int64_t ptr, const char* oldText, const char* newText, b
     return count;
 }
 
-// ¹â±êÎ»ÖÃ
+// ï¿½ï¿½ï¿½Î»ï¿½ï¿½
 int qTextEditLineCount(int64_t ptr) {
     QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
     if (textEdit) {
@@ -864,7 +861,7 @@ int qTextEditCurrentLine(int64_t ptr) {
     QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
     if (textEdit) {
         QTextCursor cursor = textEdit->textCursor();
-        return cursor.blockNumber() + 1;  // ·µ»Ø1-basedÐÐºÅ
+        return cursor.blockNumber() + 1;  // ï¿½ï¿½ï¿½ï¿½1-basedï¿½Ðºï¿½
     }
     return 1;
 }
@@ -873,7 +870,7 @@ int qTextEditCurrentColumn(int64_t ptr) {
     QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
     if (textEdit) {
         QTextCursor cursor = textEdit->textCursor();
-        return cursor.columnNumber() + 1;  // ·µ»Ø1-basedÁÐºÅ
+        return cursor.columnNumber() + 1;  // ï¿½ï¿½ï¿½ï¿½1-basedï¿½Ðºï¿½
     }
     return 1;
 }
@@ -886,7 +883,7 @@ int qTextEditCharacterCount(int64_t ptr) {
     return 0;
 }
 
-// ´òÓ¡¹¦ÄÜ
+// ï¿½ï¿½Ó¡ï¿½ï¿½ï¿½ï¿½
 void qTextEditPrint(int64_t ptr, int64_t printerPtr) {
     QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
     QPrinter* printer = reinterpret_cast<QPrinter*>(printerPtr);
@@ -895,7 +892,7 @@ void qTextEditPrint(int64_t ptr, int64_t printerPtr) {
     }
 }
 
-// Ìø×ªµ½Ö¸¶¨ÐÐ
+// ï¿½ï¿½×ªï¿½ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½
 void qTextEditGoToLine(int64_t ptr, int line) {
     QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
     if (textEdit) {
@@ -910,7 +907,7 @@ void qTextEditGoToLine(int64_t ptr, int line) {
 }
 
 // ============================================================
-// QPlainTextEdit ÇÅ½Óº¯Êý
+// QPlainTextEdit ï¿½Å½Óºï¿½ï¿½ï¿½
 // ============================================================
 
 int64_t qPlainTextEditCreate() {
@@ -927,10 +924,11 @@ void qPlainTextEditSetPlainText(int64_t ptr, const char* text) {
 
 const char* qPlainTextEditToPlainText(int64_t ptr) {
     QPlainTextEdit* editor = reinterpret_cast<QPlainTextEdit*>(ptr);
-    if (!editor) return "";
-    static QByteArray arr;
-    arr = editor->toPlainText().toUtf8();
-    return arr.constData();
+    if (!editor) return nullptr;
+    QByteArray arr = editor->toPlainText().toUtf8();
+    char* result = (char*)malloc(arr.size() + 1);
+    if (result) memcpy(result, arr.constData(), arr.size() + 1);
+    return result;
 }
 
 void qPlainTextEditSetReadOnly(int64_t ptr, bool readonly) {
@@ -1048,7 +1046,7 @@ void qPlainTextEditDelete(int64_t ptr) {
 }
 
 // ============================================================
-// QCompleter ÇÅ½Óº¯Êý
+// QCompleter ï¿½Å½Óºï¿½ï¿½ï¿½
 // ============================================================
 
 int64_t qCompleterCreate() {
@@ -1060,7 +1058,7 @@ int64_t qCompleterCreateWithStrings(const char* items) {
     QStringList list = QString::fromUtf8(items).split('\n', Qt::SkipEmptyParts);
     QStringListModel* model = new QStringListModel(list);
     QCompleter* completer = new QCompleter(model);
-    // completer ÓµÓÐ model µÄËùÓÐÈ¨
+    // completer Óµï¿½ï¿½ model ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¨
     return reinterpret_cast<int64_t>(completer);
 }
 
@@ -1115,10 +1113,11 @@ void qCompleterSetCompletionPrefix(int64_t ptr, const char* prefix) {
 
 const char* qCompleterCompletionPrefix(int64_t ptr) {
     QCompleter* completer = reinterpret_cast<QCompleter*>(ptr);
-    if (!completer) return "";
-    static QByteArray arr;
-    arr = completer->completionPrefix().toUtf8();
-    return arr.constData();
+    if (!completer) return nullptr;
+    QByteArray arr = completer->completionPrefix().toUtf8();
+    char* result = (char*)malloc(arr.size() + 1);
+    if (result) memcpy(result, arr.constData(), arr.size() + 1);
+    return result;
 }
 
 int32_t qCompleterCompletionCount(int64_t ptr) {
@@ -1141,7 +1140,7 @@ void qCompleterDelete(int64_t ptr) {
 }
 
 // ============================================================
-// QTextBrowser ÇÅ½Óº¯Êý
+// QTextBrowser ï¿½Å½Óºï¿½ï¿½ï¿½
 // ============================================================
 
 int64_t qTextBrowserCreate() {
@@ -1158,10 +1157,11 @@ void qTextBrowserSetText(int64_t ptr, const char* text) {
 
 const char* qTextBrowserToPlainText(int64_t ptr) {
     QTextBrowser* browser = reinterpret_cast<QTextBrowser*>(ptr);
-    if (!browser) return "";
-    static QByteArray arr;
-    arr = browser->toPlainText().toUtf8();
-    return arr.constData();
+    if (!browser) return nullptr;
+    QByteArray arr = browser->toPlainText().toUtf8();
+    char* result = (char*)malloc(arr.size() + 1);
+    if (result) memcpy(result, arr.constData(), arr.size() + 1);
+    return result;
 }
 
 void qTextBrowserSetHtml(int64_t ptr, const char* html) {
@@ -1173,10 +1173,11 @@ void qTextBrowserSetHtml(int64_t ptr, const char* html) {
 
 const char* qTextBrowserToHtml(int64_t ptr) {
     QTextBrowser* browser = reinterpret_cast<QTextBrowser*>(ptr);
-    if (!browser) return "";
-    static QByteArray arr;
-    arr = browser->toHtml().toUtf8();
-    return arr.constData();
+    if (!browser) return nullptr;
+    QByteArray arr = browser->toHtml().toUtf8();
+    char* result = (char*)malloc(arr.size() + 1);
+    if (result) memcpy(result, arr.constData(), arr.size() + 1);
+    return result;
 }
 
 void qTextBrowserSetSource(int64_t ptr, const char* url) {
@@ -1236,7 +1237,7 @@ void qTextBrowserDelete(int64_t ptr) {
 }
 
 // ============================================================
-// QKeySequenceEdit ÇÅ½Óº¯Êý
+// QKeySequenceEdit ï¿½Å½Óºï¿½ï¿½ï¿½
 // ============================================================
 
 int64_t qKeySequenceEditCreate(int64_t parentPtr) {
@@ -1247,10 +1248,11 @@ int64_t qKeySequenceEditCreate(int64_t parentPtr) {
 
 const char* qKeySequenceEditKeySequence(int64_t ptr) {
     QKeySequenceEdit* edit = reinterpret_cast<QKeySequenceEdit*>(ptr);
-    if (!edit) return "";
-    static QByteArray arr;
-    arr = edit->keySequence().toString(QKeySequence::NativeText).toUtf8();
-    return arr.constData();
+    if (!edit) return nullptr;
+    QByteArray arr = edit->keySequence().toString(QKeySequence::NativeText).toUtf8();
+    char* result = (char*)malloc(arr.size() + 1);
+    if (result) memcpy(result, arr.constData(), arr.size() + 1);
+    return result;
 }
 
 void qKeySequenceEditSetKeySequence(int64_t ptr, const char* text) {
@@ -1273,7 +1275,7 @@ void qKeySequenceEditDelete(int64_t ptr) {
 }
 
 // ============================================================
-// QSystemTrayIcon ÇÅ½Óº¯Êý
+// QSystemTrayIcon ï¿½Å½Óºï¿½ï¿½ï¿½
 // ============================================================
 
 int64_t qSystemTrayIconCreate(int64_t parentPtr) {
@@ -1339,7 +1341,7 @@ void qSystemTrayIconSetContextMenu(int64_t ptr, int64_t menuPtr) {
 }
 
 // ============================================================
-// QGraphicsView ÇÅ½Óº¯Êý
+// QGraphicsView ï¿½Å½Óºï¿½ï¿½ï¿½
 // ============================================================
 
 int64_t qGraphicsViewCreate(int64_t parentPtr) {
@@ -1444,7 +1446,7 @@ const char* qGraphicsViewMapToScene(int64_t ptr, double x, double y) {
 }
 
 // ============================================================
-// QGraphicsScene ÇÅ½Óº¯Êý
+// QGraphicsScene ï¿½Å½Óºï¿½ï¿½ï¿½
 // ============================================================
 
 int64_t qGraphicsSceneCreate() {
@@ -1568,7 +1570,7 @@ int64_t qGraphicsSceneAddWidget(int64_t ptr, int64_t widgetPtr) {
 }
 
 // ============================================================
-// QGraphicsItem ÇÅ½Óº¯Êý (×îÐ¡»¯)
+// QGraphicsItem ï¿½Å½Óºï¿½ï¿½ï¿½ (ï¿½ï¿½Ð¡ï¿½ï¿½)
 // ============================================================
 
 void qGraphicsItemSetPos(int64_t ptr, double x, double y) {
@@ -1621,7 +1623,7 @@ void qGraphicsItemUpdate(int64_t ptr) {
 }
 
 // ============================================================
-// QGraphicsOpacityEffect ÇÅ½Óº¯Êý
+// QGraphicsOpacityEffect ï¿½Å½Óºï¿½ï¿½ï¿½
 // ============================================================
 
 int64_t qGraphicsOpacityEffectCreate() {
@@ -1650,7 +1652,7 @@ void qGraphicsOpacityEffectDelete(int64_t ptr) {
 }
 
 // ============================================================
-// QGraphicsDropShadowEffect ÇÅ½Óº¯Êý
+// QGraphicsDropShadowEffect ï¿½Å½Óºï¿½ï¿½ï¿½
 // ============================================================
 
 int64_t qGraphicsDropShadowEffectCreate() {
@@ -1689,7 +1691,7 @@ void qGraphicsDropShadowEffectDelete(int64_t ptr) {
 }
 
 // ============================================================
-// QFontComboBox ÇÅ½Óº¯Êý
+// QFontComboBox ï¿½Å½Óºï¿½ï¿½ï¿½
 // ============================================================
 
 int64_t qFontComboBoxCreate() {
@@ -1941,7 +1943,7 @@ void qValidatorDelete(int64_t ptr) {
 
 
 // ============================================================
-// QSplashScreen ÇÅ½Óº¯Êý
+// QSplashScreen ï¿½Å½Óºï¿½ï¿½ï¿½
 // ============================================================
 
 int64_t qSplashScreenCreate() {
@@ -1951,6 +1953,7 @@ int64_t qSplashScreenCreate() {
 
 int64_t qSplashScreenCreateWithPixmap(int64_t pixmapPtr) {
     QPixmap* pixmap = reinterpret_cast<QPixmap*>(pixmapPtr);
+    if (!pixmap) return 0;
     QSplashScreen* splash = new QSplashScreen(*pixmap);
     return reinterpret_cast<int64_t>(splash);
 }
@@ -1985,7 +1988,7 @@ void qSplashScreenDelete(int64_t ptr) {
 }
 
 // ============================================================
-// QSizeGrip ÇÅ½Óº¯Êý
+// QSizeGrip ï¿½Å½Óºï¿½ï¿½ï¿½
 // ============================================================
 
 int64_t qSizeGripCreate(int64_t parentPtr) {
@@ -2005,7 +2008,7 @@ void qSizeGripDelete(int64_t ptr) {
 }
 
 // ============================================================
-// QRubberBand ÇÅ½Óº¯Êý
+// QRubberBand ï¿½Å½Óºï¿½ï¿½ï¿½
 // ============================================================
 
 int64_t qRubberBandCreate(int32_t shape, int64_t parentPtr) {

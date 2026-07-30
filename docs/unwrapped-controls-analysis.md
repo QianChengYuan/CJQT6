@@ -1,7 +1,7 @@
 # CJQT6 未封装控件分析报告
 
 > 生成日期：2026-07-18
-> 最后更新：2026-07-18（P0/P1/P2 已完成）
+> 最后更新：2026-07-29（全集更新——修正控件清单、覆盖率、P3 待实施项）
 
 ## 一、整体架构模式
 
@@ -21,28 +21,31 @@ C++ 桥接实现    →  native/src/*/bridge_*.cpp   (extern "C" FFI函数实现
 
 | 模块 | 已封装 | 常用未封装 | 覆盖率 |
 |------|--------|-----------|--------|
-| 基础控件 (widgets) | 34 | 1 (QFontDialog已移至dialogs) | ~97% |
-| 容器/布局 | 9 | 1 | ~90% |
-| 视图 (views) | 3 | 3 | ~50% |
+| 基础控件 (widgets) | 37 | 0 | ~100% |
+| 容器/布局 | 10 | 0 | 100% |
+| 视图 (views) | 9 | 2 | ~82% |
 | 对话框 | 9 | 0 | 100% |
 | 菜单/工具栏 | 6 | 0 | 100% |
 | 绘图 | 9 | 0 | 100% |
-| 多媒体 | 3 | 3 | ~50% |
+| 多媒体 | 3 | 2 | ~60% |
 | 网络 | 3 | 0 | 100% |
-| 核心/工具 | 17 | 3 | ~85% |
+| 核心/工具 | 20 | 3 | ~87% |
 | 动画/特效 | 5 | 2 | ~71% |
-| **合计** | **~92** | **~13** | **~88%** |
+| **合计** | **~106** | **~9** | **~92%** |
 
 ## 三、已封装控件完整清单
 
-### core/ — 17 文件
+### core/ — 20 文件
 | 文件 | 控件/类 | 状态 |
 |------|---------|------|
 | application.cj | QApplication | ✅ 较完整（含多语言/翻译支持） |
 | widget.cj | QWidget | ✅ 较完整（几何/样式/启用/工具提示/父窗口） |
 | timer.cj | QTimer | ✅ 完整 |
 | process.cj | QProcess | ✅ 较完整 |
-| signal.cj | 回调类型系统 | ✅ 完整（5种回调类型） |
+| signal.cj | 回调类型系统 + SignalConnection 句柄 | ✅ 完整（5种回调类型，含 P0/P1/P2） |
+| emitter.cj | SignalEmitter（自定义信号发射） | ✅ P2 新增（含跨线程 QueuedConnection） |
+| callback.cj | 闭包捕获辅助类型 | ✅ P2 新增 |
+| common.cj | 公共 FFI 声明 | ✅ 集中管理 |
 | events.cj | 事件系统 | ✅ 较完整（鼠标/键盘/绘制事件） |
 | dragdrop.cj | 拖放支持 | ✅ 基础 |
 | resource.cj | 资源管理 | ✅ 较完整 |
@@ -56,7 +59,7 @@ C++ 桥接实现    →  native/src/*/bridge_*.cpp   (extern "C" FFI函数实现
 | propertyanimation.cj | QPropertyAnimation | ✅ P2 新增 |
 | screen.cj | QScreen | ✅ P2 新增 |
 
-### widgets/ — 30 文件
+### widgets/ — 37 文件
 | 文件 | 控件 | 状态 |
 |------|------|------|
 | label.cj | QLabel | ✅ 完整 |
@@ -89,13 +92,26 @@ C++ 桥接实现    →  native/src/*/bridge_*.cpp   (extern "C" FFI函数实现
 | graphicsview.cj | QGraphicsView/QGraphicsScene | ✅ P1 新增 |
 | graphicseffect.cj | QGraphicsOpacityEffect / QGraphicsDropShadowEffect | ✅ P2 新增 |
 | fontcombobox.cj | QFontComboBox | ✅ P2 新增 |
+| commandlinkbutton.cj | QCommandLinkButton | ✅ 初始（未在 P0/P1/P2 报告中列出） |
+| dialogbuttonbox.cj | QDialogButtonBox | ✅ 初始 |
+| rubberband.cj | QRubberBand | ✅ 初始 |
+| scrollbar.cj | QScrollBar | ✅ 初始 |
+| sizegrip.cj | QSizeGrip | ✅ 初始 |
+| splashscreen.cj | QSplashScreen | ✅ 初始 |
+| validators.cj | QValidator / QIntValidator / QDoubleValidator | ✅ 初始 |
 
-### views/ — 3 文件
+### views/ — 9 文件
 | 文件 | 控件 | 状态 |
 |------|------|------|
 | listwidget.cj | QListWidget | ✅ 较完整 |
 | tablewidget.cj | QTableWidget | ✅ 较完整 |
 | treewidget.cj | QTreeWidget + QTreeWidgetItem | ✅ 较完整 |
+| listview.cj | QListView | ✅ 较完整（含 QModelIndex 和 EditTrigger） |
+| tableview.cj | QTableView（含 SelectionBehavior） | ✅ 较完整 |
+| treeview.cj | QTreeView | ✅ 较完整 |
+| headerview.cj | QHeaderView（含 Orientation/ResizeMode） | ✅ 较完整 |
+| standarditemmodel.cj | QStandardItemModel | ✅ 较完整 |
+| filesystemmodel.cj | QFileSystemModel | ✅ 较完整 |
 
 ### dialogs/ — 1 文件（9 个对话框）
 | 控件 | 状态 | 阶段 |
@@ -122,7 +138,7 @@ C++ 桥接实现    →  native/src/*/bridge_*.cpp   (extern "C" FFI函数实现
 ### gui/ — 2 文件
 | 控件 | 状态 |
 |------|------|
-| QVBoxLayout/QHBoxLayout/QGridLayout | ✅ 较完整 |
+| QVBoxLayout/QHBoxLayout/QGridLayout/QFormLayout | ✅ 较完整（含 stretch 参数） |
 | 对齐/方向/边距类型 | ✅ 完整 |
 
 ### paint/ — 3 文件
@@ -207,30 +223,37 @@ C++ 桥接实现    →  native/src/*/bridge_*.cpp   (extern "C" FFI函数实现
 |------|--------|------|-------|------|
 | 动画 | QParallelAnimationGroup | core | ⭐⭐ | 依赖于 QAbstractAnimation |
 | Model/View | QSortFilterProxyModel | views | ⭐⭐⭐ | 排序过滤代理 |
-| | QStandardItemModel | views | ⭐⭐ | 标准数据模型 |
 | 高级工具 | QUndoStack/QUndoCommand | core | ⭐⭐ | 需要子类化支持 |
 | | QStyle | gui | ⭐⭐ | 样式查询 |
 | 多媒体增强 | QVideoWidget | multimedia | ⭐⭐ | 需要 Qt6::MultimediaWidgets 模块（CMake 修改） |
 | | QCamera | multimedia | ⭐⭐⭐ | 复杂度高 |
-| 其他 | QFormLayout（备选） | gui | ⭐ | 可以跳过，QGridLayout 已可替代 |
 
-## 五、实施路线图
+**已实现（从 P3 移除）**：
+- QStandardItemModel → `src/views/standarditemmodel.cj` ✅
+- QFormLayout → `src/gui/layout.cj` 中完整实现 ✅
+
+## 五、实施路线图（已完成）
 
 ```
-Phase 0 (立即)          Phase 1 (1-2周)          Phase 2 (3-4周)
+Phase 0 (已完成)         Phase 1 (已完成)          Phase 2 (已完成)
 ┌──────────────────┐   ┌──────────────────┐    ┌──────────────────┐
-│ QButtonGroup     │   │ QSystemTrayIcon  │    │ Animation System │
+│ QButtonGroup     │   │ QSystemTrayIcon  │    │ QPropertyAnimation│
 │ QStackedWidget   │   │ QGraphicsView    │    │ QSettings        │
 │ QPlainTextEdit   │   │ QDockWidget      │    │ QClipboard       │
 │ QCompleter       │   │ QWizard          │    │ QShortcut        │
-│ QFormLayout      │   │ QKeySequenceEdit │    │ QStandardPaths   │
-│ QFontDialog      │   │ QToolBox         │    │ QFileSystemWatcher│
-│ QProgressDialog  │   │ QTextBrowser     │    │ Model/View       │
-│                  │   │ QPrintDialog     │    │ Multimedia       │
+│ QFontDialog      │   │ QKeySequenceEdit │    │ QStandardPaths   │
+│ QProgressDialog  │   │ QToolBox         │    │ QFileSystemWatcher│
+│                  │   │ QTextBrowser     │    │ QSoundEffect     │
+│                  │   │ QPrintDialog     │    │ QFontComboBox    │
+│                  │   │ QErrorMessage    │    │ QFontDatabase    │
+│                  │   │ QMdiArea         │    │ QScreen          │
+│                  │   │                  │    │ QDesktopServices │
+│                  │   │                  │    │ QGraphicsEffect  │
 └──────────────────┘   └──────────────────┘    └──────────────────┘
-  7 个控件               8 个控件                10+ 个控件/类
-  ~4 天工期              ~6 天工期               ~5 天工期
+  6 个控件               10 个控件               12 个控件/类
 ```
+
+当前焦点：**Phase 3**（按需实施）— 见第四节 🔵 清单。
 
 ## 六、实施模板（标准 3 层模式）
 

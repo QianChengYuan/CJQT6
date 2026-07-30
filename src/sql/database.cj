@@ -1,5 +1,7 @@
 package cjqt6.sql
 
+import cjqt6.core.*
+
 // QSqlDatabase - 数据库连接
 foreign func qSqlDatabaseAddDatabase(`type`: CString, name: CString): Int64
 foreign func qSqlDatabaseDatabase(name: CString): Int64
@@ -53,8 +55,10 @@ public class SqlDriver {
 }
 
 /// SQL数据库连接
-public class QSqlDatabase {
+/// 支持资源管理，可使用 try-with-resources 自动释放
+public class QSqlDatabase <: QtResource {
     private var ptr: Int64 = 0
+    private var closed: Bool = false
     
     private init() {}
     
@@ -92,6 +96,7 @@ public class QSqlDatabase {
     }
     
     public func setHostName(host: String): Unit {
+        checkValid()
         unsafe {
             var cstr = LibC.mallocCString(host)
             qSqlDatabaseSetHostName(ptr, cstr)
@@ -100,10 +105,12 @@ public class QSqlDatabase {
     }
     
     public func setPort(port: Int32): Unit {
+        checkValid()
         unsafe { qSqlDatabaseSetPort(ptr, port) }
     }
     
     public func setDatabaseName(name: String): Unit {
+        checkValid()
         unsafe {
             var cstr = LibC.mallocCString(name)
             qSqlDatabaseSetDatabaseName(ptr, cstr)
@@ -112,6 +119,7 @@ public class QSqlDatabase {
     }
     
     public func setUserName(user: String): Unit {
+        checkValid()
         unsafe {
             var cstr = LibC.mallocCString(user)
             qSqlDatabaseSetUserName(ptr, cstr)
@@ -120,6 +128,7 @@ public class QSqlDatabase {
     }
     
     public func setPassword(password: String): Unit {
+        checkValid()
         unsafe {
             var cstr = LibC.mallocCString(password)
             qSqlDatabaseSetPassword(ptr, cstr)
@@ -127,19 +136,26 @@ public class QSqlDatabase {
         }
     }
     
+    /// 打开数据库连接
     public func open(): Bool {
+        checkValid()
         unsafe { qSqlDatabaseOpen(ptr) }
     }
     
-    public func close(): Unit {
+    /// 关闭数据库连接（如仍需使用数据库对象，调用 closeDatabase 仅关闭连接）
+    public func closeDatabase(): Unit {
+        checkValid()
         unsafe { qSqlDatabaseClose(ptr) }
     }
     
+    /// 检查数据库连接是否已打开
     public func isOpen(): Bool {
+        checkValid()
         unsafe { qSqlDatabaseIsOpen(ptr) }
     }
     
     public func lastError(): String {
+        checkValid()
         unsafe {
             let cstr = qSqlDatabaseLastError(ptr)
             return cstr.toString()
@@ -147,6 +163,7 @@ public class QSqlDatabase {
     }
     
     public func driverName(): String {
+        checkValid()
         unsafe {
             let cstr = qSqlDatabaseDriverName(ptr)
             return cstr.toString()
@@ -155,11 +172,41 @@ public class QSqlDatabase {
     
     public func getPtr(): Int64 { ptr }
     
-    public func delete() {
-        if (ptr != 0) {
-            unsafe { qSqlDatabaseDelete(ptr) }
+    /// 是否已关闭（资源已释放）
+    public func isClosed(): Bool {
+        return closed
+    }
+    
+    /// 检查对象有效性（未关闭且指针有效）
+    public func isValid(): Bool {
+        return !closed && ptr != 0
+    }
+    
+    /// 检查有效性，无效时抛出异常
+    public func checkValid(): Unit {
+        if (closed) {
+            throw ResourceDisposedException("QSqlDatabase 已经被释放")
+        }
+        if (ptr == 0) {
+            throw NullPointerException("QSqlDatabase 指针为空")
+        }
+    }
+    
+    /// 关闭资源，释放Qt对象
+    public func close(): Unit {
+        if (!closed && ptr != 0) {
+            unsafe {
+                qSqlDatabaseClose(ptr)
+                qSqlDatabaseDelete(ptr)
+            }
+            closed = true
             ptr = 0
         }
+    }
+    
+    /// 删除数据库连接（兼容旧API）
+    public func delete() {
+        close()
     }
 }
 

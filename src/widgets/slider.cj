@@ -42,6 +42,10 @@ foreign func qSliderTickInterval(ptr: Int64): Int32
 foreign func qSliderSetInvertedControls(ptr: Int64, inverted: Bool): Unit
 // QSlider::invertedControls() - 是否反向控制
 foreign func qSliderInvertedControls(ptr: Int64): Bool
+// QSlider::setInvertedAppearance() - 设置反向外观
+foreign func qSliderSetInvertedAppearance(ptr: Int64, inverted: Int32): Unit
+// QSlider::invertedAppearance() - 是否反向外观
+foreign func qSliderInvertedAppearance(ptr: Int64): Int32
 // QSlider::setTracking() - 设置追踪模式
 foreign func qSliderSetTracking(ptr: Int64, enable: Bool): Unit
 // QSlider::hasTracking() - 是否启用追踪模式
@@ -211,6 +215,22 @@ public class QSlider <: QtResource {
         checkValid()
         unsafe {
             return qSliderHasTracking(ptr)
+        }
+    }
+    
+    /// 设置反向外观（true: 最大值在底部/左侧，最小值在顶部/右侧）
+    public func setInvertedAppearance(inverted: Bool) {
+        checkValid()
+        unsafe {
+            qSliderSetInvertedAppearance(ptr, if (inverted) { 1 } else { 0 })
+        }
+    }
+    
+    /// 是否反向外观
+    public func invertedAppearance(): Bool {
+        checkValid()
+        unsafe {
+            return qSliderInvertedAppearance(ptr) != 0
         }
     }
     

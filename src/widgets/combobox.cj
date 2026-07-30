@@ -169,6 +169,7 @@ public class QComboBox <: QtResource {
     
     /// 批量添加选项（使用换行符分隔）
     public func addItems(items: String) {
+        checkValid()
         unsafe {
             let cstr = LibC.mallocCString(items)
             qComboBoxAddItems(ptr, cstr)
@@ -178,6 +179,7 @@ public class QComboBox <: QtResource {
     
     /// 在指定位置插入选项
     public func insertItem(index: Int32, text: String) {
+        checkValid()
         unsafe {
             let cstr = LibC.mallocCString(text)
             qComboBoxInsertItem(ptr, index, cstr)
@@ -187,6 +189,7 @@ public class QComboBox <: QtResource {
     
     /// 设置指定索引的文本
     public func setItemText(index: Int32, text: String) {
+        checkValid()
         unsafe {
             let cstr = LibC.mallocCString(text)
             qComboBoxSetItemText(ptr, index, cstr)
@@ -196,6 +199,7 @@ public class QComboBox <: QtResource {
     
     /// 通过文本设置当前选中项
     public func setCurrentText(text: String) {
+        checkValid()
         unsafe {
             let cstr = LibC.mallocCString(text)
             qComboBoxSetCurrentText(ptr, cstr)
@@ -205,6 +209,7 @@ public class QComboBox <: QtResource {
     
     /// 查找文本的索引（未找到返回-1）
     public func findText(text: String): Int32 {
+        checkValid()
         unsafe {
             let cstr = LibC.mallocCString(text)
             let result = qComboBoxFindText(ptr, cstr)
@@ -215,6 +220,7 @@ public class QComboBox <: QtResource {
     
     /// 设置占位文本
     public func setPlaceholderText(text: String) {
+        checkValid()
         unsafe {
             let cstr = LibC.mallocCString(text)
             qComboBoxSetPlaceholderText(ptr, cstr)
@@ -224,140 +230,166 @@ public class QComboBox <: QtResource {
     
     /// 获取选项数量
     public func count(): Int32 {
+        checkValid()
         unsafe {
             return qComboBoxCount(ptr)
         }
     }
-    
+
+
     /// 获取指定索引的文本
     public func itemText(index: Int32): String {
+        checkValid()
         unsafe {
             let cstr = qComboBoxItemText(ptr, index)
             return cstr.toString()
         }
     }
-    
+
+
     /// 设置是否可编辑
     public func setEditable(editable: Bool) {
+        checkValid()
         unsafe {
             qComboBoxSetEditable(ptr, editable)
         }
     }
-    
+
+
     /// 移除指定索引的选项
     public func removeItem(index: Int32) {
+        checkValid()
         unsafe {
             qComboBoxRemoveItem(ptr, index)
         }
     }
-    
+
+
     /// 是否可编辑
     public func isEditable(): Bool {
+        checkValid()
         unsafe {
             return qComboBoxIsEditable(ptr) != 0
         }
     }
-    
+
+
     /// 设置插入策略（ComboBoxInsertPolicy.*）
     public func setInsertPolicy(policy: Int32) {
+        checkValid()
         unsafe {
             qComboBoxSetInsertPolicy(ptr, policy)
         }
     }
-    
+
+
     /// 获取插入策略
     public func insertPolicy(): Int32 {
+        checkValid()
         unsafe {
             return qComboBoxInsertPolicy(ptr)
         }
     }
-    
+
     /// 设置最大可见项数
     public func setMaxVisibleItems(max: Int32) {
+        checkValid()
         unsafe {
             qComboBoxSetMaxVisibleItems(ptr, max)
         }
     }
-    
+
     /// 获取最大可见项数
     public func maxVisibleItems(): Int32 {
+        checkValid()
         unsafe {
             return qComboBoxMaxVisibleItems(ptr)
         }
     }
-    
+
     /// 设置最大条目数
     public func setMaxCount(max: Int32) {
+        checkValid()
         unsafe {
             qComboBoxSetMaxCount(ptr, max)
         }
     }
-    
+
     /// 获取最大条目数
     public func maxCount(): Int32 {
+        checkValid()
         unsafe {
             return qComboBoxMaxCount(ptr)
         }
     }
-    
+
     /// 设置是否有边框
     public func setFrame(frame: Bool) {
+        checkValid()
         unsafe {
             qComboBoxSetFrame(ptr, if (frame) { 1 } else { 0 })
         }
     }
-    
+
     /// 是否有边框
     public func hasFrame(): Bool {
+        checkValid()
         unsafe {
             return qComboBoxHasFrame(ptr) != 0
         }
     }
-    
+
     /// 设置是否允许重复项
     public func setDuplicatesEnabled(enabled: Bool) {
+        checkValid()
         unsafe {
             qComboBoxSetDuplicatesEnabled(ptr, if (enabled) { 1 } else { 0 })
         }
     }
-    
+
     /// 通过用户数据设置当前项
     public func setCurrentData(value: Int64) {
+        checkValid()
         unsafe {
             qComboBoxSetCurrentData(ptr, value)
         }
     }
-    
+
     /// 设置补全器（传入 QCompleter.getPtr()）
     public func setCompleter(completerPtr: Int64) {
+        checkValid()
         unsafe {
             qComboBoxSetCompleter(ptr, completerPtr)
         }
     }
-    
+
     /// 设置尺寸自适应策略（ComboBoxSizeAdjustPolicy.*）
     public func setSizeAdjustPolicy(policy: Int32) {
+        checkValid()
         unsafe {
             qComboBoxSetSizeAdjustPolicy(ptr, policy)
         }
     }
-    
+
     /// 编辑文本变化回调（可编辑模式下触发）
     public func setOnEditTextChanged(callback: CStringCallback) {
+        checkValid()
         unsafe {
             qComboBoxConnectEditTextChanged(ptr, callback)
         }
     }
-    
+
     /// 用户激活（点击/回车）某项回调，参数为索引
     public func setOnActivated(callback: Int32Callback) {
+        checkValid()
         unsafe {
             qComboBoxConnectActivated(ptr, callback)
         }
     }
-    
+
     /// 高亮某项回调，参数为索引
     public func setOnHighlighted(callback: Int32Callback) {
+        checkValid()
         unsafe {
             qComboBoxConnectHighlighted(ptr, callback)
         }
@@ -365,71 +397,81 @@ public class QComboBox <: QtResource {
     
     /// 设置启用/禁用
     public func setEnabled(enabled: Bool) {
+        checkValid()
         unsafe {
             qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
         }
     }
-    
+
     /// 检查是否启用
     public func isEnabled(): Bool {
+        checkValid()
         unsafe {
             qWidgetIsEnabled(ptr) == 1
         }
     }
-    
+
     /// 设置样式表
     public func setStyleSheet(style: String) {
+        checkValid()
         unsafe {
             let cstr = LibC.mallocCString(style)
             qWidgetSetStyleSheet(ptr, cstr)
             LibC.free(cstr)
         }
     }
-    
+
     /// 设置最小尺寸
     public func setMinimumSize(minw: Int32, minh: Int32) {
+        checkValid()
         unsafe {
             qWidgetSetMinimumSize(ptr, minw, minh)
         }
     }
-    
+
     /// 设置最大尺寸
     public func setMaximumSize(maxw: Int32, maxh: Int32) {
+        checkValid()
         unsafe {
             qWidgetSetMaximumSize(ptr, maxw, maxh)
         }
     }
-    
+
     /// 设置当前索引变化回调
     public func setOnCurrentIndexChanged(callback: Int32Callback) {
+        checkValid()
         unsafe {
             qComboBoxConnectCurrentIndexChanged(ptr, callback)
         }
     }
-    
+
     /// 断开索引变化信号
     public func disconnectCurrentIndexChanged() {
+        checkValid()
         unsafe {
             qComboBoxDisconnectCurrentIndexChanged(ptr)
         }
     }
-    
+
     /// 设置当前文本变化回调
     public func setOnCurrentTextChanged(callback: CStringCallback) {
+        checkValid()
         unsafe {
             qComboBoxConnectCurrentTextChanged(ptr, callback)
         }
     }
-    
+
     /// 断开当前文本变化回调
     public func disconnectCurrentTextChanged() {
+        checkValid()
         unsafe {
             qComboBoxDisconnectCurrentTextChanged(ptr)
         }
     }
-    
+
     /// 断开该组合框的全部信号（currentIndexChanged/currentTextChanged）
     public func disconnect(): Unit {
+        checkValid()
         disconnectCurrentIndexChanged()
         disconnectCurrentTextChanged()
     }

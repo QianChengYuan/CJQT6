@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(CJFW VERSION 1.0.0 LANGUAGES CXX)
+project(CJQT6 VERSION 1.0.0 LANGUAGES CXX)
 
 # MSVC 下自动导出所有符号（MinGW 默认导出，无需此选项）
 if(MSVC)
@@ -81,6 +81,7 @@ set(WIDGETS_SOURCES
     native/src/widgets/bridge_ext_wrange.cpp
     native/src/widgets/bridge_ext_wlayout.cpp
     native/src/widgets/bridge_ext_wmisc.cpp
+    native/src/widgets/bridge_ext_apicomplete.cpp
 )
 
 # Views模块 - 表格视图、列表视图、树形视图

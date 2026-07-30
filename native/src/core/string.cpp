@@ -2,6 +2,8 @@
 #include "types.h"
 #include <algorithm>
 #include <sstream>
+#include <cstdlib>
+#include <cstring>
 #include <QStringList>
 #include <QRegularExpression>
 
@@ -38,7 +40,14 @@ std::string String::toStdString() const {
 }
 
 const char* String::toCString() const {
-    return m_data.toLocal8Bit().constData();
+    // 使用 malloc+memcpy 复制到堆上，避免临时 QByteArray 析构后悬垂指针
+    // 调用方（Cangjie FFI）会通过 LibC.free 释放
+    QByteArray arr = m_data.toUtf8();
+    char* result = static_cast<char*>(std::malloc(static_cast<size_t>(arr.size()) + 1));
+    if (result) {
+        std::memcpy(result, arr.constData(), static_cast<size_t>(arr.size()) + 1);
+    }
+    return result;
 }
 
 String String::toUpper() const {

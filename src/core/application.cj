@@ -37,6 +37,9 @@ public class QApplication {
     public init() {
         unsafe {
             ptr = qApplicationCreate()
+            if (ptr == 0) {
+                throw CreateFailedException("QApplication 创建失败")
+            }
         }
     }
     

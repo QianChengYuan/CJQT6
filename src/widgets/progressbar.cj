@@ -41,6 +41,8 @@ foreign func qProgressBarIsTextVisible(ptr: Int64): Int32
 foreign func qProgressBarInvertedAppearance(ptr: Int64): Int32
 // QProgressBar::setAlignment() - 设置对齐方式
 foreign func qProgressBarSetAlignment(ptr: Int64, alignment: Int32): Unit
+// QProgressBar::text() - 获取当前显示文本
+foreign func qProgressBarText(ptr: Int64): CString
 // QProgressBar::connectValueChanged() - 连接值变化信号
 foreign func qProgressBarConnectValueChanged(ptr: Int64, callback: Int32Callback): Unit
 // QProgressBar析构 - 删除控件
@@ -122,6 +124,15 @@ public class QProgressBar <: QtResource {
         checkValid()
         unsafe {
             let cstr = qProgressBarFormat(ptr)
+            return cstr.toString()
+        }
+    }
+
+    /// 获取当前显示文本（如"50%"）
+    public func text(): String {
+        checkValid()
+        unsafe {
+            let cstr = qProgressBarText(ptr)
             return cstr.toString()
         }
     }

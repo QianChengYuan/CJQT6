@@ -167,6 +167,22 @@ public class QPushButton <: QtResource {
         }
     }
 
+    /// 设置最小尺寸
+    public func setMinimumSize(minw: Int32, minh: Int32): Unit {
+        checkValid()
+        unsafe {
+            qWidgetSetMinimumSize(ptr, minw, minh)
+        }
+    }
+
+    /// 设置最大尺寸
+    public func setMaximumSize(maxw: Int32, maxh: Int32): Unit {
+        checkValid()
+        unsafe {
+            qWidgetSetMaximumSize(ptr, maxw, maxh)
+        }
+    }
+
     /// 设置启用/禁用
     public func setEnabled(enabled: Bool): Unit {
         checkValid()

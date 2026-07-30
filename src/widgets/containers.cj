@@ -26,6 +26,10 @@ foreign func qGroupBoxIsChecked(ptr: Int64): Bool
 foreign func qGroupBoxSetAlignment(ptr: Int64, alignment: Int32): Unit
 // QGroupBox::alignment() - 获取对齐方式
 foreign func qGroupBoxAlignment(ptr: Int64): Int32
+// QGroupBox::setFlat() - 设置扁平样式
+foreign func qGroupBoxSetFlat(ptr: Int64, flat: Int32): Unit
+// QGroupBox::isFlat() - 是否扁平样式
+foreign func qGroupBoxIsFlat(ptr: Int64): Int32
 // QGroupBox::connectClicked() - 连接点击信号
 foreign func qGroupBoxConnectClicked(ptr: Int64, callback: BoolCallback): Unit
 // QGroupBox::connectToggled() - 连接勾选状态变化信号
@@ -110,6 +114,10 @@ foreign func qFrameFrameStyle(ptr: Int64): Int32
 foreign func qFrameFrameShape(ptr: Int64): Int32
 // QFrame::frameShadow() - 获取边框阴影
 foreign func qFrameFrameShadow(ptr: Int64): Int32
+// QFrame::lineWidth() - 获取线宽
+foreign func qFrameLineWidth(ptr: Int64): Int32
+// QFrame::frameWidth() - 获取边框总宽度
+foreign func qFrameFrameWidth(ptr: Int64): Int32
 // QFrame::setMidLineWidth() - 设置中线宽度
 foreign func qFrameSetMidLineWidth(ptr: Int64, width: Int32): Unit
 // QFrame::midLineWidth() - 获取中线宽度
@@ -223,6 +231,22 @@ public class QGroupBox <: QtResource {
         checkValid()
         unsafe {
             qGroupBoxConnectToggled(ptr, callback)
+        }
+    }
+
+    /// 设置扁平样式
+    public func setFlat(flat: Bool) {
+        checkValid()
+        unsafe {
+            qGroupBoxSetFlat(ptr, if (flat) { 1 } else { 0 })
+        }
+    }
+
+    /// 是否扁平样式
+    public func isFlat(): Bool {
+        checkValid()
+        unsafe {
+            return qGroupBoxIsFlat(ptr) != 0
         }
     }
     
@@ -826,6 +850,22 @@ public class QFrame <: QtResource {
             qFrameSetLineWidth(ptr, width)
         }
     }
+
+    /// 获取线宽
+    public func lineWidth(): Int32 {
+        checkValid()
+        unsafe {
+            return qFrameLineWidth(ptr)
+        }
+    }
+
+    /// 获取边框总宽度（基于线宽和中线宽的实际渲染宽度）
+    public func frameWidth(): Int32 {
+        checkValid()
+        unsafe {
+            return qFrameFrameWidth(ptr)
+        }
+    }
     
     /// 设置整体边框样式（形状 | 阴影 的组合值）
     public func setFrameStyle(style: Int32) {
@@ -1135,6 +1175,48 @@ public class QSplitter <: QtResource {
         checkValid()
         unsafe {
             qWidgetResize(ptr, width, height)
+        }
+    }
+    
+    /// 设置启用/禁用
+    public func setEnabled(enabled: Bool) {
+        checkValid()
+        unsafe {
+            qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
+        }
+    }
+    
+    /// 检查是否启用
+    public func isEnabled(): Bool {
+        checkValid()
+        unsafe {
+            qWidgetIsEnabled(ptr) == 1
+        }
+    }
+    
+    /// 设置样式表
+    public func setStyleSheet(style: String) {
+        checkValid()
+        unsafe {
+            let cstr = LibC.mallocCString(style)
+            qWidgetSetStyleSheet(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+    
+    /// 设置最小尺寸
+    public func setMinimumSize(minw: Int32, minh: Int32) {
+        checkValid()
+        unsafe {
+            qWidgetSetMinimumSize(ptr, minw, minh)
+        }
+    }
+    
+    /// 设置最大尺寸
+    public func setMaximumSize(maxw: Int32, maxh: Int32) {
+        checkValid()
+        unsafe {
+            qWidgetSetMaximumSize(ptr, maxw, maxh)
         }
     }
     

@@ -12,9 +12,11 @@ package cjqt6.core
 // ============================================================
 
 import std.collection.HashMap
+import std.sync.{Mutex}
 
 // void 闭包注册表：id -> 可捕获闭包
 private var gVoidRegistry: HashMap<Int64, () -> Unit> = HashMap<Int64, () -> Unit>()
+private let gRegistryLock = Mutex()
 private var gNextId: Int64 = 1
 private var gDispatcherSet: Bool = false
 
@@ -31,19 +33,23 @@ private let gVoidDispatcher: CFunc<(Int64) -> Unit> = { id: Int64 =>
 
 /// 注册一个可捕获的 void 闭包，返回注册表 id（供 native 按 id 派发）
 public func registerVoidCallback(callback: () -> Unit): Int64 {
-    if (!gDispatcherSet) {
-        unsafe {
-            qSetCallbackDispatcher(gVoidDispatcher)
+    synchronized (gRegistryLock) {
+        if (!gDispatcherSet) {
+            unsafe {
+                qSetCallbackDispatcher(gVoidDispatcher)
+            }
+            gDispatcherSet = true
         }
-        gDispatcherSet = true
+        let id = gNextId
+        gNextId = gNextId + 1
+        gVoidRegistry[id] = callback
+        return id
     }
-    let id = gNextId
-    gNextId = gNextId + 1
-    gVoidRegistry[id] = callback
-    return id
 }
 
 /// 注销指定 id 的闭包（连接断开时调用，避免注册表泄漏）
 public func unregisterVoidCallback(id: Int64): Unit {
-    gVoidRegistry.remove(id)
+    synchronized (gRegistryLock) {
+        gVoidRegistry.remove(id)
+    }
 }

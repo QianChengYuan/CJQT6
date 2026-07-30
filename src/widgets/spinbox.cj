@@ -31,6 +31,8 @@ foreign func qSpinBoxSetGroupSeparatorShown(ptr: Int64, shown: Int32): Unit
 foreign func qSpinBoxText(ptr: Int64): CString
 foreign func qSpinBoxConnectTextChanged(ptr: Int64, callback: CStringCallback): Unit
 foreign func qSpinBoxConnectEditingFinished(ptr: Int64, callback: VoidCallback): Unit
+foreign func qSpinBoxSelectAll(ptr: Int64): Unit
+foreign func qSpinBoxSetFocus(ptr: Int64): Unit
 foreign func qSpinBoxDelete(ptr: Int64): Unit
 
 /// 整数旋转框部件
@@ -272,6 +274,22 @@ public class QSpinBox <: QtResource {
         checkValid()
         unsafe {
             qSpinBoxConnectEditingFinished(ptr, callback)
+        }
+    }
+
+    /// 全选文本
+    public func selectAll(): Unit {
+        checkValid()
+        unsafe {
+            qSpinBoxSelectAll(ptr)
+        }
+    }
+
+    /// 设置焦点
+    public func setFocus(): Unit {
+        checkValid()
+        unsafe {
+            qSpinBoxSetFocus(ptr)
         }
     }
     

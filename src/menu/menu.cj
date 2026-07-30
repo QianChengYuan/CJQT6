@@ -1,8 +1,7 @@
 package cjqt6.menu
 
-import cjqt6.core.{VoidCallback, SignalConnection, registerVoidCallback, WIDGET_TYPE_ACTION, SIGNAL_TRIGGERED}
+import cjqt6.core.*
 
-// ============================================================
 // FFI 声明
 // ============================================================
 
@@ -74,23 +73,32 @@ foreign func qMainWindowDelete(ptr: Int64): Unit
 // QAction - 动作类
 // ============================================================
 
-public class QAction {
-    private let ptr: Int64
+public class QAction <: QtResource {
+    private var ptr: Int64 = 0
+    private var closed: Bool = false
     
     public init(text: String) {
         unsafe {
             var cstr = LibC.mallocCString(text)
             ptr = qActionCreate(cstr)
             LibC.free(cstr)
+            if (ptr == 0) {
+                throw CreateFailedException("QAction 创建失败")
+            }
         }
     }
     
-    // 内部构造函数（从指针创建）
+    // 内部构造函数（从指针创建，不获取所有权）
     public init(ptr: Int64) {
+        if (ptr == 0) {
+            throw CreateFailedException("QAction 指针为空")
+        }
         this.ptr = ptr
+        closed = false
     }
     
     public func setText(text: String) {
+        checkValid()
         unsafe {
             var cstr = LibC.mallocCString(text)
             qActionSetText(ptr, cstr)
@@ -99,6 +107,7 @@ public class QAction {
     }
     
     public func text(): String {
+        checkValid()
         unsafe {
             let cstr = qActionText(ptr)
             let result = cstr.toString()
@@ -107,6 +116,7 @@ public class QAction {
     }
     
     public func setShortcut(shortcut: String) {
+        checkValid()
         unsafe {
             var cstr = LibC.mallocCString(shortcut)
             qActionSetShortcut(ptr, cstr)
@@ -115,54 +125,63 @@ public class QAction {
     }
     
     public func setCheckable(checkable: Bool) {
+        checkValid()
         unsafe {
             qActionSetCheckable(ptr, checkable)
         }
     }
     
     public func isCheckable(): Bool {
+        checkValid()
         unsafe {
             qActionIsCheckable(ptr)
         }
     }
     
     public func setChecked(checked: Bool) {
+        checkValid()
         unsafe {
             qActionSetChecked(ptr, checked)
         }
     }
     
     public func isChecked(): Bool {
+        checkValid()
         unsafe {
             qActionIsChecked(ptr)
         }
     }
     
     public func setEnabled(enabled: Bool) {
+        checkValid()
         unsafe {
             qActionSetEnabled(ptr, enabled)
         }
     }
     
     public func isEnabled(): Bool {
+        checkValid()
         unsafe {
             qActionIsEnabled(ptr)
         }
     }
     
     public func setVisible(visible: Bool) {
+        checkValid()
         unsafe {
             qActionSetVisible(ptr, visible)
         }
     }
     
     public func isVisible(): Bool {
+        checkValid()
         unsafe {
             qActionIsVisible(ptr)
         }
     }
     
     public func setOnTriggered(callback: VoidCallback) {
+        checkValid()
         unsafe {
             qActionConnectTriggered(ptr, callback)
         }
@@ -170,6 +189,7 @@ public class QAction {
 
     /// 设置触发回调（可捕获局部变量；P1c 闭包捕获），返回 SignalConnection 句柄
     public func setOnTriggeredCapture(callback: () -> Unit): SignalConnection {
+        checkValid()
         let id = registerVoidCallback(callback)
         unsafe {
             qActionConnectTriggeredId(ptr, id)
@@ -178,21 +198,47 @@ public class QAction {
     }
     
     public func disconnect() {
+        checkValid()
         unsafe {
             qActionDisconnectTriggered(ptr)
         }
     }
     
     public func getPtr(): Int64 {
-        ptr
+        return ptr
     }
     
-    public func delete() {
-        if (ptr != 0) {
+    public func isClosed(): Bool {
+        return closed
+    }
+    
+    public func isValid(): Bool {
+        return !closed && ptr != 0
+    }
+    
+    public func checkValid(): Unit {
+        if (closed) {
+            throw ResourceDisposedException("QAction 已经被释放")
+        }
+        if (ptr == 0) {
+            throw NullPointerException("QAction 指针为空")
+        }
+    }
+    
+    /// 关闭资源，释放Qt对象
+    public func close(): Unit {
+        if (!closed && ptr != 0) {
             unsafe {
                 qActionDelete(ptr)
             }
+            closed = true
+            ptr = 0
         }
+    }
+    
+    /// 删除动作（兼容旧API）
+    public func delete(): Unit {
+        close()
     }
 }
 

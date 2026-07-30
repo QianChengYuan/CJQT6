@@ -560,6 +560,7 @@ public class QTextEdit <: QtResource {
     }
     
     /// 兼容旧API
+    @Deprecated[message: "请使用 setStyleSheet 代替"]
     public func setWidgetStyleSheet(style: String) {
         checkValid()
         unsafe {

@@ -36,8 +36,10 @@ public class LCDSegmentStyle {
 }
 
 /// LCD数字显示部件
-public class QLCDNumber {
+/// 支持资源管理，可使用 try-with-resources 自动释放
+public class QLCDNumber <: QtResource {
     private var ptr: Int64 = 0
+    private var closed: Bool = false
     
     public init() {
         unsafe {
@@ -52,18 +54,21 @@ public class QLCDNumber {
     }
     
     public func show() {
+        checkValid()
         unsafe {
             qWidgetShow(ptr)
         }
     }
     
     public func hide() {
+        checkValid()
         unsafe {
             qWidgetHide(ptr)
         }
     }
     
     public func resize(width: Int32, height: Int32) {
+        checkValid()
         unsafe {
             qWidgetResize(ptr, width, height)
         }
@@ -71,6 +76,7 @@ public class QLCDNumber {
     
     /// 显示浮点数值
     public func display(value: Float64) {
+        checkValid()
         unsafe {
             qLCDNumberDisplay(ptr, value)
         }
@@ -78,6 +84,7 @@ public class QLCDNumber {
     
     /// 显示整数值
     public func displayInt(value: Int32) {
+        checkValid()
         unsafe {
             qLCDNumberDisplayInt(ptr, value)
         }
@@ -85,6 +92,7 @@ public class QLCDNumber {
     
     /// 设置显示模式
     public func setMode(mode: Int32) {
+        checkValid()
         unsafe {
             qLCDNumberSetMode(ptr, mode)
         }
@@ -92,6 +100,7 @@ public class QLCDNumber {
     
     /// 获取显示模式
     public func mode(): Int32 {
+        checkValid()
         unsafe {
             return qLCDNumberMode(ptr)
         }
@@ -99,6 +108,7 @@ public class QLCDNumber {
     
     /// 设置段样式
     public func setSegmentStyle(style: Int32) {
+        checkValid()
         unsafe {
             qLCDNumberSetSegmentStyle(ptr, style)
         }
@@ -106,6 +116,7 @@ public class QLCDNumber {
     
     /// 获取段样式
     public func segmentStyle(): Int32 {
+        checkValid()
         unsafe {
             return qLCDNumberSegmentStyle(ptr)
         }
@@ -113,6 +124,7 @@ public class QLCDNumber {
     
     /// 设置小数点样式
     public func setSmallDecimalPoint(small: Bool) {
+        checkValid()
         unsafe {
             qLCDNumberSetSmallDecimalPoint(ptr, small)
         }
@@ -120,6 +132,7 @@ public class QLCDNumber {
     
     /// 获取小数点样式
     public func smallDecimalPoint(): Bool {
+        checkValid()
         unsafe {
             return qLCDNumberSmallDecimalPoint(ptr)
         }
@@ -127,6 +140,7 @@ public class QLCDNumber {
     
     /// 设置启用/禁用
     public func setEnabled(enabled: Bool) {
+        checkValid()
         unsafe {
             qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
         }
@@ -134,6 +148,7 @@ public class QLCDNumber {
     
     /// 检查是否启用
     public func isEnabled(): Bool {
+        checkValid()
         unsafe {
             qWidgetIsEnabled(ptr) == 1
         }
@@ -141,6 +156,7 @@ public class QLCDNumber {
     
     /// 设置样式表
     public func setStyleSheet(style: String) {
+        checkValid()
         unsafe {
             let cstr = LibC.mallocCString(style)
             qWidgetSetStyleSheet(ptr, cstr)
@@ -150,6 +166,7 @@ public class QLCDNumber {
     
     /// 设置最小尺寸
     public func setMinimumSize(minw: Int32, minh: Int32) {
+        checkValid()
         unsafe {
             qWidgetSetMinimumSize(ptr, minw, minh)
         }
@@ -157,6 +174,7 @@ public class QLCDNumber {
     
     /// 设置最大尺寸
     public func setMaximumSize(maxw: Int32, maxh: Int32) {
+        checkValid()
         unsafe {
             qWidgetSetMaximumSize(ptr, maxw, maxh)
         }
@@ -164,6 +182,7 @@ public class QLCDNumber {
     
     /// 获取数字位数
     public func digitCount(): Int32 {
+        checkValid()
         unsafe {
             return qLCDNumberDigitCount(ptr)
         }
@@ -171,6 +190,7 @@ public class QLCDNumber {
     
     /// 设置数字位数
     public func setDigitCount(numDigits: Int32) {
+        checkValid()
         unsafe {
             qLCDNumberSetDigitCount(ptr, numDigits)
         }
@@ -178,6 +198,7 @@ public class QLCDNumber {
     
     /// 检查是否溢出
     public func checkOverflow(value: Float64): Bool {
+        checkValid()
         unsafe {
             return qLCDNumberCheckOverflow(ptr, value)
         }
@@ -185,6 +206,7 @@ public class QLCDNumber {
     
     /// 获取当前显示的数值
     public func value(): Float64 {
+        checkValid()
         unsafe {
             return qLCDNumberValue(ptr)
         }
@@ -192,6 +214,7 @@ public class QLCDNumber {
     
     /// 显示字符串
     public func display(value: String) {
+        checkValid()
         unsafe {
             let cstr = LibC.mallocCString(value)
             qLCDNumberDisplayString(ptr, cstr)
@@ -204,14 +227,40 @@ public class QLCDNumber {
         return ptr
     }
     
-    /// 删除LCD
-    public func delete() {
-        if (ptr != 0) {
+    /// 是否已关闭
+    public func isClosed(): Bool {
+        return closed
+    }
+    
+    /// 检查对象有效性
+    public func isValid(): Bool {
+        return !closed && ptr != 0
+    }
+    
+    /// 检查有效性，无效时抛出异常
+    public func checkValid(): Unit {
+        if (closed) {
+            throw ResourceDisposedException("QLCDNumber 已经被释放")
+        }
+        if (ptr == 0) {
+            throw NullPointerException("QLCDNumber 指针为空")
+        }
+    }
+    
+    /// 关闭资源，释放Qt对象
+    public func close(): Unit {
+        if (!closed && ptr != 0) {
             unsafe {
                 qSignalCleanup(ptr)
                 qLCDNumberDelete(ptr)
             }
+            closed = true
             ptr = 0
         }
+    }
+    
+    /// 删除LCD（兼容旧API）
+    public func delete(): Unit {
+        close()
     }
 }

@@ -16,8 +16,10 @@ foreign func qRadioButtonIsAutoExclusive(ptr: Int64): Int32
 foreign func qRadioButtonConnectClicked(ptr: Int64, callback: Int32Callback): Unit
 
 /// 单选按钮部件
-public class QRadioButton {
+/// 支持资源管理，可使用 try-with-resources 自动释放
+public class QRadioButton <: QtResource {
     private var ptr: Int64 = 0
+    private var closed: Bool = false
     
     public init() {
         unsafe {
@@ -26,24 +28,28 @@ public class QRadioButton {
     }
     
     public func show() {
+        checkValid()
         unsafe {
             qWidgetShow(ptr)
         }
     }
     
     public func hide() {
+        checkValid()
         unsafe {
             qWidgetHide(ptr)
         }
     }
     
     public func resize(width: Int32, height: Int32) {
+        checkValid()
         unsafe {
             qWidgetResize(ptr, width, height)
         }
     }
     
     public func setText(text: String) {
+        checkValid()
         unsafe {
             let cstr = LibC.mallocCString(text)
             qRadioButtonSetText(ptr, cstr)
@@ -52,6 +58,7 @@ public class QRadioButton {
     }
     
     public func text(): String {
+        checkValid()
         unsafe {
             let cstr = qRadioButtonText(ptr)
             return cstr.toString()
@@ -59,12 +66,14 @@ public class QRadioButton {
     }
     
     public func setChecked(checked: Bool) {
+        checkValid()
         unsafe {
             qRadioButtonSetChecked(ptr, checked)
         }
     }
     
     public func isChecked(): Bool {
+        checkValid()
         unsafe {
             return qRadioButtonIsChecked(ptr)
         }
@@ -72,6 +81,7 @@ public class QRadioButton {
     
     /// 设置启用/禁用
     public func setEnabled(enabled: Bool) {
+        checkValid()
         unsafe {
             qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
         }
@@ -79,6 +89,7 @@ public class QRadioButton {
     
     /// 检查是否启用
     public func isEnabled(): Bool {
+        checkValid()
         unsafe {
             qWidgetIsEnabled(ptr) == 1
         }
@@ -86,6 +97,7 @@ public class QRadioButton {
     
     /// 设置样式表
     public func setStyleSheet(style: String) {
+        checkValid()
         unsafe {
             let cstr = LibC.mallocCString(style)
             qWidgetSetStyleSheet(ptr, cstr)
@@ -95,6 +107,7 @@ public class QRadioButton {
     
     /// 设置最小尺寸
     public func setMinimumSize(minw: Int32, minh: Int32) {
+        checkValid()
         unsafe {
             qWidgetSetMinimumSize(ptr, minw, minh)
         }
@@ -102,6 +115,7 @@ public class QRadioButton {
     
     /// 设置最大尺寸
     public func setMaximumSize(maxw: Int32, maxh: Int32) {
+        checkValid()
         unsafe {
             qWidgetSetMaximumSize(ptr, maxw, maxh)
         }
@@ -109,6 +123,7 @@ public class QRadioButton {
     
     /// 设置切换回调
     public func setOnToggled(callback: Int32Callback) {
+        checkValid()
         unsafe {
             qRadioButtonConnectToggled(ptr, callback)
         }
@@ -116,6 +131,7 @@ public class QRadioButton {
     
     /// 断开切换信号
     public func disconnectToggled() {
+        checkValid()
         unsafe {
             qRadioButtonDisconnectToggled(ptr)
         }
@@ -128,6 +144,7 @@ public class QRadioButton {
     
     /// 设置是否自动互斥（同父容器内自动排他）
     public func setAutoExclusive(autoExclusive: Bool) {
+        checkValid()
         unsafe {
             qRadioButtonSetAutoExclusive(ptr, if (autoExclusive) { 1 } else { 0 })
         }
@@ -135,6 +152,7 @@ public class QRadioButton {
     
     /// 是否自动互斥
     public func isAutoExclusive(): Bool {
+        checkValid()
         unsafe {
             return qRadioButtonIsAutoExclusive(ptr) != 0
         }
@@ -142,6 +160,7 @@ public class QRadioButton {
     
     /// 点击回调（带 checked 状态，0/1）
     public func setOnClicked(callback: Int32Callback) {
+        checkValid()
         unsafe {
             qRadioButtonConnectClicked(ptr, callback)
         }
@@ -152,14 +171,40 @@ public class QRadioButton {
         return ptr
     }
     
-    /// 删除单选按钮
-    public func delete() {
-        if (ptr != 0) {
+    /// 是否已关闭
+    public func isClosed(): Bool {
+        return closed
+    }
+    
+    /// 检查对象有效性
+    public func isValid(): Bool {
+        return !closed && ptr != 0
+    }
+    
+    /// 检查有效性，无效时抛出异常
+    public func checkValid(): Unit {
+        if (closed) {
+            throw ResourceDisposedException("QRadioButton 已经被释放")
+        }
+        if (ptr == 0) {
+            throw NullPointerException("QRadioButton 指针为空")
+        }
+    }
+    
+    /// 关闭资源，释放Qt对象
+    public func close(): Unit {
+        if (!closed && ptr != 0) {
             unsafe {
                 qSignalCleanup(ptr)
                 qRadioButtonDelete(ptr)
             }
+            closed = true
             ptr = 0
         }
+    }
+    
+    /// 删除单选按钮（兼容旧API）
+    public func delete(): Unit {
+        close()
     }
 }

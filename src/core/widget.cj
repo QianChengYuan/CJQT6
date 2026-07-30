@@ -60,13 +60,10 @@ public class QWidget <: QtResource {
     
     /// 显示窗口
     public func show(): Unit {
-        eprintln("[DBG] QWidget.show() called, ptr=${ptr}, closed=${closed}")
         checkValid()
-        eprintln("[DBG] QWidget.show() checkValid passed")
         unsafe {
             qWidgetShow(ptr)
         }
-        eprintln("[DBG] QWidget.show() done")
     }
     
     /// 隐藏窗口
