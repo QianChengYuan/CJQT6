@@ -246,8 +246,11 @@ public class QAction <: QtResource {
 // QMenu - 菜单类
 // ============================================================
 
-public class QMenu {
-    private let ptr: Int64
+/// 菜单类
+/// 支持资源管理，可使用 try-with-resources 自动释放
+public class QMenu <: QtResource {
+    private var ptr: Int64 = 0
+    private var closed: Bool = false
     private let ownsPtr: Bool
     
     public init(title: String) {
@@ -255,17 +258,25 @@ public class QMenu {
             var cstr = LibC.mallocCString(title)
             ptr = qMenuCreate(cstr)
             LibC.free(cstr)
+            if (ptr == 0) {
+                throw CreateFailedException("QMenu 创建失败")
+            }
         }
         ownsPtr = true
     }
     
     // 内部构造函数（从指针创建，不获取所有权）
     public init(ptr: Int64) {
+        if (ptr == 0) {
+            throw CreateFailedException("QMenu 指针为空")
+        }
         this.ptr = ptr
         this.ownsPtr = false
+        this.closed = false
     }
     
     public func addAction(text: String): QAction {
+        checkValid()
         unsafe {
             var cstr = LibC.mallocCString(text)
             let actionPtr = qMenuAddAction(ptr, cstr)
@@ -276,18 +287,21 @@ public class QMenu {
     
     // 通过指针添加已存在的QAction
     public func addActionPtr(actionPtr: Int64) {
+        checkValid()
         unsafe {
             qMenuAddActionByPtr(ptr, actionPtr)
         }
     }
     
     public func addSeparator() {
+        checkValid()
         unsafe {
             qMenuAddSeparator(ptr)
         }
     }
     
     public func addMenu(title: String): QMenu {
+        checkValid()
         unsafe {
             var cstr = LibC.mallocCString(title)
             let menuPtr = qMenuAddMenu(ptr, cstr)
@@ -297,6 +311,7 @@ public class QMenu {
     }
     
     public func setTitle(title: String) {
+        checkValid()
         unsafe {
             var cstr = LibC.mallocCString(title)
             qMenuSetTitle(ptr, cstr)
@@ -305,15 +320,40 @@ public class QMenu {
     }
     
     public func getPtr(): Int64 {
-        ptr
+        return ptr
     }
     
-    public func delete() {
-        if (ptr != 0 && ownsPtr) {
+    public func isClosed(): Bool {
+        return closed
+    }
+    
+    public func isValid(): Bool {
+        return !closed && ptr != 0
+    }
+    
+    public func checkValid(): Unit {
+        if (closed) {
+            throw ResourceDisposedException("QMenu 已经被释放")
+        }
+        if (ptr == 0) {
+            throw NullPointerException("QMenu 指针为空")
+        }
+    }
+    
+    /// 关闭资源，释放Qt对象（仅 ownsPtr=true 时删除C++对象）
+    public func close(): Unit {
+        if (!closed && ptr != 0 && ownsPtr) {
             unsafe {
                 qMenuDelete(ptr)
             }
         }
+        closed = true
+        ptr = 0
+    }
+    
+    /// 删除菜单（兼容旧API）
+    public func delete(): Unit {
+        close()
     }
 }
 
@@ -321,16 +361,21 @@ public class QMenu {
 // QMenuBar - 菜单栏类
 // ============================================================
 
-public class QMenuBar {
-    private let ptr: Int64
+public class QMenuBar <: QtResource {
+    private var ptr: Int64 = 0
+    private var closed: Bool = false
     
     public init() {
         unsafe {
             ptr = qMenuBarCreate()
+            if (ptr == 0) {
+                throw CreateFailedException("QMenuBar 创建失败")
+            }
         }
     }
     
     public func addMenu(title: String): QMenu {
+        checkValid()
         unsafe {
             var cstr = LibC.mallocCString(title)
             let menuPtr = qMenuBarAddMenu(ptr, cstr)
@@ -343,12 +388,37 @@ public class QMenuBar {
         ptr
     }
     
-    public func delete() {
-        if (ptr != 0) {
+    public func isClosed(): Bool {
+        return closed
+    }
+    
+    public func isValid(): Bool {
+        return !closed && ptr != 0
+    }
+    
+    public func checkValid(): Unit {
+        if (closed) {
+            throw ResourceDisposedException("QMenuBar 已经被释放")
+        }
+        if (ptr == 0) {
+            throw NullPointerException("QMenuBar 指针为空")
+        }
+    }
+    
+    /// 关闭资源，释放Qt对象
+    public func close(): Unit {
+        if (!closed && ptr != 0) {
             unsafe {
                 qMenuBarDelete(ptr)
             }
         }
+        closed = true
+        ptr = 0
+    }
+    
+    /// 删除菜单栏（兼容旧API）
+    public func delete(): Unit {
+        close()
     }
 }
 
@@ -356,14 +426,18 @@ public class QMenuBar {
 // QToolBar - 工具栏类
 // ============================================================
 
-public class QToolBar {
-    private let ptr: Int64
+public class QToolBar <: QtResource {
+    private var ptr: Int64 = 0
+    private var closed: Bool = false
     
     public init(title: String) {
         unsafe {
             var cstr = LibC.mallocCString(title)
             ptr = qToolBarCreate(cstr)
             LibC.free(cstr)
+            if (ptr == 0) {
+                throw CreateFailedException("QToolBar 创建失败")
+            }
         }
     }
     
@@ -372,28 +446,35 @@ public class QToolBar {
             var cstr = LibC.mallocCString("")
             ptr = qToolBarCreate(cstr)
             LibC.free(cstr)
+            if (ptr == 0) {
+                throw CreateFailedException("QToolBar 创建失败")
+            }
         }
     }
     
     public func addAction(actionPtr: Int64) {
+        checkValid()
         unsafe {
             qToolBarAddAction(ptr, actionPtr)
         }
     }
     
     public func addSeparator() {
+        checkValid()
         unsafe {
             qToolBarAddSeparator(ptr)
         }
     }
     
     public func addWidget(widgetPtr: Int64) {
+        checkValid()
         unsafe {
             qToolBarAddWidget(ptr, widgetPtr)
         }
     }
     
     public func setMovable(movable: Bool) {
+        checkValid()
         unsafe {
             qToolBarSetMovable(ptr, movable)
         }
@@ -403,12 +484,37 @@ public class QToolBar {
         ptr
     }
     
-    public func delete() {
-        if (ptr != 0) {
+    public func isClosed(): Bool {
+        return closed
+    }
+    
+    public func isValid(): Bool {
+        return !closed && ptr != 0
+    }
+    
+    public func checkValid(): Unit {
+        if (closed) {
+            throw ResourceDisposedException("QToolBar 已经被释放")
+        }
+        if (ptr == 0) {
+            throw NullPointerException("QToolBar 指针为空")
+        }
+    }
+    
+    /// 关闭资源，释放Qt对象
+    public func close(): Unit {
+        if (!closed && ptr != 0) {
             unsafe {
                 qToolBarDelete(ptr)
             }
         }
+        closed = true
+        ptr = 0
+    }
+    
+    /// 删除工具栏（兼容旧API）
+    public func delete(): Unit {
+        close()
     }
 }
 
@@ -416,16 +522,21 @@ public class QToolBar {
 // QStatusBar - 状态栏类
 // ============================================================
 
-public class QStatusBar {
-    private let ptr: Int64
+public class QStatusBar <: QtResource {
+    private var ptr: Int64 = 0
+    private var closed: Bool = false
     
     public init() {
         unsafe {
             ptr = qStatusBarCreate()
+            if (ptr == 0) {
+                throw CreateFailedException("QStatusBar 创建失败")
+            }
         }
     }
     
     public func showMessage(message: String) {
+        checkValid()
         unsafe {
             var cstr = LibC.mallocCString(message)
             qStatusBarShowMessage(ptr, cstr, 0)
@@ -434,6 +545,7 @@ public class QStatusBar {
     }
     
     public func showMessageWithTimeout(message: String, timeout: Int32) {
+        checkValid()
         unsafe {
             var cstr = LibC.mallocCString(message)
             qStatusBarShowMessage(ptr, cstr, timeout)
@@ -442,18 +554,21 @@ public class QStatusBar {
     }
     
     public func clearMessage() {
+        checkValid()
         unsafe {
             qStatusBarClearMessage(ptr)
         }
     }
     
     public func addWidget(widgetPtr: Int64) {
+        checkValid()
         unsafe {
             qStatusBarAddWidget(ptr, widgetPtr, 0)
         }
     }
     
     public func addWidgetWithStretch(widgetPtr: Int64, stretch: Int32) {
+        checkValid()
         unsafe {
             qStatusBarAddWidget(ptr, widgetPtr, stretch)
         }
@@ -463,12 +578,37 @@ public class QStatusBar {
         ptr
     }
     
-    public func delete() {
-        if (ptr != 0) {
+    public func isClosed(): Bool {
+        return closed
+    }
+    
+    public func isValid(): Bool {
+        return !closed && ptr != 0
+    }
+    
+    public func checkValid(): Unit {
+        if (closed) {
+            throw ResourceDisposedException("QStatusBar 已经被释放")
+        }
+        if (ptr == 0) {
+            throw NullPointerException("QStatusBar 指针为空")
+        }
+    }
+    
+    /// 关闭资源，释放Qt对象
+    public func close(): Unit {
+        if (!closed && ptr != 0) {
             unsafe {
                 qStatusBarDelete(ptr)
             }
         }
+        closed = true
+        ptr = 0
+    }
+    
+    /// 删除状态栏（兼容旧API）
+    public func delete(): Unit {
+        close()
     }
 }
 
@@ -476,28 +616,35 @@ public class QStatusBar {
 // QMainWindow - 主窗口类
 // ============================================================
 
-public class QMainWindow {
-    private let ptr: Int64
+public class QMainWindow <: QtResource {
+    private var ptr: Int64 = 0
+    private var closed: Bool = false
     
     public init() {
         unsafe {
             ptr = qMainWindowCreate()
+            if (ptr == 0) {
+                throw CreateFailedException("QMainWindow 创建失败")
+            }
         }
     }
     
     public func show() {
+        checkValid()
         unsafe {
             qWidgetShow(ptr)
         }
     }
     
     public func hide() {
+        checkValid()
         unsafe {
             qWidgetHide(ptr)
         }
     }
     
     public func setTitle(title: String) {
+        checkValid()
         unsafe {
             var cstr = LibC.mallocCString(title)
             qMainWindowSetWindowTitle(ptr, cstr)
@@ -506,30 +653,35 @@ public class QMainWindow {
     }
     
     public func resize(width: Int32, height: Int32) {
+        checkValid()
         unsafe {
             qWidgetResize(ptr, width, height)
         }
     }
     
     public func setMenuBar(menuBarPtr: Int64) {
+        checkValid()
         unsafe {
             qMainWindowSetMenuBar(ptr, menuBarPtr)
         }
     }
     
     public func addToolBar(toolBarPtr: Int64) {
+        checkValid()
         unsafe {
             qMainWindowAddToolBar(ptr, toolBarPtr)
         }
     }
     
     public func setStatusBar(statusBarPtr: Int64) {
+        checkValid()
         unsafe {
             qMainWindowSetStatusBar(ptr, statusBarPtr)
         }
     }
     
     public func setCentralWidget(widgetPtr: Int64) {
+        checkValid()
         unsafe {
             qMainWindowSetCentralWidget(ptr, widgetPtr)
         }
@@ -539,11 +691,36 @@ public class QMainWindow {
         ptr
     }
     
-    public func delete() {
-        if (ptr != 0) {
+    public func isClosed(): Bool {
+        return closed
+    }
+    
+    public func isValid(): Bool {
+        return !closed && ptr != 0
+    }
+    
+    public func checkValid(): Unit {
+        if (closed) {
+            throw ResourceDisposedException("QMainWindow 已经被释放")
+        }
+        if (ptr == 0) {
+            throw NullPointerException("QMainWindow 指针为空")
+        }
+    }
+    
+    /// 关闭资源，释放Qt对象
+    public func close(): Unit {
+        if (!closed && ptr != 0) {
             unsafe {
                 qMainWindowDelete(ptr)
             }
         }
+        closed = true
+        ptr = 0
+    }
+    
+    /// 删除主窗口（兼容旧API）
+    public func delete(): Unit {
+        close()
     }
 }

@@ -561,16 +561,21 @@ foreign func qWizardPageSetSubTitle(ptr: Int64, subTitle: CString): Unit
 foreign func qWizardPageSetCommitPage(ptr: Int64, isCommit: Int32): Unit
 foreign func qWizardPageIsCommitPage(ptr: Int64): Int32
 
-public class QWizardPage {
-    private let ptr: Int64
+public class QWizardPage <: QtResource {
+    private var ptr: Int64 = 0
+    private var closed: Bool = false
 
     public init(parent!: Int64 = 0) {
         unsafe {
             ptr = qWizardPageCreate(parent)
+            if (ptr == 0) {
+                throw CreateFailedException("QWizardPage 创建失败")
+            }
         }
     }
 
     public func setTitle(title: String) {
+        checkValid()
         unsafe {
             var cstr = LibC.mallocCString(title)
             qWizardPageSetTitle(ptr, cstr)
@@ -579,6 +584,7 @@ public class QWizardPage {
     }
 
     public func setSubTitle(subTitle: String) {
+        checkValid()
         unsafe {
             var cstr = LibC.mallocCString(subTitle)
             qWizardPageSetSubTitle(ptr, cstr)
@@ -587,27 +593,54 @@ public class QWizardPage {
     }
 
     public func setCommitPage(isCommit: Bool) {
+        checkValid()
         unsafe {
             qWizardPageSetCommitPage(ptr, (if (isCommit) { 1 } else { 0 }))
         }
     }
 
     public func isCommitPage(): Bool {
+        checkValid()
         unsafe {
             qWizardPageIsCommitPage(ptr) == 1
         }
     }
 
     public func getPtr(): Int64 {
-        ptr
+        return ptr
     }
 
-    public func delete() {
-        if (ptr != 0) {
+    public func isClosed(): Bool {
+        return closed
+    }
+
+    public func isValid(): Bool {
+        return !closed && ptr != 0
+    }
+
+    public func checkValid(): Unit {
+        if (closed) {
+            throw ResourceDisposedException("QWizardPage 已经被释放")
+        }
+        if (ptr == 0) {
+            throw NullPointerException("QWizardPage 指针为空")
+        }
+    }
+
+    /// 关闭资源，释放Qt对象
+    public func close(): Unit {
+        if (!closed && ptr != 0) {
             unsafe {
                 qWizardPageDelete(ptr)
             }
+            closed = true
+            ptr = 0
         }
+    }
+
+    /// 删除向导页面（兼容旧API）
+    public func delete(): Unit {
+        close()
     }
 }
 
@@ -640,76 +673,93 @@ foreign func qWizardTestOption(ptr: Int64, option: Int32): Int32
 foreign func qWizardSetWindowTitle(ptr: Int64, title: CString): Unit
 foreign func qWizardShow(ptr: Int64): Unit
 
-public class QWizard {
-    private let ptr: Int64
+/// 向导对话框
+/// 支持资源管理，可使用 try-with-resources 自动释放
+public class QWizard <: QtResource {
+    private var ptr: Int64 = 0
+    private var closed: Bool = false
 
     public init(parent!: Int64 = 0) {
         unsafe {
             ptr = qWizardCreate(parent)
+            if (ptr == 0) {
+                throw CreateFailedException("QWizard 创建失败")
+            }
         }
     }
 
     public func addPage(page: QWizardPage): Int32 {
+        checkValid()
         unsafe {
             qWizardAddPage(ptr, page.getPtr())
         }
     }
 
     public func page(index: Int32): Int64 {
+        checkValid()
         unsafe {
             qWizardPage(ptr, index)
         }
     }
 
     public func currentId(): Int32 {
+        checkValid()
         unsafe {
             qWizardCurrentId(ptr)
         }
     }
 
     public func next() {
+        checkValid()
         unsafe {
             qWizardNext(ptr)
         }
     }
 
     public func back() {
+        checkValid()
         unsafe {
             qWizardBack(ptr)
         }
     }
 
     public func restart() {
+        checkValid()
         unsafe {
             qWizardRestart(ptr)
         }
     }
 
     public func setStartId(id: Int32) {
+        checkValid()
         unsafe {
             qWizardSetStartId(ptr, id)
         }
     }
 
     public func exec(): Int32 {
+        checkValid()
         unsafe {
             qWizardExec(ptr)
         }
     }
 
     public func setOption(option: Int32, enabled: Bool) {
+        checkValid()
         unsafe {
             qWizardSetOption(ptr, option, (if (enabled) { 1 } else { 0 }))
         }
     }
 
     public func testOption(option: Int32): Bool {
+        checkValid()
         unsafe {
             qWizardTestOption(ptr, option) == 1
         }
     }
 
     public func setWindowTitle(title: String) {
+        checkValid()
         unsafe {
             var cstr = LibC.mallocCString(title)
             qWizardSetWindowTitle(ptr, cstr)
@@ -718,21 +768,47 @@ public class QWizard {
     }
 
     public func show() {
+        checkValid()
         unsafe {
             qWizardShow(ptr)
         }
     }
 
     public func getPtr(): Int64 {
-        ptr
+        return ptr
     }
 
-    public func delete() {
-        if (ptr != 0) {
+    public func isClosed(): Bool {
+        return closed
+    }
+
+    public func isValid(): Bool {
+        return !closed && ptr != 0
+    }
+
+    public func checkValid(): Unit {
+        if (closed) {
+            throw ResourceDisposedException("QWizard 已经被释放")
+        }
+        if (ptr == 0) {
+            throw NullPointerException("QWizard 指针为空")
+        }
+    }
+
+    /// 关闭资源，释放Qt对象
+    public func close(): Unit {
+        if (!closed && ptr != 0) {
             unsafe {
                 qWizardDelete(ptr)
             }
+            closed = true
+            ptr = 0
         }
+    }
+
+    /// 删除向导对话框（兼容旧API）
+    public func delete(): Unit {
+        close()
     }
 }
 
@@ -745,16 +821,23 @@ foreign func qErrorMessageShowMessage(ptr: Int64, message: CString): Unit
 foreign func qErrorMessageSetWindowTitle(ptr: Int64, title: CString): Unit
 foreign func qErrorMessageShow(ptr: Int64): Unit
 
-public class QErrorMessage {
-    private let ptr: Int64
+/// 错误消息对话框
+/// 支持资源管理，可使用 try-with-resources 自动释放
+public class QErrorMessage <: QtResource {
+    private var ptr: Int64 = 0
+    private var closed: Bool = false
 
     public init(parent!: Int64 = 0) {
         unsafe {
             ptr = qErrorMessageCreate(parent)
+            if (ptr == 0) {
+                throw CreateFailedException("QErrorMessage 创建失败")
+            }
         }
     }
 
     public func showMessage(message: String) {
+        checkValid()
         unsafe {
             var cstr = LibC.mallocCString(message)
             qErrorMessageShowMessage(ptr, cstr)
@@ -763,6 +846,7 @@ public class QErrorMessage {
     }
 
     public func setWindowTitle(title: String) {
+        checkValid()
         unsafe {
             var cstr = LibC.mallocCString(title)
             qErrorMessageSetWindowTitle(ptr, cstr)
@@ -771,20 +855,46 @@ public class QErrorMessage {
     }
 
     public func show() {
+        checkValid()
         unsafe {
             qErrorMessageShow(ptr)
         }
     }
 
     public func getPtr(): Int64 {
-        ptr
+        return ptr
     }
 
-    public func delete() {
-        if (ptr != 0) {
+    public func isClosed(): Bool {
+        return closed
+    }
+
+    public func isValid(): Bool {
+        return !closed && ptr != 0
+    }
+
+    public func checkValid(): Unit {
+        if (closed) {
+            throw ResourceDisposedException("QErrorMessage 已经被释放")
+        }
+        if (ptr == 0) {
+            throw NullPointerException("QErrorMessage 指针为空")
+        }
+    }
+
+    /// 关闭资源，释放Qt对象
+    public func close(): Unit {
+        if (!closed && ptr != 0) {
             unsafe {
                 qErrorMessageDelete(ptr)
             }
+            closed = true
+            ptr = 0
         }
+    }
+
+    /// 删除错误消息对话框（兼容旧API）
+    public func delete(): Unit {
+        close()
     }
 }
