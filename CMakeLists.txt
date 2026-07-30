@@ -24,8 +24,9 @@ endforeach()
 
 # 查找 Qt6 包
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Qml Quick QuickWidgets Sql PrintSupport Network)
-# Multimedia 是可选的
+# Multimedia / MultimediaWidgets 是可选的
 find_package(Qt6 COMPONENTS Multimedia QUIET)
+find_package(Qt6 COMPONENTS MultimediaWidgets QUIET)
 
 # 设置 Qt6 自动 MOC、UIC、RCC
 set(CMAKE_AUTOMOC ON)
@@ -48,7 +49,7 @@ include_directories(
 # CJQT 桥接库 (用于仓颉语言FFI)
 # ============================================================
 
-# 核心模块 - QApplication, QWidget, QTimer, Events, Signal/Slot, Drag&Drop
+# 核心模块 - QApplication, QWidget, QTimer, Events, Signal/Slot, Drag&Drop, Animation, Undo
 set(CORE_SOURCES
     native/src/core/string.cpp
     native/src/core/core.cpp
@@ -56,14 +57,17 @@ set(CORE_SOURCES
     native/src/core/bridge_events.cpp
     native/src/core/bridge_signal.cpp
     native/src/core/bridge_dragdrop.cpp
+    native/src/core/bridge_animation.cpp
+    native/src/core/bridge_undostack.cpp
 )
 
-# GUI模块 - 布局、对话框、菜单
+# GUI模块 - 布局、对话框、菜单、样式
 set(GUI_SOURCES
     native/src/gui/gui.cpp
     native/src/gui/bridge_layout.cpp
     native/src/gui/bridge_dialogs.cpp
     native/src/gui/bridge_menu.cpp
+    native/src/gui/bridge_style.cpp
 )
 
 # Widgets模块 - 基础部件、选择部件、数值部件、容器、日期时间
@@ -84,13 +88,14 @@ set(WIDGETS_SOURCES
     native/src/widgets/bridge_ext_apicomplete.cpp
 )
 
-# Views模块 - 表格视图、列表视图、树形视图
+# Views模块 - 表格视图、列表视图、树形视图、排序过滤代理
 set(VIEWS_SOURCES
     native/src/views/bridge_table.cpp
     native/src/views/bridge_list.cpp
     native/src/views/bridge_tree.cpp
     native/src/views/bridge_modelview.cpp
     native/src/views/bridge_ext_views.cpp
+    native/src/views/bridge_sortfilterproxymodel.cpp
 )
 
 # Paint模块 - 绘图相关类
@@ -126,7 +131,11 @@ set(NETWORK_SOURCES
 # Multimedia模块 - 多媒体支持 (可选)
 set(MULTIMEDIA_SOURCES)
 if(Qt6Multimedia_FOUND)
-    set(MULTIMEDIA_SOURCES native/src/multimedia/bridge_multimedia.cpp)
+    set(MULTIMEDIA_SOURCES
+        native/src/multimedia/bridge_multimedia.cpp
+        native/src/multimedia/bridge_videowidget.cpp
+        native/src/multimedia/bridge_camera.cpp
+    )
     message(STATUS "Qt6 Multimedia: Found")
 else()
     message(STATUS "Qt6 Multimedia: Not found, multimedia support disabled")
@@ -164,9 +173,12 @@ target_link_libraries(cjqt6_bridge PRIVATE
     Qt6::Network
 )
 
-# 可选链接 Multimedia
+# 可选链接 Multimedia / MultimediaWidgets
 if(TARGET Qt6::Multimedia)
     target_link_libraries(cjqt6_bridge PRIVATE Qt6::Multimedia)
+endif()
+if(TARGET Qt6::MultimediaWidgets)
+    target_link_libraries(cjqt6_bridge PRIVATE Qt6::MultimediaWidgets)
 endif()
 
 # 设置输出名称
