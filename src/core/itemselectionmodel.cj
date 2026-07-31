@@ -27,12 +27,14 @@ foreign func qItemSelectionModelSelectedRowAt(ptr: Int64, index: Int32): Int32
 public class SelectionFlag {
     /// 不更新选择
     public static func noUpdate(): Int32 { 0 }
+    /// 清除现有选择
+    public static func clear(): Int32 { 1 }
     /// 选择指定索引
-    public static func select(): Int32 { 1 }
+    public static func select(): Int32 { 2 }
     /// 取消选择指定索引
-    public static func deselect(): Int32 { 2 }
+    public static func deselect(): Int32 { 4 }
     /// 切换指定索引的选择状态
-    public static func toggle(): Int32 { 4 }
+    public static func toggle(): Int32 { 8 }
     /// 将指定索引设置为当前索引
     public static func current(): Int32 { 16 }
     /// 选择整行
@@ -40,7 +42,7 @@ public class SelectionFlag {
     /// 选择整列
     public static func columns(): Int32 { 64 }
     /// 清除现有选择后选择指定索引
-    public static func clearAndSelect(): Int32 { 49 }
+    public static func clearAndSelect(): Int32 { 3 }
 }
 
 // ============================================================
