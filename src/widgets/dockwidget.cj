@@ -38,6 +38,7 @@ public class DockWidgetFeature {
     public static let NoFeature: Int32 = 0
 }
 
+/// 停靠窗口，可浮动/移动/关闭，停靠到主窗口边缘区域（配合 QMainWindow 使用）
 public class QDockWidget {
     private var ptr: Int64 = 0
 

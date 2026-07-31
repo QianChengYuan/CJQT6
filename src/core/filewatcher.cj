@@ -1,14 +1,20 @@
 package cjqt6.core
 
+// ============================================================
+// QFileSystemWatcher - 文件系统监视器
+// ============================================================
+
 foreign func qFileSystemWatcherCreate(): Int64
 foreign func qFileSystemWatcherAddPath(ptr: Int64, path: CString): Unit
 foreign func qFileSystemWatcherRemovePath(ptr: Int64, path: CString): Unit
 foreign func qFileSystemWatcherDelete(ptr: Int64): Unit
 
+/// 文件系统监视器，监听指定文件/目录的变化（本封装提供路径的添加与移除管理）
 public class QFileSystemWatcher <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
+    /// 创建文件系统监视器
     public init() {
         unsafe {
             ptr = qFileSystemWatcherCreate()
@@ -18,6 +24,7 @@ public class QFileSystemWatcher <: QtResource {
         }
     }
 
+    /// 添加要监视的文件或目录路径
     public func addPath(path: String): Unit {
         checkValid()
         unsafe {
@@ -27,6 +34,7 @@ public class QFileSystemWatcher <: QtResource {
         }
     }
 
+    /// 移除不再监视的文件或目录路径
     public func removePath(path: String): Unit {
         checkValid()
         unsafe {

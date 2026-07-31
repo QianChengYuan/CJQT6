@@ -30,6 +30,7 @@ public class ModelSorting {
     public static let CaseInsensitivelySortedModel: Int32 = 2
 }
 
+/// 补全模式常量：弹出列表/内联补全/弹出并内联
 public class CompletionMode {
     /// 弹出补全列表
     public static let Popup: Int32 = 0

@@ -19,6 +19,7 @@ public class FontFilters {
     public static let ProportionalFonts: Int32 = 8
 }
 
+/// 书写系统枚举，用于过滤字体列表中显示的书写系统（对应 QFontDatabase::WritingSystem）
 public class FontWritingSystem {
     public static let Any: Int32 = 0
     public static let Latin: Int32 = 1
@@ -33,6 +34,7 @@ public class FontWritingSystem {
     public static let TraditionalChinese: Int32 = 10
 }
 
+/// 字体选择下拉框，列出系统可用字体族，支持按书写系统与字体筛选器过滤
 public class QFontComboBox {
     private var ptr: Int64 = 0
 

@@ -280,3 +280,164 @@ main(): Int32 {
 | `setOnTimeout(callback: VoidCallback)` | 设置超时回调 |
 | `disconnectTimeout()` | 断开超时信号连接 |
 | `delete()` | **必须调用** - 释放资源 |
+
+---
+
+## QAbstractAnimation / QParallelAnimationGroup
+
+动画基础类与并行动画组。
+
+```cangjie
+import cjqt6.core.*
+
+// 创建并行动画组
+let group = QParallelAnimationGroup()
+
+// 添加属性动画
+let anim = QPropertyAnimation(targetPtr, "pos")
+anim.setDuration(1000)
+anim.setStartValue(0.0f64)
+anim.setEndValue(100.0f64)
+group.addAnimation(anim.getPtr())
+
+// 控制动画组
+group.start()
+group.pause()
+group.resume()
+group.stop()
+
+// 获取状态
+let state = group.state()
+if (state == AnimationState.running()) {
+    println("动画正在运行")
+}
+
+// 设置循环次数（0=无限循环）
+group.setLoopCount(3)
+
+group.close()
+```
+
+**QAbstractAnimation 方法**:
+| 方法 | 说明 |
+|------|------|
+| `start()` | 开始动画 |
+| `stop()` | 停止动画 |
+| `pause()` | 暂停动画 |
+| `resume()` | 恢复动画 |
+| `state(): Int32` | 获取动画状态 |
+| `duration(): Int64` | 获取动画时长 |
+| `setLoopCount(count: Int32)` | 设置循环次数（0=无限） |
+| `loopCount(): Int32` | 获取循环次数 |
+| `currentTime(): Int32` | 获取当前时间 |
+| `setCurrentTime(ms: Int32)` | 设置当前时间 |
+| `currentLoop(): Int32` | 获取当前循环 |
+| `setDirection(direction: Int32)` | 设置播放方向 |
+| `direction(): Int32` | 获取播放方向 |
+| `getPtr(): Int64` | 获取指针 |
+| `delete()` | 释放资源 |
+
+**QParallelAnimationGroup 方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` | 创建并行动画组 |
+| `addAnimation(animPtr: Int64)` | 添加动画 |
+| `removeAnimation(animPtr: Int64)` | 移除动画 |
+| `animationCount(): Int32` | 获取动画数量 |
+| `start()` / `stop()` / `pause()` / `resume()` | 控制动画组 |
+| `state(): Int32` / `duration(): Int64` | 查询状态 |
+| `setLoopCount(count: Int32)` / `loopCount(): Int32` | 循环控制 |
+| `setDirection(direction: Int32)` / `direction(): Int32` | 方向控制 |
+| `getPtr(): Int64` | 获取指针 |
+| `close()` | 释放资源 |
+
+**状态常量** (`AnimationState`):
+| 常量 | 值 | 说明 |
+|------|-----|------|
+| `AnimationState.stopped()` | 0 | 已停止 |
+| `AnimationState.paused()` | 1 | 已暂停 |
+| `AnimationState.running()` | 2 | 运行中 |
+
+**方向常量** (`AnimationDirection`):
+| 常量 | 值 | 说明 |
+|------|-----|------|
+| `AnimationDirection.forward()` | 0 | 正向播放 |
+| `AnimationDirection.backward()` | 1 | 反向播放 |
+
+---
+
+## QUndoCommand / QUndoStack
+
+撤销/重做框架。
+
+```cangjie
+import cjqt6.core.*
+
+// 创建撤销栈
+let undoStack = QUndoStack()
+
+// 创建撤销命令
+// undoCallback: 撤销回调 (userData)
+// redoCallback: 重做回调 (userData)
+// userData: 用户数据
+// text: 命令描述
+let cmd = QUndoCommand(
+    { userData => println("撤销: ${userData}") },
+    { userData => println("重做: ${userData}") },
+    42,
+    "操作描述"
+)
+
+// 压入撤销栈
+undoStack.push(cmd)
+
+// 撤销/重做
+undoStack.undo()
+undoStack.redo()
+
+// 查询状态
+println("可撤销: ${undoStack.canUndo()}")
+println("可重做: ${undoStack.canRedo()}")
+println("撤销描述: ${undoStack.undoText()}")
+
+// 批量操作
+undoStack.beginMacro("批量操作")
+// ... 执行多个命令 ...
+undoStack.endMacro()
+
+// 清空撤销栈
+undoStack.clear()
+undoStack.close()
+```
+
+**QUndoCommand 方法**:
+| 方法 | 说明 |
+|------|------|
+| `init(undoCallback, redoCallback, userData, text)` | 创建撤销命令 |
+| `setText(text: String)` | 设置命令描述 |
+| `text(): String` | 获取命令描述 |
+| `getPtr(): Int64` | 获取指针 |
+| `delete()` | 释放资源（未压入栈时） |
+
+**QUndoStack 方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` | 创建撤销栈 |
+| `push(cmd: QUndoCommand)` | 压入命令 |
+| `undo()` | 撤销 |
+| `redo()` | 重做 |
+| `canUndo(): Bool` | 是否可撤销 |
+| `canRedo(): Bool` | 是否可重做 |
+| `undoText(): String` | 获取撤销描述 |
+| `redoText(): String` | 获取重做描述 |
+| `count(): Int32` | 获取命令数 |
+| `index(): Int32` | 获取当前索引 |
+| `clear()` | 清空栈 |
+| `setUndoLimit(limit: Int32)` | 设置撤销限制 |
+| `undoLimit(): Int32` | 获取撤销限制 |
+| `setClean()` | 标记为干净 |
+| `isClean(): Bool` | 是否干净 |
+| `beginMacro(text: String)` | 开始宏命令 |
+| `endMacro()` | 结束宏命令 |
+| `getPtr(): Int64` | 获取指针 |
+| `close()` | 释放资源 |

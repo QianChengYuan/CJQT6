@@ -40,6 +40,7 @@ public class MdiAreaActivationOrder {
     public static let ActivationHistoryOrder: Int32 = 2
 }
 
+/// 多文档界面区域，管理多个子窗口的平铺/层叠/排列
 public class QMdiArea {
     private var ptr: Int64 = 0
 
@@ -183,6 +184,7 @@ public class QMdiArea {
     }
 }
 
+/// 多文档界面子窗口，由 QMdiArea 管理，可包含任意内容控件
 public class QMdiSubWindow {
     private var ptr: Int64 = 0
 

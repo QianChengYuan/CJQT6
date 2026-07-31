@@ -6,11 +6,11 @@ CJQT6 是仓颉语言的 Qt6 封装库，提供跨平台 GUI 开发能力。
 
 | 文档 | 说明 |
 |------|------|
-| [01_core.md](./01_core.md) | 核心模块 - QApplication、QWidget、QTimer、资源管理 |
+| [01_core.md](./01_core.md) | 核心模块 - QApplication、QWidget、QTimer、QAbstractAnimation、QUndoStack、资源管理 |
 | [02_widgets_basic.md](./02_widgets_basic.md) | 基础控件 - QLabel、QPushButton、QLineEdit |
 | [03_widgets_selection.md](./03_widgets_selection.md) | 选择与数值控件 - QCheckBox、QRadioButton、QComboBox、QSpinBox、QSlider |
 | [04_containers_layout.md](./04_containers_layout.md) | 容器与布局 - QGroupBox、QTabWidget、QVBoxLayout、QHBoxLayout、QGridLayout |
-| [05_views.md](./05_views.md) | 视图控件 - QTableWidget、QListWidget、QTreeWidget |
+| [05_views.md](./05_views.md) | 视图控件 - QTableWidget、QListWidget、QTreeWidget、QSortFilterProxyModel |
 | [06_menu_dialogs.md](./06_menu_dialogs.md) | 菜单与对话框 - QMainWindow、QMenu、QAction、QMessageBox、QFileDialog |
 | [07_events.md](./07_events.md) | 事件处理 - QEventWidget、鼠标事件、键盘事件 |
 | [08_paint.md](./08_paint.md) | 绘图模块 - QColor、QPen、QBrush、QPainter、QPixmap |
@@ -18,7 +18,7 @@ CJQT6 是仓颉语言的 Qt6 封装库，提供跨平台 GUI 开发能力。
 | [10_datetime.md](./10_datetime.md) | 日期时间 - QDate、QTime、QDateTime、QCalendarWidget、QDateEdit |
 | [11_qml.md](./11_qml.md) | QML模块 - QQmlApplicationEngine、QQuickView |
 | [12_signal_slot.md](./12_signal_slot.md) | 信号与槽 - 回调机制、信号连接 |
-| [13_multimedia.md](./13_multimedia.md) | 多媒体模块 - QMediaPlayer、QAudioOutput |
+| [13_multimedia.md](./13_multimedia.md) | 多媒体模块 - QMediaPlayer、QAudioOutput、QCamera、QVideoWidget |
 | [14_print.md](./14_print.md) | 打印模块 - QPrinter、QPrintDialog |
 | [15_examples_faq.md](./15_examples_faq.md) | 示例与常见问题 |
 | [16_misc_widgets.md](./16_misc_widgets.md) | 其他控件 - QLCDNumber、QToolButton |

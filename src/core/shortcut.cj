@@ -1,15 +1,21 @@
 package cjqt6.core
 
+// ============================================================
+// QShortcut - 快捷键
+// ============================================================
+
 foreign func qShortcutCreate(parentPtr: Int64): Int64
 foreign func qShortcutSetKey(ptr: Int64, keySequence: CString): Unit
 foreign func qShortcutSetEnabled(ptr: Int64, enabled: Bool): Unit
 foreign func qShortcutSetAutoRepeat(ptr: Int64, repeat: Bool): Unit
 foreign func qShortcutDelete(ptr: Int64): Unit
 
+/// 快捷键，将按键序列绑定到父控件，触发对应操作（结合信号系统使用）
 public class QShortcut <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
+    /// 为指定父控件创建快捷键
     public init(parent: QWidget) {
         unsafe {
             ptr = qShortcutCreate(parent.getPtr())
@@ -19,6 +25,7 @@ public class QShortcut <: QtResource {
         }
     }
 
+    /// 设置快捷键对应的按键序列（如 "Ctrl+O"）
     public func setKey(keySequence: String): Unit {
         checkValid()
         unsafe {
@@ -28,6 +35,7 @@ public class QShortcut <: QtResource {
         }
     }
 
+    /// 启用或禁用快捷键
     public func setEnabled(enabled: Bool): Unit {
         checkValid()
         unsafe {
@@ -35,6 +43,7 @@ public class QShortcut <: QtResource {
         }
     }
 
+    /// 设置长按按键时是否自动重复触发
     public func setAutoRepeat(repeat: Bool): Unit {
         checkValid()
         unsafe {

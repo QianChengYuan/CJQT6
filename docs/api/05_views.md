@@ -189,3 +189,76 @@ CheckState.Unchecked
 CheckState.PartiallyChecked
 CheckState.Checked
 ```
+
+---
+
+## QSortFilterProxyModel — 排序过滤代理模型
+
+为视图提供排序和过滤功能。
+
+```cangjie
+import cjqt6.views.*
+
+// 创建代理模型
+let proxyModel = QSortFilterProxyModel()
+
+// 设置源模型（如 QStandardItemModel 的指针）
+proxyModel.setSourceModel(sourceModelPtr)
+
+// 设置过滤器
+proxyModel.setFilterRegularExpression("关键词")
+proxyModel.setFilterKeyColumn(0)      // 按第0列过滤
+proxyModel.setFilterCaseSensitivity(CaseSensitivity.insensitive())  // 不区分大小写
+
+// 设置排序
+proxyModel.sort(0, SortOrder.ascending())   // 按第0列升序排序
+proxyModel.setDynamicSortFilter(true)        // 自动排序
+
+// 刷新过滤器
+proxyModel.invalidate()
+
+// 映射索引
+let sourceIndex = proxyModel.mapToSource(proxyRow, proxyCol)
+
+proxyModel.delete()
+```
+
+**方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` | 创建代理模型 |
+| `setSourceModel(modelPtr: Int64)` | 设置源模型 |
+| `setFilterRegularExpression(pattern: String)` | 设置正则表达式过滤器 |
+| `setFilterFixedString(pattern: String)` | 设置固定字符串过滤器 |
+| `setFilterWildcard(pattern: String)` | 设置通配符过滤器 |
+| `setFilterKeyColumn(col: Int32)` | 设置过滤的列 |
+| `filterKeyColumn(): Int32` | 获取过滤的列 |
+| `setFilterRole(role: Int32)` | 设置过滤角色 |
+| `filterRole(): Int32` | 获取过滤角色 |
+| `setSortRole(role: Int32)` | 设置排序角色 |
+| `sortRole(): Int32` | 获取排序角色 |
+| `setDynamicSortFilter(enable: Bool)` | 设置动态排序 |
+| `dynamicSortFilter(): Bool` | 是否动态排序 |
+| `sort(column: Int32, order: Int32)` | 执行排序 |
+| `sortOrder(): Int32` | 获取排序顺序 |
+| `mapToSource(proxyRow: Int32, proxyCol: Int32): Int64` | 映射到源模型索引 |
+| `mapFromSource(sourceRow: Int32, sourceCol: Int32, sourceModelPtr: Int64): Int64` | 从源模型映射 |
+| `setFilterCaseSensitivity(cs: Int32)` | 设置过滤大小写敏感 |
+| `filterCaseSensitivity(): Int32` | 获取过滤大小写敏感 |
+| `invalidate()` | 刷新过滤器 |
+| `rowCount(): Int32` | 获取行数 |
+| `columnCount(): Int32` | 获取列数 |
+| `getPtr(): Int64` | 获取指针 |
+| `delete()` | 释放资源 |
+
+**排序顺序常量** (`SortOrder`):
+| 常量 | 值 | 说明 |
+|------|-----|------|
+| `SortOrder.ascending()` | 0 | 升序 |
+| `SortOrder.descending()` | 1 | 降序 |
+
+**大小写敏感常量** (`CaseSensitivity`):
+| 常量 | 值 | 说明 |
+|------|-----|------|
+| `CaseSensitivity.insensitive()` | 0 | 不区分大小写 |
+| `CaseSensitivity.sensitive()` | 1 | 区分大小写 |

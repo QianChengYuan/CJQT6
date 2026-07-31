@@ -21,6 +21,7 @@ foreign func qToolBoxSetCurrentWidget(ptr: Int64, widgetPtr: Int64): Unit
 foreign func qToolBoxIndexOf(ptr: Int64, widgetPtr: Int64): Int32
 foreign func qToolBoxConnectCurrentChanged(ptr: Int64, callback: Int32Callback): Unit
 
+/// 工具箱控件，以选项卡方式组织多个页面（类似分页容器）
 public class QToolBox {
     private var ptr: Int64 = 0
 

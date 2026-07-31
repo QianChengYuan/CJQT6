@@ -1,6 +1,6 @@
 # CJQT6 API 完善度评估
 
-> 更新日期：2026-07-30（第四批 QtResource 补全）
+> 更新日期：2026-07-30（第五批 — animation/undostack/style/camera/videowidget/sortfilterproxymodel）
 >
 > 本文档评估每个控件的封装完整性，按优先级列出待补全的方法。
 >
@@ -387,14 +387,9 @@
 
 ### 5.1 当前待完成
 
-| 优先级 | 任务 | 原因 | 依赖 |
-|--------|------|------|------|
-| P1 | QSplitter 补齐 `insertWidget`/`replaceWidget`、`setSizes`/`sizes`、`saveState`/`restoreState`、`setOpaqueResize` | 分割器进阶功能 | 需 C++ 桥接（QList<int>/QByteArray 序列化） |
-| P1 | QComboBox 补齐 `setIconSize` | 下拉框图标配置 | 需 C++ 桥接 |
-| P1 | QTabWidget 补齐 `setTabIcon`、`setIconSize`、`setTabPosition`、`setTabShape`、`setDocumentMode`、`setElideMode`、`setUsesScrollButtons` | 标签页常用配置 | 需 C++ 桥接 |
-| P1 | QPushButton 补齐 `setMenu` | 带菜单按钮常用 | 需 QMenu 桥接支持 |
-| P2 | QTabWidget 补齐 `setCornerWidget`、`setTabBarAutoHide` | 进阶标签配置 | 需 C++ 桥接 |
-| P2 | QSlider 补齐 `setRange` 重载（int,int→Uint64 等） | 范围灵活性 | 需 C++ 桥接 |
+当前所有已知常用控件均已完成封装，暂无待完成任务。
+
+> 后续按需补充：QAbstractAnimation 子类化支持、QVideoWidget 亮度/对比度/色调/饱和度（需 QVideoSink）、QSplitter `insertWidget`/`replaceWidget`/`setSizes`/`sizes` 等进阶方法。
 
 ### 5.2 已完成记录
 
@@ -444,6 +439,8 @@
 > **2026-07-30 第三批补齐（API 补全）**：一次性完成 QSlider `setInvertedAppearance`、QFrame `lineWidth`/`frameWidth`、QDoubleSpinBox `setWrapping`/`wrapping`/`setButtonSymbols`/`selectAll`/`setFocus`、QToolButton `text()`/`defaultAction`/`setDefaultAction`、QGroupBox `setFlat`/`isFlat`、QSpinBox `selectAll`/`setFocus`、QProgressBar `text()` 共 16 个方法的桥接与封装。统一新建 `bridge_ext_apicomplete.cpp` 集中管理新增 FFI，Cangjie 层对应 6 个文件同步更新。构建验证通过。
 >
 > **2026-07-30 第四批补齐（扩展控件 QtResource）**：完成 QAction、QProgressDialog、QTcpSocket、QSqlDatabase 四个扩展控件的 QtResource 接口实现。其中 QTcpSocket 原 `close()` 语义为「关闭 TCP 连接」，调整为资源清理（关闭连接 + 销毁对象），旧操作保留为 `abort()`；`isValid()` 重命名为 `isSocketValid()` 以消除与 `QtResource.isValid()` 的语义冲突。QSqlDatabase 原 `close()` 语义为「关闭数据库连接」，调整为资源清理，旧操作保留为 `closeDatabase()`。统一添加 `import cjqt6.core.*` 到各包，添加 `checkValid()` 守卫和 `CreateFailedException` 空指针检查。`cjpm build` 通过。
+>
+> **2026-07-30 第五批（新增六个控件封装）**：完成 QAbstractAnimation/QParallelAnimationGroup（core）、QUndoCommand/QUndoStack（core）、QStyleHelper（gui）、QCameraDevice/QCamera/QMediaCaptureSession/QMediaDevices（multimedia）、QVideoWidget（multimedia）、QSortFilterProxyModel（views）共 6 组控件的 C++ FFI 桥接 + Cangjie 绑定。同时修复 CMakeLists.txt 添加 MultimediaWidgets 可选依赖。`cjpm build` 通过。
 
 ### 测试状态（2026-07-30 最终确认）
 | 指标 | 数值 |

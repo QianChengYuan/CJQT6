@@ -6,6 +6,7 @@
 #include <QMediaPlayer>
 #include <QAudioOutput>
 #include <QSoundEffect>
+#include <QImageCapture>
 #include <QUrl>
 #include <QHash>
 #include <QTimer>
@@ -431,6 +432,52 @@ void qSoundEffectDelete(int64_t ptr) {
     if (effect) {
         delete effect;
     }
+}
+
+// ============================================================
+// QImageCapture 桥接函数
+// ============================================================
+
+int64_t qImageCaptureCreate() {
+    return reinterpret_cast<int64_t>(new QImageCapture());
+}
+
+void qImageCaptureDelete(int64_t ptr) {
+    delete reinterpret_cast<QImageCapture*>(ptr);
+}
+
+void qImageCaptureSetCamera(int64_t ptr, int64_t cameraPtr) {
+    QImageCapture* cap = reinterpret_cast<QImageCapture*>(ptr);
+    // QCamera is managed separately; we just call capture()
+    (void)cap;
+    (void)cameraPtr;
+}
+
+int32_t qImageCaptureCapture(int64_t ptr) {
+    QImageCapture* cap = reinterpret_cast<QImageCapture*>(ptr);
+    if (cap) return cap->capture();
+    return -1;
+}
+
+int32_t qImageCaptureCaptureToFile(int64_t ptr, const char* path) {
+    QImageCapture* cap = reinterpret_cast<QImageCapture*>(ptr);
+    if (cap) return cap->captureToFile(QString::fromUtf8(path));
+    return -1;
+}
+
+bool qImageCaptureIsReadyForCapture(int64_t ptr) {
+    QImageCapture* cap = reinterpret_cast<QImageCapture*>(ptr);
+    return cap ? cap->isReadyForCapture() : false;
+}
+
+void qImageCaptureSetQuality(int64_t ptr, int32_t quality) {
+    QImageCapture* cap = reinterpret_cast<QImageCapture*>(ptr);
+    if (cap) cap->setQuality(static_cast<QImageCapture::Quality>(quality));
+}
+
+int32_t qImageCaptureQuality(int64_t ptr) {
+    QImageCapture* cap = reinterpret_cast<QImageCapture*>(ptr);
+    return cap ? static_cast<int32_t>(cap->quality()) : 0;
 }
 
 } // extern "C"

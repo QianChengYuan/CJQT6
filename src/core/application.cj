@@ -31,6 +31,7 @@ public class Language {
     public static func korean(): String { "ko_KR" }
 }
 
+/// 应用程序主类，管理 Qt 应用生命周期（创建/事件循环/退出）与界面翻译语言
 public class QApplication {
     private var ptr: Int64 = 0
     

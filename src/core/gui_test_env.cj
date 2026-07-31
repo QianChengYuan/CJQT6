@@ -1,5 +1,10 @@
 package cjqt6.core
 
+// ============================================================
+// GUITestEnvironment - GUI 测试环境
+// ============================================================
+
+/// GUI 测试环境管理器，为单元测试提供 QApplication 实例的创建/销毁与事件循环控制（单例）
 public class GUITestEnvironment {
     private static var instance: ?GUITestEnvironment = None
     private var qappInstance: ?QApplication = None

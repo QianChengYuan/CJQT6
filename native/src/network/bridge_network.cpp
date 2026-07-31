@@ -6,7 +6,12 @@
 #include <QHostAddress>
 #include <QTcpSocket>
 #include <QUdpSocket>
+#include <QSslSocket>
+#include <QSslCertificate>
 #include <QAbstractSocket>
+#include <QNetworkProxy>
+#include <QLocalServer>
+#include <QLocalSocket>
 #include <QDebug>
 #include <QHash>
 #include <functional>
@@ -424,6 +429,245 @@ void qUdpSocketConnectError(int64_t ptr, void (*callback)()) {
 void qUdpSocketDisconnectCallbacks(int64_t ptr) {
     LOCK_NETWORK_CALLBACKS();
     g_networkVoidCallbacks.remove(ptr);
+}
+
+// ============================================================
+// QSslSocket - SSL/TLS加密套接字
+// ============================================================
+
+int64_t qSslSocketCreate() {
+    return reinterpret_cast<int64_t>(new QSslSocket());
+}
+
+void qSslSocketDelete(int64_t ptr) {
+    QSslSocket* socket = reinterpret_cast<QSslSocket*>(ptr);
+    if (socket) {
+        {
+            LOCK_NETWORK_CALLBACKS();
+            g_networkVoidCallbacks.remove(ptr);
+        }
+        delete socket;
+    }
+}
+
+void qSslSocketConnectToHostEncrypted(int64_t ptr, const char* host, uint16_t port) {
+    QSslSocket* socket = reinterpret_cast<QSslSocket*>(ptr);
+    if (socket) {
+        socket->connectToHostEncrypted(QString::fromUtf8(host), port);
+    }
+}
+
+void qSslSocketStartClientEncryption(int64_t ptr) {
+    QSslSocket* socket = reinterpret_cast<QSslSocket*>(ptr);
+    if (socket) {
+        socket->startClientEncryption();
+    }
+}
+
+void qSslSocketStartServerEncryption(int64_t ptr) {
+    QSslSocket* socket = reinterpret_cast<QSslSocket*>(ptr);
+    if (socket) {
+        socket->startServerEncryption();
+    }
+}
+
+bool qSslSocketIsEncrypted(int64_t ptr) {
+    QSslSocket* socket = reinterpret_cast<QSslSocket*>(ptr);
+    return socket ? socket->isEncrypted() : false;
+}
+
+int32_t qSslSocketSslMode(int64_t ptr) {
+    QSslSocket* socket = reinterpret_cast<QSslSocket*>(ptr);
+    return socket ? static_cast<int32_t>(socket->mode()) : 0;
+}
+
+void qSslSocketSetPeerVerifyMode(int64_t ptr, int32_t mode) {
+    QSslSocket* socket = reinterpret_cast<QSslSocket*>(ptr);
+    if (socket) {
+        socket->setPeerVerifyMode(static_cast<QSslSocket::PeerVerifyMode>(mode));
+    }
+}
+
+int32_t qSslSocketPeerVerifyMode(int64_t ptr) {
+    QSslSocket* socket = reinterpret_cast<QSslSocket*>(ptr);
+    return socket ? static_cast<int32_t>(socket->peerVerifyMode()) : 0;
+}
+
+const char* qSslSocketPeerCertificateInfo(int64_t ptr) {
+    QSslSocket* socket = reinterpret_cast<QSslSocket*>(ptr);
+    if (socket && !socket->peerCertificate().isNull()) {
+        static QByteArray buffer;
+        QSslCertificate cert = socket->peerCertificate();
+        buffer = cert.subjectDisplayName().toUtf8();
+        return buffer.constData();
+    }
+    return "";
+}
+
+void qSslSocketConnectEncrypted(int64_t ptr, void (*callback)()) {
+    QSslSocket* socket = reinterpret_cast<QSslSocket*>(ptr);
+    if (socket && callback) {
+        LOCK_NETWORK_CALLBACKS();
+        g_networkVoidCallbacks[ptr] = callback;
+        QObject::connect(socket, &QSslSocket::encrypted, [ptr]() {
+            std::function<void()> cb;
+            {
+                LOCK_NETWORK_CALLBACKS();
+                auto it = g_networkVoidCallbacks.find(ptr);
+                if (it != g_networkVoidCallbacks.end()) {
+                    cb = it.value();
+                }
+            }
+            if (cb) cb();
+        });
+    }
+}
+
+void qSslSocketConnectPeerVerifyError(int64_t ptr, void (*callback)(const char*)) {
+    QSslSocket* socket = reinterpret_cast<QSslSocket*>(ptr);
+    if (socket && callback) {
+        QObject::connect(socket, &QSslSocket::peerVerifyError, [ptr, callback](const QSslError& error) {
+            QByteArray errStr = error.errorString().toUtf8();
+            callback(errStr.constData());
+        });
+    }
+}
+
+// ============================================================
+// QNetworkProxy 桥接函数
+// ============================================================
+
+int64_t qNetworkProxyCreate() {
+    return reinterpret_cast<int64_t>(new QNetworkProxy());
+}
+
+int64_t qNetworkProxyCreateWithType(int32_t proxyType) {
+    return reinterpret_cast<int64_t>(new QNetworkProxy(static_cast<QNetworkProxy::ProxyType>(proxyType)));
+}
+
+void qNetworkProxyDelete(int64_t ptr) {
+    delete reinterpret_cast<QNetworkProxy*>(ptr);
+}
+
+void qNetworkProxySetType(int64_t ptr, int32_t proxyType) {
+    reinterpret_cast<QNetworkProxy*>(ptr)->setType(static_cast<QNetworkProxy::ProxyType>(proxyType));
+}
+
+int32_t qNetworkProxyType(int64_t ptr) {
+    return static_cast<int32_t>(reinterpret_cast<QNetworkProxy*>(ptr)->type());
+}
+
+void qNetworkProxySetHostName(int64_t ptr, const char* host) {
+    reinterpret_cast<QNetworkProxy*>(ptr)->setHostName(QString::fromUtf8(host));
+}
+
+static QByteArray netBuffer;
+const char* qNetworkProxyHostName(int64_t ptr) {
+    netBuffer = reinterpret_cast<QNetworkProxy*>(ptr)->hostName().toUtf8();
+    return netBuffer.constData();
+}
+
+void qNetworkProxySetPort(int64_t ptr, uint16_t port) {
+    reinterpret_cast<QNetworkProxy*>(ptr)->setPort(port);
+}
+
+uint16_t qNetworkProxyPort(int64_t ptr) {
+    return reinterpret_cast<QNetworkProxy*>(ptr)->port();
+}
+
+void qNetworkProxySetUser(int64_t ptr, const char* user) {
+    reinterpret_cast<QNetworkProxy*>(ptr)->setUser(QString::fromUtf8(user));
+}
+
+const char* qNetworkProxyUser(int64_t ptr) {
+    netBuffer = reinterpret_cast<QNetworkProxy*>(ptr)->user().toUtf8();
+    return netBuffer.constData();
+}
+
+void qNetworkProxySetPassword(int64_t ptr, const char* pass) {
+    reinterpret_cast<QNetworkProxy*>(ptr)->setPassword(QString::fromUtf8(pass));
+}
+
+const char* qNetworkProxyPassword(int64_t ptr) {
+    netBuffer = reinterpret_cast<QNetworkProxy*>(ptr)->password().toUtf8();
+    return netBuffer.constData();
+}
+
+void qNetworkProxySetApplicationProxy(const char* host, uint16_t port) {
+    QNetworkProxy proxy(QNetworkProxy::HttpProxy, QString::fromUtf8(host), port);
+    QNetworkProxy::setApplicationProxy(proxy);
+}
+
+// ============================================================
+// QLocalServer 桥接函数
+// ============================================================
+
+int64_t qLocalServerCreate() {
+    return reinterpret_cast<int64_t>(new QLocalServer());
+}
+
+void qLocalServerDelete(int64_t ptr) {
+    delete reinterpret_cast<QLocalServer*>(ptr);
+}
+
+bool qLocalServerListen(int64_t ptr, const char* name) {
+    return reinterpret_cast<QLocalServer*>(ptr)->listen(QString::fromUtf8(name));
+}
+
+void qLocalServerClose(int64_t ptr) {
+    reinterpret_cast<QLocalServer*>(ptr)->close();
+}
+
+bool qLocalServerIsListening(int64_t ptr) {
+    return reinterpret_cast<QLocalServer*>(ptr)->isListening();
+}
+
+const char* qLocalServerFullServerName(int64_t ptr) {
+    netBuffer = reinterpret_cast<QLocalServer*>(ptr)->fullServerName().toUtf8();
+    return netBuffer.constData();
+}
+
+const char* qLocalServerServerName(int64_t ptr) {
+    netBuffer = reinterpret_cast<QLocalServer*>(ptr)->serverName().toUtf8();
+    return netBuffer.constData();
+}
+
+int32_t qLocalServerMaxPendingConnections(int64_t ptr) {
+    return reinterpret_cast<QLocalServer*>(ptr)->maxPendingConnections();
+}
+
+void qLocalServerSetMaxPendingConnections(int64_t ptr, int32_t count) {
+    reinterpret_cast<QLocalServer*>(ptr)->setMaxPendingConnections(count);
+}
+
+int64_t qLocalServerWaitForNewConnection(int64_t ptr, int32_t msec) {
+    bool ok = reinterpret_cast<QLocalServer*>(ptr)->waitForNewConnection(msec, nullptr);
+    if (ok) {
+        QLocalSocket* client = reinterpret_cast<QLocalServer*>(ptr)->nextPendingConnection();
+        return reinterpret_cast<int64_t>(client);
+    }
+    return 0;
+}
+
+bool qLocalServerHasPendingConnections(int64_t ptr) {
+    return reinterpret_cast<QLocalServer*>(ptr)->hasPendingConnections();
+}
+
+int64_t qLocalServerNextPendingConnection(int64_t ptr) {
+    QLocalSocket* client = reinterpret_cast<QLocalServer*>(ptr)->nextPendingConnection();
+    return reinterpret_cast<int64_t>(client);
+}
+
+void qLocalServerSetSocketOptions(int64_t ptr, int32_t options) {
+    reinterpret_cast<QLocalServer*>(ptr)->setSocketOptions(static_cast<QLocalServer::SocketOption>(options));
+}
+
+int32_t qLocalServerSocketOptions(int64_t ptr) {
+    return static_cast<int32_t>(reinterpret_cast<QLocalServer*>(ptr)->socketOptions());
+}
+
+bool qLocalServerRemoveServer(const char* name) {
+    return QLocalServer::removeServer(QString::fromUtf8(name));
 }
 
 } // extern "C"

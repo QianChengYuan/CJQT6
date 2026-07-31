@@ -639,6 +639,7 @@ public class QPixmap {
     // }
 }
 
+/// 图像类，表示内存中的像素图数据，支持从文件加载与像素读写
 public class QImage {
     private var ptr: Int64 = 0
 

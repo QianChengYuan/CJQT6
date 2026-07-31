@@ -292,6 +292,8 @@ func parseSize(s: String): Int32 {
     }
     return if (negative) { -result } else { result }
 }
+
+/// 字体选择对话框，弹出系统字体选择器（getFontName 返回选中字体名，取消返回空字符串）
 public class QFontDialog {
     
     // 获取字体名称 (返回空字符串表示取消)
@@ -561,6 +563,7 @@ foreign func qWizardPageSetSubTitle(ptr: Int64, subTitle: CString): Unit
 foreign func qWizardPageSetCommitPage(ptr: Int64, isCommit: Int32): Unit
 foreign func qWizardPageIsCommitPage(ptr: Int64): Int32
 
+/// 向导页面，作为 QWizard 向导流程中的一页（可设标题、副标题与提交页标记）
 public class QWizardPage <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false

@@ -17,6 +17,7 @@ foreign func qRubberBandSetShape(ptr: Int64, shape: Int32): Unit
 foreign func qRubberBandShape(ptr: Int64): Int32
 foreign func qRubberBandDelete(ptr: Int64): Unit
 
+/// 橡皮筋选框控件，用于在父控件上绘制矩形选择区域（如拖拽框选）
 public class QRubberBand {
     private var ptr: Int64 = 0
     
@@ -87,6 +88,7 @@ public class QRubberBand {
     }
 }
 
+/// 橡皮筋选框形状枚举：直线/矩形
 public class RubberBandShape {
     public static let Line: Int32 = 0
     public static let Rectangle: Int32 = 1

@@ -105,3 +105,163 @@ player.onDurationChanged(onDurationChanged)
 | `onMediaStatusChanged(callback)` | `CFunc<(Int32) -> Unit>` | 媒体状态变化 |
 
 > 说明：当前封装没有要求使用 `@C` 修饰顶层函数；只要传入与签名匹配的 `CFunc` 即可。
+
+---
+
+## QCameraDevice — 摄像头设备描述
+
+描述摄像头设备信息。
+
+```cangjie
+import cjqt6.multimedia.*
+
+// 获取默认摄像头
+let device = QMediaDevices.defaultVideoInput()
+println("设备: ${device.description()}")
+println("ID: ${device.id()}")
+device.delete()
+```
+
+**方法**:
+| 方法 | 说明 |
+|------|------|
+| `description(): String` | 获取设备描述名称 |
+| `id(): String` | 获取设备 ID |
+| `getPtr(): Int64` | 获取指针 |
+| `delete()` | 释放资源 |
+
+---
+
+## QMediaDevices — 媒体设备信息（静态类）
+
+提供设备枚举功能。
+
+```cangjie
+import cjqt6.multimedia.*
+
+// 获取默认视频输入设备
+let device = QMediaDevices.defaultVideoInput()
+
+// 获取视频输入设备数量
+let count = QMediaDevices.videoInputCount()
+println("可用摄像头数: ${count}")
+```
+
+**方法**:
+| 方法 | 说明 |
+|------|------|
+| `defaultVideoInput(): QCameraDevice` | 获取默认摄像头设备 |
+| `videoInputCount(): Int32` | 获取可用摄像头数量 |
+
+---
+
+## QCamera — 摄像头控制
+
+控制摄像头采集。
+
+```cangjie
+import cjqt6.multimedia.*
+
+// 使用默认摄像头
+let camera = QCamera()
+
+// 使用指定摄像头
+let device = QMediaDevices.defaultVideoInput()
+let camera = QCamera(device)
+device.delete()  // 创建设备后可释放
+
+// 启动/停止
+camera.start()
+camera.stop()
+
+// 查询状态
+let active = camera.isActive()
+let error = camera.errorString()
+
+camera.close()
+```
+
+**方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` | 使用默认设备创建 |
+| `init(device: QCameraDevice)` | 使用指定设备创建 |
+| `start()` | 启动摄像头 |
+| `stop()` | 停止摄像头 |
+| `isActive(): Bool` | 是否激活 |
+| `errorCode(): Int32` | 获取错误码 |
+| `errorString(): String` | 获取错误描述 |
+| `getPtr(): Int64` | 获取指针 |
+| `close()` | 释放资源 |
+
+---
+
+## QMediaCaptureSession — 媒体捕获会话
+
+管理摄像头到视频输出的连接。
+
+```cangjie
+import cjqt6.multimedia.*
+
+let session = QMediaCaptureSession()
+let camera = QCamera()
+let videoWidget = QVideoWidget()
+
+// 配置捕获会话
+session.setCamera(camera.getPtr())
+session.setVideoOutput(videoWidget.getPtr())
+
+camera.start()    // 开始采集
+videoWidget.show() // 显示视频
+
+// 清理
+camera.close()
+session.close()
+videoWidget.close()
+```
+
+**方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` | 创建捕获会话 |
+| `setCamera(cameraPtr: Int64)` | 设置摄像头 |
+| `setVideoOutput(outputPtr: Int64)` | 设置视频输出（QVideoWidget 指针） |
+| `getPtr(): Int64` | 获取指针 |
+| `close()` | 释放资源 |
+
+---
+
+## QVideoWidget — 视频显示控件
+
+用于显示视频画面的窗口部件。
+
+```cangjie
+import cjqt6.multimedia.*
+
+let videoWidget = QVideoWidget()
+
+// 设置宽高比模式
+videoWidget.setAspectRatioMode(AspectRatioMode.keep())
+
+// 显示
+videoWidget.show()
+
+videoWidget.close()
+```
+
+**方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` | 创建视频显示控件 |
+| `show()` | 显示控件 |
+| `setAspectRatioMode(mode: Int32)` | 设置宽高比模式 |
+| `aspectRatioMode(): Int32` | 获取宽高比模式 |
+| `getPtr(): Int64` | 获取指针 |
+| `close()` | 释放资源 |
+
+**宽高比模式常量** (`AspectRatioMode`):
+| 常量 | 值 | 说明 |
+|------|-----|------|
+| `AspectRatioMode.ignore()` | 0 | 忽略宽高比 |
+| `AspectRatioMode.keep()` | 1 | 保持宽高比 |
+| `AspectRatioMode.keepByExpanding()` | 2 | 保持宽高比并扩展 |

@@ -134,3 +134,7 @@ releases/windows-x64/tmp_merge/
 # 兜底：忽略 .agents 下除 skills 外的临时内容（tmp-cangjie-skills/、tmp-docs-03.md 等）
 .agents/*
 !.agents/skills/
+
+# 示例运行时产物（数据库与调试输出不入库）
+examples/**/*.db
+examples/**/stderr_*.txt

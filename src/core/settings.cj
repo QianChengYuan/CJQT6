@@ -1,5 +1,9 @@
 package cjqt6.core
 
+// ============================================================
+// QSettings - 应用配置持久化
+// ============================================================
+
 foreign func qSettingsCreate(appName: CString): Int64
 foreign func qSettingsCreateWithFile(fileName: CString): Int64
 foreign func qSettingsSetValue(ptr: Int64, key: CString, value: CString): Unit
@@ -13,12 +17,14 @@ foreign func qSettingsContains(ptr: Int64, key: CString): Bool
 foreign func qSettingsRemove(ptr: Int64, key: CString): Unit
 foreign func qSettingsDelete(ptr: Int64): Unit
 
+/// 应用配置持久化，以键值对方式读写应用设置（支持分组与多类型取值）
 public class QSettings <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
     private init() {}
 
+    /// 按应用名称创建配置存储（读写平台约定的应用配置位置）
     public init(appName: String) {
         unsafe {
             let cstr = LibC.mallocCString(appName)
@@ -30,6 +36,7 @@ public class QSettings <: QtResource {
         }
     }
 
+    /// 从指定 INI 格式文件创建配置存储
     public static func fromFile(fileName: String): QSettings {
         let s = QSettings()
         unsafe {
@@ -43,6 +50,7 @@ public class QSettings <: QtResource {
         return s
     }
 
+    /// 写入字符串键值对
     public func setValue(key: String, value: String): Unit {
         checkValid()
         unsafe {
@@ -54,6 +62,7 @@ public class QSettings <: QtResource {
         }
     }
 
+    /// 读取字符串值，键不存在时返回 defaultValue
     public func value(key: String, defaultValue: String): String {
         checkValid()
         unsafe {
@@ -66,6 +75,7 @@ public class QSettings <: QtResource {
         }
     }
 
+    /// 读取整数值，键不存在时返回 defaultValue
     public func valueInt(key: String, defaultValue: Int32): Int32 {
         checkValid()
         unsafe {
@@ -76,6 +86,7 @@ public class QSettings <: QtResource {
         }
     }
 
+    /// 读取布尔值，键不存在时返回 defaultValue
     public func valueBool(key: String, defaultValue: Bool): Bool {
         checkValid()
         unsafe {
@@ -86,6 +97,7 @@ public class QSettings <: QtResource {
         }
     }
 
+    /// 开始分组，后续键读写都带上前缀（如 "window/"）
     public func beginGroup(prefix: String): Unit {
         checkValid()
         unsafe {
@@ -95,6 +107,7 @@ public class QSettings <: QtResource {
         }
     }
 
+    /// 结束当前分组
     public func endGroup(): Unit {
         checkValid()
         unsafe {
@@ -102,6 +115,7 @@ public class QSettings <: QtResource {
         }
     }
 
+    /// 将内存中的改动同步写入磁盘
     public func sync(): Unit {
         checkValid()
         unsafe {
@@ -109,6 +123,7 @@ public class QSettings <: QtResource {
         }
     }
 
+    /// 指定键是否存在
     public func contains(key: String): Bool {
         checkValid()
         unsafe {
@@ -119,6 +134,7 @@ public class QSettings <: QtResource {
         }
     }
 
+    /// 删除指定键及其值
     public func remove(key: String): Unit {
         checkValid()
         unsafe {

@@ -1,7 +1,7 @@
 # CJQT6 未封装控件分析报告
 
 > 生成日期：2026-07-18
-> 最后更新：2026-07-29（全集更新——修正控件清单、覆盖率、P3 待实施项）
+> 最后更新：2026-07-30（P3 全部完成 — animation/undostack/style/camera/videowidget/sortfilterproxymodel）
 
 ## 一、整体架构模式
 
@@ -23,19 +23,19 @@ C++ 桥接实现    →  native/src/*/bridge_*.cpp   (extern "C" FFI函数实现
 |------|--------|-----------|--------|
 | 基础控件 (widgets) | 37 | 0 | ~100% |
 | 容器/布局 | 10 | 0 | 100% |
-| 视图 (views) | 9 | 2 | ~82% |
+| 视图 (views) | 10 | 0 | ~100% |
 | 对话框 | 9 | 0 | 100% |
 | 菜单/工具栏 | 6 | 0 | 100% |
 | 绘图 | 9 | 0 | 100% |
-| 多媒体 | 3 | 2 | ~60% |
+| 多媒体 | 5 | 0 | ~100% |
 | 网络 | 3 | 0 | 100% |
-| 核心/工具 | 20 | 3 | ~87% |
-| 动画/特效 | 5 | 2 | ~71% |
-| **合计** | **~106** | **~9** | **~92%** |
+| 核心/工具 | 22 | 0 | ~95% |
+| 动画/特效 | 7 | 0 | ~100% |
+| **合计** | **~118** | **0** | **~98%** |
 
 ## 三、已封装控件完整清单
 
-### core/ — 20 文件
+### core/ — 22 文件
 | 文件 | 控件/类 | 状态 |
 |------|---------|------|
 | application.cj | QApplication | ✅ 较完整（含多语言/翻译支持） |
@@ -58,6 +58,8 @@ C++ 桥接实现    →  native/src/*/bridge_*.cpp   (extern "C" FFI函数实现
 | settings.cj | QSettings | ✅ P2 新增 |
 | propertyanimation.cj | QPropertyAnimation | ✅ P2 新增 |
 | screen.cj | QScreen | ✅ P2 新增 |
+| animation.cj | QAbstractAnimation / QParallelAnimationGroup | ✅ P3 新增 |
+| undostack.cj | QUndoCommand / QUndoStack | ✅ P3 新增 |
 
 ### widgets/ — 37 文件
 | 文件 | 控件 | 状态 |
@@ -100,7 +102,7 @@ C++ 桥接实现    →  native/src/*/bridge_*.cpp   (extern "C" FFI函数实现
 | splashscreen.cj | QSplashScreen | ✅ 初始 |
 | validators.cj | QValidator / QIntValidator / QDoubleValidator | ✅ 初始 |
 
-### views/ — 9 文件
+### views/ — 10 文件
 | 文件 | 控件 | 状态 |
 |------|------|------|
 | listwidget.cj | QListWidget | ✅ 较完整 |
@@ -112,6 +114,7 @@ C++ 桥接实现    →  native/src/*/bridge_*.cpp   (extern "C" FFI函数实现
 | headerview.cj | QHeaderView（含 Orientation/ResizeMode） | ✅ 较完整 |
 | standarditemmodel.cj | QStandardItemModel | ✅ 较完整 |
 | filesystemmodel.cj | QFileSystemModel | ✅ 较完整 |
+| sortfilterproxymodel.cj | QSortFilterProxyModel | ✅ P3 新增 |
 
 ### dialogs/ — 1 文件（9 个对话框）
 | 控件 | 状态 | 阶段 |
@@ -135,11 +138,12 @@ C++ 桥接实现    →  native/src/*/bridge_*.cpp   (extern "C" FFI函数实现
 | QToolBar | ✅ 基础 |
 | QStatusBar | ✅ 基础 |
 
-### gui/ — 2 文件
+### gui/ — 3 文件
 | 控件 | 状态 |
 |------|------|
 | QVBoxLayout/QHBoxLayout/QGridLayout/QFormLayout | ✅ 较完整（含 stretch 参数） |
 | 对齐/方向/边距类型 | ✅ 完整 |
+| QStyleHelper（QStyle 查询） | ✅ P3 新增 |
 
 ### paint/ — 3 文件
 | 控件 | 状态 |
@@ -148,12 +152,14 @@ C++ 桥接实现    →  native/src/*/bridge_*.cpp   (extern "C" FFI函数实现
 | QTransform | ✅ 基础 |
 | QFontDatabase | ✅ P2 新增 |
 
-### multimedia/ — 2 文件
+### multimedia/ — 4 文件
 | 控件 | 状态 |
 |------|------|
 | QMediaPlayer | ✅ 较完整 |
 | QAudioOutput | ✅ 基础 |
 | QSoundEffect | ✅ P2 新增 |
+| QCameraDevice / QCamera / QMediaCaptureSession / QMediaDevices | ✅ P3 新增 |
+| QVideoWidget | ✅ P3 新增 |
 
 ### network/ — 3 文件
 | 控件 | 状态 |
@@ -217,20 +223,18 @@ C++ 桥接实现    →  native/src/*/bridge_*.cpp   (extern "C" FFI函数实现
 | 字体 | QFontComboBox | widgets | ⭐ |
 | | QFontDatabase | paint | ⭐⭐ |
 
-### 🔵 Phase 3：P3 待实施（按需）
+### ✅ Phase 3：P3 全部完成
 
-| 分类 | 控件/类 | 模块 | 复杂度 | 说明 |
-|------|--------|------|-------|------|
-| 动画 | QParallelAnimationGroup | core | ⭐⭐ | 依赖于 QAbstractAnimation |
-| Model/View | QSortFilterProxyModel | views | ⭐⭐⭐ | 排序过滤代理 |
-| 高级工具 | QUndoStack/QUndoCommand | core | ⭐⭐ | 需要子类化支持 |
-| | QStyle | gui | ⭐⭐ | 样式查询 |
-| 多媒体增强 | QVideoWidget | multimedia | ⭐⭐ | 需要 Qt6::MultimediaWidgets 模块（CMake 修改） |
-| | QCamera | multimedia | ⭐⭐⭐ | 复杂度高 |
+| 控件/类 | 模块 | 完成状态 |
+|---------|------|---------|
+| QAbstractAnimation / QParallelAnimationGroup | core | ✅ 已完成 |
+| QUndoCommand / QUndoStack | core | ✅ 已完成 |
+| QStyleHelper（QStyle 查询） | gui | ✅ 已完成 |
+| QCamera / QCameraDevice / QMediaCaptureSession / QMediaDevices | multimedia | ✅ 已完成 |
+| QVideoWidget | multimedia | ✅ 已完成（需 Qt6::MultimediaWidgets） |
+| QSortFilterProxyModel | views | ✅ 已完成 |
 
-**已实现（从 P3 移除）**：
-- QStandardItemModel → `src/views/standarditemmodel.cj` ✅
-- QFormLayout → `src/gui/layout.cj` 中完整实现 ✅
+**至此，CJQT6 所有已知常用控件封装已全部完成**，覆盖率达 ~98%。后续按需补充进阶方法和 QVideoSink 等深度功能。
 
 ## 五、实施路线图（已完成）
 

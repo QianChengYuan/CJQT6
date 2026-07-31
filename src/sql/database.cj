@@ -45,6 +45,26 @@ foreign func qSqlQueryClear(ptr: Int64): Unit
 foreign func qSqlQueryLastError(ptr: Int64): CString
 foreign func qSqlQueryDelete(ptr: Int64): Unit
 
+// QSqlRecord FFI
+foreign func qSqlQueryRecord(ptr: Int64): Int64
+foreign func qSqlRecordCount(ptr: Int64): Int32
+foreign func qSqlRecordFieldName(ptr: Int64, index: Int32): CString
+foreign func qSqlRecordIndexOf(ptr: Int64, name: CString): Int32
+foreign func qSqlRecordIsNull(ptr: Int64, index: Int32): Bool
+foreign func qSqlRecordValueString(ptr: Int64, index: Int32): CString
+foreign func qSqlRecordValueInt(ptr: Int64, index: Int32): Int32
+foreign func qSqlRecordValueDouble(ptr: Int64, index: Int32): Float64
+foreign func qSqlRecordField(ptr: Int64, index: Int32): Int64
+foreign func qSqlRecordDelete(ptr: Int64): Unit
+
+// QSqlField FFI
+foreign func qSqlFieldName(ptr: Int64): CString
+foreign func qSqlFieldIsNull(ptr: Int64): Bool
+foreign func qSqlFieldIsReadOnly(ptr: Int64): Bool
+foreign func qSqlFieldIsAutoValue(ptr: Int64): Bool
+foreign func qSqlFieldValueString(ptr: Int64): CString
+foreign func qSqlFieldDelete(ptr: Int64): Unit
+
 /// 数据库驱动类型
 public class SqlDriver {
     public static func sqlite(): String { "QSQLITE" }
@@ -340,12 +360,180 @@ public class QSqlQuery {
         }
     }
     
+    /// 获取当前查询的记录元数据
+    public func record(): QSqlRecord {
+        unsafe {
+            let recordPtr = qSqlQueryRecord(ptr)
+            if (recordPtr == 0) {
+                throw CreateFailedException("QSqlRecord create failed")
+            }
+            return QSqlRecord(recordPtr)
+        }
+    }
+    
     public func getPtr(): Int64 { ptr }
     
     public func delete() {
         if (ptr != 0) {
             unsafe { qSqlQueryDelete(ptr) }
             ptr = 0
+        }
+    }
+}
+
+// ============================================================
+// QSqlRecord - 数据库记录（字段集合）
+// ============================================================
+public class QSqlRecord {
+    private var ptr: Int64 = 0
+    private var closed: Bool = false
+
+    internal init(p: Int64) {
+        ptr = p
+    }
+
+    private func checkValid(): Unit {
+        if (ptr == 0 || closed) {
+            throw ResourceDisposedException("QSqlRecord already deleted")
+        }
+    }
+
+    /// 获取字段数量
+    public func count(): Int32 {
+        checkValid()
+        unsafe { qSqlRecordCount(ptr) }
+    }
+
+    /// 获取字段名
+    public func fieldName(index: Int32): String {
+        checkValid()
+        unsafe {
+            let cstr = qSqlRecordFieldName(ptr, index)
+            return cstr.toString()
+        }
+    }
+
+    /// 根据字段名查找索引
+    public func indexOf(name: String): Int32 {
+        checkValid()
+        unsafe {
+            let cstr = LibC.mallocCString(name)
+            let result = qSqlRecordIndexOf(ptr, cstr)
+            LibC.free(cstr)
+            return result
+        }
+    }
+
+    /// 检查字段是否为空
+    public func isNull(index: Int32): Bool {
+        checkValid()
+        unsafe { qSqlRecordIsNull(ptr, index) }
+    }
+
+    /// 获取字符串值
+    public func valueString(index: Int32): String {
+        checkValid()
+        unsafe {
+            let cstr = qSqlRecordValueString(ptr, index)
+            return cstr.toString()
+        }
+    }
+
+    /// 获取整数值
+    public func valueInt(index: Int32): Int32 {
+        checkValid()
+        unsafe { qSqlRecordValueInt(ptr, index) }
+    }
+
+    /// 获取浮点值
+    public func valueDouble(index: Int32): Float64 {
+        checkValid()
+        unsafe { qSqlRecordValueDouble(ptr, index) }
+    }
+
+    /// 获取字段对象
+    public func field(index: Int32): QSqlField {
+        checkValid()
+        unsafe {
+            let fieldPtr = qSqlRecordField(ptr, index)
+            if (fieldPtr == 0) {
+                throw CreateFailedException("QSqlField create failed")
+            }
+            return QSqlField(fieldPtr)
+        }
+    }
+
+    public func getPtr(): Int64 { ptr }
+
+    public func close(): Unit {
+        if (!closed && ptr != 0) {
+            unsafe { qSqlRecordDelete(ptr) }
+            ptr = 0
+            closed = true
+        }
+    }
+}
+
+// ============================================================
+// QSqlField - 数据库字段
+// ============================================================
+public class QSqlField {
+    private var ptr: Int64 = 0
+    private var closed: Bool = false
+
+    internal init(p: Int64) {
+        ptr = p
+    }
+
+    private func checkValid(): Unit {
+        if (ptr == 0 || closed) {
+            throw ResourceDisposedException("QSqlField already deleted")
+        }
+    }
+
+    /// 获取字段名
+    public func name(): String {
+        checkValid()
+        unsafe {
+            let cstr = qSqlFieldName(ptr)
+            return cstr.toString()
+        }
+    }
+
+    /// 字段是否为空
+    public func isNull(): Bool {
+        checkValid()
+        unsafe { qSqlFieldIsNull(ptr) }
+    }
+
+    /// 是否只读
+    public func isReadOnly(): Bool {
+        checkValid()
+        unsafe { qSqlFieldIsReadOnly(ptr) }
+    }
+
+    /// 是否自动递增
+    public func isAutoValue(): Bool {
+        checkValid()
+        unsafe { qSqlFieldIsAutoValue(ptr) }
+    }
+
+    /// 获取字符串值
+    public func valueString(): String {
+        checkValid()
+        unsafe {
+            let cstr = qSqlFieldValueString(ptr)
+            return cstr.toString()
+        }
+    }
+
+    public func getPtr(): Int64 { ptr }
+
+    public func close(): Unit {
+        if (!closed && ptr != 0) {
+            unsafe { qSqlFieldDelete(ptr) }
+            ptr = 0
+            closed = true
         }
     }
 }

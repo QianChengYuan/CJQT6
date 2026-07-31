@@ -49,7 +49,7 @@ include_directories(
 # CJQT 桥接库 (用于仓颉语言FFI)
 # ============================================================
 
-# 核心模块 - QApplication, QWidget, QTimer, Events, Signal/Slot, Drag&Drop, Animation, Undo
+# 核心模块 - QApplication, QWidget, QTimer, Events, Signal/Slot, Drag&Drop, Animation, Undo, Thread
 set(CORE_SOURCES
     native/src/core/string.cpp
     native/src/core/core.cpp
@@ -59,15 +59,21 @@ set(CORE_SOURCES
     native/src/core/bridge_dragdrop.cpp
     native/src/core/bridge_animation.cpp
     native/src/core/bridge_undostack.cpp
+    native/src/core/bridge_thread.cpp
+    native/src/core/bridge_itemselection.cpp
+    native/src/core/bridge_json.cpp
 )
 
-# GUI模块 - 布局、对话框、菜单、样式
+# GUI模块 - 布局、对话框、菜单、样式、文本文档
 set(GUI_SOURCES
     native/src/gui/gui.cpp
     native/src/gui/bridge_layout.cpp
     native/src/gui/bridge_dialogs.cpp
     native/src/gui/bridge_menu.cpp
     native/src/gui/bridge_style.cpp
+    native/src/gui/bridge_textdoc.cpp
+    native/src/gui/bridge_font.cpp
+    native/src/gui/bridge_syntax.cpp
 )
 
 # Widgets模块 - 基础部件、选择部件、数值部件、容器、日期时间
@@ -86,9 +92,10 @@ set(WIDGETS_SOURCES
     native/src/widgets/bridge_ext_wlayout.cpp
     native/src/widgets/bridge_ext_wmisc.cpp
     native/src/widgets/bridge_ext_apicomplete.cpp
+    native/src/widgets/bridge_graphicsitem.cpp
 )
 
-# Views模块 - 表格视图、列表视图、树形视图、排序过滤代理
+# Views模块 - 表格视图、列表视图、树形视图、排序过滤代理、抽象模型
 set(VIEWS_SOURCES
     native/src/views/bridge_table.cpp
     native/src/views/bridge_list.cpp
@@ -96,6 +103,7 @@ set(VIEWS_SOURCES
     native/src/views/bridge_modelview.cpp
     native/src/views/bridge_ext_views.cpp
     native/src/views/bridge_sortfilterproxymodel.cpp
+    native/src/views/bridge_abstractmodel.cpp
 )
 
 # Paint模块 - 绘图相关类
@@ -126,6 +134,7 @@ set(PRINT_SOURCES
 # Network模块 - 网络支持
 set(NETWORK_SOURCES
     native/src/network/bridge_network.cpp
+    native/src/network/bridge_network_access.cpp
 )
 
 # Multimedia模块 - 多媒体支持 (可选)
