@@ -30,14 +30,18 @@ public class ImageCaptureError {
     public static func fileError(): Int32 { 5 }
 }
 
-/// 图像捕获质量（与 QImageCapture::Quality 枚举对应）
+/// 图像捕获质量（与 QImageCapture::Quality 枚举对应，取值与 Qt6 一致）
 public class ImageCaptureQuality {
-    /// 低质量（小文件）
-    public static func lowQuality(): Int32 { 0 }
-    /// 普通质量
-    public static func normalQuality(): Int32 { 1 }
-    /// 高质量（大文件）
-    public static func highQuality(): Int32 { 2 }
+    /// 极低质量（VeryLowQuality=0）
+    public static func veryLowQuality(): Int32 { 0 }
+    /// 低质量（LowQuality=1）
+    public static func lowQuality(): Int32 { 1 }
+    /// 普通质量（NormalQuality=2）
+    public static func normalQuality(): Int32 { 2 }
+    /// 高质量（HighQuality=3）
+    public static func highQuality(): Int32 { 3 }
+    /// 极高质量（VeryHighQuality=4）
+    public static func veryHighQuality(): Int32 { 4 }
 }
 
 /// 图像捕获器，用于从相机捕获静态图像
