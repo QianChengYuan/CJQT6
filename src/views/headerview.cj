@@ -7,7 +7,7 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qHeaderViewCreate(orientation: Int32): Int64
-foreign func qHeaderViewSetStretchLastSection(ptr: Int64, stretch: Bool): Unit
+foreign func qHeaderViewSetStretchLastSection(ptr: Int64, stretch: Int32): Unit
 foreign func qHeaderViewSetSectionResizeMode(ptr: Int64, mode: Int32): Unit
 foreign func qHeaderViewDelete(ptr: Int64): Unit
 
@@ -128,7 +128,7 @@ public class QHeaderView {
     public func setStretchLastSection(stretch: Bool): Unit {
         checkValid()
         unsafe {
-            qHeaderViewSetStretchLastSection(ptr, stretch)
+            qHeaderViewSetStretchLastSection(ptr, if (stretch) { 1 } else { 0 })
         }
     }
 

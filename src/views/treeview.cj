@@ -11,7 +11,7 @@ foreign func qTreeViewSetModel(ptr: Int64, modelPtr: Int64): Unit
 foreign func qTreeViewExpandAll(ptr: Int64): Unit
 foreign func qTreeViewCollapseAll(ptr: Int64): Unit
 foreign func qTreeViewSetSelectionMode(ptr: Int64, mode: Int32): Unit
-foreign func qTreeViewSetHeaderHidden(ptr: Int64, hidden: Bool): Unit
+foreign func qTreeViewSetHeaderHidden(ptr: Int64, hidden: Int32): Unit
 foreign func qTreeViewDelete(ptr: Int64): Unit
 
 // 补充 API FFI（编辑/动画/展开/索引/信号）
@@ -133,7 +133,7 @@ public class QTreeView {
     public func setHeaderHidden(hidden: Bool): Unit {
         checkValid()
         unsafe {
-            qTreeViewSetHeaderHidden(ptr, hidden)
+            qTreeViewSetHeaderHidden(ptr, if (hidden) { 1 } else { 0 })
         }
     }
 

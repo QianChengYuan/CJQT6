@@ -52,24 +52,30 @@ foreign func qTextCursorColumnNumber(ptr: Int64): Int32
 // ============================================================
 public class MoveOperation {
     public static func noMove(): Int32 { 0 }
-    public static func startOfLine(): Int32 { 2 }
-    public static func startOfBlock(): Int32 { 3 }
-    public static func startOfWord(): Int32 { 4 }
-    public static func previousBlock(): Int32 { 5 }
-    public static func previousCharacter(): Int32 { 6 }
-    public static func previousWord(): Int32 { 7 }
-    public static func up(): Int32 { 8 }
+    public static func start(): Int32 { 1 }
+    public static func up(): Int32 { 2 }
+    public static func startOfLine(): Int32 { 3 }
+    public static func startOfBlock(): Int32 { 4 }
+    public static func startOfWord(): Int32 { 5 }
+    public static func previousBlock(): Int32 { 6 }
+    public static func previousCharacter(): Int32 { 7 }
+    public static func previousWord(): Int32 { 8 }
     public static func left(): Int32 { 9 }
-    public static func wordRight(): Int32 { 10 }
+    public static func wordLeft(): Int32 { 10 }
     public static func end(): Int32 { 11 }
-    public static func endOfLine(): Int32 { 12 }
-    public static func endOfWord(): Int32 { 13 }
-    public static func endOfBlock(): Int32 { 14 }
-    public static func nextBlock(): Int32 { 15 }
-    public static func nextCharacter(): Int32 { 16 }
-    public static func nextWord(): Int32 { 17 }
-    public static func down(): Int32 { 18 }
+    public static func down(): Int32 { 12 }
+    public static func endOfLine(): Int32 { 13 }
+    public static func endOfWord(): Int32 { 14 }
+    public static func endOfBlock(): Int32 { 15 }
+    public static func nextBlock(): Int32 { 16 }
+    public static func nextCharacter(): Int32 { 17 }
+    public static func nextWord(): Int32 { 18 }
     public static func right(): Int32 { 19 }
+    public static func wordRight(): Int32 { 20 }
+    public static func nextCell(): Int32 { 21 }
+    public static func previousCell(): Int32 { 22 }
+    public static func nextRow(): Int32 { 23 }
+    public static func previousRow(): Int32 { 24 }
 }
 
 // ============================================================

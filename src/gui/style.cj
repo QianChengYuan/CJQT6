@@ -17,65 +17,69 @@ foreign func qStyleLayoutSpacing(stylePtr: Int64, spacingType: Int32): Int32
 // 标准图标类型
 // ============================================================
 public class StandardIcon {
-    public static func messageBoxInformation(): Int32 { 0 }
-    public static func messageBoxWarning(): Int32 { 1 }
-    public static func messageBoxCritical(): Int32 { 2 }
-    public static func messageBoxQuestion(): Int32 { 3 }
-    public static func computerIcon(): Int32 { 4 }
-    public static func desktopIcon(): Int32 { 5 }
-    public static func driveCDIcon(): Int32 { 9 }
-    public static func driveHDIcon(): Int32 { 10 }
-    public static func driveNetIcon(): Int32 { 11 }
-    public static func fileIcon(): Int32 { 12 }
-    public static func fileLinkIcon(): Int32 { 13 }
-    public static func folderIcon(): Int32 { 14 }
-    public static func folderLinkIcon(): Int32 { 15 }
-    public static func infoIcon(): Int32 { 17 }
-    public static func warningIcon(): Int32 { 18 }
-    public static func errorIcon(): Int32 { 20 }
-    public static func arrowUp(): Int32 { 21 }
-    public static func arrowDown(): Int32 { 22 }
-    public static func arrowLeft(): Int32 { 23 }
-    public static func arrowRight(): Int32 { 24 }
-    public static func mediaPlay(): Int32 { 47 }
-    public static func mediaPause(): Int32 { 48 }
-    public static func mediaStop(): Int32 { 49 }
-    public static func mediaSkipForward(): Int32 { 50 }
-    public static func mediaSkipBackward(): Int32 { 51 }
-    public static func mediaVolume(): Int32 { 52 }
-    public static func mediaVolumeMuted(): Int32 { 53 }
-    public static func dialogClose(): Int32 { 35 }
-    public static func dialogOpen(): Int32 { 32 }
-    public static func dialogSave(): Int32 { 33 }
-    public static func dialogApply(): Int32 { 41 }
-    public static func dialogCancel(): Int32 { 30 }
-    public static func dialogHelp(): Int32 { 34 }
-    public static func dialogYes(): Int32 { 40 }
-    public static func dialogNo(): Int32 { 39 }
+    public static func messageBoxInformation(): Int32 { 9 }
+    public static func messageBoxWarning(): Int32 { 10 }
+    public static func messageBoxCritical(): Int32 { 11 }
+    public static func messageBoxQuestion(): Int32 { 12 }
+    public static func desktopIcon(): Int32 { 13 }
+    public static func computerIcon(): Int32 { 15 }
+    public static func driveCDIcon(): Int32 { 18 }
+    public static func driveHDIcon(): Int32 { 17 }
+    public static func driveNetIcon(): Int32 { 20 }
+    public static func fileIcon(): Int32 { 25 }
+    public static func fileLinkIcon(): Int32 { 26 }
+    public static func folderIcon(): Int32 { 38 }
+    public static func folderLinkIcon(): Int32 { 23 }
+    public static func infoIcon(): Int32 { 9 }
+    public static func warningIcon(): Int32 { 10 }
+    public static func errorIcon(): Int32 { 11 }
+    public static func arrowUp(): Int32 { 50 }
+    public static func arrowDown(): Int32 { 51 }
+    public static func arrowLeft(): Int32 { 52 }
+    public static func arrowRight(): Int32 { 53 }
+    public static func mediaPlay(): Int32 { 61 }
+    public static func mediaPause(): Int32 { 63 }
+    public static func mediaStop(): Int32 { 62 }
+    public static func mediaSkipForward(): Int32 { 64 }
+    public static func mediaSkipBackward(): Int32 { 65 }
+    public static func mediaVolume(): Int32 { 68 }
+    public static func mediaVolumeMuted(): Int32 { 69 }
+    public static func dialogClose(): Int32 { 44 }
+    public static func dialogOpen(): Int32 { 42 }
+    public static func dialogSave(): Int32 { 43 }
+    public static func dialogApply(): Int32 { 45 }
+    public static func dialogCancel(): Int32 { 40 }
+    public static func dialogHelp(): Int32 { 41 }
+    public static func dialogYes(): Int32 { 48 }
+    public static func dialogNo(): Int32 { 49 }
 }
 
 // ============================================================
 // 像素度量类型
 // ============================================================
 public class PixelMetric {
-    public static func buttonIconSize(): Int32 { 16 }
-    public static func buttonMinimumWidth(): Int32 { 65 }
-    public static func buttonMinimumHeight(): Int32 { 66 }
-    public static func tabBarTabOverlap(): Int32 { 1 }
-    public static func tabBarBaseHeight(): Int32 { 2 }
-    public static func titleBarHeight(): Int32 { 27 }
-    public static func scrollBarExtent(): Int32 { 68 }
-    public static func sliderThickness(): Int32 { 73 }
-    public static func sliderLength(): Int32 { 74 }
-    public static func progressBarHeight(): Int32 { 75 }
-    public static func toolBarIconSize(): Int32 { 88 }
-    public static func listViewIconSize(): Int32 { 89 }
-    public static func smallIconSize(): Int32 { 102 }
-    public static func largeIconSize(): Int32 { 103 }
-    public static func focusFrameVMargin(): Int32 { 121 }
-    public static func focusFrameHMargin(): Int32 { 120 }
-    public static func menuBarHeight(): Int32 { 100 }
-    public static func toolBarIconSpacing(): Int32 { 95 }
+    public static func buttonIconSize(): Int32 { 72 }
+    // Qt 6 已移除 PM_ButtonMinimumWidth/Height，映射到 PM_ButtonMargin 以保持 API 兼容
+    public static func buttonMinimumWidth(): Int32 { 0 }
+    public static func buttonMinimumHeight(): Int32 { 0 }
+    public static func tabBarTabOverlap(): Int32 { 19 }
+    public static func tabBarBaseHeight(): Int32 { 22 }
+    public static func titleBarHeight(): Int32 { 26 }
+    public static func scrollBarExtent(): Int32 { 9 }
+    public static func sliderThickness(): Int32 { 11 }
+    public static func sliderLength(): Int32 { 13 }
+    // Qt 6 已移除 PM_ProgressBarHeight，进度条高度由 PM_ProgressBarChunkWidth 表征
+    public static func progressBarHeight(): Int32 { 24 }
+    public static func toolBarIconSize(): Int32 { 59 }
+    public static func listViewIconSize(): Int32 { 60 }
+    public static func smallIconSize(): Int32 { 62 }
+    public static func largeIconSize(): Int32 { 63 }
+    public static func focusFrameVMargin(): Int32 { 64 }
+    public static func focusFrameHMargin(): Int32 { 65 }
+    // Qt 6 已移除 PM_MenuBarHeight，映射到 PM_MenuBarPanelWidth 以保持 API 兼容
+    public static func menuBarHeight(): Int32 { 33 }
+    // Qt 6 已移除 PM_ToolBarIconSpacing，映射到 PM_ToolBarItemSpacing
+    public static func toolBarIconSpacing(): Int32 { 54 }
 }
 
 

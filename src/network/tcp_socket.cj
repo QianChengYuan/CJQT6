@@ -52,7 +52,19 @@ public class SocketError {
     public static let AddressInUseError: Int32 = 8
     public static let SocketAddressNotAvailableError: Int32 = 9
     public static let UnsupportedSocketOperationError: Int32 = 10
-    public static let UnknownSocketError: Int32 = 11
+    public static let UnfinishedSocketOperationError: Int32 = 11
+    public static let ProxyAuthenticationRequiredError: Int32 = 12
+    public static let SslHandshakeFailedError: Int32 = 13
+    public static let ProxyConnectionRefusedError: Int32 = 14
+    public static let ProxyConnectionClosedError: Int32 = 15
+    public static let ProxyConnectionTimeoutError: Int32 = 16
+    public static let ProxyNotFoundError: Int32 = 17
+    public static let ProxyProtocolError: Int32 = 18
+    public static let OperationError: Int32 = 19
+    public static let SslInternalError: Int32 = 20
+    public static let SslInvalidUserDataError: Int32 = 21
+    public static let TemporaryError: Int32 = 22
+    public static let UnknownSocketError: Int32 = -1
 }
 
 /// TCP套接字

@@ -173,6 +173,16 @@ public enum BrushStyle {
         match (v) {
             case 0 => NoBrush
             case 1 => SolidPattern
+            case 2 => Dense1Pattern
+            case 3 => Dense2Pattern
+            case 4 => Dense3Pattern
+            case 5 => Dense4Pattern
+            case 6 => Dense5Pattern
+            case 7 => Dense6Pattern
+            case 8 => Dense7Pattern
+            case 9 => HorPattern
+            case 10 => VerPattern
+            case 11 => CrossPattern
             case 15 => LinearGradient
             case 16 => RadialGradient
             case 17 => ConicalGradient

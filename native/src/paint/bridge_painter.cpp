@@ -352,8 +352,17 @@ void qFontSetItalic(int64_t ptr, int32_t italic) {
 // ============================================================
 
 int64_t qPainterCreate(int64_t devicePtr) {
-    QPaintDevice* device = reinterpret_cast<QPaintDevice*>(devicePtr);
-    QPainter* painter = new QPainter(device);
+    QPainter* painter;
+    if (devicePtr != 0) {
+        // 有设备：绑定设备（内部 begin）
+        QPaintDevice* device = reinterpret_cast<QPaintDevice*>(devicePtr);
+        painter = new QPainter(device);
+    } else {
+        // 无设备：必须使用无参构造。
+        // 注意：new QPainter(nullptr) 在 Qt6 下会导致访问冲突崩溃
+        // (0xC0000005)，不能用带参构造传空指针。
+        painter = new QPainter();
+    }
     return reinterpret_cast<int64_t>(painter);
 }
 
@@ -1302,7 +1311,7 @@ void qTransformDelete(int64_t ptr) {
 const char* qFontDatabaseFamilies() {
     static QByteArray arr;
     QStringList families = QFontDatabase::families();
-    arr = families.join('\n').toUtf8();
+    arr = families.join(',').toUtf8();
     return arr.constData();
 }
 
@@ -1327,7 +1336,7 @@ const char* qFontDatabaseStyles(const char* family) {
     static QByteArray arr;
     if (!family) return "";
     QStringList styles = QFontDatabase::styles(QString::fromUtf8(family));
-    arr = styles.join('\n').toUtf8();
+    arr = styles.join(',').toUtf8();
     return arr.constData();
 }
 

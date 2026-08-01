@@ -10,13 +10,13 @@ foreign func qTableViewCreate(): Int64
 foreign func qTableViewSetModel(ptr: Int64, modelPtr: Int64): Unit
 foreign func qTableViewSetColumnWidth(ptr: Int64, col: Int32, width: Int32): Unit
 foreign func qTableViewSetRowHeight(ptr: Int64, row: Int32, height: Int32): Unit
-foreign func qTableViewSetShowGrid(ptr: Int64, show: Bool): Unit
+foreign func qTableViewSetShowGrid(ptr: Int64, show: Int32): Unit
 foreign func qTableViewSetSelectionMode(ptr: Int64, mode: Int32): Unit
 foreign func qTableViewSetSelectionBehavior(ptr: Int64, behavior: Int32): Unit
-foreign func qTableViewSetSortingEnabled(ptr: Int64, enabled: Bool): Unit
+foreign func qTableViewSetSortingEnabled(ptr: Int64, enabled: Int32): Unit
 foreign func qTableViewResizeColumnsToContents(ptr: Int64): Unit
 foreign func qTableViewResizeRowsToContents(ptr: Int64): Unit
-foreign func qTableViewHorizontalHeaderSetStretchLastSection(ptr: Int64, stretch: Bool): Unit
+foreign func qTableViewHorizontalHeaderSetStretchLastSection(ptr: Int64, stretch: Int32): Unit
 foreign func qTableViewDelete(ptr: Int64): Unit
 
 // 补充 API FFI（编辑/网格/布局/索引/信号）
@@ -133,7 +133,7 @@ public class QTableView {
     public func setShowGrid(show: Bool): Unit {
         checkValid()
         unsafe {
-            qTableViewSetShowGrid(ptr, show)
+            qTableViewSetShowGrid(ptr, if (show) { 1 } else { 0 })
         }
     }
 
@@ -154,7 +154,7 @@ public class QTableView {
     public func setSortingEnabled(enabled: Bool): Unit {
         checkValid()
         unsafe {
-            qTableViewSetSortingEnabled(ptr, enabled)
+            qTableViewSetSortingEnabled(ptr, if (enabled) { 1 } else { 0 })
         }
     }
 
@@ -175,7 +175,7 @@ public class QTableView {
     public func horizontalHeaderSetStretchLastSection(stretch: Bool): Unit {
         checkValid()
         unsafe {
-            qTableViewHorizontalHeaderSetStretchLastSection(ptr, stretch)
+            qTableViewHorizontalHeaderSetStretchLastSection(ptr, if (stretch) { 1 } else { 0 })
         }
     }
 

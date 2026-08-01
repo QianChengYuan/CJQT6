@@ -65,7 +65,7 @@ foreign func qTabWidgetSetMovable(ptr: Int64, movable: Bool): Unit
 // QTabWidget::clear() - 清除所有标签页
 foreign func qTabWidgetClear(ptr: Int64): Unit
 // QTabWidget::connectCurrentChanged() - 连接当前标签页变化信号
-foreign func qTabWidgetConnectCurrentChanged(ptr: Int64, callback: Int64Callback): Unit
+foreign func qTabWidgetConnectCurrentChanged(ptr: Int64, callback: Int32Callback): Unit
 // QTabWidget::disconnectCurrentChanged() - 断开当前标签页变化信号
 foreign func qTabWidgetDisconnectCurrentChanged(ptr: Int64): Unit
 // QTabWidget析构 - 删除控件
@@ -480,7 +480,7 @@ public class QTabWidget <: QtResource {
     }
     
     /// 设置当前标签页变化回调
-    public func setOnCurrentChanged(callback: Int64Callback) {
+    public func setOnCurrentChanged(callback: Int32Callback) {
         checkValid()
         unsafe {
             qTabWidgetConnectCurrentChanged(ptr, callback)

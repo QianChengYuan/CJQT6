@@ -180,18 +180,15 @@ void qTabWidgetClear(int64_t ptr) {
 }
 
 // QTabWidget 回调映射
-static std::unordered_map<int64_t, std::function<void(int64_t)>> g_tabChangedCallbacks;
+static std::unordered_map<int64_t, std::function<void(int32_t)>> g_tabChangedCallbacks;
 
-void qTabWidgetConnectCurrentChanged(int64_t ptr, void (*callback)(int64_t)) {
+void qTabWidgetConnectCurrentChanged(int64_t ptr, void (*callback)(int32_t)) {
     QTabWidget* tabWidget = reinterpret_cast<QTabWidget*>(ptr);
-    if (tabWidget && callback) {
-        int64_t widgetPtr = ptr;
-        g_tabChangedCallbacks[ptr] = [callback, widgetPtr](int64_t) { callback(widgetPtr); };
-        QObject::connect(tabWidget, &QTabWidget::currentChanged, [widgetPtr](int) {
-            auto it = g_tabChangedCallbacks.find(widgetPtr);
-            if (it != g_tabChangedCallbacks.end()) {
-                it->second(widgetPtr);
-            }
+    if (tabWidget && callback && g_tabChangedCallbacks.find(ptr) == g_tabChangedCallbacks.end()) {
+        g_tabChangedCallbacks[ptr] = [callback](int32_t v) { callback(v); };
+        QObject::connect(tabWidget, &QTabWidget::currentChanged, [ptr](int index) {
+            auto it = g_tabChangedCallbacks.find(ptr);
+            if (it != g_tabChangedCallbacks.end()) it->second(static_cast<int32_t>(index));
         });
     }
 }
