@@ -1,4 +1,45 @@
 ﻿# 更新日志
+## [1.7.0] - 2026-08-02
+
+### 新增
+
+- **P1 批次 12 个控件/工具封装**: 新增 C++ FFI 桥接 + Cangjie 绑定——core 模块 `QItemSelectionModel`（含 `SelectionFlag`）、`QJsonDocument`/`QJsonArray`/`QJsonObject`/`QJsonValue`（含 `JsonType`）、`QThread`/`QThreadPool`/`QRunnable`（含 `ThreadPriority`）、`QSettings`、`QShortcut`、`QPropertyAnimation`；gui 模块 `QCursor`、`QPalette`、`QFont`、`QSyntaxHighlighter`、`QTextDocument`/`QTextCursor`、`QIcon`；multimedia 模块 `QImageCapture`、`QSoundEffect`；network 模块 `QNetworkProxy`、`QLocalServer`、`QNetworkAccessManager`、`QSslSocket`；views 模块 `QAbstractItemModel`；widgets 模块 `QGraphicsItem` 系列 7 个图形项 + `QGraphicsOpacityEffect`/`QGraphicsDropShadowEffect`/`QRubberBand`/`QToolBox`/`QMdiArea`/`QDockWidget`/`QFontComboBox`/`QCompleter`；sql 模块 `QSqlTableModel`；paint 模块 `QFontDatabase`
+- **6 个控件封装**: `QAbstractAnimation`/`QParallelAnimationGroup`（含 `AnimationState`/`AnimationDirection`）、`QUndoCommand`/`QUndoStack`、`QStyleHelper`（含 `StandardIcon`/`PixelMetric`）、`QCamera`/`QCameraDevice`/`QMediaDevices`/`QMediaCaptureSession`、`QVideoWidget`、`QSortFilterProxyModel`（含 `SortOrder`/`CaseSensitivity`）
+- **宿舍管理系统示例**: `examples/dormitory_manager` 完整 GUI 应用——三角色登录、宿舍楼/房间/学生/宿管/考勤/报修/公告管理，基于 SQLite 数据库
+- **全量中文注释补齐**: 103 个 `.cj` 文件均含中文注释，每个 `public class` 上方均有文档注释；补齐 10 个历史遗漏文件 + 15 处类定义注释
+
+### 修复
+
+- **C++ 桥接异常安全**: `bridge_signal.cpp` 所有信号回调包裹 `try/catch(...)`，防止 Cangjie 异常穿越 C FFI 边界
+- **字符串生命周期**: `string.cpp`/`bridge_widgets.cpp` 中 `const char*` 返回改为 `malloc+memcpy` 堆分配，消除悬垂指针（QLineEdit/QTextEdit/QPlainTextEdit/QTextBrowser/QKeySequenceEdit 等字符串返回统一修复）
+- **信号槽死锁**: `bridge_signal.cpp` 中 `std::mutex` 在 DLL 加载时的死锁问题改为 `atomic_flag` 自旋锁；`bridge_core.cpp` 清理调试日志并增加 `qWidgetShow` NULL 检查
+- **QPainter 空设备崩溃**: 修复空绘制设备崩溃；修正 `QTabWidget` 信号签名与字体族/样式分隔符
+- **枚举值对齐 Qt6**: `ImageCaptureQuality`（VeryLow=0~VeryHigh=4）补齐两个缺失档位；`QItemSelectionModel` 选择标志枚举值与 Qt 一致
+- **VC143 运行时库**: 部署新版 `msvcp140.dll`/`vcruntime140.dll` 等 5 个 DLL 到 `releases/windows-x64/`，修复旧版运行时下互斥锁崩溃
+
+### 重构
+
+- **8 个控件类实现 QtResource 接口**: `QWizardPage`/`QWizard`/`QErrorMessage`（`var ptr` + `closed` + `checkValid()`）、`QAction`/`QMenu`（沿用 `ownsPtr` 语义）、`QMenuBar`/`QToolBar`/`QStatusBar`/`QMainWindow`（新增 QtResource 实现）；所有 public 方法增加 `checkValid()` 守卫，`close()` 幂等、`delete()` 兼容旧 API
+- **QtResource 第二批/第四批**: `QRadioButton`/`QDial`/`QLCDNumber`/`QToolButton`、`QAction`/`QProgressDialog`/`QTcpSocket`/`QSqlDatabase` 补齐 QtResource 实现与 `CreateFailedException` 空指针检查
+- **API 补齐**（`bridge_ext_apicomplete.cpp`）: QSlider `setInvertedAppearance`、QFrame `lineWidth`/`frameWidth`、QDoubleSpinBox `setWrapping`/`setButtonSymbols`/`selectAll`/`setFocus`、QToolButton `text`/`defaultAction`/`setDefaultAction`、QGroupBox `setFlat`/`isFlat`、QSpinBox `selectAll`/`setFocus`、QProgressBar `text`
+- **诊断脚本整合**: `check_qt6.cj`/`detect_platform.cj`/`post_install.cj`/`verify_install.cj` 合并为 `tools/cjqt6-diagnose` CJPM 项目
+
+### 构建
+
+- **脚本适配 Cangjie 1.1.0**: `build_bridge.bat`/`rebuild_all.ps1`/`setup-qt-env.ps1`/`update-bridge.ps1` 等动态扫描 Qt6 组件，支持 `-QtDir` 参数透传
+- **移除冗余脚本**: 删除 `build-windows-x64.ps1`、`build_bridge.bat`，`rebuild_all.ps1` 改调 `update-bridge.ps1`
+- **过期脚本更新**: `run-test.sh`/`build-windows-x64.ps1`/`setup-qt-env.sh` 同步适配；`rebuild_all.ps1` 注释改为中文；修复 `update-bridge.ps1` 管道导致 MSBuild 中文乱码
+- **Windows 桥接库更新**: `releases/windows-x64/cjqt6_bridge.dll`/`.lib` 随各批次重新编译
+
+### 文档
+
+- **API 文档全覆盖**: `docs/api/*.md` 与 `src/` 逐类对齐，302 个公开类文档覆盖率达 100%——补齐 QTimer、QTextDocument/QTextCursor/QSyntaxHighlighter、QTextEdit 富文本查找替换、图形特效（QGraphicsOpacityEffect/QGraphicsDropShadowEffect）、通用布局类型（Alignment/Orientation/Margins/Point/Size/Rect）、LabelTextFormat、SpinBoxCorrectionMode/SpinBoxButtonSymbols、QListWidgetItem/QTableWidgetItem、WidgetInfo、ResourceUtils、ScrollBarPolicy、ProcessChannel 等章节
+- **文档结构整理**: 删除 `docs/installation.md`，资源管理文档移入 `docs/resource/`，更新 `build-guide` 脚本引用
+- **安装方式变更**: 改用 Git 依赖方式安装（`cjpm.toml` 中 `git = "..."`, `tag = "..."`），替代中心仓发布；示例代码 API 用法修正并添加运行时 PATH 配置说明
+- **api-completeness.md / unwrapped-controls-analysis.md**: 反映新增 API 后的覆盖度评估
+
+---
+
 ## [1.6.0] - 2026-07-27
 
 ### 新增

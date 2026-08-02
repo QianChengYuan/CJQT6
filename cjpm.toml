@@ -8,7 +8,7 @@
   # ---- 必填字段 ----
   cjc-version = "1.1.0"          # 所需 cjc 最低版本
   name        = "cjqt6"          # 模块名（须与模块 root 包名一致）
-  version     = "1.6.0"          # 模块版本（语义化）
+  version     = "1.7.0"          # 模块版本（语义化）
   output-type = "dynamic"        # static / dynamic / executable
 
   # ---- 选填字段 ----
