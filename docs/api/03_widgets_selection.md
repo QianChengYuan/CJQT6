@@ -163,6 +163,19 @@ spinBox.setOnValueChanged({ value: Int32 => println(value) })
 | `show()` / `hide()` / `resize(width, height)` | 控件显示与尺寸 |
 | `getPtr(): Int64` / `delete()` | 获取指针与释放资源 |
 
+**纠正模式常量** (`SpinBoxCorrectionMode`，对应 QAbstractSpinBox::CorrectionMode):
+| 常量 | 值 | 说明 |
+|------|-----|------|
+| `SpinBoxCorrectionMode.CorrectToPreviousValue` | 0 | 纠正为上一次有效值 |
+| `SpinBoxCorrectionMode.CorrectToNearestValue` | 1 | 纠正为最近的有效值 |
+
+**按钮符号常量** (`SpinBoxButtonSymbols`，对应 QAbstractSpinBox::ButtonSymbols):
+| 常量 | 值 | 说明 |
+|------|-----|------|
+| `SpinBoxButtonSymbols.UpDownArrows` | 0 | 上下箭头 |
+| `SpinBoxButtonSymbols.PlusMinus` | 1 | 加号/减号 |
+| `SpinBoxButtonSymbols.NoButtons` | 2 | 无按钮 |
+
 ### QSlider - 滑动条
 
 ```cangjie
@@ -210,3 +223,144 @@ TicksLeft
 TicksRight
 TicksBothSides
 ```
+
+### QDoubleSpinBox - 浮点旋转框
+
+双精度数值输入控件，支持小数位、前缀/后缀、范围与步长控制。
+
+```cangjie
+import cjqt6.widgets.*
+
+let spinBox = QDoubleSpinBox()
+spinBox.setRange(0.0, 100.0)
+spinBox.setDecimals(2)            // 两位小数
+spinBox.setValue(50.5)
+spinBox.setSingleStep(0.5)
+spinBox.setPrefix("$")            // 前缀
+spinBox.setSuffix(" 元")          // 后缀
+spinBox.setWrapping(true)         // 循环
+spinBox.setGroupSeparatorShown(true)  // 千位分隔符
+spinBox.setOnValueChanged({ value: Float64 => println(value) })
+```
+
+**方法**:
+| 方法 | 说明 |
+|------|------|
+| `setValue(value: Float64)` / `value(): Float64` | 设置/获取值 |
+| `setRange(min: Float64, max: Float64)` | 设置范围 |
+| `setSingleStep(step: Float64)` | 设置步长 |
+| `setDecimals(decimals: Int32)` / `decimals(): Int32` | 设置/获取小数位数 |
+| `setPrefix(prefix: String)` / `prefix(): String` | 设置/获取前缀 |
+| `setSuffix(suffix: String)` / `suffix(): String` | 设置/获取后缀 |
+| `setSpecialValueText(text: String)` | 设置特殊值文本（最小值时显示） |
+| `setMinimum(value: Float64)` / `minimum(): Float64` | 设置/获取最小值 |
+| `setMaximum(value: Float64)` / `maximum(): Float64` | 设置/获取最大值 |
+| `setStepType(stepType: Int32)` | 设置步长类型（DoubleSpinBoxStepType） |
+| `setGroupSeparatorShown(shown: Bool)` | 设置千位分隔符 |
+| `setWrapping(wrap: Bool)` / `wrapping(): Bool` | 设置/获取循环 |
+| `setButtonSymbols(symbols: Int32)` | 设置按钮符号（SpinBoxButtonSymbols） |
+| `cleanText(): String` | 获取纯净文本（无前后缀） |
+| `text(): String` | 获取完整文本 |
+| `selectAll()` / `setFocus()` | 全选/聚焦 |
+| `setOnValueChanged(callback: Float64Callback)` | 值变化回调 |
+| `setOnTextChanged(callback: CStringCallback)` | 文本变化回调 |
+| `setOnEditingFinished(callback: VoidCallback)` | 编辑结束回调 |
+| `disconnectValueChanged()` / `disconnect()` | 断开信号 |
+| `setEnabled(enabled: Bool)` / `isEnabled(): Bool` | 启用/禁用 |
+| `setStyleSheet(style: String)` | 设置样式表 |
+| `setMinimumSize(minw: Int32, minh: Int32)` / `setMaximumSize(maxw: Int32, maxh: Int32)` | 设置最小/最大尺寸 |
+| `show()` / `hide()` / `resize(width, height)` | 显示与尺寸 |
+| `getPtr(): Int64` / `close()` / `delete()` | 指针与资源释放 |
+
+**步长类型常量**:
+```cangjie
+DoubleSpinBoxStepType.DefaultStepType            // 0 固定步长
+DoubleSpinBoxStepType.AdaptiveDecimalStepType    // 1 自适应小数步长
+```
+
+### QDial - 旋钮控件
+
+圆形旋钮，常用于音量、亮度等连续值调节。
+
+```cangjie
+import cjqt6.widgets.*
+
+let dial = QDial()
+dial.setRange(0, 100)
+dial.setValue(50)
+dial.setNotchesVisible(true)      // 显示刻度
+dial.setNotchTarget(10.0)         // 刻度间距（像素）
+dial.setPageStep(10)              // 翻页步长
+dial.setWrapping(true)            // 循环
+dial.setOnValueChanged({ value: Int32 => println(value) })
+```
+
+**方法**:
+| 方法 | 说明 |
+|------|------|
+| `setValue(value: Int32)` / `value(): Int32` | 设置/获取值 |
+| `setRange(min: Int32, max: Int32)` | 设置范围 |
+| `setSingleStep(step: Int32)` | 设置步长 |
+| `setWrapping(wrapping: Bool)` / `wrapping(): Bool` | 设置/获取循环 |
+| `setNotchesVisible(visible: Bool)` / `notchesVisible(): Bool` | 设置/获取刻度可见 |
+| `setNotchTarget(target: Float64)` / `notchTarget(): Float64` | 设置/获取刻度间距 |
+| `setPageStep(step: Int32)` / `pageStep(): Int32` | 设置/获取翻页步长 |
+| `setOnValueChanged(callback: Int32Callback)` | 值变化回调 |
+| `disconnectValueChanged()` / `disconnect()` | 断开信号 |
+| `setEnabled(enabled: Bool)` / `isEnabled(): Bool` | 启用/禁用 |
+| `setStyleSheet(style: String)` | 设置样式表 |
+| `setMinimumSize(minw: Int32, minh: Int32)` / `setMaximumSize(maxw: Int32, maxh: Int32)` | 设置最小/最大尺寸 |
+| `show()` / `hide()` / `resize(width, height)` | 显示与尺寸 |
+| `getPtr(): Int64` / `close()` / `delete()` | 指针与资源释放 |
+
+---
+
+## 按钮分组
+
+### QButtonGroup - 按钮分组
+
+管理一组按钮的互斥行为，常用于多个 QRadioButton 的分组。
+
+```cangjie
+import cjqt6.widgets.*
+
+let group = QButtonGroup()
+group.setExclusive(true)                    // 互斥（默认 true）
+
+group.addButton(radio1.getPtr(), 1)         // 添加按钮并指定 ID
+group.addButton(radio2.getPtr(), 2)
+group.addButton(radio3.getPtr(), 3)
+
+let checkedId = group.checkedId()           // 当前选中按钮 ID（无则 -1）
+let btnPtr = group.checkedButton()          // 当前选中按钮指针
+let btnPtr2 = group.button(2)               // 按 ID 获取按钮
+
+group.setOnIdClicked({ id: Int32 =>
+    println("点击了 ID=${id}")
+})
+group.setOnButtonToggled({ btn: Int64, checked: Int32 =>
+    println("按钮切换 checked=${checked}")
+})
+
+group.delete()
+```
+
+**方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` | 创建按钮分组 |
+| `addButton(btnPtr: Int64, id: Int32)` | 添加按钮并指定 ID |
+| `removeButton(btnPtr: Int64)` | 移除按钮 |
+| `setExclusive(exclusive: Bool)` / `isExclusive(): Bool` | 设置/获取互斥 |
+| `checkedId(): Int32` | 当前选中按钮 ID（无则 -1） |
+| `checkedButton(): Int64` | 当前选中按钮指针 |
+| `button(id: Int32): Int64` | 按 ID 获取按钮指针 |
+| `setId(btnPtr: Int64, id: Int32)` | 设置按钮 ID |
+| `id(btnPtr: Int64): Int32` | 获取按钮 ID |
+| `buttonsCount(): Int32` | 按钮数量 |
+| `setOnButtonClicked(callback: Int64Callback)` | 点击回调（按钮指针） |
+| `setOnButtonPressed(callback: Int64Callback)` | 按下回调（按钮指针） |
+| `setOnButtonReleased(callback: Int64Callback)` | 释放回调（按钮指针） |
+| `setOnButtonToggled(callback: Int64Int32Callback)` | 切换回调（指针, 选中状态） |
+| `setOnIdClicked(callback: Int32Callback)` | ID 点击回调 |
+| `getPtr(): Int64` / `delete()` | 指针与资源释放 |

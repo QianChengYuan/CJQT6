@@ -441,3 +441,602 @@ undoStack.close()
 | `endMacro()` | 结束宏命令 |
 | `getPtr(): Int64` | 获取指针 |
 | `close()` | 释放资源 |
+
+---
+
+## QThread / QThreadPool / QRunnable
+
+多线程支持：`QThread` 线程、`QRunnable` 任务、`QThreadPool` 线程池。
+
+```cangjie
+import cjqt6.core.*
+
+// ---- QThread 线程 ----
+let thread = QThread()
+thread.setOnStarted({ =>
+    println("线程启动")
+})
+thread.setOnFinished({ =>
+    println("线程结束")
+})
+thread.start()
+
+// 等待线程结束（无限等待）
+thread.wait()
+
+// ---- QRunnable + QThreadPool 线程池 ----
+let task = QRunnable({ =>
+    println("任务执行中...")
+})
+
+let pool = QThreadPool.globalInstance()
+pool.setMaxThreadCount(4)
+pool.start(task)
+pool.waitForDone()  // 等待所有任务完成
+
+// 静态工具
+QThread.msleep(100)          // 休眠 100ms
+let cores = QThread.idealThreadCount()  // CPU 核心数
+```
+
+**QThread 方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` | 创建线程 |
+| `start()` | 启动线程 |
+| `quit()` | 退出线程事件循环 |
+| `exit()` | 退出线程（带返回码） |
+| `wait(): Bool` | 无限等待线程结束 |
+| `waitTimeout(timeoutMs: Int32): Bool` | 指定超时等待线程结束 |
+| `isRunning(): Bool` | 线程是否运行中 |
+| `isFinished(): Bool` | 线程是否已结束 |
+| `setPriority(priority: Int32)` / `priority(): Int32` | 设置/获取优先级（ThreadPriority 常量） |
+| `setStackSize(stackSize: Int64)` / `stackSize(): Int64` | 设置/获取栈大小 |
+| `isInterruptionRequested(): Bool` | 是否请求了中断 |
+| `requestInterruption()` | 请求线程中断 |
+| `setOnStarted(callback: VoidCallback)` | 线程启动回调 |
+| `setOnFinished(callback: VoidCallback)` | 线程结束回调 |
+| `disconnectCallbacks()` | 断开全部信号连接 |
+| `currentThreadPtr(): Int64` | （静态）获取当前线程指针 |
+| `idealThreadCount(): Int64` | （静态）获取理想线程数 |
+| `msleep(ms: Int32)` | （静态）休眠指定毫秒 |
+| `getPtr(): Int64` / `close()` | 指针与资源释放 |
+
+**QRunnable 方法**:
+| 方法 | 说明 |
+|------|------|
+| `init(callback: VoidCallback)` | 创建可运行任务 |
+| `getPtr(): Int64` / `close()` | 指针与资源释放 |
+
+**QThreadPool 方法**:
+| 方法 | 说明 |
+|------|------|
+| `globalInstance(): QThreadPool` | （静态）获取全局线程池 |
+| `start(runnable: QRunnable)` | 启动任务 |
+| `waitForDone(): Bool` | 无限等待所有任务完成 |
+| `waitForDoneTimeout(timeoutMs: Int32): Bool` | 指定超时等待 |
+| `activeThreadCount(): Int32` | 活动线程数 |
+| `maxThreadCount(): Int32` / `setMaxThreadCount(count: Int32)` | 最大线程数 |
+| `expiryTimeout(): Int32` / `setExpiryTimeout(timeout: Int32)` | 线程超时回收时间 |
+| `getPtr(): Int64` | 获取指针 |
+
+**优先级常量** (`ThreadPriority`):
+```cangjie
+ThreadPriority.idle()          // 0
+ThreadPriority.lowest()        // 1
+ThreadPriority.low()           // 2
+ThreadPriority.normal()        // 3
+ThreadPriority.high()          // 4
+ThreadPriority.highest()       // 5
+ThreadPriority.timeCritical()  // 6
+ThreadPriority.inherit()       // 7
+```
+
+---
+
+## QSettings - 应用配置持久化
+
+以键值对方式读写应用设置，支持分组与多类型取值。
+
+```cangjie
+import cjqt6.core.*
+
+// 按应用名创建（写入平台约定的配置位置）
+let settings = QSettings("MyApp")
+settings.setValue("window/width", "800")
+settings.setValue("window/height", "600")
+settings.setValue("volume", "70")
+
+// 读取
+let width = settings.value("window/width", "0")     // "800"
+let vol = settings.valueInt("volume", 0)            // 70
+let autoSave = settings.valueBool("autoSave", true) // true（默认值）
+
+// 分组读写
+settings.beginGroup("window")
+settings.setValue("x", "10")
+settings.endGroup()
+
+// 判断与删除
+let has = settings.contains("volume")  // true
+settings.remove("volume")
+
+// 从 INI 文件创建
+let fileSettings = QSettings.fromFile("config.ini")
+
+settings.sync()   // 立即写盘
+settings.close()  // 释放资源
+```
+
+**方法**:
+| 方法 | 说明 |
+|------|------|
+| `init(appName: String)` | 按应用名创建配置存储 |
+| `fromFile(fileName: String): QSettings` | （静态）从 INI 文件创建 |
+| `setValue(key: String, value: String)` | 写入字符串键值对 |
+| `value(key: String, defaultValue: String): String` | 读取字符串值 |
+| `valueInt(key: String, defaultValue: Int32): Int32` | 读取整数值 |
+| `valueBool(key: String, defaultValue: Bool): Bool` | 读取布尔值 |
+| `beginGroup(prefix: String)` / `endGroup()` | 分组读写 |
+| `sync()` | 将改动同步写入磁盘 |
+| `contains(key: String): Bool` | 键是否存在 |
+| `remove(key: String)` | 删除键 |
+| `getPtr(): Int64` / `close()` / `delete()` | 指针与资源释放 |
+
+---
+
+## QShortcut - 快捷键
+
+将按键序列绑定到父控件，触发对应操作。
+
+```cangjie
+import cjqt6.core.*
+
+// 为窗口创建快捷键
+let shortcut = QShortcut(window)
+shortcut.setKey("Ctrl+O")     // 打开文件
+shortcut.setEnabled(true)     // 启用
+shortcut.setAutoRepeat(false) // 长按不重复
+
+// 结合信号系统使用（QShortcut 自身不携带回调，需配合应用层事件）
+shortcut.close()
+```
+
+**方法**:
+| 方法 | 说明 |
+|------|------|
+| `init(parent: QWidget)` | 为父控件创建快捷键 |
+| `setKey(keySequence: String)` | 设置按键序列（如 "Ctrl+O"） |
+| `setEnabled(enabled: Bool)` | 启用/禁用快捷键 |
+| `setAutoRepeat(repeat: Bool)` | 长按时是否自动重复 |
+| `getPtr(): Int64` / `close()` / `delete()` | 指针与资源释放 |
+
+---
+
+## QClipboard - 剪贴板
+
+系统剪贴板，提供文本读取、写入、清空与存在性判断（静态方法）。
+
+```cangjie
+import cjqt6.core.*
+
+// 写入文本
+QClipboard.setText("Hello CJQT6")
+
+// 读取文本
+let text = QClipboard.text()     // "Hello CJQT6"
+
+// 是否有文本
+let has = QClipboard.hasText()   // true
+
+// 清空
+QClipboard.clear()
+```
+
+**方法**（全部为静态方法）:
+| 方法 | 说明 |
+|------|------|
+| `text(): String` | 获取剪贴板纯文本 |
+| `setText(text: String)` | 写入文本到剪贴板 |
+| `hasText(): Bool` | 剪贴板是否包含文本 |
+| `clear()` | 清空剪贴板 |
+
+---
+
+## QDesktopServices - 桌面服务
+
+使用系统默认程序打开 URL 或文件（静态方法）。
+
+```cangjie
+import cjqt6.core.*
+
+// 打开网页
+let ok1 = QDesktopServices.openUrl("https://gitcode.com")
+
+// 打开文件（系统关联程序）
+let ok2 = QDesktopServices.openFile("C:/Users/public/readme.txt")
+```
+
+**方法**（全部为静态方法）:
+| 方法 | 说明 |
+|------|------|
+| `openUrl(url: String): Bool` | 使用默认浏览器/程序打开 URL |
+| `openFile(filePath: String): Bool` | 使用默认关联程序打开文件 |
+
+---
+
+## QFileSystemWatcher - 文件系统监视器
+
+监听指定文件/目录的变化（本封装提供路径的添加与移除管理）。
+
+```cangjie
+import cjqt6.core.*
+
+let watcher = QFileSystemWatcher()
+watcher.addPath("C:/data/config.ini")   // 监视文件
+watcher.addPath("C:/data/logs")         // 监视目录
+watcher.removePath("C:/data/logs")      // 取消监视
+watcher.close()
+```
+
+**方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` | 创建监视器 |
+| `addPath(path: String)` | 添加监视路径（文件或目录） |
+| `removePath(path: String)` | 移除监视路径 |
+| `getPtr(): Int64` / `close()` / `delete()` | 指针与资源释放 |
+
+---
+
+## QScreen - 屏幕信息
+
+主屏幕信息查询：分辨率、DPI、刷新率等（静态方法）。
+
+```cangjie
+import cjqt6.core.*
+
+let w = QScreen.primaryWidth()          // 主屏宽度
+let h = QScreen.primaryHeight()         // 主屏高度
+let dpiX = QScreen.primaryDpiX()        // 逻辑 DPI X
+let ratio = QScreen.primaryDevicePixelRatio()  // 缩放比
+
+// DPI 换算辅助
+let scale = QScreen.scaleFactor()                     // 缩放因子
+let phys = QScreen.logicalToPhysical(100)             // 逻辑→物理像素
+let logic = QScreen.physicalToLogical(200)            // 物理→逻辑像素
+```
+
+**方法**（全部为静态方法）:
+| 方法 | 说明 |
+|------|------|
+| `primaryDpiX(): Float64` | 主屏逻辑 DPI X |
+| `primaryDpiY(): Float64` | 主屏逻辑 DPI Y |
+| `primaryPhysicalDpiX(): Float64` | 主屏物理 DPI X |
+| `primaryPhysicalDpiY(): Float64` | 主屏物理 DPI Y |
+| `primaryDevicePixelRatio(): Float64` | 设备像素比 |
+| `primaryWidth(): Int32` | 主屏宽度（像素） |
+| `primaryHeight(): Int32` | 主屏高度（像素） |
+| `primaryRefreshRate(): Float64` | 主屏刷新率 |
+| `scaleFactor(): Float64` | DPI 缩放因子（devicePixelRatio 别名） |
+| `logicalToPhysical(logical: Int32): Int32` | 逻辑像素转物理像素 |
+| `physicalToLogical(physical: Int32): Int32` | 物理像素转逻辑像素 |
+
+---
+
+## QStandardPaths - 标准路径
+
+获取各平台约定的文档/配置/缓存等系统目录（静态方法）。
+
+```cangjie
+import cjqt6.core.*
+
+// 获取文档目录
+let docs = QStandardPaths.writableLocation(StandardLocationDocuments)
+
+// 获取临时目录
+let tmp = QStandardPaths.tempDir()
+
+// 查找文件
+let found = QStandardPaths.locate(StandardLocationApplications, "notepad.exe")
+
+// 本地化显示名称
+let name = QStandardPaths.displayName(StandardLocationPictures)  // "图片"
+```
+
+**方法**（全部为静态方法）:
+| 方法 | 说明 |
+|------|------|
+| `writableLocation(type: Int32): String` | 获取指定类型可写目录 |
+| `locate(type: Int32, fileName: String): String` | 在指定位置查找文件 |
+| `displayName(type: Int32): String` | 获取本地化显示名称 |
+| `tempDir(): String` | 获取系统临时目录 |
+
+**位置类型常量**（`StandardLocation*`）:
+```cangjie
+StandardLocationDesktop            // 0  桌面
+StandardLocationDocuments          // 1  文档
+StandardLocationFonts              // 2  字体
+StandardLocationApplications       // 3  应用程序
+StandardLocationMusic              // 4  音乐
+StandardLocationMovies             // 5  影片
+StandardLocationPictures           // 6  图片
+StandardLocationTemp               // 7  临时目录
+StandardLocationHome               // 8  主目录
+StandardLocationAppLocalData       // 9  应用本地数据
+StandardLocationAppConfig          // 10 应用配置
+StandardLocationDownload           // 11 下载
+StandardLocationGenericData        // 12 通用数据
+StandardLocationRuntime            // 13 运行时数据
+StandardLocationConfig             // 14 配置文件
+StandardLocationGenericCache       // 15 通用缓存
+```
+
+---
+
+## QPropertyAnimation - 属性动画
+
+驱动目标对象的指定数值属性在起止值间随时间变化。
+
+```cangjie
+import cjqt6.core.*
+
+// 目标对象指针 + 属性名（数值属性，按 Float64 处理）
+let anim = QPropertyAnimation(widget.getPtr(), "pos")
+anim.setDuration(1000)            // 1 秒
+anim.setStartValue(0.0f64)
+anim.setEndValue(300.0f64)
+anim.setLoopCount(2)              // 循环 2 次（-1 无限）
+anim.setEasingCurve(EasingCurve.InOutQuad)  // 缓动曲线
+anim.start()
+
+// 加入动画组
+let group = QParallelAnimationGroup()
+group.addAnimation(anim.getPtr())
+group.start()
+```
+
+**方法**:
+| 方法 | 说明 |
+|------|------|
+| `init(target: Int64, propertyName: String)` | 创建属性动画 |
+| `setDuration(duration: Int32)` / `duration(): Int32` | 设置/获取时长（毫秒） |
+| `setStartValue(value: Float64)` | 设置起始值 |
+| `setEndValue(value: Float64)` | 设置结束值 |
+| `start()` / `stop()` | 开始/停止 |
+| `setLoopCount(count: Int32)` / `loopCount(): Int32` | 循环次数（-1 无限） |
+| `setEasingCurve(curveType: Int32)` | 设置缓动曲线 |
+| `getPtr(): Int64` / `close()` / `delete()` | 指针与资源释放 |
+
+**缓动曲线常量** (`EasingCurve`):
+```cangjie
+EasingCurve.Linear       // 0  线性
+EasingCurve.InQuad       // 1  二次缓入
+EasingCurve.OutQuad      // 2  二次缓出
+EasingCurve.InOutQuad    // 3  二次缓入缓出
+EasingCurve.InCubic      // 4  三次缓入
+EasingCurve.OutCubic     // 5  三次缓出
+EasingCurve.InOutCubic   // 6  三次缓入缓出
+EasingCurve.InSine       // 7  正弦缓入
+EasingCurve.OutSine      // 8  正弦缓出
+EasingCurve.InOutSine    // 9  正弦缓入缓出
+EasingCurve.InElastic    // 14 弹性缓入
+EasingCurve.OutElastic   // 15 弹性缓出
+EasingCurve.InOutElastic // 16 弹性缓入缓出
+EasingCurve.InBounce     // 17 弹跳缓入
+EasingCurve.OutBounce    // 18 弹跳缓出
+EasingCurve.InOutBounce  // 19 弹跳缓入缓出
+```
+
+---
+
+## QJsonDocument / QJsonObject / QJsonArray / QJsonValue
+
+JSON 编解码支持：从字符串解析、构建、序列化。
+
+```cangjie
+import cjqt6.core.*
+
+// ---- 解析 ----
+let doc = QJsonDocument("{\"name\":\"CJQT6\",\"version\":1}")
+if (doc.isObject()) {
+    let obj = doc.object()
+    let name = obj.value("name")            // QJsonValue
+    println(name.toString())                // "CJQT6"
+    let ver = obj.value("version")
+    println(ver.toInt(0))                   // 1
+}
+
+// ---- 构建 ----
+let obj = QJsonObject()
+obj.insert("name", QJsonValue.createString("测试"))
+obj.insert("count", QJsonValue.createInt(42))
+obj.insert("ok", QJsonValue.createBool(true))
+
+let arr = QJsonArray()
+arr.append(QJsonValue.createString("a"))
+arr.append(QJsonValue.createString("b"))
+
+let doc2 = QJsonDocument("{}")
+println(doc2.toJson(2))   // 序列化（2 空格缩进）
+
+obj.close()
+arr.close()
+doc.close()
+```
+
+**JsonType 类型常量**:
+```cangjie
+JsonType.nullType()      // 0
+JsonType.boolType()      // 1
+JsonType.doubleType()    // 2
+JsonType.stringType()    // 3
+JsonType.arrayType()     // 4
+JsonType.objectType()    // 5
+JsonType.undefinedType() // 6
+```
+
+**QJsonDocument 方法**:
+| 方法 | 说明 |
+|------|------|
+| `init(json: String)` | 从 JSON 字符串解析（失败时文档为 Null） |
+| `toJson(indent: Int32): String` | 序列化为字符串（0 紧凑，>0 缩进空格数） |
+| `isNull(): Bool` | 是否为空文档 |
+| `isArray(): Bool` / `isObject(): Bool` | 类型判断 |
+| `object(): QJsonObject` | 获取根对象 |
+| `array(): QJsonArray` | 获取根数组 |
+| `getPtr(): Int64` / `close()` | 指针与资源释放 |
+
+**QJsonObject 方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` | 创建空对象 |
+| `insert(key: String, value: QJsonValue)` | 插入/覆盖键值对 |
+| `value(key: String): QJsonValue` | 获取键对应值（无则 Null） |
+| `contains(key: String): Bool` | 是否包含键 |
+| `remove(key: String)` | 移除键 |
+| `size(): Int32` / `isEmpty(): Bool` | 大小/空判断 |
+| `keyAt(index: Int32): String` | 按索引获取键名 |
+| `getPtr(): Int64` / `close()` | 指针与资源释放 |
+
+**QJsonArray 方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` | 创建空数组 |
+| `append(value: QJsonValue)` | 追加元素 |
+| `at(index: Int32): QJsonValue` | 按索引取值 |
+| `size(): Int32` / `isEmpty(): Bool` | 大小/空判断 |
+| `removeAt(index: Int32)` | 移除元素 |
+| `getPtr(): Int64` / `close()` | 指针与资源释放 |
+
+**QJsonValue 方法**:
+| 方法 | 说明 |
+|------|------|
+| `createNull(): QJsonValue` | （静态）创建 Null 值 |
+| `createString(val: String): QJsonValue` | （静态）创建字符串值 |
+| `createInt(val: Int64): QJsonValue` | （静态）创建整数值 |
+| `createDouble(val: Float64): QJsonValue` | （静态）创建浮点值 |
+| `createBool(val: Bool): QJsonValue` | （静态）创建布尔值 |
+| `valueType(): Int32` | 获取值类型（JsonType） |
+| `toString(): String` | 转为字符串 |
+| `toInt(defaultVal: Int64): Int64` | 转为整数 |
+| `toDouble(defaultVal: Float64): Float64` | 转为浮点 |
+| `toBool(defaultVal: Bool): Bool` | 转为布尔 |
+| `toObject(): Int64` / `toArray(): Int64` | 转对象/数组指针 |
+| `isNull()` / `isString()` / `isArray()` / `isObject()` / `isBool()` / `isDouble(): Bool` | 类型判断 |
+| `getPtr(): Int64` / `close()` | 指针与资源释放 |
+
+---
+
+## QItemSelectionModel - 选择模型
+
+管理模型中的选中项、当前项（常与 QTableView 等视图配合使用）。
+
+```cangjie
+import cjqt6.core.*
+
+// 创建选择模型（modelPtr 为数据模型指针）
+let selModel = QItemSelectionModel(model.getPtr())
+selModel.setCurrentIndex(0, 0, SelectionFlag.clearAndSelect())
+
+// 查询选择状态
+let selected = selModel.isSelected(0, 0)     // 指定单元格
+let rowSel = selModel.isRowSelected(1)       // 指定行
+let any = selModel.hasSelection()            // 是否有选中项
+
+// 选中行操作
+let count = selModel.selectedRowsCount()
+let row = selModel.selectedRowAt(0)
+
+selModel.clearSelection()  // 清除选中（保留当前项）
+selModel.clear()           // 全部清除
+selModel.close()
+```
+
+**SelectionFlag 选择标志常量**:
+```cangjie
+SelectionFlag.noUpdate()      // 0  不更新选择
+SelectionFlag.clear()         // 1  清除现有选择
+SelectionFlag.select()        // 2  选择指定索引
+SelectionFlag.deselect()      // 4  取消选择
+SelectionFlag.toggle()        // 8  切换选择状态
+SelectionFlag.current()       // 16 设置为当前索引
+SelectionFlag.rows()          // 32 选择整行
+SelectionFlag.columns()       // 64 选择整列
+SelectionFlag.clearAndSelect()// 3  清除后选择
+```
+
+**方法**:
+| 方法 | 说明 |
+|------|------|
+| `init(modelPtr: Int64)` | 创建选择模型 |
+| `currentIndexRow(): Int32` / `currentIndexCol(): Int32` | 当前项行/列 |
+| `setCurrentIndex(row: Int32, col: Int32, command: Int32)` | 设置当前索引 |
+| `isSelected(row: Int32, col: Int32): Bool` | 单元格是否选中 |
+| `isRowSelected(row: Int32): Bool` | 行是否选中 |
+| `hasSelection(): Bool` | 是否有选中项 |
+| `clearSelection()` | 清除选中项（保留当前项） |
+| `clear()` | 清除全部 |
+| `model(): Int64` | 获取关联模型指针 |
+| `select(row: Int32, col: Int32, command: Int32)` | 选择单元格 |
+| `selectedRowsCount(): Int32` | 选中行数量 |
+| `selectedRowAt(index: Int32): Int32` | 按索引获取选中行号 |
+| `getPtr(): Int64` / `close()` | 指针与资源释放 |
+
+---
+
+## SignalEmitter - 自定义信号发射器
+
+支持 void/int/double/string 四种参数信号，可指定连接类型（含跨线程 QueuedConnection）。
+
+```cangjie
+import cjqt6.core.*
+
+// 创建发射器
+let emitter = SignalEmitter()
+
+// 连接信号（支持闭包捕获版本）
+emitter.setOnVoid({ =>
+    println("收到 void 信号")
+})
+emitter.setOnInt({ value: Int32 =>
+    println("收到 int 信号: ${value}")
+})
+emitter.setOnString({ text: CString =>
+    println("收到 string 信号: ${text.toString()}")
+})
+
+// 发射信号
+emitter.emitVoid()
+emitter.emitInt(42)
+emitter.emitString("hello")
+
+// 跨线程连接（QueuedConnection 投递到接收线程）
+emitter.setOnInt({ value: Int32 => println("${value}") }, ConnectionType.Queued)
+
+emitter.disconnect()  // 断开全部信号
+emitter.close()
+```
+
+**ConnectionType 连接类型常量**:
+```cangjie
+ConnectionType.Auto           // 0 自动
+ConnectionType.Direct         // 1 直接调用
+ConnectionType.Queued         // 2 队列投递（跨线程）
+ConnectionType.BlockingQueued // 3 阻塞队列投递
+```
+
+**方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` | 创建发射器 |
+| `setOnVoid(callback: VoidCallback): SignalConnection` | 连接 void 信号 |
+| `setOnVoid(callback: VoidCallback, connType: Int32): SignalConnection` | 指定连接类型 |
+| `setOnVoidCapture(callback: () -> Unit): SignalConnection` | 闭包捕获版 |
+| `setOnInt(callback: Int32Callback): SignalConnection` | 连接 int 信号 |
+| `setOnDouble(callback: Float64Callback): SignalConnection` | 连接 double 信号 |
+| `setOnString(callback: CStringCallback): SignalConnection` | 连接 string 信号 |
+| `emitVoid()` / `emitInt(v: Int32)` / `emitDouble(v: Float64)` / `emitString(s: String)` | 发射信号 |
+| `disconnectVoid()` / `disconnectInt()` / `disconnectDouble()` / `disconnectString()` | 断开单个信号 |
+| `disconnect()` | 断开全部信号 |
+| `getPtr(): Int64` / `close()` / `delete()` | 指针与资源释放 |

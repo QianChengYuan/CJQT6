@@ -208,6 +208,17 @@ println("创建时间: ${stats.createdTime}")
 | createdTime | Int64 | 创建时间 |
 | closedTime | Int64 | 关闭时间 |
 
+### WidgetInfo 类
+
+ScopeManager 内部登记控件的元数据类，记录每个注册控件的底层指针、类型与释放状态（由 ScopeManager 内部维护，一般无需直接构造）。
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| ptr | Int64 | 控件的底层指针 |
+| typeName | String | 控件的类型名称 |
+| registerTime | Int64 | 注册时间（毫秒时间戳） |
+| status | ReleaseStatus | 当前释放状态（Pending/Released/Failed/Skipped） |
+
 ### ScopeManager 方法
 
 | 方法 | 说明 |

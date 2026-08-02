@@ -43,6 +43,7 @@ player.setLoops(Loops.infinite())
 | `setLoops(loops: Int32)` | 设置循环次数，`Loops.infinite()` 表示无限循环 |
 | `setPlaybackRate(rate: Float32)` | 设置播放速度 |
 | `playbackRate(): Float32` | 获取播放速度 |
+| `getPtr(): Int64` | 获取原生指针 |
 | `delete()` | 释放资源 |
 
 **媒体信息与状态**:
@@ -73,7 +74,124 @@ player.setLoops(Loops.infinite())
 | `MediaStatus.buffered()` | 已缓冲 |
 | `MediaStatus.endOfMedia()` | 播放结束 |
 | `MediaStatus.invalidMedia()` | 无效媒体 |
+| `Loops.once()` | 播放一次 |
 | `Loops.infinite()` | 无限循环 |
+
+---
+
+## QAudioOutput - 音频输出设备
+
+控制媒体播放的音量与静音状态，通常与 `QMediaPlayer` 搭配使用。
+
+```cangjie
+let audioOutput = QAudioOutput()
+audioOutput.setVolume(0.8f32)
+audioOutput.setMuted(false)
+
+let player = QMediaPlayer()
+player.setAudioOutput(audioOutput)
+```
+
+**方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` | 创建音频输出设备 |
+| `setVolume(volume: Float32)` | 设置音量（0.0~1.0） |
+| `volume(): Float32` | 获取音量 |
+| `setMuted(muted: Bool)` | 设置静音 |
+| `isMuted(): Bool` | 是否静音 |
+| `getPtr(): Int64` | 获取原生指针 |
+| `delete()` | 释放资源 |
+
+---
+
+## QImageCapture - 相机图像捕获
+
+从相机捕获静态图像，配合 `QMediaCaptureSession` 使用。
+
+```cangjie
+let imageCapture = QImageCapture()
+
+// 摄像头就绪后触发捕获并保存到文件，返回错误码（ImageCaptureError）
+let err = imageCapture.captureToFile("photo.jpg")
+if (err == ImageCaptureError.noError()) {
+    println("拍照成功")
+}
+```
+
+> 说明：当前封装的 `QMediaCaptureSession` 仅提供 `setCamera` / `setVideoOutput`，
+> 尚未提供 `setImageCapture` 绑定；`QImageCapture` 可独立创建使用。
+
+**方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` | 创建图像捕获器 |
+| `capture(): Int32` | 触发捕获，返回错误码（ImageCaptureError） |
+| `captureToFile(path: String): Int32` | 捕获并保存到文件，返回错误码 |
+| `isReadyForCapture(): Bool` | 相机是否已准备好捕获 |
+| `setQuality(quality: Int32)` | 设置捕获质量（ImageCaptureQuality） |
+| `quality(): Int32` | 获取捕获质量 |
+| `getPtr(): Int64` | 获取原生指针 |
+| `close()` | 释放资源 |
+
+**ImageCaptureError 错误码**:
+| 常量 | 值 | 说明 |
+|------|------|------|
+| `noError()` | 0 | 无错误 |
+| `notReady()` | 1 | 相机未就绪 |
+| `resourceError()` | 2 | 资源错误（相机被占用等） |
+| `outOfSpace()` | 3 | 存储空间不足 |
+| `notSupported()` | 4 | 不支持该操作 |
+| `fileError()` | 5 | 文件写入错误 |
+
+**ImageCaptureQuality 质量**:
+| 常量 | 值 | 说明 |
+|------|------|------|
+| `veryLowQuality()` | 0 | 极低质量 |
+| `lowQuality()` | 1 | 低质量 |
+| `normalQuality()` | 2 | 普通质量 |
+| `highQuality()` | 3 | 高质量 |
+| `veryHighQuality()` | 4 | 极高质量 |
+
+---
+
+## QSoundEffect - 音效播放器
+
+适合播放短促音效文件（低延迟），支持音量、循环、静音控制。
+
+```cangjie
+let effect = QSoundEffect()
+effect.setSourceFile("/path/to/click.wav")
+effect.setVolume(0.5)
+effect.setLoopCount(1)  // 0 为无限循环
+effect.play()
+```
+
+**方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` | 创建音效播放器 |
+| `setSource(url: String)` | 设置音源（URL，如 `qrc:/sounds/click.wav`） |
+| `setSourceFile(filePath: String)` | 设置音源（本地文件路径） |
+| `setVolume(volume: Float64)` | 设置音量（0.0~1.0） |
+| `volume(): Float64` | 获取音量 |
+| `setLoopCount(count: Int32)` | 设置循环次数（0 为无限循环） |
+| `loopCount(): Int32` | 获取循环次数 |
+| `setMuted(muted: Bool)` | 设置静音 |
+| `isMuted(): Bool` | 是否静音 |
+| `isPlaying(): Bool` | 是否正在播放 |
+| `play()` | 开始播放 |
+| `stop()` | 停止播放 |
+| `status(): Int32` | 获取当前状态（SoundEffectStatus） |
+| `delete()` | 释放资源 |
+
+**SoundEffectStatus 状态常量**:
+| 常量 | 值 | 说明 |
+|------|------|------|
+| `Null()` | 0 | 无效状态 |
+| `Loading()` | 1 | 正在加载音源 |
+| `Ready()` | 2 | 加载完成，可播放 |
+| `Error()` | 3 | 加载出错 |
 
 ---
 

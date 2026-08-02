@@ -4,6 +4,82 @@
 
 ## 基础部件
 
+### QPushButton - 按钮
+
+```cangjie
+import cjqt6.widgets.*
+
+let button = QPushButton()
+button.setText("点击我")
+button.setShortcut("Ctrl+S")
+button.setCheckable(true)
+button.setChecked(false)
+button.setDefault(true)
+button.setFlat(false)
+button.setOnClick({ =>
+    println("按钮被点击")
+})
+```
+
+**当前支持方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` | 创建按钮 |
+| `setText(text: String)` / `text(): String` | 设置/获取按钮文本 |
+| `setIcon(iconPath: String)` | 从文件路径设置图标 |
+| `setIconSize(width: Int32, height: Int32)` | 设置图标大小 |
+| `setStandardIcon(iconType: Int32)` | 设置 Qt 标准图标（StandardIcon 常量） |
+| `setShortcut(key: String)` / `shortcut(): String` | 设置/获取快捷键 |
+| `setCheckable(checkable: Bool)` / `isCheckable(): Bool` | 设置/获取是否可勾选 |
+| `setChecked(checked: Bool)` / `isChecked(): Bool` | 设置/获取勾选状态 |
+| `setDefault(isDefault: Bool)` / `isDefault(): Bool` | 设置/获取默认按钮（回车触发） |
+| `setAutoDefault(autoDefault: Bool)` / `isAutoDefault(): Bool` | 设置/获取自动默认按钮 |
+| `setFlat(flat: Bool)` / `isFlat(): Bool` | 设置/获取扁平样式 |
+| `setAutoRepeat(autoRepeat: Bool)` / `isAutoRepeat(): Bool` | 设置/获取自动重复触发 |
+| `setOnClick(callback: VoidCallback)` / `disconnectClick()` | 点击回调/断开 |
+| `setOnClickCapture(callback: () -> Unit): SignalConnection` | 点击回调（可捕获局部变量） |
+| `setOnPressed(callback: VoidCallback): SignalConnection` / `disconnectPressed()` | 按下回调/断开 |
+| `setOnPressedCapture(callback: () -> Unit): SignalConnection` | 按下回调（可捕获局部变量） |
+| `setOnReleased(callback: VoidCallback): SignalConnection` / `disconnectReleased()` | 释放回调/断开 |
+| `setOnReleasedCapture(callback: () -> Unit): SignalConnection` | 释放回调（可捕获局部变量） |
+| `setOnToggled(callback: Int32Callback)` / `disconnectToggled()` | 切换状态回调（传 0/1） |
+| `setOnClickedChecked(callback: Int32Callback)` / `disconnectClickedChecked()` | 带勾选状态的点击回调 |
+| `disconnect()` | 断开全部信号 |
+| `setEnabled(enabled: Bool)` / `isEnabled(): Bool` | 启用/禁用状态 |
+| `setStyleSheet(style: String)` / `setMinimumSize(minw, minh)` / `setMaximumSize(maxw, maxh)` | 样式与尺寸 |
+| `show()` / `hide()` / `resize(width, height)` | 控件显示与尺寸 |
+| `isClosed(): Bool` / `isValid(): Bool` | 资源状态检查 |
+| `getPtr(): Int64` / `close()` / `delete()` | 获取指针与释放资源 |
+
+**标准图标常量** (`StandardIcon`):
+```cangjie
+StandardIcon.Open
+StandardIcon.Save
+StandardIcon.Close
+StandardIcon.Apply
+StandardIcon.Cancel
+StandardIcon.Help
+StandardIcon.File
+StandardIcon.Folder
+StandardIcon.NewFolder
+StandardIcon.Link
+StandardIcon.Reload
+StandardIcon.Stop
+StandardIcon.MediaPlay
+StandardIcon.MediaPause
+StandardIcon.MediaStop
+StandardIcon.MediaForward
+StandardIcon.MediaBackward
+StandardIcon.MediaSkipForward
+StandardIcon.MediaSkipBackward
+StandardIcon.ArrowUp
+StandardIcon.ArrowDown
+StandardIcon.ArrowLeft
+StandardIcon.ArrowRight
+StandardIcon.Yes
+StandardIcon.No
+```
+
 ### QLabel - 标签
 
 ```cangjie
@@ -35,6 +111,14 @@ label.setWordWrap(true)
 | `setStyleSheet(style: String)` | 设置样式表 |
 | `show()` / `hide()` / `resize(width, height)` | 控件显示与尺寸 |
 | `getPtr(): Int64` / `delete()` | 获取指针与释放资源 |
+
+**文本格式常量** (`LabelTextFormat`，对应 Qt::TextFormat，用于 `setTextFormat(format: Int32)`):
+| 常量 | 值 | 说明 |
+|------|-----|------|
+| `LabelTextFormat.PlainText` | 0 | 纯文本 |
+| `LabelTextFormat.RichText` | 1 | 富文本（HTML） |
+| `LabelTextFormat.AutoText` | 2 | 自动检测 |
+| `LabelTextFormat.MarkdownText` | 3 | Markdown 文本 |
 
 ---
 
@@ -365,3 +449,156 @@ editor.setFontBold(true)
 | `setMinimumSize(width: Int32, height: Int32)` / `setMaximumSize(width: Int32, height: Int32)` | 设置最小/最大尺寸 |
 | `show()` / `hide()` / `resize(width, height)` | 控件显示与尺寸 |
 | `getPtr(): Int64` / `delete()` | 获取指针与释放资源 |
+
+---
+
+## QTextDocument - 富文本文档
+
+独立的富文本文档，支持纯文本与 HTML，提供块数、行数、字符数等统计，可与编辑器协同。
+
+```cangjie
+import cjqt6.gui.*
+
+let doc = QTextDocument()
+doc.setPlainText("Hello CJQT6")
+doc.setHtml("<b>粗体</b> 文本")
+
+println("块数: ${doc.blockCount()}")
+println("行数: ${doc.lineCount()}")
+println("字符数: ${doc.characterCount()}")
+println("是否为空: ${doc.isEmpty()}")
+
+doc.setDefaultFont("Microsoft YaHei", 12)
+doc.clear()
+doc.close()
+```
+
+**方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` | 创建空文档 |
+| `init(text: String)` | 创建并设置纯文本 |
+| `setPlainText(text)` / `toPlainText(): String` | 设置/获取纯文本 |
+| `setHtml(html)` / `toHtml(): String` | 设置/获取 HTML |
+| `blockCount(): Int32` | 获取块（段落）数量 |
+| `lineCount(): Int32` | 获取行数 |
+| `characterCount(): Int32` | 获取字符数 |
+| `pageCount(): Int32` | 获取页数 |
+| `isEmpty(): Bool` | 是否为空 |
+| `isModified(): Bool` / `setModified(modified: Bool)` | 获取/设置修改状态 |
+| `setDefaultFont(family: String, pointSize: Int32)` | 设置默认字体 |
+| `clear()` | 清空文档 |
+| `getPtr(): Int64` | 获取指针 |
+| `close()` | 释放资源 |
+
+---
+
+## QTextCursor - 文本光标
+
+在文档中定位、选择、插入和删除文本的光标对象。
+
+```cangjie
+let doc = QTextDocument("Hello World")
+let cursor = QTextCursor(doc)
+
+// 移动与插入
+cursor.movePosition(MoveOperation.end())
+cursor.insertText("!")
+
+// 选择
+cursor.movePosition(MoveOperation.start())
+cursor.movePositionEx(MoveOperation.endOfWord(), MoveMode.keepAnchor(), 1)
+if (cursor.hasSelection()) {
+    println("选中: ${cursor.selectedText()}")
+    cursor.removeSelectedText()
+}
+
+// 定位信息
+println("位置: ${cursor.position()}，块: ${cursor.blockNumber()}，列: ${cursor.columnNumber()}")
+cursor.close()
+doc.close()
+```
+
+**方法**:
+| 方法 | 说明 |
+|------|------|
+| `init(doc: QTextDocument)` | 在指定文档上创建光标 |
+| `position(): Int32` / `setPosition(pos: Int32)` | 获取/设置位置 |
+| `anchor(): Int32` | 获取锚点位置 |
+| `insertText(text: String)` | 插入文本 |
+| `movePosition(operation: Int32): Bool` | 移动光标（默认 moveAnchor 模式，1 次） |
+| `movePositionEx(operation, mode: Int32, count: Int32): Bool` | 移动光标（指定模式和次数） |
+| `select(operation: Int32)` | 按操作选择文本 |
+| `selectedText(): String` | 获取选中文本 |
+| `clearSelection()` | 清除选区 |
+| `hasSelection(): Bool` | 是否有选区 |
+| `removeSelectedText()` | 删除选中文本 |
+| `deleteChar()` | 删除当前字符 |
+| `deletePreviousChar()` | 删除前一字符 |
+| `insertNewBlock()` | 插入新块（换行） |
+| `isNull(): Bool` | 光标是否无效 |
+| `blockNumber(): Int32` / `columnNumber(): Int32` | 块号 / 列号 |
+| `getPtr(): Int64` | 获取指针 |
+| `close()` | 释放资源 |
+
+**MoveOperation 移动操作常量**（常用部分）:
+| 常量 | 值 | 说明 |
+|------|-----|------|
+| `MoveOperation.start()` | 1 | 文档开头 |
+| `MoveOperation.up()` | 2 | 上移 |
+| `MoveOperation.startOfLine()` | 3 | 行首 |
+| `MoveOperation.startOfBlock()` | 4 | 块首 |
+| `MoveOperation.previousCharacter()` | 7 | 前一字符 |
+| `MoveOperation.left()` | 9 | 左移 |
+| `MoveOperation.wordLeft()` | 10 | 左移一词 |
+| `MoveOperation.end()` | 11 | 文档末尾 |
+| `MoveOperation.down()` | 12 | 下移 |
+| `MoveOperation.endOfLine()` | 13 | 行尾 |
+| `MoveOperation.endOfWord()` | 14 | 词尾 |
+| `MoveOperation.nextCharacter()` | 17 | 下一字符 |
+| `MoveOperation.right()` | 19 | 右移 |
+| `MoveOperation.wordRight()` | 20 | 右移一词 |
+
+**MoveMode 移动模式常量**:
+| 常量 | 值 | 说明 |
+|------|-----|------|
+| `MoveMode.moveAnchor()` | 0 | 移动锚点（取消选区） |
+| `MoveMode.keepAnchor()` | 1 | 保留锚点（扩展选区） |
+
+---
+
+## QSyntaxHighlighter - 语法高亮
+
+为 QTextDocument 提供基于回调的语法高亮（用于代码编辑器）。高亮回调为 `CFunc<(Int64, CString) -> Unit>` 类型。
+
+```cangjie
+import cjqt6.gui.*
+
+let doc = QTextDocument()
+let highlighter = QSyntaxHighlighter(doc.getPtr())
+
+// 设置高亮回调：收到文本块内容后，用 setFormat 应用格式
+highlighter.setOnHighlight(CFunc { (selfId: Int64, text: CString) =>
+    let line = text.toString()
+    if (line.startsWith("//")) {
+        highlighter.setFormat(0, line.size, 0xFF00AA00)  // 注释绿色
+    }
+})
+
+highlighter.rehighlight()  // 重新高亮整个文档
+highlighter.close()
+```
+
+**方法**:
+| 方法 | 说明 |
+|------|------|
+| `init(docPtr: Int64)` | 创建语法高亮器（关联 QTextDocument 指针） |
+| `setOnHighlight(callback: CFunc<(Int64, CString) -> Unit>)` | 设置高亮回调（收到文本块内容） |
+| `setFormat(start: Int32, count: Int32, color: Int64, bold: Bool, italic: Bool, underline: Bool)` | 设置文本格式（颜色/粗体/斜体/下划线） |
+| `setFormat(start: Int32, count: Int32, color: Int64)` | 设置文本格式（仅颜色） |
+| `rehighlight()` | 重新高亮整个文档 |
+| `document(): Int64` | 获取关联文档指针 |
+| `getPtr(): Int64` | 获取指针 |
+| `close()` | 释放资源 |
+
+> 说明：`setFormat` 的 `color` 为 ARGB 值（如 `0xFF00AA00` 表示不透明绿色）；回调内通过 `highlighter` 捕获引用调用 `setFormat` 应用格式。

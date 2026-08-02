@@ -246,3 +246,291 @@ udpSocket.delete()
 | `data` | `Array<Byte>` | 数据内容 |
 | `senderAddress` | `String` | 发送者地址 |
 | `senderPort` | `UInt16` | 发送者端口 |
+
+---
+
+## QLocalServer - 本地服务器
+
+通过 Unix 域套接字（Unix）或 Windows 命名管道（Windows）提供进程间通信（IPC）。
+
+```cangjie
+let server = QLocalServer()
+if (server.listen("my_app_server")) {
+    println("监听中: ${server.serverName()}")
+    println("完整名称: ${server.fullServerName()}")
+}
+
+server.setMaxPendingConnections(10)
+server.setSocketOptions(SocketOption.userAccessOption())
+
+// 阻塞等待新连接（返回已连接的 QLocalSocket 指针，无连接返回 0）
+let sockPtr = server.waitForNewConnection(3000)
+
+// 或非阻塞检查挂起连接
+if (server.hasPendingConnections()) {
+    let sockPtr = server.nextPendingConnection()
+}
+
+server.stopListening()  // 停止监听
+server.close()          // 释放资源
+QLocalServer.removeServer("my_app_server")  // 移除服务器（静态方法）
+```
+
+**QLocalServer 方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` | 创建本地服务器 |
+| `listen(name: String): Bool` | 开始监听指定名称，返回是否成功 |
+| `stopListening()` | 停止监听（对应 Qt 的 close） |
+| `isListening(): Bool` | 是否正在监听 |
+| `serverName(): String` | 获取服务器名称 |
+| `fullServerName(): String` | 获取完整服务器名称（含平台前缀，如 Windows 管道路径） |
+| `maxPendingConnections(): Int32` / `setMaxPendingConnections(count)` | 获取/设置最大挂起连接数 |
+| `waitForNewConnection(msec: Int32): Int64` | 阻塞等待新连接，返回 QLocalSocket 指针（无连接返回 0） |
+| `hasPendingConnections(): Bool` | 是否有挂起的连接 |
+| `nextPendingConnection(): Int64` | 获取下一个挂起连接的 QLocalSocket 指针 |
+| `setSocketOptions(options)` / `socketOptions(): Int32` | 设置/获取套接字访问权限（SocketOption 组合） |
+| `removeServer(name: String): Bool` | 移除指定名称的服务器（静态方法） |
+| `getPtr(): Int64` | 获取指针 |
+| `close()` | 释放资源 |
+
+**SocketOption 访问权限常量**（可按位组合）:
+| 常量 | 值 | 说明 |
+|------|-----|------|
+| `SocketOption.noOptions()` | 0 | 无特殊权限 |
+| `SocketOption.userAccessOption()` | 1 | 仅用户可访问 |
+| `SocketOption.groupAccessOption()` | 2 | 同组用户可访问 |
+| `SocketOption.otherAccessOption()` | 4 | 其他用户可访问 |
+| `SocketOption.worldAccessOption()` | 7 | 所有用户可访问（1\|2\|4） |
+
+---
+
+## QNetworkAccessManager - 网络访问管理器
+
+发送 HTTP 请求（GET/POST/PUT/DELETE），异步返回 `QNetworkReply` 对象。
+
+```cangjie
+let manager = QNetworkAccessManager()
+manager.setTransferTimeout(5000)  // 5秒超时
+
+let request = QNetworkRequest("https://example.com/api")
+request.setHeader(KnownHeaders.userAgent(), "CJQT6/1.0")
+
+let reply = manager.get(request)
+reply.setOnFinished({ replyPtr: Int64 =>
+    // 在回调中通过指针读取结果（注意：回调内勿直接 delete reply）
+    println("状态码: ${reply.statusCode()}")
+    println("响应体: ${reply.readAll()}")
+})
+
+// POST 请求
+let req2 = QNetworkRequest("https://example.com/login")
+req2.setHeader(KnownHeaders.contentType(), "application/json")
+let reply2 = manager.post(req2, "{\"user\":\"alice\"}")
+
+manager.close()  // 释放资源
+```
+
+**QNetworkAccessManager 方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` | 创建网络访问管理器 |
+| `get(request: QNetworkRequest): QNetworkReply` | 发送 GET 请求 |
+| `post(request, data: String): QNetworkReply` | 发送 POST 请求 |
+| `put(request, data: String): QNetworkReply` | 发送 PUT 请求 |
+| `deleteResource(request): QNetworkReply` | 发送 DELETE 请求 |
+| `setTransferTimeout(timeoutMs: Int32)` | 设置传输超时（毫秒） |
+| `getPtr(): Int64` | 获取指针 |
+| `close()` | 释放资源 |
+
+---
+
+## QNetworkRequest - 网络请求
+
+描述一个 HTTP 请求的 URL、请求头等信息。
+
+```cangjie
+let request = QNetworkRequest("https://example.com/api")
+request.setUrl("https://example.com/v2/api")   // 修改 URL
+request.setHeader(KnownHeaders.userAgent(), "Mozilla/5.0")
+request.setRawHeader("X-Api-Key", "secret123") // 自定义原始头
+request.setTransferTimeout(10000)              // 10秒超时
+
+let url = request.url()      // 获取 URL
+let ua = request.header(KnownHeaders.userAgent())  // 获取请求头
+request.close()
+```
+
+**QNetworkRequest 方法**:
+| 方法 | 说明 |
+|------|------|
+| `init(url: String)` | 从 URL 创建网络请求 |
+| `setUrl(url)` / `url(): String` | 设置/获取 URL |
+| `setHeader(header: Int32, value: String)` | 设置已知 HTTP 头 |
+| `header(header: Int32): String` | 获取已知 HTTP 头 |
+| `setRawHeader(name: String, value: String)` | 设置原始 HTTP 头 |
+| `setTransferTimeout(timeoutMs: Int32)` | 设置传输超时（毫秒） |
+| `getPtr(): Int64` | 获取指针 |
+| `close()` | 释放资源 |
+
+**KnownHeaders 已知 HTTP 头常量**:
+| 常量 | 值 | 说明 |
+|------|-----|------|
+| `KnownHeaders.contentType()` | 0 | Content-Type |
+| `KnownHeaders.contentLength()` | 1 | Content-Length |
+| `KnownHeaders.location()` | 2 | Location |
+| `KnownHeaders.lastModified()` | 3 | Last-Modified |
+| `KnownHeaders.cookie()` | 4 | Cookie |
+| `KnownHeaders.setCookie()` | 5 | Set-Cookie |
+| `KnownHeaders.userAgent()` | 6 | User-Agent |
+| `KnownHeaders.referer()` | 7 | Referer |
+| `KnownHeaders.server()` | 8 | Server |
+
+---
+
+## QNetworkReply - 网络响应
+
+网络请求的响应对象，由 `QNetworkAccessManager` 的请求方法返回。**不可直接构造**。
+
+```cangjie
+let reply = manager.get(request)
+println("状态码: ${reply.statusCode()}")
+println("错误码: ${reply.error()} / ${reply.errorString()}")
+println("响应头: ${reply.header(KnownHeaders.contentType())}")
+
+reply.setOnFinished({ replyPtr: Int64 =>
+    if (reply.isFinished()) {
+        let body = reply.readAll()
+        println("响应体: ${body}")
+    }
+})
+
+if (reply.isRunning()) {
+    reply.abort()  // 中止请求
+}
+reply.close()  // 释放资源（内部使用 deleteLater 保证线程安全）
+```
+
+**QNetworkReply 方法**:
+| 方法 | 说明 |
+|------|------|
+| `readAll(): String` | 读取所有响应数据 |
+| `bytesAvailable(): Int64` | 获取可用字节数 |
+| `error(): Int32` | 获取错误码 |
+| `errorString(): String` | 获取错误描述 |
+| `statusCode(): Int32` | 获取 HTTP 状态码 |
+| `header(header: Int32): String` | 获取响应头 |
+| `isFinished(): Bool` | 请求是否完成 |
+| `isRunning(): Bool` | 请求是否进行中 |
+| `abort()` | 中止请求 |
+| `url(): String` | 获取请求 URL |
+| `setOnFinished(callback: Int64Callback)` | 请求完成回调（参数为 reply 指针） |
+| `getPtr(): Int64` | 获取指针 |
+| `close()` | 释放资源 |
+
+> 注意：`setOnFinished` 回调参数为底层 reply 指针（Int64），若需访问封装对象请在闭包外捕获 reply 引用；回调内请勿直接 `close()` 该对象。
+
+---
+
+## QNetworkProxy - 网络代理
+
+描述代理服务器的类型、主机、端口及认证信息，可设置为应用级代理。
+
+```cangjie
+let proxy = QNetworkProxy(ProxyType.http())
+proxy.setHostName("proxy.example.com")
+proxy.setPort(8080)
+proxy.setUser("alice")
+proxy.setPassword("secret")
+
+// 设为应用级代理（静态方法，影响所有网络请求）
+QNetworkProxy.setApplicationProxy("proxy.example.com", 8080)
+
+proxy.close()
+```
+
+**QNetworkProxy 方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` | 创建默认代理配置（NoProxy） |
+| `init(proxyType: Int32)` | 创建指定类型的代理配置 |
+| `setType(proxyType)` / `proxyType(): Int32` | 设置/获取代理类型 |
+| `setHostName(host)` / `hostName(): String` | 设置/获取代理主机名 |
+| `setPort(port: UInt16)` / `port(): UInt16` | 设置/获取代理端口 |
+| `setUser(user)` / `user(): String` | 设置/获取认证用户名 |
+| `setPassword(pass)` / `password(): String` | 设置/获取认证密码 |
+| `setApplicationProxy(host, port)` | 设为应用级代理（静态方法） |
+| `getPtr(): Int64` | 获取指针 |
+| `close()` | 释放资源 |
+
+**ProxyType 代理类型常量**:
+| 常量 | 值 | 说明 |
+|------|-----|------|
+| `ProxyType.noProxy()` | 0 | 不使用代理 |
+| `ProxyType.defaultProxy()` | 1 | 使用系统默认代理 |
+| `ProxyType.socks5()` | 2 | SOCKS5 代理 |
+| `ProxyType.http()` | 3 | HTTP 代理 |
+| `ProxyType.httpCaching()` | 4 | HTTP 缓存代理 |
+| `ProxyType.ftpCaching()` | 5 | FTP 缓存代理 |
+
+---
+
+## QSslSocket - SSL/TLS 加密套接字
+
+提供加密的网络通信（如 HTTPS），支持客户端/服务端加密模式与对端证书验证。
+
+```cangjie
+let sslSocket = QSslSocket()
+sslSocket.setPeerVerifyMode(PeerVerifyMode.verifyNone())  // 跳过证书验证（仅测试用）
+
+sslSocket.setOnEncrypted({ =>
+    println("加密完成！")
+})
+
+sslSocket.setOnPeerVerifyError({ err: String =>
+    println("证书验证错误: ${err}")
+})
+
+sslSocket.connectToHostEncrypted("example.com", 443)
+
+// 已建立 TCP 连接后升级为加密
+// sslSocket.startClientEncryption()
+
+if (sslSocket.isEncrypted()) {
+    println("模式: ${sslSocket.sslMode()}")
+    println("对端证书: ${sslSocket.peerCertificateInfo()}")
+}
+
+sslSocket.close()
+```
+
+**QSslSocket 方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` | 创建 SSL 套接字 |
+| `connectToHostEncrypted(host: String, port: UInt16)` | 连接到加密主机 |
+| `startClientEncryption()` | 启动客户端加密（用于已建立连接的加密升级） |
+| `startServerEncryption()` | 启动服务端加密 |
+| `isEncrypted(): Bool` | 是否已加密 |
+| `sslMode(): Int32` | 获取 SSL 模式（SslMode 常量） |
+| `setPeerVerifyMode(mode)` / `peerVerifyMode(): Int32` | 设置/获取对端验证模式 |
+| `peerCertificateInfo(): String` | 获取对端证书信息 |
+| `setOnEncrypted(callback: VoidCallback)` | 加密完成回调 |
+| `setOnPeerVerifyError(callback: CStringCallback)` | 对端证书验证错误回调 |
+| `getPtr(): Int64` | 获取指针 |
+| `close()` | 释放资源 |
+
+**SslMode SSL 模式常量**:
+| 常量 | 值 | 说明 |
+|------|-----|------|
+| `SslMode.unsecured()` | 0 | 未加密模式 |
+| `SslMode.sslClient()` | 1 | SSL 客户端模式 |
+| `SslMode.sslServer()` | 2 | SSL 服务端模式 |
+
+**PeerVerifyMode 对端验证模式常量**:
+| 常量 | 值 | 说明 |
+|------|-----|------|
+| `PeerVerifyMode.verifyNone()` | 0 | 不验证对端证书 |
+| `PeerVerifyMode.queryPeer()` | 1 | 请求对端证书但不验证 |
+| `PeerVerifyMode.verifyPeer()` | 2 | 请求并验证对端证书 |
+| `PeerVerifyMode.autoVerify()` | 3 | 自动验证（客户端模式自动开启验证） |

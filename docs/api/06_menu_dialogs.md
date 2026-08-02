@@ -264,3 +264,192 @@ progress.show()
 | `cancel()` | 取消操作 |
 | `reset()` | 重置进度 |
 | `delete()` | 释放资源 |
+
+---
+
+## 向导对话框
+
+### QWizardPage - 向导页面
+
+作为 QWizard 向导流程中的一页，可设置标题、副标题与提交页标记。
+
+```cangjie
+import cjqt6.dialogs.*
+
+let page1 = QWizardPage()
+page1.setTitle("欢迎")
+page1.setSubTitle("欢迎使用安装向导")
+
+let page2 = QWizardPage()
+page2.setTitle("确认")
+page2.setSubTitle("确认安装选项")
+page2.setCommitPage(true)
+```
+
+**当前支持方法**:
+| 方法 | 说明 |
+|------|------|
+| `init(parent!: Int64 = 0)` | 创建向导页面 |
+| `setTitle(title: String)` | 设置页面标题 |
+| `setSubTitle(subTitle: String)` | 设置页面副标题 |
+| `setCommitPage(isCommit: Bool)` / `isCommitPage(): Bool` | 设置/获取是否提交页 |
+| `isClosed(): Bool` / `isValid(): Bool` | 资源状态检查 |
+| `getPtr(): Int64` | 获取底层指针 |
+| `close()` / `delete()` | 释放资源 |
+
+### QWizard - 向导对话框
+
+```cangjie
+let wizard = QWizard()
+wizard.setWindowTitle("安装向导")
+
+let page1 = QWizardPage()
+page1.setTitle("欢迎")
+let page2 = QWizardPage()
+page2.setTitle("安装中")
+
+wizard.addPage(page1)
+wizard.addPage(page2)
+wizard.setStartId(0)
+
+if (wizard.exec() != 0) {
+    println("向导完成")
+}
+wizard.delete()
+```
+
+**当前支持方法**:
+| 方法 | 说明 |
+|------|------|
+| `init(parent!: Int64 = 0)` | 创建向导对话框 |
+| `addPage(page: QWizardPage): Int32` | 添加页面，返回页面ID |
+| `page(index: Int32): Int64` | 获取指定索引的页面指针 |
+| `currentId(): Int32` | 获取当前页面ID |
+| `next()` / `back()` | 前进/后退一页 |
+| `restart()` | 重新开始向导 |
+| `setStartId(id: Int32)` | 设置起始页面ID |
+| `exec(): Int32` | 以模态方式运行向导 |
+| `setOption(option: Int32, enabled: Bool)` / `testOption(option: Int32): Bool` | 设置/查询向导选项 |
+| `setWindowTitle(title: String)` | 设置窗口标题 |
+| `show()` | 显示向导 |
+| `isClosed(): Bool` / `isValid(): Bool` | 资源状态检查 |
+| `getPtr(): Int64` | 获取底层指针 |
+| `close()` / `delete()` | 释放资源 |
+
+**选项常量** (`QWizardOption`):
+```cangjie
+QWizardOption.HaveCustomButton1
+QWizardOption.NoBackButtonOnStartPage
+QWizardOption.NoCancelButton
+QWizardOption.IndependentPages
+QWizardOption.NoDefaultButton
+```
+
+### QErrorMessage - 错误消息对话框
+
+用于显示错误消息，用户可选择不再显示同类消息。
+
+```cangjie
+let errDialog = QErrorMessage()
+errDialog.setWindowTitle("错误")
+errDialog.showMessage("磁盘空间不足！")
+errDialog.show()
+errDialog.delete()
+```
+
+**当前支持方法**:
+| 方法 | 说明 |
+|------|------|
+| `init(parent!: Int64 = 0)` | 创建错误消息对话框 |
+| `showMessage(message: String)` | 显示错误消息 |
+| `setWindowTitle(title: String)` | 设置窗口标题 |
+| `show()` | 显示对话框 |
+| `isClosed(): Bool` / `isValid(): Bool` | 资源状态检查 |
+| `getPtr(): Int64` | 获取底层指针 |
+| `close()` / `delete()` | 释放资源 |
+
+---
+
+## 对话框按钮组
+
+### QDialogButtonBox - 标准按钮组
+
+用于组织对话框的标准按钮（确定/取消/是/否等），可设置按钮组合并监听接受/拒绝信号。
+
+```cangjie
+import cjqt6.widgets.*
+
+let buttonBox = QDialogButtonBox()
+
+// 方式1：使用标准按钮组合
+buttonBox.setStandardButtons(
+    makeStandardButtons([StandardButtons.Ok, StandardButtons.Cancel])
+)
+
+// 方式2：添加自定义按钮
+buttonBox.addButton("全部应用", ButtonRole.ApplyRole)
+
+buttonBox.setOnAccepted({ =>
+    println("点击了确定")
+})
+buttonBox.setOnRejected({ =>
+    println("点击了取消")
+})
+buttonBox.setOnClicked({ btnPtr: Int64 =>
+    println("按钮被点击")
+})
+```
+
+**当前支持方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` | 创建按钮组 |
+| `addButton(text: String, role: Int32)` | 添加自定义按钮并指定角色 |
+| `setStandardButtons(buttons: Int32)` / `standardButtons(): Int32` | 设置/获取标准按钮组合 |
+| `button(which: Int32): Int64` | 按标准按钮枚举值获取按钮指针 |
+| `buttonRole(buttonPtr: Int64): Int32` | 查询按钮角色 |
+| `setOnClicked(callback: Int64Callback)` | 任意按钮点击回调（传按钮指针） |
+| `setOnAccepted(callback: VoidCallback)` | 接受信号回调 |
+| `setOnRejected(callback: VoidCallback)` | 拒绝信号回调 |
+| `setEnabled(enabled: Bool)` | 设置启用/禁用 |
+| `setStyleSheet(style: String)` | 设置样式表 |
+| `show()` / `hide()` / `resize(width, height)` | 显示与尺寸 |
+| `getPtr(): Int64` / `delete()` | 指针与资源释放 |
+
+**标准按钮常量** (`StandardButtons`，可用 `makeStandardButtons` 组合):
+```cangjie
+makeStandardButtons([StandardButtons.Ok, StandardButtons.Cancel])
+
+StandardButtons.Ok
+StandardButtons.Open
+StandardButtons.Save
+StandardButtons.Cancel
+StandardButtons.Close
+StandardButtons.Discard
+StandardButtons.Apply
+StandardButtons.Reset
+StandardButtons.RestoreDefaults
+StandardButtons.Help
+StandardButtons.SaveAll
+StandardButtons.Yes
+StandardButtons.YesToAll
+StandardButtons.No
+StandardButtons.NoToAll
+StandardButtons.Abort
+StandardButtons.Retry
+StandardButtons.Ignore
+```
+
+**按钮角色常量** (`ButtonRole`):
+```cangjie
+ButtonRole.InvalidRole
+ButtonRole.AcceptRole
+ButtonRole.RejectRole
+ButtonRole.DestructiveRole
+ButtonRole.ActionRole
+ButtonRole.HelpRole
+ButtonRole.YesRole
+ButtonRole.NoRole
+ButtonRole.ApplyRole
+ButtonRole.ResetRole
+```

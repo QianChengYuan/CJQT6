@@ -25,6 +25,15 @@ public type Int32Int32Callback = CFunc<(Int32, Int32) -> Unit>
 
 // Int64 + Int32 参数回调
 public type Int64Int32Callback = CFunc<(Int64, Int32) -> Unit>
+
+// Bool 参数回调
+public type BoolCallback = CFunc<(Bool) -> Unit>
+
+// 字符串 + Int32 参数回调（如 currentTextChanged(text, index)）
+public type CStringInt32Callback = CFunc<(CString, Int32) -> Unit>
+
+// Int32 + Bool 参数回调
+public type Int32BoolCallback = CFunc<(Int32, Bool) -> Unit>
 ```
 
 ---
@@ -150,3 +159,135 @@ timer.start()
 timer.stop()
 timer.disconnectTimeout()
 ```
+
+---
+
+## ConnectionType - 连接类型
+
+映射 Qt::ConnectionType，用于指定信号跨线程时的投递方式：
+
+| 常量 | 值 | 说明 |
+|------|------|------|
+| `Auto` | 0 | 自动选择（发射与接收同线程走直接调用，跨线程自动排队） |
+| `Direct` | 1 | 直接调用（发射线程立即执行槽函数） |
+| `Queued` | 2 | 排队投递（槽函数在接收对象所属线程的事件循环中执行） |
+| `BlockingQueued` | 3 | 阻塞排队（发射线程阻塞直到槽函数执行完成） |
+
+---
+
+## SignalEmitter - 自定义信号发射器
+
+仓颉无法从 C++ 侧派生 Q_OBJECT 子类，`SignalEmitter` 通过 native 侧固定的
+void/int/double/string 四组信号实现「用户自定义信号」，支持指定 `ConnectionType`
+实现跨线程 QueuedConnection。
+
+```cangjie
+import cjqt6.core.*
+import std.sync.Mutex
+
+// 全局缓存（CFunc 回调不能捕获局部变量）
+var emitter: ?SignalEmitter = None
+
+// 发射端线程：创建发射器并连接监听
+let em = SignalEmitter()
+emitter = em
+
+// 连接监听（可指定连接类型）
+em.setOnVoid({ =>
+    println("收到 void 信号")
+})
+em.setOnInt({ v: Int32 =>
+    println("收到 int 信号: ${v}")
+})
+em.setOnString({ s: CString =>
+    println("收到 string 信号: ${s}")
+})
+
+// 发射信号
+em.emitVoid()
+em.emitInt(42)
+em.emitString("hello")
+```
+
+**SignalEmitter 方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` | 创建发射器 |
+| `setOnVoid(callback): SignalConnection` | 连接 void 信号（默认 AutoConnection） |
+| `setOnVoid(callback, connType): SignalConnection` | 连接 void 信号（指定连接类型） |
+| `setOnVoidCapture(callback: () -> Unit): SignalConnection` | 连接 void 信号（闭包捕获版本） |
+| `setOnVoidCapture(callback, connType): SignalConnection` | 闭包捕获版本 + 指定连接类型 |
+| `emitVoid()` | 发射 void 信号 |
+| `disconnectVoid()` | 断开 void 信号 |
+| `setOnInt(callback): SignalConnection` | 连接 int 信号 |
+| `setOnInt(callback, connType): SignalConnection` | 连接 int 信号（指定连接类型） |
+| `emitInt(v: Int32)` | 发射 int 信号 |
+| `disconnectInt()` | 断开 int 信号 |
+| `setOnDouble(callback): SignalConnection` | 连接 double 信号 |
+| `setOnDouble(callback, connType): SignalConnection` | 连接 double 信号（指定连接类型） |
+| `emitDouble(v: Float64)` | 发射 double 信号 |
+| `disconnectDouble()` | 断开 double 信号 |
+| `setOnString(callback): SignalConnection` | 连接 string 信号 |
+| `setOnString(callback, connType): SignalConnection` | 连接 string 信号（指定连接类型） |
+| `emitString(s: String)` | 发射 string 信号 |
+| `disconnectString()` | 断开 string 信号 |
+| `disconnect()` | 断开该发射器的全部信号 |
+| `getPtr(): Int64` | 获取原生指针 |
+| `isClosed(): Bool` | 是否已关闭 |
+| `isValid(): Bool` | 是否有效 |
+| `close()` / `delete()` | 释放资源 |
+
+> 说明：`setOnXxxCapture` 系列使用闭包捕获注册表机制，回调可以捕获局部变量（见下文「闭包捕获机制」）。
+
+---
+
+## SignalConnection - 信号连接句柄
+
+`setOnXxx` 系列方法均返回 `SignalConnection` 句柄，用于管理和断开连接。
+在支持控件内部分信号（如 pressed/released/buttonToggled/clickedChecked）的
+路由断开时会自动选择正确的断开函数。
+
+| 方法 | 说明 |
+|------|------|
+| `disconnect()` | 断开连接 |
+| `isConnected(): Bool` | 是否仍处于连接状态 |
+| `getPtr(): Int64` | 获取原生指针 |
+| `getSignalType(): String` | 获取信号类型标识 |
+
+```cangjie
+let conn = button.setOnClick({ =>
+    println("clicked")
+})
+
+// 需要时断开
+if (conn.isConnected()) {
+    conn.disconnect()
+}
+```
+
+---
+
+## 闭包捕获机制（P1c）
+
+传统 `CFunc` 回调不能捕获局部变量，只能通过全局 `?T` 变量中转。为此封装提供了
+`Capture` 系列重载（如 `setOnClickCapture`、`setOnVoidCapture`），底层通过注册表
+按 id 派发，回调可以自由捕获局部变量：
+
+```cangjie
+// CFunc 路径（不能捕获局部变量）
+button.setOnClick({ =>
+    // 只能访问全局变量
+})
+
+// Capture 路径（可以捕获局部变量）
+let label = QLabel()
+button.setOnClickCapture({ =>
+    label.setText("clicked")  // ✅ 允许
+})
+
+// 断开时自动注销闭包，避免注册表泄漏
+let conn = button.setOnClickCapture({ => ... })
+conn.disconnect()
+```
+
+> 注意：捕获路径断开连接时会自动从注册表注销闭包。SignalConnection 内部已处理，无需手动调用 `unregisterVoidCallback`。

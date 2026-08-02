@@ -28,6 +28,9 @@ widget.show()
 | `resize(width, height)` | 调整大小 |
 | `setGeometry(x, y, width, height)` | 设置位置和尺寸 |
 | `setLayout(layoutPtr: Int64)` | 绑定布局 |
+| `getPtr(): Int64` | 获取底层控件指针 |
+| `getId(): Int64` | 获取控件唯一 ID |
+| `update()` | 触发重绘 |
 | `setOnMousePress(callback)` | 鼠标按下回调 |
 | `setOnMouseMove(callback)` | 鼠标移动回调 |
 | `setOnMouseRelease(callback)` | 鼠标释放回调 |
@@ -78,11 +81,41 @@ Modifier.hasMeta(modifiers)
 
 ### Key
 
+键盘按键常量，全部为静态方法，返回 `Int32`：
+
+| 方法 | 说明 |
+|------|------|
+| `escape()` | Esc |
+| `tab()` | Tab |
+| `backspace()` | 退格 |
+| `enter()` | 回车（Return） |
+| `returnKey()` | 回车（Enter 键码） |
+| `insert()` | Insert |
+| `delete()` | Delete |
+| `pause()` | Pause |
+| `print()` | Print |
+| `home()` | Home |
+| `end()` | End |
+| `left()` / `up()` / `right()` / `down()` | 方向键 |
+| `pageUp()` / `pageDown()` | 翻页键 |
+| `shift()` / `control()` / `meta()` / `alt()` | 修饰键 |
+| `capsLock()` / `numLock()` / `scrollLock()` | 锁定键 |
+| `space()` | 空格 |
+| `f1()` ~ `f12()` | 功能键 F1-F12 |
+| `a()` ~ `z()` | 字母键（ASCII 码 65-90） |
+| `num0()` ~ `num9()` | 数字键（ASCII 码 48-57） |
+
 ```cangjie
 Key.escape()
 Key.enter()
 Key.space()
 Key.f1()
+Key.a()       // 65
+Key.num0()    // 48
 ```
 
 > 说明：当前实现中的事件回调签名使用 C 回调风格，调用时需要传入与源码保持一致的参数个数。
+
+## 拖放支持
+
+拖放相关类（QMimeData、QDrag）位于 `cjqt6.core` 包，详见 [17_dragdrop.md](./17_dragdrop.md)。

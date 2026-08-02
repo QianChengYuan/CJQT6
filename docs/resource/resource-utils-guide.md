@@ -59,8 +59,28 @@ public class ReleaseResult {
     
     public func isAllSuccess(): Bool  // 是否全部成功
     public func hasFailure(): Bool    // 是否有失败
+    public func successRate(): Int32  // 成功率（0-100）
 }
 ```
+
+---
+
+## 二·补、ResourceUtils API 参考
+
+### 静态方法
+
+| 方法 | 说明 |
+|------|------|
+| `releaseAll(widgets: Array<QtResource>): ReleaseResult` | 批量释放数组中的所有控件，已关闭的自动跳过，失败计数 |
+| `releaseSafe(widgets: Array<?QtResource>): ReleaseResult` | 安全释放 Option 类型控件数组，None 值跳过并计入 skipped |
+| `releaseTwo(w1: QtResource, w2: QtResource): ReleaseResult` | 释放两个控件（免数组开销） |
+| `releaseThree(w1: QtResource, w2: QtResource, w3: QtResource): ReleaseResult` | 释放三个控件 |
+| `releaseFour(w1: QtResource, w2: QtResource, w3: QtResource, w4: QtResource): ReleaseResult` | 释放四个控件 |
+
+### 注意事项
+
+- `releaseAll` / `releaseSafe` 遍历过程中单个控件释放失败会捕获异常并计入 `failedCount`，不会中断后续控件释放。
+- 释放结果通过返回的 `ReleaseResult` 统计，`isAllSuccess()` 等价于 `failedCount == 0`。
 
 ---
 

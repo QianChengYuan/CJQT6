@@ -68,8 +68,10 @@ db.delete()
 | `setUserName(user: String)` | 设置用户名 |
 | `setPassword(password: String)` | 设置密码 |
 | `open(): Bool` | 打开数据库连接 |
-| `close()` | 关闭数据库连接 |
+| `closeDatabase()` | 仅关闭连接（不释放数据库对象） |
+| `close()` | 关闭连接并释放资源 |
 | `isOpen(): Bool` | 是否已打开 |
+| `isClosed(): Bool` / `isValid(): Bool` | 状态查询（是否已释放 / 是否有效） |
 | `lastError(): String` | 获取最后错误信息 |
 | `driverName(): String` | 获取驱动名称 |
 | `getPtr(): Int64` | 获取指针 |
@@ -155,9 +157,134 @@ query.delete()
 | `isSelect(): Bool` | 是否为 SELECT 查询 |
 | `finish()` | 结束查询 |
 | `clear()` | 清空查询 |
+| `record(): QSqlRecord` | 获取当前查询的记录元数据（字段集合） |
 | `lastError(): String` | 获取最后错误信息 |
 | `getPtr(): Int64` | 获取指针 |
 | `delete()` | 释放资源 |
+
+---
+
+## QSqlRecord - 数据库记录
+
+表示一条查询结果的字段集合（元数据），通过 `QSqlQuery.record()` 获取。注意：**不可直接构造**，只能由查询产生。
+
+```cangjie
+let record = query.record()
+println("字段数: ${record.count()}")
+println("第0字段名: ${record.fieldName(0)}")
+println("字段 \"name\" 的索引: ${record.indexOf("name")}")
+
+// 读取字段值
+if (!record.isNull(0)) {
+    let v = record.valueString(0)
+}
+
+// 获取字段对象
+let field = record.field(0)
+record.close()
+```
+
+**方法**:
+| 方法 | 说明 |
+|------|------|
+| `count(): Int32` | 获取字段数量 |
+| `fieldName(index: Int32): String` | 获取字段名 |
+| `indexOf(name: String): Int32` | 根据字段名查找索引（找不到返回 -1） |
+| `isNull(index: Int32): Bool` | 字段是否为空 |
+| `valueString(index: Int32): String` | 获取字符串值 |
+| `valueInt(index: Int32): Int32` | 获取整数值 |
+| `valueDouble(index: Int32): Float64` | 获取浮点值 |
+| `field(index: Int32): QSqlField` | 获取字段对象 |
+| `getPtr(): Int64` | 获取指针 |
+| `close()` | 释放资源 |
+
+---
+
+## QSqlField - 数据库字段
+
+单个字段的描述信息（名称、只读性、自增性、值）。通过 `QSqlRecord.field(index)` 获取，**不可直接构造**。
+
+```cangjie
+let field = record.field(0)
+println("字段名: ${field.name()}")
+println("只读: ${field.isReadOnly()}")
+println("自增: ${field.isAutoValue()}")
+if (!field.isNull()) {
+    println("值: ${field.valueString()}")
+}
+field.close()
+```
+
+**方法**:
+| 方法 | 说明 |
+|------|------|
+| `name(): String` | 获取字段名 |
+| `isNull(): Bool` | 字段是否为空 |
+| `isReadOnly(): Bool` | 是否只读 |
+| `isAutoValue(): Bool` | 是否自动递增 |
+| `valueString(): String` | 获取字符串值 |
+| `getPtr(): Int64` | 获取指针 |
+| `close()` | 释放资源 |
+
+---
+
+## QSqlTableModel - SQL 表格数据模型
+
+将数据库表映射为可编辑的表格数据模型，常与 `QTableView` 配合显示。实现资源管理，支持 try-with-resources。
+
+```cangjie
+let model = QSqlTableModel("my_connection")  // 空串 "" 使用默认连接
+model.setTable("users")
+model.setFilter("age > 18")
+model.setSort(1, 0)            // 按第1列升序（0=升序, 1=降序）
+model.setEditStrategy(EditStrategy.onManualSubmit())
+
+if (model.select()) {
+    println("行数: ${model.rowCount()}，列数: ${model.columnCount()}")
+    // 读取单元格
+    let name = model.data(0, 1)
+    // 修改单元格后提交
+    if (model.setData(0, 2, "30") && model.submitAll()) {
+        println("提交成功")
+    }
+}
+
+// 插入/删除行
+model.insertRow(model.rowCount())
+model.removeRow(0)
+model.revertAll()  // 回滚未提交更改
+model.close()
+```
+
+**QSqlTableModel 方法**:
+| 方法 | 说明 |
+|------|------|
+| `init(dbName: String)` | 创建模型（dbName 为连接名，空串用默认连接） |
+| `setTable(tableName)` / `tableName(): String` | 设置/获取映射的表名 |
+| `select(): Bool` | 执行查询填充模型数据 |
+| `rowCount(): Int32` / `columnCount(): Int32` | 数据行数 / 列数 |
+| `setFilter(filter)` / `filter(): String` | 设置/获取过滤条件（SQL WHERE 子句） |
+| `setSort(col, order)` | 设置排序（order: 0 升序, 1 降序） |
+| `setEditStrategy(strategy)` / `editStrategy(): Int32` | 设置/获取编辑策略 |
+| `data(row, col): String` | 获取指定单元格文本 |
+| `setData(row, col, value): Bool` | 设置单元格值 |
+| `headerData(section): String` | 获取表头文本 |
+| `insertRow(row): Bool` | 插入一行（row 为插入位置） |
+| `removeRow(row): Bool` | 删除一行 |
+| `submitAll(): Bool` | 提交所有未提交更改到数据库 |
+| `revertAll()` | 回滚所有未提交更改 |
+| `databaseError(): String` | 获取最近一次数据库操作错误信息 |
+| `clearTable()` | 清空表格数据（删除所有行） |
+| `fetchMore()` / `canFetchMore(): Bool` | 分页加载更多数据 / 是否还有更多 |
+| `getPtr(): Int64` | 获取指针 |
+| `close()` / `delete()` | 释放资源 |
+
+**编辑策略常量** (`EditStrategy`，对应 Qt `QSqlTableModel::EditStrategy`):
+| 常量 | 值 | 说明 |
+|------|-----|------|
+| `EditStrategy.onFieldChange()` | 0 | 字段变更时立即提交 |
+| `EditStrategy.onRowChange()` | 1 | 行变更时提交 |
+| `EditStrategy.onManualSubmit()` | 2 | 手动调用 submitAll 时提交 |
 
 ---
 

@@ -101,6 +101,9 @@ ProcessChannelMode.MergedChannels
 ProcessChannelMode.ForwardedChannels
 ProcessChannelMode.ForwardedOutputChannel
 ProcessChannelMode.ForwardedErrorChannel
+
+ProcessChannel.StandardOutput
+ProcessChannel.StandardError
 ```
 
 ## QProcessEnvironment
