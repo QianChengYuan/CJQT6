@@ -22,11 +22,34 @@ foreign func qTcpSocketError(ptr: Int64): Int32
 foreign func qTcpSocketErrorString(ptr: Int64): CString
 foreign func qTcpSocketIsValid(ptr: Int64): Bool
 foreign func qTcpSocketClose(ptr: Int64): Unit
+foreign func qTcpSocketPeerAddress(ptr: Int64): CString
+foreign func qTcpSocketPeerPort(ptr: Int64): UInt16
+foreign func qTcpSocketLocalAddress(ptr: Int64): CString
+foreign func qTcpSocketLocalPort(ptr: Int64): UInt16
 foreign func qTcpSocketConnectConnected(ptr: Int64, callback: VoidCallback): Unit
 foreign func qTcpSocketConnectDisconnected(ptr: Int64, callback: VoidCallback): Unit
 foreign func qTcpSocketConnectReadyRead(ptr: Int64, callback: VoidCallback): Unit
 foreign func qTcpSocketConnectError(ptr: Int64, callback: VoidCallback): Unit
 foreign func qTcpSocketDisconnectCallbacks(ptr: Int64): Unit
+foreign func qNetSetVoidDispatcher(disp: CFunc<(Int64) -> Unit>): Unit
+foreign func qTcpSocketConnectConnectedId(ptr: Int64, id: Int64): Unit
+foreign func qTcpSocketConnectDisconnectedId(ptr: Int64, id: Int64): Unit
+foreign func qTcpSocketConnectReadyReadId(ptr: Int64, id: Int64): Unit
+foreign func qTcpSocketConnectErrorId(ptr: Int64, id: Int64): Unit
+
+// 网络模块闭包调度器注册标记（Capture 回调首次使用时初始化）
+private var gNetDispatcherReady: Bool = false
+
+/// 确保 native 网络模块已注册 Cangjie 闭包调度器
+/// tcp_socket / tcp_server 的 Capture 回调均依赖此调度器按 id 派发
+public func ensureNetDispatcher(): Unit {
+    if (!gNetDispatcherReady) {
+        unsafe {
+            qNetSetVoidDispatcher(getVoidDispatcher())
+        }
+        gNetDispatcherReady = true
+    }
+}
 
 /// 套接字状态
 public class SocketState {
@@ -82,6 +105,16 @@ public class QTcpSocket <: QtResource {
                 throw CreateFailedException("QTcpSocket 创建失败")
             }
         }
+    }
+    
+    /// 包装已存在的原生套接字指针
+    /// 用于 QTcpServer.nextPendingConnection() 返回的连接，
+    /// 其生命周期由本包装对象接管（释放时调用 close()）
+    public init(nativePtr: Int64) {
+        if (nativePtr == 0) {
+            throw CreateFailedException("QTcpSocket 包装失败：原生指针为空")
+        }
+        ptr = nativePtr
     }
     
     /// 连接到主机
@@ -227,6 +260,40 @@ public class QTcpSocket <: QtResource {
         }
     }
     
+    /// 获取对端IP地址（连接建立后有效）
+    public func peerAddress(): String {
+        checkValid()
+        unsafe {
+            let cstr = qTcpSocketPeerAddress(ptr)
+            return cstr.toString()
+        }
+    }
+    
+    /// 获取对端端口（连接建立后有效）
+    public func peerPort(): UInt16 {
+        checkValid()
+        unsafe {
+            return qTcpSocketPeerPort(ptr)
+        }
+    }
+    
+    /// 获取本端IP地址
+    public func localAddress(): String {
+        checkValid()
+        unsafe {
+            let cstr = qTcpSocketLocalAddress(ptr)
+            return cstr.toString()
+        }
+    }
+    
+    /// 获取本端端口
+    public func localPort(): UInt16 {
+        checkValid()
+        unsafe {
+            return qTcpSocketLocalPort(ptr)
+        }
+    }
+    
     /// Qt资源管理：检查底层套接字是否有效
     public func isSocketValid(): Bool {
         checkValid()
@@ -273,6 +340,52 @@ public class QTcpSocket <: QtResource {
         unsafe {
             qTcpSocketDisconnectCallbacks(ptr)
         }
+    }
+    
+    /// 设置连接成功回调（闭包捕获版，可捕获局部变量）
+    /// 返回闭包注册表 id，可调用 unregisterVoidCallback(id) 注销
+    public func setOnConnectedCapture(callback: () -> Unit): Int64 {
+        checkValid()
+        ensureNetDispatcher()
+        let id = registerVoidCallback(callback)
+        unsafe {
+            qTcpSocketConnectConnectedId(ptr, id)
+        }
+        return id
+    }
+    
+    /// 设置断开连接回调（闭包捕获版）
+    public func setOnDisconnectedCapture(callback: () -> Unit): Int64 {
+        checkValid()
+        ensureNetDispatcher()
+        let id = registerVoidCallback(callback)
+        unsafe {
+            qTcpSocketConnectDisconnectedId(ptr, id)
+        }
+        return id
+    }
+    
+    /// 设置数据就绪回调（闭包捕获版）
+    /// 服务器多连接场景：每个连接套接字注册各自闭包即可区分来源
+    public func setOnReadyReadCapture(callback: () -> Unit): Int64 {
+        checkValid()
+        ensureNetDispatcher()
+        let id = registerVoidCallback(callback)
+        unsafe {
+            qTcpSocketConnectReadyReadId(ptr, id)
+        }
+        return id
+    }
+    
+    /// 设置错误回调（闭包捕获版）
+    public func setOnErrorCapture(callback: () -> Unit): Int64 {
+        checkValid()
+        ensureNetDispatcher()
+        let id = registerVoidCallback(callback)
+        unsafe {
+            qTcpSocketConnectErrorId(ptr, id)
+        }
+        return id
     }
     
     /// 获取原生指针

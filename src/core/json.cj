@@ -88,7 +88,7 @@ public class QJsonValue {
         if (ptr == 0 || closed) { throw ResourceDisposedException("QJsonValue already deleted") }
     }
 
-    internal init(p: Int64) { ptr = p }
+    public init(p: Int64) { ptr = p }
 
     /// 创建 Null 值
     public static func createNull(): QJsonValue {
@@ -169,7 +169,7 @@ public class QJsonObject {
         if (ptr == 0 || closed) { throw ResourceDisposedException("QJsonObject already deleted") }
     }
 
-    internal init(p: Int64) { ptr = p }
+    public init(p: Int64) { ptr = p }
 
     /// 创建空对象
     public init() { unsafe { ptr = qJsonObjectCreate() } }
@@ -232,7 +232,7 @@ public class QJsonArray {
         if (ptr == 0 || closed) { throw ResourceDisposedException("QJsonArray already deleted") }
     }
 
-    internal init(p: Int64) { ptr = p }
+    public init(p: Int64) { ptr = p }
 
     /// 创建空数组
     public init() { unsafe { ptr = qJsonArrayCreate() } }

@@ -10,6 +10,8 @@
 #include <QHash>
 #include <functional>
 #include <mutex>
+#include <atomic>
+#include <thread>
 
 extern "C" {
 
@@ -17,10 +19,24 @@ extern "C" {
 // 线程安全回调存储
 // ============================================================
 
-static std::mutex g_namCallbackMutex;
+// atomic_flag 自旋锁：std::mutex 在 Cangjie 运行时加载的 DLL 中首次加锁即死锁
+static std::atomic_flag g_namLockFlag = ATOMIC_FLAG_INIT;
+
+class NamSpinLock {
+public:
+    NamSpinLock() {
+        while (g_namLockFlag.test_and_set(std::memory_order_acquire)) {
+            std::this_thread::yield();
+        }
+    }
+    ~NamSpinLock() {
+        g_namLockFlag.clear(std::memory_order_release);
+    }
+};
+
 static QHash<int64_t, std::function<void(int64_t)>> g_namReplyCallbacks;
 
-#define LOCK_NAM_CALLBACKS() std::lock_guard<std::mutex> lock(g_namCallbackMutex)
+#define LOCK_NAM_CALLBACKS() NamSpinLock _namLock
 
 // ============================================================
 // QNetworkRequest 桥接函数

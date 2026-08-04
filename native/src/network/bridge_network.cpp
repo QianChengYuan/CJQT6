@@ -5,6 +5,7 @@
 
 #include <QHostAddress>
 #include <QTcpSocket>
+#include <QTcpServer>
 #include <QUdpSocket>
 #include <QSslSocket>
 #include <QSslCertificate>
@@ -14,8 +15,11 @@
 #include <QLocalSocket>
 #include <QDebug>
 #include <QHash>
+#include <QMutex>
 #include <functional>
 #include <mutex>
+#include <atomic>
+#include <thread>
 
 extern "C" {
 
@@ -23,10 +27,56 @@ extern "C" {
 // 线程安全回调存储
 // ============================================================
 
-static std::mutex g_networkCallbackMutex;
+// 线程安全 - atomic_flag 自旋锁（与 bridge_signal.cpp 保持一致）
+// 不能用 std::mutex：其底层 CRT/OS 原始锁在 Cangjie 运行时加载的 DLL 中
+// 首次加锁即死锁（已实测：连栈上新构造的 std::mutex::try_lock 都会卡死）
+static std::atomic_flag g_networkLockFlag = ATOMIC_FLAG_INIT;
+
+class NetworkSpinLock {
+public:
+    NetworkSpinLock() {
+        while (g_networkLockFlag.test_and_set(std::memory_order_acquire)) {
+            std::this_thread::yield();
+        }
+    }
+    ~NetworkSpinLock() {
+        g_networkLockFlag.clear(std::memory_order_release);
+    }
+};
+
 static QHash<int64_t, std::function<void()>> g_networkVoidCallbacks;
 
-#define LOCK_NETWORK_CALLBACKS() std::lock_guard<std::mutex> lock(g_networkCallbackMutex)
+// QTcpSocket 各信号独立回调表（修复共用单表互相覆盖的问题）
+static QHash<int64_t, std::function<void()>> g_tcpConnectedCbs;
+static QHash<int64_t, std::function<void()>> g_tcpDisconnectedCbs;
+static QHash<int64_t, std::function<void()>> g_tcpReadyReadCbs;
+static QHash<int64_t, std::function<void()>> g_tcpErrorCbs;
+
+// id 版回调（闭包捕获）：ptr -> 注册表 id
+static void (*g_netVoidDispatcher)(int64_t) = nullptr;
+static QHash<int64_t, int64_t> g_tcpConnectedIds;
+static QHash<int64_t, int64_t> g_tcpDisconnectedIds;
+static QHash<int64_t, int64_t> g_tcpReadyReadIds;
+static QHash<int64_t, int64_t> g_tcpErrorIds;
+static QHash<int64_t, int64_t> g_tcpServerNewConnIds;
+
+#define LOCK_NETWORK_CALLBACKS() NetworkSpinLock _netLock
+
+// 前向声明：id 回调表清理辅助（定义在文件尾部；调用方必须已持有网络回调自旋锁（LOCK_NETWORK_CALLBACKS））
+static void removeTcpSocketIdEntriesLocked(int64_t ptr);
+
+// 通用：从指定回调表触发 ptr 对应的回调
+static void invokeTcpCallback(QHash<int64_t, std::function<void()>>& table, int64_t ptr) {
+    std::function<void()> cb;
+    {
+        LOCK_NETWORK_CALLBACKS();
+        auto it = table.find(ptr);
+        if (it != table.end()) {
+            cb = it.value();
+        }
+    }
+    if (cb) cb();
+}
 
 // ============================================================
 // QHostAddress - IP地址
@@ -96,6 +146,11 @@ void qTcpSocketDelete(int64_t ptr) {
         {
             LOCK_NETWORK_CALLBACKS();
             g_networkVoidCallbacks.remove(ptr);
+            g_tcpConnectedCbs.remove(ptr);
+            g_tcpDisconnectedCbs.remove(ptr);
+            g_tcpReadyReadCbs.remove(ptr);
+            g_tcpErrorCbs.remove(ptr);
+            removeTcpSocketIdEntriesLocked(ptr);
         }
         delete socket;
     }
@@ -200,22 +255,46 @@ void qTcpSocketClose(int64_t ptr) {
     }
 }
 
-// 信号连接
+const char* qTcpSocketPeerAddress(int64_t ptr) {
+    QTcpSocket* socket = reinterpret_cast<QTcpSocket*>(ptr);
+    if (socket) {
+        static QByteArray buffer;
+        buffer = socket->peerAddress().toString().toUtf8();
+        return buffer.constData();
+    }
+    return "";
+}
+
+uint16_t qTcpSocketPeerPort(int64_t ptr) {
+    QTcpSocket* socket = reinterpret_cast<QTcpSocket*>(ptr);
+    return socket ? socket->peerPort() : 0;
+}
+
+const char* qTcpSocketLocalAddress(int64_t ptr) {
+    QTcpSocket* socket = reinterpret_cast<QTcpSocket*>(ptr);
+    if (socket) {
+        static QByteArray buffer;
+        buffer = socket->localAddress().toString().toUtf8();
+        return buffer.constData();
+    }
+    return "";
+}
+
+uint16_t qTcpSocketLocalPort(int64_t ptr) {
+    QTcpSocket* socket = reinterpret_cast<QTcpSocket*>(ptr);
+    return socket ? socket->localPort() : 0;
+}
+
+// 信号连接（四类信号各自独立回调表，可同时注册）
 void qTcpSocketConnectConnected(int64_t ptr, void (*callback)()) {
     QTcpSocket* socket = reinterpret_cast<QTcpSocket*>(ptr);
     if (socket && callback) {
-        LOCK_NETWORK_CALLBACKS();
-        g_networkVoidCallbacks[ptr] = callback;
+        {
+            LOCK_NETWORK_CALLBACKS();
+            g_tcpConnectedCbs[ptr] = callback;
+        }
         QObject::connect(socket, &QTcpSocket::connected, [ptr]() {
-            std::function<void()> cb;
-            {
-                LOCK_NETWORK_CALLBACKS();
-                auto it = g_networkVoidCallbacks.find(ptr);
-                if (it != g_networkVoidCallbacks.end()) {
-                    cb = it.value();
-                }
-            }
-            if (cb) cb();
+            invokeTcpCallback(g_tcpConnectedCbs, ptr);
         });
     }
 }
@@ -223,18 +302,12 @@ void qTcpSocketConnectConnected(int64_t ptr, void (*callback)()) {
 void qTcpSocketConnectDisconnected(int64_t ptr, void (*callback)()) {
     QTcpSocket* socket = reinterpret_cast<QTcpSocket*>(ptr);
     if (socket && callback) {
-        LOCK_NETWORK_CALLBACKS();
-        g_networkVoidCallbacks[ptr] = callback;
+        {
+            LOCK_NETWORK_CALLBACKS();
+            g_tcpDisconnectedCbs[ptr] = callback;
+        }
         QObject::connect(socket, &QTcpSocket::disconnected, [ptr]() {
-            std::function<void()> cb;
-            {
-                LOCK_NETWORK_CALLBACKS();
-                auto it = g_networkVoidCallbacks.find(ptr);
-                if (it != g_networkVoidCallbacks.end()) {
-                    cb = it.value();
-                }
-            }
-            if (cb) cb();
+            invokeTcpCallback(g_tcpDisconnectedCbs, ptr);
         });
     }
 }
@@ -242,18 +315,12 @@ void qTcpSocketConnectDisconnected(int64_t ptr, void (*callback)()) {
 void qTcpSocketConnectReadyRead(int64_t ptr, void (*callback)()) {
     QTcpSocket* socket = reinterpret_cast<QTcpSocket*>(ptr);
     if (socket && callback) {
-        LOCK_NETWORK_CALLBACKS();
-        g_networkVoidCallbacks[ptr] = callback;
+        {
+            LOCK_NETWORK_CALLBACKS();
+            g_tcpReadyReadCbs[ptr] = callback;
+        }
         QObject::connect(socket, &QTcpSocket::readyRead, [ptr]() {
-            std::function<void()> cb;
-            {
-                LOCK_NETWORK_CALLBACKS();
-                auto it = g_networkVoidCallbacks.find(ptr);
-                if (it != g_networkVoidCallbacks.end()) {
-                    cb = it.value();
-                }
-            }
-            if (cb) cb();
+            invokeTcpCallback(g_tcpReadyReadCbs, ptr);
         });
     }
 }
@@ -261,14 +328,153 @@ void qTcpSocketConnectReadyRead(int64_t ptr, void (*callback)()) {
 void qTcpSocketConnectError(int64_t ptr, void (*callback)()) {
     QTcpSocket* socket = reinterpret_cast<QTcpSocket*>(ptr);
     if (socket && callback) {
-        LOCK_NETWORK_CALLBACKS();
-        g_networkVoidCallbacks[ptr] = callback;
+        {
+            LOCK_NETWORK_CALLBACKS();
+            g_tcpErrorCbs[ptr] = callback;
+        }
         QObject::connect(socket, &QTcpSocket::errorOccurred, [ptr](QAbstractSocket::SocketError) {
+            invokeTcpCallback(g_tcpErrorCbs, ptr);
+        });
+    }
+}
+
+void qTcpSocketDisconnectCallbacks(int64_t ptr) {
+    LOCK_NETWORK_CALLBACKS();
+    g_networkVoidCallbacks.remove(ptr);
+    g_tcpConnectedCbs.remove(ptr);
+    g_tcpDisconnectedCbs.remove(ptr);
+    g_tcpReadyReadCbs.remove(ptr);
+    g_tcpErrorCbs.remove(ptr);
+    removeTcpSocketIdEntriesLocked(ptr);
+}
+
+// ============================================================
+// QTcpServer - TCP服务器
+// ============================================================
+
+// 独立于 g_networkVoidCallbacks，避免与套接字回调键冲突
+static QHash<int64_t, std::function<void()>> g_tcpServerCallbacks;
+
+int64_t qTcpServerCreate() {
+    QTcpServer* s = new QTcpServer();
+    return reinterpret_cast<int64_t>(s);
+}
+
+void qTcpServerDelete(int64_t ptr) {
+    QTcpServer* server = reinterpret_cast<QTcpServer*>(ptr);
+    if (server) {
+        {
+            LOCK_NETWORK_CALLBACKS();
+            g_tcpServerCallbacks.remove(ptr);
+            g_tcpServerNewConnIds.remove(ptr);
+        }
+        delete server;
+    }
+}
+
+bool qTcpServerListen(int64_t ptr, const char* address, uint16_t port) {
+    QTcpServer* server = reinterpret_cast<QTcpServer*>(ptr);
+    if (!server) {
+        return false;
+    }
+    QHostAddress addr = QHostAddress::Any;
+    if (address && address[0] != '\0') {
+        addr = QHostAddress(QString::fromUtf8(address));
+    }
+    bool ok = server->listen(addr, port);
+    return ok;
+}
+
+void qTcpServerClose(int64_t ptr) {
+    QTcpServer* server = reinterpret_cast<QTcpServer*>(ptr);
+    if (server) {
+        server->close();
+    }
+}
+
+bool qTcpServerIsListening(int64_t ptr) {
+    QTcpServer* server = reinterpret_cast<QTcpServer*>(ptr);
+    return server ? server->isListening() : false;
+}
+
+uint16_t qTcpServerServerPort(int64_t ptr) {
+    QTcpServer* server = reinterpret_cast<QTcpServer*>(ptr);
+    return server ? server->serverPort() : 0;
+}
+
+const char* qTcpServerServerAddress(int64_t ptr) {
+    QTcpServer* server = reinterpret_cast<QTcpServer*>(ptr);
+    if (server) {
+        static QByteArray buffer;
+        buffer = server->serverAddress().toString().toUtf8();
+        return buffer.constData();
+    }
+    return "";
+}
+
+const char* qTcpServerErrorString(int64_t ptr) {
+    QTcpServer* server = reinterpret_cast<QTcpServer*>(ptr);
+    if (server) {
+        static QByteArray buffer;
+        buffer = server->errorString().toUtf8();
+        return buffer.constData();
+    }
+    return "";
+}
+
+int32_t qTcpServerMaxPendingConnections(int64_t ptr) {
+    QTcpServer* server = reinterpret_cast<QTcpServer*>(ptr);
+    return server ? server->maxPendingConnections() : 0;
+}
+
+void qTcpServerSetMaxPendingConnections(int64_t ptr, int32_t count) {
+    QTcpServer* server = reinterpret_cast<QTcpServer*>(ptr);
+    if (server) {
+        server->setMaxPendingConnections(count);
+    }
+}
+
+bool qTcpServerHasPendingConnections(int64_t ptr) {
+    QTcpServer* server = reinterpret_cast<QTcpServer*>(ptr);
+    return server ? server->hasPendingConnections() : false;
+}
+
+int64_t qTcpServerNextPendingConnection(int64_t ptr) {
+    QTcpServer* server = reinterpret_cast<QTcpServer*>(ptr);
+    if (!server) {
+        return 0;
+    }
+    QTcpSocket* client = server->nextPendingConnection();
+    if (!client) {
+        return 0;
+    }
+    // 脱离 Qt 父子树，生命周期交由仓颉侧 QTcpSocket 包装对象管理
+    client->setParent(nullptr);
+    return reinterpret_cast<int64_t>(client);
+}
+
+void qTcpServerWaitForNewConnection(int64_t ptr, int32_t msec, bool* result) {
+    QTcpServer* server = reinterpret_cast<QTcpServer*>(ptr);
+    if (server) {
+        bool ok = false;
+        server->waitForNewConnection(msec, &ok);
+        if (result) {
+            *result = ok;
+        }
+    }
+}
+
+void qTcpServerConnectNewConnection(int64_t ptr, void (*callback)()) {
+    QTcpServer* server = reinterpret_cast<QTcpServer*>(ptr);
+    if (server && callback) {
+        LOCK_NETWORK_CALLBACKS();
+        g_tcpServerCallbacks[ptr] = callback;
+        QObject::connect(server, &QTcpServer::newConnection, [ptr]() {
             std::function<void()> cb;
             {
                 LOCK_NETWORK_CALLBACKS();
-                auto it = g_networkVoidCallbacks.find(ptr);
-                if (it != g_networkVoidCallbacks.end()) {
+                auto it = g_tcpServerCallbacks.find(ptr);
+                if (it != g_tcpServerCallbacks.end()) {
                     cb = it.value();
                 }
             }
@@ -277,9 +483,10 @@ void qTcpSocketConnectError(int64_t ptr, void (*callback)()) {
     }
 }
 
-void qTcpSocketDisconnectCallbacks(int64_t ptr) {
+void qTcpServerDisconnectCallbacks(int64_t ptr) {
     LOCK_NETWORK_CALLBACKS();
-    g_networkVoidCallbacks.remove(ptr);
+    g_tcpServerCallbacks.remove(ptr);
+    g_tcpServerNewConnIds.remove(ptr);
 }
 
 // ============================================================
@@ -668,6 +875,106 @@ int32_t qLocalServerSocketOptions(int64_t ptr) {
 
 bool qLocalServerRemoveServer(const char* name) {
     return QLocalServer::removeServer(QString::fromUtf8(name));
+}
+
+// ============================================================
+// id 版回调派发（闭包捕获支持）
+//   Cangjie 侧把可捕获闭包存入全局注册表得到 id；native 仅保存 id，
+//   信号触发时回调 Cangjie 注册的调度器 g_netVoidDispatcher(id)。
+//   用于服务器等多连接场景：每个套接字注册各自的闭包以区分来源。
+//   （相关全局表定义见文件顶部回调存储区）
+// ============================================================
+
+void qNetSetVoidDispatcher(void (*disp)(int64_t)) {
+    g_netVoidDispatcher = disp;
+}
+
+static void dispatchNetId(QHash<int64_t, int64_t>& table, int64_t ptr) {
+    int64_t id = 0;
+    {
+        LOCK_NETWORK_CALLBACKS();
+        auto it = table.find(ptr);
+        if (it != table.end()) {
+            id = it.value();
+        }
+    }
+    if (g_netVoidDispatcher && id != 0) {
+        g_netVoidDispatcher(id);
+    }
+}
+
+void qTcpSocketConnectConnectedId(int64_t ptr, int64_t id) {
+    QTcpSocket* socket = reinterpret_cast<QTcpSocket*>(ptr);
+    if (socket && id != 0) {
+        {
+            LOCK_NETWORK_CALLBACKS();
+            g_tcpConnectedIds[ptr] = id;
+        }
+        QObject::connect(socket, &QTcpSocket::connected, [ptr]() {
+            dispatchNetId(g_tcpConnectedIds, ptr);
+        });
+    }
+}
+
+void qTcpSocketConnectDisconnectedId(int64_t ptr, int64_t id) {
+    QTcpSocket* socket = reinterpret_cast<QTcpSocket*>(ptr);
+    if (socket && id != 0) {
+        {
+            LOCK_NETWORK_CALLBACKS();
+            g_tcpDisconnectedIds[ptr] = id;
+        }
+        QObject::connect(socket, &QTcpSocket::disconnected, [ptr]() {
+            dispatchNetId(g_tcpDisconnectedIds, ptr);
+        });
+    }
+}
+
+void qTcpSocketConnectReadyReadId(int64_t ptr, int64_t id) {
+    QTcpSocket* socket = reinterpret_cast<QTcpSocket*>(ptr);
+    if (socket && id != 0) {
+        {
+            LOCK_NETWORK_CALLBACKS();
+            g_tcpReadyReadIds[ptr] = id;
+        }
+        QObject::connect(socket, &QTcpSocket::readyRead, [ptr]() {
+            dispatchNetId(g_tcpReadyReadIds, ptr);
+        });
+    }
+}
+
+void qTcpSocketConnectErrorId(int64_t ptr, int64_t id) {
+    QTcpSocket* socket = reinterpret_cast<QTcpSocket*>(ptr);
+    if (socket && id != 0) {
+        {
+            LOCK_NETWORK_CALLBACKS();
+            g_tcpErrorIds[ptr] = id;
+        }
+        QObject::connect(socket, &QTcpSocket::errorOccurred, [ptr](QAbstractSocket::SocketError) {
+            dispatchNetId(g_tcpErrorIds, ptr);
+        });
+    }
+}
+
+void qTcpServerConnectNewConnectionId(int64_t ptr, int64_t id) {
+    QTcpServer* server = reinterpret_cast<QTcpServer*>(ptr);
+    if (server && id != 0) {
+        {
+            LOCK_NETWORK_CALLBACKS();
+            g_tcpServerNewConnIds[ptr] = id;
+        }
+        QObject::connect(server, &QTcpServer::newConnection, [ptr]() {
+            dispatchNetId(g_tcpServerNewConnIds, ptr);
+        });
+    } else {
+    }
+}
+
+// id 表清理辅助（调用方必须已持有网络回调自旋锁（LOCK_NETWORK_CALLBACKS））
+static void removeTcpSocketIdEntriesLocked(int64_t ptr) {
+    g_tcpConnectedIds.remove(ptr);
+    g_tcpDisconnectedIds.remove(ptr);
+    g_tcpReadyReadIds.remove(ptr);
+    g_tcpErrorIds.remove(ptr);
 }
 
 } // extern "C"

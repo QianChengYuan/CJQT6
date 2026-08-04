@@ -53,3 +53,10 @@ public func unregisterVoidCallback(id: Int64): Unit {
         gVoidRegistry.remove(id)
     }
 }
+
+/// 获取顶层 void 闭包调度器
+/// 供其他模块（如 cjqt6.network）注册自己的 id 派发入口时复用同一调度器：
+/// 信号触发 -> native 调用此调度器(id) -> 查 gVoidRegistry 调用对应闭包
+public func getVoidDispatcher(): CFunc<(Int64) -> Unit> {
+    return gVoidDispatcher
+}

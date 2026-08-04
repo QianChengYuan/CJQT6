@@ -9,6 +9,8 @@
 #include <QHash>
 #include <functional>
 #include <mutex>
+#include <atomic>
+#include <thread>
 
 extern "C" {
 
@@ -16,10 +18,24 @@ extern "C" {
 // 线程安全回调存储
 // ============================================================
 
-static std::mutex g_threadCallbackMutex;
+// atomic_flag 自旋锁：std::mutex 在 Cangjie 运行时加载的 DLL 中首次加锁即死锁
+static std::atomic_flag g_threadLockFlag = ATOMIC_FLAG_INIT;
+
+class ThreadSpinLock {
+public:
+    ThreadSpinLock() {
+        while (g_threadLockFlag.test_and_set(std::memory_order_acquire)) {
+            std::this_thread::yield();
+        }
+    }
+    ~ThreadSpinLock() {
+        g_threadLockFlag.clear(std::memory_order_release);
+    }
+};
+
 static QHash<int64_t, std::function<void()>> g_threadVoidCallbacks;
 
-#define LOCK_THREAD_CALLBACKS() std::lock_guard<std::mutex> lock(g_threadCallbackMutex)
+#define LOCK_THREAD_CALLBACKS() ThreadSpinLock _threadLock
 
 // ============================================================
 // QRunnable wrapper - 允许仓颉创建可运行任务
