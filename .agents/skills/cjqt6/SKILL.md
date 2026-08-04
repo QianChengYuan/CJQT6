@@ -16,10 +16,11 @@ CJQT6 通过 FFI 桥接技术，把 Qt6 的 C++ API 封装成仓颉原生 API �
 - 构建/部署 `cjqt6_bridge` 原生桥接库、解决 `cjpm build` 链接错误
 - 排查 Qt 对象内存泄漏 / 悬垂指针 / 终结器崩溃
 
+**当前版本**：1.7.0（2026-08-02）
 **远程仓库（权威源）**：`https://gitcode.com/yuan_1992/CJQT6.git`（主页 `https://gitcode.com/yuan_1992/CJQT6`，Issue 反馈同页）
 **本机克隆路径**（因机器而异，下文用 `<仓库根>` 指代）：`C:\CodeTools\cangjie_git\CJQT6`
 **源码根**：`<仓库根>/src`
-**API 文档**：`<仓库根>/docs/api/`（01_core.md ~ 19_network.md + 12_signal_slot.md）
+**API 文档**：`<仓库根>/docs/api/`（01_core.md ~ 19_network.md + 12_signal_slot.md，已覆盖全部公开类 100%）
 
 ---
 
@@ -29,19 +30,19 @@ CJQT6 通过 FFI 桥接技术，把 Qt6 的 C++ API 封装成仓颉原生 API �
 
 | 模块 | 包名 | 主要内容 |
 |------|------|---------|
-| 核心 | `cjqt6.core` | `QApplication`、`QWidget`、`QMainWindow`(在 menu)、`QTimer`、信号常量与回调类型、`QtResource` 接口、异常类、剪贴板/屏幕/设置/进程等 |
-| 控件 | `cjqt6.widgets` | `QLabel`、`QPushButton`、`QLineEdit`、`QTextEdit`、`QCheckBox`、`QRadioButton`、`QComboBox`、`QSlider`、`QSpinBox`、`QProgressBar`、容器等（37 个文件） |
-| 图形/布局 | `cjqt6.gui` | `QVBoxLayout`/`QHBoxLayout`/`QGridLayout`、`Alignment`/`Orientation`/`Margins` 等类型 |
-| 对话框 | `cjqt6.dialogs` | `QMessageBox`、`QFileDialog` |
-| 菜单 | `cjqt6.menu` | 菜单、`QMainWindow` |
-| 绘图 | `cjqt6.paint` | `QPainter`、`QPen`、`QBrush`、`QFont`、`QTransform` |
-| QML | `cjqt6.qml` | QML 集成 |
-| 多媒体 | `cjqt6.multimedia` | `QMediaPlayer`、`QAudioOutput`、`QSoundEffect` |
-| 网络 | `cjqt6.network` | `QTcpSocket`、`QUdpSocket`、`QHostAddress` |
-| 数据库 | `cjqt6.sql` | `QSqlDatabase` 等 |
-| 视图 | `cjqt6.views` | `QListView`/`QTableWidget`/`QTreeWidget` 等 model/view |
-| 打印 | `cjqt6.print` | `QPrinter` |
-| 资源 | `cjqt6.resource` | 资源容器、作用域管理器（RAII 辅助） |
+| 核心 | `cjqt6.core` | `QApplication`/`QApp`、`QWidget`、`QTimer`、`QThread`/`QThreadPool`、`QSettings`、`QShortcut`、`QPropertyAnimation`、`QUndoStack`、`QJsonValue/Object/Array/Document`、`QItemSelectionModel`、`QFileSystemWatcher`、`QStandardPaths`、`QDesktopServices`、`QClipboard`、`QScreen`、`QProcess`、`QMimeData`/`QDrag`、`SignalEmitter`、信号常量与回调类型、`QtResource` 接口、异常类 |
+| 控件 | `cjqt6.widgets` | `QLabel`、`QPushButton`、`QLineEdit`、`QTextEdit`、`QCheckBox`、`QRadioButton`、`QComboBox`、`QSlider`、`QSpinBox`、`QProgressBar`、`QGroupBox`/`QTabWidget`/`QScrollArea`/`QSplitter`、`QDockWidget`、`QMdiArea`、`QSystemTrayIcon`、`QGraphicsView`/`QGraphicsItem` 系列、日期/时间控件等（38 个文件） |
+| 图形/布局 | `cjqt6.gui` | `QVBoxLayout`/`QHBoxLayout`/`QGridLayout`/`QFormLayout`、`Alignment`/`Orientation`/`Margins`、`QCursor`、`QPalette`、`QIcon`、`QFontMetrics`/`QFontInfo`、`QStyleHelper`、`QSyntaxHighlighter`、`QTextDocument`/`QTextCursor` |
+| 对话框 | `cjqt6.dialogs` | `QMessageBox`、`QFileDialog`、`QInputDialog`、`QColorDialog`、`QFontDialog`、`QProgressDialog`、`QWizard`/`QWizardPage`、`QErrorMessage` |
+| 菜单 | `cjqt6.menu` | `QMainWindow`、`QMenu`/`QMenuBar`、`QToolBar`、`QStatusBar`、`QAction` |
+| 绘图 | `cjqt6.paint` | `QPainter`、`QPen`、`QBrush`、`QColor`、`QFont`、`QTransform`、`QPainterPath`、`QPixmap`/`QImage`、渐变、`QFontDatabase` |
+| QML | `cjqt6.qml` | `QQmlApplicationEngine`、`QQuickView`/`QQuickWidget`/`QQuickItem` |
+| 多媒体 | `cjqt6.multimedia` | `QMediaPlayer`、`QAudioOutput`、`QSoundEffect`、`QCamera`、`QImageCapture`、`QVideoWidget` |
+| 网络 | `cjqt6.network` | `QTcpSocket`、`QUdpSocket`、`QHostAddress`、`QNetworkAccessManager`/`QNetworkRequest`/`QNetworkReply`、`QSslSocket`、`QLocalServer`、`QNetworkProxy` |
+| 数据库 | `cjqt6.sql` | `QSqlDatabase`、`QSqlQuery`、`QSqlTableModel` |
+| 视图 | `cjqt6.views` | `QListView`/`QTableView`/`QTreeView`/`QTableWidget`/`QTreeWidget`/`QListWidget`、`QAbstractItemModel`、`QStandardItemModel`、`QSortFilterProxyModel`、`QFileSystemModel`、`QHeaderView` |
+| 打印 | `cjqt6.print` | `QPrinter`、`QPrintDialog`/`QPrintPreviewDialog` |
+| 资源 | `cjqt6.resource` | 资源容器、作用域管理器（RAII 辅助）、`ResourceUtils` |
 
 > 最小示例里通常 import：`cjqt6.core.*`、`cjqt6.widgets.*`、`cjqt6.gui.*`。
 
@@ -141,15 +142,19 @@ main(): Int32 {
 }
 ```
 各控件常用连接方法（源文件已确认）：
-- `QPushButton`：`setOnClick(VoidCallback)` / `disconnectClick()`；可勾选：`setOnClickChecked(Int32Callback)`、`setOnClickedChecked`
-- `QLineEdit`：`setOnTextChanged(CStringCallback)`
+- `QPushButton`：`setOnClick(VoidCallback)` / `disconnectClick()`；可勾选：`setOnClickedChecked(Int32Callback)`、`setOnClickChecked(Int32Callback)`
+- `QLineEdit`：`setOnTextChanged(CStringCallback)`、`setOnEditingFinished(VoidCallback)`
 - `QSpinBox`：`setOnValueChanged(Int32Callback)`；`QDoubleSpinBox` 用 `Float64Callback`
 - `QSlider`：`setOnValueChanged(Int32Callback)`、`setOnSliderMoved(Int32Callback)`
 - `QCheckBox`：`setOnStateChanged(Int32Callback)`（state：0=未选，1=半选，2=选中）
 - `QRadioButton`：`setOnToggled(Int32Callback)`（checked=1）
-- `QComboBox`：`setOnCurrentIndexChanged(Int32Callback)`
+- `QComboBox`：`setOnCurrentIndexChanged(Int32Callback)`、`setOnCurrentTextChanged(CStringCallback)`
 - `QTimer`(core/timer.cj)：`setOnTimeout(VoidCallback)`
+- `QThread`/`QProcess`：`setOnFinished(...)`；`QProcess` 还有 `setOnErrorOccurred(Int32Callback)`
+- 视图类（views）：`QListWidget.setOnItemClicked(CFunc<(Int32) -> Unit>)`（传行号）；`QTableWidget`/`QTreeWidget` 的 `setOnItemClicked` 传 `CFunc<(Int64) -> Unit>`（传 item 指针）、`setOnCellChanged(CFunc<(Int32, Int32) -> Unit>)` 等
 - 信号常量字符串：`SIGNAL_CLICKED`/`SIGNAL_TEXT_CHANGED`/`SIGNAL_VALUE_CHANGED`/`SIGNAL_TIMEOUT` 等（多数场景直接用上面的 `setOnXxx` 方法即可）
+
+> **`SignalConnection`**（`core/signal.cj`）：部分 `setOnXxx` 方法返回 `SignalConnection` 对象，可调用 `.disconnect()` 手动断开（如 `setOnClickCapture`、`setOnClickedChecked`、`setOnDouble`、`setOnInt` 等带 capture/命名连接的场景）。
 
 > 注意 `CString` 回调：Qt 返回的 CString 由桥接层管理，回调内用 `.toString()` 立即转为仓颉 `String`，不要长期持有 CString。
 
@@ -181,6 +186,11 @@ QMessageBox.information(parentPtr, "提示", "完成")
 
 ### 5.1 构建 FFI 桥接库（cjqt6_bridge）
 ```powershell
+# 方式1（推荐）：一键脚本，自动探测 Qt 路径
+.\scripts\update-bridge.ps1              # 自动用 $env:QTDIR 或常见路径
+.\scripts\update-bridge.ps1 -QtDir "C:\Qt\6.10.3\msvc2022_64"   # 手动指定
+
+# 方式2：手动步骤
 # 设置 Qt6 路径（替换为实际路径）
 $env:QTDIR = "C:\Qt\6.10.3\msvc2022_64"
 
@@ -194,16 +204,31 @@ cd ..\..
 # 部署桥接库到 releases/（cjpm build 链接用）
 Copy-Item native\build_windows\bin\cjqt6_bridge.dll releases\windows-x64\ -Force
 Copy-Item native\build_windows\lib\cjqt6_bridge.lib releases\windows-x64\ -Force
-# 或用脚本：.\scripts\update-bridge.ps1
 ```
-> Linux：`mkdir native/build_linux && cd $_ && cmake ../.. && make -j$(nproc)`，产物 `libcjqt6_bridge.so` 拷到 `releases/linux-x64/`。
+> ⚠️ **增量构建陷阱**：`native\build_windows` 有 CMake 缓存时，`cmake --build` 可能判定"已是最新"跳过实际链接（产物时间戳不变）。**需要确保重新编译时**用：
+> ```powershell
+> cmake --build native\build_windows --config Release --clean-first
+> # 或删除缓存目录后重来：
+> Remove-Item -Recurse -Force native\build_windows
+> ```
+>
+> **Linux（含 WSL）**：在仓库根目录执行
+> ```bash
+> bash scripts/build-linux-x64.sh        # 自动探测 /usr/lib/qt6 等，产物部署到 releases/linux-x64/
+> # 手动方式：
+> mkdir -p native/build-linux-x64 && cd native/build-linux-x64
+> cmake ../.. -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/usr/lib/qt6
+> make -j$(nproc)
+> cp lib/libcjqt6_bridge.so ../../releases/linux-x64/
+> ```
 
 ### 5.2 构建仓颉项目
 ```powershell
 cjpm build
 ```
-- `cjpm.toml` 已配置 `link-option` 指向 `releases/windows-x64/cjqt6_bridge.dll`（默认 Windows 目标为硬编码绝对路径，换机器需改）。
+- `cjpm.toml` 已配置各平台 `link-option`：Windows 用 `releases/windows-x64/cjqt6_bridge.lib`（MSVC）/ `.dll`（MinGW），Linux 用 `-Lreleases/linux-x64 -lcjqt6_bridge`。
 - 常见链接错误 `cannot find -lcjqt6_bridge` → 桥接库没构建/没部署到 `releases/`，回到 5.1。
+- 全量重建脚本：`.\scripts\rebuild_all.ps1`（先桥接库后 cjpm + 可选示例，`-Example dormitory_manager` 指定示例，`-SkipExample` 跳过）。
 
 ### 5.3 运行（需要 Qt6 运行时 DLL）
 ```powershell
@@ -243,6 +268,7 @@ C:\Qt\6.10.3\msvc2022_64\bin\windeployqt.exe examples\notepad\target\release\bin
 |------|------------|
 | 程序崩溃 / 双击无反应 | 没部署 Qt6 DLL 到运行时 PATH，或没 `windeployqt`；先 `setup-qt-env.ps1` |
 | `cannot find -lcjqt6_bridge` | 桥接库未构建或未拷到 `releases/` → 重做 5.1 |
+| 桥接库改了代码但运行没变化 | 增量构建跳过链接 → 用 `cmake --build . --clean-first` 或删 `native\build_windows` 重来 |
 | 回调不触发 | 信号连接方法名写错（用 `setOnClick` 而非 `connect`）；`CFunc` 闭包捕获问题 → 改顶层 `let` + 全局 `?T` 变量 |
 | 控件不显示 / 布局错乱 | `addWidget` 忘了 `.getPtr()`；窗口没 `setLayout`；没 `window.show()` |
 | 文本对齐无效 | `setAlignment` 要传 `Alignment.Center.value`（Int32），不是 `Alignment.Center` 对象 |
@@ -253,12 +279,17 @@ C:\Qt\6.10.3\msvc2022_64\bin\windeployqt.exe examples\notepad\target\release\bin
 
 ## 8. 深入查阅指引（按需 Read 这些源码/文档）
 
-- 信号机制与回调类型：`src/core/signal.cj`
+- 信号机制与回调类型：`src/core/signal.cj`（含 `SignalConnection`）、`src/core/emitter.cj`
 - 资源管理接口与异常：`src/core/resource.cj`
 - 控件实现范式（任选）：`src/widgets/label.cj`、`pushbutton.cj`、`lineedit.cj`、`slider.cj`
 - 布局实现：`src/gui/layout.cj`、类型定义 `src/gui/types.cj`
-- 完整示例：`examples/widgets_demo/src/main.cj`（控件+信号全集）、`examples/notepad/src/main.cj`（菜单/对话框/打印完整 App）
-- API 文档：`docs/api/01_core.md`、`02_widgets_basic.md`、`04_containers_layout.md`、`12_signal_slot.md`、`15_examples_faq.md`
+- 图形/文本：`src/gui/textdoc.cj`（QTextDocument/QTextCursor）、`src/gui/syntaxhighlighter.cj`
+- 线程：`src/core/thread.cj`（QThread/QThreadPool）、进程：`src/core/process.cj`、设置：`src/core/settings.cj`
+- 网络：`src/network/`（tcp_socket/udp_socket/network_access/ssl_socket/localserver）
+- 多媒体：`src/multimedia/`（mediaplayer/camera/imagecapture/videowidget）
+- 完整示例：`examples/all_controls_demo/src/main.cj`（控件+信号全集）、`examples/notepad/src/main.cj`（菜单/对话框/打印完整 App）、`examples/dormitory_manager/src/main.cj`（宿舍管理完整业务 App）
+- API 文档：`docs/api/01_core.md`、`02_widgets_basic.md`、`04_containers_layout.md`、`05_views.md`、`12_signal_slot.md`、`15_examples_faq.md`
+- 资源管理指南：`docs/resource/scope-manager-guide.md`、`docs/resource/resource-utils-guide.md`
 - 构建细节：`docs/build-guide.md`、`README.md`、`cjpm.toml`
 
 > 写新控件/排查问题时，先 Read 同模块已有 `.cj` 文件作为范式（foreign 声明 + 封装 class + `checkValid` 守卫 + `close` 释放），保持风格一致。

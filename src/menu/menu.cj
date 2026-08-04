@@ -23,6 +23,7 @@ foreign func qMenuAddActionByPtr(menuPtr: Int64, actionPtr: Int64): Unit
 foreign func qMenuAddSeparator(ptr: Int64): Int64
 foreign func qMenuAddMenu(ptr: Int64, title: CString): Int64
 foreign func qMenuSetTitle(ptr: Int64, title: CString): Unit
+foreign func qMenuPopup(ptr: Int64, x: Int32, y: Int32): Unit
 foreign func qMenuDelete(ptr: Int64): Unit
 
 // QAction
@@ -316,6 +317,13 @@ public class QMenu <: QtResource {
             var cstr = LibC.mallocCString(title)
             qMenuSetTitle(ptr, cstr)
             LibC.free(cstr)
+        }
+    }
+    
+    public func popup(globalX: Int32, globalY: Int32): Unit {
+        checkValid()
+        unsafe {
+            qMenuPopup(ptr, globalX, globalY)
         }
     }
     

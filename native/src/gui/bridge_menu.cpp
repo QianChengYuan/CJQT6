@@ -93,6 +93,13 @@ void qMenuSetTitle(int64_t ptr, const char* title) {
     }
 }
 
+void qMenuPopup(int64_t ptr, int32_t x, int32_t y) {
+    QMenu* menu = reinterpret_cast<QMenu*>(ptr);
+    if (menu) {
+        menu->popup(QPoint(x, y));
+    }
+}
+
 void qMenuDelete(int64_t ptr) {
     QMenu* menu = reinterpret_cast<QMenu*>(ptr);
     if (menu) {

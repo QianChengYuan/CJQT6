@@ -5,6 +5,8 @@
 
 #include <QListWidget>
 #include <QListWidgetItem>
+#include <QPixmap>
+#include <QIcon>
 #include <cstring>
 #include <functional>
 #include <unordered_map>
@@ -197,6 +199,20 @@ void qListWidgetSetItemIcon(int64_t ptr, int32_t row, int32_t iconType) {
                 default: return;
             }
             item->setIcon(list->style()->standardIcon(stdIcon));
+        }
+    }
+}
+
+// 设置自定义图像图标（pixmap 指针）
+void qListWidgetSetItemIconPixmap(int64_t ptr, int32_t row, int64_t pixmapPtr) {
+    QListWidget* list = reinterpret_cast<QListWidget*>(ptr);
+    if (list) {
+        QListWidgetItem* item = list->item(row);
+        if (item) {
+            QPixmap* pixmap = reinterpret_cast<QPixmap*>(pixmapPtr);
+            if (pixmap) {
+                item->setIcon(QIcon(*pixmap));
+            }
         }
     }
 }

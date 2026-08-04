@@ -1,5 +1,7 @@
 package cjqt6.views
 
+import cjqt6.paint.*
+
 // ============================================================
 // QListWidget FFI声明
 // ============================================================
@@ -28,6 +30,7 @@ foreign func qListWidgetSetAlternatingRowColors(ptr: Int64, enable: Bool): Unit
 foreign func qListWidgetSetSortingEnabled(ptr: Int64, enable: Bool): Unit
 
 foreign func qListWidgetSetItemIcon(ptr: Int64, row: Int32, iconType: Int32): Unit
+foreign func qListWidgetSetItemIconPixmap(ptr: Int64, row: Int32, pixmapPtr: Int64): Unit
 foreign func qListWidgetSetCheckable(ptr: Int64, row: Int32, checkable: Bool): Unit
 foreign func qListWidgetIsChecked(ptr: Int64, row: Int32): Int32
 foreign func qListWidgetSetChecked(ptr: Int64, row: Int32, checked: Bool): Unit
@@ -235,6 +238,13 @@ public class QListWidget {
     public func setItemIcon(row: Int32, iconType: Int32) {
         unsafe {
             qListWidgetSetItemIcon(ptr, row, iconType)
+        }
+    }
+
+    // 设置自定义图像图标（pixmap），支持任意用户自定义图像
+    public func setItemIconPixmap(row: Int32, pixmap: QPixmap) {
+        unsafe {
+            qListWidgetSetItemIconPixmap(ptr, row, pixmap.getPtr())
         }
     }
     

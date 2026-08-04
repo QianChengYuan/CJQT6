@@ -17,6 +17,8 @@ foreign func qWidgetY(ptr: Int64): Int32
 foreign func qWidgetSetFixedSize(ptr: Int64, width: Int32, height: Int32): Unit
 // QWidget::setWindowIcon() - 设置窗口图标
 foreign func qWidgetSetWindowIcon(ptr: Int64, iconPath: CString): Unit
+// QWidget::setWindowFlags() - 设置窗口标志
+foreign func qWidgetSetWindowFlags(ptr: Int64, flags: Int32): Unit
 // QWidget::update() - 请求重绘
 foreign func qWidgetUpdate(ptr: Int64): Unit
 // QWidget::repaint() - 立即重绘
@@ -118,6 +120,9 @@ public class QWidget <: QtResource {
     public func setFixedSize(width: Int32, height: Int32): Unit { checkValid(); unsafe { qWidgetSetFixedSize(ptr, width, height) } }
     /// 设置窗口图标
     public func setWindowIcon(iconPath: String): Unit { checkValid(); unsafe { let cstr = LibC.mallocCString(iconPath); qWidgetSetWindowIcon(ptr, cstr); LibC.free(cstr) } }
+
+    /// 设置窗口标志位（如去除系统标题栏）
+    public func setWindowFlags(flags: Int32): Unit { checkValid(); unsafe { qWidgetSetWindowFlags(ptr, flags) } }
 
     /// 获取原生指针
     public func getPtr(): Int64 {
@@ -340,4 +345,18 @@ public class QWidget <: QtResource {
     public func disconnect(): Unit {
         disconnectDestroyed()
     }
+}
+
+// ============================================================
+// WindowFlags - 窗口标志常量
+// ============================================================
+
+public class WindowFlags {
+    public static let Window: Int32 = 1
+    public static let Dialog: Int32 = 2
+    public static let FramelessWindowHint: Int32 = 2048
+    public static let WindowStaysOnTopHint: Int32 = 4096
+    public static let WindowMinimizeButtonHint: Int32 = 8
+    public static let WindowMaximizeButtonHint: Int32 = 16
+    public static let WindowCloseButtonHint: Int32 = 32
 }
