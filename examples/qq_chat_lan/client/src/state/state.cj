@@ -31,6 +31,18 @@ public var gHistory: HashMap<Int64, ArrayList<ChatMsg>> = HashMap<Int64, ArrayLi
 /// 当前聊天窗口打开的好友 ID（0 表示未打开）
 public var gCurrentChatId: Int64 = 0
 
+/// 文件接收缓冲表：tid -> RecvTransfer
+public var gTransfers: HashMap<String, RecvTransfer> = HashMap<String, RecvTransfer>()
+
+/// 每个好友会话最后一条已确认(ack)的发送消息 ID（撤回用）：friendId -> msgId
+public var gLastSentId: HashMap<Int64, Int64> = HashMap<Int64, Int64>()
+
+/// 文件发送计数器（生成 tid）
+public var gSendCounter: Int64 = 0
+
+/// 接收文件保存目录（绝对路径）
+public var gRecvDir: String = "recv"
+
 // --------------------------------------------------------
 // 窗口与控件
 // --------------------------------------------------------
@@ -60,3 +72,31 @@ public var gSelfLabel: ?QLabel = None
 public var gChatTitle: ?QLabel = None
 public var gChatHistory: ?QTextEdit = None
 public var gChatInput: ?QLineEdit = None
+
+/// 表情面板窗口
+public var gEmojiPanel: ?QWidget = None
+
+// --------------------------------------------------------
+// 好友辅助（仅依赖 state，供 app 各文件共用，避免循环依赖）
+// --------------------------------------------------------
+
+/// 当前选中好友的 ID（未选中返回 0）
+public func selectedFriendId(): Int64 {
+    match (gFriendList) {
+        case Some(list) =>
+            let row = list.currentRow()
+            if (row < 0 || Int64(row) >= gFriends.size) { return 0 }
+            gFriends[Int64(row)].id
+        case None => 0
+    }
+}
+
+/// 好友显示名（备注优先）
+public func displayNameOf(fid: Int64): String {
+    for (f in gFriends) {
+        if (f.id == fid) {
+            return if (f.remark.isEmpty()) { f.nickname } else { f.remark }
+        }
+    }
+    ""
+}

@@ -21,11 +21,9 @@ let onInputReturn: VoidCallback = { => doSend() }
 public func openChatWithFriend(friendId: Int64): Unit {
     // 找到好友信息
     var found = false
-    var friendName = ""
     for (f in gFriends) {
         if (f.id == friendId) {
             found = true
-            friendName = f.nickname
         }
     }
     if (!found) { return }
@@ -39,7 +37,7 @@ public func openChatWithFriend(friendId: Int64): Unit {
         buildChatWindow()
     }
     if (let Some(t) <- gChatTitle) {
-        t.setText("与 ${friendName} 聊天中")
+        t.setText("与 ${displayNameOf(friendId)} 聊天中")
     }
     renderHistory(friendId)
     if (let Some(w) <- gChatWindow) {
@@ -48,6 +46,8 @@ public func openChatWithFriend(friendId: Int64): Unit {
     if (let Some(e) <- gChatInput) {
         e.setText("")
     }
+    // 向服务端拉取最新历史（回来后重渲染）
+    sendRaw("{\"type\":\"history\",\"friend\":${friendId},\"limit\":100}")
 }
 
 /// 构建聊天窗口骨架（只建一次）
@@ -83,6 +83,36 @@ public func buildChatWindow(): Unit {
     gChatHistory = history
     vbox.addWidget(history.getPtr(), 1)
 
+    // 工具栏：表情/图片/文件/撤回
+    let toolBar = QWidget()
+    toolBar.setStyleSheet("background: #F0F2F5; border-top: 1px solid #E0E4EA;")
+    let toolLayout = QHBoxLayout()
+    toolLayout.setMargin(6)
+    toolLayout.setSpacing(6)
+    let emojiBtn = QPushButton()
+    emojiBtn.setText("表情")
+    emojiBtn.setStyleSheet("background: transparent; border: none; font-size: 14px; padding: 4px 8px;")
+    emojiBtn.setOnClick(onEmojiClick)
+    toolLayout.addWidget(emojiBtn.getPtr())
+    let imgBtn = QPushButton()
+    imgBtn.setText("图片")
+    imgBtn.setStyleSheet("background: transparent; border: none; font-size: 14px; padding: 4px 8px;")
+    imgBtn.setOnClick(onImageClick)
+    toolLayout.addWidget(imgBtn.getPtr())
+    let fileBtn = QPushButton()
+    fileBtn.setText("文件")
+    fileBtn.setStyleSheet("background: transparent; border: none; font-size: 14px; padding: 4px 8px;")
+    fileBtn.setOnClick(onFileClick)
+    toolLayout.addWidget(fileBtn.getPtr())
+    let recallBtn = QPushButton()
+    recallBtn.setText("撤回")
+    recallBtn.setStyleSheet("background: transparent; border: none; font-size: 14px; padding: 4px 8px; color: #888;")
+    recallBtn.setOnClick(onRecallClick)
+    toolLayout.addWidget(recallBtn.getPtr())
+    toolLayout.addStretch()
+    toolBar.setLayout(toolLayout.getPtr())
+    vbox.addWidget(toolBar.getPtr())
+
     // 输入区
     let inputBar = QWidget()
     inputBar.setStyleSheet("background: white; border-top: 1px solid #E0E4EA;")
@@ -116,8 +146,7 @@ public func renderHistory(friendId: Int64): Unit {
             match (gHistory.get(friendId)) {
                 case Some(list) =>
                     for (m in list) {
-                        let name = if (m.outgoing) { "我" } else { m.fromName }
-                        html = html + buildBubbleHtml(m.text, m.time, m.outgoing, name)
+                        html = html + buildMsgHtml(m)
                     }
                 case None => ()
             }
@@ -133,7 +162,7 @@ public func renderHistory(friendId: Int64): Unit {
 public func appendBubble(m: ChatMsg): Unit {
     match (gChatHistory) {
         case Some(view) =>
-            view.append(buildBubbleHtml(m.text, m.time, m.outgoing, m.fromName))
+            view.append(buildMsgHtml(m))
         case None => ()
     }
 }

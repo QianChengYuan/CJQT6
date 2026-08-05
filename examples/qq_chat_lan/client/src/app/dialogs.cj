@@ -6,6 +6,7 @@ package qq_lan_client.app
 import cjqt6.core.*
 import cjqt6.widgets.*
 import cjqt6.gui.*
+import cjqt6.dialogs.*
 import qq_lan_client.core.*
 import qq_lan_client.state.*
 import std.convert.*
@@ -221,4 +222,215 @@ public func closeAddFriendDialog(): Unit {
         e.setText("")
     }
     setAddFriendStatus(" ")
+}
+
+// ============================================================
+// v2：备注 / 删好友 / 改昵称 / 改密码
+// ============================================================
+public var gRemarkDialog: ?QWidget = None
+public var gRemarkEdit: ?QLineEdit = None
+public var gRemarkTargetId: Int64 = 0
+
+public var gNickDialog: ?QWidget = None
+public var gNickEdit: ?QLineEdit = None
+
+public var gPwdDialog: ?QWidget = None
+public var gOldPwdEdit: ?QLineEdit = None
+public var gNewPwdEdit: ?QLineEdit = None
+
+let onRemarkSubmit: VoidCallback = { => doSetRemark() }
+let onRemarkCancel: VoidCallback = { => closeRemarkDialog() }
+let onNickSubmit: VoidCallback = { => doChangeNick() }
+let onNickCancel: VoidCallback = { => closeProfileDialogs() }
+let onPwdSubmit: VoidCallback = { => doChangePwd() }
+let onPwdCancel: VoidCallback = { => closeProfileDialogs() }
+
+/// 主窗口管理按钮回调（public，供 main_window 引用）
+public let onRemarkClick: VoidCallback = { => showRemarkDialog() }
+public let onDelFriendClick: VoidCallback = { => showDelFriendConfirm() }
+public let onChangeNickClick: VoidCallback = { => showChangeNickDialog() }
+public let onChangePwdClick: VoidCallback = { => showChangePwdDialog() }
+
+/// 打开备注对话框（针对当前选中好友）
+public func showRemarkDialog(): Unit {
+    let fid = selectedFriendId()
+    if (fid == 0) {
+        QMessageBox.information(0, "备注", "请先在列表中选中一个好友")
+        return
+    }
+    gRemarkTargetId = fid
+    if (let Some(d) <- gRemarkDialog) {
+        d.show()
+        return
+    }
+    let dlg = QWidget()
+    dlg.setTitle("设置备注")
+    dlg.setFixedSize(320, 150)
+    dlg.setStyleSheet("background: white;")
+    let vbox = QVBoxLayout()
+    vbox.setMargin(18)
+    vbox.setSpacing(10)
+    let title = QLabel()
+    title.setText("好友备注（仅自己可见）")
+    title.setStyleSheet("font-size: 14px; font-weight: bold; color: #1A3A5C;")
+    vbox.addWidget(title.getPtr())
+    let edit = QLineEdit()
+    edit.setPlaceholder("输入备注名")
+    edit.setStyleSheet("background: #F5F7FA; border: 1px solid #D0D7DE; border-radius: 3px; padding: 6px;")
+    gRemarkEdit = edit
+    vbox.addWidget(edit.getPtr())
+    let row = QHBoxLayout()
+    let cancelBtn = QPushButton()
+    cancelBtn.setText("取消")
+    cancelBtn.setStyleSheet("background: transparent; color: #666; border: 1px solid #C5CDD8; border-radius: 3px; padding: 6px 18px;")
+    cancelBtn.setOnClick(onRemarkCancel)
+    row.addWidget(cancelBtn.getPtr())
+    row.addStretch()
+    let okBtn = QPushButton()
+    okBtn.setText("保存")
+    okBtn.setStyleSheet("background: #12B7F5; color: white; border: none; border-radius: 3px; padding: 6px 24px; font-weight: bold;")
+    okBtn.setOnClick(onRemarkSubmit)
+    row.addWidget(okBtn.getPtr())
+    vbox.addLayout(row.getPtr())
+    dlg.setLayout(vbox.getPtr())
+    gRemarkDialog = dlg
+    dlg.show()
+}
+
+public func doSetRemark(): Unit {
+    var remark = ""
+    if (let Some(e) <- gRemarkEdit) { remark = e.text() }
+    sendRaw("{\"type\":\"set_remark\",\"friend\":${gRemarkTargetId},\"remark\":\"${escapeJson(remark)}\"}")
+}
+
+public func closeRemarkDialog(): Unit {
+    if (let Some(d) <- gRemarkDialog) { d.hide() }
+    if (let Some(e) <- gRemarkEdit) { e.setText("") }
+}
+
+/// 删除好友（确认后发送）
+public func showDelFriendConfirm(): Unit {
+    let fid = selectedFriendId()
+    if (fid == 0) {
+        QMessageBox.information(0, "删除好友", "请先在列表中选中一个好友")
+        return
+    }
+    let name = displayNameOf(fid)
+    if (QMessageBox.question(0, "删除好友", "确定删除好友 ${name} 吗？")) {
+        sendRaw("{\"type\":\"del_friend\",\"friend\":${fid}}")
+    }
+}
+
+/// 改昵称对话框
+public func showChangeNickDialog(): Unit {
+    if (let Some(d) <- gNickDialog) {
+        d.show()
+        return
+    }
+    let dlg = QWidget()
+    dlg.setTitle("修改昵称")
+    dlg.setFixedSize(320, 150)
+    dlg.setStyleSheet("background: white;")
+    let vbox = QVBoxLayout()
+    vbox.setMargin(18)
+    vbox.setSpacing(10)
+    let title = QLabel()
+    title.setText("新昵称")
+    title.setStyleSheet("font-size: 14px; font-weight: bold; color: #1A3A5C;")
+    vbox.addWidget(title.getPtr())
+    let edit = QLineEdit()
+    edit.setPlaceholder("输入新昵称")
+    edit.setStyleSheet("background: #F5F7FA; border: 1px solid #D0D7DE; border-radius: 3px; padding: 6px;")
+    gNickEdit = edit
+    vbox.addWidget(edit.getPtr())
+    let row = QHBoxLayout()
+    let cancelBtn = QPushButton()
+    cancelBtn.setText("取消")
+    cancelBtn.setStyleSheet("background: transparent; color: #666; border: 1px solid #C5CDD8; border-radius: 3px; padding: 6px 18px;")
+    cancelBtn.setOnClick(onNickCancel)
+    row.addWidget(cancelBtn.getPtr())
+    row.addStretch()
+    let okBtn = QPushButton()
+    okBtn.setText("保存")
+    okBtn.setStyleSheet("background: #12B7F5; color: white; border: none; border-radius: 3px; padding: 6px 24px; font-weight: bold;")
+    okBtn.setOnClick(onNickSubmit)
+    row.addWidget(okBtn.getPtr())
+    vbox.addLayout(row.getPtr())
+    dlg.setLayout(vbox.getPtr())
+    gNickDialog = dlg
+    dlg.show()
+}
+
+public func doChangeNick(): Unit {
+    var nick = ""
+    if (let Some(e) <- gNickEdit) { nick = e.text() }
+    if (nick.isEmpty()) {
+        QMessageBox.warning(0, "修改昵称", "昵称不能为空")
+        return
+    }
+    sendRaw("{\"type\":\"change_nick\",\"nickname\":\"${escapeJson(nick)}\"}")
+}
+
+/// 改密码对话框
+public func showChangePwdDialog(): Unit {
+    if (let Some(d) <- gPwdDialog) {
+        d.show()
+        return
+    }
+    let dlg = QWidget()
+    dlg.setTitle("修改密码")
+    dlg.setFixedSize(320, 190)
+    dlg.setStyleSheet("background: white;")
+    let vbox = QVBoxLayout()
+    vbox.setMargin(18)
+    vbox.setSpacing(10)
+    let oldEdit = QLineEdit()
+    oldEdit.setPlaceholder("旧密码")
+    oldEdit.setEchoMode(LineEditEchoMode.Password)
+    oldEdit.setStyleSheet("background: #F5F7FA; border: 1px solid #D0D7DE; border-radius: 3px; padding: 6px;")
+    gOldPwdEdit = oldEdit
+    vbox.addWidget(oldEdit.getPtr())
+    let newEdit = QLineEdit()
+    newEdit.setPlaceholder("新密码（至少 4 位）")
+    newEdit.setEchoMode(LineEditEchoMode.Password)
+    newEdit.setStyleSheet("background: #F5F7FA; border: 1px solid #D0D7DE; border-radius: 3px; padding: 6px;")
+    gNewPwdEdit = newEdit
+    vbox.addWidget(newEdit.getPtr())
+    let row = QHBoxLayout()
+    let cancelBtn = QPushButton()
+    cancelBtn.setText("取消")
+    cancelBtn.setStyleSheet("background: transparent; color: #666; border: 1px solid #C5CDD8; border-radius: 3px; padding: 6px 18px;")
+    cancelBtn.setOnClick(onPwdCancel)
+    row.addWidget(cancelBtn.getPtr())
+    row.addStretch()
+    let okBtn = QPushButton()
+    okBtn.setText("保存")
+    okBtn.setStyleSheet("background: #12B7F5; color: white; border: none; border-radius: 3px; padding: 6px 24px; font-weight: bold;")
+    okBtn.setOnClick(onPwdSubmit)
+    row.addWidget(okBtn.getPtr())
+    vbox.addLayout(row.getPtr())
+    dlg.setLayout(vbox.getPtr())
+    gPwdDialog = dlg
+    dlg.show()
+}
+
+public func doChangePwd(): Unit {
+    var oldPwd = ""
+    var newPwd = ""
+    if (let Some(e) <- gOldPwdEdit) { oldPwd = e.text() }
+    if (let Some(e) <- gNewPwdEdit) { newPwd = e.text() }
+    if (newPwd.size < 4) {
+        QMessageBox.warning(0, "修改密码", "新密码至少 4 位")
+        return
+    }
+    sendRaw("{\"type\":\"change_pwd\",\"old\":\"${escapeJson(oldPwd)}\",\"new\":\"${escapeJson(newPwd)}\"}")
+}
+
+/// 关闭改昵称/改密码对话框
+public func closeProfileDialogs(): Unit {
+    if (let Some(d) <- gNickDialog) { d.hide() }
+    if (let Some(d) <- gPwdDialog) { d.hide() }
+    if (let Some(e) <- gNickEdit) { e.setText("") }
+    if (let Some(e) <- gOldPwdEdit) { e.setText("") }
+    if (let Some(e) <- gNewPwdEdit) { e.setText("") }
 }

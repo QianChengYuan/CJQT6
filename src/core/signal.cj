@@ -202,6 +202,10 @@ foreign func qSetCallbackDispatcher(disp: CFunc<(Int64) -> Unit>): Unit
 foreign func qTimerConnectTimeoutId(ptr: Int64, id: Int64): Unit
 foreign func qWidgetConnectDestroyedId(ptr: Int64, id: Int64): Unit
 
+// QWidget close 事件（事件过滤器实现）
+foreign func qWidgetConnectCloseId(ptr: Int64, id: Int64): Unit
+foreign func qWidgetDisconnectClose(ptr: Int64): Unit
+
 // ============================================================
 // 清理函数
 // ============================================================

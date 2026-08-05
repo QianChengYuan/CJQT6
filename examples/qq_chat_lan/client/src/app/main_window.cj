@@ -63,6 +63,18 @@ public func buildMainWindow(): Unit {
     gSelfLabel = selfLabel
     infoBox.addWidget(selfLabel.getPtr())
     titleLayout.addLayout(infoBox.getPtr())
+
+    let nickBtn = QPushButton()
+    nickBtn.setText("改昵称")
+    nickBtn.setStyleSheet("background: transparent; color: #B8D4EE; border: 1px solid #3A6ea5; border-radius: 3px; padding: 3px 8px; font-size: 12px;")
+    nickBtn.setOnClick(onChangeNickClick)
+    titleLayout.addWidget(nickBtn.getPtr())
+    let pwdBtn = QPushButton()
+    pwdBtn.setText("改密码")
+    pwdBtn.setStyleSheet("background: transparent; color: #B8D4EE; border: 1px solid #3A6ea5; border-radius: 3px; padding: 3px 8px; font-size: 12px;")
+    pwdBtn.setOnClick(onChangePwdClick)
+    titleLayout.addWidget(pwdBtn.getPtr())
+
     titleBar.setLayout(titleLayout.getPtr())
     vbox.addWidget(titleBar.getPtr())
 
@@ -90,6 +102,18 @@ public func buildMainWindow(): Unit {
     addBtn.setOnClick(onAddFriendClick)
     bottomLayout.addWidget(addBtn.getPtr())
 
+    let remarkBtn = QPushButton()
+    remarkBtn.setText("备注")
+    remarkBtn.setStyleSheet("background: transparent; color: #666; border: 1px solid #C5CDD8; border-radius: 3px; padding: 6px 10px;")
+    remarkBtn.setOnClick(onRemarkClick)
+    bottomLayout.addWidget(remarkBtn.getPtr())
+
+    let delBtn = QPushButton()
+    delBtn.setText("删好友")
+    delBtn.setStyleSheet("background: transparent; color: #B00020; border: 1px solid #C5CDD8; border-radius: 3px; padding: 6px 10px;")
+    delBtn.setOnClick(onDelFriendClick)
+    bottomLayout.addWidget(delBtn.getPtr())
+
     bottomLayout.addStretch()
 
     let logoutBtn = QPushButton()
@@ -103,6 +127,13 @@ public func buildMainWindow(): Unit {
 
     win.setLayout(vbox.getPtr())
     gMainWindow = win
+    // 主窗口关闭（X）即退出整个应用（库级 setOnCloseCapture 事件回调，替代轮询）
+    // 先隐藏可能仍存在的聊天窗/表情面板，再退出事件循环；进程随 main 返回而结束
+    let _ = win.setOnCloseCapture({ =>
+        if (let Some(w) <- gChatWindow) { w.hide() }
+        if (let Some(w) <- gEmojiPanel) { w.hide() }
+        if (let Some(app) <- gApp) { app.quit() }
+    })
 }
 
 /// 刷新好友列表（全量重建：头像 + 在线状态 + 未读角标）
@@ -113,14 +144,15 @@ public func refreshFriendList(): Unit {
             var row: Int32 = 0
             for (f in gFriends) {
                 let unread = gUnread.get(f.id) ?? 0
-                var text = "${f.nickname}"
+                let name = displayNameOf(f.id)
+                var text = "${name}"
                 text = if (f.online) { "${text} · 在线" } else { "${text} · 离线" }
                 if (unread > 0) {
                     text = "${text} [${unread}条未读]"
                 }
                 let _ = list.addItem(text)
                 let (r, g, b) = colorFromName(f.nickname)
-                let pm = createAvatarPixmap(r, g, b, firstCharOf(f.nickname), AVATAR_SIZE)
+                let pm = createAvatarPixmap(r, g, b, firstCharOf(name), AVATAR_SIZE)
                 list.setItemIconPixmap(row, pm)
                 pm.delete()
                 row++

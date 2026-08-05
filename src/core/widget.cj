@@ -340,6 +340,29 @@ public class QWidget <: QtResource {
             }
         }
     }
+
+    /// 设置窗口关闭回调（可捕获局部变量；事件过滤器拦截 QEvent::Close）
+    /// 返回注册表 id，断开连接时传给 disconnectClose 以清理闭包注册
+    public func setOnCloseCapture(callback: () -> Unit): Int64 {
+        checkValid()
+        let id = registerVoidCallback(callback)
+        unsafe {
+            qWidgetConnectCloseId(ptr, id)
+        }
+        return id
+    }
+    
+    /// 断开窗口关闭回调
+    public func disconnectClose(callbackId: Int64): Unit {
+        if (ptr != 0) {
+            unsafe {
+                qWidgetDisconnectClose(ptr)
+            }
+        }
+        if (callbackId != 0) {
+            unregisterVoidCallback(callbackId)
+        }
+    }
     
     /// 断开该控件的全部信号（destroyed）
     public func disconnect(): Unit {

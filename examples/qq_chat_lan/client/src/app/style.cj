@@ -6,6 +6,7 @@ package qq_lan_client.app
 
 import cjqt6.paint.*
 import cjqt6.gui.*
+import qq_lan_client.core.*
 
 // --------------------------------------------------------
 // 样式常量
@@ -104,6 +105,60 @@ public func buildBubbleHtml(text: String, time: String, outgoing: Bool, senderNa
         "border-radius:8px;padding:8px 12px;margin-left:8px;'>" +
         "<div style='font-size:11px;color:#888;margin-bottom:2px;'>${escapeHtml(senderName)} ${time}</div>" +
         "<div style='font-size:14px;color:#333;word-wrap:break-word;'>${content}</div>" +
+        "</div></div>"
+    }
+}
+
+/// 字节数友好显示
+public func fmtSize(n: Int64): String {
+    if (n < 1024) { "${n} B" }
+    else if (n < 1024 * 1024) { "${n / 1024} KB" }
+    else { "${n / (1024 * 1024)} MB" }
+}
+
+/// 按消息类型渲染气泡（撤回/文本/图片/文件）
+public func buildMsgHtml(m: ChatMsg): String {
+    if (m.recalled) {
+        let who = if (m.outgoing) { "我" } else { escapeHtml(m.fromName) }
+        return "<div style='text-align:center;color:#999;font-size:12px;font-style:italic;margin:8px 0;'>" +
+            "${who} 撤回了一条消息</div>"
+    }
+    if (m.kind == "image") {
+        let body = if (!m.localPath.isEmpty()) {
+            let url = m.localPath.replace("\\", "/")
+            "<img src='file:///${url}' width='180' style='border-radius:4px;'/>"
+        } else {
+            "&#128444; 图片（未接收）"
+        }
+        return buildContentBubble(m, body)
+    }
+    if (m.kind == "file") {
+        let body = if (!m.localPath.isEmpty()) {
+            "&#128206; ${escapeHtml(m.fileName)}（${fmtSize(m.fileSize)}）"
+        } else {
+            "&#128206; ${escapeHtml(m.fileName)}（${fmtSize(m.fileSize)}）未接收"
+        }
+        return buildContentBubble(m, body)
+    }
+    buildBubbleHtml(m.text, m.time, m.outgoing, m.fromName)
+}
+
+/// 图片/文件共用的气泡外壳
+func buildContentBubble(m: ChatMsg, body: String): String {
+    let head = if (m.outgoing) { "我 ${m.time}" } else { "${escapeHtml(m.fromName)} ${m.time}" }
+    if (m.outgoing) {
+        "<div style='display:flex;justify-content:flex-end;margin:4px 0;'>" +
+        "<div style='max-width:70%;background-color:${SELF_BUBBLE_COLOR};border-radius:8px;" +
+        "padding:8px 12px;margin-right:8px;'>" +
+        "<div style='font-size:11px;color:#666;margin-bottom:2px;'>${head}</div>" +
+        "<div style='font-size:14px;color:#333;'>${body}</div>" +
+        "</div></div>"
+    } else {
+        "<div style='display:flex;justify-content:flex-start;margin:4px 0;'>" +
+        "<div style='max-width:70%;background-color:#FFFFFF;border:1px solid #E0E0E0;" +
+        "border-radius:8px;padding:8px 12px;margin-left:8px;'>" +
+        "<div style='font-size:11px;color:#888;margin-bottom:2px;'>${head}</div>" +
+        "<div style='font-size:14px;color:#333;'>${body}</div>" +
         "</div></div>"
     }
 }

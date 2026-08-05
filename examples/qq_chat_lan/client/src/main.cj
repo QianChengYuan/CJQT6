@@ -9,12 +9,20 @@
 package qq_lan_client
 
 import cjqt6.core.*
+import std.fs.*
 import qq_lan_client.state.*
 import qq_lan_client.app.*
 
 main(): Int32 {
     let app = QApplication()
     gApp = app
+
+    // 接收文件目录：<当前目录>/recv
+    try {
+        gRecvDir = canonicalize(Path(".")).join("recv").toString()
+    } catch (_: Exception) {
+        gRecvDir = "recv"
+    }
 
     // 登录窗口
     let loginPage = buildLoginUI()

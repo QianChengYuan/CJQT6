@@ -138,3 +138,6 @@ releases/windows-x64/tmp_merge/
 # 示例运行时产物（数据库与调试输出不入库）
 examples/**/*.db
 examples/**/stderr_*.txt
+
+# 示例运行时接收目录（文件传输产物）
+examples/**/recv/

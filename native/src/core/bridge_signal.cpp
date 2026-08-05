@@ -14,6 +14,9 @@
  */
 
 #include <QObject>
+#include <QEvent>
+#include <QWidget>
+#include <QPointer>
 #include <QPushButton>
 #include <QToolButton>
 #include <QSlider>
@@ -77,6 +80,7 @@ enum SigId {
     SIG_RELEASED,
     SIG_TOOLPRESSED,
     SIG_TOOLRELEASED,
+    SIG_CLOSE,
     // P2：SignalEmitter 通用自定义信号
     SIG_EMIT_VOID = 100,
     SIG_EMIT_INT,
@@ -113,6 +117,42 @@ static std::unordered_map<ConnKey, int64_t>                          g_voidIds;
 // Cangjie 注册的 void 调度器：native 触发信号时回调它，按 id 查注册表并调用闭包
 static void (*g_voidDispatcher)(int64_t) = nullptr;
 
+// 触发辅助：取 id 并派发到 Cangjie 调度器（内部辅助，定义在 extern "C" 之外避免链接规范冲突）
+static void dispatchVoidId(ConnKey key) {
+    int64_t id = 0;
+    {
+        LOCK_CALLBACKS();
+        auto i = g_voidIds.find(key);
+        if (i != g_voidIds.end()) id = i->second;
+    }
+    if (g_voidDispatcher && id != 0) {
+        g_voidDispatcher(id);
+    }
+}
+
+// QWidget close 事件过滤器（P0 修复版同风格）：
+// 拦截 QEvent::Close 派发 void 信号。filter 以被监听 widget 为 parent，
+// 随 widget 销毁自动回收；g_closeFilters 用 QPointer 持有，杜绝悬垂访问。
+class CloseEventFilter : public QObject {
+public:
+    CloseEventFilter(int64_t widgetPtr)
+        : QObject(nullptr), m_widgetPtr(widgetPtr) {}
+
+    bool eventFilter(QObject* watched, QEvent* event) override {
+        if (event->type() == QEvent::Close && watched == reinterpret_cast<QObject*>(m_widgetPtr)) {
+            dispatchVoidId(ConnKey{m_widgetPtr, SIG_CLOSE});
+        }
+        // 不吞掉事件：widget 仍按原逻辑正常关闭
+        return QObject::eventFilter(watched, event);
+    }
+
+private:
+    int64_t m_widgetPtr;
+};
+
+// close 事件过滤器注册表（QPointer 保证被监听 widget 销毁后自动置空）
+static std::unordered_map<ConnKey, QPointer<CloseEventFilter>>       g_closeFilters;
+
 // 按复合键精确断开：取句柄 -> 锁外 QObject::disconnect -> 清理回调表
 static void disconnectByKey(ConnKey key) {
     QMetaObject::Connection conn;
@@ -133,6 +173,17 @@ static void disconnectByKey(ConnKey key) {
     g_float64Cbs.erase(key);
     g_textCbs.erase(key);
     g_voidIds.erase(key);
+    // close 事件过滤器清理：先摘除再删除（QPointer 若已随 widget 销毁置空则跳过）
+    auto fi = g_closeFilters.find(key);
+    if (fi != g_closeFilters.end()) {
+        CloseEventFilter* f = fi->second.data();
+        if (f) {
+            QObject* w = reinterpret_cast<QObject*>(key.ptr);
+            if (w) { w->removeEventFilter(f); }
+            delete f;
+        }
+        g_closeFilters.erase(fi);
+    }
 }
 
 // ============================================================
@@ -640,19 +691,6 @@ void qButtonReleasedIdDisconnect(int64_t ptr)  { disconnectByKey(ConnKey{ptr, SI
 void qToolButtonPressedIdDisconnect(int64_t ptr)   { disconnectByKey(ConnKey{ptr, SIG_TOOLPRESSED}); }
 void qToolButtonReleasedIdDisconnect(int64_t ptr)  { disconnectByKey(ConnKey{ptr, SIG_TOOLRELEASED}); }
 
-// 触发辅助：取 id 并派发到 Cangjie 调度器
-static void dispatchVoidId(ConnKey key) {
-    int64_t id = 0;
-    {
-        LOCK_CALLBACKS();
-        auto i = g_voidIds.find(key);
-        if (i != g_voidIds.end()) id = i->second;
-    }
-    if (g_voidDispatcher && id != 0) {
-        g_voidDispatcher(id);
-    }
-}
-
 void qButtonConnectClickedId(int64_t ptr, int64_t id) {
     QPushButton* btn = reinterpret_cast<QPushButton*>(ptr);
     if (btn) {
@@ -774,6 +812,29 @@ void qWidgetConnectDestroyedId(int64_t ptr, int64_t id) {
         g_voidIds[key] = id;
         g_conns[key] = QObject::connect(obj, &QObject::destroyed, [key]() { dispatchVoidId(key); });
     }
+}
+
+// ============================================================
+// QWidget close 事件（事件过滤器实现，拦截 QEvent::Close）
+// 替换式连接：重复连接先断开旧 filter，行为与其他信号一致
+// ============================================================
+
+void qWidgetConnectCloseId(int64_t ptr, int64_t id) {
+    QWidget* w = reinterpret_cast<QWidget*>(ptr);
+    if (w) {
+        ConnKey key{ptr, SIG_CLOSE};
+        disconnectByKey(key);
+        LOCK_CALLBACKS();
+        g_voidIds[key] = id;
+        CloseEventFilter* filter = new CloseEventFilter(ptr);
+        filter->setParent(w);
+        g_closeFilters[key] = filter;
+        w->installEventFilter(filter);
+    }
+}
+
+void qWidgetDisconnectClose(int64_t ptr) {
+    disconnectByKey(ConnKey{ptr, SIG_CLOSE});
 }
 
 // ============================================================
@@ -918,6 +979,12 @@ void qSignalCleanup(int64_t ptr) {
     {
         LOCK_CALLBACKS();
         for (auto& kv : g_conns) {
+            if (kv.first.ptr == ptr) {
+                toErase.push_back(kv.first);
+            }
+        }
+        // close 事件过滤器不占用 g_conns，需单独收集
+        for (auto& kv : g_closeFilters) {
             if (kv.first.ptr == ptr) {
                 toErase.push_back(kv.first);
             }

@@ -8,6 +8,7 @@ import cjqt6.core.*
 import cjqt6.widgets.*
 import cjqt6.dialogs.*
 import std.collection.*
+import std.fs.*
 import qq_lan_client.core.*
 import qq_lan_client.state.*
 
@@ -20,6 +21,22 @@ public func handleFrame(line: String): Unit {
                 onLoginOk(obj)
             } else if (frameType == "chat") {
                 onChatFrame(obj)
+            } else if (frameType == "chat_ack") {
+                onChatAck(obj)
+            } else if (frameType == "history") {
+                onHistory(obj)
+            } else if (frameType == "recall") {
+                onRecall(obj)
+            } else if (frameType == "file_begin") {
+                onFileBegin(obj)
+            } else if (frameType == "file_chunk") {
+                onFileChunk(obj)
+            } else if (frameType == "file_end") {
+                onFileEnd(obj)
+            } else if (frameType == "nick_changed") {
+                onNickChanged(obj)
+            } else if (frameType == "friend_deleted") {
+                onFriendDeleted(obj)
             } else if (frameType == "presence") {
                 onPresence(obj)
             } else if (frameType == "friend_added") {
@@ -62,6 +79,7 @@ public func onLoginOk(obj: QJsonObject): Unit {
                 f.id = jint(item, "id")
                 f.account = jint(item, "account")
                 f.nickname = jstr(item, "nickname")
+                f.remark = jstr(item, "remark")
                 f.online = jbool(item, "online")
                 gFriends.add(f)
                 item.close()
@@ -129,10 +147,13 @@ public func appendHistory(friendId: Int64, msg: ChatMsg): Unit {
 // ============================================================
 public func onChatFrame(obj: QJsonObject): Unit {
     let m = ChatMsg()
+    m.id = jint(obj, "id")
     m.fromId = jint(obj, "from")
     m.fromName = jstr(obj, "fromName")
     m.text = jstr(obj, "text")
     m.time = jstr(obj, "time")
+    m.kind = jstr(obj, "kind")
+    if (m.kind.isEmpty()) { m.kind = "text" }
     m.outgoing = false
     appendHistory(m.fromId, m)
 
@@ -142,6 +163,13 @@ public func onChatFrame(obj: QJsonObject): Unit {
         gUnread[m.fromId] = (gUnread.get(m.fromId) ?? 0) + 1
     }
     refreshFriendList()
+}
+
+/// chat_ack：记录本会话最后一条已确认消息 ID（供撤回）
+public func onChatAck(obj: QJsonObject): Unit {
+    let id = jint(obj, "id")
+    let to = jint(obj, "to")
+    gLastSentId[to] = id
 }
 
 /// 聊天窗口是否正打开着指定好友的会话
@@ -187,6 +215,35 @@ public func onOkFrame(obj: QJsonObject): Unit {
         if (!name.isEmpty()) {
             QMessageBox.information(0, "添加好友", "成功添加 ${name} 为好友")
         }
+    } else if (op == "recall") {
+        // 自己撤回成功：本地标记并重渲染
+        let msgId = jint(obj, "msgId")
+        markRecalled(gCurrentChatId, msgId)
+    } else if (op == "set_remark") {
+        let fid = jint(obj, "friend")
+        let remark = jstr(obj, "remark")
+        for (f in gFriends) {
+            if (f.id == fid) { f.remark = remark }
+        }
+        refreshFriendList()
+        closeRemarkDialog()
+    } else if (op == "del_friend") {
+        let fid = jint(obj, "friend")
+        removeFriend(fid)
+        closeRemarkDialog()
+        QMessageBox.information(0, "删除好友", "已删除好友")
+    } else if (op == "change_nick") {
+        let nick = jstr(obj, "nickname")
+        if (let Some(s) <- gSelf) {
+            s.nickname = nick
+            if (let Some(l) <- gSelfLabel) {
+                l.setText("${nick}  (QQ号 ${s.account})")
+            }
+        }
+        closeProfileDialogs()
+    } else if (op == "change_pwd") {
+        closeProfileDialogs()
+        QMessageBox.information(0, "修改密码", "密码已修改，下次登录请使用新密码")
     }
 }
 
@@ -253,4 +310,184 @@ public func handleLoggedOut(reason: String): Unit {
         w.show()
     }
     setLoginStatus(reason)
+}
+
+// ============================================================
+// v2：历史记录同步
+// ============================================================
+public func onHistory(obj: QJsonObject): Unit {
+    let friendId = jint(obj, "friend")
+    var selfId: Int64 = 0
+    if (let Some(s) <- gSelf) { selfId = s.id }
+    let list = ArrayList<ChatMsg>()
+    let mv = obj.value("messages")
+    if (mv.isArray()) {
+        let arr = QJsonArray(mv.toArray())
+        var i: Int32 = 0
+        while (i < arr.size()) {
+            let itemV = arr.at(i)
+            if (itemV.isObject()) {
+                let item = QJsonObject(itemV.toObject())
+                let m = ChatMsg()
+                m.id = jint(item, "id")
+                m.fromId = jint(item, "from")
+                m.fromName = jstr(item, "fromName")
+                m.text = jstr(item, "text")
+                m.time = jstr(item, "time")
+                m.kind = jstr(item, "kind")
+                if (m.kind.isEmpty()) { m.kind = "text" }
+                m.recalled = jbool(item, "recalled")
+                m.outgoing = (m.fromId == selfId)
+                list.add(m)
+                item.close()
+            }
+            itemV.close()
+            i++
+        }
+        arr.close()
+    }
+    mv.close()
+    gHistory[friendId] = list
+    if (isChatOpenFor(friendId)) {
+        renderHistory(friendId)
+    }
+}
+
+// ============================================================
+// v2：消息撤回
+// ============================================================
+public func onRecall(obj: QJsonObject): Unit {
+    let from = jint(obj, "from")
+    let msgId = jint(obj, "msgId")
+    markRecalled(from, msgId)
+}
+
+/// 在历史缓存中标记某消息已撤回并重渲染
+public func markRecalled(friendId: Int64, msgId: Int64): Unit {
+    match (gHistory.get(friendId)) {
+        case Some(list) =>
+            for (m in list) {
+                if (m.id == msgId) { m.recalled = true }
+            }
+        case None => ()
+    }
+    if (isChatOpenFor(friendId)) {
+        renderHistory(friendId)
+    }
+}
+
+// ============================================================
+// v2：文件接收（base64 分块 -> 落盘）
+// ============================================================
+public func onFileBegin(obj: QJsonObject): Unit {
+    let tid = jstr(obj, "tid")
+    let size = jint(obj, "size")
+    if (size <= 0 || size > 50 * 1024 * 1024) { return }
+    let t = RecvTransfer()
+    t.buffer = Array<Byte>(size, repeat: 0)
+    t.offset = 0
+    t.name = jstr(obj, "name")
+    t.kind = jstr(obj, "kind")
+    t.fromId = jint(obj, "from")
+    t.fromName = jstr(obj, "fromName")
+    gTransfers[tid] = t
+}
+
+public func onFileChunk(obj: QJsonObject): Unit {
+    let tid = jstr(obj, "tid")
+    let data = jstr(obj, "data")
+    match (gTransfers.get(tid)) {
+        case Some(t) =>
+            let dec = base64Decode(data)
+            var i: Int64 = 0
+            while (i < dec.size && t.offset < t.buffer.size) {
+                t.buffer[t.offset] = dec[i]
+                t.offset++
+                i++
+            }
+        case None => ()
+    }
+}
+
+public func onFileEnd(obj: QJsonObject): Unit {
+    let tid = jstr(obj, "tid")
+    match (gTransfers.get(tid)) {
+        case Some(t) =>
+            gTransfers.remove(tid)
+            // 落盘
+            try { Directory.create(Path(gRecvDir), recursive: true) } catch (_: Exception) { () }
+            let fullPath = "${gRecvDir}/${t.fromId}_${t.name}"
+            var saved = false
+            try {
+                let f = File(Path(fullPath), Write)
+                f.write(t.buffer)
+                f.close()
+                saved = true
+            } catch (_: Exception) { () }
+
+            let m = ChatMsg()
+            m.fromId = t.fromId
+            m.fromName = t.fromName
+            m.kind = t.kind
+            m.fileName = t.name
+            m.fileSize = t.buffer.size
+            m.localPath = if (saved) { fullPath } else { "" }
+            m.time = nowString()
+            m.outgoing = false
+            appendHistory(t.fromId, m)
+            if (isChatOpenFor(t.fromId)) {
+                appendBubble(m)
+            } else {
+                gUnread[t.fromId] = (gUnread.get(t.fromId) ?? 0) + 1
+            }
+            refreshFriendList()
+        case None => ()
+    }
+}
+
+// ============================================================
+// v2：昵称变更 / 好友删除
+// ============================================================
+public func onNickChanged(obj: QJsonObject): Unit {
+    let userId = jint(obj, "userId")
+    let nickname = jstr(obj, "nickname")
+    for (f in gFriends) {
+        if (f.id == userId) { f.nickname = nickname }
+    }
+    refreshFriendList()
+    if (isChatOpenFor(userId)) {
+        if (let Some(t) <- gChatTitle) {
+            t.setText("与 ${displayNameOf(userId)} 聊天中")
+        }
+    }
+}
+
+public func onFriendDeleted(obj: QJsonObject): Unit {
+    let userId = jint(obj, "userId")
+    removeFriend(userId)
+    QMessageBox.information(0, "好友通知", "对方已将你从好友中删除")
+}
+
+/// 从好友列表移除并清理聊天窗口
+public func removeFriend(fid: Int64): Unit {
+    var idx: Int64 = -1
+    var i: Int64 = 0
+    for (f in gFriends) {
+        if (f.id == fid) { idx = i }
+        i++
+    }
+    if (idx >= 0) {
+        let newList = ArrayList<FriendInfo>()
+        var j: Int64 = 0
+        for (f in gFriends) {
+            if (j != idx) { newList.add(f) }
+            j++
+        }
+        gFriends = newList
+    }
+    if (gCurrentChatId == fid) {
+        if (let Some(w) <- gChatWindow) { w.hide() }
+        gCurrentChatId = 0
+    }
+    refreshFriendList()
 }
