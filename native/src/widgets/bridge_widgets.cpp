@@ -1,4 +1,4 @@
-
+﻿
 /**
  * @file bridge_widgets.cpp
  * @brief ���������ŽӺ��� - QLabel, QPushButton, QToolButton, QLineEdit, QTextEdit
@@ -737,40 +737,55 @@ int qTextEditLineWrapMode(int64_t ptr) {
     return 0;
 }
 
+// Apply the char format to the current selection if there is one, otherwise to the whole
+// document. Restore the original cursor position/selection, and merge into the current
+// char format so subsequently typed text uses the new format too.
+static void qTextEditApplyFormatSmart(QTextEdit* textEdit, const QTextCharFormat& fmt) {
+    QTextCursor cursor = textEdit->textCursor();
+    const int anchor = cursor.anchor();
+    const int pos = cursor.position();
+    if (cursor.hasSelection()) {
+        cursor.mergeCharFormat(fmt);
+    } else {
+        cursor.select(QTextCursor::Document);
+        cursor.mergeCharFormat(fmt);
+    }
+    cursor.setPosition(anchor, QTextCursor::MoveAnchor);
+    cursor.setPosition(pos, QTextCursor::KeepAnchor);
+    textEdit->setTextCursor(cursor);
+    textEdit->mergeCurrentCharFormat(fmt);
+}
+
 void qTextEditSetFontFamily(int64_t ptr, const char* family) {
     QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
-    if (textEdit) {
-        QFont font = textEdit->font();
-        font.setFamily(QString::fromUtf8(family));
-        textEdit->setFont(font);
-    }
+    if (!textEdit) return;
+    QTextCharFormat fmt;
+    fmt.setFontFamilies({ QString::fromUtf8(family) });
+    qTextEditApplyFormatSmart(textEdit, fmt);
 }
 
 void qTextEditSetFontSize(int64_t ptr, int size) {
     QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
-    if (textEdit) {
-        QFont font = textEdit->font();
-        font.setPointSize(size);
-        textEdit->setFont(font);
-    }
+    if (!textEdit) return;
+    QTextCharFormat fmt;
+    fmt.setFontPointSize(size);
+    qTextEditApplyFormatSmart(textEdit, fmt);
 }
 
 void qTextEditSetFontBold(int64_t ptr, bool bold) {
     QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
-    if (textEdit) {
-        QFont font = textEdit->font();
-        font.setBold(bold);
-        textEdit->setFont(font);
-    }
+    if (!textEdit) return;
+    QTextCharFormat fmt;
+    fmt.setFontWeight(bold ? QFont::Bold : QFont::Normal);
+    qTextEditApplyFormatSmart(textEdit, fmt);
 }
 
 void qTextEditSetFontItalic(int64_t ptr, bool italic) {
     QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
-    if (textEdit) {
-        QFont font = textEdit->font();
-        font.setItalic(italic);
-        textEdit->setFont(font);
-    }
+    if (!textEdit) return;
+    QTextCharFormat fmt;
+    fmt.setFontItalic(italic);
+    qTextEditApplyFormatSmart(textEdit, fmt);
 }
 
 // ���ҹ���

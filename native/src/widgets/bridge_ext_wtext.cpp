@@ -230,7 +230,22 @@ void qTextEditInsertHtml(int64_t ptr, const char* html) {
 
 void qTextEditSetTextColor(int64_t ptr, int32_t r, int32_t g, int32_t b) {
     QTextEdit* te = reinterpret_cast<QTextEdit*>(ptr);
-    if (te) te->setTextColor(QColor(r, g, b));
+    if (!te) return;
+    QTextCursor cursor = te->textCursor();
+    const int anchor = cursor.anchor();
+    const int pos = cursor.position();
+    QTextCharFormat fmt;
+    fmt.setForeground(QBrush(QColor(r, g, b)));
+    if (cursor.hasSelection()) {
+        cursor.mergeCharFormat(fmt);
+    } else {
+        cursor.select(QTextCursor::Document);
+        cursor.mergeCharFormat(fmt);
+    }
+    cursor.setPosition(anchor, QTextCursor::MoveAnchor);
+    cursor.setPosition(pos, QTextCursor::KeepAnchor);
+    te->setTextCursor(cursor);
+    te->mergeCurrentCharFormat(fmt);
 }
 
 void qTextEditZoomIn(int64_t ptr, int32_t range) {

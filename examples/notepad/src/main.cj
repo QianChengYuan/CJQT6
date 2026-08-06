@@ -1,4 +1,4 @@
-package notepad
+﻿package notepad
 
 import cjqt6.core.*
 import cjqt6.widgets.*
@@ -27,17 +27,76 @@ var findLineEdit: ?QLineEdit = None
 var replaceLineEdit: ?QLineEdit = None
 var caseSensitiveCheck: ?QCheckBox = None
 var lastFindText: String = ""
-var currentLanguage: String = "zh_CN"  // 当前语言：zh_CN 或 en_US
+var currentLanguage: String = "zh_CN"
+
+// 最近文件（固定大小数组，最多5个）
+let MAX_RECENT_FILES: Int64 = 5
+var recentFileCount: Int64 = 0
+var recentFile0: String = ""
+var recentFile1: String = ""
+var recentFile2: String = ""
+var recentFile3: String = ""
+var recentFile4: String = ""
+var gPendingRecentFile: String = ""
+var gFontCombo: ?QFontComboBox = None
+var gSizeCombo: ?QComboBox = None
+var gBoldEnabled: Bool = false
+
+func getRecentFile(index: Int64): String {
+    if (index == 0) { return recentFile0 }
+    if (index == 1) { return recentFile1 }
+    if (index == 2) { return recentFile2 }
+    if (index == 3) { return recentFile3 }
+    return recentFile4
+}
+
+func setRecentFile(index: Int64, value: String) {
+    if (index == 0) { recentFile0 = value }
+    if (index == 1) { recentFile1 = value }
+    if (index == 2) { recentFile2 = value }
+    if (index == 3) { recentFile3 = value }
+    return if (index == 4) { recentFile4 = value } else { () }
+}
 
 // ============================================================
 // 辅助函数
 // ============================================================
 
+func addToRecentFiles(filePath: String) {
+    var existingIndex: Int64 = -1
+    var i: Int64 = 0
+    while (i < recentFileCount) {
+        if (getRecentFile(i) == filePath) {
+            existingIndex = i
+            break
+        }
+        i++
+    }
+    if (existingIndex >= 0) {
+        var j = existingIndex
+        while (j > 0) {
+            setRecentFile(j, getRecentFile(j - 1))
+            j--
+        }
+        setRecentFile(0, filePath)
+    } else {
+        var count = if (recentFileCount < MAX_RECENT_FILES) { recentFileCount } else { MAX_RECENT_FILES - 1 }
+        var k = count
+        while (k > 0) {
+            setRecentFile(k, getRecentFile(k - 1))
+            k--
+        }
+        setRecentFile(0, filePath)
+        if (recentFileCount < MAX_RECENT_FILES) {
+            recentFileCount++
+        }
+    }
+}
+
 func updateTitle() {
     if (let Some(window) <- mainWindow) {
         var title = "记事本"
         if (!currentFile.isEmpty()) {
-            // 只显示文件名
             let path = Path(currentFile)
             title = "${path.fileName} - 记事本"
         }
@@ -47,6 +106,16 @@ func updateTitle() {
             }
         }
         window.setTitle(title)
+    }
+}
+
+func updateDocumentStats() {
+    if (let Some(edit) <- textEdit) {
+        let lines = edit.lineCount()
+        let chars = edit.characterCount()
+        let line = edit.currentLine()
+        let col = edit.currentColumn()
+        updateStatus("第 ${line}/${lines} 行, 第 ${col} 列 | 字符数: ${chars}")
     }
 }
 
@@ -66,7 +135,6 @@ func updateCursorPosition() {
     }
 }
 
-// 检查是否需要保存
 func checkSave(): Bool {
     if (let Some(edit) <- textEdit) {
         if (edit.isModified()) {
@@ -121,6 +189,7 @@ func openFile() {
                 edit.setModified(false)
             }
             currentFile = filePath
+            addToRecentFiles(filePath)
             updateTitle()
             updateCursorPosition()
         } catch (e: Exception) {
@@ -156,13 +225,12 @@ func saveFileAs() {
 func doSave(filePath: String) {
     if (let Some(edit) <- textEdit) {
         try {
-            // 检查文件是否有后缀名，没有则自动添加.txt
             var finalPath = filePath
             let path = Path(filePath)
             let fileName = path.fileName
             var hasExtension = false
             for (c in fileName) {
-                if (c == 46) {  // '.' 的ASCII码
+                if (c == 46) {
                     hasExtension = true
                     break
                 }
@@ -175,6 +243,7 @@ func doSave(filePath: String) {
             File.writeTo(Path(finalPath), content.toArray())
             edit.setModified(false)
             currentFile = finalPath
+            addToRecentFiles(finalPath)
             updateTitle()
             updateStatus("已保存: ${finalPath}")
         } catch (e: Exception) {
@@ -184,6 +253,29 @@ func doSave(filePath: String) {
                 "无法保存文件: ${filePath}"
             )
         }
+    }
+}
+
+func openRecentFile() {
+    if (gPendingRecentFile.isEmpty()) {
+        return
+    }
+    if (!checkSave()) {
+        return
+    }
+    try {
+        let data = File.readFrom(Path(gPendingRecentFile))
+        let content = String.fromUtf8(data)
+        if (let Some(edit) <- textEdit) {
+            edit.setText(content)
+            edit.setModified(false)
+        }
+        currentFile = gPendingRecentFile
+        addToRecentFiles(gPendingRecentFile)
+        updateTitle()
+        updateCursorPosition()
+    } catch (e: Exception) {
+        QMessageBox.critical(0, "错误", "无法打开文件: ${gPendingRecentFile}")
     }
 }
 
@@ -235,7 +327,7 @@ func selectAll() {
 
 func deleteSelected() {
     if (let Some(edit) <- textEdit) {
-        edit.cut()  // 使用cut实现删除
+        edit.cut()
         updateStatus("删除")
     }
 }
@@ -244,7 +336,6 @@ func deleteSelected() {
 // 查找替换
 // ============================================================
 
-// 关闭查找对话框回调
 let onCloseFindDialog: VoidCallback = { =>
     if (let Some(dialog) <- findDialog) {
         dialog.hide()
@@ -260,7 +351,6 @@ func showFindDialog() {
         return
     }
     
-    // 创建查找对话框
     let dialog = QWidget()
     dialog.setTitle("查找和替换")
     dialog.resize(400, 180)
@@ -270,7 +360,6 @@ func showFindDialog() {
     layout.setSpacing(10)
     layout.setMargin(15)
     
-    // 查找输入
     let findRow = QHBoxLayout()
     let findLabel = QLabel()
     findLabel.setText("查找:")
@@ -281,7 +370,6 @@ func showFindDialog() {
     findRow.addWidget(findEdit.getPtr())
     layout.addLayout(findRow.getPtr())
     
-    // 替换输入
     let replaceRow = QHBoxLayout()
     let replaceLabel = QLabel()
     replaceLabel.setText("替换:")
@@ -292,13 +380,11 @@ func showFindDialog() {
     replaceRow.addWidget(replaceEdit.getPtr())
     layout.addLayout(replaceRow.getPtr())
     
-    // 选项
     let caseCheck = QCheckBox()
     caseCheck.setText("区分大小写")
     caseSensitiveCheck = caseCheck
     layout.addWidget(caseCheck.getPtr())
     
-    // 按钮
     let btnRow = QHBoxLayout()
     
     let findNextBtn = QPushButton()
@@ -331,7 +417,6 @@ func showFindDialog() {
     
     layout.addLayout(btnRow.getPtr())
     
-    // 关闭按钮
     let closeBtn = QPushButton()
     closeBtn.setText("关闭")
     closeBtn.setOnClick(onCloseFindDialog)
@@ -421,15 +506,50 @@ func findNext() {
 // 格式操作
 // ============================================================
 
+func zoomIn() {
+    if (let Some(edit) <- textEdit) {
+        edit.zoomIn(2)
+        updateStatus("放大")
+    }
+}
+
+func zoomOut() {
+    if (let Some(edit) <- textEdit) {
+        edit.zoomOut(2)
+        updateStatus("缩小")
+    }
+}
+
+func zoomReset() {
+    if (let Some(edit) <- textEdit) {
+        currentFontSize = 12
+        edit.setFontSize(currentFontSize)
+        syncFontToolbar()
+        updateStatus("缩放已重置")
+    }
+}
+
 func toggleLineWrap() {
     lineWrapEnabled = !lineWrapEnabled
     if (let Some(edit) <- textEdit) {
         if (lineWrapEnabled) {
-            edit.setLineWrapMode(1)  // WidgetWidth
+            edit.setLineWrapMode(1)
             updateStatus("自动换行: 开启")
         } else {
-            edit.setLineWrapMode(0)  // NoWrap
+            edit.setLineWrapMode(0)
             updateStatus("自动换行: 关闭")
+        }
+    }
+}
+
+func syncFontToolbar() {
+    if (let Some(combo) <- gFontCombo) {
+        combo.setCurrentFont(currentFontFamily)
+    }
+    if (let Some(combo) <- gSizeCombo) {
+        let idx = combo.findText(currentFontSize.toString())
+        if (idx >= 0) {
+            combo.setCurrentIndex(idx)
         }
     }
 }
@@ -448,11 +568,11 @@ func setFont() {
         currentFontFamily = info.family
         currentFontSize = info.size
         if (let Some(edit) <- textEdit) {
+            // 保留已有格式：只应用字体族和字号，不动粗体/斜体（避免覆盖工具栏 B 按钮等设置）
             edit.setFontFamily(info.family)
             edit.setFontSize(info.size)
-            edit.setFontBold(info.bold)
-            edit.setFontItalic(info.italic)
         }
+        syncFontToolbar()
         updateStatus("字体: ${info.family}, 大小: ${info.size}")
     }
 }
@@ -463,12 +583,46 @@ func setFont() {
 
 func insertDateTime() {
     let now = DateTime.now()
-    // 使用默认格式
     let dateStr = now.toString()
     if (let Some(edit) <- textEdit) {
-        // 由于没有直接的insertText，我们通过替换选中文本实现
         edit.replace(dateStr)
         updateStatus("插入日期时间: ${dateStr}")
+    }
+}
+
+func toggleBold() {
+    gBoldEnabled = !gBoldEnabled
+    if (let Some(edit) <- textEdit) {
+        edit.setFontBold(gBoldEnabled)
+    }
+}
+
+func pickTextColor() {
+    let color = QColorDialog.getColor(
+        if (let Some(w) <- mainWindow) { w.getPtr() } else { 0 },
+        "选择文字颜色"
+    )
+    if (!color.isEmpty()) {
+        var r: Int32 = 0
+        var g: Int32 = 0
+        var b: Int32 = 0
+        var ci: Int64 = 0
+        for (ch in color) {
+            if (ch == 35) { continue }
+            var val: Int32 = 0
+            if (ch >= 48 && ch <= 57) { val = Int32(ch - 48) }
+            else if (ch >= 65 && ch <= 70) { val = Int32(ch - 55) }
+            else if (ch >= 97 && ch <= 102) { val = Int32(ch - 87) }
+            else { continue }
+            if (ci == 0 || ci == 1) { r = r * 16 + val }
+            if (ci == 2 || ci == 3) { g = g * 16 + val }
+            if (ci == 4 || ci == 5) { b = b * 16 + val }
+            ci++
+        }
+        if (let Some(edit) <- textEdit) {
+            edit.setTextColor(r, g, b)
+        }
+        updateStatus("文字颜色: ")
     }
 }
 
@@ -480,10 +634,9 @@ func goToLine() {
         "1"
     )
     if (!lineStr.isEmpty()) {
-        // 解析行号
         var lineNum: Int32 = 0
         for (c in lineStr) {
-            if (c >= 48 && c <= 57) {  // '0'-'9'
+            if (c >= 48 && c <= 57) {
                 lineNum = lineNum * 10 + Int32(c - 48)
             }
         }
@@ -504,7 +657,7 @@ func printDocument() {
     let printer = QPrinter()
     let printDialog = QPrintDialog(printer)
     let result = printDialog.exec()
-    if (result == 1) {  // Accepted
+    if (result == 1) {
         if (let Some(edit) <- textEdit) {
             edit.print(printer.getPtr())
             updateStatus("打印完成")
@@ -525,6 +678,20 @@ func printPreview() {
 }
 
 // ============================================================
+// 文档统计
+// ============================================================
+
+func showStats() {
+    if (let Some(edit) <- textEdit) {
+        let lines = edit.lineCount()
+        let chars = edit.characterCount()
+        var filename = if (currentFile.isEmpty()) { "未命名" } else { currentFile }
+        QMessageBox.information(0, "文档统计",
+            "文件: ${filename}\n总行数: ${lines}\n总字符数: ${chars}")
+    }
+}
+
+// ============================================================
 // 帮助
 // ============================================================
 
@@ -532,7 +699,7 @@ func about() {
     QMessageBox.information(
         if (let Some(w) <- mainWindow) { w.getPtr() } else { 0 },
         "关于记事本",
-        "CJQT6 记事本示例\n\n版本: 1.0.0\n\n使用仓颉语言和Qt6开发\n\n功能:\n• 文件操作: 新建/打开/保存/另存为\n• 编辑操作: 撤销/重做/剪切/复制/粘贴\n• 查找替换: 查找/替换/全部替换\n• 格式设置: 自动换行/字体\n• 打印功能: 打印/打印预览\n• 跳转功能: 跳转到指定行"
+        "CJQT6 记事本示例\n\n版本: 1.1.0\n\n使用仓颉语言和 Qt6 开发\n\n新功能:\n• 文档实时统计\n• Ctrl+= 放大, Ctrl+- 缩小\n• 最近打开文件列表"
     )
 }
 
@@ -572,6 +739,17 @@ func switchToEnglish() {
 // 回调函数
 // ============================================================
 
+let onTextChanged: VoidCallback = { => updateDocumentStats() }
+let onZoomIn: VoidCallback = { => zoomIn() }
+let onZoomOut: VoidCallback = { => zoomOut() }
+let onZoomReset: VoidCallback = { => zoomReset() }
+
+let onOpenRecentFile0: VoidCallback = { => gPendingRecentFile = recentFile0; openRecentFile() }
+let onOpenRecentFile1: VoidCallback = { => gPendingRecentFile = recentFile1; openRecentFile() }
+let onOpenRecentFile2: VoidCallback = { => gPendingRecentFile = recentFile2; openRecentFile() }
+let onOpenRecentFile3: VoidCallback = { => gPendingRecentFile = recentFile3; openRecentFile() }
+let onOpenRecentFile4: VoidCallback = { => gPendingRecentFile = recentFile4; openRecentFile() }
+
 let onNewFile: VoidCallback = { => newFile() }
 let onOpenFile: VoidCallback = { => openFile() }
 let onSaveFile: VoidCallback = { => saveFile() }
@@ -588,6 +766,10 @@ let onFindNext: VoidCallback = { => findNext() }
 let onGoToLine: VoidCallback = { => goToLine() }
 let onToggleLineWrap: VoidCallback = { => toggleLineWrap() }
 let onSetFont: VoidCallback = { => setFont() }
+let onApplyFormat: VoidCallback = { => if (let Some(combo) <- gFontCombo) { let family = combo.currentFont(); if (!family.isEmpty()) { currentFontFamily = family; if (let Some(edit) <- textEdit) { edit.setFontFamily(family) } } } }
+let onSizeChanged: Int32Callback = { _ => if (let Some(combo) <- gSizeCombo) { let sizeStr = combo.currentText(); var size: Int32 = 12; for (c in sizeStr) { if (c >= 48 && c <= 57) { size = size * 10 + Int32(c - 48) } }; if (size > 0) { currentFontSize = size; if (let Some(edit) <- textEdit) { edit.setFontSize(size) } } } }
+let onToggleBold: VoidCallback = { => toggleBold() }
+let onPickColor: VoidCallback = { => pickTextColor() }
 let onInsertDateTime: VoidCallback = { => insertDateTime() }
 let onPrint: VoidCallback = { => printDocument() }
 let onPrintPreview: VoidCallback = { => printPreview() }
@@ -595,6 +777,7 @@ let onAbout: VoidCallback = { => about() }
 let onAboutQt: VoidCallback = { => aboutQt() }
 let onSwitchToChinese: VoidCallback = { => switchToChinese() }
 let onSwitchToEnglish: VoidCallback = { => switchToEnglish() }
+let onShowStats: VoidCallback = { => showStats() }
 let onExit: VoidCallback = { =>
     if (!checkSave()) {
         return
@@ -611,16 +794,13 @@ main(): Int32 {
     let app = QApplication()
     gApp = app
     
-    // 加载Qt中文翻译（使打印对话框等显示中文）
     app.loadQtTranslation("zh_CN")
     
-    // 创建主窗口
     let window = QMainWindow()
     window.setTitle("记事本")
     window.resize(900, 650)
     mainWindow = window
     
-    // 创建菜单栏
     let menuBar = QMenuBar()
     
     // ========== 文件菜单 ==========
@@ -643,6 +823,31 @@ main(): Int32 {
     saveAsAction.setOnTriggered(onSaveFileAs)
     
     fileMenu.addSeparator()
+    
+    // 最近文件
+    if (recentFileCount > 0) {
+        let r0 = fileMenu.addAction(recentFile0)
+        r0.setOnTriggered(onOpenRecentFile0)
+    }
+    if (recentFileCount > 1) {
+        let r1 = fileMenu.addAction(recentFile1)
+        r1.setOnTriggered(onOpenRecentFile1)
+    }
+    if (recentFileCount > 2) {
+        let r2 = fileMenu.addAction(recentFile2)
+        r2.setOnTriggered(onOpenRecentFile2)
+    }
+    if (recentFileCount > 3) {
+        let r3 = fileMenu.addAction(recentFile3)
+        r3.setOnTriggered(onOpenRecentFile3)
+    }
+    if (recentFileCount > 4) {
+        let r4 = fileMenu.addAction(recentFile4)
+        r4.setOnTriggered(onOpenRecentFile4)
+    }
+    if (recentFileCount > 0) {
+        fileMenu.addSeparator()
+    }
     
     let printAction = fileMenu.addAction("打印(&P)...")
     printAction.setShortcut("Ctrl+P")
@@ -706,6 +911,26 @@ main(): Int32 {
     goToLineAction.setShortcut("Ctrl+G")
     goToLineAction.setOnTriggered(onGoToLine)
     
+    // ========== 查看菜单 ==========
+    let viewMenu = menuBar.addMenu("查看(&V)")
+    
+    let zoomInAction = viewMenu.addAction("放大(&I)")
+    zoomInAction.setShortcut("Ctrl+=")
+    zoomInAction.setOnTriggered(onZoomIn)
+    
+    let zoomOutAction = viewMenu.addAction("缩小(&O)")
+    zoomOutAction.setShortcut("Ctrl+-")
+    zoomOutAction.setOnTriggered(onZoomOut)
+    
+    let zoomResetAction = viewMenu.addAction("重置缩放(&R)")
+    zoomResetAction.setShortcut("Ctrl+0")
+    zoomResetAction.setOnTriggered(onZoomReset)
+    
+    viewMenu.addSeparator()
+    
+    let statsAction = viewMenu.addAction("文档统计(&S)")
+    statsAction.setOnTriggered(onShowStats)
+    
     // ========== 格式菜单 ==========
     let formatMenu = menuBar.addMenu("格式(&O)")
     
@@ -727,7 +952,6 @@ main(): Int32 {
     // ========== 帮助菜单 ==========
     let helpMenu = menuBar.addMenu("帮助(&H)")
     
-    // 语言子菜单
     let languageMenu = helpMenu.addMenu("语言(&L)")
     
     let chineseAction = languageMenu.addAction("中文简体")
@@ -799,6 +1023,57 @@ main(): Int32 {
     toolBar.addAction(printBtn.getPtr())
     
     window.addToolBar(toolBar.getPtr())
+
+    // ========== 格式工具栏 ==========
+    let formatBar = QToolBar("格式工具栏")
+
+    // 字体选择
+    let fontCombo = QFontComboBox()
+    fontCombo.setCurrentFont(currentFontFamily)
+    fontCombo.setStyleSheet("min-width: 140px;")
+    gFontCombo = fontCombo
+    formatBar.addWidget(fontCombo.getPtr())
+
+    // 字号选择
+    let sizeCombo = QComboBox()
+    let sizes = ["8", "9", "10", "11", "12", "14", "16", "18", "20", "22", "24", "28", "32", "36", "48", "72"]
+    for (sz in sizes) {
+        sizeCombo.addItem(sz)
+    }
+
+    gSizeCombo = sizeCombo
+    
+    sizeCombo.setMaxVisibleItems(16)
+    sizeCombo.setStyleSheet("QComboBox { min-width: 60px; } QComboBox QAbstractItemView { min-height: 200px; }")
+    // 字号变化时自动应用
+    sizeCombo.setOnCurrentIndexChanged(onSizeChanged)
+    formatBar.addWidget(sizeCombo.getPtr())
+
+    // 应用格式按钮
+    let applyBtn = QPushButton()
+    applyBtn.setText("应用")
+    applyBtn.setStyleSheet("QPushButton { border: 1px solid #999; border-radius: 2px; padding: 2px 8px; font-size: 12px; } QPushButton:hover { background: #E0E8F0; }")
+    applyBtn.setOnClick(onApplyFormat)
+    formatBar.addWidget(applyBtn.getPtr())
+
+    formatBar.addSeparator()
+
+    // 加粗按钮
+    let boldBtn = QPushButton()
+    boldBtn.setText("B")
+    boldBtn.setCheckable(true)
+    boldBtn.setStyleSheet("QPushButton { font-weight: bold; font-size: 14px; min-width: 28px; min-height: 24px; } QPushButton:checked { background-color: #D0D8E0; }")
+    boldBtn.setOnClick(onToggleBold)
+    formatBar.addWidget(boldBtn.getPtr())
+
+    // 颜色按钮
+    let colorBtn = QPushButton()
+    colorBtn.setText("A")
+    colorBtn.setStyleSheet("QPushButton { color: #CC0000; font-weight: bold; font-size: 14px; text-decoration: underline; min-width: 28px; min-height: 24px; } QPushButton:hover { background-color: #F0F0F0; }")
+    colorBtn.setOnClick(onPickColor)
+    formatBar.addWidget(colorBtn.getPtr())
+
+    window.addToolBar(formatBar.getPtr())
     
     // ========== 创建状态栏 ==========
     let status = QStatusBar()
@@ -808,16 +1083,19 @@ main(): Int32 {
     
     // ========== 创建文本编辑区 ==========
     let edit = QTextEdit()
-    edit.setLineWrapMode(1)  // WidgetWidth
+    edit.setLineWrapMode(1)
     edit.setFontFamily(currentFontFamily)
     edit.setFontSize(currentFontSize)
     textEdit = edit
+
+    // 实时更新状态栏（字数、行数等）
+    edit.setOnTextChanged(onTextChanged)
     
     window.setCentralWidget(edit.getPtr())
     
-    // 显示窗口
     window.show()
-    updateStatus("就绪 - 按 Ctrl+N 新建, Ctrl+O 打开文件")
+    updateDocumentStats()
+    updateStatus("就绪 - Ctrl+N 新建, Ctrl+O 打开, Ctrl+= 放大, Ctrl+- 缩小")
     
     let result = app.exec()
     return result
