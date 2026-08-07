@@ -21,7 +21,7 @@ CJQT6 是仓颉语言的 Qt6 封装库，提供跨平台 GUI 开发能力。
 | [13_multimedia.md](./13_multimedia.md) | 多媒体模块 - QMediaPlayer、QAudioOutput、QCamera、QVideoWidget |
 | [14_print.md](./14_print.md) | 打印模块 - QPrinter、QPrintDialog |
 | [15_examples_faq.md](./15_examples_faq.md) | 示例与常见问题 |
-| [16_misc_widgets.md](./16_misc_widgets.md) | 其他控件 - QLCDNumber、QToolButton |
+| [16_misc_widgets.md](./16_misc_widgets.md) | 其他控件 - QLCDNumber、QToolButton、QUiLoader |
 | [17_dragdrop.md](./17_dragdrop.md) | 拖放支持 - QMimeData、QDrag |
 | [18_sql.md](./18_sql.md) | SQL数据库 - QSqlDatabase、QSqlQuery |
 | [19_network.md](./19_network.md) | 网络模块 - QTcpSocket、QUdpSocket、QHostAddress |

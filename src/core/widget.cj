@@ -19,6 +19,8 @@ foreign func qWidgetSetFixedSize(ptr: Int64, width: Int32, height: Int32): Unit
 foreign func qWidgetSetWindowIcon(ptr: Int64, iconPath: CString): Unit
 // QWidget::setWindowFlags() - 设置窗口标志
 foreign func qWidgetSetWindowFlags(ptr: Int64, flags: Int32): Unit
+// QWidget::findChild() - 按 objectName 递归查找子控件（返回 QWidget*，未找到返回 0）
+foreign func qWidgetFindChild(ptr: Int64, name: CString): Int64
 // QWidget::update() - 请求重绘
 foreign func qWidgetUpdate(ptr: Int64): Unit
 // QWidget::repaint() - 立即重绘
@@ -41,6 +43,27 @@ public func setWidgetParent(widgetPtr: Int64, parentPtr: Int64): Unit {
 public class QWidget <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
+    /// 是否拥有原生对象所有权（fromPtr 包装的指针为 false，close() 只标记关闭不删除）
+    private var owned: Bool = true
+    
+    /// 从原生指针包装 QWidget（不拥有所有权，close() 不删除底层对象）
+    public static func fromPtr(p: Int64): QWidget {
+        let w = QWidget()
+        w.ptr = p
+        w.owned = false
+        return w
+    }
+    
+    /// 按 objectName 递归查找子控件（未找到返回无效 QWidget，用 isValid() 判断）
+    public func findChild(name: String): QWidget {
+        checkValid()
+        unsafe {
+            let cstr = LibC.mallocCString(name)
+            let childPtr = qWidgetFindChild(ptr, cstr)
+            LibC.free(cstr)
+            return QWidget.fromPtr(childPtr)
+        }
+    }
     
     /// 创建窗口部件
     public init() {
@@ -154,7 +177,9 @@ public class QWidget <: QtResource {
         if (!closed && ptr != 0) {
             unsafe {
                 qSignalCleanup(ptr)
-                qWidgetDelete(ptr)
+                if (owned) {
+                    qWidgetDelete(ptr)
+                }
             }
             closed = true
             ptr = 0

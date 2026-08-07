@@ -23,7 +23,7 @@ foreach(CONFIG RELEASE DEBUG MINSIZEREL RELWITHDEBINFO)
 endforeach()
 
 # 查找 Qt6 包
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Qml Quick QuickWidgets Sql PrintSupport Network)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Qml Quick QuickWidgets Sql PrintSupport Network UiTools)
 # Multimedia / MultimediaWidgets 是可选的
 find_package(Qt6 COMPONENTS Multimedia QUIET)
 find_package(Qt6 COMPONENTS MultimediaWidgets QUIET)
@@ -93,6 +93,7 @@ set(WIDGETS_SOURCES
     native/src/widgets/bridge_ext_wmisc.cpp
     native/src/widgets/bridge_ext_apicomplete.cpp
     native/src/widgets/bridge_graphicsitem.cpp
+    native/src/widgets/bridge_uiloader.cpp
 )
 
 # Views模块 - 表格视图、列表视图、树形视图、排序过滤代理、抽象模型
@@ -180,6 +181,7 @@ target_link_libraries(cjqt6_bridge PRIVATE
     Qt6::Sql
     Qt6::PrintSupport
     Qt6::Network
+    Qt6::UiTools
 )
 
 # 可选链接 Multimedia / MultimediaWidgets

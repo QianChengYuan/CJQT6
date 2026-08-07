@@ -734,3 +734,40 @@ effect.delete()
 | `yOffset(): Float64` / `setYOffset(v: Float64)` | 获取/设置垂直偏移 |
 | `setEnabled(enabled: Bool): QGraphicsDropShadowEffect` | 启用/禁用特效，返回自身 |
 | `delete()` | 释放资源 |
+
+---
+
+## QUiLoader - Qt Designer .ui 文件加载器
+
+通过 QtUiTools 模块从 Qt Designer 生成的 .ui 文件静态构建控件树，无需逐一手写创建控件的代码。加载成功后返回根控件，可用 `QWidget.findChild()` 按 objectName 获取任意子控件。
+
+```cangjie
+import cjqt6.core.*
+import cjqt6.widgets.*
+
+let loader = QUiLoader()
+// 加载 .ui 文件，返回根控件（独立顶层窗口）
+let window = loader.load("mainwindow.ui", 0)
+// 按 objectName 获取子控件并强转为具体控件类型
+let button = window.findChild("openButton") as QPushButton
+button.setText("打开")
+// 使用完毕显式释放
+window.close()
+loader.close()
+```
+
+**方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` | 创建加载器 |
+| `load(filePath: String, parentPtr: Int64): QWidget` | 加载 .ui 文件，返回根控件（`fromPtr` 包装，不拥有所有权，生命周期由 Qt 父子关系管理） |
+| `setWorkingDirectory(dir: String)` | 设置工作目录（.ui 内相对路径资源基于此目录解析） |
+| `errorString(): String` | 获取最近一次加载的错误信息 |
+| `getPtr(): Int64` | 获取原生指针 |
+| `isClosed(): Bool` | 是否已关闭 |
+| `isValid(): Bool` | 检查对象有效性 |
+| `checkValid()` | 检查有效性，无效时抛出异常 |
+| `close()` | 释放资源 |
+| `delete()` | 释放资源（兼容旧 API） |
+
+> 说明：`load()` 的 `parentPtr` 传 0 时返回的控件作为独立顶层窗口；传入某控件指针则挂为其子控件。加载失败抛出 `CreateFailedException`，可通过 `errorString()` 查看具体原因。返回的控件由 Qt 父子关系管理生命周期，关闭窗口时调用其 `close()` 即可。
