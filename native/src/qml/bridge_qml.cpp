@@ -7,13 +7,17 @@
 #include <QQuickView>
 #include <QQuickWidget>
 #include <QQmlApplicationEngine>
+#include <QQmlComponent>
 #include <QQmlContext>
 #include <QQuickItem>
 #include <QUrl>
 #include <QVariant>
+#include <QColor>
 #include <QDebug>
+#include <QFileInfo>
 #include <QCoreApplication>
 #include <QSurfaceFormat>
+#include <cstring>
 
 extern "C" {
 
@@ -31,7 +35,8 @@ void qQmlEngineLoadFile(int64_t ptr, const char* filePath) {
     QQmlApplicationEngine* engine = reinterpret_cast<QQmlApplicationEngine*>(ptr);
     if (engine && filePath) {
         qDebug() << "Loading QML file:" << filePath;
-        QUrl url = QUrl::fromLocalFile(QString::fromUtf8(filePath));
+        // 相对路径转绝对路径（基于当前工作目录），避免 QUrl::fromLocalFile 生成相对 URL 导致加载失败
+        QUrl url = QUrl::fromLocalFile(QFileInfo(QString::fromUtf8(filePath)).absoluteFilePath());
         qDebug() << "URL:" << url;
         engine->load(url);
         qDebug() << "Root objects after loadFile:" << engine->rootObjects().size();
@@ -165,6 +170,14 @@ void qQmlEngineAddImportPath(int64_t ptr, const char* path) {
     }
 }
 
+int64_t qQmlEngineRootContext(int64_t ptr) {
+    QQmlApplicationEngine* engine = reinterpret_cast<QQmlApplicationEngine*>(ptr);
+    if (engine) {
+        return reinterpret_cast<int64_t>(engine->rootContext());
+    }
+    return 0;
+}
+
 void qQmlEngineDelete(int64_t ptr) {
     QQmlApplicationEngine* engine = reinterpret_cast<QQmlApplicationEngine*>(ptr);
     if (engine) {
@@ -211,7 +224,7 @@ int64_t qQuickViewCreate() {
 void qQuickViewSetSource(int64_t ptr, const char* source) {
     QQuickView* view = reinterpret_cast<QQuickView*>(ptr);
     if (view) {
-        view->setSource(QUrl::fromLocalFile(source));
+        view->setSource(QUrl::fromLocalFile(QFileInfo(QString::fromUtf8(source)).absoluteFilePath()));
     }
 }
 
@@ -288,6 +301,14 @@ int32_t qQuickViewErrors(int64_t ptr) {
     return 1;
 }
 
+int64_t qQuickViewEngine(int64_t ptr) {
+    QQuickView* view = reinterpret_cast<QQuickView*>(ptr);
+    if (view && view->engine()) {
+        return reinterpret_cast<int64_t>(view->engine());
+    }
+    return 0;
+}
+
 // ============================================================
 // QQuickWidget - QML嵌入Widget
 // ============================================================
@@ -320,7 +341,7 @@ int64_t qQuickWidgetCreate() {
 void qQuickWidgetSetSource(int64_t ptr, const char* source) {
     QQuickWidget* widget = reinterpret_cast<QQuickWidget*>(ptr);
     if (widget) {
-        widget->setSource(QUrl::fromLocalFile(source));
+        widget->setSource(QUrl::fromLocalFile(QFileInfo(QString::fromUtf8(source)).absoluteFilePath()));
     }
 }
 
@@ -369,6 +390,14 @@ void qQuickWidgetDelete(int64_t ptr) {
     if (widget) {
         delete widget;
     }
+}
+
+int64_t qQuickWidgetEngine(int64_t ptr) {
+    QQuickWidget* widget = reinterpret_cast<QQuickWidget*>(ptr);
+    if (widget && widget->engine()) {
+        return reinterpret_cast<int64_t>(widget->engine());
+    }
+    return 0;
 }
 
 // ============================================================
@@ -570,6 +599,380 @@ int32_t qQuickItemGetPropertyBool(int64_t ptr, const char* name) {
 void qQuickItemFreeString(char* str) {
     if (str) {
         delete[] str;
+    }
+}
+
+// ============================================================
+// QQuickItem 属性扩展 - opacity / rotation / scale / z / objectName / focus / parentItem
+// ============================================================
+
+void qQuickItemSetOpacity(int64_t ptr, float opacity) {
+    QQuickItem* item = reinterpret_cast<QQuickItem*>(ptr);
+    if (item) {
+        item->setOpacity(opacity);
+    }
+}
+
+float qQuickItemOpacity(int64_t ptr) {
+    QQuickItem* item = reinterpret_cast<QQuickItem*>(ptr);
+    if (item) {
+        return static_cast<float>(item->opacity());
+    }
+    return 1.0f;
+}
+
+void qQuickItemSetRotation(int64_t ptr, float rotation) {
+    QQuickItem* item = reinterpret_cast<QQuickItem*>(ptr);
+    if (item) {
+        item->setRotation(rotation);
+    }
+}
+
+float qQuickItemRotation(int64_t ptr) {
+    QQuickItem* item = reinterpret_cast<QQuickItem*>(ptr);
+    if (item) {
+        return static_cast<float>(item->rotation());
+    }
+    return 0.0f;
+}
+
+void qQuickItemSetScale(int64_t ptr, float scale) {
+    QQuickItem* item = reinterpret_cast<QQuickItem*>(ptr);
+    if (item) {
+        item->setScale(scale);
+    }
+}
+
+float qQuickItemScale(int64_t ptr) {
+    QQuickItem* item = reinterpret_cast<QQuickItem*>(ptr);
+    if (item) {
+        return static_cast<float>(item->scale());
+    }
+    return 1.0f;
+}
+
+void qQuickItemSetZ(int64_t ptr, float z) {
+    QQuickItem* item = reinterpret_cast<QQuickItem*>(ptr);
+    if (item) {
+        item->setZ(z);
+    }
+}
+
+float qQuickItemZ(int64_t ptr) {
+    QQuickItem* item = reinterpret_cast<QQuickItem*>(ptr);
+    if (item) {
+        return static_cast<float>(item->z());
+    }
+    return 0.0f;
+}
+
+void qQuickItemSetObjectName(int64_t ptr, const char* name) {
+    QQuickItem* item = reinterpret_cast<QQuickItem*>(ptr);
+    if (item && name) {
+        item->setObjectName(QString::fromUtf8(name));
+    }
+}
+
+char* qQuickItemObjectName(int64_t ptr) {
+    QQuickItem* item = reinterpret_cast<QQuickItem*>(ptr);
+    if (item) {
+        QByteArray ba = item->objectName().toUtf8();
+        char* result = new char[ba.size() + 1];
+        strcpy(result, ba.constData());
+        return result;
+    }
+    char* empty = new char[1];
+    empty[0] = '\0';
+    return empty;
+}
+
+void qQuickItemSetFocus(int64_t ptr, int32_t focus) {
+    QQuickItem* item = reinterpret_cast<QQuickItem*>(ptr);
+    if (item) {
+        item->setFocus(focus != 0);
+    }
+}
+
+int32_t qQuickItemHasFocus(int64_t ptr) {
+    QQuickItem* item = reinterpret_cast<QQuickItem*>(ptr);
+    if (item) {
+        return item->hasFocus() ? 1 : 0;
+    }
+    return 0;
+}
+
+void qQuickItemSetParentItem(int64_t ptr, int64_t parentPtr) {
+    QQuickItem* item = reinterpret_cast<QQuickItem*>(ptr);
+    QQuickItem* parent = reinterpret_cast<QQuickItem*>(parentPtr);
+    if (item) {
+        item->setParentItem(parent);
+    }
+}
+
+int64_t qQuickItemParentItem(int64_t ptr) {
+    QQuickItem* item = reinterpret_cast<QQuickItem*>(ptr);
+    if (item) {
+        return reinterpret_cast<int64_t>(item->parentItem());
+    }
+    return 0;
+}
+
+int64_t qQuickItemCreate() {
+    QQuickItem* item = new QQuickItem();
+    return reinterpret_cast<int64_t>(item);
+}
+
+void qQuickItemDelete(int64_t ptr) {
+    QQuickItem* item = reinterpret_cast<QQuickItem*>(ptr);
+    if (item) {
+        delete item;
+    }
+}
+
+// ============================================================
+// QQmlComponent - QML组件
+// ============================================================
+
+int64_t qQmlComponentCreate(int64_t enginePtr) {
+    QQmlEngine* engine = reinterpret_cast<QQmlEngine*>(enginePtr);
+    QQmlComponent* comp = new QQmlComponent(engine);
+    return reinterpret_cast<int64_t>(comp);
+}
+
+void qQmlComponentLoadUrl(int64_t ptr, const char* url) {
+    QQmlComponent* comp = reinterpret_cast<QQmlComponent*>(ptr);
+    if (comp && url) {
+        comp->loadUrl(QUrl(url));
+    }
+}
+
+void qQmlComponentSetData(int64_t ptr, const char* data, const char* url) {
+    QQmlComponent* comp = reinterpret_cast<QQmlComponent*>(ptr);
+    if (comp && data) {
+        QUrl baseUrl = (url && url[0] != '\0') ? QUrl(url) : QUrl("qrc:/inline.qml");
+        comp->setData(QByteArray(data), baseUrl);
+    }
+}
+
+int32_t qQmlComponentStatus(int64_t ptr) {
+    QQmlComponent* comp = reinterpret_cast<QQmlComponent*>(ptr);
+    if (comp) {
+        return static_cast<int32_t>(comp->status());
+    }
+    return 0;
+}
+
+int32_t qQmlComponentIsReady(int64_t ptr) {
+    QQmlComponent* comp = reinterpret_cast<QQmlComponent*>(ptr);
+    if (comp) {
+        return comp->isReady() ? 1 : 0;
+    }
+    return 0;
+}
+
+int32_t qQmlComponentIsError(int64_t ptr) {
+    QQmlComponent* comp = reinterpret_cast<QQmlComponent*>(ptr);
+    if (comp) {
+        return comp->isError() ? 1 : 0;
+    }
+    return 0;
+}
+
+char* qQmlComponentErrorString(int64_t ptr) {
+    QQmlComponent* comp = reinterpret_cast<QQmlComponent*>(ptr);
+    if (comp) {
+        QByteArray ba = comp->errorString().toUtf8();
+        char* result = new char[ba.size() + 1];
+        strcpy(result, ba.constData());
+        return result;
+    }
+    char* empty = new char[1];
+    empty[0] = '\0';
+    return empty;
+}
+
+int64_t qQmlComponentCreateObject(int64_t ptr, int64_t contextPtr, int64_t parentPtr) {
+    QQmlComponent* comp = reinterpret_cast<QQmlComponent*>(ptr);
+    if (comp) {
+        QQmlContext* context = reinterpret_cast<QQmlContext*>(contextPtr);
+        QObject* parent = reinterpret_cast<QObject*>(parentPtr);
+        QObject* obj = comp->create(context);
+        if (obj && parent) {
+            obj->setParent(parent);
+        }
+        return reinterpret_cast<int64_t>(obj);
+    }
+    return 0;
+}
+
+void qQmlComponentDelete(int64_t ptr) {
+    QQmlComponent* comp = reinterpret_cast<QQmlComponent*>(ptr);
+    if (comp) {
+        delete comp;
+    }
+}
+
+// ============================================================
+// QQmlContext - QML上下文
+// ============================================================
+
+int64_t qQmlContextCreate(int64_t parentContextPtr) {
+    QQmlContext* parent = reinterpret_cast<QQmlContext*>(parentContextPtr);
+    QQmlContext* ctx = new QQmlContext(parent);
+    return reinterpret_cast<int64_t>(ctx);
+}
+
+void qQmlContextSetContextProperty(int64_t ptr, const char* name, int64_t valuePtr) {
+    QQmlContext* ctx = reinterpret_cast<QQmlContext*>(ptr);
+    if (ctx && name) {
+        QObject* obj = reinterpret_cast<QObject*>(valuePtr);
+        ctx->setContextProperty(name, QVariant::fromValue(obj));
+    }
+}
+
+void qQmlContextSetContextPropertyString(int64_t ptr, const char* name, const char* value) {
+    QQmlContext* ctx = reinterpret_cast<QQmlContext*>(ptr);
+    if (ctx && name) {
+        ctx->setContextProperty(name, QString(value));
+    }
+}
+
+void qQmlContextSetContextPropertyInt(int64_t ptr, const char* name, int32_t value) {
+    QQmlContext* ctx = reinterpret_cast<QQmlContext*>(ptr);
+    if (ctx && name) {
+        ctx->setContextProperty(name, value);
+    }
+}
+
+void qQmlContextSetContextPropertyDouble(int64_t ptr, const char* name, double value) {
+    QQmlContext* ctx = reinterpret_cast<QQmlContext*>(ptr);
+    if (ctx && name) {
+        ctx->setContextProperty(name, value);
+    }
+}
+
+void qQmlContextSetContextPropertyBool(int64_t ptr, const char* name, int32_t value) {
+    QQmlContext* ctx = reinterpret_cast<QQmlContext*>(ptr);
+    if (ctx && name) {
+        ctx->setContextProperty(name, value != 0);
+    }
+}
+
+void qQmlContextSetContextObject(int64_t ptr, int64_t objPtr) {
+    QQmlContext* ctx = reinterpret_cast<QQmlContext*>(ptr);
+    if (ctx) {
+        QObject* obj = reinterpret_cast<QObject*>(objPtr);
+        ctx->setContextObject(obj);
+    }
+}
+
+int64_t qQmlContextContextObject(int64_t ptr) {
+    QQmlContext* ctx = reinterpret_cast<QQmlContext*>(ptr);
+    if (ctx) {
+        return reinterpret_cast<int64_t>(ctx->contextObject());
+    }
+    return 0;
+}
+
+int64_t qQmlContextParentContext(int64_t ptr) {
+    QQmlContext* ctx = reinterpret_cast<QQmlContext*>(ptr);
+    if (ctx) {
+        return reinterpret_cast<int64_t>(ctx->parentContext());
+    }
+    return 0;
+}
+
+void qQmlContextDelete(int64_t ptr) {
+    QQmlContext* ctx = reinterpret_cast<QQmlContext*>(ptr);
+    if (ctx) {
+        delete ctx;
+    }
+}
+
+// ============================================================
+// QQuickWindow - QML窗口
+// ============================================================
+
+int64_t qQuickWindowCreate() {
+    if (!QCoreApplication::instance()) {
+        qWarning() << "QQuickWindow requires QApplication instance";
+        return 0;
+    }
+    QQuickWindow* win = new QQuickWindow();
+    return reinterpret_cast<int64_t>(win);
+}
+
+void qQuickWindowShow(int64_t ptr) {
+    QQuickWindow* win = reinterpret_cast<QQuickWindow*>(ptr);
+    if (win) {
+        win->show();
+    }
+}
+
+void qQuickWindowHide(int64_t ptr) {
+    QQuickWindow* win = reinterpret_cast<QQuickWindow*>(ptr);
+    if (win) {
+        win->hide();
+    }
+}
+
+void qQuickWindowSetTitle(int64_t ptr, const char* title) {
+    QQuickWindow* win = reinterpret_cast<QQuickWindow*>(ptr);
+    if (win && title) {
+        win->setTitle(QString::fromUtf8(title));
+    }
+}
+
+void qQuickWindowResize(int64_t ptr, int32_t width, int32_t height) {
+    QQuickWindow* win = reinterpret_cast<QQuickWindow*>(ptr);
+    if (win) {
+        win->resize(width, height);
+    }
+}
+
+int32_t qQuickWindowWidth(int64_t ptr) {
+    QQuickWindow* win = reinterpret_cast<QQuickWindow*>(ptr);
+    if (win) {
+        return win->width();
+    }
+    return 0;
+}
+
+int32_t qQuickWindowHeight(int64_t ptr) {
+    QQuickWindow* win = reinterpret_cast<QQuickWindow*>(ptr);
+    if (win) {
+        return win->height();
+    }
+    return 0;
+}
+
+void qQuickWindowSetColor(int64_t ptr, int32_t r, int32_t g, int32_t b, int32_t a) {
+    QQuickWindow* win = reinterpret_cast<QQuickWindow*>(ptr);
+    if (win) {
+        win->setColor(QColor(r, g, b, a));
+    }
+}
+
+int32_t qQuickWindowIsVisible(int64_t ptr) {
+    QQuickWindow* win = reinterpret_cast<QQuickWindow*>(ptr);
+    if (win) {
+        return win->isVisible() ? 1 : 0;
+    }
+    return 0;
+}
+
+int64_t qQuickWindowContentItem(int64_t ptr) {
+    QQuickWindow* win = reinterpret_cast<QQuickWindow*>(ptr);
+    if (win) {
+        return reinterpret_cast<int64_t>(win->contentItem());
+    }
+    return 0;
+}
+
+void qQuickWindowDelete(int64_t ptr) {
+    QQuickWindow* win = reinterpret_cast<QQuickWindow*>(ptr);
+    if (win) {
+        delete win;
     }
 }
 

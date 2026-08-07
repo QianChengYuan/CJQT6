@@ -29,6 +29,9 @@
 #include <QLineEdit>
 #include <QTimer>
 #include <QAction>
+#include <QQuickItem>
+#include <QQmlComponent>
+#include <QQuickWindow>
 #include <QHash>
 #include <functional>
 #include <unordered_map>
@@ -81,6 +84,24 @@ enum SigId {
     SIG_TOOLPRESSED,
     SIG_TOOLRELEASED,
     SIG_CLOSE,
+    // QML/QtQuick 信号
+    SIG_ITEM_X,
+    SIG_ITEM_Y,
+    SIG_ITEM_WIDTH,
+    SIG_ITEM_HEIGHT,
+    SIG_ITEM_OPACITY,
+    SIG_ITEM_ROTATION,
+    SIG_ITEM_SCALE,
+    SIG_ITEM_Z,
+    SIG_ITEM_VISIBLE,
+    SIG_ITEM_ENABLED,
+    SIG_ITEM_FOCUS,
+    SIG_ITEM_PARENT,
+    SIG_ITEM_CHILDREN,
+    SIG_WIN_WIDTH,
+    SIG_WIN_HEIGHT,
+    SIG_WIN_VISIBLE,
+    SIG_COMP_STATUS,
     // P2：SignalEmitter 通用自定义信号
     SIG_EMIT_VOID = 100,
     SIG_EMIT_INT,
@@ -109,6 +130,7 @@ static std::unordered_map<ConnKey, std::function<void()>>            g_voidCbs;
 static std::unordered_map<ConnKey, std::function<void(int32_t)>>     g_int32Cbs;
 static std::unordered_map<ConnKey, std::function<void(double)>>      g_float64Cbs;
 static std::unordered_map<ConnKey, std::function<void(const char*)>> g_textCbs;
+static std::unordered_map<ConnKey, std::function<void(int64_t)>>     g_int64Cbs;
 // 连接句柄表
 static std::unordered_map<ConnKey, QMetaObject::Connection>          g_conns;
 
@@ -172,6 +194,7 @@ static void disconnectByKey(ConnKey key) {
     g_int32Cbs.erase(key);
     g_float64Cbs.erase(key);
     g_textCbs.erase(key);
+    g_int64Cbs.erase(key);
     g_voidIds.erase(key);
     // close 事件过滤器清理：先摘除再删除（QPointer 若已随 widget 销毁置空则跳过）
     auto fi = g_closeFilters.find(key);
@@ -968,6 +991,409 @@ void qEmitterEmitDouble(int64_t ptr, double v) {
 void qEmitterEmitString(int64_t ptr, const char* s) {
     cjfw::SignalEmitter* em = reinterpret_cast<cjfw::SignalEmitter*>(ptr);
     if (em) { em->emitString(QString::fromUtf8(s ? s : "")); }
+}
+
+// ============================================================
+// QQuickItem 信号
+// ============================================================
+
+void qQuickItemConnectXChanged(int64_t ptr, void (*callback)()) {
+    QQuickItem* item = reinterpret_cast<QQuickItem*>(ptr);
+    if (item && callback) {
+        ConnKey key{ptr, SIG_ITEM_X};
+        disconnectByKey(key);
+        LOCK_CALLBACKS();
+        g_voidCbs[key] = callback;
+        g_conns[key] = QObject::connect(item, &QQuickItem::xChanged, [key]() {
+            std::function<void()> cb;
+            {
+                LOCK_CALLBACKS();
+                auto i = g_voidCbs.find(key);
+                if (i != g_voidCbs.end()) cb = i->second;
+            }
+            if (cb) { try { cb(); } catch (...) {} }
+        });
+    }
+}
+
+void qQuickItemDisconnectXChanged(int64_t ptr) {
+    disconnectByKey(ConnKey{ptr, SIG_ITEM_X});
+}
+
+void qQuickItemConnectYChanged(int64_t ptr, void (*callback)()) {
+    QQuickItem* item = reinterpret_cast<QQuickItem*>(ptr);
+    if (item && callback) {
+        ConnKey key{ptr, SIG_ITEM_Y};
+        disconnectByKey(key);
+        LOCK_CALLBACKS();
+        g_voidCbs[key] = callback;
+        g_conns[key] = QObject::connect(item, &QQuickItem::yChanged, [key]() {
+            std::function<void()> cb;
+            {
+                LOCK_CALLBACKS();
+                auto i = g_voidCbs.find(key);
+                if (i != g_voidCbs.end()) cb = i->second;
+            }
+            if (cb) { try { cb(); } catch (...) {} }
+        });
+    }
+}
+
+void qQuickItemDisconnectYChanged(int64_t ptr) {
+    disconnectByKey(ConnKey{ptr, SIG_ITEM_Y});
+}
+
+void qQuickItemConnectWidthChanged(int64_t ptr, void (*callback)()) {
+    QQuickItem* item = reinterpret_cast<QQuickItem*>(ptr);
+    if (item && callback) {
+        ConnKey key{ptr, SIG_ITEM_WIDTH};
+        disconnectByKey(key);
+        LOCK_CALLBACKS();
+        g_voidCbs[key] = callback;
+        g_conns[key] = QObject::connect(item, &QQuickItem::widthChanged, [key]() {
+            std::function<void()> cb;
+            {
+                LOCK_CALLBACKS();
+                auto i = g_voidCbs.find(key);
+                if (i != g_voidCbs.end()) cb = i->second;
+            }
+            if (cb) { try { cb(); } catch (...) {} }
+        });
+    }
+}
+
+void qQuickItemDisconnectWidthChanged(int64_t ptr) {
+    disconnectByKey(ConnKey{ptr, SIG_ITEM_WIDTH});
+}
+
+void qQuickItemConnectHeightChanged(int64_t ptr, void (*callback)()) {
+    QQuickItem* item = reinterpret_cast<QQuickItem*>(ptr);
+    if (item && callback) {
+        ConnKey key{ptr, SIG_ITEM_HEIGHT};
+        disconnectByKey(key);
+        LOCK_CALLBACKS();
+        g_voidCbs[key] = callback;
+        g_conns[key] = QObject::connect(item, &QQuickItem::heightChanged, [key]() {
+            std::function<void()> cb;
+            {
+                LOCK_CALLBACKS();
+                auto i = g_voidCbs.find(key);
+                if (i != g_voidCbs.end()) cb = i->second;
+            }
+            if (cb) { try { cb(); } catch (...) {} }
+        });
+    }
+}
+
+void qQuickItemDisconnectHeightChanged(int64_t ptr) {
+    disconnectByKey(ConnKey{ptr, SIG_ITEM_HEIGHT});
+}
+
+void qQuickItemConnectOpacityChanged(int64_t ptr, void (*callback)()) {
+    QQuickItem* item = reinterpret_cast<QQuickItem*>(ptr);
+    if (item && callback) {
+        ConnKey key{ptr, SIG_ITEM_OPACITY};
+        disconnectByKey(key);
+        LOCK_CALLBACKS();
+        g_voidCbs[key] = callback;
+        g_conns[key] = QObject::connect(item, &QQuickItem::opacityChanged, [key]() {
+            std::function<void()> cb;
+            {
+                LOCK_CALLBACKS();
+                auto i = g_voidCbs.find(key);
+                if (i != g_voidCbs.end()) cb = i->second;
+            }
+            if (cb) { try { cb(); } catch (...) {} }
+        });
+    }
+}
+
+void qQuickItemDisconnectOpacityChanged(int64_t ptr) {
+    disconnectByKey(ConnKey{ptr, SIG_ITEM_OPACITY});
+}
+
+void qQuickItemConnectRotationChanged(int64_t ptr, void (*callback)()) {
+    QQuickItem* item = reinterpret_cast<QQuickItem*>(ptr);
+    if (item && callback) {
+        ConnKey key{ptr, SIG_ITEM_ROTATION};
+        disconnectByKey(key);
+        LOCK_CALLBACKS();
+        g_voidCbs[key] = callback;
+        g_conns[key] = QObject::connect(item, &QQuickItem::rotationChanged, [key]() {
+            std::function<void()> cb;
+            {
+                LOCK_CALLBACKS();
+                auto i = g_voidCbs.find(key);
+                if (i != g_voidCbs.end()) cb = i->second;
+            }
+            if (cb) { try { cb(); } catch (...) {} }
+        });
+    }
+}
+
+void qQuickItemDisconnectRotationChanged(int64_t ptr) {
+    disconnectByKey(ConnKey{ptr, SIG_ITEM_ROTATION});
+}
+
+void qQuickItemConnectScaleChanged(int64_t ptr, void (*callback)()) {
+    QQuickItem* item = reinterpret_cast<QQuickItem*>(ptr);
+    if (item && callback) {
+        ConnKey key{ptr, SIG_ITEM_SCALE};
+        disconnectByKey(key);
+        LOCK_CALLBACKS();
+        g_voidCbs[key] = callback;
+        g_conns[key] = QObject::connect(item, &QQuickItem::scaleChanged, [key]() {
+            std::function<void()> cb;
+            {
+                LOCK_CALLBACKS();
+                auto i = g_voidCbs.find(key);
+                if (i != g_voidCbs.end()) cb = i->second;
+            }
+            if (cb) { try { cb(); } catch (...) {} }
+        });
+    }
+}
+
+void qQuickItemDisconnectScaleChanged(int64_t ptr) {
+    disconnectByKey(ConnKey{ptr, SIG_ITEM_SCALE});
+}
+
+void qQuickItemConnectZChanged(int64_t ptr, void (*callback)()) {
+    QQuickItem* item = reinterpret_cast<QQuickItem*>(ptr);
+    if (item && callback) {
+        ConnKey key{ptr, SIG_ITEM_Z};
+        disconnectByKey(key);
+        LOCK_CALLBACKS();
+        g_voidCbs[key] = callback;
+        g_conns[key] = QObject::connect(item, &QQuickItem::zChanged, [key]() {
+            std::function<void()> cb;
+            {
+                LOCK_CALLBACKS();
+                auto i = g_voidCbs.find(key);
+                if (i != g_voidCbs.end()) cb = i->second;
+            }
+            if (cb) { try { cb(); } catch (...) {} }
+        });
+    }
+}
+
+void qQuickItemDisconnectZChanged(int64_t ptr) {
+    disconnectByKey(ConnKey{ptr, SIG_ITEM_Z});
+}
+
+void qQuickItemConnectVisibleChanged(int64_t ptr, void (*callback)()) {
+    QQuickItem* item = reinterpret_cast<QQuickItem*>(ptr);
+    if (item && callback) {
+        ConnKey key{ptr, SIG_ITEM_VISIBLE};
+        disconnectByKey(key);
+        LOCK_CALLBACKS();
+        g_voidCbs[key] = callback;
+        g_conns[key] = QObject::connect(item, &QQuickItem::visibleChanged, [key]() {
+            std::function<void()> cb;
+            {
+                LOCK_CALLBACKS();
+                auto i = g_voidCbs.find(key);
+                if (i != g_voidCbs.end()) cb = i->second;
+            }
+            if (cb) { try { cb(); } catch (...) {} }
+        });
+    }
+}
+
+void qQuickItemDisconnectVisibleChanged(int64_t ptr) {
+    disconnectByKey(ConnKey{ptr, SIG_ITEM_VISIBLE});
+}
+
+void qQuickItemConnectEnabledChanged(int64_t ptr, void (*callback)()) {
+    QQuickItem* item = reinterpret_cast<QQuickItem*>(ptr);
+    if (item && callback) {
+        ConnKey key{ptr, SIG_ITEM_ENABLED};
+        disconnectByKey(key);
+        LOCK_CALLBACKS();
+        g_voidCbs[key] = callback;
+        g_conns[key] = QObject::connect(item, &QQuickItem::enabledChanged, [key]() {
+            std::function<void()> cb;
+            {
+                LOCK_CALLBACKS();
+                auto i = g_voidCbs.find(key);
+                if (i != g_voidCbs.end()) cb = i->second;
+            }
+            if (cb) { try { cb(); } catch (...) {} }
+        });
+    }
+}
+
+void qQuickItemDisconnectEnabledChanged(int64_t ptr) {
+    disconnectByKey(ConnKey{ptr, SIG_ITEM_ENABLED});
+}
+
+void qQuickItemConnectFocusChanged(int64_t ptr, void (*callback)(int32_t)) {
+    QQuickItem* item = reinterpret_cast<QQuickItem*>(ptr);
+    if (item && callback) {
+        ConnKey key{ptr, SIG_ITEM_FOCUS};
+        disconnectByKey(key);
+        LOCK_CALLBACKS();
+        g_int32Cbs[key] = callback;
+        g_conns[key] = QObject::connect(item, &QQuickItem::focusChanged, [key](bool focus) {
+            std::function<void(int32_t)> cb;
+            {
+                LOCK_CALLBACKS();
+                auto i = g_int32Cbs.find(key);
+                if (i != g_int32Cbs.end()) cb = i->second;
+            }
+            if (cb) { try { cb(focus ? 1 : 0); } catch (...) {} }
+        });
+    }
+}
+
+void qQuickItemDisconnectFocusChanged(int64_t ptr) {
+    disconnectByKey(ConnKey{ptr, SIG_ITEM_FOCUS});
+}
+
+void qQuickItemConnectParentChanged(int64_t ptr, void (*callback)(int64_t)) {
+    QQuickItem* item = reinterpret_cast<QQuickItem*>(ptr);
+    if (item && callback) {
+        ConnKey key{ptr, SIG_ITEM_PARENT};
+        disconnectByKey(key);
+        LOCK_CALLBACKS();
+        g_int64Cbs[key] = callback;
+        g_conns[key] = QObject::connect(item, &QQuickItem::parentChanged, [key](QQuickItem* parent) {
+            std::function<void(int64_t)> cb;
+            {
+                LOCK_CALLBACKS();
+                auto i = g_int64Cbs.find(key);
+                if (i != g_int64Cbs.end()) cb = i->second;
+            }
+            if (cb) { try { cb(reinterpret_cast<int64_t>(parent)); } catch (...) {} }
+        });
+    }
+}
+
+void qQuickItemDisconnectParentChanged(int64_t ptr) {
+    disconnectByKey(ConnKey{ptr, SIG_ITEM_PARENT});
+}
+
+void qQuickItemConnectChildrenChanged(int64_t ptr, void (*callback)()) {
+    QQuickItem* item = reinterpret_cast<QQuickItem*>(ptr);
+    if (item && callback) {
+        ConnKey key{ptr, SIG_ITEM_CHILDREN};
+        disconnectByKey(key);
+        LOCK_CALLBACKS();
+        g_voidCbs[key] = callback;
+        g_conns[key] = QObject::connect(item, &QQuickItem::childrenChanged, [key]() {
+            std::function<void()> cb;
+            {
+                LOCK_CALLBACKS();
+                auto i = g_voidCbs.find(key);
+                if (i != g_voidCbs.end()) cb = i->second;
+            }
+            if (cb) { try { cb(); } catch (...) {} }
+        });
+    }
+}
+
+void qQuickItemDisconnectChildrenChanged(int64_t ptr) {
+    disconnectByKey(ConnKey{ptr, SIG_ITEM_CHILDREN});
+}
+
+// ============================================================
+// QQuickWindow 信号
+// ============================================================
+
+void qQuickWindowConnectWidthChanged(int64_t ptr, void (*callback)(int32_t)) {
+    QQuickWindow* win = reinterpret_cast<QQuickWindow*>(ptr);
+    if (win && callback) {
+        ConnKey key{ptr, SIG_WIN_WIDTH};
+        disconnectByKey(key);
+        LOCK_CALLBACKS();
+        g_int32Cbs[key] = callback;
+        g_conns[key] = QObject::connect(win, &QQuickWindow::widthChanged, [key](int w) {
+            std::function<void(int32_t)> cb;
+            {
+                LOCK_CALLBACKS();
+                auto i = g_int32Cbs.find(key);
+                if (i != g_int32Cbs.end()) cb = i->second;
+            }
+            if (cb) { try { cb(static_cast<int32_t>(w)); } catch (...) {} }
+        });
+    }
+}
+
+void qQuickWindowDisconnectWidthChanged(int64_t ptr) {
+    disconnectByKey(ConnKey{ptr, SIG_WIN_WIDTH});
+}
+
+void qQuickWindowConnectHeightChanged(int64_t ptr, void (*callback)(int32_t)) {
+    QQuickWindow* win = reinterpret_cast<QQuickWindow*>(ptr);
+    if (win && callback) {
+        ConnKey key{ptr, SIG_WIN_HEIGHT};
+        disconnectByKey(key);
+        LOCK_CALLBACKS();
+        g_int32Cbs[key] = callback;
+        g_conns[key] = QObject::connect(win, &QQuickWindow::heightChanged, [key](int h) {
+            std::function<void(int32_t)> cb;
+            {
+                LOCK_CALLBACKS();
+                auto i = g_int32Cbs.find(key);
+                if (i != g_int32Cbs.end()) cb = i->second;
+            }
+            if (cb) { try { cb(static_cast<int32_t>(h)); } catch (...) {} }
+        });
+    }
+}
+
+void qQuickWindowDisconnectHeightChanged(int64_t ptr) {
+    disconnectByKey(ConnKey{ptr, SIG_WIN_HEIGHT});
+}
+
+void qQuickWindowConnectVisibleChanged(int64_t ptr, void (*callback)(int32_t)) {
+    QQuickWindow* win = reinterpret_cast<QQuickWindow*>(ptr);
+    if (win && callback) {
+        ConnKey key{ptr, SIG_WIN_VISIBLE};
+        disconnectByKey(key);
+        LOCK_CALLBACKS();
+        g_int32Cbs[key] = callback;
+        g_conns[key] = QObject::connect(win, &QQuickWindow::visibleChanged, [key](bool v) {
+            std::function<void(int32_t)> cb;
+            {
+                LOCK_CALLBACKS();
+                auto i = g_int32Cbs.find(key);
+                if (i != g_int32Cbs.end()) cb = i->second;
+            }
+            if (cb) { try { cb(v ? 1 : 0); } catch (...) {} }
+        });
+    }
+}
+
+void qQuickWindowDisconnectVisibleChanged(int64_t ptr) {
+    disconnectByKey(ConnKey{ptr, SIG_WIN_VISIBLE});
+}
+
+// ============================================================
+// QQmlComponent 信号
+// ============================================================
+
+void qQmlComponentConnectStatusChanged(int64_t ptr, void (*callback)(int32_t)) {
+    QQmlComponent* comp = reinterpret_cast<QQmlComponent*>(ptr);
+    if (comp && callback) {
+        ConnKey key{ptr, SIG_COMP_STATUS};
+        disconnectByKey(key);
+        LOCK_CALLBACKS();
+        g_int32Cbs[key] = callback;
+        g_conns[key] = QObject::connect(comp, &QQmlComponent::statusChanged, [key](QQmlComponent::Status status) {
+            std::function<void(int32_t)> cb;
+            {
+                LOCK_CALLBACKS();
+                auto i = g_int32Cbs.find(key);
+                if (i != g_int32Cbs.end()) cb = i->second;
+            }
+            if (cb) { try { cb(static_cast<int32_t>(status)); } catch (...) {} }
+        });
+    }
+}
+
+void qQmlComponentDisconnectStatusChanged(int64_t ptr) {
+    disconnectByKey(ConnKey{ptr, SIG_COMP_STATUS});
 }
 
 // ============================================================
