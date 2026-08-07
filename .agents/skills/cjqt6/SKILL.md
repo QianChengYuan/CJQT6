@@ -195,21 +195,21 @@ QMessageBox.information(parentPtr, "提示", "完成")
 $env:QTDIR = "C:\Qt\6.10.3\msvc2022_64"
 
 # 构建（MSVC 2022 x64）
-New-Item -ItemType Directory -Force -Path native\build_windows
-cd native\build_windows
+New-Item -ItemType Directory -Force -Path native\build_windows_x64
+cd native\build_windows_x64
 cmake ..\.. -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="$env:QTDIR"
 cmake --build . --config Release
 cd ..\..
 
 # 部署桥接库到 releases/（cjpm build 链接用）
-Copy-Item native\build_windows\bin\cjqt6_bridge.dll releases\windows-x64\ -Force
-Copy-Item native\build_windows\lib\cjqt6_bridge.lib releases\windows-x64\ -Force
+Copy-Item native\build_windows_x64\bin\cjqt6_bridge.dll releases\windows-x64\ -Force
+Copy-Item native\build_windows_x64\lib\cjqt6_bridge.lib releases\windows-x64\ -Force
 ```
-> ⚠️ **增量构建陷阱**：`native\build_windows` 有 CMake 缓存时，`cmake --build` 可能判定"已是最新"跳过实际链接（产物时间戳不变）。**需要确保重新编译时**用：
+> ⚠️ **增量构建陷阱**：`native\build_windows_x64` 有 CMake 缓存时，`cmake --build` 可能判定"已是最新"跳过实际链接（产物时间戳不变）。**需要确保重新编译时**用：
 > ```powershell
-> cmake --build native\build_windows --config Release --clean-first
+> cmake --build native\build_windows_x64 --config Release --clean-first
 > # 或删除缓存目录后重来：
-> Remove-Item -Recurse -Force native\build_windows
+> Remove-Item -Recurse -Force native\build_windows_x64
 > ```
 >
 > **Linux（含 WSL）**：在仓库根目录执行
@@ -253,8 +253,8 @@ C:\Qt\6.10.3\msvc2022_64\bin\windeployqt.exe examples\notepad\target\release\bin
 - **`unsafe` 块**：所有 `foreign func` 调用必须包在 `unsafe { }` 内（库内方法已包好，用户自定义 FFI 时要自己包）。
 - **字符串与 CString**：传给 FFI 的字符串用 `LibC.mallocCString(s)` 分配，用完 `LibC.free(c)`；用 `.toString()` 把 FFI 返回的 `CString` 转仓颉字符串。**不要让 CString 长期存活/逃逸**。
 - **无三元运算符**：用 `if/else` 表达式替代。
-- **无默认参数**：用命名参数或重载（库本身大量用重载，如 `addWidget(ptr)` 与 `addWidget(ptr, stretch)`）。
-- **`match` 分支体为单表达式**：每个 `case` 只能是一个表达式，不能写多条语句块。
+- **默认参数仅支持命名参数**：`p!: T = 默认值` 才可带默认值；非命名参数无默认值——库中可选参数用重载实现（如 `addWidget(ptr)` 与 `addWidget(ptr, stretch)`）。
+- **`match` 分支体不能使用 `{}` 包裹**：`case x =>` 后可直接跟 1~N 行 exprs（每行一个表达式，各占一行），分支值取最后一行表达式的值。
 - **`Int64` 作哈希键**：若用 `Int64`(如 `ptr`) 当 Map key，需 `& 0x3FFFFFFF` 位掩码。
 - **`ArrayList`**：用 `.add()` 添加、`.size` 取长度（不是 `push`/`length`）。
 - **`open class` 构造器内不能用 `this`**。
@@ -268,7 +268,7 @@ C:\Qt\6.10.3\msvc2022_64\bin\windeployqt.exe examples\notepad\target\release\bin
 |------|------------|
 | 程序崩溃 / 双击无反应 | 没部署 Qt6 DLL 到运行时 PATH，或没 `windeployqt`；先 `setup-qt-env.ps1` |
 | `cannot find -lcjqt6_bridge` | 桥接库未构建或未拷到 `releases/` → 重做 5.1 |
-| 桥接库改了代码但运行没变化 | 增量构建跳过链接 → 用 `cmake --build . --clean-first` 或删 `native\build_windows` 重来 |
+| 桥接库改了代码但运行没变化 | 增量构建跳过链接 → 用 `cmake --build . --clean-first` 或删 `native\build_windows_x64` 重来 |
 | 回调不触发 | 信号连接方法名写错（用 `setOnClick` 而非 `connect`）；`CFunc` 闭包捕获问题 → 改顶层 `let` + 全局 `?T` 变量 |
 | 控件不显示 / 布局错乱 | `addWidget` 忘了 `.getPtr()`；窗口没 `setLayout`；没 `window.show()` |
 | 文本对齐无效 | `setAlignment` 要传 `Alignment.Center.value`（Int32），不是 `Alignment.Center` 对象 |

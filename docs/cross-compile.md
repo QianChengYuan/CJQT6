@@ -130,8 +130,8 @@ Copy-Item lib\Release\cjqt6_bridge.lib ..\..\releases\windows-x64\
 $env:PATH = "C:\Qt\6.10.3\mingw_64\bin;C:\Qt\Tools\mingw1310_64\bin;$env:PATH"
 
 # 在项目根目录创建构建目录
-New-Item -ItemType Directory -Force -Path native\build_windows
-cd native\build_windows
+New-Item -ItemType Directory -Force -Path native\build_windows_x64
+cd native\build_windows_x64
 
 # 配置CMake
 cmake ..\.. `
@@ -281,7 +281,7 @@ ls -lh "$RELEASE_DIR/libcjqt6_bridge.so"
 $ErrorActionPreference = "Stop"
 
 $ProjectRoot = Split-Path -Parent $PSScriptRoot
-$BuildDir = Join-Path $ProjectRoot "native\build_windows"
+$BuildDir = Join-Path $ProjectRoot "native\build_windows_x64"
 $ReleaseDir = Join-Path $ProjectRoot "releases\windows-x64"
 
 Write-Host "=== 编译Windows x64桥接库 (MSVC 2022) ===" -ForegroundColor Green

@@ -27,7 +27,7 @@ if ([string]::IsNullOrEmpty($QtDir) -or -not (Test-Path "$QtDir\bin\Qt6Core.dll"
     exit 1
 }
 
-$buildDir = "native\build_windows"
+$buildDir = "native\build_windows_x64"
 
 # ---- Step 1: cmake configure if needed ----
 if (-not (Test-Path "$buildDir\CMakeCache.txt")) {
