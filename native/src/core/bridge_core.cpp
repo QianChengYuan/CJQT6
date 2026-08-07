@@ -464,7 +464,7 @@ void qWidgetSetWindowIcon(int64_t ptr, const char* iconPath) {
     if (widget && iconPath) widget->setWindowIcon(QIcon(iconPath));
 }
 
-__declspec(dllexport) void qWidgetSetWindowFlags(int64_t ptr, int32_t flags) {
+void qWidgetSetWindowFlags(int64_t ptr, int32_t flags) {
     QWidget* widget = reinterpret_cast<QWidget*>(ptr);
     if (widget) {
         widget->setWindowFlags(Qt::WindowFlags(QFlag(flags)));
