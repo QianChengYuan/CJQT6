@@ -7,7 +7,7 @@
   output-type = "executable"
   compile-option = ""
   override-compile-option = ""
-  link-option = "-LC:/CodeTools/cangjie_git/CJQT6/test_deploy -lcjqt6_bridge"
+  link-option = "-L../../../releases/windows-x64 -lcjqt6_bridge"
   package-configuration = {}
 
 

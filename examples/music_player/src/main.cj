@@ -4,13 +4,16 @@ import cjqt6.core.*
 import cjqt6.widgets.*
 import cjqt6.menu.*
 import cjqt6.dialogs.*
-import cjqt6.gui.*
+import cjqt6.gui.QVBoxLayout
+import cjqt6.gui.QHBoxLayout
+import cjqt6.gui.Alignment
 import cjqt6.multimedia.*
 import cjqt6.views.*
 import std.fs.*
 import std.env.*
 import std.collection.*
 import std.random.*
+import std.convert.*
 
 // ============================================================
 // CJQT6 音乐播放器 - 完整功能演示
@@ -54,6 +57,17 @@ class MusicItem {
     }
 }
 
+// 歌词行
+class LyricLine {
+    public var timeMs: Int64
+    public var text: String
+    
+    public init(timeMs: Int64, text: String) {
+        this.timeMs = timeMs
+        this.text = text
+    }
+}
+
 // 全局状态
 var mainWindow: ?QWidget = None
 var player: ?QMediaPlayer = None
@@ -65,9 +79,12 @@ var isPlaying: Bool = false
 var isMuted: Bool = false
 var currentVolume: Float32 = 0.7f32
 var currentSpeed: Float32 = 1.0f32
-var positionTimer: ?QTimer = None
 var isUpdatingSlider: Bool = false  // 防止 slider 更新循环
 let randomGen: Random = Random()
+
+// 歌词状态
+var lyricLines: ArrayList<LyricLine> = ArrayList<LyricLine>()
+var currentLyricIndex: Int32 = -1
 
 // 自定义图标路径
 var iconFolder: String = ""
@@ -85,13 +102,32 @@ var stopButton: ?QPushButton = None
 var nextButton: ?QPushButton = None
 var muteButton: ?QPushButton = None
 var playModeButton: ?QPushButton = None
+var speedButton: ?QPushButton = None
 var speedLabel: ?QLabel = None
+var volumeLabel: ?QLabel = None
+var addButton: ?QPushButton = None
+var folderButton: ?QPushButton = None
+var removeButton: ?QPushButton = None
+var clearButton: ?QPushButton = None
+var lyricLabel: ?QLabel = None
 var playlistWidget: ?QListWidget = None
 var statusLabel: ?QLabel = None
 
 // ============================================================
 // 图标辅助函数
 // ============================================================
+
+// 现代深色主题样式常量
+let QSS_WINDOW: String = "QWidget { background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #24262d, stop:1 #191b21); color: #e6e8ec; font-family: 'Microsoft YaHei UI', 'Microsoft YaHei', 'SimSun', sans-serif; font-size: 13px; } QLabel { background: transparent; color: #e6e8ec; } QPushButton { background: #2c2f38; border: 1px solid #3a3e49; border-radius: 8px; padding: 6px 14px; color: #d5d8e0; } QPushButton:hover { background: #3a3f4c; border-color: #4d9fff; } QPushButton:pressed { background: #22242b; } QPushButton:disabled { color: #5a5d66; background: #262931; } QMenuBar { background: transparent; } QMenuBar::item { background: transparent; padding: 5px 10px; border-radius: 6px; } QMenuBar::item:selected { background: #2f323d; } QMenu { background: #2c2f38; border: 1px solid #3a3e49; border-radius: 8px; padding: 4px; } QMenu::item { padding: 6px 24px; border-radius: 6px; color: #d5d8e0; } QMenu::item:selected { background: #4d9fff; color: #ffffff; } QMenu::separator { height: 1px; background: #3a3e49; margin: 4px 8px; } QSlider::groove:horizontal { height: 5px; background: #3a3e49; border-radius: 2px; } QSlider::sub-page:horizontal { background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #4d9fff, stop:1 #6fadff); border-radius: 2px; } QSlider::handle:horizontal { width: 14px; height: 14px; margin: -5px 0; background: #f2f3f5; border: 2px solid #4d9fff; border-radius: 7px; } QSlider::handle:horizontal:hover { background: #ffffff; } QListWidget { background: #232530; border: 1px solid #2f323d; border-radius: 10px; padding: 4px; outline: none; } QListWidget::item { padding: 7px 10px; border-radius: 6px; color: #c9cdd6; } QListWidget::item:hover { background: #2f323d; } QListWidget::item:selected { background: #3d7bfd; color: #ffffff; }"
+
+// 圆形控制按钮（上一曲/停止/下一曲）
+let QSS_BTN_TRANSPORT: String = "QPushButton { background: #2c2f38; border: none; border-radius: 20px; } QPushButton:hover { background: #3a3f4c; } QPushButton:pressed { background: #22242b; }"
+
+// 播放主按钮（强调色圆形）
+let QSS_BTN_PLAY: String = "QPushButton { background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #5b9dff, stop:1 #3d7bfd); border: none; border-radius: 28px; } QPushButton:hover { background: #6fadff; } QPushButton:pressed { background: #3d7bfd; }"
+
+// 透明小图标按钮（静音/速度）
+let QSS_BTN_ICON: String = "QPushButton { background: transparent; border: none; border-radius: 13px; } QPushButton:hover { background: #2f323d; } QPushButton:pressed { background: #232530; }"
 
 func setButtonIcon(btn: QPushButton, iconName: String, stdIcon: Int32) {
     if (useCustomIcons && !iconFolder.isEmpty()) {
@@ -110,23 +146,75 @@ func setButtonIcon(btn: QPushButton, iconName: String, stdIcon: Int32) {
     btn.setStandardIcon(stdIcon)
 }
 
+// 设置纯图标按钮（无文本）：自定义图标优先，不可用时回退到标准图标或文本
+func setIconOnlyButton(btn: QPushButton, iconName: String, stdIcon: Int32, fallbackText: String) {
+    if (useCustomIcons && !iconFolder.isEmpty()) {
+        let iconPath = "${iconFolder}/${iconName}.png"
+        try {
+            if (exists(Path(iconPath))) {
+                btn.setIcon(iconPath)
+                btn.setText("")
+                return
+            }
+        } catch (e: Exception) {
+            // 忽略错误，使用回退图标
+        }
+    }
+    btn.setStandardIcon(stdIcon)
+    if (stdIcon == StandardIcon.No) {
+        btn.setText(fallbackText)
+    } else {
+        btn.setText("")
+    }
+}
+
+// 自动探测自定义图标目录：优先当前目录下的 icons，其次是源码目录（相对 bin 运行时的 ../../../icons）
+func detectIconFolder(): String {
+    var candidates = ["icons", "../../../icons"]
+    for (c in candidates) {
+        try {
+            if (exists(Path(c))) {
+                return c
+            }
+        } catch (e: Exception) {
+        }
+    }
+    return ""
+}
+
 func loadCustomIcons() {
     // 设置各按钮图标
     if (let Some(btn) <- prevButton) {
-        setButtonIcon(btn, "prev", StandardIcon.MediaSkipBackward)
+        setIconOnlyButton(btn, "prev", StandardIcon.MediaSkipBackward, "")
     }
     if (let Some(btn) <- playButton) {
-        setButtonIcon(btn, if (isPlaying) { "pause" } else { "play" }, 
-            if (isPlaying) { StandardIcon.MediaPause } else { StandardIcon.MediaPlay })
+        setIconOnlyButton(btn, if (isPlaying) { "pause" } else { "play" }, 
+            if (isPlaying) { StandardIcon.MediaPause } else { StandardIcon.MediaPlay }, "")
     }
     if (let Some(btn) <- stopButton) {
-        setButtonIcon(btn, "stop", StandardIcon.MediaStop)
+        setIconOnlyButton(btn, "stop", StandardIcon.MediaStop, "")
     }
     if (let Some(btn) <- nextButton) {
-        setButtonIcon(btn, "next", StandardIcon.MediaSkipForward)
+        setIconOnlyButton(btn, "next", StandardIcon.MediaSkipForward, "")
     }
     if (let Some(btn) <- muteButton) {
-        setButtonIcon(btn, "mute", StandardIcon.No)  // 使用 No 作为静音图标
+        setIconOnlyButton(btn, if (isMuted) { "mute" } else { "volume" }, StandardIcon.No,
+            if (isMuted) { "取消" } else { "静音" })
+    }
+    if (let Some(btn) <- speedButton) {
+        setIconOnlyButton(btn, "speed", StandardIcon.No, "x1")
+    }
+    if (let Some(btn) <- addButton) {
+        setButtonIcon(btn, "add", StandardIcon.No)
+    }
+    if (let Some(btn) <- folderButton) {
+        setButtonIcon(btn, "folder", StandardIcon.No)
+    }
+    if (let Some(btn) <- removeButton) {
+        setButtonIcon(btn, "remove", StandardIcon.No)
+    }
+    if (let Some(btn) <- clearButton) {
+        setButtonIcon(btn, "clear", StandardIcon.No)
     }
 }
 
@@ -160,30 +248,201 @@ func formatTime(ms: Int64): String {
     }
 }
 
+// ============================================================
+// 歌词（LRC）解析与显示
+// ============================================================
+
+// HTML 转义，防止歌词中的特殊字符破坏富文本
+func escapeHtml(text: String): String {
+    var result = text
+    result = result.replace("&", "&amp;")
+    result = result.replace("<", "&lt;")
+    result = result.replace(">", "&gt;")
+    return result
+}
+
+// 解析 LRC 时间标签 [mm:ss.xx]，返回毫秒数；解析失败返回 -1
+func parseLrcTime(tag: String): Int64 {
+    var s = tag
+    // 去掉前后括号
+    if (s.startsWith("[")) {
+        s = s[1..s.size]
+    }
+    if (s.endsWith("]")) {
+        s = s[0..s.size - 1]
+    }
+    if (let Some(colon) <- s.indexOf(":")) {
+        if (colon <= 0) {
+            return -1
+        }
+        let mmStr = s[0..colon]
+        let rest = s[colon + 1..s.size]
+        let minutes = Int64.parse(mmStr)
+        if (minutes < 0) {
+            return -1
+        }
+        let secPart = Float64.parse(rest)  // 支持 ss 或 ss.xx
+        if (secPart < 0.0) {
+            return -1
+        }
+        return minutes * 60000 + Int64(secPart * 1000.0)
+    }
+    return -1
+}
+
+// 尝试加载与当前音频同名的 .lrc 歌词文件
+func loadLyrics(filePath: String) {
+    lyricLines = ArrayList<LyricLine>()
+    currentLyricIndex = -1
+    
+    // 将扩展名替换为 .lrc
+    var lrcPath = filePath
+    if (let Some(lastDot) <- filePath.lastIndexOf(".")) {
+        if (lastDot > 0) {
+            lrcPath = filePath[0..lastDot] + ".lrc"
+        } else {
+            lrcPath = filePath + ".lrc"
+        }
+    } else {
+        lrcPath = filePath + ".lrc"
+    }
+    
+    try {
+        if (!exists(Path(lrcPath))) {
+            resetLyrics()
+            return
+        }
+        let bytes = File.readFrom(lrcPath)
+        let content = String.fromUtf8(bytes)
+        let lines = content.split("\n")
+        
+        // 第一遍：解析所有形如 [mm:ss.xx] 的时间标签行
+        var temp: ArrayList<LyricLine> = ArrayList<LyricLine>()
+        for (line in lines) {
+            var rest = line
+            var tags: ArrayList<String> = ArrayList<String>()
+            // 收集行首的多个时间标签，如 [01:23][02:34]歌词
+            while (rest.startsWith("[")) {
+                if (let Some(closeIdx) <- rest.indexOf("]")) {
+                    if (closeIdx <= 0) {
+                        break
+                    }
+                    let tag = rest[0..closeIdx + 1]
+                    tags.add(tag)
+                    rest = rest[closeIdx + 1..rest.size]
+                } else {
+                    break
+                }
+            }
+            let text = rest.trimAscii()
+            for (tag in tags) {
+                let timeMs = parseLrcTime(tag)
+                if (timeMs >= 0 && !text.isEmpty()) {
+                    temp.add(LyricLine(timeMs, text))
+                }
+            }
+        }
+        
+        // 按时间排序（插入排序，保持稳定）
+        for (i in 1..temp.size) {
+            let key = temp[i]
+            var j = i
+            while (j > 0 && temp[j - 1].timeMs > key.timeMs) {
+                temp[j] = temp[j - 1]
+                j--
+            }
+            temp[j] = key
+        }
+        
+        if (temp.size > 0) {
+            lyricLines = temp
+            renderLyrics()
+            updateStatus("已加载歌词 (${lyricLines.size} 行)")
+        } else {
+            resetLyrics()
+            updateStatus("未找到可用歌词")
+        }
+    } catch (e: Exception) {
+        resetLyrics()
+    }
+}
+
+// 重置歌词显示为占位符
+func resetLyrics() {
+    lyricLines = ArrayList<LyricLine>()
+    currentLyricIndex = -1
+    if (let Some(lbl) <- lyricLabel) {
+        lbl.setText("<font color='#7a7e8a'>&lt;暂无歌词&gt;</font>")
+    }
+}
+
+// 根据播放位置更新歌词高亮
+func updateLyrics(pos: Int64) {
+    if (lyricLines.size == 0) {
+        return
+    }
+    
+    // 找到最后一行 timeMs <= pos 的歌词
+    var idx: Int32 = -1
+    for (i in 0..lyricLines.size) {
+        if (lyricLines[i].timeMs <= pos) {
+            idx = Int32(i)
+        } else {
+            break
+        }
+    }
+    
+    if (idx != currentLyricIndex) {
+        currentLyricIndex = idx
+        renderLyrics()
+    }
+}
+
+// 渲染当前歌词（高亮当前行，显示上下文）
+func renderLyrics() {
+    if (let Some(lbl) <- lyricLabel) {
+        if (lyricLines.size == 0) {
+            lbl.setText("<font color='#7a7e8a'>&lt;暂无歌词&gt;</font>")
+            return
+        }
+        var sb = ""
+        let idx = if (currentLyricIndex < 0) { Int32(0) } else { currentLyricIndex }
+        
+        // 前一行
+        if (idx > 0) {
+            sb += "<font color='#7a7e8a'>${escapeHtml(lyricLines[Int64(idx) - 1].text)}</font><br/>"
+        }
+        // 当前行
+        sb += "<font color='#ffffff' size='4'><b>${escapeHtml(lyricLines[Int64(idx)].text)}</b></font>"
+        // 后一行
+        if (idx < Int32(lyricLines.size) - 1) {
+            sb += "<br/><font color='#7a7e8a'>${escapeHtml(lyricLines[Int64(idx) + 1].text)}</font>"
+        }
+        lbl.setText(sb)
+    }
+}
+
 func updateUI() {
     if (let Some(lbl) <- titleLabel) {
         if (let Some(item) <- getCurrentItem()) {
-            lbl.setText("<font size='4' color='#0066cc'><b>${item.title}</b></font>")
+            lbl.setText("<font size='5' color='#ffffff'><b>${item.title}</b></font>")
         } else {
-            lbl.setText("<font size='4' color='#0066cc'><b>欢迎使用千千静听</b></font>")
+            lbl.setText("<font size='5' color='#ffffff'><b>欢迎使用音乐播放器</b></font>")
         }
     }
     
     if (let Some(lbl) <- artistLabel) {
         if (let Some(item) <- getCurrentItem()) {
-            lbl.setText("<font color='#666666'>${item.artist}</font>")
+            lbl.setText("<font color='#8b8e98'>${item.artist}</font>")
         } else {
-            lbl.setText("<font color='#666666'>双击列表开始播放</font>")
+            lbl.setText("<font color='#8b8e98'>双击列表开始播放</font>")
         }
     }
     
-    // 播放按钮图标切换
+    // 播放按钮图标切换（优先自定义图标，回退标准图标）
     if (let Some(btn) <- playButton) {
-        if (isPlaying) {
-            btn.setStandardIcon(StandardIcon.MediaPause)
-        } else {
-            btn.setStandardIcon(StandardIcon.MediaPlay)
-        }
+        setIconOnlyButton(btn, if (isPlaying) { "pause" } else { "play" },
+            if (isPlaying) { StandardIcon.MediaPause } else { StandardIcon.MediaPlay }, "")
     }
     
     if (let Some(lbl) <- speedLabel) {
@@ -196,10 +455,10 @@ func updateUI() {
 func updatePlayModeButton() {
     if (let Some(btn) <- playModeButton) {
         match (playMode) {
-            case PlayMode.Sequential => btn.setText(">")
-            case PlayMode.Loop => btn.setText("O")
-            case PlayMode.LoopOne => btn.setText("1")
-            case PlayMode.Random => btn.setText("?")
+            case PlayMode.Sequential => btn.setText("顺序")
+            case PlayMode.Loop => btn.setText("循环")
+            case PlayMode.LoopOne => btn.setText("单曲")
+            case PlayMode.Random => btn.setText("随机")
         }
     }
 }
@@ -334,6 +593,7 @@ func play() {
                 // 如果是新文件或已停止，加载文件
                 if (p.playbackState() == PlaybackState.stopped()) {
                     p.setSourceFile(item.filePath)
+                    loadLyrics(item.filePath)
                 }
                 p.play()
                 isPlaying = true
@@ -365,6 +625,7 @@ func stop() {
         if (let Some(lbl) <- timeLabel) {
             lbl.setText("0:00 / 0:00")
         }
+        resetLyrics()
         updateUI()
         updateStatus("已停止")
     }
@@ -428,6 +689,7 @@ func loadAndPlay() {
         p.stop()
         if (let Some(item) <- getCurrentItem()) {
             p.setSourceFile(item.filePath)
+            loadLyrics(item.filePath)
             p.play()
             isPlaying = true
             updateUI()
@@ -440,6 +702,10 @@ func toggleMute() {
     if (let Some(out) <- audioOutput) {
         isMuted = !isMuted
         out.setMuted(isMuted)
+        if (let Some(btn) <- muteButton) {
+            setIconOnlyButton(btn, if (isMuted) { "mute" } else { "volume" }, StandardIcon.No,
+                if (isMuted) { "取消" } else { "静音" })
+        }
         updateStatus(if (isMuted) { "已静音" } else { "已取消静音" })
     }
 }
@@ -448,6 +714,9 @@ func setVolume(value: Int32) {
     currentVolume = Float32(value) / 100.0f32
     if (let Some(audio) <- audioOutput) {
         audio.setVolume(currentVolume)
+    }
+    if (let Some(lbl) <- volumeLabel) {
+        lbl.setText("${value}%")
     }
 }
 
@@ -507,41 +776,8 @@ func changeSpeed() {
 }
 
 // ============================================================
-// 位置定时器
+// 播放结束处理
 // ============================================================
-
-func startPositionTimer() {
-    if (let Some(timer) <- positionTimer) {
-        timer.setInterval(500)
-        timer.start()
-    }
-}
-
-func stopPositionTimer() {
-    if (let Some(timer) <- positionTimer) {
-        timer.stop()
-    }
-}
-
-func updatePosition() {
-    if (let Some(p) <- player) {
-        let pos = p.position()
-        let dur = p.duration()
-        
-        if (dur > 0) {
-            // 更新进度条
-            if (let Some(slider) <- progressSlider) {
-                let percent = Int32(pos * 100 / dur)
-                slider.setValue(percent)
-            }
-            
-            // 更新时间显示
-            if (let Some(lbl) <- timeLabel) {
-                lbl.setText("${formatTime(pos)} / ${formatTime(dur)}")
-            }
-        }
-    }
-}
 
 func onPlaybackFinished() {
     isPlaying = false
@@ -552,7 +788,15 @@ func onPlaybackFinished() {
             if (currentIndex < Int32(playList.size) - 1) {
                 next()
             } else {
-                // 播放完毕
+                // 播放完毕，复位界面
+                if (let Some(slider) <- progressSlider) {
+                    slider.setValue(0)
+                }
+                if (let Some(lbl) <- timeLabel) {
+                    lbl.setText("0:00 / 0:00")
+                }
+                resetLyrics()
+                updateUI()
                 updateStatus("播放完毕")
             }
         case PlayMode.Loop =>
@@ -642,6 +886,7 @@ func cbPositionChanged(pos: Int64): Unit {
                 lbl.setText("${formatTime(pos)} / ${formatTime(dur)}")
             }
         }
+        updateLyrics(pos)
     }
 }
 
@@ -658,7 +903,25 @@ func cbDurationChanged(dur: Int64): Unit {
 
 @C
 func cbMediaStatusChanged(status: Int32): Unit {
-    // 暂时禁用此回调，改用 playbackStateChanged
+    // status: 0=NoMedia, 1=Loading, 2=Loaded, 3=Buffering, 4=Stalled, 5=Buffered, 6=EndOfMedia, 7=InvalidMedia
+    // 媒体加载完成时读取元数据（标题/艺术家/时长）并刷新界面
+    if (status == MediaStatus.loaded() || status == MediaStatus.buffered()) {
+        if (let Some(p) <- player) {
+            if (let Some(item) <- getCurrentItem()) {
+                item.updateInfo(p)
+                // 刷新播放列表行文本：文件名 + 时长
+                if (let Some(list) <- playlistWidget) {
+                    var rowText = item.fileName
+                    if (item.duration > 0) {
+                        rowText += "  [${formatTime(item.duration)}]"
+                    }
+                    list.setItemText(currentIndex, rowText)
+                }
+                updateUI()
+                updateStatus("已加载: ${item.title} - ${item.artist}")
+            }
+        }
+    }
 }
 
 @C
@@ -699,10 +962,6 @@ let onExit: VoidCallback = { =>
         out.delete()
         audioOutput = None
     }
-    if (let Some(t) <- positionTimer) {
-        t.delete()
-        positionTimer = None
-    }
     QApp.quit()
 }
 let onAbout: VoidCallback = { => about() }
@@ -737,17 +996,18 @@ main(): Int32 {
     
     // 创建主窗口
     let window = QWidget()
-    window.setTitle("千千静听 - CJQT版")
-    window.resize(380, 520)
+    window.setTitle("音乐播放器 - CJQT6")
+    window.resize(460, 640)
+    window.setMinimumSize(420, 560)
     mainWindow = window
     
-    // 千千静听经典风格样式
-    window.setStyleSheet("QWidget { background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #e8f4fc, stop:1 #d0e8f8); color: #333; font-family: 'Microsoft YaHei', 'SimSun', sans-serif; font-size: 12px; } QLabel { background: transparent; color: #333; } QPushButton { background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #f8f8f8, stop:1 #e0e0e0); border: 1px solid #aaa; border-radius: 3px; padding: 5px 10px; color: #333; } QPushButton:hover { background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #fff, stop:1 #f0f0f0); border-color: #6699cc; } QPushButton:pressed { background: #c0d8f0; } QSlider::groove:horizontal { height: 6px; background: #c0c0c0; border-radius: 3px; } QSlider::handle:horizontal { width: 12px; height: 12px; margin: -3px 0; background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #fff, stop:1 #ddd); border: 1px solid #999; border-radius: 6px; } QSlider::sub-page:horizontal { background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #4a90d9, stop:1 #7eb8f0); border-radius: 3px; } QListWidget { background: #fff; border: 1px solid #aaa; border-radius: 3px; } QListWidget::item { padding: 3px 5px; } QListWidget::item:selected { background: #c0d8f0; color: #000; } QListWidget::item:hover { background: #e0f0ff; } QMenuBar { background: transparent; } QMenuBar::item { padding: 3px 8px; } QMenu { background: #fff; border: 1px solid #aaa; } QMenu::item { padding: 5px 20px; } QMenu::item:selected { background: #c0d8f0; }")
+    // 现代深色主题样式
+    window.setStyleSheet(QSS_WINDOW)
     
     // 主布局
     let mainLayout = QVBoxLayout()
-    mainLayout.setSpacing(8)
-    mainLayout.setMargin(10)
+    mainLayout.setSpacing(10)
+    mainLayout.setMargin(14)
     
     // ========== 菜单栏（顶部） ==========
     let menuBar = QMenuBar()
@@ -792,186 +1052,249 @@ main(): Int32 {
     
     mainLayout.addWidget(menuBar.getPtr())
     
-    // ========== 歌曲信息区域 ==========
+    // ========== 头部：封面 + 曲目信息 ==========
+    let headerWidget = QWidget()
+    headerWidget.setStyleSheet("background: transparent;")
+    let headerLayout = QHBoxLayout()
+    headerLayout.setSpacing(14)
+    headerLayout.setMargin(2)
+    
+    // 封面占位（圆形渐变）
+    let cover = QLabel()
+    cover.setMinimumSize(92, 92)
+    cover.setMaximumSize(92, 92)
+    cover.setAlignment(Alignment.Center.value)
+    cover.setText("<span style='font-size:38px; color:#4d9fff;'>&#9835;</span>")
+    cover.setStyleSheet("QLabel { background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #34384a, stop:1 #232530); border: 1px solid #3a3e49; border-radius: 46px; }")
+    headerLayout.addWidget(cover.getPtr())
+    
+    // 右侧：标题 + 艺术家
+    let infoLayout = QVBoxLayout()
+    infoLayout.setSpacing(6)
+    
     let title = QLabel()
-    title.setText("<font size='4' color='#0066cc'><b>欢迎使用千千静听</b></font>")
-    title.setAlignment(0x04 | 0x01)
+    title.setText("<font size='5' color='#ffffff'><b>欢迎使用音乐播放器</b></font>")
+    title.setAlignment((Alignment.Left | Alignment.VCenter).value)
+    title.setWordWrap(true)
     titleLabel = title
-    mainLayout.addWidget(title.getPtr())
+    infoLayout.addWidget(title.getPtr())
     
     let artist = QLabel()
-    artist.setText("<font color='#666666'>双击列表开始播放</font>")
-    artist.setAlignment(0x04)
+    artist.setText("<font color='#8b8e98'>双击列表开始播放</font>")
+    artist.setAlignment((Alignment.Left | Alignment.VCenter).value)
     artistLabel = artist
-    mainLayout.addWidget(artist.getPtr())
+    infoLayout.addWidget(artist.getPtr())
     
-    // ========== 歌词显示区域（预留） ==========
+    headerLayout.addLayout(infoLayout.getPtr())
+    headerWidget.setLayout(headerLayout.getPtr())
+    mainLayout.addWidget(headerWidget.getPtr())
+    
+    // ========== 歌词显示区域 ==========
     let lyricWidget = QWidget()
-    lyricWidget.setStyleSheet("background: #fff; border: 1px solid #aaa; border-radius: 3px;")
+    lyricWidget.setMinimumSize(0, 110)
+    lyricWidget.setStyleSheet("QWidget { background: #232530; border: 1px solid #2f323d; border-radius: 10px; } QLabel { background: transparent; }")
     let lyricLayout = QVBoxLayout()
-    let lyricLabel = QLabel()
-    lyricLabel.setText("<font color='#999999'>&lt;歌词显示区域&gt;</font>")
-    lyricLabel.setAlignment(0x04 | 0x01)
-    lyricLayout.addWidget(lyricLabel.getPtr())
+    lyricLayout.setMargin(10)
+    let lyricLbl = QLabel()
+    lyricLbl.setText("<font color='#7a7e8a'>&lt;歌词显示区域&gt;</font>")
+    lyricLbl.setAlignment(Alignment.Center.value)
+    lyricLbl.setWordWrap(true)
+    lyricLayout.addWidget(lyricLbl.getPtr())
     lyricWidget.setLayout(lyricLayout.getPtr())
     mainLayout.addWidget(lyricWidget.getPtr())
+    lyricLabel = lyricLbl
     
     // ========== 进度条区域 ==========
-    let progressWidget = QWidget()
-    progressWidget.setStyleSheet("background: transparent;")
-    let progressLayout = QVBoxLayout()
-    progressLayout.setSpacing(2)
-    
     let slider = QSlider()
     slider.setOrientation(0x01)
     slider.setRange(0, 100)
     slider.setValue(0)
     slider.setOnValueChanged({ pos => setPosition(pos) })
     progressSlider = slider
-    progressLayout.addWidget(slider.getPtr())
+    mainLayout.addWidget(slider.getPtr())
     
     let time = QLabel()
     time.setText("00:00 / 00:00")
-    time.setAlignment(0x04)
+    time.setAlignment(Alignment.Right.value)
+    time.setStyleSheet("color: #8b8e98; font-size: 12px;")
     timeLabel = time
-    progressLayout.addWidget(time.getPtr())
+    mainLayout.addWidget(time.getPtr())
     
-    progressWidget.setLayout(progressLayout.getPtr())
-    mainLayout.addWidget(progressWidget.getPtr())
-    
-    // ========== 控制按钮区域 ==========
+    // ========== 播放控制（上一曲/播放/停止/下一曲） ==========
     let controlWidget = QWidget()
     controlWidget.setStyleSheet("background: transparent;")
     let controlLayout = QHBoxLayout()
-    controlLayout.setSpacing(5)
+    controlLayout.setSpacing(20)
+    controlLayout.addStretch()
     
-    // 上一曲 - 使用标准图标
+    // 上一曲
     let prevBtn = QPushButton()
+    prevBtn.setMinimumSize(40, 40)
+    prevBtn.setMaximumSize(40, 40)
+    prevBtn.setIconSize(20, 20)
+    prevBtn.setStyleSheet(QSS_BTN_TRANSPORT)
     prevBtn.setStandardIcon(StandardIcon.MediaSkipBackward)
-    prevBtn.setIconSize(24, 24)
     prevBtn.setOnClick(onPrev)
     prevButton = prevBtn
     controlLayout.addWidget(prevBtn.getPtr())
     
-    // 播放/暂停 - 主按钮（切换状态）
+    // 播放/暂停 - 主按钮（强调色圆形）
     let playBtn = QPushButton()
+    playBtn.setMinimumSize(56, 56)
+    playBtn.setMaximumSize(56, 56)
+    playBtn.setIconSize(30, 30)
+    playBtn.setStyleSheet(QSS_BTN_PLAY)
     playBtn.setStandardIcon(StandardIcon.MediaPlay)
-    playBtn.setIconSize(28, 28)
-    playBtn.setStyleSheet("min-width: 50px; min-height: 40px;")
     playBtn.setOnClick(onTogglePlay)
     playButton = playBtn
     controlLayout.addWidget(playBtn.getPtr())
     
     // 停止
     let stopBtn = QPushButton()
+    stopBtn.setMinimumSize(40, 40)
+    stopBtn.setMaximumSize(40, 40)
+    stopBtn.setIconSize(20, 20)
+    stopBtn.setStyleSheet(QSS_BTN_TRANSPORT)
     stopBtn.setStandardIcon(StandardIcon.MediaStop)
-    stopBtn.setIconSize(24, 24)
     stopBtn.setOnClick(onStop)
     stopButton = stopBtn
     controlLayout.addWidget(stopBtn.getPtr())
     
     // 下一曲
     let nextBtn = QPushButton()
+    nextBtn.setMinimumSize(40, 40)
+    nextBtn.setMaximumSize(40, 40)
+    nextBtn.setIconSize(20, 20)
+    nextBtn.setStyleSheet(QSS_BTN_TRANSPORT)
     nextBtn.setStandardIcon(StandardIcon.MediaSkipForward)
-    nextBtn.setIconSize(24, 24)
     nextBtn.setOnClick(onNext)
     nextButton = nextBtn
     controlLayout.addWidget(nextBtn.getPtr())
     
+    controlLayout.addStretch()
+    controlWidget.setLayout(controlLayout.getPtr())
+    mainLayout.addWidget(controlWidget.getPtr())
+    
+    // ========== 辅助控制（播放模式 / 速度 / 音量） ==========
+    let utilWidget = QWidget()
+    utilWidget.setStyleSheet("background: transparent;")
+    let utilLayout = QHBoxLayout()
+    utilLayout.setSpacing(8)
+    
     // 播放模式
     let modeBtn = QPushButton()
-    modeBtn.setText(">")
-    modeBtn.setStyleSheet("min-width: 30px;")
+    modeBtn.setText("顺序")
+    modeBtn.setMinimumSize(52, 30)
     modeBtn.setOnClick(onChangePlayMode)
     playModeButton = modeBtn
-    controlLayout.addWidget(modeBtn.getPtr())
+    utilLayout.addWidget(modeBtn.getPtr())
     
     // 速度
     let speedBtn = QPushButton()
+    speedBtn.setMinimumSize(30, 30)
+    speedBtn.setMaximumSize(30, 30)
+    speedBtn.setIconSize(18, 18)
+    speedBtn.setStyleSheet(QSS_BTN_ICON)
     speedBtn.setText("x1")
-    speedBtn.setStyleSheet("min-width: 30px;")
     speedBtn.setOnClick(onChangeSpeed)
-    controlLayout.addWidget(speedBtn.getPtr())
+    speedButton = speedBtn
+    utilLayout.addWidget(speedBtn.getPtr())
     
-    // 分隔
-    let sepLabel = QLabel()
-    sepLabel.setText("  ")
-    controlLayout.addWidget(sepLabel.getPtr())
+    let speed = QLabel()
+    speed.setText("1.0x")
+    speed.setStyleSheet("color: #8b8e98; font-size: 12px; min-width: 34px;")
+    speedLabel = speed
+    utilLayout.addWidget(speed.getPtr())
     
-    // 音量图标
-    let volLabel = QLabel()
-    volLabel.setText("Vol:")
-    controlLayout.addWidget(volLabel.getPtr())
+    utilLayout.addStretch()
     
+    // 静音
+    let muteBtn = QPushButton()
+    muteBtn.setMinimumSize(40, 26)
+    muteBtn.setIconSize(16, 16)
+    muteBtn.setStyleSheet(QSS_BTN_ICON)
+    muteBtn.setText("静音")
+    muteBtn.setOnClick(onToggleMute)
+    muteButton = muteBtn
+    utilLayout.addWidget(muteBtn.getPtr())
+    
+    // 音量滑块
     let volSlider = QSlider()
     volSlider.setOrientation(0x01)
     volSlider.setRange(0, 100)
     volSlider.setValue(70)
+    volSlider.setMinimumSize(90, 20)
+    volSlider.setMaximumSize(120, 20)
     volSlider.setOnValueChanged({ value => setVolume(value) })
     volumeSlider = volSlider
-    controlLayout.addWidget(volSlider.getPtr())
+    utilLayout.addWidget(volSlider.getPtr())
     
-    // 静音
-    let muteBtn = QPushButton()
-    muteBtn.setText("M")
-    muteBtn.setStyleSheet("min-width: 25px;")
-    muteBtn.setOnClick(onToggleMute)
-    muteButton = muteBtn
-    controlLayout.addWidget(muteBtn.getPtr())
+    let volPct = QLabel()
+    volPct.setText("70%")
+    volPct.setStyleSheet("color: #8b8e98; font-size: 12px; min-width: 32px;")
+    volumeLabel = volPct
+    utilLayout.addWidget(volPct.getPtr())
     
-    controlWidget.setLayout(controlLayout.getPtr())
-    mainLayout.addWidget(controlWidget.getPtr())
+    utilWidget.setLayout(utilLayout.getPtr())
+    mainLayout.addWidget(utilWidget.getPtr())
     
     // ========== 播放列表 ==========
     let listWidget = QListWidget()
+    listWidget.setMinimumSize(0, 150)
     listWidget.setOnItemDoubleClicked({ row => onPlaylistDoubleClicked(row) })
     playlistWidget = listWidget
-    mainLayout.addWidget(listWidget.getPtr())
+    mainLayout.addWidget(listWidget.getPtr(), 1)
     
     // ========== 列表操作按钮 ==========
     let listBtnWidget = QWidget()
     listBtnWidget.setStyleSheet("background: transparent;")
     let listBtnLayout = QHBoxLayout()
-    listBtnLayout.setSpacing(5)
+    listBtnLayout.setSpacing(8)
     
     let addFilesBtn = QPushButton()
-    addFilesBtn.setText("+ 添加")
+    addFilesBtn.setIconSize(16, 16)
+    addFilesBtn.setText("添加")
     addFilesBtn.setOnClick(onAddFiles)
+    addButton = addFilesBtn
     listBtnLayout.addWidget(addFilesBtn.getPtr())
     
     let addFolderBtn = QPushButton()
-    addFolderBtn.setText("+ 目录")
+    addFolderBtn.setIconSize(16, 16)
+    addFolderBtn.setText("目录")
     addFolderBtn.setOnClick(onAddFolder)
+    folderButton = addFolderBtn
     listBtnLayout.addWidget(addFolderBtn.getPtr())
     
     let removeBtn = QPushButton()
-    removeBtn.setText("- 移除")
+    removeBtn.setIconSize(16, 16)
+    removeBtn.setText("移除")
     removeBtn.setOnClick(onRemoveSelected)
+    removeButton = removeBtn
     listBtnLayout.addWidget(removeBtn.getPtr())
     
     let clearBtn = QPushButton()
+    clearBtn.setIconSize(16, 16)
     clearBtn.setText("清空")
     clearBtn.setOnClick(onClearPlaylist)
+    clearButton = clearBtn
     listBtnLayout.addWidget(clearBtn.getPtr())
     
-    let speedBtn2 = QPushButton()
-    speedBtn2.setText("速度")
-    speedBtn2.setOnClick(onChangeSpeed)
-    listBtnLayout.addWidget(speedBtn2.getPtr())
-    
-    let speed = QLabel()
-    speed.setText("1.0x")
-    speedLabel = speed
-    listBtnLayout.addWidget(speed.getPtr())
-    
+    listBtnLayout.addStretch()
     listBtnWidget.setLayout(listBtnLayout.getPtr())
     mainLayout.addWidget(listBtnWidget.getPtr())
     
     // ========== 状态栏 ==========
     let status = QLabel()
     status.setText("就绪 - 点击「添加」添加音乐文件")
+    status.setStyleSheet("color: #7a7e8a; font-size: 12px;")
     statusLabel = status
     mainLayout.addWidget(status.getPtr())
+    
+    // 自动加载自定义图标（icons 目录存在时）
+    let detectedIcons = detectIconFolder()
+    if (!detectedIcons.isEmpty()) {
+        setIconFolder(detectedIcons)
+    }
     
     window.setLayout(mainLayout.getPtr())
     window.show()

@@ -88,12 +88,19 @@ native/src/tools/
 
 # 示例媒体文件（太大）
 examples/music_player/music/*.mp3
+examples/music_player/music/*.flac
+examples/music_player/music/*.lrc
 examples/multimedia_demo/*.mp3
 examples/**/*.wav
 examples/**/*.ogg
 
 # 打包文件（发行版使用）
 *.cjp
+
+# 发布流程中间产物（7z 归档及解压目录，通过 GitCode Releases 分发，不入库）
+releases/**/*.7z
+releases/**/windows_x64_*/
+releases/**/linux_x64_*/
 
 # Linux交叉编译输出
 build_linux/
