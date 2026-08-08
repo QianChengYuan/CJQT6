@@ -1,5 +1,7 @@
 package cjqt6.multimedia
 
+import cjqt6.core.*
+
 // QMediaPlayer - 媒体播放器
 foreign func qMediaPlayerCreate(): Int64
 foreign func qMediaPlayerSetSource(ptr: Int64, url: CString): Unit
@@ -181,7 +183,9 @@ public class QMediaPlayer {
             var cstr = LibC.mallocCString(key)
             let result = qMediaPlayerMetaData(ptr, cstr)
             LibC.free(cstr)
-            return result.toString()
+            let str = result.toString()
+            freeBridgeString(result)
+            return str
         }
     }
     
@@ -206,7 +210,12 @@ public class QMediaPlayer {
     }
     
     public func errorString(): String {
-        unsafe { qMediaPlayerErrorString(ptr).toString() }
+        unsafe {
+            let cstr = qMediaPlayerErrorString(ptr)
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            result
+        }
     }
     
     // 信号回调注册

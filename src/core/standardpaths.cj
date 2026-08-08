@@ -52,7 +52,9 @@ public class QStandardPaths {
     public static func writableLocation(`type`: Int32): String {
         unsafe {
             let cstr = qStandardPathWritableLocation(`type`)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 
@@ -61,8 +63,10 @@ public class QStandardPaths {
         unsafe {
             let cstrFile = LibC.mallocCString(fileName)
             let cstr = qStandardPathLocate(`type`, cstrFile)
+            let result = cstr.toString()
+            freeBridgeString(cstr)
             LibC.free(cstrFile)
-            return cstr.toString()
+            return result
         }
     }
 
@@ -70,7 +74,9 @@ public class QStandardPaths {
     public static func displayName(`type`: Int32): String {
         unsafe {
             let cstr = qStandardPathDisplayName(`type`)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 
@@ -78,7 +84,9 @@ public class QStandardPaths {
     public static func tempDir(): String {
         unsafe {
             let cstr = qStandardPathTempDir()
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 }

@@ -12,6 +12,7 @@
 #include <mutex>
 #include <atomic>
 #include <thread>
+#include "bridge_string_utils.h"
 
 extern "C" {
 
@@ -58,12 +59,10 @@ void qNetworkRequestSetUrl(int64_t ptr, const char* url) {
 
 const char* qNetworkRequestUrl(int64_t ptr) {
     QNetworkRequest* req = reinterpret_cast<QNetworkRequest*>(ptr);
-    static QByteArray buffer;
     if (req) {
-        buffer = req->url().toString().toUtf8();
-        return buffer.constData();
+        return cjqt6::dupUtf8(req->url().toString());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qNetworkRequestSetHeader(int64_t ptr, int32_t header, const char* value) {
@@ -75,12 +74,10 @@ void qNetworkRequestSetHeader(int64_t ptr, int32_t header, const char* value) {
 
 const char* qNetworkRequestHeader(int64_t ptr, int32_t header) {
     QNetworkRequest* req = reinterpret_cast<QNetworkRequest*>(ptr);
-    static QByteArray buffer;
     if (req) {
-        buffer = req->header(static_cast<QNetworkRequest::KnownHeaders>(header)).toString().toUtf8();
-        return buffer.constData();
+        return cjqt6::dupUtf8(req->header(static_cast<QNetworkRequest::KnownHeaders>(header)).toString());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qNetworkRequestSetRawHeader(int64_t ptr, const char* name, const char* value) {
@@ -101,12 +98,10 @@ void qNetworkRequestSetTransferTimeout(int64_t ptr, int32_t timeoutMs) {
 
 const char* qNetworkReplyReadAll(int64_t ptr) {
     QNetworkReply* reply = reinterpret_cast<QNetworkReply*>(ptr);
-    static QByteArray buffer;
     if (reply) {
-        buffer = reply->readAll();
-        return buffer.constData();
+        return cjqt6::dupUtf8(reply->readAll());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 int64_t qNetworkReplyBytesAvailable(int64_t ptr) {
@@ -122,12 +117,10 @@ int32_t qNetworkReplyError(int64_t ptr) {
 
 const char* qNetworkReplyErrorString(int64_t ptr) {
     QNetworkReply* reply = reinterpret_cast<QNetworkReply*>(ptr);
-    static QByteArray buffer;
     if (reply) {
-        buffer = reply->errorString().toUtf8();
-        return buffer.constData();
+        return cjqt6::dupUtf8(reply->errorString());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 int32_t qNetworkReplyStatusCode(int64_t ptr) {
@@ -140,12 +133,10 @@ int32_t qNetworkReplyStatusCode(int64_t ptr) {
 
 const char* qNetworkReplyHeader(int64_t ptr, int32_t header) {
     QNetworkReply* reply = reinterpret_cast<QNetworkReply*>(ptr);
-    static QByteArray buffer;
     if (reply) {
-        buffer = reply->header(static_cast<QNetworkRequest::KnownHeaders>(header)).toString().toUtf8();
-        return buffer.constData();
+        return cjqt6::dupUtf8(reply->header(static_cast<QNetworkRequest::KnownHeaders>(header)).toString());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 bool qNetworkReplyIsFinished(int64_t ptr) {
@@ -181,12 +172,10 @@ void qNetworkReplyDelete(int64_t ptr) {
 
 const char* qNetworkReplyUrl(int64_t ptr) {
     QNetworkReply* reply = reinterpret_cast<QNetworkReply*>(ptr);
-    static QByteArray buffer;
     if (reply) {
-        buffer = reply->url().toString().toUtf8();
-        return buffer.constData();
+        return cjqt6::dupUtf8(reply->url().toString());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 // ============================================================

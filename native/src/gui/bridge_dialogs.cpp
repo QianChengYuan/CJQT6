@@ -16,20 +16,11 @@
 #include <QErrorMessage>
 #include <QWizard>
 #include <QWizardPage>
+#include "bridge_string_utils.h"
 
-// 静态存储用于返回字符串（使用char数组避免悬空指针）
-static char g_stringBuffer[4096];
-
-// 安全复制QString到静态缓冲区
-static const char* safeCopyString(const QString& str) {
-    QByteArray utf8 = str.toUtf8();
-    int len = utf8.size();
-    if (len >= (int)sizeof(g_stringBuffer)) {
-        len = sizeof(g_stringBuffer) - 1;
-    }
-    std::memcpy(g_stringBuffer, utf8.constData(), len);
-    g_stringBuffer[len] = '\0';
-    return g_stringBuffer;
+// 安全复制QString为malloc分配的堆字符串
+static char* safeCopyString(const QString& str) {
+    return cjqt6::dupUtf8(str);
 }
 
 extern "C" {

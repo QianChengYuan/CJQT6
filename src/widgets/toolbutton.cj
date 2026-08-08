@@ -93,7 +93,9 @@ public class QToolButton <: QtResource {
         checkValid()
         unsafe {
             let cstr = qToolButtonText(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 

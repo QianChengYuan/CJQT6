@@ -6,6 +6,7 @@
 #include <QTableWidget>
 #include <QTableWidgetItem>
 #include <QHeaderView>
+#include "bridge_string_utils.h"
 
 extern "C" {
 
@@ -92,12 +93,10 @@ const char* qTableWidgetItemText(int64_t ptr, int32_t row, int32_t col) {
     if (table) {
         QTableWidgetItem* item = table->item(row, col);
         if (item) {
-            static QString text;
-            text = item->text();
-            return text.toUtf8().constData();
+            return cjqt6::dupUtf8(item->text());
         }
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qTableWidgetClear(int64_t ptr) {

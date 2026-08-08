@@ -25,6 +25,8 @@
 #include <unordered_map>
 #include <exception>
 #include <cstdio>
+#include <cstdlib>
+#include "bridge_string_utils.h"
 
 // 全局应用程序指针
 static QApplication* g_app = nullptr;
@@ -38,6 +40,16 @@ std::unordered_map<int64_t, std::function<void(int64_t)>> g_buttonCallbacks;
 std::unordered_map<int64_t, std::function<void(int64_t)>> g_timerCallbacks;
 
 extern "C" {
+
+// ============================================================
+// 通用字符串释放
+// 桥接层用 std::malloc 分配返回字符串；仓颉侧 LibC.free 绑定的是
+// msvcrt free，无法释放本库(UCRT) malloc 的内存，必须经由本函数
+// 让 malloc/free 处于同一堆，避免堆损坏崩溃/挂起。
+// ============================================================
+void qCStringFree(const char* s) {
+    std::free(const_cast<char*>(s));
+}
 
 // ============================================================
 // QApplication 桥接函数
@@ -224,11 +236,9 @@ void qWidgetSetStyleSheet(int64_t ptr, const char* styleSheet) {
 const char* qWidgetStyleSheet(int64_t ptr) {
     QWidget* widget = reinterpret_cast<QWidget*>(ptr);
     if (widget) {
-        static QByteArray styleSheet;
-        styleSheet = widget->styleSheet().toUtf8();
-        return styleSheet.constData();
+        return cjqt6::dupUtf8(widget->styleSheet());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qWidgetSetEnabled(int64_t ptr, int32_t enabled) {
@@ -415,16 +425,12 @@ void qApplicationSetLocale(const char* locale) {
 
 // 获取当前语言环境
 const char* qApplicationLocale() {
-    static QByteArray buffer;
-    buffer = QLocale().name().toUtf8();  // 例如 "zh_CN"
-    return buffer.constData();
+    return cjqt6::dupUtf8(QLocale().name());  // 例如 "zh_CN"
 }
 
 // 获取系统语言环境
 const char* qApplicationSystemLocale() {
-    static QByteArray buffer;
-    buffer = QLocale::system().name().toUtf8();
-    return buffer.constData();
+    return cjqt6::dupUtf8(QLocale::system().name());
 }
 
 // 切换语言（同时加载Qt翻译）
@@ -478,11 +484,9 @@ void qWidgetSetWindowFlags(int64_t ptr, int32_t flags) {
 const char* qClipboardText() {
     QClipboard* clipboard = QApplication::clipboard();
     if (clipboard) {
-        static QByteArray text;
-        text = clipboard->text().toUtf8();
-        return text.constData();
+        return cjqt6::dupUtf8(clipboard->text());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qClipboardSetText(const char* text) {
@@ -565,27 +569,19 @@ void qShortcutDelete(int64_t ptr) {
 // ============================================================
 
 const char* qStandardPathWritableLocation(int32_t type) {
-    static QByteArray path;
-    path = QStandardPaths::writableLocation(static_cast<QStandardPaths::StandardLocation>(type)).toUtf8();
-    return path.constData();
+    return cjqt6::dupUtf8(QStandardPaths::writableLocation(static_cast<QStandardPaths::StandardLocation>(type)));
 }
 
 const char* qStandardPathLocate(int32_t type, const char* fileName) {
-    static QByteArray path;
-    path = QStandardPaths::locate(static_cast<QStandardPaths::StandardLocation>(type), QString::fromUtf8(fileName)).toUtf8();
-    return path.constData();
+    return cjqt6::dupUtf8(QStandardPaths::locate(static_cast<QStandardPaths::StandardLocation>(type), QString::fromUtf8(fileName)));
 }
 
 const char* qStandardPathDisplayName(int32_t type) {
-    static QByteArray name;
-    name = QStandardPaths::displayName(static_cast<QStandardPaths::StandardLocation>(type)).toUtf8();
-    return name.constData();
+    return cjqt6::dupUtf8(QStandardPaths::displayName(static_cast<QStandardPaths::StandardLocation>(type)));
 }
 
 const char* qStandardPathTempDir() {
-    static QByteArray path;
-    path = QStandardPaths::writableLocation(QStandardPaths::TempLocation).toUtf8();
-    return path.constData();
+    return cjqt6::dupUtf8(QStandardPaths::writableLocation(QStandardPaths::TempLocation));
 }
 
 // ============================================================
@@ -642,11 +638,9 @@ void qSettingsSetValue(int64_t ptr, const char* key, const char* value) {
 const char* qSettingsValue(int64_t ptr, const char* key, const char* defaultValue) {
     QSettings* settings = reinterpret_cast<QSettings*>(ptr);
     if (settings) {
-        static QByteArray value;
-        value = settings->value(QString::fromUtf8(key), QString::fromUtf8(defaultValue)).toString().toUtf8();
-        return value.constData();
+        return cjqt6::dupUtf8(settings->value(QString::fromUtf8(key), QString::fromUtf8(defaultValue)).toString());
     }
-    return defaultValue;
+    return cjqt6::dupUtf8(QString::fromUtf8(defaultValue));
 }
 
 int32_t qSettingsValueInt(int64_t ptr, const char* key, int32_t defaultValue) {

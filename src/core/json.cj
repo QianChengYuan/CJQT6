@@ -123,7 +123,7 @@ public class QJsonValue {
     /// 获取值的类型（见 JsonType 常量）
     public func valueType(): Int32 { checkValid(); unsafe { qJsonValueType(ptr) } }
     /// 将值转换为字符串
-    public func toString(): String { checkValid(); unsafe { qJsonValueToString(ptr).toString() } }
+    public func toString(): String { checkValid(); unsafe { let cstr = qJsonValueToString(ptr); let result = cstr.toString(); freeBridgeString(cstr); result } }
     /// 转换为整数（非整型时返回默认值）
     public func toInt(defaultVal: Int64): Int64 { checkValid(); unsafe { qJsonValueToInt(ptr, defaultVal) } }
     /// 转换为浮点数（非浮点类型时返回默认值）
@@ -207,7 +207,7 @@ public class QJsonObject {
     /// 按索引获取键名
     public func keyAt(index: Int32): String {
         checkValid()
-        unsafe { qJsonObjectKeyAt(ptr, index).toString() }
+        unsafe { let cstr = qJsonObjectKeyAt(ptr, index); let result = cstr.toString(); freeBridgeString(cstr); result }
     }
 
     /// 获取底层指针
@@ -295,7 +295,7 @@ public class QJsonDocument {
     /// 序列化为 JSON 字符串，indent 为缩进空格数（0 表示紧凑输出）
     public func toJson(indent: Int32): String {
         checkValid()
-        unsafe { qJsonDocumentToJson(ptr, indent).toString() }
+        unsafe { let cstr = qJsonDocumentToJson(ptr, indent); let result = cstr.toString(); freeBridgeString(cstr); result }
     }
 
     /// 文档是否为 Null（解析失败或空文档）

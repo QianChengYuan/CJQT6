@@ -1,4 +1,4 @@
-﻿package cjqt6.widgets
+package cjqt6.widgets
 
 import cjqt6.core.*
 
@@ -117,7 +117,9 @@ public class QPushButton <: QtResource {
         checkValid()
         unsafe {
             let cstr = qButtonText(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
     
@@ -271,7 +273,9 @@ public class QPushButton <: QtResource {
         checkValid()
         unsafe {
             let cstr = qButtonIconName(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
     
@@ -290,7 +294,9 @@ public class QPushButton <: QtResource {
         checkValid()
         unsafe {
             let cstr = qButtonShortcut(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
     

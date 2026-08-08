@@ -11,6 +11,7 @@
 #include <QHash>
 #include <QTimer>
 #include <QMediaMetaData>
+#include "bridge_string_utils.h"
 
 // 存储播放器状态变化的回调
 static QHash<int64_t, std::function<void(int)>> stateCallbacks;
@@ -160,15 +161,13 @@ const char* qMediaPlayerMetaData(int64_t ptr, const char* key) {
             value = metaData.value(QMediaMetaData::Author);
         } else if (keyStr == "album") {
             value = metaData.value(QMediaMetaData::AlbumTitle);
-        } else if (keyStr == "duration") {
+        } else         if (keyStr == "duration") {
             value = metaData.value(QMediaMetaData::Duration);
         }
         
-        static QByteArray buffer;
-        buffer = value.toString().toUtf8();
-        return buffer.constData();
+        return cjqt6::dupUtf8(value.toString());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 // 是否可播放
@@ -210,11 +209,9 @@ int32_t qMediaPlayerError(int64_t ptr) {
 const char* qMediaPlayerErrorString(int64_t ptr) {
     QMediaPlayer* player = reinterpret_cast<QMediaPlayer*>(ptr);
     if (player) {
-        static QByteArray buffer;
-        buffer = player->errorString().toUtf8();
-        return buffer.constData();
+        return cjqt6::dupUtf8(player->errorString());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 // ============================================================

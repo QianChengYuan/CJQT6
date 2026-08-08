@@ -256,7 +256,9 @@ public class QTcpSocket <: QtResource {
         checkValid()
         unsafe {
             let cstr = qTcpSocketErrorString(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
     
@@ -265,7 +267,9 @@ public class QTcpSocket <: QtResource {
         checkValid()
         unsafe {
             let cstr = qTcpSocketPeerAddress(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
     
@@ -282,7 +286,9 @@ public class QTcpSocket <: QtResource {
         checkValid()
         unsafe {
             let cstr = qTcpSocketLocalAddress(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
     

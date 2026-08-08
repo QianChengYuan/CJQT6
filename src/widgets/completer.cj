@@ -144,7 +144,9 @@ public class QCompleter {
     public func completionPrefix(): String {
         unsafe {
             let cstr = qCompleterCompletionPrefix(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 

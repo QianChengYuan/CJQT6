@@ -114,7 +114,9 @@ public class QSpinBox <: QtResource {
         checkValid()
         unsafe {
             let cstr = qSpinBoxPrefix(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
     
@@ -133,7 +135,9 @@ public class QSpinBox <: QtResource {
         checkValid()
         unsafe {
             let cstr = qSpinBoxSuffix(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
     
@@ -168,7 +172,9 @@ public class QSpinBox <: QtResource {
         checkValid()
         unsafe {
             let cstr = qSpinBoxCleanText(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
     
@@ -257,7 +263,9 @@ public class QSpinBox <: QtResource {
         checkValid()
         unsafe {
             let cstr = qSpinBoxText(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
     

@@ -20,6 +20,7 @@
 #include <mutex>
 #include <atomic>
 #include <thread>
+#include "bridge_string_utils.h"
 
 extern "C" {
 
@@ -104,11 +105,9 @@ void qHostAddressSetAddress(int64_t ptr, const char* address) {
 const char* qHostAddressToString(int64_t ptr) {
     QHostAddress* addr = reinterpret_cast<QHostAddress*>(ptr);
     if (addr) {
-        static QByteArray buffer;
-        buffer = addr->toString().toUtf8();
-        return buffer.constData();
+        return cjqt6::dupUtf8(addr->toString());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 int32_t qHostAddressProtocol(int64_t ptr) {
@@ -236,11 +235,9 @@ int32_t qTcpSocketError(int64_t ptr) {
 const char* qTcpSocketErrorString(int64_t ptr) {
     QTcpSocket* socket = reinterpret_cast<QTcpSocket*>(ptr);
     if (socket) {
-        static QByteArray buffer;
-        buffer = socket->errorString().toUtf8();
-        return buffer.constData();
+        return cjqt6::dupUtf8(socket->errorString());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 bool qTcpSocketIsValid(int64_t ptr) {
@@ -258,11 +255,9 @@ void qTcpSocketClose(int64_t ptr) {
 const char* qTcpSocketPeerAddress(int64_t ptr) {
     QTcpSocket* socket = reinterpret_cast<QTcpSocket*>(ptr);
     if (socket) {
-        static QByteArray buffer;
-        buffer = socket->peerAddress().toString().toUtf8();
-        return buffer.constData();
+        return cjqt6::dupUtf8(socket->peerAddress().toString());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 uint16_t qTcpSocketPeerPort(int64_t ptr) {
@@ -273,11 +268,9 @@ uint16_t qTcpSocketPeerPort(int64_t ptr) {
 const char* qTcpSocketLocalAddress(int64_t ptr) {
     QTcpSocket* socket = reinterpret_cast<QTcpSocket*>(ptr);
     if (socket) {
-        static QByteArray buffer;
-        buffer = socket->localAddress().toString().toUtf8();
-        return buffer.constData();
+        return cjqt6::dupUtf8(socket->localAddress().toString());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 uint16_t qTcpSocketLocalPort(int64_t ptr) {
@@ -405,21 +398,17 @@ uint16_t qTcpServerServerPort(int64_t ptr) {
 const char* qTcpServerServerAddress(int64_t ptr) {
     QTcpServer* server = reinterpret_cast<QTcpServer*>(ptr);
     if (server) {
-        static QByteArray buffer;
-        buffer = server->serverAddress().toString().toUtf8();
-        return buffer.constData();
+        return cjqt6::dupUtf8(server->serverAddress().toString());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 const char* qTcpServerErrorString(int64_t ptr) {
     QTcpServer* server = reinterpret_cast<QTcpServer*>(ptr);
     if (server) {
-        static QByteArray buffer;
-        buffer = server->errorString().toUtf8();
-        return buffer.constData();
+        return cjqt6::dupUtf8(server->errorString());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 int32_t qTcpServerMaxPendingConnections(int64_t ptr) {
@@ -583,11 +572,9 @@ int32_t qUdpSocketError(int64_t ptr) {
 const char* qUdpSocketErrorString(int64_t ptr) {
     QUdpSocket* socket = reinterpret_cast<QUdpSocket*>(ptr);
     if (socket) {
-        static QByteArray buffer;
-        buffer = socket->errorString().toUtf8();
-        return buffer.constData();
+        return cjqt6::dupUtf8(socket->errorString());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 bool qUdpSocketIsValid(int64_t ptr) {
@@ -703,12 +690,10 @@ int32_t qSslSocketPeerVerifyMode(int64_t ptr) {
 const char* qSslSocketPeerCertificateInfo(int64_t ptr) {
     QSslSocket* socket = reinterpret_cast<QSslSocket*>(ptr);
     if (socket && !socket->peerCertificate().isNull()) {
-        static QByteArray buffer;
         QSslCertificate cert = socket->peerCertificate();
-        buffer = cert.subjectDisplayName().toUtf8();
-        return buffer.constData();
+        return cjqt6::dupUtf8(cert.subjectDisplayName());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qSslSocketConnectEncrypted(int64_t ptr, void (*callback)()) {
@@ -768,10 +753,8 @@ void qNetworkProxySetHostName(int64_t ptr, const char* host) {
     reinterpret_cast<QNetworkProxy*>(ptr)->setHostName(QString::fromUtf8(host));
 }
 
-static QByteArray netBuffer;
 const char* qNetworkProxyHostName(int64_t ptr) {
-    netBuffer = reinterpret_cast<QNetworkProxy*>(ptr)->hostName().toUtf8();
-    return netBuffer.constData();
+    return cjqt6::dupUtf8(reinterpret_cast<QNetworkProxy*>(ptr)->hostName());
 }
 
 void qNetworkProxySetPort(int64_t ptr, uint16_t port) {
@@ -787,8 +770,7 @@ void qNetworkProxySetUser(int64_t ptr, const char* user) {
 }
 
 const char* qNetworkProxyUser(int64_t ptr) {
-    netBuffer = reinterpret_cast<QNetworkProxy*>(ptr)->user().toUtf8();
-    return netBuffer.constData();
+    return cjqt6::dupUtf8(reinterpret_cast<QNetworkProxy*>(ptr)->user());
 }
 
 void qNetworkProxySetPassword(int64_t ptr, const char* pass) {
@@ -796,8 +778,7 @@ void qNetworkProxySetPassword(int64_t ptr, const char* pass) {
 }
 
 const char* qNetworkProxyPassword(int64_t ptr) {
-    netBuffer = reinterpret_cast<QNetworkProxy*>(ptr)->password().toUtf8();
-    return netBuffer.constData();
+    return cjqt6::dupUtf8(reinterpret_cast<QNetworkProxy*>(ptr)->password());
 }
 
 void qNetworkProxySetApplicationProxy(const char* host, uint16_t port) {
@@ -830,13 +811,11 @@ bool qLocalServerIsListening(int64_t ptr) {
 }
 
 const char* qLocalServerFullServerName(int64_t ptr) {
-    netBuffer = reinterpret_cast<QLocalServer*>(ptr)->fullServerName().toUtf8();
-    return netBuffer.constData();
+    return cjqt6::dupUtf8(reinterpret_cast<QLocalServer*>(ptr)->fullServerName());
 }
 
 const char* qLocalServerServerName(int64_t ptr) {
-    netBuffer = reinterpret_cast<QLocalServer*>(ptr)->serverName().toUtf8();
-    return netBuffer.constData();
+    return cjqt6::dupUtf8(reinterpret_cast<QLocalServer*>(ptr)->serverName());
 }
 
 int32_t qLocalServerMaxPendingConnections(int64_t ptr) {

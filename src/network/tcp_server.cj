@@ -105,7 +105,9 @@ public class QTcpServer <: QtResource {
         checkValid()
         unsafe {
             let cstr = qTcpServerServerAddress(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 
@@ -114,7 +116,9 @@ public class QTcpServer <: QtResource {
         checkValid()
         unsafe {
             let cstr = qTcpServerErrorString(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 

@@ -124,7 +124,9 @@ public class QSslSocket {
         checkValid()
         unsafe {
             let cstr = qSslSocketPeerCertificateInfo(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 

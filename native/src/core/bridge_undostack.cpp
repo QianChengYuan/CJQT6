@@ -11,6 +11,7 @@
 #include <QUndoStack>
 #include <functional>
 #include <cstring>
+#include "bridge_string_utils.h"
 
 // ============================================================
 // CallbackUndoCommand - 基于回调的 QUndoCommand
@@ -76,11 +77,9 @@ void qUndoCommandSetText(int64_t ptr, const char* text) {
 const char* qUndoCommandText(int64_t ptr) {
     QUndoCommand* cmd = reinterpret_cast<QUndoCommand*>(ptr);
     if (cmd) {
-        static QByteArray buffer;
-        buffer = cmd->text().toUtf8();
-        return buffer.constData();
+        return cjqt6::dupUtf8(cmd->text());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qUndoCommandDelete(int64_t ptr) {
@@ -144,21 +143,17 @@ int32_t qUndoStackCanRedo(int64_t ptr) {
 const char* qUndoStackUndoText(int64_t ptr) {
     QUndoStack* stack = reinterpret_cast<QUndoStack*>(ptr);
     if (stack) {
-        static QByteArray buffer;
-        buffer = stack->undoText().toUtf8();
-        return buffer.constData();
+        return cjqt6::dupUtf8(stack->undoText());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 const char* qUndoStackRedoText(int64_t ptr) {
     QUndoStack* stack = reinterpret_cast<QUndoStack*>(ptr);
     if (stack) {
-        static QByteArray buffer;
-        buffer = stack->redoText().toUtf8();
-        return buffer.constData();
+        return cjqt6::dupUtf8(stack->redoText());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 int32_t qUndoStackCount(int64_t ptr) {

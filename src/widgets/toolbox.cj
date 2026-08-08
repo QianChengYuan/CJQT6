@@ -111,7 +111,9 @@ public class QToolBox {
     public func itemText(index: Int32): String {
         unsafe {
             let cstr = qToolBoxItemText(ptr, index)
-            cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            result
         }
     }
 

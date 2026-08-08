@@ -98,7 +98,9 @@ public class QPlainTextEdit {
     public func toPlainText(): String {
         unsafe {
             let cstr = qPlainTextEditToPlainText(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 

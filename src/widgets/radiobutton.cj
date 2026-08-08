@@ -61,7 +61,9 @@ public class QRadioButton <: QtResource {
         checkValid()
         unsafe {
             let cstr = qRadioButtonText(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
     

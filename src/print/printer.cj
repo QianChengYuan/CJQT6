@@ -1,5 +1,6 @@
 package cjqt6.print
 
+import cjqt6.core.*
 import cjqt6.widgets.QTextEdit
 
 // QPrinter - 打印机
@@ -118,7 +119,9 @@ public class QPrinter {
     public func outputFileName(): String {
         unsafe {
             let cstr = qPrinterOutputFileName(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
     
@@ -201,7 +204,9 @@ public class QPrinter {
     public func printerName(): String {
         unsafe {
             let cstr = qPrinterPrinterName(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
     
@@ -216,7 +221,9 @@ public class QPrinter {
     public func docName(): String {
         unsafe {
             let cstr = qPrinterDocName(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
     

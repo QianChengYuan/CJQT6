@@ -1,4 +1,4 @@
-﻿package cjqt6.core
+package cjqt6.core
 
 // QWidget - 基础窗口部件FFI声明
 // QWidget::create() - 创建控件实例
@@ -222,7 +222,9 @@ public class QWidget <: QtResource {
         checkValid()
         unsafe {
             let cstr = qWidgetStyleSheet(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
     

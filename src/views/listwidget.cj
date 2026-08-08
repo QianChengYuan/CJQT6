@@ -1,5 +1,6 @@
 package cjqt6.views
 
+import cjqt6.core.*
 import cjqt6.paint.*
 
 // ============================================================
@@ -170,7 +171,9 @@ public class QListWidget {
     public func currentItemText(): String {
         unsafe {
             let cstr = qListWidgetCurrentItemText(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
     
@@ -180,7 +183,9 @@ public class QListWidget {
     public func itemText(row: Int32): String {
         unsafe {
             let cstr = qListWidgetItemText(ptr, row)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
     
@@ -453,7 +458,9 @@ public class QListWidgetItem {
     public func text(): String {
         unsafe {
             let cstr = qListWidgetItemGetText(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 

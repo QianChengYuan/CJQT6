@@ -23,6 +23,7 @@
 #include <QCompleter>
 #include <QColor>
 #include <QUrl>
+#include "bridge_string_utils.h"
 
 extern "C" {
 
@@ -140,11 +141,9 @@ void qLineEditSetCompleter(int64_t ptr, int64_t completerPtr) {
 const char* qLineEditDisplayText(int64_t ptr) {
     QLineEdit* le = reinterpret_cast<QLineEdit*>(ptr);
     if (le) {
-        static QString s;
-        s = le->displayText();
-        return s.toUtf8().constData();
+        return cjqt6::dupUtf8(le->displayText());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 static std::unordered_map<int64_t, std::function<void(int32_t, int32_t)>> g_leCursorPos;
@@ -196,11 +195,9 @@ void qTextEditSetHtml(int64_t ptr, const char* html) {
 const char* qTextEditToHtml(int64_t ptr) {
     QTextEdit* te = reinterpret_cast<QTextEdit*>(ptr);
     if (te) {
-        static QString s;
-        s = te->toHtml();
-        return s.toUtf8().constData();
+        return cjqt6::dupUtf8(te->toHtml());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qTextEditSetPlainText(int64_t ptr, const char* text) {
@@ -211,11 +208,9 @@ void qTextEditSetPlainText(int64_t ptr, const char* text) {
 const char* qTextEditToPlainText(int64_t ptr) {
     QTextEdit* te = reinterpret_cast<QTextEdit*>(ptr);
     if (te) {
-        static QString s;
-        s = te->toPlainText();
-        return s.toUtf8().constData();
+        return cjqt6::dupUtf8(te->toPlainText());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qTextEditAppend(int64_t ptr, const char* text) {
@@ -397,11 +392,9 @@ bool qTextBrowserIsOpenLinks(int64_t ptr) {
 const char* qTextBrowserSource(int64_t ptr) {
     QTextBrowser* tb = reinterpret_cast<QTextBrowser*>(ptr);
     if (tb) {
-        static QString s;
-        s = tb->source().toString();
-        return s.toUtf8().constData();
+        return cjqt6::dupUtf8(tb->source().toString());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qTextBrowserClearHistory(int64_t ptr) {

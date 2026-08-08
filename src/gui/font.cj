@@ -76,7 +76,12 @@ public class QFontMetrics {
     /// 字体族名称（如 "Microsoft YaHei"）
     public func fontFamily(): String {
         checkValid()
-        unsafe { qFontMetricsFontFamily(ptr).toString() }
+        unsafe {
+            let cstr = qFontMetricsFontFamily(ptr)
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            result
+        }
     }
 
     /// 获取底层指针
@@ -103,7 +108,15 @@ public class QFontInfo {
     }
 
     /// 实际使用的字体族名称
-    public func family(): String { checkValid(); unsafe { qFontInfoFamily(ptr).toString() } }
+    public func family(): String {
+        checkValid()
+        unsafe {
+            let cstr = qFontInfoFamily(ptr)
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            result
+        }
+    }
     /// 字号（磅，整数）
     public func pointSize(): Int32 { checkValid(); unsafe { qFontInfoPointSize(ptr) } }
     /// 字号（磅，浮点精度）

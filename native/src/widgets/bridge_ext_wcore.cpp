@@ -21,6 +21,7 @@
 #include <QKeySequence>
 #include <functional>
 #include <unordered_map>
+#include "bridge_string_utils.h"
 
 // 扩展信号槽存储（C++ 类型，必须位于 extern "C" 之外）
 template <typename Fn>
@@ -35,21 +36,17 @@ extern "C" {
 const char* qButtonIconName(int64_t ptr) {
     QPushButton* btn = reinterpret_cast<QPushButton*>(ptr);
     if (btn) {
-        static QString s;
-        s = btn->icon().name();
-        return s.toUtf8().constData();
+        return cjqt6::dupUtf8(btn->icon().name());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 const char* qButtonShortcut(int64_t ptr) {
     QPushButton* btn = reinterpret_cast<QPushButton*>(ptr);
     if (btn) {
-        static QString s;
-        s = btn->shortcut().toString();
-        return s.toUtf8().constData();
+        return cjqt6::dupUtf8(btn->shortcut().toString());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qButtonSetShortcut(int64_t ptr, const char* key) {

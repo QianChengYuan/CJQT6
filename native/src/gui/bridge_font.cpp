@@ -2,8 +2,8 @@
 #include <QFontMetrics>
 #include <QFontInfo>
 #include <unordered_map>
+#include "bridge_string_utils.h"
 
-static QByteArray g_fontBuffer;
 // Qt6 的 QFontMetrics 无 font() 成员，需保存创建时的 QFont 以便获取 family
 static std::unordered_map<int64_t, QFont> g_fontMetricsFonts;
 
@@ -68,10 +68,9 @@ int32_t qFontMetricsMaxWidth(int64_t ptr) {
 const char* qFontMetricsFontFamily(int64_t ptr) {
     auto it = g_fontMetricsFonts.find(ptr);
     if (it != g_fontMetricsFonts.end()) {
-        g_fontBuffer = it->second.family().toUtf8();
-        return g_fontBuffer.constData();
+        return cjqt6::dupUtf8(it->second.family());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 // ============================================================
@@ -91,10 +90,9 @@ void qFontInfoDelete(int64_t ptr) {
 const char* qFontInfoFamily(int64_t ptr) {
     QFontInfo* fi = reinterpret_cast<QFontInfo*>(ptr);
     if (fi) {
-        g_fontBuffer = fi->family().toUtf8();
-        return g_fontBuffer.constData();
+        return cjqt6::dupUtf8(fi->family());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 int32_t qFontInfoPointSize(int64_t ptr) {

@@ -10,9 +10,7 @@
 #include <cstring>
 #include <functional>
 #include <unordered_map>
-
-// 静态缓冲区用于返回字符串
-static char g_listBuffer[4096];
+#include "bridge_string_utils.h"
 
 // 列表事件回调映射
 static std::unordered_map<int64_t, std::function<void(int32_t)>> g_listItemClickedCallbacks;
@@ -20,14 +18,7 @@ static std::unordered_map<int64_t, std::function<void(int32_t)>> g_listItemDoubl
 static std::unordered_map<int64_t, std::function<void(int32_t)>> g_listCurrentRowChangedCallbacks;
 
 static const char* safeCopyString(const QString& str) {
-    QByteArray utf8 = str.toUtf8();
-    int len = utf8.size();
-    if (len >= (int)sizeof(g_listBuffer)) {
-        len = sizeof(g_listBuffer) - 1;
-    }
-    std::memcpy(g_listBuffer, utf8.constData(), len);
-    g_listBuffer[len] = '\0';
-    return g_listBuffer;
+    return cjqt6::dupUtf8(str);
 }
 
 extern "C" {
@@ -112,7 +103,7 @@ const char* qListWidgetCurrentItemText(int64_t ptr) {
             return safeCopyString(item->text());
         }
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 // 获取指定行文本
@@ -124,7 +115,7 @@ const char* qListWidgetItemText(int64_t ptr, int32_t row) {
             return safeCopyString(item->text());
         }
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qListWidgetSetItemText(int64_t ptr, int32_t row, const char* text) {

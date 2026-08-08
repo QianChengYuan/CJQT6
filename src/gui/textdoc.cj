@@ -133,7 +133,9 @@ public class QTextDocument {
         checkValid()
         unsafe {
             let cstr = qTextDocumentToPlainText(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 
@@ -150,7 +152,9 @@ public class QTextDocument {
         checkValid()
         unsafe {
             let cstr = qTextDocumentToHtml(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 
@@ -281,7 +285,9 @@ public class QTextCursor {
         checkValid()
         unsafe {
             let cstr = qTextCursorSelectedText(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 

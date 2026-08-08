@@ -57,7 +57,9 @@ public class QHostAddress {
     public func toString(): String {
         unsafe {
             let cstr = qHostAddressToString(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
     

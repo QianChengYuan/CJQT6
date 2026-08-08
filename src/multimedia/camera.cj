@@ -39,15 +39,23 @@ public class QCameraDevice {
     /// 获取设备描述
     public func description(): String {
         if (ptr == 0) { return "" }
-        let cstr = unsafe { qCameraDeviceDescription(ptr) }
-        cstr.toString()
+        unsafe {
+            let cstr = qCameraDeviceDescription(ptr)
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            result
+        }
     }
 
     /// 获取设备ID
     public func id(): String {
         if (ptr == 0) { return "" }
-        let cstr = unsafe { qCameraDeviceId(ptr) }
-        cstr.toString()
+        unsafe {
+            let cstr = qCameraDeviceId(ptr)
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            result
+        }
     }
 
     /// 释放设备描述
@@ -135,8 +143,12 @@ public class QCamera {
     /// 获取错误描述
     public func errorString(): String {
         checkValid()
-        let cstr = unsafe { qCameraErrorString(ptr) }
-        cstr.toString()
+        unsafe {
+            let cstr = qCameraErrorString(ptr)
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            result
+        }
     }
 
     /// 获取原生指针

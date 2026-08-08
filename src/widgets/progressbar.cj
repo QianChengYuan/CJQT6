@@ -124,7 +124,9 @@ public class QProgressBar <: QtResource {
         checkValid()
         unsafe {
             let cstr = qProgressBarFormat(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 
@@ -133,7 +135,9 @@ public class QProgressBar <: QtResource {
         checkValid()
         unsafe {
             let cstr = qProgressBarText(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
     

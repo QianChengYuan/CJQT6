@@ -83,13 +83,23 @@ public class QLocalServer {
     /// 获取完整服务器名称（含平台前缀，如 Windows 管道路径）
     public func fullServerName(): String {
         checkValid()
-        unsafe { qLocalServerFullServerName(ptr).toString() }
+        unsafe {
+            let cstr = qLocalServerFullServerName(ptr)
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            result
+        }
     }
 
     /// 获取服务器名称
     public func serverName(): String {
         checkValid()
-        unsafe { qLocalServerServerName(ptr).toString() }
+        unsafe {
+            let cstr = qLocalServerServerName(ptr)
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            result
+        }
     }
 
     /// 最大挂起连接数

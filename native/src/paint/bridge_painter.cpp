@@ -15,6 +15,7 @@
 #include <QPixmap>
 #include <QImage>
 #include <QFontDatabase>
+#include "bridge_string_utils.h"
 
 extern "C" {
 
@@ -1309,10 +1310,8 @@ void qTransformDelete(int64_t ptr) {
 // ============================================================
 
 const char* qFontDatabaseFamilies() {
-    static QByteArray arr;
     QStringList families = QFontDatabase::families();
-    arr = families.join(',').toUtf8();
-    return arr.constData();
+    return cjqt6::dupUtf8(families.join(','));
 }
 
 int32_t qFontDatabaseStandardSizes() {
@@ -1333,11 +1332,9 @@ bool qFontDatabaseIsScalable(const char* family) {
 }
 
 const char* qFontDatabaseStyles(const char* family) {
-    static QByteArray arr;
-    if (!family) return "";
+    if (!family) return cjqt6::emptyString();
     QStringList styles = QFontDatabase::styles(QString::fromUtf8(family));
-    arr = styles.join(',').toUtf8();
-    return arr.constData();
+    return cjqt6::dupUtf8(styles.join(','));
 }
 
 int32_t qFontDatabasePointSizes(const char* family, const char* style) {

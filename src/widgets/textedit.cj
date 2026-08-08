@@ -138,6 +138,7 @@ public class QTextEdit <: QtResource {
         unsafe {
             let cstr = qTextEditText(ptr)
             let result = cstr.toString()
+            freeBridgeString(cstr)
             return result
         }
     }
@@ -292,7 +293,9 @@ public class QTextEdit <: QtResource {
         checkValid()
         unsafe {
             let cstr = qTextEditToHtml(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
     
@@ -311,7 +314,9 @@ public class QTextEdit <: QtResource {
         checkValid()
         unsafe {
             let cstr = qTextEditToPlainText(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
     
@@ -574,7 +579,9 @@ public class QTextEdit <: QtResource {
         checkValid()
         unsafe {
             let cstr = qWidgetStyleSheet(ptr)
-            cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            result
         }
     }
     

@@ -94,7 +94,9 @@ public class QApplication {
     public func locale(): String {
         unsafe {
             let cstr = qApplicationLocale()
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
     
@@ -102,7 +104,9 @@ public class QApplication {
     public func systemLocale(): String {
         unsafe {
             let cstr = qApplicationSystemLocale()
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
     

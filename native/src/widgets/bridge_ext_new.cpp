@@ -26,6 +26,7 @@
 #include <QRegularExpression>
 #include <functional>
 #include <unordered_map>
+#include "bridge_string_utils.h"
 
 extern "C" {
 
@@ -192,11 +193,9 @@ void qScrollBarConnectActionTriggered(int64_t ptr, void (*cb)(int32_t)) {
 const char* qCommandLinkButtonDescription(int64_t ptr) {
     QCommandLinkButton* btn = reinterpret_cast<QCommandLinkButton*>(ptr);
     if (btn) {
-        static QString desc;
-        desc = btn->description();
-        return desc.toUtf8().constData();
+        return cjqt6::dupUtf8(btn->description());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qCommandLinkButtonSetIcon(int64_t ptr, const char* path) {
@@ -242,11 +241,9 @@ void qSplashScreenClearMessage(int64_t ptr) {
 const char* qSplashScreenMessage(int64_t ptr) {
     QSplashScreen* s = reinterpret_cast<QSplashScreen*>(ptr);
     if (s) {
-        static QString msg;
-        msg = s->message();
-        return msg.toUtf8().constData();
+        return cjqt6::dupUtf8(s->message());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qSplashScreenShowMessageAlign(int64_t ptr, const char* message, int32_t alignment) {

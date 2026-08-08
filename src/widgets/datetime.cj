@@ -38,14 +38,18 @@ public class QDate {
             var fmt = LibC.mallocCString("yyyy-MM-dd")
             let cstr = qDateToString(ptr, fmt)
             LibC.free(fmt)
-            cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            result
         }
     }
     
     public func toString(format: String): String {
         unsafe {
             var cstr = LibC.mallocCString(format)
-            let result = qDateToString(ptr, cstr).toString()
+            let out = qDateToString(ptr, cstr)
+            let result = out.toString()
+            freeBridgeString(out)
             LibC.free(cstr)
             result
         }
@@ -115,14 +119,18 @@ public class QTime {
             var fmt = LibC.mallocCString("hh:mm:ss")
             let cstr = qTimeToString(ptr, fmt)
             LibC.free(fmt)
-            cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            result
         }
     }
     
     public func toString(format: String): String {
         unsafe {
             var cstr = LibC.mallocCString(format)
-            let result = qTimeToString(ptr, cstr).toString()
+            let out = qTimeToString(ptr, cstr)
+            let result = out.toString()
+            freeBridgeString(out)
             LibC.free(cstr)
             result
         }
@@ -198,14 +206,18 @@ public class QDateTime {
             var fmt = LibC.mallocCString("yyyy-MM-dd hh:mm:ss")
             let cstr = qDateTimeToString(ptr, fmt)
             LibC.free(fmt)
-            cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            result
         }
     }
     
     public func toString(format: String): String {
         unsafe {
             var cstr = LibC.mallocCString(format)
-            let result = qDateTimeToString(ptr, cstr).toString()
+            let out = qDateTimeToString(ptr, cstr)
+            let result = out.toString()
+            freeBridgeString(out)
             LibC.free(cstr)
             result
         }
@@ -407,7 +419,12 @@ public class QDateEdit {
     }
     
     public func displayFormat(): String {
-        unsafe { qDateEditDisplayFormat(ptr).toString() }
+        unsafe {
+            let cstr = qDateEditDisplayFormat(ptr)
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            result
+        }
     }
     
     public func setCalendarPopup(enable: Bool): QDateEdit {
@@ -497,7 +514,12 @@ public class QTimeEdit {
     }
     
     public func displayFormat(): String {
-        unsafe { qTimeEditDisplayFormat(ptr).toString() }
+        unsafe {
+            let cstr = qTimeEditDisplayFormat(ptr)
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            result
+        }
     }
     
     /// 按时/分/秒设置时间（便捷方法，内部构造 QTime）
@@ -608,7 +630,12 @@ public class QDateTimeEdit {
     }
     
     public func displayFormat(): String {
-        unsafe { qDateTimeEditDisplayFormat(ptr).toString() }
+        unsafe {
+            let cstr = qDateTimeEditDisplayFormat(ptr)
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            result
+        }
     }
     
     public func setCalendarPopup(enable: Bool): QDateTimeEdit {

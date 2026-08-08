@@ -11,12 +11,11 @@
 #include <QTime>
 #include <QDateTime>
 #include <cstring>
+#include "bridge_string_utils.h"
 
 // 辅助函数：安全复制字符串
 static const char* safeCopyString(const QString& str) {
-    static QByteArray buffer;
-    buffer = str.toUtf8();
-    return buffer.constData();
+    return cjqt6::dupUtf8(str);
 }
 
 extern "C" {
@@ -73,7 +72,7 @@ const char* qDateToString(int64_t ptr, const char* format) {
         QString str = date->toString(QString::fromUtf8(format));
         return safeCopyString(str);
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qDateSetDate(int64_t ptr, int32_t year, int32_t month, int32_t day) {
@@ -135,7 +134,7 @@ const char* qTimeToString(int64_t ptr, const char* format) {
         QString str = time->toString(QString::fromUtf8(format));
         return safeCopyString(str);
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qTimeSetHMS(int64_t ptr, int32_t hour, int32_t minute, int32_t second, int32_t msec) {
@@ -197,7 +196,7 @@ const char* qDateTimeToString(int64_t ptr, const char* format) {
         QString str = dt->toString(QString::fromUtf8(format));
         return safeCopyString(str);
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qDateTimeSetDate(int64_t ptr, int64_t datePtr) {
@@ -407,7 +406,7 @@ const char* qDateEditDisplayFormat(int64_t ptr) {
     if (edit) {
         return safeCopyString(edit->displayFormat());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qDateEditSetCalendarPopup(int64_t ptr, int32_t enable) {
@@ -489,7 +488,7 @@ const char* qTimeEditDisplayFormat(int64_t ptr) {
     if (edit) {
         return safeCopyString(edit->displayFormat());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 // ============================================================
@@ -593,7 +592,7 @@ const char* qDateTimeEditDisplayFormat(int64_t ptr) {
     if (edit) {
         return safeCopyString(edit->displayFormat());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qDateTimeEditSetCalendarPopup(int64_t ptr, int32_t enable) {

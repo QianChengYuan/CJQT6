@@ -93,7 +93,12 @@ public class QNetworkProxy {
     /// 获取代理服务器主机名
     public func hostName(): String {
         checkValid()
-        unsafe { qNetworkProxyHostName(ptr).toString() }
+        unsafe {
+            let cstr = qNetworkProxyHostName(ptr)
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            result
+        }
     }
 
     /// 设置代理服务器端口
@@ -121,7 +126,12 @@ public class QNetworkProxy {
     /// 获取代理认证用户名
     public func user(): String {
         checkValid()
-        unsafe { qNetworkProxyUser(ptr).toString() }
+        unsafe {
+            let cstr = qNetworkProxyUser(ptr)
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            result
+        }
     }
 
     /// 设置代理认证密码
@@ -137,7 +147,12 @@ public class QNetworkProxy {
     /// 获取代理认证密码
     public func password(): String {
         checkValid()
-        unsafe { qNetworkProxyPassword(ptr).toString() }
+        unsafe {
+            let cstr = qNetworkProxyPassword(ptr)
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            result
+        }
     }
 
     /// 设置为应用级代理（静态方法，影响所有网络请求）

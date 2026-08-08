@@ -20,6 +20,7 @@
 #include <QByteArray>
 #include <functional>
 #include <unordered_map>
+#include "bridge_string_utils.h"
 
 extern "C" {
 
@@ -80,13 +81,9 @@ void qSpinBoxSetGroupSeparatorShown(int64_t ptr, int32_t v) {
 const char* qSpinBoxText(int64_t ptr) {
     QSpinBox* w = reinterpret_cast<QSpinBox*>(ptr);
     if (w) {
-        static QString s;
-        s = w->text();
-        static QByteArray b;
-        b = s.toUtf8();
-        return b.constData();
+        return cjqt6::dupUtf8(w->text());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 // QSpinBox 信号回调映射
@@ -129,13 +126,9 @@ void qDoubleSpinBoxSetPrefix(int64_t ptr, const char* s) {
 const char* qDoubleSpinBoxPrefix(int64_t ptr) {
     QDoubleSpinBox* w = reinterpret_cast<QDoubleSpinBox*>(ptr);
     if (w) {
-        static QString s;
-        s = w->prefix();
-        static QByteArray b;
-        b = s.toUtf8();
-        return b.constData();
+        return cjqt6::dupUtf8(w->prefix());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qDoubleSpinBoxSetSuffix(int64_t ptr, const char* s) {
@@ -146,13 +139,9 @@ void qDoubleSpinBoxSetSuffix(int64_t ptr, const char* s) {
 const char* qDoubleSpinBoxSuffix(int64_t ptr) {
     QDoubleSpinBox* w = reinterpret_cast<QDoubleSpinBox*>(ptr);
     if (w) {
-        static QString s;
-        s = w->suffix();
-        static QByteArray b;
-        b = s.toUtf8();
-        return b.constData();
+        return cjqt6::dupUtf8(w->suffix());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qDoubleSpinBoxSetSpecialValueText(int64_t ptr, const char* s) {
@@ -193,25 +182,17 @@ void qDoubleSpinBoxSetGroupSeparatorShown(int64_t ptr, int32_t v) {
 const char* qDoubleSpinBoxCleanText(int64_t ptr) {
     QDoubleSpinBox* w = reinterpret_cast<QDoubleSpinBox*>(ptr);
     if (w) {
-        static QString s;
-        s = w->cleanText();
-        static QByteArray b;
-        b = s.toUtf8();
-        return b.constData();
+        return cjqt6::dupUtf8(w->cleanText());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 const char* qDoubleSpinBoxText(int64_t ptr) {
     QDoubleSpinBox* w = reinterpret_cast<QDoubleSpinBox*>(ptr);
     if (w) {
-        static QString s;
-        s = w->text();
-        static QByteArray b;
-        b = s.toUtf8();
-        return b.constData();
+        return cjqt6::dupUtf8(w->text());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 // QDoubleSpinBox 信号回调映射

@@ -17,7 +17,9 @@
 #include <QFileInfo>
 #include <QCoreApplication>
 #include <QSurfaceFormat>
+#include <cstdlib>
 #include <cstring>
+#include "bridge_string_utils.h"
 
 extern "C" {
 
@@ -563,13 +565,9 @@ char* qQuickItemGetPropertyString(int64_t ptr, const char* name) {
     if (item) {
         QVariant value = item->property(name);
         QString str = value.toString();
-        char* result = new char[str.size() + 1];
-        strcpy(result, str.toUtf8().constData());
-        return result;
+        return cjqt6::dupUtf8(str);
     }
-    char* empty = new char[1];
-    empty[0] = '\0';
-    return empty;
+    return cjqt6::emptyString();
 }
 
 int32_t qQuickItemGetPropertyInt(int64_t ptr, const char* name) {
@@ -598,7 +596,7 @@ int32_t qQuickItemGetPropertyBool(int64_t ptr, const char* name) {
 
 void qQuickItemFreeString(char* str) {
     if (str) {
-        delete[] str;
+        std::free(str);
     }
 }
 
@@ -677,13 +675,9 @@ char* qQuickItemObjectName(int64_t ptr) {
     QQuickItem* item = reinterpret_cast<QQuickItem*>(ptr);
     if (item) {
         QByteArray ba = item->objectName().toUtf8();
-        char* result = new char[ba.size() + 1];
-        strcpy(result, ba.constData());
-        return result;
+        return cjqt6::dupUtf8(ba);
     }
-    char* empty = new char[1];
-    empty[0] = '\0';
-    return empty;
+    return cjqt6::emptyString();
 }
 
 void qQuickItemSetFocus(int64_t ptr, int32_t focus) {
@@ -782,13 +776,9 @@ char* qQmlComponentErrorString(int64_t ptr) {
     QQmlComponent* comp = reinterpret_cast<QQmlComponent*>(ptr);
     if (comp) {
         QByteArray ba = comp->errorString().toUtf8();
-        char* result = new char[ba.size() + 1];
-        strcpy(result, ba.constData());
-        return result;
+        return cjqt6::dupUtf8(ba);
     }
-    char* empty = new char[1];
-    empty[0] = '\0';
-    return empty;
+    return cjqt6::emptyString();
 }
 
 int64_t qQmlComponentCreateObject(int64_t ptr, int64_t contextPtr, int64_t parentPtr) {

@@ -22,10 +22,9 @@
 #include <QGraphicsScene>
 #include <QCursor>
 #include <QByteArray>
+#include "bridge_string_utils.h"
 
 extern "C" {
-
-static QByteArray g_graphicsBuffer;
 
 // ============================================================
 // QGraphicsItem 通用操作（仅新增的 getter/setter，避免与 bridge_widgets.cpp 重复）
@@ -129,8 +128,7 @@ void qGraphicsRectItemSetRect(int64_t ptr, double x, double y, double w, double 
 
 const char* qGraphicsRectItemRect(int64_t ptr) {
     QRectF r = reinterpret_cast<QGraphicsRectItem*>(ptr)->rect();
-    g_graphicsBuffer = QString("(%1,%2,%3,%4)").arg(r.x()).arg(r.y()).arg(r.width()).arg(r.height()).toUtf8();
-    return g_graphicsBuffer.constData();
+    return cjqt6::dupUtf8(QString("(%1,%2,%3,%4)").arg(r.x()).arg(r.y()).arg(r.width()).arg(r.height()));
 }
 
 void qGraphicsRectItemSetPen(int64_t ptr, int32_t colorR, int32_t colorG, int32_t colorB, int32_t width) {
@@ -163,8 +161,7 @@ void qGraphicsEllipseItemSetRect(int64_t ptr, double x, double y, double w, doub
 
 const char* qGraphicsEllipseItemRect(int64_t ptr) {
     QRectF r = reinterpret_cast<QGraphicsEllipseItem*>(ptr)->rect();
-    g_graphicsBuffer = QString("(%1,%2,%3,%4)").arg(r.x()).arg(r.y()).arg(r.width()).arg(r.height()).toUtf8();
-    return g_graphicsBuffer.constData();
+    return cjqt6::dupUtf8(QString("(%1,%2,%3,%4)").arg(r.x()).arg(r.y()).arg(r.width()).arg(r.height()));
 }
 
 void qGraphicsEllipseItemSetStartAngle(int64_t ptr, int32_t angle) {
@@ -205,8 +202,7 @@ void qGraphicsLineItemSetLine(int64_t ptr, double x1, double y1, double x2, doub
 
 const char* qGraphicsLineItemLine(int64_t ptr) {
     QLineF l = reinterpret_cast<QGraphicsLineItem*>(ptr)->line();
-    g_graphicsBuffer = QString("(%1,%2,%3,%4)").arg(l.x1()).arg(l.y1()).arg(l.x2()).arg(l.y2()).toUtf8();
-    return g_graphicsBuffer.constData();
+    return cjqt6::dupUtf8(QString("(%1,%2,%3,%4)").arg(l.x1()).arg(l.y1()).arg(l.x2()).arg(l.y2()));
 }
 
 void qGraphicsLineItemSetPen(int64_t ptr, int32_t colorR, int32_t colorG, int32_t colorB, int32_t width) {
@@ -234,8 +230,7 @@ void qGraphicsTextItemSetText(int64_t ptr, const char* text) {
 }
 
 const char* qGraphicsTextItemText(int64_t ptr) {
-    g_graphicsBuffer = reinterpret_cast<QGraphicsTextItem*>(ptr)->toPlainText().toUtf8();
-    return g_graphicsBuffer.constData();
+    return cjqt6::dupUtf8(reinterpret_cast<QGraphicsTextItem*>(ptr)->toPlainText());
 }
 
 void qGraphicsTextItemSetHtml(int64_t ptr, const char* html) {

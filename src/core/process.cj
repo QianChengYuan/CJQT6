@@ -96,7 +96,9 @@ public class QProcessEnvironment {
     public func value(name: String): String {
         unsafe {
             var n = LibC.mallocCString(name)
-            let result = qProcessEnvironmentValue(ptr, n).toString()
+            let cstr = qProcessEnvironmentValue(ptr, n)
+            let result = cstr.toString()
+            freeBridgeString(cstr)
             LibC.free(n)
             result
         }
@@ -203,7 +205,7 @@ public class QProcess {
     }
     
     public static func systemEnvironment(): String {
-        unsafe { qProcessSystemEnvironment().toString() }
+        unsafe { let cstr = qProcessSystemEnvironment(); let result = cstr.toString(); freeBridgeString(cstr); result }
     }
     
     // ========== 等待 ==========
@@ -241,7 +243,7 @@ public class QProcess {
         this
     }
     
-    public func program(): String { unsafe { qProcessProgram(ptr).toString() } }
+    public func program(): String { unsafe { let cstr = qProcessProgram(ptr); let result = cstr.toString(); freeBridgeString(cstr); result } }
     
     public func setArguments(args: String): QProcess {
         unsafe {
@@ -252,7 +254,7 @@ public class QProcess {
         this
     }
     
-    public func arguments(): String { unsafe { qProcessArguments(ptr).toString() } }
+    public func arguments(): String { unsafe { let cstr = qProcessArguments(ptr); let result = cstr.toString(); freeBridgeString(cstr); result } }
     
     public func setWorkingDirectory(dir: String): QProcess {
         unsafe {
@@ -263,7 +265,7 @@ public class QProcess {
         this
     }
     
-    public func workingDirectory(): String { unsafe { qProcessWorkingDirectory(ptr).toString() } }
+    public func workingDirectory(): String { unsafe { let cstr = qProcessWorkingDirectory(ptr); let result = cstr.toString(); freeBridgeString(cstr); result } }
     
     public func setProcessEnvironment(env: QProcessEnvironment): QProcess {
         unsafe { qProcessSetProcessEnvironment(ptr, env.getPtr()) }
@@ -281,8 +283,8 @@ public class QProcess {
         }
     }
     
-    public func readAllStandardOutput(): String { unsafe { qProcessReadAllStandardOutput(ptr).toString() } }
-    public func readAllStandardError(): String { unsafe { qProcessReadAllStandardError(ptr).toString() } }
+    public func readAllStandardOutput(): String { unsafe { let cstr = qProcessReadAllStandardOutput(ptr); let result = cstr.toString(); freeBridgeString(cstr); result } }
+    public func readAllStandardError(): String { unsafe { let cstr = qProcessReadAllStandardError(ptr); let result = cstr.toString(); freeBridgeString(cstr); result } }
     
     public func closeWriteChannel(): QProcess { unsafe { qProcessCloseWriteChannel(ptr) }; this }
     public func closeReadChannel(channel: Int32): QProcess { unsafe { qProcessCloseReadChannel(ptr, channel) }; this }

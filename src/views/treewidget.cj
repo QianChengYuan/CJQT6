@@ -1,5 +1,7 @@
 package cjqt6.views
 
+import cjqt6.core.*
+
 // ============================================================
 // QTreeWidget FFI声明
 // ============================================================
@@ -131,7 +133,9 @@ public class QTreeWidgetItem {
     public func text(column: Int32): String {
         unsafe {
             let cstr = qTreeWidgetItemText(ptr, column)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
     

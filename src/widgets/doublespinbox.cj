@@ -135,7 +135,9 @@ public class QDoubleSpinBox <: QtResource {
         checkValid()
         unsafe {
             let cstr = qDoubleSpinBoxPrefix(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 
@@ -154,7 +156,9 @@ public class QDoubleSpinBox <: QtResource {
         checkValid()
         unsafe {
             let cstr = qDoubleSpinBoxSuffix(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 
@@ -245,7 +249,9 @@ public class QDoubleSpinBox <: QtResource {
         checkValid()
         unsafe {
             let cstr = qDoubleSpinBoxCleanText(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 
@@ -254,7 +260,9 @@ public class QDoubleSpinBox <: QtResource {
         checkValid()
         unsafe {
             let cstr = qDoubleSpinBoxText(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 

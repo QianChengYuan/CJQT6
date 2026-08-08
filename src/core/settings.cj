@@ -69,9 +69,11 @@ public class QSettings <: QtResource {
             let cstrKey = LibC.mallocCString(key)
             let cstrDef = LibC.mallocCString(defaultValue)
             let cstr = qSettingsValue(ptr, cstrKey, cstrDef)
+            let result = cstr.toString()
+            freeBridgeString(cstr)
             LibC.free(cstrKey)
             LibC.free(cstrDef)
-            return cstr.toString()
+            return result
         }
     }
 

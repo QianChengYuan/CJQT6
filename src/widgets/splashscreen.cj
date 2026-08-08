@@ -79,7 +79,9 @@ public class QSplashScreen <: QtResource {
         checkValid()
         unsafe {
             let cstr = qSplashScreenMessage(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 

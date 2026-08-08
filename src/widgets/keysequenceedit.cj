@@ -45,7 +45,9 @@ public class QKeySequenceEdit {
     public func keySequence(): String {
         unsafe {
             let cstr = qKeySequenceEditKeySequence(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 

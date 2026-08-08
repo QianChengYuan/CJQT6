@@ -170,6 +170,7 @@ public class QGroupBox <: QtResource {
         unsafe {
             let cstr = qGroupBoxTitle(ptr)
             let result = cstr.toString()
+            freeBridgeString(cstr)
             return result
         }
     }
@@ -430,7 +431,9 @@ public class QTabWidget <: QtResource {
         checkValid()
         unsafe {
             let cstr = qTabWidgetTabText(ptr, index)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
     

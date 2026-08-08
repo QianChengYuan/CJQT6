@@ -9,9 +9,7 @@
 #include <cstring>
 #include <functional>
 #include <unordered_map>
-
-// 静态缓冲区用于返回字符串
-static char g_treeBuffer[4096];
+#include "bridge_string_utils.h"
 
 // 树形事件回调映射
 static std::unordered_map<int64_t, std::function<void(int64_t)>> g_treeItemClickedCallbacks;
@@ -21,14 +19,7 @@ static std::unordered_map<int64_t, std::function<void(int64_t)>> g_treeItemColla
 static std::unordered_map<int64_t, std::function<void(int64_t)>> g_treeCurrentItemChangedCallbacks;
 
 static const char* safeCopyString(const QString& str) {
-    QByteArray utf8 = str.toUtf8();
-    int len = utf8.size();
-    if (len >= (int)sizeof(g_treeBuffer)) {
-        len = sizeof(g_treeBuffer) - 1;
-    }
-    std::memcpy(g_treeBuffer, utf8.constData(), len);
-    g_treeBuffer[len] = '\0';
-    return g_treeBuffer;
+    return cjqt6::dupUtf8(str);
 }
 
 extern "C" {
@@ -218,7 +209,7 @@ const char* qTreeWidgetItemText(int64_t itemPtr, int32_t column) {
     if (item) {
         return safeCopyString(item->text(column));
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 // 子项

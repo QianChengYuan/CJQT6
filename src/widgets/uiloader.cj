@@ -1,4 +1,4 @@
-﻿package cjqt6.widgets
+package cjqt6.widgets
 
 import cjqt6.core.*
 
@@ -57,7 +57,10 @@ public class QUiLoader <: QtResource {
     public func errorString(): String {
         checkValid()
         unsafe {
-            return qUiLoaderErrorString(ptr).toString()
+            let cstr = qUiLoaderErrorString(ptr)
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 

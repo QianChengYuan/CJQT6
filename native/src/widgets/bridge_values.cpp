@@ -11,6 +11,7 @@
 #include <QProgressBar>
 #include <functional>
 #include <unordered_map>
+#include "bridge_string_utils.h"
 
 // 回调映射
 static std::unordered_map<int64_t, std::function<void(int64_t)>> g_spinBoxCallbacks;
@@ -68,10 +69,8 @@ void qSpinBoxSetPrefix(int64_t ptr, const char* prefix) {
 
 const char* qSpinBoxPrefix(int64_t ptr) {
     QSpinBox* spinBox = reinterpret_cast<QSpinBox*>(ptr);
-    if (!spinBox) return "";
-    static QByteArray arr;
-    arr = spinBox->prefix().toUtf8();
-    return arr.constData();
+    if (!spinBox) return cjqt6::emptyString();
+    return cjqt6::dupUtf8(spinBox->prefix());
 }
 
 void qSpinBoxSetSuffix(int64_t ptr, const char* suffix) {
@@ -83,10 +82,8 @@ void qSpinBoxSetSuffix(int64_t ptr, const char* suffix) {
 
 const char* qSpinBoxSuffix(int64_t ptr) {
     QSpinBox* spinBox = reinterpret_cast<QSpinBox*>(ptr);
-    if (!spinBox) return "";
-    static QByteArray arr;
-    arr = spinBox->suffix().toUtf8();
-    return arr.constData();
+    if (!spinBox) return cjqt6::emptyString();
+    return cjqt6::dupUtf8(spinBox->suffix());
 }
 
 void qSpinBoxSetWrapping(int64_t ptr, bool wrapping) {
@@ -110,10 +107,8 @@ void qSpinBoxSetSpecialValueText(int64_t ptr, const char* text) {
 
 const char* qSpinBoxCleanText(int64_t ptr) {
     QSpinBox* spinBox = reinterpret_cast<QSpinBox*>(ptr);
-    if (!spinBox) return "";
-    static QByteArray arr;
-    arr = spinBox->cleanText().toUtf8();
-    return arr.constData();
+    if (!spinBox) return cjqt6::emptyString();
+    return cjqt6::dupUtf8(spinBox->cleanText());
 }
 
 void qSpinBoxSetOnValueChanged(int64_t ptr, void (*callback)(int64_t)) {
@@ -366,10 +361,8 @@ void qProgressBarSetFormat(int64_t ptr, const char* format) {
 
 const char* qProgressBarFormat(int64_t ptr) {
     QProgressBar* progressBar = reinterpret_cast<QProgressBar*>(ptr);
-    if (!progressBar) return "";
-    static QByteArray arr;
-    arr = progressBar->format().toUtf8();
-    return arr.constData();
+    if (!progressBar) return cjqt6::emptyString();
+    return cjqt6::dupUtf8(progressBar->format());
 }
 
 void qProgressBarSetOrientation(int64_t ptr, int32_t orientation) {

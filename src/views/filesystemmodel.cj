@@ -97,7 +97,9 @@ public class QFileSystemModel {
         checkValid()
         unsafe {
             let cstr = qFileSystemModelRootPath(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 
@@ -174,7 +176,9 @@ public class QFileSystemModel {
         checkValid()
         unsafe {
             let cstr = qFileSystemModelFilePath(ptr, index.ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 
@@ -182,7 +186,9 @@ public class QFileSystemModel {
         checkValid()
         unsafe {
             let cstr = qFileSystemModelFileName(ptr, index.ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 

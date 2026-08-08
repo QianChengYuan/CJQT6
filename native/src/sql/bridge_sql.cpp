@@ -11,6 +11,7 @@
 #include <QSqlTableModel>
 #include <QVariant>
 #include <QStringList>
+#include "bridge_string_utils.h"
 
 extern "C" {
 
@@ -96,22 +97,18 @@ bool qSqlDatabaseIsOpen(int64_t ptr) {
 
 const char* qSqlDatabaseLastError(int64_t ptr) {
     QSqlDatabase* db = reinterpret_cast<QSqlDatabase*>(ptr);
-    static QByteArray buffer;
     if (db) {
-        buffer = db->lastError().text().toUtf8();
-        return buffer.constData();
+        return cjqt6::dupUtf8(db->lastError().text());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 const char* qSqlDatabaseDriverName(int64_t ptr) {
     QSqlDatabase* db = reinterpret_cast<QSqlDatabase*>(ptr);
-    static QByteArray buffer;
     if (db) {
-        buffer = db->driverName().toUtf8();
-        return buffer.constData();
+        return cjqt6::dupUtf8(db->driverName());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qSqlDatabaseRemoveDatabase(const char* name) {
@@ -222,12 +219,10 @@ bool qSqlQueryLast(int64_t ptr) {
 
 const char* qSqlQueryValueString(int64_t ptr, int32_t index) {
     QSqlQuery* query = reinterpret_cast<QSqlQuery*>(ptr);
-    static QByteArray buffer;
     if (query) {
-        buffer = query->value(index).toString().toUtf8();
-        return buffer.constData();
+        return cjqt6::dupUtf8(query->value(index).toString());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 int32_t qSqlQueryValueInt(int64_t ptr, int32_t index) {
@@ -310,12 +305,10 @@ void qSqlQueryClear(int64_t ptr) {
 
 const char* qSqlQueryLastError(int64_t ptr) {
     QSqlQuery* query = reinterpret_cast<QSqlQuery*>(ptr);
-    static QByteArray buffer;
     if (query) {
-        buffer = query->lastError().text().toUtf8();
-        return buffer.constData();
+        return cjqt6::dupUtf8(query->lastError().text());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qSqlQueryDelete(int64_t ptr) {
@@ -346,12 +339,10 @@ int32_t qSqlRecordCount(int64_t ptr) {
 
 const char* qSqlRecordFieldName(int64_t ptr, int32_t index) {
     QSqlRecord* record = reinterpret_cast<QSqlRecord*>(ptr);
-    static QByteArray buffer;
     if (record) {
-        buffer = record->fieldName(index).toUtf8();
-        return buffer.constData();
+        return cjqt6::dupUtf8(record->fieldName(index));
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 int32_t qSqlRecordIndexOf(int64_t ptr, const char* name) {
@@ -370,12 +361,10 @@ bool qSqlRecordIsNull(int64_t ptr, int32_t index) {
 
 const char* qSqlRecordValueString(int64_t ptr, int32_t index) {
     QSqlRecord* record = reinterpret_cast<QSqlRecord*>(ptr);
-    static QByteArray buffer;
     if (record) {
-        buffer = record->value(index).toString().toUtf8();
-        return buffer.constData();
+        return cjqt6::dupUtf8(record->value(index).toString());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 int32_t qSqlRecordValueInt(int64_t ptr, int32_t index) {
@@ -410,12 +399,10 @@ void qSqlRecordDelete(int64_t ptr) {
 
 const char* qSqlFieldName(int64_t ptr) {
     QSqlField* field = reinterpret_cast<QSqlField*>(ptr);
-    static QByteArray buffer;
     if (field) {
-        buffer = field->name().toUtf8();
-        return buffer.constData();
+        return cjqt6::dupUtf8(field->name());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 bool qSqlFieldIsNull(int64_t ptr) {
@@ -435,12 +422,10 @@ bool qSqlFieldIsAutoValue(int64_t ptr) {
 
 const char* qSqlFieldValueString(int64_t ptr) {
     QSqlField* field = reinterpret_cast<QSqlField*>(ptr);
-    static QByteArray buffer;
     if (field) {
-        buffer = field->value().toString().toUtf8();
-        return buffer.constData();
+        return cjqt6::dupUtf8(field->value().toString());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qSqlFieldDelete(int64_t ptr) {
@@ -466,10 +451,8 @@ void qSqlTableModelSetTable(int64_t ptr, const char* tableName) {
     reinterpret_cast<QSqlTableModel*>(ptr)->setTable(QString::fromUtf8(tableName));
 }
 
-static QByteArray sqlBuffer;
 const char* qSqlTableModelTableName(int64_t ptr) {
-    sqlBuffer = reinterpret_cast<QSqlTableModel*>(ptr)->tableName().toUtf8();
-    return sqlBuffer.constData();
+    return cjqt6::dupUtf8(reinterpret_cast<QSqlTableModel*>(ptr)->tableName());
 }
 
 bool qSqlTableModelSelect(int64_t ptr) {
@@ -489,8 +472,7 @@ void qSqlTableModelSetFilter(int64_t ptr, const char* filter) {
 }
 
 const char* qSqlTableModelFilter(int64_t ptr) {
-    sqlBuffer = reinterpret_cast<QSqlTableModel*>(ptr)->filter().toUtf8();
-    return sqlBuffer.constData();
+    return cjqt6::dupUtf8(reinterpret_cast<QSqlTableModel*>(ptr)->filter());
 }
 
 void qSqlTableModelSetSort(int64_t ptr, int32_t col, int32_t order) {
@@ -499,8 +481,7 @@ void qSqlTableModelSetSort(int64_t ptr, int32_t col, int32_t order) {
 
 const char* qSqlTableModelData(int64_t ptr, int32_t row, int32_t col) {
     QModelIndex idx = reinterpret_cast<QSqlTableModel*>(ptr)->index(row, col);
-    sqlBuffer = idx.data(Qt::DisplayRole).toString().toUtf8();
-    return sqlBuffer.constData();
+    return cjqt6::dupUtf8(idx.data(Qt::DisplayRole).toString());
 }
 
 bool qSqlTableModelSetData(int64_t ptr, int32_t row, int32_t col, const char* val) {
@@ -509,8 +490,7 @@ bool qSqlTableModelSetData(int64_t ptr, int32_t row, int32_t col, const char* va
 }
 
 const char* qSqlTableModelHeaderData(int64_t ptr, int32_t section) {
-    sqlBuffer = reinterpret_cast<QSqlTableModel*>(ptr)->headerData(section, Qt::Horizontal, Qt::DisplayRole).toString().toUtf8();
-    return sqlBuffer.constData();
+    return cjqt6::dupUtf8(reinterpret_cast<QSqlTableModel*>(ptr)->headerData(section, Qt::Horizontal, Qt::DisplayRole).toString());
 }
 
 bool qSqlTableModelInsertRow(int64_t ptr, int32_t row) {
@@ -530,8 +510,7 @@ void qSqlTableModelRevertAll(int64_t ptr) {
 }
 
 const char* qSqlTableModelDatabaseError(int64_t ptr) {
-    sqlBuffer = reinterpret_cast<QSqlTableModel*>(ptr)->lastError().text().toUtf8();
-    return sqlBuffer.constData();
+    return cjqt6::dupUtf8(reinterpret_cast<QSqlTableModel*>(ptr)->lastError().text());
 }
 
 void qSqlTableModelSetEditStrategy(int64_t ptr, int32_t strategy) {

@@ -1,4 +1,4 @@
-﻿package cjqt6.widgets
+package cjqt6.widgets
 
 import cjqt6.core.*
 
@@ -142,7 +142,9 @@ public class QComboBox <: QtResource {
         checkValid()
         unsafe {
             let cstr = qComboBoxCurrentText(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
     
@@ -242,7 +244,9 @@ public class QComboBox <: QtResource {
         checkValid()
         unsafe {
             let cstr = qComboBoxItemText(ptr, index)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 

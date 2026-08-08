@@ -177,7 +177,9 @@ public class QUdpSocket {
     public func errorString(): String {
         unsafe {
             let cstr = qUdpSocketErrorString(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
     

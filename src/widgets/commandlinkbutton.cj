@@ -63,7 +63,9 @@ public class QCommandLinkButton {
     public func description(): String {
         unsafe {
             let cstr = qCommandLinkButtonDescription(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 

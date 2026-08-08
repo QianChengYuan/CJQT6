@@ -280,7 +280,9 @@ public class QGraphicsView <: QtResource {
         checkValid()
         unsafe {
             let cstr = qGraphicsViewMapToScene(ptr, x, y)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 
@@ -399,7 +401,9 @@ public class QGraphicsScene <: QtResource {
         checkValid()
         unsafe {
             let cstr = qGraphicsSceneItems(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 
@@ -421,7 +425,9 @@ public class QGraphicsScene <: QtResource {
         checkValid()
         unsafe {
             let cstr = qGraphicsSceneSceneRect(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 
@@ -494,7 +500,9 @@ public func graphicsItemSetPos(itemPtr: Int64, x: Float64, y: Float64): Unit {
 public func graphicsItemPos(itemPtr: Int64): String {
     unsafe {
         let cstr = qGraphicsItemPos(itemPtr)
-        return cstr.toString()
+        let result = cstr.toString()
+        freeBridgeString(cstr)
+        return result
     }
 }
 

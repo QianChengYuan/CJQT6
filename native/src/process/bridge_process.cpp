@@ -8,6 +8,7 @@
 #include <QStringList>
 #include <functional>
 #include <unordered_map>
+#include "bridge_string_utils.h"
 
 // 回调映射
 static std::unordered_map<int64_t, std::function<void(int, int)>> g_finishedCallbacks;
@@ -198,11 +199,9 @@ void qProcessSetProgram(int64_t ptr, const char* program) {
 const char* qProcessProgram(int64_t ptr) {
     QProcess* process = reinterpret_cast<QProcess*>(ptr);
     if (process) {
-        static QString program;
-        program = process->program();
-        return program.toUtf8().constData();
+        return cjqt6::dupUtf8(process->program());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qProcessSetArguments(int64_t ptr, const char* args) {
@@ -216,11 +215,9 @@ void qProcessSetArguments(int64_t ptr, const char* args) {
 const char* qProcessArguments(int64_t ptr) {
     QProcess* process = reinterpret_cast<QProcess*>(ptr);
     if (process) {
-        static QString args;
-        args = process->arguments().join(' ');
-        return args.toUtf8().constData();
+        return cjqt6::dupUtf8(process->arguments().join(' '));
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 // 工作目录
@@ -234,11 +231,9 @@ void qProcessSetWorkingDirectory(int64_t ptr, const char* dir) {
 const char* qProcessWorkingDirectory(int64_t ptr) {
     QProcess* process = reinterpret_cast<QProcess*>(ptr);
     if (process) {
-        static QString dir;
-        dir = process->workingDirectory();
-        return dir.toUtf8().constData();
+        return cjqt6::dupUtf8(process->workingDirectory());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 // 读写
@@ -261,21 +256,17 @@ int64_t qProcessWriteData(int64_t ptr, const char* data, int64_t len) {
 const char* qProcessReadAllStandardOutput(int64_t ptr) {
     QProcess* process = reinterpret_cast<QProcess*>(ptr);
     if (process) {
-        static QByteArray data;
-        data = process->readAllStandardOutput();
-        return data.constData();
+        return cjqt6::dupUtf8(process->readAllStandardOutput());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 const char* qProcessReadAllStandardError(int64_t ptr) {
     QProcess* process = reinterpret_cast<QProcess*>(ptr);
     if (process) {
-        static QByteArray data;
-        data = process->readAllStandardError();
-        return data.constData();
+        return cjqt6::dupUtf8(process->readAllStandardError());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 int64_t qProcessReadAllStandardOutputLength(int64_t ptr) {
@@ -429,9 +420,7 @@ void qProcessSetOnStateChanged(int64_t ptr, void (*callback)(int)) {
 // ============================================================
 
 const char* qProcessSystemEnvironment() {
-    static QString env;
-    env = QProcess::systemEnvironment().join('\n');
-    return env.toUtf8().constData();
+    return cjqt6::dupUtf8(QProcess::systemEnvironment().join('\n'));
 }
 
 // ============================================================
@@ -472,11 +461,9 @@ void qProcessEnvironmentRemove(int64_t ptr, const char* name) {
 const char* qProcessEnvironmentValue(int64_t ptr, const char* name) {
     QProcessEnvironment* env = reinterpret_cast<QProcessEnvironment*>(ptr);
     if (env) {
-        static QString value;
-        value = env->value(QString::fromUtf8(name));
-        return value.toUtf8().constData();
+        return cjqt6::dupUtf8(env->value(QString::fromUtf8(name)));
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 int qProcessEnvironmentContains(int64_t ptr, const char* name) {

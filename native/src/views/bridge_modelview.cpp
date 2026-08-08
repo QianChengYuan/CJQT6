@@ -12,6 +12,7 @@
 #include <QHeaderView>
 #include <QStringList>
 #include <QDir>
+#include "bridge_string_utils.h"
 
 extern "C" {
 
@@ -72,12 +73,10 @@ const char* qStandardItemModelItemText(int64_t ptr, int32_t row, int32_t col) {
     if (model) {
         QStandardItem* item = model->item(row, col);
         if (item) {
-            static QByteArray buffer;
-            buffer = item->text().toUtf8();
-            return buffer.constData();
+            return cjqt6::dupUtf8(item->text());
         }
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qStandardItemModelClear(int64_t ptr) {
@@ -383,11 +382,9 @@ void qFileSystemModelSetRootPath(int64_t ptr, const char* path) {
 const char* qFileSystemModelRootPath(int64_t ptr) {
     QFileSystemModel* model = reinterpret_cast<QFileSystemModel*>(ptr);
     if (model) {
-        static QByteArray buffer;
-        buffer = model->rootPath().toUtf8();
-        return buffer.constData();
+        return cjqt6::dupUtf8(model->rootPath());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 int64_t qFileSystemModelIndex(int64_t ptr, const char* path) {

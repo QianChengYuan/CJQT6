@@ -15,7 +15,9 @@ public class QClipboard {
     public static func text(): String {
         unsafe {
             let cstr = qClipboardText()
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 

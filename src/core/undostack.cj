@@ -74,8 +74,12 @@ public class QUndoCommand {
     /// 获取命令文本
     public func text(): String {
         checkValid()
-        let cstr = unsafe { qUndoCommandText(ptr) }
-        return cstr.toString()
+        unsafe {
+            let cstr = qUndoCommandText(ptr)
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
+        }
     }
 
     /// 获取原生指针
@@ -153,15 +157,23 @@ public class QUndoStack {
     /// 获取撤销操作的描述
     public func undoText(): String {
         checkValid()
-        let cstr = unsafe { qUndoStackUndoText(ptr) }
-        cstr.toString()
+        unsafe {
+            let cstr = qUndoStackUndoText(ptr)
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            result
+        }
     }
 
     /// 获取重做操作的描述
     public func redoText(): String {
         checkValid()
-        let cstr = unsafe { qUndoStackRedoText(ptr) }
-        cstr.toString()
+        unsafe {
+            let cstr = qUndoStackRedoText(ptr)
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            result
+        }
     }
 
     /// 获取命令数量

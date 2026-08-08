@@ -4,7 +4,7 @@
  *
  * 风格与 bridge_ext_new.cpp 一致：
  *   - 入参 ptr 做空指针校验；
- *   - 字符串返回使用 static QString + toUtf8().constData()；
+ *   - 字符串返回使用 cjqt6::dupUtf8 / cjqt6::emptyString（malloc 分配，调用方释放）；
  *   - 信号通过 std::unordered_map 注册回调，connect 前做去重保护。
  * 注意：QModelIndex 句柄统一以 QPersistentModelIndex*（堆分配）表示，
  * 以便文件系统模型返回的索引也兼容。索引句柄在显式 getter 中由调用者负责
@@ -36,6 +36,7 @@
 #include <QVariant>
 #include <functional>
 #include <unordered_map>
+#include "bridge_string_utils.h"
 
 extern "C" {
 
@@ -376,11 +377,9 @@ void qListWidgetItemSetText(int64_t itemPtr, const char* text) {
 const char* qListWidgetItemGetText(int64_t itemPtr) {
     QListWidgetItem* item = reinterpret_cast<QListWidgetItem*>(itemPtr);
     if (item) {
-        static QString s;
-        s = item->text();
-        return s.toUtf8().constData();
+        return cjqt6::dupUtf8(item->text());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qListWidgetItemSetFlags(int64_t itemPtr, int32_t flags) {
@@ -804,11 +803,9 @@ void qTableWidgetItemSetText(int64_t itemPtr, const char* text) {
 const char* qTableWidgetItemGetText(int64_t itemPtr) {
     QTableWidgetItem* item = reinterpret_cast<QTableWidgetItem*>(itemPtr);
     if (item) {
-        static QString s;
-        s = item->text();
-        return s.toUtf8().constData();
+        return cjqt6::dupUtf8(item->text());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qTableWidgetItemSetFlags(int64_t itemPtr, int32_t flags) {
@@ -1172,21 +1169,17 @@ int32_t qFileSystemModelIsResolveSymlinks(int64_t ptr) {
 const char* qFileSystemModelFilePath(int64_t ptr, int64_t indexPtr) {
     QFileSystemModel* m = reinterpret_cast<QFileSystemModel*>(ptr);
     if (m && indexPtr) {
-        static QString s;
-        s = m->filePath(*reinterpret_cast<QPersistentModelIndex*>(indexPtr));
-        return s.toUtf8().constData();
+        return cjqt6::dupUtf8(m->filePath(*reinterpret_cast<QPersistentModelIndex*>(indexPtr)));
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 const char* qFileSystemModelFileName(int64_t ptr, int64_t indexPtr) {
     QFileSystemModel* m = reinterpret_cast<QFileSystemModel*>(ptr);
     if (m && indexPtr) {
-        static QString s;
-        s = m->fileName(*reinterpret_cast<QPersistentModelIndex*>(indexPtr));
-        return s.toUtf8().constData();
+        return cjqt6::dupUtf8(m->fileName(*reinterpret_cast<QPersistentModelIndex*>(indexPtr)));
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 int32_t qFileSystemModelIsDir(int64_t ptr, int64_t indexPtr) {
@@ -1313,11 +1306,9 @@ void qStandardItemSetText(int64_t itemPtr, const char* text) {
 const char* qStandardItemGetText(int64_t itemPtr) {
     QStandardItem* item = reinterpret_cast<QStandardItem*>(itemPtr);
     if (item) {
-        static QString s;
-        s = item->text();
-        return s.toUtf8().constData();
+        return cjqt6::dupUtf8(item->text());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qStandardItemSetFlags(int64_t itemPtr, int32_t flags) {

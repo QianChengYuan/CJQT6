@@ -9,6 +9,7 @@
 #include <QButtonGroup>
 #include <functional>
 #include <unordered_map>
+#include "bridge_string_utils.h"
 
 // 回调映射
 static std::unordered_map<int64_t, std::function<void(int64_t)>> g_checkBoxCallbacks;
@@ -36,7 +37,7 @@ void qCheckBoxSetText(int64_t ptr, const char* text) {
 
 const char* qCheckBoxText(int64_t ptr) {
     QCheckBox* checkBox = reinterpret_cast<QCheckBox*>(ptr);
-    if (!checkBox) return "";
+    if (!checkBox) return cjqt6::emptyString();
     QByteArray arr = checkBox->text().toUtf8();
     char* result = (char*)malloc(arr.size() + 1);
     if (result) memcpy(result, arr.constData(), arr.size() + 1);
@@ -83,7 +84,7 @@ void qRadioButtonSetText(int64_t ptr, const char* text) {
 
 const char* qRadioButtonText(int64_t ptr) {
     QRadioButton* radioButton = reinterpret_cast<QRadioButton*>(ptr);
-    if (!radioButton) return "";
+    if (!radioButton) return cjqt6::emptyString();
     QByteArray arr = radioButton->text().toUtf8();
     char* result = (char*)malloc(arr.size() + 1);
     if (result) memcpy(result, arr.constData(), arr.size() + 1);
@@ -131,11 +132,9 @@ void qComboBoxAddItem(int64_t ptr, const char* text) {
 const char* qComboBoxCurrentText(int64_t ptr) {
     QComboBox* comboBox = reinterpret_cast<QComboBox*>(ptr);
     if (comboBox) {
-        static QString text;
-        text = comboBox->currentText();
-        return text.toUtf8().constData();
+        return cjqt6::dupUtf8(comboBox->currentText());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qComboBoxSetCurrentIndex(int64_t ptr, int32_t index) {

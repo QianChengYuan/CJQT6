@@ -112,6 +112,7 @@ public class QAction <: QtResource {
         unsafe {
             let cstr = qActionText(ptr)
             let result = cstr.toString()
+            freeBridgeString(cstr)
             return result
         }
     }

@@ -12,6 +12,7 @@
 #include <QTextEdit>
 #include <functional>
 #include <unordered_map>
+#include "bridge_string_utils.h"
 
 extern "C" {
 
@@ -53,12 +54,10 @@ void qPrinterSetOutputFileName(int64_t ptr, const char* name) {
 
 const char* qPrinterOutputFileName(int64_t ptr) {
     QPrinter* printer = reinterpret_cast<QPrinter*>(ptr);
-    static QByteArray buffer;
     if (printer) {
-        buffer = printer->outputFileName().toUtf8();
-        return buffer.constData();
+        return cjqt6::dupUtf8(printer->outputFileName());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qPrinterSetPageSize(int64_t ptr, int32_t pageSize) {
@@ -206,12 +205,10 @@ void qPrinterSetResolution(int64_t ptr, int32_t dpi) {
 
 const char* qPrinterPrinterName(int64_t ptr) {
     QPrinter* printer = reinterpret_cast<QPrinter*>(ptr);
-    static QByteArray buffer;
     if (printer) {
-        buffer = printer->printerName().toUtf8();
-        return buffer.constData();
+        return cjqt6::dupUtf8(printer->printerName());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qPrinterSetPrinterName(int64_t ptr, const char* name) {
@@ -223,12 +220,10 @@ void qPrinterSetPrinterName(int64_t ptr, const char* name) {
 
 const char* qPrinterDocName(int64_t ptr) {
     QPrinter* printer = reinterpret_cast<QPrinter*>(ptr);
-    static QByteArray buffer;
     if (printer) {
-        buffer = printer->docName().toUtf8();
-        return buffer.constData();
+        return cjqt6::dupUtf8(printer->docName());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qPrinterSetDocName(int64_t ptr, const char* name) {

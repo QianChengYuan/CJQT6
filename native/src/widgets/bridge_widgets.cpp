@@ -39,6 +39,7 @@
 #include <QRubberBand>
 #include <functional>
 #include <unordered_map>
+#include "bridge_string_utils.h"
 
 // �ⲿ�ص�ӳ������
 extern std::unordered_map<int64_t, std::function<void(int64_t)>> g_buttonCallbacks;
@@ -122,7 +123,7 @@ void qButtonSetText(int64_t ptr, const char* text) {
 
 const char* qButtonText(int64_t ptr) {
     QPushButton* button = reinterpret_cast<QPushButton*>(ptr);
-    if (!button) return "";
+    if (!button) return cjqt6::emptyString();
     QByteArray arr = button->text().toUtf8();
     char* result = (char*)malloc(arr.size() + 1);
     if (result) memcpy(result, arr.constData(), arr.size() + 1);
@@ -1453,11 +1454,9 @@ void qGraphicsViewSetForegroundBrush(int64_t ptr, int32_t r, int32_t g, int32_t 
 
 const char* qGraphicsViewMapToScene(int64_t ptr, double x, double y) {
     QGraphicsView* view = reinterpret_cast<QGraphicsView*>(ptr);
-    if (!view) return "0,0";
+    if (!view) return cjqt6::dupUtf8(QStringLiteral("0,0"));
     QPointF pt = view->mapToScene(static_cast<int>(x), static_cast<int>(y));
-    static thread_local std::string buf;
-    buf = QString("%1,%2").arg(pt.x(), 0, 'f', 4).arg(pt.y(), 0, 'f', 4).toStdString();
-    return buf.c_str();
+    return cjqt6::dupUtf8(QString("%1,%2").arg(pt.x(), 0, 'f', 4).arg(pt.y(), 0, 'f', 4));
 }
 
 // ============================================================
@@ -1493,15 +1492,14 @@ void qGraphicsSceneClear(int64_t ptr) {
 
 const char* qGraphicsSceneItems(int64_t ptr) {
     QGraphicsScene* scene = reinterpret_cast<QGraphicsScene*>(ptr);
-    if (!scene) return "";
+    if (!scene) return cjqt6::emptyString();
     QList<QGraphicsItem*> items = scene->items();
-    static thread_local std::string buf;
-    buf.clear();
+    std::string buf;
     for (int i = 0; i < items.size(); ++i) {
         if (i > 0) buf += ",";
         buf += std::to_string(reinterpret_cast<int64_t>(items[i]));
     }
-    return buf.c_str();
+    return cjqt6::dupUtf8(QString::fromStdString(buf));
 }
 
 int64_t qGraphicsSceneItemAt(int64_t ptr, double x, double y) {
@@ -1556,12 +1554,10 @@ void qGraphicsSceneSetSceneRect(int64_t ptr, double x, double y, double w, doubl
 
 const char* qGraphicsSceneSceneRect(int64_t ptr) {
     QGraphicsScene* scene = reinterpret_cast<QGraphicsScene*>(ptr);
-    if (!scene) return "0,0,0,0";
+    if (!scene) return cjqt6::dupUtf8(QStringLiteral("0,0,0,0"));
     QRectF r = scene->sceneRect();
-    static thread_local std::string buf;
-    buf = QString("%1,%2,%3,%4").arg(r.x(), 0, 'f', 4).arg(r.y(), 0, 'f', 4)
-                                .arg(r.width(), 0, 'f', 4).arg(r.height(), 0, 'f', 4).toStdString();
-    return buf.c_str();
+    return cjqt6::dupUtf8(QString("%1,%2,%3,%4").arg(r.x(), 0, 'f', 4).arg(r.y(), 0, 'f', 4)
+                                                .arg(r.width(), 0, 'f', 4).arg(r.height(), 0, 'f', 4));
 }
 
 void qGraphicsSceneUpdate(int64_t ptr) {
@@ -1595,11 +1591,9 @@ void qGraphicsItemSetPos(int64_t ptr, double x, double y) {
 
 const char* qGraphicsItemPos(int64_t ptr) {
     QGraphicsItem* item = reinterpret_cast<QGraphicsItem*>(ptr);
-    if (!item) return "0,0";
+    if (!item) return cjqt6::dupUtf8(QStringLiteral("0,0"));
     QPointF p = item->pos();
-    static thread_local std::string buf;
-    buf = QString("%1,%2").arg(p.x(), 0, 'f', 4).arg(p.y(), 0, 'f', 4).toStdString();
-    return buf.c_str();
+    return cjqt6::dupUtf8(QString("%1,%2").arg(p.x(), 0, 'f', 4).arg(p.y(), 0, 'f', 4));
 }
 
 void qGraphicsItemSetZValue(int64_t ptr, double z) {
@@ -1729,10 +1723,8 @@ void qFontComboBoxSetCurrentFont(int64_t ptr, const char* family) {
 
 const char* qFontComboBoxCurrentFont(int64_t ptr) {
     QFontComboBox* combo = reinterpret_cast<QFontComboBox*>(ptr);
-    if (!combo) return "";
-    static QByteArray arr;
-    arr = combo->currentFont().family().toUtf8();
-    return arr.constData();
+    if (!combo) return cjqt6::emptyString();
+    return cjqt6::dupUtf8(combo->currentFont().family());
 }
 
 void qFontComboBoxSetWritingSystem(int64_t ptr, int32_t ws) {

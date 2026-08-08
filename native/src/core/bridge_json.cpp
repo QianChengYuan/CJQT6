@@ -4,8 +4,8 @@
 #include <QJsonValue>
 #include <QJsonParseError>
 #include <QStringList>
+#include "bridge_string_utils.h"
 
-static QByteArray g_jsonBuffer;
 static QStringList g_jsonKeyList;
 
 extern "C" {
@@ -31,10 +31,9 @@ const char* qJsonDocumentToJson(int64_t ptr, int32_t indent) {
     QJsonDocument* doc = reinterpret_cast<QJsonDocument*>(ptr);
     if (doc) {
         QJsonDocument::JsonFormat fmt = (indent > 0) ? QJsonDocument::Indented : QJsonDocument::Compact;
-        g_jsonBuffer = doc->toJson(fmt);
-        return g_jsonBuffer.constData();
+        return cjqt6::dupUtf8(doc->toJson(fmt));
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 bool qJsonDocumentIsNull(int64_t ptr) {
@@ -121,11 +120,10 @@ const char* qJsonObjectKeyAt(int64_t ptr, int32_t index) {
     if (obj) {
         QStringList keys = obj->keys();
         if (index >= 0 && index < keys.size()) {
-            g_jsonBuffer = keys[index].toUtf8();
-            return g_jsonBuffer.constData();
+            return cjqt6::dupUtf8(keys[index]);
         }
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 // ============================================================
@@ -219,10 +217,9 @@ int32_t qJsonValueType(int64_t ptr) {
 const char* qJsonValueToString(int64_t ptr) {
     QJsonValue* val = reinterpret_cast<QJsonValue*>(ptr);
     if (val && val->isString()) {
-        g_jsonBuffer = val->toString().toUtf8();
-        return g_jsonBuffer.constData();
+        return cjqt6::dupUtf8(val->toString());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 int64_t qJsonValueToInt(int64_t ptr, int64_t defaultVal) {

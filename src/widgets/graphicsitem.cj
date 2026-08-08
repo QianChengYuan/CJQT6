@@ -112,7 +112,7 @@ public open class QGraphicsItem {
     /// 设置位置（场景坐标）
     public func setPos(x: Float64, y: Float64): Unit { checkValid(); unsafe { qGraphicsItemSetPos(ptr, x, y) } }
     /// 获取位置（返回 "x,y" 字符串）
-    public func pos(): String { checkValid(); unsafe { qGraphicsItemPos(ptr).toString() } }
+    public func pos(): String { checkValid(); unsafe { let cstr = qGraphicsItemPos(ptr); let result = cstr.toString(); freeBridgeString(cstr); result } }
     /// 获取 X 坐标
     public func posX(): Float64 { checkValid(); unsafe { qGraphicsItemPosX(ptr) } }
     /// 获取 Y 坐标
@@ -197,7 +197,7 @@ public class QGraphicsRectItem <: QGraphicsItem {
     }
 
     /// 获取矩形范围（返回 "x,y,w,h" 字符串）
-    public func rect(): String { checkValid(); unsafe { qGraphicsRectItemRect(ptr).toString() } }
+    public func rect(): String { checkValid(); unsafe { let cstr = qGraphicsRectItemRect(ptr); let result = cstr.toString(); freeBridgeString(cstr); result } }
 
     /// 设置边框画笔（颜色 RGB + 线宽）
     public func setPen(colorR: Int32, colorG: Int32, colorB: Int32, width: Int32): Unit {
@@ -237,7 +237,7 @@ public class QGraphicsEllipseItem <: QGraphicsItem {
     }
 
     /// 获取外接矩形范围（返回 "x,y,w,h" 字符串）
-    public func rect(): String { checkValid(); unsafe { qGraphicsEllipseItemRect(ptr).toString() } }
+    public func rect(): String { checkValid(); unsafe { let cstr = qGraphicsEllipseItemRect(ptr); let result = cstr.toString(); freeBridgeString(cstr); result } }
 
     /// 设置扇形起始角（度，0 为三点钟方向）
     public func setStartAngle(angle: Int32): Unit { checkValid(); unsafe { qGraphicsEllipseItemSetStartAngle(ptr, angle) } }
@@ -282,7 +282,7 @@ public class QGraphicsLineItem <: QGraphicsItem {
     }
 
     /// 获取线段端点（返回 "x1,y1,x2,y2" 字符串）
-    public func line(): String { checkValid(); unsafe { qGraphicsLineItemLine(ptr).toString() } }
+    public func line(): String { checkValid(); unsafe { let cstr = qGraphicsLineItemLine(ptr); let result = cstr.toString(); freeBridgeString(cstr); result } }
 
     /// 设置线段画笔（颜色 RGB + 线宽）
     public func setPen(colorR: Int32, colorG: Int32, colorB: Int32, width: Int32): Unit {
@@ -323,7 +323,7 @@ public class QGraphicsTextItem <: QGraphicsItem {
     }
 
     /// 获取文本内容
-    public func text(): String { checkValid(); unsafe { qGraphicsTextItemText(ptr).toString() } }
+    public func text(): String { checkValid(); unsafe { let cstr = qGraphicsTextItemText(ptr); let result = cstr.toString(); freeBridgeString(cstr); result } }
 
     /// 设置 HTML 富文本内容
     public func setHtml(html: String): Unit {

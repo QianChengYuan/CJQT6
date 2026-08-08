@@ -1,5 +1,7 @@
 package cjqt6.views
 
+import cjqt6.core.*
+
 // ============================================================
 // QTableWidget - 表格控件 FFI声明
 // ============================================================
@@ -218,7 +220,7 @@ public class QTableWidget {
         unsafe {
             let cstr = qTableWidgetItemText(ptr, row, col)
             let result = cstr.toString()
-            // 注意：cstr指向静态缓冲区，不要free
+            freeBridgeString(cstr)
             return result
         }
     }
@@ -625,7 +627,9 @@ public class QTableWidgetItem {
     public func text(): String {
         unsafe {
             let cstr = qTableWidgetItemGetText(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 

@@ -14,6 +14,7 @@
 #include <QMdiArea>
 #include <QMdiSubWindow>
 #include <QDockWidget>
+#include "bridge_string_utils.h"
 
 extern "C" {
 
@@ -36,11 +37,9 @@ void qGroupBoxSetTitle(int64_t ptr, const char* title) {
 const char* qGroupBoxTitle(int64_t ptr) {
     QGroupBox* groupBox = reinterpret_cast<QGroupBox*>(ptr);
     if (groupBox) {
-        static QString title;
-        title = groupBox->title();
-        return title.toUtf8().constData();
+        return cjqt6::dupUtf8(groupBox->title());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qGroupBoxSetCheckable(int64_t ptr, bool checkable) {
@@ -136,10 +135,8 @@ void qTabWidgetSetTabText(int64_t ptr, int32_t index, const char* text) {
 
 const char* qTabWidgetTabText(int64_t ptr, int32_t index) {
     QTabWidget* tabWidget = reinterpret_cast<QTabWidget*>(ptr);
-    if (!tabWidget) return "";
-    static QByteArray arr;
-    arr = tabWidget->tabText(index).toUtf8();
-    return arr.constData();
+    if (!tabWidget) return cjqt6::emptyString();
+    return cjqt6::dupUtf8(tabWidget->tabText(index));
 }
 
 void qTabWidgetSetTabToolTip(int64_t ptr, int32_t index, const char* toolTip) {
@@ -554,11 +551,9 @@ void qToolBoxSetItemText(int64_t ptr, int32_t index, const char* text) {
 const char* qToolBoxItemText(int64_t ptr, int32_t index) {
     QToolBox* toolbox = reinterpret_cast<QToolBox*>(ptr);
     if (toolbox) {
-        static QString text;
-        text = toolbox->itemText(index);
-        return text.toUtf8().constData();
+        return cjqt6::dupUtf8(toolbox->itemText(index));
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qToolBoxSetItemToolTip(int64_t ptr, int32_t index, const char* toolTip) {

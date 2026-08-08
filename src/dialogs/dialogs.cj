@@ -12,7 +12,7 @@ foreign func qMessageBoxWarning(parentPtr: Int64, title: CString, text: CString)
 foreign func qMessageBoxCritical(parentPtr: Int64, title: CString, text: CString): Unit
 foreign func qMessageBoxQuestion(parentPtr: Int64, title: CString, text: CString): Int32
 
-// QFileDialog (返回静态缓冲区指针，不需要free)
+// QFileDialog (桥接层返回 malloc 内存，调用方需 LibC.free)
 foreign func qFileDialogGetOpenFileName(parentPtr: Int64, title: CString, filter: CString): CString
 foreign func qFileDialogGetSaveFileName(parentPtr: Int64, title: CString, filter: CString): CString
 foreign func qFileDialogGetExistingDirectory(parentPtr: Int64, title: CString): CString
@@ -91,9 +91,10 @@ public class QFileDialog {
             var filterCstr = LibC.mallocCString(filter)
             let cstr = qFileDialogGetOpenFileName(parent, titleCstr, filterCstr)
             let result = cstr.toString()
+            freeBridgeString(cstr)
             LibC.free(titleCstr)
             LibC.free(filterCstr)
-            // 注意：cstr指向静态缓冲区，不要free
+            // 注意：桥接层返回 malloc 内存，必须释放
             return result
         }
     }
@@ -105,9 +106,10 @@ public class QFileDialog {
             var filterCstr = LibC.mallocCString(filter)
             let cstr = qFileDialogGetSaveFileName(parent, titleCstr, filterCstr)
             let result = cstr.toString()
+            freeBridgeString(cstr)
             LibC.free(titleCstr)
             LibC.free(filterCstr)
-            // 注意：cstr指向静态缓冲区，不要free
+            // 注意：桥接层返回 malloc 内存，必须释放
             return result
         }
     }
@@ -118,8 +120,9 @@ public class QFileDialog {
             var titleCstr = LibC.mallocCString(title)
             let cstr = qFileDialogGetExistingDirectory(parent, titleCstr)
             let result = cstr.toString()
+            freeBridgeString(cstr)
             LibC.free(titleCstr)
-            // 注意：cstr指向静态缓冲区，不要free
+            // 注意：桥接层返回 malloc 内存，必须释放
             return result
         }
     }
@@ -131,9 +134,10 @@ public class QFileDialog {
             var filterCstr = LibC.mallocCString(filter)
             let cstr = qFileDialogGetOpenFileNames(parent, titleCstr, filterCstr)
             let result = cstr.toString()
+            freeBridgeString(cstr)
             LibC.free(titleCstr)
             LibC.free(filterCstr)
-            // 注意：cstr指向静态缓冲区，不要free
+            // 注意：桥接层返回 malloc 内存，必须释放
             return result
         }
     }
@@ -153,11 +157,12 @@ public class QInputDialog {
             
             let cstr = qInputDialogGetTextValue(parent, titleCstr, labelCstr, textCstr)
             let result = cstr.toString()
+            freeBridgeString(cstr)
             
             LibC.free(titleCstr)
             LibC.free(labelCstr)
             LibC.free(textCstr)
-            // 注意：cstr指向静态缓冲区，不要free
+            // 注意：桥接层返回 malloc 内存，必须释放
             
             return result
         }
@@ -174,6 +179,7 @@ public class QInputDialog {
             var okValue: Int32 = 0
             let cstr = qInputDialogGetTextWithOk(parent, titleCstr, labelCstr, textCstr, inout okValue)
             let result = cstr.toString()
+            freeBridgeString(cstr)
             
             LibC.free(titleCstr)
             LibC.free(labelCstr)
@@ -242,9 +248,10 @@ public class QColorDialog {
             
             let cstr = qColorDialogGetColorHex(parent, titleCstr)
             let result = cstr.toString()
+            freeBridgeString(cstr)
             
             LibC.free(titleCstr)
-            // 注意：cstr指向静态缓冲区，不要free
+            // 注意：桥接层返回 malloc 内存，必须释放
             
             return result
         }
@@ -302,6 +309,7 @@ public class QFontDialog {
             var titleCstr = LibC.mallocCString(title)
             let cstr = qFontDialogGetFontName(parent, titleCstr)
             let result = cstr.toString()
+            freeBridgeString(cstr)
             LibC.free(titleCstr)
             return result
         }
@@ -323,6 +331,7 @@ public class QFontDialog {
             var titleCstr = LibC.mallocCString(title)
             let cstr = qFontDialogGetFontInfo(parent, titleCstr)
             let info = cstr.toString()
+            freeBridgeString(cstr)
             LibC.free(titleCstr)
             
             if (info.isEmpty()) {
@@ -350,6 +359,7 @@ public class QFontDialog {
             
             let cstr = qFontDialogGetFontWithDefault(parent, titleCstr, familyCstr, defaultSize, (if (defaultBold) { 1 } else { 0 }), (if (defaultItalic) { 1 } else { 0 }))
             let info = cstr.toString()
+            freeBridgeString(cstr)
             
             LibC.free(titleCstr)
             LibC.free(familyCstr)

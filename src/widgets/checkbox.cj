@@ -83,7 +83,9 @@ public class QCheckBox <: QtResource {
         checkValid()
         unsafe {
             let cstr = qCheckBoxText(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
     

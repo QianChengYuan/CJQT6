@@ -13,6 +13,7 @@
 #include <QUrl>
 #include <QStringList>
 #include <QDebug>
+#include "bridge_string_utils.h"
 
 extern "C" {
 
@@ -35,11 +36,9 @@ void qMimeDataSetText(int64_t ptr, const char* text) {
 const char* qMimeDataText(int64_t ptr) {
     QMimeData* mimeData = reinterpret_cast<QMimeData*>(ptr);
     if (mimeData) {
-        static QByteArray buffer;
-        buffer = mimeData->text().toUtf8();
-        return buffer.constData();
+        return cjqt6::dupUtf8(mimeData->text());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qMimeDataSetHtml(int64_t ptr, const char* html) {
@@ -52,11 +51,9 @@ void qMimeDataSetHtml(int64_t ptr, const char* html) {
 const char* qMimeDataHtml(int64_t ptr) {
     QMimeData* mimeData = reinterpret_cast<QMimeData*>(ptr);
     if (mimeData) {
-        static QByteArray buffer;
-        buffer = mimeData->html().toUtf8();
-        return buffer.constData();
+        return cjqt6::dupUtf8(mimeData->html());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qMimeDataSetUrls(int64_t ptr, const char** urls, int32_t count) {
@@ -83,12 +80,10 @@ const char* qMimeDataUrlAt(int64_t ptr, int32_t index) {
     if (mimeData) {
         QList<QUrl> urls = mimeData->urls();
         if (index >= 0 && index < urls.size()) {
-            static QByteArray buffer;
-            buffer = urls[index].toString().toUtf8();
-            return buffer.constData();
+            return cjqt6::dupUtf8(urls[index].toString());
         }
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qMimeDataSetImageData(int64_t ptr, int64_t imagePtr) {

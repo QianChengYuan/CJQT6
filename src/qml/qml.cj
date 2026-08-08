@@ -936,7 +936,7 @@ public class QQmlComponent <: QtResource {
         unsafe {
             let cstr = qQmlComponentErrorString(ptr)
             let result = cstr.toString()
-            qQuickItemFreeString(cstr)
+            freeBridgeString(cstr)
             return result
         }
     }
@@ -1409,7 +1409,7 @@ public class QQuickItem <: QtResource {
         unsafe {
             let cstr = qQuickItemObjectName(ptr)
             let result = cstr.toString()
-            qQuickItemFreeString(cstr)
+            freeBridgeString(cstr)
             return result
         }
     }
@@ -1507,7 +1507,7 @@ public class QQuickItem <: QtResource {
             let cstr = qQuickItemGetPropertyString(ptr, nameStr)
             LibC.free(nameStr)
             let result = cstr.toString()
-            qQuickItemFreeString(cstr)
+            freeBridgeString(cstr)
             return result
         }
     }

@@ -95,7 +95,9 @@ public class QNetworkRequest {
         checkValid()
         unsafe {
             let cstr = qNetworkRequestUrl(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 
@@ -114,7 +116,9 @@ public class QNetworkRequest {
         checkValid()
         unsafe {
             let cstr = qNetworkRequestHeader(ptr, header)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 
@@ -170,7 +174,9 @@ public class QNetworkReply {
         checkValid()
         unsafe {
             let cstr = qNetworkReplyReadAll(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 
@@ -191,7 +197,9 @@ public class QNetworkReply {
         checkValid()
         unsafe {
             let cstr = qNetworkReplyErrorString(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 
@@ -206,7 +214,9 @@ public class QNetworkReply {
         checkValid()
         unsafe {
             let cstr = qNetworkReplyHeader(ptr, header)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 
@@ -233,7 +243,9 @@ public class QNetworkReply {
         checkValid()
         unsafe {
             let cstr = qNetworkReplyUrl(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 

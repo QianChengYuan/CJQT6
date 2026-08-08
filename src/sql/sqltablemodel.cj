@@ -65,7 +65,7 @@ public class QSqlTableModel {
     }
 
     /// 获取当前映射的表名
-    public func tableName(): String { checkValid(); unsafe { qSqlTableModelTableName(ptr).toString() } }
+    public func tableName(): String { checkValid(); unsafe { let cstr = qSqlTableModelTableName(ptr); let result = cstr.toString(); freeBridgeString(cstr); result } }
     /// 执行查询填充模型数据，返回是否成功
     public func select(): Bool { checkValid(); unsafe { qSqlTableModelSelect(ptr) } }
     /// 数据行数
@@ -80,7 +80,7 @@ public class QSqlTableModel {
     }
 
     /// 获取当前过滤条件
-    public func filter(): String { checkValid(); unsafe { qSqlTableModelFilter(ptr).toString() } }
+    public func filter(): String { checkValid(); unsafe { let cstr = qSqlTableModelFilter(ptr); let result = cstr.toString(); freeBridgeString(cstr); result } }
 
     /// 设置排序规则，order 为 Qt::SortOrder（0 升序、1 降序）
     public func setSort(col: Int32, order: Int32): Unit { checkValid(); unsafe { qSqlTableModelSetSort(ptr, col, order) } }
@@ -93,7 +93,7 @@ public class QSqlTableModel {
 
     /// 获取指定单元格的文本
     public func data(row: Int32, col: Int32): String {
-        checkValid(); unsafe { qSqlTableModelData(ptr, row, col).toString() }
+        checkValid(); unsafe { let cstr = qSqlTableModelData(ptr, row, col); let result = cstr.toString(); freeBridgeString(cstr); result }
     }
 
     /// 设置指定单元格的值，返回是否成功
@@ -104,7 +104,7 @@ public class QSqlTableModel {
 
     /// 获取表头文本
     public func headerData(section: Int32): String {
-        checkValid(); unsafe { qSqlTableModelHeaderData(ptr, section).toString() }
+        checkValid(); unsafe { let cstr = qSqlTableModelHeaderData(ptr, section); let result = cstr.toString(); freeBridgeString(cstr); result }
     }
 
     /// 插入一行（row 为插入位置），返回是否成功
@@ -116,7 +116,7 @@ public class QSqlTableModel {
     /// 回滚所有未提交的更改
     public func revertAll(): Unit { checkValid(); unsafe { qSqlTableModelRevertAll(ptr) } }
     /// 获取最近一次数据库操作的错误信息
-    public func databaseError(): String { checkValid(); unsafe { qSqlTableModelDatabaseError(ptr).toString() } }
+    public func databaseError(): String { checkValid(); unsafe { let cstr = qSqlTableModelDatabaseError(ptr); let result = cstr.toString(); freeBridgeString(cstr); result } }
     /// 清空表格数据（删除所有行）
     public func clearTable(): Unit { checkValid(); unsafe { qSqlTableModelClearTable(ptr) } }
     /// 获取更多数据（用于分页加载）

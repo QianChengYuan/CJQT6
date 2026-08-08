@@ -6,6 +6,7 @@
 #include <QTextDocument>
 #include <QTextCursor>
 #include <QFont>
+#include "bridge_string_utils.h"
 
 extern "C" {
 
@@ -32,12 +33,10 @@ void qTextDocumentSetPlainText(int64_t ptr, const char* text) {
 
 const char* qTextDocumentToPlainText(int64_t ptr) {
     QTextDocument* doc = reinterpret_cast<QTextDocument*>(ptr);
-    static QByteArray buffer;
     if (doc) {
-        buffer = doc->toPlainText().toUtf8();
-        return buffer.constData();
+        return cjqt6::dupUtf8(doc->toPlainText());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qTextDocumentSetHtml(int64_t ptr, const char* html) {
@@ -47,12 +46,10 @@ void qTextDocumentSetHtml(int64_t ptr, const char* html) {
 
 const char* qTextDocumentToHtml(int64_t ptr) {
     QTextDocument* doc = reinterpret_cast<QTextDocument*>(ptr);
-    static QByteArray buffer;
     if (doc) {
-        buffer = doc->toHtml().toUtf8();
-        return buffer.constData();
+        return cjqt6::dupUtf8(doc->toHtml());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 int32_t qTextDocumentBlockCount(int64_t ptr) {
@@ -161,12 +158,10 @@ void qTextCursorSelect(int64_t ptr, int32_t operation) {
 
 const char* qTextCursorSelectedText(int64_t ptr) {
     QTextCursor* cursor = reinterpret_cast<QTextCursor*>(ptr);
-    static QByteArray buffer;
     if (cursor) {
-        buffer = cursor->selectedText().toUtf8();
-        return buffer.constData();
+        return cjqt6::dupUtf8(cursor->selectedText());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qTextCursorClearSelection(int64_t ptr) {

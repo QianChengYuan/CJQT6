@@ -120,7 +120,9 @@ public class QLineEdit <: QtResource {
         checkValid()
         unsafe {
             let cstr = qLineEditText(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
     
@@ -350,7 +352,9 @@ public class QLineEdit <: QtResource {
         checkValid()
         unsafe {
             let cstr = qLineEditSelectedText(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
     
@@ -429,7 +433,9 @@ public class QLineEdit <: QtResource {
         checkValid()
         unsafe {
             let cstr = qLineEditDisplayText(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
     

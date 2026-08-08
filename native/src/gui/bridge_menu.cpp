@@ -11,6 +11,7 @@
 #include <QMainWindow>
 #include <functional>
 #include <unordered_map>
+#include "bridge_string_utils.h"
 
 // 动作触发回调映射
 static std::unordered_map<int64_t, std::function<void(int64_t)>> g_actionCallbacks;
@@ -126,11 +127,9 @@ void qActionSetText(int64_t ptr, const char* text) {
 const char* qActionText(int64_t ptr) {
     QAction* action = reinterpret_cast<QAction*>(ptr);
     if (action) {
-        static QString text;
-        text = action->text();
-        return text.toUtf8().constData();
+        return cjqt6::dupUtf8(action->text());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qActionSetShortcut(int64_t ptr, const char* shortcut) {

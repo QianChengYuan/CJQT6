@@ -1,5 +1,7 @@
 package cjqt6.paint
 
+import cjqt6.core.*
+
 // ============================================================
 // QFontDatabase - 字体数据库
 // ============================================================
@@ -17,7 +19,9 @@ public class QFontDatabase {
     public static func families(): String {
         unsafe {
             let cstr = qFontDatabaseFamilies()
-            cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            result
         }
     }
 
@@ -54,7 +58,9 @@ public class QFontDatabase {
             let f = LibC.mallocCString(family)
             let cstr = qFontDatabaseStyles(f)
             LibC.free(f)
-            cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            result
         }
     }
 

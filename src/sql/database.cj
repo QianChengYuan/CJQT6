@@ -178,7 +178,9 @@ public class QSqlDatabase <: QtResource {
         checkValid()
         unsafe {
             let cstr = qSqlDatabaseLastError(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
     
@@ -186,7 +188,9 @@ public class QSqlDatabase <: QtResource {
         checkValid()
         unsafe {
             let cstr = qSqlDatabaseDriverName(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
     
@@ -309,7 +313,9 @@ public class QSqlQuery {
     public func valueString(index: Int32): String {
         unsafe {
             let cstr = qSqlQueryValueString(ptr, index)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
     
@@ -356,7 +362,9 @@ public class QSqlQuery {
     public func lastError(): String {
         unsafe {
             let cstr = qSqlQueryLastError(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
     
@@ -409,7 +417,9 @@ public class QSqlRecord {
         checkValid()
         unsafe {
             let cstr = qSqlRecordFieldName(ptr, index)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 
@@ -435,7 +445,9 @@ public class QSqlRecord {
         checkValid()
         unsafe {
             let cstr = qSqlRecordValueString(ptr, index)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 
@@ -496,7 +508,9 @@ public class QSqlField {
         checkValid()
         unsafe {
             let cstr = qSqlFieldName(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 
@@ -523,7 +537,9 @@ public class QSqlField {
         checkValid()
         unsafe {
             let cstr = qSqlFieldValueString(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 

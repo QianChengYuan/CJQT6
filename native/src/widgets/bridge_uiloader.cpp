@@ -10,6 +10,7 @@
 #include <QWidget>
 #include <QDebug>
 #include <cstring>
+#include "bridge_string_utils.h"
 
 extern "C" {
 
@@ -71,11 +72,9 @@ void qUiLoaderSetWorkingDirectory(int64_t ptr, const char* dir) {
 const char* qUiLoaderErrorString(int64_t ptr) {
     QUiLoader* loader = reinterpret_cast<QUiLoader*>(ptr);
     if (!loader) {
-        return "";
+        return cjqt6::emptyString();
     }
-    static QByteArray err;
-    err = loader->errorString().toUtf8();
-    return err.constData();
+    return cjqt6::dupUtf8(loader->errorString());
 }
 
 // ============================================================

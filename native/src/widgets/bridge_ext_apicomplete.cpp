@@ -22,6 +22,7 @@
 #include <QSpinBox>
 #include <QAbstractSpinBox>
 #include <QAction>
+#include "bridge_string_utils.h"
 
 extern "C" {
 
@@ -79,13 +80,9 @@ void qDoubleSpinBoxSetButtonSymbols(int64_t ptr, int32_t v) {
 const char* qToolButtonText(int64_t ptr) {
     QToolButton* w = reinterpret_cast<QToolButton*>(ptr);
     if (w) {
-        static QString s;
-        s = w->text();
-        static QByteArray b;
-        b = s.toUtf8();
-        return b.constData();
+        return cjqt6::dupUtf8(w->text());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 int64_t qToolButtonDefaultAction(int64_t ptr) {
@@ -121,13 +118,9 @@ int32_t qGroupBoxIsFlat(int64_t ptr) {
 const char* qProgressBarText(int64_t ptr) {
     QProgressBar* w = reinterpret_cast<QProgressBar*>(ptr);
     if (w) {
-        static QString s;
-        s = w->text();
-        static QByteArray b;
-        b = s.toUtf8();
-        return b.constData();
+        return cjqt6::dupUtf8(w->text());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 // ============================================================

@@ -10,6 +10,7 @@
 #include <QImageCapture>
 #include <QMediaRecorder>
 #include <QVideoWidget>
+#include "bridge_string_utils.h"
 
 extern "C" {
 
@@ -31,21 +32,17 @@ int32_t qMediaDevicesVideoInputCount() {
 const char* qCameraDeviceDescription(int64_t ptr) {
     QCameraDevice* dev = reinterpret_cast<QCameraDevice*>(ptr);
     if (dev) {
-        static QByteArray buffer;
-        buffer = dev->description().toUtf8();
-        return buffer.constData();
+        return cjqt6::dupUtf8(dev->description());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 const char* qCameraDeviceId(int64_t ptr) {
     QCameraDevice* dev = reinterpret_cast<QCameraDevice*>(ptr);
     if (dev) {
-        static QByteArray buffer;
-        buffer = dev->id();
-        return buffer.constData();
+        return cjqt6::dupUtf8(dev->id());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qCameraDeviceDelete(int64_t ptr) {
@@ -103,11 +100,9 @@ int32_t qCameraErrorCode(int64_t ptr) {
 const char* qCameraErrorString(int64_t ptr) {
     QCamera* camera = reinterpret_cast<QCamera*>(ptr);
     if (camera) {
-        static QByteArray buffer;
-        buffer = camera->errorString().toUtf8();
-        return buffer.constData();
+        return cjqt6::dupUtf8(camera->errorString());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 void qCameraDelete(int64_t ptr) {

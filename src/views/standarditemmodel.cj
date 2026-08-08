@@ -174,7 +174,9 @@ public class QStandardItemModel {
         checkValid()
         unsafe {
             let cstr = qStandardItemModelItemText(ptr, row, col)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 
@@ -385,7 +387,9 @@ public class QStandardItem {
     public func text(): String {
         unsafe {
             let cstr = qStandardItemGetText(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 

@@ -1,5 +1,7 @@
 package cjqt6.widgets
 
+import cjqt6.core.*
+
 foreign func qFontComboBoxCreate(): Int64
 foreign func qFontComboBoxCreateWithParent(parentPtr: Int64): Int64
 foreign func qFontComboBoxSetCurrentFont(ptr: Int64, family: CString): Unit
@@ -73,7 +75,9 @@ public class QFontComboBox {
     public func currentFont(): String {
         unsafe {
             let cstr = qFontComboBoxCurrentFont(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 

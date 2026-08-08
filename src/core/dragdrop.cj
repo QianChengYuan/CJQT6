@@ -103,7 +103,9 @@ public class QMimeData {
     public func text(): String {
         unsafe {
             let cstr = qMimeDataText(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
     
@@ -120,7 +122,9 @@ public class QMimeData {
     public func html(): String {
         unsafe {
             let cstr = qMimeDataHtml(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
     
@@ -135,7 +139,9 @@ public class QMimeData {
     public func urlAt(index: Int32): String {
         unsafe {
             let cstr = qMimeDataUrlAt(ptr, index)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
     

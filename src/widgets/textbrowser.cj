@@ -78,7 +78,9 @@ public class QTextBrowser {
     public func toPlainText(): String {
         unsafe {
             let cstr = qTextBrowserToPlainText(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 
@@ -95,7 +97,9 @@ public class QTextBrowser {
     public func toHtml(): String {
         unsafe {
             let cstr = qTextBrowserToHtml(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 
@@ -136,7 +140,9 @@ public class QTextBrowser {
     public func source(): String {
         unsafe {
             let cstr = qTextBrowserSource(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 
