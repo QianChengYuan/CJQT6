@@ -257,7 +257,8 @@ CJQT6/
 │   ├── gui/                    # GUI模块
 │   ├── dialogs/                # 对话框模块
 │   ├── paint/                  # 绘图模块
-│   └── qml/                    # QML模块
+│   ├── qml/                    # QML模块
+│   └── test/                   # 测试源码（package cjqt6.test）
 ├── examples/                   # 示例程序
 │   ├── widgets_demo/           # 常用控件演示
 │   ├── calculator/             # 计算器
@@ -266,7 +267,7 @@ CJQT6/
 │   ├── music_player/           # 音乐播放器
 │   └── ...
 ├── releases/                   # 发行版目录
-└── tests/                      # 测试代码
+└── tests/                      # 测试部署脚本（deploy_qt_test.ps1）
 ```
 
 ## 文档导航

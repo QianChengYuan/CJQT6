@@ -74,8 +74,12 @@ native/*.cmake
 # 废弃的平台分包
 packages/
 
-# 测试代码本地保留，不上传
-tests/
+# 测试代码已纳入主仓（src/test/），仅忽略本地构建产物与报告
+tests/target/
+tests/reports/
+tests/.cache/
+tests/cjpm.lock
+tests/cjpm.toml
 
 # 测试和生成目录
 test_deploy/

@@ -99,13 +99,14 @@ CJQT6/
 │   ├── core/          # 核心模块
 │   ├── widgets/       # 控件模块
 │   ├── gui/           # GUI模块
+│   ├── test/          # 测试源码（package cjqt6.test）
 │   └── ...
 ├── native/            # C++桥接代码
 │   ├── src/
 │   └── includes/
 ├── examples/          # 示例程序
 ├── doc/              # 文档
-└── tests/            # 测试
+└── tests/            # 测试部署脚本
 ```
 
 ## 开发流程
@@ -129,9 +130,20 @@ CJQT6/
 
 ### 单元测试
 
+测试源码位于 `src/test/`（`package cjqt6.test`），根目录 `cjpm test` 直接发现并运行全部 889 用例。
+
 ```bash
-cjpm test
+cjpm test                          # 全部用例
+cjpm test --filter "QPushButton*"  # 指定测试类
 ```
+
+Windows 无显示环境（headless 基线）一键跑：
+
+```bash
+powershell -File tests\deploy_qt_test.ps1 -RunTest
+```
+
+Linux 无显示环境：`xvfb-run cjpm test`
 
 ### 手动测试
 
