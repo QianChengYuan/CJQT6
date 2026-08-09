@@ -23,7 +23,9 @@
 #include <QUrl>
 #include <QWidget>
 #include <unordered_map>
+#include <atomic>
 #include <exception>
+#include <thread>
 #include <cstdio>
 #include <cstdlib>
 #include "bridge_string_utils.h"
@@ -49,6 +51,92 @@ extern "C" {
 // ============================================================
 void qCStringFree(const char* s) {
     std::free(const_cast<char*>(s));
+}
+
+// ============================================================
+// QObject 存活注册表（P0 反向失效通知）
+//
+// 仓颉侧句柄在对象创建后调用 qTrackObject 注册，close 时调用
+// qUntrackObject 注销。当 QObject 被级联销毁（如父控件 close 导致
+// 子对象析构）时，QObject::destroyed 信号自动把条目标记为失效，
+// 此后 qIsObjectAlive 返回 0，仓颉 isValid()/checkValid() 即可识别。
+//
+// 约定：
+//   - 未 track 的对象（值类型/非 QObject）视为存活，查询返回 1；
+//   - destroyed 信号连接以值捕获 ptr（而非裸指针），对象销毁瞬间
+//     仍能安全执行，标记失效后连接随发送者销毁自动断开。
+// ============================================================
+
+struct AliveEntry {
+    bool alive = true;
+    QMetaObject::Connection conn;
+};
+
+static std::unordered_map<int64_t, AliveEntry> g_aliveObjs;
+static std::atomic_flag g_aliveLock = ATOMIC_FLAG_INIT;
+
+class AliveSpinLock {
+public:
+    AliveSpinLock() {
+        while (g_aliveLock.test_and_set(std::memory_order_acquire)) {
+            std::this_thread::yield();
+        }
+    }
+    ~AliveSpinLock() {
+        g_aliveLock.clear(std::memory_order_release);
+    }
+};
+
+// 注册：建立 destroyed 连接，销毁时自动标记失效
+void qTrackObject(int64_t ptr) {
+    QObject* obj = reinterpret_cast<QObject*>(ptr);
+    if (!obj) return;
+    QMetaObject::Connection oldConn;
+    {
+        AliveSpinLock lock;
+        auto it = g_aliveObjs.find(ptr);
+        if (it != g_aliveObjs.end()) {
+            oldConn = it->second.conn;
+            g_aliveObjs.erase(it);
+        }
+    }
+    if (oldConn) {
+        QObject::disconnect(oldConn);
+    }
+    QMetaObject::Connection conn = QObject::connect(obj, &QObject::destroyed, [ptr]() {
+        AliveSpinLock lock;
+        auto it = g_aliveObjs.find(ptr);
+        if (it != g_aliveObjs.end()) {
+            it->second.alive = false;
+        }
+    });
+    AliveSpinLock lock;
+    g_aliveObjs[ptr] = AliveEntry{true, conn};
+}
+
+// 注销：断开 destroyed 连接并删除条目
+void qUntrackObject(int64_t ptr) {
+    QMetaObject::Connection conn;
+    {
+        AliveSpinLock lock;
+        auto it = g_aliveObjs.find(ptr);
+        if (it != g_aliveObjs.end()) {
+            conn = it->second.conn;
+            g_aliveObjs.erase(it);
+        }
+    }
+    if (conn) {
+        QObject::disconnect(conn);
+    }
+}
+
+// 查询：未 track 视为存活；已 track 且未销毁返回 1
+int32_t qIsObjectAlive(int64_t ptr) {
+    if (ptr == 0) return 0;
+    AliveSpinLock lock;
+    auto it = g_aliveObjs.find(ptr);
+    if (it == g_aliveObjs.end()) return 1;
+    return it->second.alive ? 1 : 0;
 }
 
 // ============================================================

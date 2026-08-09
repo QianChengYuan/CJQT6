@@ -55,6 +55,7 @@ public class SignalEmitter <: QtResource {
                 throw CreateFailedException("SignalEmitter 创建失败")
             }
         }
+        trackObject(ptr)
     }
 
     // ---- void 信号 ----
@@ -169,14 +170,22 @@ public class SignalEmitter <: QtResource {
     public func getPtr(): Int64 { ptr }
 
     public func isClosed(): Bool { closed }
-    public func isValid(): Bool { !closed && ptr != 0 }
+    public func isValid(): Bool { !closed && ptr != 0 && isObjectAlive(ptr) }
     public func checkValid(): Unit {
         if (closed) { throw ResourceDisposedException("SignalEmitter 已经被释放") }
         if (ptr == 0) { throw NullPointerException("SignalEmitter 指针为空") }
+        if (!isObjectAlive(ptr)) { throw ResourceDisposedException("SignalEmitter 底层 Qt 对象已失效") }
     }
 
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qSignalCleanup(ptr)
                 qEmitterDelete(ptr)

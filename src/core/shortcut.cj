@@ -23,6 +23,7 @@ public class QShortcut <: QtResource {
                 throw CreateFailedException("QShortcut 创建失败")
             }
         }
+        trackObject(ptr)
     }
 
     /// 设置快捷键对应的按键序列（如 "Ctrl+O"）
@@ -60,7 +61,7 @@ public class QShortcut <: QtResource {
     }
 
     public func isValid(): Bool {
-        return !closed && ptr != 0
+        return !closed && ptr != 0 && isObjectAlive(ptr)
     }
 
     public func checkValid(): Unit {
@@ -70,10 +71,20 @@ public class QShortcut <: QtResource {
         if (ptr == 0) {
             throw NullPointerException("QShortcut 指针为空")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QShortcut 底层 Qt 对象已失效")
+        }
     }
 
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qShortcutDelete(ptr)
             }

@@ -22,6 +22,7 @@ public class QSyntaxHighlighter {
 
     private func checkValid(): Unit {
         if (ptr == 0 || closed) { throw ResourceDisposedException("QSyntaxHighlighter already deleted") }
+        if (!isObjectAlive(ptr)) { throw ResourceDisposedException("QSyntaxHighlighter 底层 Qt 对象已失效") }
     }
 
     /// 创建语法高亮器，docPtr 为关联的 QTextDocument 指针
@@ -32,6 +33,7 @@ public class QSyntaxHighlighter {
             ptr = qSyntaxHighlighterCreate(selfId, docPtr)
             if (ptr == 0) { throw CreateFailedException("QSyntaxHighlighter create failed") }
         }
+        trackObject(ptr)
     }
 
     /// 设置高亮回调（收到文本块内容后调用 setFormat 应用格式）
@@ -69,6 +71,13 @@ public class QSyntaxHighlighter {
     /// 释放资源
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe { qSyntaxHighlighterDelete(ptr) }
             ptr = 0; closed = true
         }

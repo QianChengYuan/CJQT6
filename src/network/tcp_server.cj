@@ -45,6 +45,7 @@ public class QTcpServer <: QtResource {
                 throw CreateFailedException("QTcpServer 创建失败")
             }
         }
+        trackObject(ptr)
     }
 
     /// 开始监听
@@ -201,7 +202,7 @@ public class QTcpServer <: QtResource {
 
     /// 检查对象有效性（未关闭且指针有效）
     public func isValid(): Bool {
-        return !closed && ptr != 0
+        return !closed && ptr != 0 && isObjectAlive(ptr)
     }
 
     /// 检查有效性，无效时抛出异常
@@ -212,12 +213,22 @@ public class QTcpServer <: QtResource {
         if (ptr == 0) {
             throw NullPointerException("QTcpServer 指针为空")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QTcpServer 底层 Qt 对象已失效")
+        }
     }
 
     /// 关闭资源，释放Qt对象
     /// 先停止监听、断开信号，再删除底层 QTcpServer
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qTcpServerClose(ptr)
                 qTcpServerDisconnectCallbacks(ptr)

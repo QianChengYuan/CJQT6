@@ -163,10 +163,14 @@ public class QNetworkReply {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QNetworkReply already deleted")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QNetworkReply 底层 Qt 对象已失效")
+        }
     }
 
     internal init(p: Int64) {
         ptr = p
+        trackObject(ptr)
     }
 
     /// 读取所有响应数据
@@ -262,6 +266,13 @@ public class QNetworkReply {
     /// 释放资源（使用deleteLater确保线程安全）
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qNetworkReplyDisconnectCallbacks(ptr)
                 qNetworkReplyDelete(ptr)
@@ -284,6 +295,9 @@ public class QNetworkAccessManager {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QNetworkAccessManager already deleted")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QNetworkAccessManager 底层 Qt 对象已失效")
+        }
     }
 
     public init() {
@@ -293,6 +307,7 @@ public class QNetworkAccessManager {
                 throw CreateFailedException("QNetworkAccessManager create failed")
             }
         }
+        trackObject(ptr)
     }
 
     /// 发送GET请求
@@ -357,6 +372,13 @@ public class QNetworkAccessManager {
 
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe { qNetworkAccessManagerDelete(ptr) }
             ptr = 0
             closed = true

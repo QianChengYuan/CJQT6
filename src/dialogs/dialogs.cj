@@ -419,6 +419,7 @@ public class QProgressDialog <: QtResource {
                 throw CreateFailedException("QProgressDialog 创建失败")
             }
         }
+        trackObject(ptr)
     }
     
     public func setValue(value: Int32) {
@@ -534,7 +535,7 @@ public class QProgressDialog <: QtResource {
     }
     
     public func isValid(): Bool {
-        return !closed && ptr != 0
+        return !closed && ptr != 0 && isObjectAlive(ptr)
     }
     
     public func checkValid(): Unit {
@@ -544,11 +545,21 @@ public class QProgressDialog <: QtResource {
         if (ptr == 0) {
             throw NullPointerException("QProgressDialog 指针为空")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QProgressDialog 底层 Qt 对象已失效")
+        }
     }
     
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qProgressDialogDelete(ptr)
             }
@@ -585,6 +596,7 @@ public class QWizardPage <: QtResource {
                 throw CreateFailedException("QWizardPage 创建失败")
             }
         }
+        trackObject(ptr)
     }
 
     public func setTitle(title: String) {
@@ -628,7 +640,7 @@ public class QWizardPage <: QtResource {
     }
 
     public func isValid(): Bool {
-        return !closed && ptr != 0
+        return !closed && ptr != 0 && isObjectAlive(ptr)
     }
 
     public func checkValid(): Unit {
@@ -638,11 +650,21 @@ public class QWizardPage <: QtResource {
         if (ptr == 0) {
             throw NullPointerException("QWizardPage 指针为空")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QWizardPage 底层 Qt 对象已失效")
+        }
     }
 
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qWizardPageDelete(ptr)
             }
@@ -699,6 +721,7 @@ public class QWizard <: QtResource {
                 throw CreateFailedException("QWizard 创建失败")
             }
         }
+        trackObject(ptr)
     }
 
     public func addPage(page: QWizardPage): Int32 {
@@ -796,7 +819,7 @@ public class QWizard <: QtResource {
     }
 
     public func isValid(): Bool {
-        return !closed && ptr != 0
+        return !closed && ptr != 0 && isObjectAlive(ptr)
     }
 
     public func checkValid(): Unit {
@@ -806,11 +829,21 @@ public class QWizard <: QtResource {
         if (ptr == 0) {
             throw NullPointerException("QWizard 指针为空")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QWizard 底层 Qt 对象已失效")
+        }
     }
 
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qWizardDelete(ptr)
             }
@@ -847,6 +880,7 @@ public class QErrorMessage <: QtResource {
                 throw CreateFailedException("QErrorMessage 创建失败")
             }
         }
+        trackObject(ptr)
     }
 
     public func showMessage(message: String) {
@@ -883,7 +917,7 @@ public class QErrorMessage <: QtResource {
     }
 
     public func isValid(): Bool {
-        return !closed && ptr != 0
+        return !closed && ptr != 0 && isObjectAlive(ptr)
     }
 
     public func checkValid(): Unit {
@@ -893,11 +927,21 @@ public class QErrorMessage <: QtResource {
         if (ptr == 0) {
             throw NullPointerException("QErrorMessage 指针为空")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QErrorMessage 底层 Qt 对象已失效")
+        }
     }
 
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qErrorMessageDelete(ptr)
             }

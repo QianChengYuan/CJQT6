@@ -59,6 +59,9 @@ public class QListView {
         if (ptr == 0) {
             throw ResourceDisposedException("QListView already deleted")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QListView 底层 Qt 对象已失效")
+        }
     }
 
     public init() {
@@ -68,6 +71,7 @@ public class QListView {
         if (ptr == 0) {
             throw CreateFailedException("QListView create failed")
         }
+        trackObject(ptr)
     }
 
     public func show(): Unit {
@@ -330,6 +334,12 @@ public class QListView {
 
     public func delete(): Unit {
         if (ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qSignalCleanup(ptr)
                 qListViewDelete(ptr)

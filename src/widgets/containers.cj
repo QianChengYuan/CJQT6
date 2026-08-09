@@ -140,6 +140,7 @@ public class QGroupBox <: QtResource {
         unsafe {
             ptr = qGroupBoxCreate()
         }
+        trackObject(ptr)
     }
     
     public func show() {
@@ -319,7 +320,7 @@ public class QGroupBox <: QtResource {
     
     /// 检查对象有效性
     public func isValid(): Bool {
-        return !closed && ptr != 0
+        return !closed && ptr != 0 && isObjectAlive(ptr)
     }
     
     /// 检查有效性，无效时抛出异常
@@ -330,11 +331,21 @@ public class QGroupBox <: QtResource {
         if (ptr == 0) {
             throw NullPointerException("QGroupBox 指针为空")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QGroupBox 底层 Qt 对象已失效")
+        }
     }
     
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qSignalCleanup(ptr)
                 qGroupBoxDelete(ptr)
@@ -363,6 +374,7 @@ public class QTabWidget <: QtResource {
         unsafe {
             ptr = qTabWidgetCreate()
         }
+        trackObject(ptr)
     }
     
     public func show() {
@@ -564,7 +576,7 @@ public class QTabWidget <: QtResource {
     
     /// 检查对象有效性
     public func isValid(): Bool {
-        return !closed && ptr != 0
+        return !closed && ptr != 0 && isObjectAlive(ptr)
     }
     
     /// 检查有效性，无效时抛出异常
@@ -575,11 +587,21 @@ public class QTabWidget <: QtResource {
         if (ptr == 0) {
             throw NullPointerException("QTabWidget 指针为空")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QTabWidget 底层 Qt 对象已失效")
+        }
     }
     
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qSignalCleanup(ptr)
                 qTabWidgetDelete(ptr)
@@ -608,6 +630,7 @@ public class QScrollArea <: QtResource {
         unsafe {
             ptr = qScrollAreaCreate()
         }
+        trackObject(ptr)
     }
     
     public func show() {
@@ -762,7 +785,7 @@ public class QScrollArea <: QtResource {
     
     /// 检查对象有效性
     public func isValid(): Bool {
-        return !closed && ptr != 0
+        return !closed && ptr != 0 && isObjectAlive(ptr)
     }
     
     /// 检查有效性，无效时抛出异常
@@ -773,11 +796,21 @@ public class QScrollArea <: QtResource {
         if (ptr == 0) {
             throw NullPointerException("QScrollArea 指针为空")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QScrollArea 底层 Qt 对象已失效")
+        }
     }
     
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qSignalCleanup(ptr)
                 qScrollAreaDelete(ptr)
@@ -817,6 +850,7 @@ public class QFrame <: QtResource {
         unsafe {
             ptr = qFrameCreate()
         }
+        trackObject(ptr)
     }
     
     public func show() {
@@ -1004,7 +1038,7 @@ public class QFrame <: QtResource {
     
     /// 检查对象有效性
     public func isValid(): Bool {
-        return !closed && ptr != 0
+        return !closed && ptr != 0 && isObjectAlive(ptr)
     }
     
     /// 检查有效性，无效时抛出异常
@@ -1015,11 +1049,21 @@ public class QFrame <: QtResource {
         if (ptr == 0) {
             throw NullPointerException("QFrame 指针为空")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QFrame 底层 Qt 对象已失效")
+        }
     }
     
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qSignalCleanup(ptr)
                 qFrameDelete(ptr)
@@ -1090,6 +1134,7 @@ public class QSplitter <: QtResource {
         unsafe {
             ptr = qSplitterCreate(parent)
         }
+        trackObject(ptr)
     }
     
     // 内部构造函数，用于静态工厂方法
@@ -1235,7 +1280,7 @@ public class QSplitter <: QtResource {
     
     /// 检查对象有效性
     public func isValid(): Bool {
-        return !closed && ptr != 0
+        return !closed && ptr != 0 && isObjectAlive(ptr)
     }
     
     /// 检查有效性，无效时抛出异常
@@ -1246,11 +1291,21 @@ public class QSplitter <: QtResource {
         if (ptr == 0) {
             throw NullPointerException("QSplitter 指针为空")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QSplitter 底层 Qt 对象已失效")
+        }
     }
     
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qSignalCleanup(ptr)
                 qSplitterDelete(ptr)

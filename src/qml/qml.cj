@@ -206,6 +206,7 @@ public class QQmlApplicationEngine <: QtResource {
                 throw CreateFailedException("QQmlApplicationEngine 创建失败")
             }
         }
+        trackObject(ptr)
     }
     
     /// 获取内部指针
@@ -354,7 +355,7 @@ public class QQmlApplicationEngine <: QtResource {
     
     /// 检查对象有效性
     public func isValid(): Bool {
-        return !closed && ptr != 0
+        return !closed && ptr != 0 && isObjectAlive(ptr)
     }
     
     /// 检查有效性，无效时抛出异常
@@ -365,11 +366,21 @@ public class QQmlApplicationEngine <: QtResource {
         if (ptr == 0) {
             throw NullPointerException("QQmlApplicationEngine 指针为空")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QQmlApplicationEngine 底层 Qt 对象已失效")
+        }
     }
     
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qSignalCleanup(ptr)
                 qQmlEngineDelete(ptr)
@@ -401,6 +412,7 @@ public class QQuickView <: QtResource {
                 throw CreateFailedException("QQuickView 创建失败（需要 QApplication 实例）")
             }
         }
+        trackObject(ptr)
     }
     
     /// 设置QML源文件
@@ -513,7 +525,7 @@ public class QQuickView <: QtResource {
     
     /// 检查对象有效性
     public func isValid(): Bool {
-        return !closed && ptr != 0
+        return !closed && ptr != 0 && isObjectAlive(ptr)
     }
     
     /// 检查有效性，无效时抛出异常
@@ -524,11 +536,21 @@ public class QQuickView <: QtResource {
         if (ptr == 0) {
             throw NullPointerException("QQuickView 指针为空")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QQuickView 底层 Qt 对象已失效")
+        }
     }
     
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qSignalCleanup(ptr)
                 qQuickViewDelete(ptr)
@@ -565,6 +587,7 @@ public class QQuickWidget <: QtResource {
                 throw CreateFailedException("QQuickWidget 创建失败（需要 QApplication 实例）")
             }
         }
+        trackObject(ptr)
     }
     
     /// 设置QML源文件
@@ -640,7 +663,7 @@ public class QQuickWidget <: QtResource {
     
     /// 检查对象有效性
     public func isValid(): Bool {
-        return !closed && ptr != 0
+        return !closed && ptr != 0 && isObjectAlive(ptr)
     }
     
     /// 检查有效性，无效时抛出异常
@@ -651,11 +674,21 @@ public class QQuickWidget <: QtResource {
         if (ptr == 0) {
             throw NullPointerException("QQuickWidget 指针为空")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QQuickWidget 底层 Qt 对象已失效")
+        }
     }
     
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qSignalCleanup(ptr)
                 qQuickWidgetDelete(ptr)
@@ -687,6 +720,7 @@ public class QQuickWindow <: QtResource {
                 throw CreateFailedException("QQuickWindow 创建失败（需要 QApplication 实例）")
             }
         }
+        trackObject(ptr)
     }
     
     /// 显示窗口
@@ -829,7 +863,7 @@ public class QQuickWindow <: QtResource {
     
     /// 检查对象有效性
     public func isValid(): Bool {
-        return !closed && ptr != 0
+        return !closed && ptr != 0 && isObjectAlive(ptr)
     }
     
     /// 检查有效性，无效时抛出异常
@@ -840,11 +874,21 @@ public class QQuickWindow <: QtResource {
         if (ptr == 0) {
             throw NullPointerException("QQuickWindow 指针为空")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QQuickWindow 底层 Qt 对象已失效")
+        }
     }
     
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qSignalCleanup(ptr)
                 qQuickWindowDelete(ptr)
@@ -882,6 +926,7 @@ public class QQmlComponent <: QtResource {
                 throw CreateFailedException("QQmlComponent 创建失败")
             }
         }
+        trackObject(ptr)
     }
     
     /// 从 URL 加载组件
@@ -974,7 +1019,7 @@ public class QQmlComponent <: QtResource {
     
     /// 检查对象有效性
     public func isValid(): Bool {
-        return !closed && ptr != 0
+        return !closed && ptr != 0 && isObjectAlive(ptr)
     }
     
     /// 检查有效性，无效时抛出异常
@@ -985,11 +1030,21 @@ public class QQmlComponent <: QtResource {
         if (ptr == 0) {
             throw NullPointerException("QQmlComponent 指针为空")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QQmlComponent 底层 Qt 对象已失效")
+        }
     }
     
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qSignalCleanup(ptr)
                 qQmlComponentDelete(ptr)
@@ -1038,6 +1093,7 @@ public class QQmlContext <: QtResource {
             ctx.ptr = qQmlContextCreate(parentContextPtr)
         }
         ctx.owned = true
+        trackObject(ctx.ptr)
         return ctx
     }
     
@@ -1124,7 +1180,7 @@ public class QQmlContext <: QtResource {
     
     /// 检查对象有效性
     public func isValid(): Bool {
-        return !closed && ptr != 0
+        return !closed && ptr != 0 && isObjectAlive(ptr)
     }
     
     /// 检查有效性，无效时抛出异常
@@ -1135,11 +1191,21 @@ public class QQmlContext <: QtResource {
         if (ptr == 0) {
             throw NullPointerException("QQmlContext 指针为空")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QQmlContext 底层 Qt 对象已失效")
+        }
     }
     
     /// 关闭资源（仅拥有所有权时删除对象）
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             if (owned) {
                 unsafe {
                     qSignalCleanup(ptr)
@@ -1183,6 +1249,7 @@ public class QQuickItem <: QtResource {
             item.ptr = qQuickItemCreate()
         }
         item.owned = true
+        trackObject(item.ptr)
         return item
     }
     
@@ -1196,7 +1263,7 @@ public class QQuickItem <: QtResource {
     
     /// 检查指针是否有效
     public func isValid(): Bool {
-        return !closed && ptr != 0
+        return !closed && ptr != 0 && isObjectAlive(ptr)
     }
     
     /// 是否已关闭
@@ -1212,11 +1279,21 @@ public class QQuickItem <: QtResource {
         if (ptr == 0) {
             throw NullPointerException("QQuickItem 指针为空")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QQuickItem 底层 Qt 对象已失效")
+        }
     }
     
     /// 关闭资源（仅拥有所有权时删除对象；借用指针只标记关闭并断开信号）
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qSignalCleanup(ptr)
                 if (owned) {

@@ -45,6 +45,9 @@ public class QLocalServer {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QLocalServer already deleted")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QLocalServer 底层 Qt 对象已失效")
+        }
     }
 
     /// 创建本地服务器
@@ -55,6 +58,7 @@ public class QLocalServer {
                 throw CreateFailedException("QLocalServer create failed")
             }
         }
+        trackObject(ptr)
     }
 
     /// 开始监听指定名称，返回是否成功
@@ -160,6 +164,13 @@ public class QLocalServer {
     /// 释放资源
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe { qLocalServerDelete(ptr) }
             ptr = 0
             closed = true

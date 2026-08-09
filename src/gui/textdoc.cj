@@ -98,6 +98,9 @@ public class QTextDocument {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QTextDocument already deleted")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QTextDocument 底层 Qt 对象已失效")
+        }
     }
 
     public init() {
@@ -107,6 +110,7 @@ public class QTextDocument {
                 throw CreateFailedException("QTextDocument create failed")
             }
         }
+        trackObject(ptr)
     }
 
     public init(text: String) {
@@ -118,6 +122,7 @@ public class QTextDocument {
                 throw CreateFailedException("QTextDocument create failed")
             }
         }
+        trackObject(ptr)
     }
 
     public func setPlainText(text: String): Unit {
@@ -211,6 +216,13 @@ public class QTextDocument {
 
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe { qTextDocumentDelete(ptr) }
             ptr = 0
             closed = true

@@ -11,7 +11,7 @@ class BridgeTests {
         let color = QColor(255, 0, 0)
         @Expect(color.getPtr() != 0, true)
         @Expect(color.isValid(), true)
-        
+
         color.delete()
         @Expect(color.getPtr(), 0)
         @Expect(color.isValid(), false)
@@ -22,11 +22,11 @@ class BridgeTests {
         let c1 = QColor(255, 0, 0)
         let c2 = QColor(0, 255, 0)
         let c3 = QColor(0, 0, 255)
-        
+
         @Expect(c1.getPtr() != c2.getPtr(), true)
         @Expect(c2.getPtr() != c3.getPtr(), true)
         @Expect(c1.getPtr() != c3.getPtr(), true)
-        
+
         c1.delete()
         c2.delete()
         c3.delete()

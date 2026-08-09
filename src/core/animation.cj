@@ -57,10 +57,14 @@ public class QAbstractAnimation {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QAbstractAnimation already deleted")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QAbstractAnimation 底层 Qt 对象已失效")
+        }
     }
 
     internal init(p: Int64) {
         ptr = p
+        trackObject(ptr)
     }
 
     /// 启动动画
@@ -147,6 +151,13 @@ public class QAbstractAnimation {
     /// 释放资源
     public func delete(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe { qAbstractAnimationDelete(ptr) }
             ptr = 0
             closed = true
@@ -166,6 +177,9 @@ public class QParallelAnimationGroup {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QParallelAnimationGroup already deleted")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QParallelAnimationGroup 底层 Qt 对象已失效")
+        }
     }
 
     public init() {
@@ -173,6 +187,7 @@ public class QParallelAnimationGroup {
         if (ptr == 0) {
             throw CreateFailedException("QParallelAnimationGroup create failed")
         }
+        trackObject(ptr)
     }
 
     /// 添加动画
@@ -261,6 +276,13 @@ public class QParallelAnimationGroup {
     /// 释放资源
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe { qParallelAnimationGroupDelete(ptr) }
             ptr = 0
             closed = true

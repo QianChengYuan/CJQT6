@@ -51,10 +51,14 @@ public class QImageCapture {
 
     private func checkValid(): Unit {
         if (ptr == 0 || closed) { throw ResourceDisposedException("QImageCapture already deleted") }
+        if (!isObjectAlive(ptr)) { throw ResourceDisposedException("QImageCapture 底层 Qt 对象已失效") }
     }
 
     /// 创建图像捕获器
-    public init() { unsafe { ptr = qImageCaptureCreate() } }
+    public init() {
+        unsafe { ptr = qImageCaptureCreate() }
+        trackObject(ptr)
+    }
 
     /// 触发捕获，返回错误码（ImageCaptureError）
     public func capture(): Int32 { checkValid(); unsafe { qImageCaptureCapture(ptr) } }
@@ -84,6 +88,17 @@ public class QImageCapture {
 
     /// 释放资源
     public func close(): Unit {
-        if (!closed && ptr != 0) { unsafe { qImageCaptureDelete(ptr) }; ptr = 0; closed = true }
+        if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
+            unsafe { qImageCaptureDelete(ptr) }
+            ptr = 0
+            closed = true
+        }
     }
 }

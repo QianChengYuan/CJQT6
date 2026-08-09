@@ -87,6 +87,7 @@ public class QAction <: QtResource {
                 throw CreateFailedException("QAction 创建失败")
             }
         }
+        trackObject(ptr)
     }
     
     // 内部构造函数（从指针创建，不获取所有权）
@@ -215,7 +216,7 @@ public class QAction <: QtResource {
     }
     
     public func isValid(): Bool {
-        return !closed && ptr != 0
+        return !closed && ptr != 0 && isObjectAlive(ptr)
     }
     
     public func checkValid(): Unit {
@@ -225,11 +226,21 @@ public class QAction <: QtResource {
         if (ptr == 0) {
             throw NullPointerException("QAction 指针为空")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QAction 底层 Qt 对象已失效")
+        }
     }
     
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qActionDelete(ptr)
             }
@@ -265,6 +276,7 @@ public class QMenu <: QtResource {
             }
         }
         ownsPtr = true
+        trackObject(ptr)
     }
     
     // 内部构造函数（从指针创建，不获取所有权）
@@ -337,7 +349,7 @@ public class QMenu <: QtResource {
     }
     
     public func isValid(): Bool {
-        return !closed && ptr != 0
+        return !closed && ptr != 0 && isObjectAlive(ptr)
     }
     
     public func checkValid(): Unit {
@@ -347,11 +359,21 @@ public class QMenu <: QtResource {
         if (ptr == 0) {
             throw NullPointerException("QMenu 指针为空")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QMenu 底层 Qt 对象已失效")
+        }
     }
     
     /// 关闭资源，释放Qt对象（仅 ownsPtr=true 时删除C++对象）
     public func close(): Unit {
         if (!closed && ptr != 0 && ownsPtr) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                closed = true
+                ptr = 0
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qMenuDelete(ptr)
             }
@@ -381,6 +403,7 @@ public class QMenuBar <: QtResource {
                 throw CreateFailedException("QMenuBar 创建失败")
             }
         }
+        trackObject(ptr)
     }
     
     public func addMenu(title: String): QMenu {
@@ -402,7 +425,7 @@ public class QMenuBar <: QtResource {
     }
     
     public func isValid(): Bool {
-        return !closed && ptr != 0
+        return !closed && ptr != 0 && isObjectAlive(ptr)
     }
     
     public func checkValid(): Unit {
@@ -412,11 +435,21 @@ public class QMenuBar <: QtResource {
         if (ptr == 0) {
             throw NullPointerException("QMenuBar 指针为空")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QMenuBar 底层 Qt 对象已失效")
+        }
     }
     
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qMenuBarDelete(ptr)
             }
@@ -448,6 +481,7 @@ public class QToolBar <: QtResource {
                 throw CreateFailedException("QToolBar 创建失败")
             }
         }
+        trackObject(ptr)
     }
     
     public init() {
@@ -459,6 +493,7 @@ public class QToolBar <: QtResource {
                 throw CreateFailedException("QToolBar 创建失败")
             }
         }
+        trackObject(ptr)
     }
     
     public func addAction(actionPtr: Int64) {
@@ -498,7 +533,7 @@ public class QToolBar <: QtResource {
     }
     
     public func isValid(): Bool {
-        return !closed && ptr != 0
+        return !closed && ptr != 0 && isObjectAlive(ptr)
     }
     
     public func checkValid(): Unit {
@@ -508,11 +543,21 @@ public class QToolBar <: QtResource {
         if (ptr == 0) {
             throw NullPointerException("QToolBar 指针为空")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QToolBar 底层 Qt 对象已失效")
+        }
     }
     
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qToolBarDelete(ptr)
             }
@@ -542,6 +587,7 @@ public class QStatusBar <: QtResource {
                 throw CreateFailedException("QStatusBar 创建失败")
             }
         }
+        trackObject(ptr)
     }
     
     public func showMessage(message: String) {
@@ -592,7 +638,7 @@ public class QStatusBar <: QtResource {
     }
     
     public func isValid(): Bool {
-        return !closed && ptr != 0
+        return !closed && ptr != 0 && isObjectAlive(ptr)
     }
     
     public func checkValid(): Unit {
@@ -602,11 +648,21 @@ public class QStatusBar <: QtResource {
         if (ptr == 0) {
             throw NullPointerException("QStatusBar 指针为空")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QStatusBar 底层 Qt 对象已失效")
+        }
     }
     
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qStatusBarDelete(ptr)
             }
@@ -636,6 +692,7 @@ public class QMainWindow <: QtResource {
                 throw CreateFailedException("QMainWindow 创建失败")
             }
         }
+        trackObject(ptr)
     }
     
     public func show() {
@@ -705,7 +762,7 @@ public class QMainWindow <: QtResource {
     }
     
     public func isValid(): Bool {
-        return !closed && ptr != 0
+        return !closed && ptr != 0 && isObjectAlive(ptr)
     }
     
     public func checkValid(): Unit {
@@ -715,11 +772,21 @@ public class QMainWindow <: QtResource {
         if (ptr == 0) {
             throw NullPointerException("QMainWindow 指针为空")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QMainWindow 底层 Qt 对象已失效")
+        }
     }
     
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qMainWindowDelete(ptr)
             }

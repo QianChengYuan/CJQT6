@@ -22,6 +22,7 @@ public class QFileSystemWatcher <: QtResource {
                 throw CreateFailedException("QFileSystemWatcher 创建失败")
             }
         }
+        trackObject(ptr)
     }
 
     /// 添加要监视的文件或目录路径
@@ -53,7 +54,7 @@ public class QFileSystemWatcher <: QtResource {
     }
 
     public func isValid(): Bool {
-        return !closed && ptr != 0
+        return !closed && ptr != 0 && isObjectAlive(ptr)
     }
 
     public func checkValid(): Unit {
@@ -63,10 +64,20 @@ public class QFileSystemWatcher <: QtResource {
         if (ptr == 0) {
             throw NullPointerException("QFileSystemWatcher 指针为空")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QFileSystemWatcher 底层 Qt 对象已失效")
+        }
     }
 
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qFileSystemWatcherDelete(ptr)
             }

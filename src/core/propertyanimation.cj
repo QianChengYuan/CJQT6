@@ -67,6 +67,7 @@ public class QPropertyAnimation <: QtResource {
                 throw CreateFailedException("QPropertyAnimation 创建失败")
             }
         }
+        trackObject(ptr)
     }
 
     /// 设置动画时长（毫秒）
@@ -132,7 +133,7 @@ public class QPropertyAnimation <: QtResource {
     }
 
     public func isValid(): Bool {
-        return !closed && ptr != 0
+        return !closed && ptr != 0 && isObjectAlive(ptr)
     }
 
     public func checkValid(): Unit {
@@ -142,10 +143,20 @@ public class QPropertyAnimation <: QtResource {
         if (ptr == 0) {
             throw NullPointerException("QPropertyAnimation 指针为空")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QPropertyAnimation 底层 Qt 对象已失效")
+        }
     }
 
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe { qPropertyAnimationDelete(ptr) }
             closed = true
             ptr = 0

@@ -1,5 +1,7 @@
 package cjqt6.gui
 
+import cjqt6.core.*
+
 // ============================================================
 // 布局管理 FFI声明
 // ============================================================
@@ -72,6 +74,7 @@ public class QVBoxLayout <: QLayout {
         unsafe {
             ptr = qVBoxLayoutCreate()
         }
+        trackObject(ptr)
     }
     
     public func addWidget(widgetPtr: Int64) {
@@ -133,7 +136,7 @@ public class QVBoxLayout <: QLayout {
     }
     
     public func isValid(): Bool {
-        !closed && ptr != 0
+        !closed && ptr != 0 && isObjectAlive(ptr)
     }
     
     public func checkValid(): Unit {
@@ -143,10 +146,20 @@ public class QVBoxLayout <: QLayout {
         if (ptr == 0) {
             throw Exception("QVBoxLayout 指针为空")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QVBoxLayout 底层 Qt 对象已失效")
+        }
     }
     
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qVBoxLayoutDelete(ptr)
             }
@@ -171,6 +184,7 @@ public class QHBoxLayout <: QLayout {
         unsafe {
             ptr = qHBoxLayoutCreate()
         }
+        trackObject(ptr)
     }
     
     public func addWidget(widgetPtr: Int64) {
@@ -232,7 +246,7 @@ public class QHBoxLayout <: QLayout {
     }
     
     public func isValid(): Bool {
-        !closed && ptr != 0
+        !closed && ptr != 0 && isObjectAlive(ptr)
     }
     
     public func checkValid(): Unit {
@@ -242,10 +256,20 @@ public class QHBoxLayout <: QLayout {
         if (ptr == 0) {
             throw Exception("QHBoxLayout 指针为空")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QHBoxLayout 底层 Qt 对象已失效")
+        }
     }
     
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qHBoxLayoutDelete(ptr)
             }
@@ -270,6 +294,7 @@ public class QGridLayout <: QLayout {
         unsafe {
             ptr = qGridLayoutCreate()
         }
+        trackObject(ptr)
     }
     
     public func addWidget(widgetPtr: Int64, row: Int32, col: Int32) {
@@ -317,7 +342,7 @@ public class QGridLayout <: QLayout {
     }
     
     public func isValid(): Bool {
-        !closed && ptr != 0
+        !closed && ptr != 0 && isObjectAlive(ptr)
     }
     
     public func checkValid(): Unit {
@@ -327,10 +352,20 @@ public class QGridLayout <: QLayout {
         if (ptr == 0) {
             throw Exception("QGridLayout 指针为空")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QGridLayout 底层 Qt 对象已失效")
+        }
     }
     
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qGridLayoutDelete(ptr)
             }
@@ -402,6 +437,7 @@ public class QFormLayout <: QLayout {
         unsafe {
             ptr = qFormLayoutCreate()
         }
+        trackObject(ptr)
     }
 
     /// 添加一行：文本标签 + 控件
@@ -524,7 +560,7 @@ public class QFormLayout <: QLayout {
     }
     
     public func isValid(): Bool {
-        !closed && ptr != 0
+        !closed && ptr != 0 && isObjectAlive(ptr)
     }
     
     public func checkValid(): Unit {
@@ -534,10 +570,20 @@ public class QFormLayout <: QLayout {
         if (ptr == 0) {
             throw Exception("QFormLayout 指针为空")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QFormLayout 底层 Qt 对象已失效")
+        }
     }
     
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qFormLayoutDelete(ptr)
             }

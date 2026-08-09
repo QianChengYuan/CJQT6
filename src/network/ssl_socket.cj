@@ -61,6 +61,9 @@ public class QSslSocket {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QSslSocket already deleted")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QSslSocket 底层 Qt 对象已失效")
+        }
     }
 
     /// 创建SSL套接字
@@ -71,6 +74,7 @@ public class QSslSocket {
                 throw CreateFailedException("QSslSocket create failed")
             }
         }
+        trackObject(ptr)
     }
 
     /// 连接到加密主机
@@ -150,6 +154,13 @@ public class QSslSocket {
     /// 释放资源
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe { qSslSocketDelete(ptr) }
             ptr = 0
             closed = true

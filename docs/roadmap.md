@@ -59,11 +59,25 @@ CJQT6 的演进边界由仓颉语言特性决定，先固定几个**不可绕过
 - 动作：对 `native/src/**/bridge_*.cpp` 做一次「谁分配、谁释放、谁持有」的逐文件核查，统一字符串返回改为 `malloc+memcpy`（1.7.0 已修部分，扩展到全部返回点）。
 - **反向失效通知（顺手小改）**：目前仓颉侧 `checkValid()` 是被动守卫——C++ 侧 QObject 已析构、仓颉句柄仍持有旧 `ptr` 时，调用前检查发现不了。在桥接析构里反向通知仓颉句柄置脏（如通过仓颉侧 WeakRef/回调置空），比纯调用前检查更稳，属 P0 内可一并完成的小改。
 
+**✅ 已完成（2026-08-08）**：`native/src/**/bridge_*.cpp` 全部 `const char*` 返回点已统一为独立 `malloc` 分配（`dupUtf8`/`emptyString`），并按「bridge 自持释放」落地：
+- 新增导出 `qCStringFree`（`std::free` 同堆释放），仓颉侧新增 `cstring_utils.cj::freeBridgeString` 统一释放 bridge 返回字符串；
+- 412 处 `LibC.free` 中针对 bridge 返回串的 153 处替换为 `freeBridgeString`（输入参数 `LibC.mallocCString` 释放保持 `LibC.free`）；
+- **附带修复 Windows CRT 堆不匹配崩溃**：`LibC.free` 绑定 `msvcrt`，而 MSVC `/MD` 编译的 bridge 用 UCRT `malloc`，混用触发堆损坏（`0xC0000409`）或挂起（此前 QClipboard/json 测试挂起根因）；桥接层所有返回字符串统一经 `freeBridgeString` 释放后，全量测试 889/889 通过；
+- 顺带补齐 7 个文件缺失的 `import cjqt6.core.*`。
+
+**✅ 已完成（2026-08-09）**：`反向失效通知` 落地——桥接层维护 native 存活表（`g_aliveObjs`，`std::atomic_flag` 自旋锁），任何 QObject 被 Qt 级联析构后自动置脏；仓颉侧统一 `trackObject`/`untrackObject`/`isObjectAlive` 三件套：
+- 约 49 个封装类（core/widgets/gui/dialogs/menu/qml/multimedia/network/sql/views/print 等）构造时 `trackObject(ptr)`，`close()`/`delete()` 释放前先查 `isObjectAlive(ptr)`——已级联析构则只注销不重复 delete，根除 double-free；
+- `isValid()` 升级为 `!closed && ptr != 0 && isObjectAlive(ptr)`，`checkValid()` 对已失效对象抛 `ResourceDisposedException`；
+- `QWidget.fromPtr` 采纳外部指针前先 `untrackObject`，避免误销毁；
+- 全量测试 894/894 通过（含新增 `reverse_invalidation_test.cj`：级联析构后调用不再崩溃/挂起）。
+
 ### 3.3 CI / 构建门禁（仓颉实际约束内可行）
 - 远端是 GitCode，无 GitHub Actions，但可用 **GitCode CI / 自建脚本门禁**：
   - `update-bridge.ps1` + `cjpm build` + `cjpm test` 串成一条本地一键命令（`rebuild_all.ps1` 已有雏形）；
   - Linux 用 `xvfb-run cjpm test` 跑 GUI 测试。
 - 产出：新增 `scripts/verify_all.ps1`（编译桥接 → cjpm build → cjpm test → 冒烟示例）。
+
+**✅ 已完成（2026-08-08）**：`scripts/verify_all.ps1` 已落地（`update-bridge.ps1` → `cjpm build` → `deploy_qt_test.ps1 -RunTest` → 冒烟示例，支持 `-SkipBridge`/`-SkipTest`/`-SkipExample`/`-Example`/`-QtDir`）；测试 headless offscreen 基线随 3.1 一并验证通过。GitCode CI 仍未配置。
 
 ---
 
@@ -141,7 +155,7 @@ CJQT6 的演进边界由仓颉语言特性决定，先固定几个**不可绕过
 
 | 阶段 | 主题 | 主要产出 | 估算工作类型 |
 |------|------|---------|-------------|
-| **P0（近期）** | 工程质量 | 测试入库+`cjpm test` 一键化（含 headless 基线，`# flaky` 隔离）；桥接字符串/锁审计+反向失效通知；`verify_all.ps1` | 主要仓颉+脚本，少量 C++ |
+| **P0（近期）** | 工程质量 | 测试入库+`cjpm test` 一键化（含 headless 基线，`# flaky` 隔离）✅；桥接字符串审计 ✅；反向失效通知 ✅；`verify_all.ps1` ✅ | 主要仓颉+脚本，少量 C++ |
 | **P1（中期）** | 异步与模型 | `runOnUiThread` 工具（`UiPoster` 单例收口）；QAbstractItemModel 补 `dataChanged`/`layoutChanged`（**P1-a 优先**）；重载信号消歧；bench 工程建基（量化信号槽/FFI 热点，为 P3 `@FastNative` 标注提供依据） | 仓颉 + C++ 桥接 |
 | **P2（中期）** | 开发体验 | Designer→代码生成器；QSS/翻译完善；macOS 构建链 | 仓颉 + CMake |
 | **P3（长期）** | 深度与性能 | QtCharts、自绘委托、`@FastNative` 优化（依据 P1 bench 结论标注，高频 getter 未必是热点）、进阶教程 | C++ + 仓颉 + 文档 |

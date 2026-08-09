@@ -58,6 +58,9 @@ public class QItemSelectionModel {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QItemSelectionModel already deleted")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QItemSelectionModel 底层 Qt 对象已失效")
+        }
     }
 
     /// 创建选择模型，modelPtr 为关联的数据模型指针（QAbstractItemModel）
@@ -66,6 +69,7 @@ public class QItemSelectionModel {
             ptr = qItemSelectionModelCreate(modelPtr)
             if (ptr == 0) { throw CreateFailedException("QItemSelectionModel create failed") }
         }
+        trackObject(ptr)
     }
 
     /// 获取当前项的行号
@@ -134,6 +138,13 @@ public class QItemSelectionModel {
     /// 释放资源
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe { qItemSelectionModelDelete(ptr) }
             ptr = 0; closed = true
         }

@@ -34,6 +34,7 @@ public class QSettings <: QtResource {
                 throw CreateFailedException("QSettings 创建失败")
             }
         }
+        trackObject(ptr)
     }
 
     /// 从指定 INI 格式文件创建配置存储
@@ -47,6 +48,7 @@ public class QSettings <: QtResource {
                 throw CreateFailedException("QSettings 创建失败")
             }
         }
+        trackObject(s.ptr)
         return s
     }
 
@@ -155,7 +157,7 @@ public class QSettings <: QtResource {
     }
 
     public func isValid(): Bool {
-        return !closed && ptr != 0
+        return !closed && ptr != 0 && isObjectAlive(ptr)
     }
 
     public func checkValid(): Unit {
@@ -165,10 +167,20 @@ public class QSettings <: QtResource {
         if (ptr == 0) {
             throw NullPointerException("QSettings 指针为空")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QSettings 底层 Qt 对象已失效")
+        }
     }
 
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qSettingsDelete(ptr)
             }

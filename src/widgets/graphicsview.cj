@@ -127,6 +127,7 @@ public class QGraphicsView <: QtResource {
                 throw CreateFailedException("QGraphicsView 创建失败")
             }
         }
+        trackObject(ptr)
     }
 
     public func show(): Unit {
@@ -295,7 +296,7 @@ public class QGraphicsView <: QtResource {
     }
 
     public func isValid(): Bool {
-        return !closed && ptr != 0
+        return !closed && ptr != 0 && isObjectAlive(ptr)
     }
 
     public func checkValid(): Unit {
@@ -305,10 +306,20 @@ public class QGraphicsView <: QtResource {
         if (ptr == 0) {
             throw NullPointerException("QGraphicsView 指针为空")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QGraphicsView 底层 Qt 对象已失效")
+        }
     }
 
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qSignalCleanup(ptr)
                 qGraphicsViewDelete(ptr)
@@ -338,6 +349,7 @@ public class QGraphicsScene <: QtResource {
                 throw CreateFailedException("QGraphicsScene 创建失败")
             }
         }
+        trackObject(ptr)
     }
 
     public func addRect(x: Float64, y: Float64, w: Float64, h: Float64,
@@ -461,7 +473,7 @@ public class QGraphicsScene <: QtResource {
     }
 
     public func isValid(): Bool {
-        return !closed && ptr != 0
+        return !closed && ptr != 0 && isObjectAlive(ptr)
     }
 
     public func checkValid(): Unit {
@@ -471,10 +483,20 @@ public class QGraphicsScene <: QtResource {
         if (ptr == 0) {
             throw NullPointerException("QGraphicsScene 指针为空")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QGraphicsScene 底层 Qt 对象已失效")
+        }
     }
 
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qSignalCleanup(ptr)
                 qGraphicsSceneDelete(ptr)

@@ -66,6 +66,9 @@ public class QAbstractItemModel {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QAbstractItemModel already deleted")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QAbstractItemModel 底层 Qt 对象已失效")
+        }
     }
 
     /// 创建自定义模型
@@ -76,6 +79,7 @@ public class QAbstractItemModel {
                 throw CreateFailedException("QAbstractItemModel create failed")
             }
         }
+        trackObject(ptr)
     }
 
     /// 设置行数回调 (modelPtr, parentPtr) -> 行数
@@ -163,6 +167,13 @@ public class QAbstractItemModel {
     /// 释放资源
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe { qAbstractItemModelDelete(ptr) }
             ptr = 0
             closed = true

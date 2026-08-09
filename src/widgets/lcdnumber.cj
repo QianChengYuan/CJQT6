@@ -45,12 +45,14 @@ public class QLCDNumber <: QtResource {
         unsafe {
             ptr = qLCDNumberCreate()
         }
+        trackObject(ptr)
     }
     
     public init(numDigits: Int32) {
         unsafe {
             ptr = qLCDNumberCreateWithDigits(numDigits)
         }
+        trackObject(ptr)
     }
     
     public func show() {
@@ -234,7 +236,7 @@ public class QLCDNumber <: QtResource {
     
     /// 检查对象有效性
     public func isValid(): Bool {
-        return !closed && ptr != 0
+        return !closed && ptr != 0 && isObjectAlive(ptr)
     }
     
     /// 检查有效性，无效时抛出异常
@@ -245,11 +247,21 @@ public class QLCDNumber <: QtResource {
         if (ptr == 0) {
             throw NullPointerException("QLCDNumber 指针为空")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QLCDNumber 底层 Qt 对象已失效")
+        }
     }
     
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qSignalCleanup(ptr)
                 qLCDNumberDelete(ptr)

@@ -24,6 +24,7 @@ public class QUiLoader <: QtResource {
                 throw CreateFailedException("QUiLoader 创建失败")
             }
         }
+        trackObject(ptr)
     }
 
     /// 加载 .ui 文件，返回根控件
@@ -76,7 +77,7 @@ public class QUiLoader <: QtResource {
 
     /// 检查对象有效性
     public func isValid(): Bool {
-        return !closed && ptr != 0
+        return !closed && ptr != 0 && isObjectAlive(ptr)
     }
 
     /// 检查有效性，无效时抛出异常
@@ -87,11 +88,21 @@ public class QUiLoader <: QtResource {
         if (ptr == 0) {
             throw NullPointerException("QUiLoader 指针为空")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QUiLoader 底层 Qt 对象已失效")
+        }
     }
 
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qUiLoaderDelete(ptr)
             }

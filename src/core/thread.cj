@@ -99,6 +99,9 @@ public class QThread {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QThread already deleted")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QThread 底层 Qt 对象已失效")
+        }
     }
 
     public init() {
@@ -108,6 +111,7 @@ public class QThread {
                 throw CreateFailedException("QThread create failed")
             }
         }
+        trackObject(ptr)
     }
 
     /// 启动线程
@@ -229,6 +233,13 @@ public class QThread {
 
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe { qThreadDelete(ptr) }
             ptr = 0
             closed = true
@@ -251,6 +262,7 @@ public class QThreadPool {
     public static func globalInstance(): QThreadPool {
         let pool = QThreadPool(0)
         unsafe { pool.ptr = qThreadPoolGlobalInstance() }
+        trackObject(pool.ptr)
         return pool
     }
 

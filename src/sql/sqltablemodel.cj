@@ -47,6 +47,7 @@ public class QSqlTableModel {
 
     private func checkValid(): Unit {
         if (ptr == 0 || closed) { throw ResourceDisposedException("QSqlTableModel already deleted") }
+        if (!isObjectAlive(ptr)) { throw ResourceDisposedException("QSqlTableModel 底层 Qt 对象已失效") }
     }
 
     /// 创建模型，dbName 为数据库连接名（空串使用默认连接）
@@ -56,6 +57,7 @@ public class QSqlTableModel {
             ptr = qSqlTableModelCreate(0, cstr)
             LibC.free(cstr)
         }
+        trackObject(ptr)
     }
 
     /// 设置要映射的数据库表名
@@ -129,6 +131,17 @@ public class QSqlTableModel {
 
     /// 释放资源
     public func close(): Unit {
-        if (!closed && ptr != 0) { unsafe { qSqlTableModelDelete(ptr) }; ptr = 0; closed = true }
+        if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
+            unsafe { qSqlTableModelDelete(ptr) }
+            ptr = 0
+            closed = true
+        }
     }
 }

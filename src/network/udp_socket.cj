@@ -51,6 +51,7 @@ public class QUdpSocket {
         unsafe {
             ptr = qUdpSocketCreate()
         }
+        trackObject(ptr)
     }
     
     /// 绑定到指定地址和端口
@@ -219,6 +220,12 @@ public class QUdpSocket {
     /// 删除套接字
     public func delete(): Unit {
         if (ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qUdpSocketDisconnectCallbacks(ptr)
                 qUdpSocketDelete(ptr)

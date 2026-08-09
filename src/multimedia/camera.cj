@@ -98,6 +98,9 @@ public class QCamera {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QCamera already deleted")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QCamera 底层 Qt 对象已失效")
+        }
     }
 
     /// 创建摄像头（使用默认设备）
@@ -106,6 +109,7 @@ public class QCamera {
         if (ptr == 0) {
             throw CreateFailedException("QCamera create failed")
         }
+        trackObject(ptr)
     }
 
     /// 创建摄像头（指定设备）
@@ -114,6 +118,7 @@ public class QCamera {
         if (ptr == 0) {
             throw CreateFailedException("QCamera create failed")
         }
+        trackObject(ptr)
     }
 
     /// 启动摄像头
@@ -157,6 +162,13 @@ public class QCamera {
     /// 释放资源
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe { qCameraDelete(ptr) }
             ptr = 0
             closed = true
@@ -176,6 +188,9 @@ public class QMediaCaptureSession {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QMediaCaptureSession already deleted")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QMediaCaptureSession 底层 Qt 对象已失效")
+        }
     }
 
     public init() {
@@ -183,6 +198,7 @@ public class QMediaCaptureSession {
         if (ptr == 0) {
             throw CreateFailedException("QMediaCaptureSession create failed")
         }
+        trackObject(ptr)
     }
 
     /// 设置摄像头
@@ -203,6 +219,13 @@ public class QMediaCaptureSession {
     /// 释放资源
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe { qMediaCaptureSessionDelete(ptr) }
             ptr = 0
             closed = true

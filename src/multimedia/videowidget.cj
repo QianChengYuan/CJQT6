@@ -24,6 +24,9 @@ public class QVideoWidget {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QVideoWidget already deleted")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QVideoWidget 底层 Qt 对象已失效")
+        }
     }
 
     /// 创建视频显示控件
@@ -34,6 +37,7 @@ public class QVideoWidget {
         if (ptr == 0) {
             throw CreateFailedException("QVideoWidget create failed")
         }
+        trackObject(ptr)
     }
 
     /// 显示控件
@@ -68,6 +72,13 @@ public class QVideoWidget {
     /// 释放资源
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qVideoWidgetDelete(ptr)
             }

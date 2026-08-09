@@ -43,6 +43,9 @@ public class QUndoCommand {
         if (ptr == 0) {
             throw ResourceDisposedException("QUndoCommand already deleted or pushed")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QUndoCommand 底层 Qt 对象已失效")
+        }
     }
 
     /// 创建撤销命令
@@ -59,6 +62,7 @@ public class QUndoCommand {
         if (ptr == 0) {
             throw CreateFailedException("QUndoCommand create failed")
         }
+        trackObject(ptr)
     }
 
     /// 设置命令文本
@@ -96,6 +100,12 @@ public class QUndoCommand {
     /// 释放资源（仅当未入栈时可用）
     public func delete(): Unit {
         if (ptr != 0 && !pushed) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                return
+            }
+            untrackObject(ptr)
             unsafe { qUndoCommandDelete(ptr) }
             ptr = 0
         }
@@ -114,6 +124,9 @@ public class QUndoStack {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QUndoStack already deleted")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QUndoStack 底层 Qt 对象已失效")
+        }
     }
 
     public init() {
@@ -121,6 +134,7 @@ public class QUndoStack {
         if (ptr == 0) {
             throw CreateFailedException("QUndoStack create failed")
         }
+        trackObject(ptr)
     }
 
     /// 压入命令（入栈后 QUndoCommand 由栈管理生命周期）
@@ -240,6 +254,13 @@ public class QUndoStack {
     /// 释放资源
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe { qUndoStackDelete(ptr) }
             ptr = 0
             closed = true
