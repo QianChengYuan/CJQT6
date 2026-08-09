@@ -1,4 +1,24 @@
 ﻿# 更新日志
+## [Unreleased] - 2026-08-09
+
+### 新增
+
+- **P1 异步与模型（roadmap 方向二）**：
+  - `UiPoster` 单例收口跨线程回投：`UiPoster.runOnUiThread`/`post` + 顶层 `runOnUiThread`/`runAsync`（`src/core/uiposter.cj`），复用 `registerVoidCallback` 闭包注册表按 id 派发、一次性任务自动注销；native 侧新增 `bridge_ui_poster.cpp::qUiPosterPost`（`QMetaObject::invokeMethod` QueuedConnection 塞入 GUI 线程事件队列）+ `bridge_signal.cpp::qGetVoidDispatcher`；
+  - `QAbstractItemModel` 补 `notifyDataChanged(topLeftRow, topLeftCol, bottomRightRow, bottomRightCol)` / `notifyLayoutChanged()`（P1-a 局部刷新，dataChanged 索引复用回调模型 `m_indexCb` 内部 id）；`QTableView` 新增 `setModel(QAbstractItemModel)` 重载，自定义实时表可直接挂载。
+- **P1 测试**：`src/test/p1_async_model_test.cj` 12 用例（模型局部刷新通知、UiPoster 跨线程回投 FIFO/线程身份、旋转框 `textChanged`），全量 906/906 通过。
+- **P1 bench 工程**：`examples/bench` 基准工程（`std.time.MonoTime` 单调纳秒钟测时，先 warmup 再计时），量化纯 FFI 往返 / 字符串过 FFI / 信号回调吞吐 / 异步路径四条高频路径，为 P3 `@FastNative` 标注提供数据：Int32 getter≈166ns、setText≈350~790ns、Direct emitVoid 回调≈300ns、runOnUiThread 端到端≈2.7µs、QTimer(interval=0) 事件循环派发≈14µs/op——事件分发与字符串转换是热点，纯 getter 标注收益有限。
+
+### 修复
+
+- 移除对 Qt 6 已移除的 `QSpinBox/QDoubleSpinBox::valueChanged(QString)` 重载的桥接尝试（Qt 6.10.3 编译期即报错）；文本变化统一走既有 `setOnTextChanged`（`textChanged(const QString&)`），与数值 `setOnValueChanged` 并存互不覆盖。
+
+### 文档
+
+- `docs/roadmap.md`：4.1/4.2/4.3 落地标记与 Qt6 重载结论；P1 里程碑矩阵更新（bench ✅ + 量化数据）。
+- `docs/api/01_core.md`：新增 `UiPoster`/`runOnUiThread`/`runAsync` 章节。
+- `docs/api/05_views.md`：`QTableView::setModel(QAbstractItemModel)`、`QAbstractItemModel::notifyDataChanged`/`notifyLayoutChanged`；修正示例中不存在的 `(row*2+col).toInt64()`（仓颉数值转换用 `Int64(...)`）。
+
 ## [1.7.0] - 2026-08-02
 
 ### 新增

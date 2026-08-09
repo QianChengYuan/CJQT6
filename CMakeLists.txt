@@ -62,6 +62,7 @@ set(CORE_SOURCES
     native/src/core/bridge_thread.cpp
     native/src/core/bridge_itemselection.cpp
     native/src/core/bridge_json.cpp
+    native/src/core/bridge_ui_poster.cpp
 )
 
 # GUI模块 - 布局、对话框、菜单、样式、文本文档

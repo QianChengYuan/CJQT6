@@ -1,0 +1,14 @@
+[package]
+  cjc-version = "1.1.0"
+  name = "bench"
+  description = "CJQT6 信号/FFI 性能基准（P1 bench 工程，为 P3 @FastNative 标注提供数据）"
+  version = "1.0.0"
+  target-dir = ""
+  output-type = "executable"
+  compile-option = ""
+  override-compile-option = ""
+  link-option = "-L../../releases/windows-x64 -lcjqt6_bridge"
+  package-configuration = {}
+
+[dependencies]
+  cjqt6 = { path = "../../" }

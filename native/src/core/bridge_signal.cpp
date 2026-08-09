@@ -708,6 +708,11 @@ void qSetCallbackDispatcher(void (*disp)(int64_t)) {
     g_voidDispatcher = disp;
 }
 
+// P1：UiPoster 跨线程回投 —— 供 bridge_ui_poster.cpp 获取 Cangjie 注册的 void 调度器
+void (*qGetVoidDispatcher())(int64_t) {
+    return g_voidDispatcher;
+}
+
 // P1c：捕获路径的断开（供 bridge_ext_wcore.cpp 中按钮扩展信号 disconnect 同步清理）
 void qButtonPressedIdDisconnect(int64_t ptr)   { disconnectByKey(ConnKey{ptr, SIG_PRESSED}); }
 void qButtonReleasedIdDisconnect(int64_t ptr)  { disconnectByKey(ConnKey{ptr, SIG_RELEASED}); }

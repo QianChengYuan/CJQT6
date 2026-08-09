@@ -116,6 +116,15 @@ public class QTableView {
         }
     }
 
+    /// 设置自定义回调模型（QAbstractItemModel，P1 实时数据表）
+    /// 配合 notifyDataChanged/notifyLayoutChanged 实现局部刷新，避免整表 reset
+    public func setModel(model: QAbstractItemModel): Unit {
+        checkValid()
+        unsafe {
+            qTableViewSetModel(ptr, model.getPtr())
+        }
+    }
+
     public func setColumnWidth(col: Int32, width: Int32): Unit {
         checkValid()
         unsafe {

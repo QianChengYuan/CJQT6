@@ -129,6 +129,24 @@ public:
     void notifyBeginRemoveRows(int32_t first, int32_t last) { beginRemoveRows(QModelIndex(), first, last); }
     void notifyEndRemoveRows() { endRemoveRows(); }
 
+    // dataChanged/layoutChanged（P1）：数据与结构局部更新通知。
+    // 索引通过回调 m_indexCb 拿到与 index() 一致的内部 ID，保证视图刷新时
+    // 重新取数的 internalPointer 与初次 index() 一致。
+    void notifyDataChanged(int32_t topLeftRow, int32_t topLeftCol,
+                           int32_t bottomRightRow, int32_t bottomRightCol) {
+        if (!m_indexCb) return;
+        int64_t tlId = m_indexCb(reinterpret_cast<int64_t>(this), topLeftRow, topLeftCol, 0);
+        int64_t brId = m_indexCb(reinterpret_cast<int64_t>(this), bottomRightRow, bottomRightCol, 0);
+        if (tlId == 0 || brId == 0) return;
+        QModelIndex tl = createIndex(topLeftRow, topLeftCol, reinterpret_cast<void*>(tlId));
+        QModelIndex br = createIndex(bottomRightRow, bottomRightCol, reinterpret_cast<void*>(brId));
+        emit dataChanged(tl, br);
+    }
+
+    void notifyLayoutChanged() {
+        emit layoutChanged(QList<QPersistentModelIndex>(), QAbstractItemModel::NoLayoutChangeHint);
+    }
+
 private:
     RowCountFunc m_rowCountCb;
     ColumnCountFunc m_columnCountCb;
@@ -215,6 +233,19 @@ void qAbstractItemModelBeginRemoveRows(int64_t ptr, int32_t first, int32_t last)
 void qAbstractItemModelEndRemoveRows(int64_t ptr) {
     CjAbstractItemModel* model = reinterpret_cast<CjAbstractItemModel*>(ptr);
     if (model) model->notifyEndRemoveRows();
+}
+
+// P1：局部数据更新通知（dataChanged）—— 视图只刷新指定矩形区域，避免整表 reset
+void qAbstractItemModelDataChanged(int64_t ptr, int32_t topLeftRow, int32_t topLeftCol,
+                                   int32_t bottomRightRow, int32_t bottomRightCol) {
+    CjAbstractItemModel* model = reinterpret_cast<CjAbstractItemModel*>(ptr);
+    if (model) model->notifyDataChanged(topLeftRow, topLeftCol, bottomRightRow, bottomRightCol);
+}
+
+// P1：布局变化通知（layoutChanged）—— 行/列顺序或结构调整后通知视图重排
+void qAbstractItemModelLayoutChanged(int64_t ptr) {
+    CjAbstractItemModel* model = reinterpret_cast<CjAbstractItemModel*>(ptr);
+    if (model) model->notifyLayoutChanged();
 }
 
 } // extern "C"

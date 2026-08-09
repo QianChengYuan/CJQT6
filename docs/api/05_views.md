@@ -122,7 +122,8 @@ table.show()
 | 方法 | 说明 |
 |------|------|
 | `init()` | 创建表格视图 |
-| `setModel(model: QStandardItemModel)` | 绑定数据模型 |
+| `setModel(model: QStandardItemModel)` | 绑定标准项模型 |
+| `setModel(model: QAbstractItemModel)` | 绑定回调式自定义模型（P1：可配合 `notifyDataChanged`/`notifyLayoutChanged` 做实时局部刷新） |
 | `setColumnWidth(col: Int32, width: Int32)` / `setRowHeight(row: Int32, height: Int32)` | 设置列宽/行高 |
 | `setShowGrid(show: Bool)` / `isShowGrid(): Bool` | 设置/获取是否显示网格 |
 | `setGridStyle(style: Int32)` / `gridStyle(): Int32` | 设置/获取网格线样式 |
@@ -670,8 +671,8 @@ let model = QAbstractItemModel()
 model.setOnRowCount(CFunc<(Int64, Int64) -> Int32> { _, _ => 3 })
 model.setOnColumnCount(CFunc<(Int64, Int64) -> Int32> { _, _ => 2 })
 
-// 索引回调 (modelPtr, row, col, parentPtr) -> 内部ID
-model.setOnIndex(CFunc<(Int64, Int32, Int32, Int64) -> Int64> { _, row, col, _ => (row * 2 + col).toInt64() })
+// 索引回调 (modelPtr, row, col, parentPtr) -> 内部ID（非零，供 dataChanged 建索引）
+model.setOnIndex(CFunc<(Int64, Int32, Int32, Int64) -> Int64> { _, row, col, _ => Int64(row * 2 + col + 1) })
 
 // 数据回调 (modelPtr, indexPtr, role) -> 字符串指针或0
 model.setOnData(CFunc<(Int64, Int64, Int32) -> Int64> { _, _, _ => 0 })
@@ -679,10 +680,16 @@ model.setOnData(CFunc<(Int64, Int64, Int32) -> Int64> { _, _, _ => 0 })
 // 表头回调 (modelPtr, section, orientation, role) -> 字符串指针或0
 model.setOnHeaderData(CFunc<(Int64, Int32, Int32, Int32) -> Int64> { _, _, _, _ => 0 })
 
-// 注意：当前源码中视图的 setModel() 仅接受 QStandardItemModel 类型，
-// 自定义模型暂无法直接传入视图，需自行封装转换后使用
+// P1：自定义模型可直接传给 QTableView.setModel(model) 驱动实时数据表
+let table = QTableView()
+table.setModel(model)
 
 // 数据变化时通知视图刷新
+// - 局部刷新：只更新 (0,0) 到 (2,1) 围成的矩形区域，避免整表 reset
+model.notifyDataChanged(0, 0, 2, 1)
+// - 布局变化（行/列顺序调整等）通知视图重排
+model.notifyLayoutChanged()
+// - 全量重置
 model.beginResetModel()
 // ... 更新内部数据 ...
 model.endResetModel()
@@ -702,6 +709,8 @@ model.endResetModel()
 | `beginResetModel()` / `endResetModel()` | 模型重置通知 |
 | `beginInsertRows(first: Int32, last: Int32)` / `endInsertRows()` | 插入行通知 |
 | `beginRemoveRows(first: Int32, last: Int32)` / `endRemoveRows()` | 移除行通知 |
+| `notifyDataChanged(topLeftRow: Int32, topLeftCol: Int32, bottomRightRow: Int32, bottomRightCol: Int32)` | 局部数据更新通知（P1：视图只刷新该矩形区域，避免整表 reset） |
+| `notifyLayoutChanged()` | 布局变化通知（P1：行/列顺序调整后让视图重排） |
 | `getPtr(): Int64` / `close()` | 获取指针与释放资源 |
 
 **数据角色常量** (`ItemDataRole`，均为函数调用形式):

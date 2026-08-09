@@ -21,6 +21,8 @@ foreign func qAbstractItemModelBeginInsertRows(ptr: Int64, first: Int32, last: I
 foreign func qAbstractItemModelEndInsertRows(ptr: Int64): Unit
 foreign func qAbstractItemModelBeginRemoveRows(ptr: Int64, first: Int32, last: Int32): Unit
 foreign func qAbstractItemModelEndRemoveRows(ptr: Int64): Unit
+foreign func qAbstractItemModelDataChanged(ptr: Int64, topLeftRow: Int32, topLeftCol: Int32, bottomRightRow: Int32, bottomRightCol: Int32): Unit
+foreign func qAbstractItemModelLayoutChanged(ptr: Int64): Unit
 
 
 // ============================================================
@@ -160,6 +162,21 @@ public class QAbstractItemModel {
     public func endRemoveRows(): Unit {
         checkValid()
         unsafe { qAbstractItemModelEndRemoveRows(ptr) }
+    }
+
+    /// 通知局部数据更新（dataChanged，P1）
+    /// 视图只刷新 topLeft 到 bottomRight 围成的矩形区域，避免整表 reset。
+    /// 行/列号对应当前模型的行列索引（0 起）。
+    public func notifyDataChanged(topLeftRow: Int32, topLeftCol: Int32, bottomRightRow: Int32, bottomRightCol: Int32): Unit {
+        checkValid()
+        unsafe { qAbstractItemModelDataChanged(ptr, topLeftRow, topLeftCol, bottomRightRow, bottomRightCol) }
+    }
+
+    /// 通知布局变化（layoutChanged，P1）
+    /// 行/列顺序或结构发生变化后调用，让视图重新排列。
+    public func notifyLayoutChanged(): Unit {
+        checkValid()
+        unsafe { qAbstractItemModelLayoutChanged(ptr) }
     }
 
     public func getPtr(): Int64 { ptr }

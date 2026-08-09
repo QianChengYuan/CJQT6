@@ -1040,3 +1040,39 @@ ConnectionType.BlockingQueued // 3 阻塞队列投递
 | `disconnectVoid()` / `disconnectInt()` / `disconnectDouble()` / `disconnectString()` | 断开单个信号 |
 | `disconnect()` | 断开全部信号 |
 | `getPtr(): Int64` / `close()` / `delete()` | 指针与资源释放 |
+
+---
+
+## UiPoster / runOnUiThread / runAsync - 跨线程回投 UI 线程（P1）
+
+仓颉 `spawn` 出的工作线程**没有 Qt 事件循环**，直接操作控件线程不安全。本组 API 收口所有「回投 UI 线程」的投递路径：闭包经 `registerVoidCallback` 注册表拿到 id，native 侧 `qUiPosterPost` 用 `QMetaObject::invokeMethod(Qt::QueuedConnection)` 塞进 `QCoreApplication`（GUI 线程）事件队列，GUI 线程事件循环取出后按 id 派发。
+
+> **约束（roadmap 4.1）**：所有 `runOnUiThread` / 异步回投都必须走本入口，禁止各模块各自 `new QTimer` / 自建投递路径。回调在事件循环中异步执行（即使调用方就在 GUI 线程，也是排队执行，语义同 `QTimer::singleShot(0)`）。一次性任务执行后自动从注册表注销。
+
+```cangjie
+import cjqt6.core.*
+
+// 1. 把闭包投递到 GUI 线程事件队列（异步，先进先出）
+runOnUiThread({ =>
+    label.setText("刷新完成")
+})
+
+// 2. 后台执行耗时任务，完成后自动回投 GUI 线程
+runAsync({
+    // 工作线程：耗时计算 / IO（没有 Qt 事件循环，勿操作控件）
+    let result = heavyCompute()
+}, {
+    // GUI 线程：安全操作控件
+    statusLabel.setText("完成: ${result}")
+})
+```
+
+**方法**:
+| 方法 | 说明 |
+|------|------|
+| `UiPoster.runOnUiThread(callback: () -> Unit)` | 把闭包投递到 GUI 线程事件队列（异步） |
+| `UiPoster.post(callback: () -> Unit)` | `runOnUiThread` 别名 |
+| `runOnUiThread(callback: () -> Unit)` | 顶层便捷函数（等价于 `UiPoster.runOnUiThread`） |
+| `runAsync(work: () -> Unit, onDone: () -> Unit)` | `spawn` 后台执行 `work`，完成后在 GUI 线程执行 `onDone` |
+
+> 事件循环通过 `app.exec()` / `GUITestEnvironment.exec()` 驱动；GUI 线程测试中可用 `QApp.quit()` 退出。

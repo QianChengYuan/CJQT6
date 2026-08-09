@@ -1,6 +1,6 @@
 # CJQT6 发展路线规划（Roadmap）
 
-> 更新日期：2026-08-08
+> 更新日期：2026-08-09
 > 依据：仓颉 1.1.0 语言实际能力与限制 + 库当前覆盖度基线（v1.7.0）
 > 说明：本文档的每个方向都先论证「仓颉能不能做、怎么做」，避免把 Qt 生态习惯直接照搬。
 
@@ -34,7 +34,7 @@ CJQT6 的演进边界由仓颉语言特性决定，先固定几个**不可绕过
 | 信号槽 | 基础回调 + `SignalConnection` 断开 + `SignalEmitter`（固定 void/int/double/string 信号 + QueuedConnection 跨线程） |
 | 数据/网络 | QJson、QProcess、QThread/QThreadPool、QTcp/Udp/Ssl、QNetworkAccessManager、QSql |
 | QML | `QQmlApplicationEngine`/`QQuickView`/`QQuickWidget`/`QQuickItem` + `QUiLoader`（.ui 静态加载） |
-| 测试 | `src/test/`（`package cjqt6.test`）21 个测试文件、889 用例，根目录 `cjpm test` 一键运行 |
+| 测试 | `src/test/`（`package cjqt6.test`）21 个测试文件、906 用例，根目录 `cjpm test` 一键运行 |
 | 发布 | Windows/Linux 预编译桥接库分平台分发；Git 依赖安装；无 CI、无 macOS 产物 |
 
 **核心判断**：功能覆盖面已进入「够用但不够稳、不够深」阶段——下一步重心应从「堆控件」转向「提可靠 + 补深度 + 建生态」。
@@ -92,14 +92,20 @@ CJQT6 的演进边界由仓颉语言特性决定，先固定几个**不可绕过
 - **投递载体唯一出口（UiPoster 单例收口）**：仓颉 `spawn` 出的线程**没有 Qt 事件循环**，消息必须经 `QCoreApplication::postEvent`（或 `QTimer::singleShot(0)`）塞进 GUI 线程的事件队列。实现上必须**收口到唯一 `UiPoster` 单例**——所有 `runOnUiThread`/异步回投都只走这一个入口，禁止各模块各自 new QTimer/自建投递路径，否则连接类型、线程亲和、释放时序会散乱失控。
 - 约束提醒：C++ 侧回调仍不能捕获仓颉局部变量，桥接层只能转发指针/标量。
 
+**✅ 已完成（2026-08-09）**：`UiPoster` 单例收口落地——仓颉侧新增 `src/core/uiposter.cj`（`UiPoster.runOnUiThread`/`UiPoster.post` + 顶层便捷函数 `runOnUiThread`/`runAsync`），复用 `registerVoidCallback` 闭包注册表按 id 派发，一次性任务执行后自动注销防注册表无界增长；native 侧新增 `bridge_ui_poster.cpp::qUiPosterPost(id)`，经 `QMetaObject::invokeMethod(Qt::QueuedConnection)` 把任务塞进 `QCoreApplication`（GUI 线程）事件队列，另从 `bridge_signal.cpp` 导出 `qGetVoidDispatcher()` 供其按 id 派发。全部回投只走这一入口。新增 `p1_async_model_test.cj` 验证：事件循环内执行、`post` 别名、FIFO 顺序、`runAsync` 的 onDone 确在 GUI 线程执行（对比 `QThread.currentThreadPtr()`）。全量 906/906 通过。
+
 ### 4.2 重载信号消歧与命名连接
 - 现状：部分 `setOnXxx` 已返回 `SignalConnection` 支持手动断开。
 - 动作：对同一信号多参数重载（如 clicked/clicked(bool)）提供显式命名方法，避免歧义。
+
+**✅ 已有/结论（2026-08-09）**：clicked/clicked(bool) 类重载早已以显式命名方法提供（`setOnPressed`/`setOnPressedChecked`、`SIGNAL_CLICKED`/`SIGNAL_CLICKED_CHECKED`），4.2 无需新增。注意：**Qt6 已移除 `QSpinBox::valueChanged(QString)` / `QDoubleSpinBox::valueChanged(QString)` 重载**（验证于 Qt 6.10.3 头文件，编译期即报错），旋转框的文本变化信号统一走 `textChanged(const QString&)`——库早已提供 `setOnTextChanged`（`CStringCallback`，含前缀/后缀完整文本），与 `setOnValueChanged`（数值）并存互不覆盖，已由 P1 测试覆盖。
 
 ### 4.3 模型动态化（dataChanged / 增量更新）【P1-a，优先落地】
 - 现状：`QAbstractItemModel` 已用回调桥接（`beginResetModel`/`beginInsertRows` 等已导出），但**缺 `dataChanged`、`layoutChanged`**，实时刷新的表格只能整表 reset。
 - 动作：桥接层补 `qAbstractItemModelDataChanged` / `layoutChanged` 导出 + 仓颉方法，支撑实时数据表（如日志、行情、聊天列表）。
 - **优先级上调半档（P1-a）**：实时表（日志/行情/聊天列表）是上位机/工控场景的高频刚需，比 QtCharts 更早产生"上手即感知"的价值。P1 内部应把本子项排在 `runOnUiThread` 同批最先落地。
+
+**✅ 已完成（2026-08-09）**：`bridge_abstractmodel.cpp` 新增 `qAbstractItemModelDataChanged(topLeftRow, topLeftCol, bottomRightRow, bottomRightCol)` 与 `qAbstractItemModelLayoutChanged()` 导出——dataChanged 的 topLeft/bottomRight 索引复用回调模型 `m_indexCb` 生成内部 id（`createIndex(row,col,(void*)id)`），保证视图刷新重新取数的 internalPointer 与初次 `index()` 一致；layoutChanged 固定带 `NoLayoutChangeHint`。仓颉侧 `QAbstractItemModel` 新增 `notifyDataChanged`/`notifyLayoutChanged`；`QTableView` 新增 `setModel(QAbstractItemModel)` 重载（与 `QStandardItemModel` 版并存），自定义实时表可直接挂载并局部刷新。P1 测试覆盖：回调索引调用、无 index 回调安全跳过、close 后抛 `ResourceDisposedException`、视图挂载后局部刷新不崩溃。
 
 ---
 
@@ -146,7 +152,7 @@ CJQT6 的演进边界由仓颉语言特性决定，先固定几个**不可绕过
 | 手段 | 说明 | 优先级 |
 |------|------|--------|
 | `@FastNative` 注解 | 对高频 `foreign` 调用标注减少 FFI 开销。**先 bench 再标**：高频 getter 收益可能不明显，热点更可能在事件分发/字符串转换，标注前用 P1 建的 bench 工程量化 | 中 |
-| 信号槽延迟基准 | `docs/internal` 规划中已列为 P5，补 `bench` 工程量化回调吞吐（**前置到 P1 末尾**，为 `@FastNative` 标注提供数据） | 中 |
+| 信号槽延迟基准 | ✅ P1 已建 `examples/bench` 并出数据（2026-08-09）：Direct emit 回调≈300ns、runOnUiThread≈2.7µs、QTimer(interval=0) 事件循环派发≈14µs/op —— 事件循环往返是量级性热点，P3 优化应瞄准减少事件队列往返/批量桥接，而非标注 getter | 中 |
 | 批量桥接减少往返 | 如 QPainter 连续绘图改为「一次调用传数组」模式 | 低 |
 
 ---
@@ -156,7 +162,7 @@ CJQT6 的演进边界由仓颉语言特性决定，先固定几个**不可绕过
 | 阶段 | 主题 | 主要产出 | 估算工作类型 |
 |------|------|---------|-------------|
 | **P0（近期）** | 工程质量 | 测试入库+`cjpm test` 一键化（含 headless 基线，`# flaky` 隔离）✅；桥接字符串审计 ✅；反向失效通知 ✅；`verify_all.ps1` ✅ | 主要仓颉+脚本，少量 C++ |
-| **P1（中期）** | 异步与模型 | `runOnUiThread` 工具（`UiPoster` 单例收口）；QAbstractItemModel 补 `dataChanged`/`layoutChanged`（**P1-a 优先**）；重载信号消歧；bench 工程建基（量化信号槽/FFI 热点，为 P3 `@FastNative` 标注提供依据） | 仓颉 + C++ 桥接 |
+| **P1（中期）** | 异步与模型 | `runOnUiThread` 工具（`UiPoster` 单例收口）✅；QAbstractItemModel 补 `dataChanged`/`layoutChanged`（**P1-a 优先**）✅ + `QTableView::setModel(QAbstractItemModel)`；重载信号消歧 ✅（Qt6 已移除旋转框 valueChanged(QString)，文本走既有 `setOnTextChanged`）；bench 工程建基 ✅（`examples/bench`：Int32 getter≈166ns、setText≈350~790ns、emitVoid≈300ns、runOnUiThread≈2.7µs、QTimer 事件循环派发≈14µs/op，为 P3 `@FastNative` 标注提供依据） | 仓颉 + C++ 桥接 |
 | **P2（中期）** | 开发体验 | Designer→代码生成器；QSS/翻译完善；macOS 构建链 | 仓颉 + CMake |
 | **P3（长期）** | 深度与性能 | QtCharts、自绘委托、`@FastNative` 优化（依据 P1 bench 结论标注，高频 getter 未必是热点）、进阶教程 | C++ + 仓颉 + 文档 |
 
