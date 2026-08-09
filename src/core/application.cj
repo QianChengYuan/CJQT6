@@ -14,10 +14,44 @@ foreign func qApplicationLocale(): CString
 foreign func qApplicationSystemLocale(): CString
 foreign func qApplicationSwitchLanguage(locale: CString): Bool
 
+// 应用级全局样式表（QSS）
+foreign func qApplicationSetStyleSheet(styleSheet: CString): Unit
+foreign func qApplicationStyleSheet(): CString
+
+// QLocale 封装（句柄为堆分配的 QLocale*，非 QObject，不入存活表）
+foreign func qLocaleCreate(name: CString): Int64
+foreign func qLocaleDelete(ptr: Int64): Unit
+foreign func qLocaleName(ptr: Int64): CString
+foreign func qLocaleNativeLanguageName(ptr: Int64): CString
+foreign func qLocaleNativeTerritoryName(ptr: Int64): CString
+foreign func qLocaleLanguageName(ptr: Int64): CString
+foreign func qLocaleTerritoryName(ptr: Int64): CString
+foreign func qLocaleLanguage(ptr: Int64): Int32
+foreign func qLocaleTerritory(ptr: Int64): Int32
+
 /// 静态方法
 public class QApp {
     public static func quit(): Unit {
         unsafe { qApplicationQuit() }
+    }
+
+    /// 设置应用级全局样式表（QSS，作用于所有控件，可被控件自身 setStyleSheet 覆盖）
+    public static func setStyleSheet(styleSheet: String): Unit {
+        unsafe {
+            let cstr = LibC.mallocCString(styleSheet)
+            qApplicationSetStyleSheet(cstr)
+            LibC.free(cstr)
+        }
+    }
+
+    /// 获取应用级全局样式表
+    public static func styleSheet(): String {
+        unsafe {
+            let cstr = qApplicationStyleSheet()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
+        }
     }
 }
 
@@ -125,6 +159,105 @@ public class QApplication {
         if (ptr != 0) {
             unsafe {
                 qApplicationDelete(ptr)
+            }
+            ptr = 0
+        }
+    }
+}
+
+/// QLocale - 语言环境信息封装（句柄为堆分配的 QLocale*，非 QObject，需显式 close/delete）
+public class QLocale {
+    private var ptr: Int64 = 0
+
+    /// 创建语言环境；name 为空字符串时使用系统默认语言环境（如 "zh_CN"、"en_US"）
+    public init(name: String) {
+        unsafe {
+            let cstr = LibC.mallocCString(name)
+            ptr = qLocaleCreate(cstr)
+            LibC.free(cstr)
+            if (ptr == 0) {
+                throw CreateFailedException("QLocale 创建失败")
+            }
+        }
+    }
+
+    /// 使用系统默认语言环境创建
+    public init() {
+        unsafe {
+            let cstr = LibC.mallocCString("")
+            ptr = qLocaleCreate(cstr)
+            LibC.free(cstr)
+            if (ptr == 0) {
+                throw CreateFailedException("QLocale 创建失败")
+            }
+        }
+    }
+
+    /// 语言环境代码，如 "zh_CN"、"en_US"
+    public func name(): String {
+        unsafe {
+            let cstr = qLocaleName(ptr)
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
+        }
+    }
+
+    /// 本地语言的名称，如中文为 "中文"
+    public func nativeLanguageName(): String {
+        unsafe {
+            let cstr = qLocaleNativeLanguageName(ptr)
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
+        }
+    }
+
+    /// 本地语言中地区名称，如中国为 "中国"
+    public func nativeTerritoryName(): String {
+        unsafe {
+            let cstr = qLocaleNativeTerritoryName(ptr)
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
+        }
+    }
+
+    /// 英文语言名称，如 "Chinese"
+    public func languageName(): String {
+        unsafe {
+            let cstr = qLocaleLanguageName(ptr)
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
+        }
+    }
+
+    /// 英文地区名称，如 "China"
+    public func territoryName(): String {
+        unsafe {
+            let cstr = qLocaleTerritoryName(ptr)
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
+        }
+    }
+
+    /// 语言枚举值（QLocale::Language），如 zh 对应 33
+    public func language(): Int32 {
+        unsafe { qLocaleLanguage(ptr) }
+    }
+
+    /// 地区枚举值（QLocale::Territory），如 CN 对应 43
+    public func territory(): Int32 {
+        unsafe { qLocaleTerritory(ptr) }
+    }
+
+    /// 释放语言环境
+    public func close() {
+        if (ptr != 0) {
+            unsafe {
+                qLocaleDelete(ptr)
             }
             ptr = 0
         }

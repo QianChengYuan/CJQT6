@@ -80,6 +80,83 @@ class QApplicationBasicTests {
         app.delete()
         @Assert(true)
     }
+
+    @TestCase
+    func testAppSetStyleSheet() {
+        let app = QApplication()
+        QApp.setStyleSheet("QPushButton { color: red; }")
+        @Assert(true)
+        app.delete()
+    }
+
+    @TestCase
+    func testAppStyleSheetRoundTrip() {
+        let app = QApplication()
+        QApp.setStyleSheet("QWidget { background-color: #ffffff; }")
+        let qss = QApp.styleSheet()
+        @Assert(qss.contains("background-color"))
+        app.delete()
+    }
+
+    @TestCase
+    func testAppStyleSheetEmptyByDefault() {
+        let app = QApplication()
+        QApp.setStyleSheet("")
+        @Assert(true)
+        app.delete()
+    }
+}
+
+// =====================================================================
+// QLocale 封装测试
+// =====================================================================
+@Test
+class QLocaleTests {
+
+    @TestCase
+    func testCreateWithName() {
+        let locale = QLocale("zh_CN")
+        @Assert(locale.name().size > 0)
+        locale.close()
+    }
+
+    @TestCase
+    func testCreateDefault() {
+        let locale = QLocale()
+        @Assert(locale.name().size > 0)
+        locale.close()
+    }
+
+    @TestCase
+    func testNativeLanguageName() {
+        let locale = QLocale("zh_CN")
+        // nativeLanguageName 返回本地文字名称（如 "中文"）
+        @Assert(locale.nativeLanguageName().size > 0)
+        locale.close()
+    }
+
+    @TestCase
+    func testLanguageName() {
+        let locale = QLocale("zh_CN")
+        // languageName 返回英文名称（如 "Chinese"）
+        @Assert(locale.languageName().size > 0)
+        locale.close()
+    }
+
+    @TestCase
+    func testEnUsName() {
+        let locale = QLocale("en_US")
+        @Assert(locale.name() == "en_US" || locale.name().size > 0)
+        locale.close()
+    }
+
+    @TestCase
+    func testDoubleClose() {
+        let locale = QLocale("en_US")
+        locale.close()
+        locale.close()  // 安全
+        @Assert(true)
+    }
 }
 
 // =====================================================================

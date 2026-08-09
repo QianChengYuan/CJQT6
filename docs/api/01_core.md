@@ -172,6 +172,60 @@ QApp.quit()
 | 方法 | 说明 |
 |------|------|
 | `quit()` | 静态方法退出应用程序 |
+| `setStyleSheet(styleSheet: String)` | 设置应用级全局样式表（QSS） |
+| `styleSheet(): String` | 获取应用级全局样式表 |
+
+**应用级 QSS**（与控件级 `setStyleSheet` 的区别）：
+```cangjie
+// 应用级：作用于所有控件，可被控件自身 styleSheet 覆盖
+QApp.setStyleSheet("QPushButton { color: red; } QLineEdit { padding: 4px; }")
+
+// 控件级：仅作用于该控件，优先级高于应用级
+let btn = QPushButton("登录")
+btn.setStyleSheet("background-color: #4CAF50;")
+```
+
+---
+
+## QLocale
+
+语言环境（区域）信息封装，基于 Qt 的 `QLocale`。可用于获取语言/地区的本地名称与英文名称，辅助国际化显示。
+
+> **内存管理**：QLocale 持有堆分配的 `QLocale*` 句柄（非 QObject），**不实现** `QtResource` 接口、无终结器，使用完毕后必须显式调用 `close()` 释放。
+
+```cangjie
+import cjqt6.core.*
+
+let locale = QLocale("zh_CN")
+println(locale.name())                    // "zh_CN"
+println(locale.nativeLanguageName())      // "中文"
+println(locale.nativeTerritoryName())     // "中国"
+println(locale.languageName())            // "Chinese"
+println(locale.territoryName())           // "China"
+println(locale.language())                // 33 (QLocale::Chinese)
+println(locale.territory())               // 43 (QLocale::China)
+locale.close()                            // 必须显式释放
+```
+
+**构造**:
+| 方法 | 说明 |
+|------|------|
+| `init(name: String)` | 按语言代码创建（如 "zh_CN"、"en_US"） |
+| `init()` | 使用系统默认语言环境创建 |
+
+**方法**:
+| 方法 | 说明 |
+|------|------|
+| `name(): String` | 语言环境代码（如 "zh_CN"） |
+| `nativeLanguageName(): String` | 本地语言的文字名称（如 "中文"） |
+| `nativeTerritoryName(): String` | 本地语言中地区名称（如 "中国"） |
+| `languageName(): String` | 英文语言名称（如 "Chinese"） |
+| `territoryName(): String` | 英文地区名称（如 "China"） |
+| `language(): Int32` | 语言枚举值（QLocale::Language） |
+| `territory(): Int32` | 地区枚举值（QLocale::Territory） |
+| `close()` | 释放语言环境 |
+
+> **注意**：`close()` 可重复调用，重复释放安全。
 
 ---
 

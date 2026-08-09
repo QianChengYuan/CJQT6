@@ -1020,10 +1020,15 @@ brew install cmake qt
 git clone https://gitcode.com/yuan_1992/CJQT6.git
 cd CJQT6
 
-# 构建FFI桥接库
+# 方式1: 一键脚本（自动探测Qt路径并部署到 releases/）
+#   Intel Mac (x86_64)        → bash scripts/build-macos-x64.sh
+#   Apple Silicon (arm64)     → bash scripts/build-macos-arm64.sh
+#   自动检测当前平台          → bash scripts/build-all-platforms.sh
+
+# 方式2: 手动构建FFI桥接库
 mkdir -p native/build_macos && cd native/build_macos
 
-# 注意: 指定Qt6路径
+# 注意: 指定Qt6路径 (Apple Silicon 用 /opt/homebrew)
 cmake .. -DCMAKE_PREFIX_PATH=$(brew --prefix qt)
 
 make -j$(sysctl -n hw.ncpu)
@@ -1035,6 +1040,8 @@ cjpm build --release
 # 验证
 cjpm run --example hello_window
 ```
+
+构建产物部署位置：`releases/macos-x64/libcjqt6_bridge.dylib`（Intel）或 `releases/macos-arm64/libcjqt6_bridge.dylib`（Apple Silicon）。
 
 #### 6.3.3 常见问题
 

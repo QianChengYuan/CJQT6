@@ -55,7 +55,7 @@ case "$PLATFORM" in
         bash scripts/build-macos-x64.sh
         ;;
     macos-arm64)
-        echo "ARM64构建尚未实现"
+        bash scripts/build-macos-arm64.sh
         ;;
     windows-x64)
         echo "请使用PowerShell脚本: scripts/build-windows-x64.ps1"

@@ -329,6 +329,20 @@ const char* qWidgetStyleSheet(int64_t ptr) {
     return cjqt6::emptyString();
 }
 
+// 应用级全局样式表：QApplication::setStyleSheet / styleSheet
+void qApplicationSetStyleSheet(const char* styleSheet) {
+    if (g_app) {
+        g_app->setStyleSheet(QString::fromUtf8(styleSheet));
+    }
+}
+
+const char* qApplicationStyleSheet() {
+    if (g_app) {
+        return cjqt6::dupUtf8(g_app->styleSheet());
+    }
+    return cjqt6::emptyString();
+}
+
 void qWidgetSetEnabled(int64_t ptr, int32_t enabled) {
     QWidget* widget = reinterpret_cast<QWidget*>(ptr);
     if (widget) {
@@ -895,6 +909,62 @@ int32_t qScreenPrimaryHeight() {
 double qScreenPrimaryRefreshRate() {
     QScreen* screen = QGuiApplication::primaryScreen();
     return screen ? screen->refreshRate() : 0.0;
+}
+
+// ============================================================
+// QLocale 封装（国际化辅助）
+// 以堆分配的 QLocale* 为句柄；QLocale 非 QObject，不入存活表。
+// ============================================================
+
+int64_t qLocaleCreate(const char* name) {
+    QLocale* locale = nullptr;
+    if (name && *name) {
+        locale = new QLocale(QString::fromUtf8(name));
+    } else {
+        locale = new QLocale();
+    }
+    return reinterpret_cast<int64_t>(locale);
+}
+
+void qLocaleDelete(int64_t ptr) {
+    delete reinterpret_cast<QLocale*>(ptr);
+}
+
+const char* qLocaleName(int64_t ptr) {
+    QLocale* locale = reinterpret_cast<QLocale*>(ptr);
+    return locale ? cjqt6::dupUtf8(locale->name()) : cjqt6::emptyString();
+}
+
+const char* qLocaleNativeLanguageName(int64_t ptr) {
+    QLocale* locale = reinterpret_cast<QLocale*>(ptr);
+    return locale ? cjqt6::dupUtf8(locale->nativeLanguageName()) : cjqt6::emptyString();
+}
+
+const char* qLocaleNativeTerritoryName(int64_t ptr) {
+    QLocale* locale = reinterpret_cast<QLocale*>(ptr);
+    return locale ? cjqt6::dupUtf8(locale->nativeTerritoryName()) : cjqt6::emptyString();
+}
+
+const char* qLocaleLanguageName(int64_t ptr) {
+    QLocale* locale = reinterpret_cast<QLocale*>(ptr);
+    if (!locale) return cjqt6::emptyString();
+    return cjqt6::dupUtf8(QLocale::languageToString(locale->language()));
+}
+
+const char* qLocaleTerritoryName(int64_t ptr) {
+    QLocale* locale = reinterpret_cast<QLocale*>(ptr);
+    if (!locale) return cjqt6::emptyString();
+    return cjqt6::dupUtf8(QLocale::territoryToString(locale->territory()));
+}
+
+int32_t qLocaleLanguage(int64_t ptr) {
+    QLocale* locale = reinterpret_cast<QLocale*>(ptr);
+    return locale ? static_cast<int32_t>(locale->language()) : 0;
+}
+
+int32_t qLocaleTerritory(int64_t ptr) {
+    QLocale* locale = reinterpret_cast<QLocale*>(ptr);
+    return locale ? static_cast<int32_t>(locale->territory()) : 0;
 }
 
 } // extern "C"

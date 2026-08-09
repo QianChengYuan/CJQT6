@@ -309,47 +309,48 @@ Get-Item "$ReleaseDir\cjqt6_bridge.dll" | Format-List Length, LastWriteTime
 
 ### macOS一键编译脚本
 
-创建 `scripts/build-macos.sh`：
+仓库自带按 CPU 架构拆分的脚本，会自动探测 Qt 路径（Homebrew 或常见目录）并部署到 `releases/`：
 
 ```bash
-#!/bin/bash
-set -e
+# Intel Mac (x86_64)
+bash scripts/build-macos-x64.sh     # 产物部署到 releases/macos-x64/
 
+# Apple Silicon (arm64)
+bash scripts/build-macos-arm64.sh   # 产物部署到 releases/macos-arm64/
+```
+
+也可直接运行统一入口脚本，自动检测当前平台并调用对应构建脚本：
+
+```bash
+bash scripts/build-all-platforms.sh
+```
+
+**手动方式**（参考）：
+
+```bash
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-BUILD_DIR="$PROJECT_ROOT/build"
-ARCH=$(uname -m)
 
-if [ "$ARCH" = "x86_64" ]; then
-    RELEASE_DIR="$PROJECT_ROOT/releases/macos-x64"
-    QT_PATH="/usr/local/opt/qt@6"
-else
-    RELEASE_DIR="$PROJECT_ROOT/releases/macos-arm64"
-    QT_PATH="/opt/homebrew/opt/qt@6"
-fi
-
-echo "=== 编译macOS $ARCH桥接库 ==="
-
-# 清理旧构建
-rm -rf "$BUILD_DIR"
+# 以 Apple Silicon 为例
+BUILD_DIR="$PROJECT_ROOT/native/build-macos-arm64"
+RELEASE_DIR="$PROJECT_ROOT/releases/macos-arm64"
 mkdir -p "$BUILD_DIR"
 cd "$BUILD_DIR"
 
-# 配置
-cmake .. \
+cmake "$PROJECT_ROOT" \
     -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_PREFIX_PATH="$QT_PATH" \
-    -DCMAKE_OSX_ARCHITECTURES="$ARCH"
+    -DCMAKE_PREFIX_PATH=/opt/homebrew/opt/qt@6 \
+    -DCMAKE_OSX_ARCHITECTURES=arm64
 
-# 编译
 make -j$(sysctl -n hw.ncpu)
 
-# 安装
 mkdir -p "$RELEASE_DIR"
 cp lib/libcjqt6_bridge.dylib "$RELEASE_DIR/"
 
 echo "✅ 编译完成: $RELEASE_DIR/libcjqt6_bridge.dylib"
 ls -lh "$RELEASE_DIR/libcjqt6_bridge.dylib"
 ```
+
+> **注意**：`uname -m` 在 Apple Silicon 上返回 `arm64`，在 Intel Mac 上返回 `x86_64`。Homebrew 前缀在 Apple Silicon 上为 `/opt/homebrew`，在 Intel Mac 上为 `/usr/local`。
 
 ---
 

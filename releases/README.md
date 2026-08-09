@@ -101,8 +101,8 @@ export QTDIR=/usr/lib/qt6
 # 使用Homebrew安装
 brew install qt@6
 
-# 设置环境
-export QTDIR=/usr/local/opt/qt@6
+# 设置环境 (Apple Silicon 为 /opt/homebrew)
+export QTDIR=/opt/homebrew/opt/qt@6
 ```
 
 ## 自行编译
@@ -121,6 +121,17 @@ make -j$(nproc)
 
 # 编译产物位于 native/build_linux/lib/
 ```
+
+各平台推荐使用脚本一键构建（自动探测 Qt 路径并部署到 `releases/`）：
+
+| 平台 | 脚本 | 产物 |
+|------|------|------|
+| Windows x64 (MSVC) | `scripts/update-bridge.ps1` | `releases/windows-x64/cjqt6_bridge.dll` |
+| Linux x86_64 | `scripts/build-linux-x64.sh` | `releases/linux-x64/libcjqt6_bridge.so` |
+| macOS Intel | `scripts/build-macos-x64.sh` | `releases/macos-x64/libcjqt6_bridge.dylib` |
+| macOS Apple Silicon | `scripts/build-macos-arm64.sh` | `releases/macos-arm64/libcjqt6_bridge.dylib` |
+
+在目标 macOS 机器上可直接运行 `bash scripts/build-all-platforms.sh` 自动检测平台并调用对应脚本。
 
 详细编译指南请参阅 [构建文档](../docs/build-guide.md)。
 
