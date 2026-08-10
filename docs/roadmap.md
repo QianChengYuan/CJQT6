@@ -1,6 +1,6 @@
 # CJQT6 发展路线规划（Roadmap）
 
-> 更新日期：2026-08-09
+> 更新日期：2026-08-10
 > 依据：仓颉 1.1.0 语言实际能力与限制 + 库当前覆盖度基线（v1.7.0）
 > 说明：本文档的每个方向都先论证「仓颉能不能做、怎么做」，避免把 Qt 生态习惯直接照搬。
 
@@ -134,12 +134,20 @@ CJQT6 的演进边界由仓颉语言特性决定，先固定几个**不可绕过
   - 依赖仓颉 `std.json`/`std.ast` 或直接字符串处理即可，无需 C++。
 - 意义：大幅降低新手上手门槛，是「生态放大器」。
 
+**✅ 已完成（2026-08-10）**：纯仓颉工具 `tools/ui2cj` 落地（零第三方依赖，自研轻量 XML 解析器），示例验证 `examples/ui2cj_demo`、`examples/ui2cj_demo2`：
+- **无工程自动引导**：`.ui` 所在目录向上查找 `cjpm.toml`——命中普通工程直接复用其包名并输出 `src/main.cj`；无工程时自动生成最小可运行工程（`cjpm.toml` 相对依赖 `..\..` + `src/main.cj`），命中库自身工程（包名 `cjqt6`，仓库根）视为无工程继续向上；
+- **顺带生成 `deploy_qt.ps1`**：一键部署 Qt6 运行时 DLL + platforms/styles/imageformats 插件 + MSVC 运行库 + cjqt6 依赖 + bridge，脚本前置 UTF-8 BOM，兼容 Windows PowerShell 5.1（无 BOM 时中文按 ANSI 解析会吞行尾引号报语法错）；
+- 布局变量名优先取 .ui 布局元素真实 `name` 属性（如 `verticalLayout_4`），缺失才派生；
+- 运行：`cd tools/ui2cj && cjpm run -- <form.ui>`，配套 `scripts/gen-ui.ps1` 一键脚本与 `docs/UI2CJ_DESIGN.md` 设计文档。
+
 ### 6.2 发布与安装链路
 - 现状：Git 依赖安装（`git = ...` + `tag`）已是主推方式，`releases/` 分平台预编译。
 - 动作：
   1. 补 macOS 桥接库与构建脚本（当前只有 windows-x64 / linux-x64）。**注意**：macOS 的 app bundle / rpath / codesign 与 linuxdeployqt 思路完全不同，`windeployqt` 经验不能直接平移；若人力紧，优先出「社区贡献指引」而非官方保证产物；
   2. 补 `windeployqt`/`linuxdeployqt` 打包模板到示例（`deploy_qt.ps1` 已存在，文档化推广）；
   3. 评估发布到仓颉中心仓（当前依赖 Git tag，中心仓能提升可发现性，但需与仓库维护节奏平衡）。
+
+**✅ 已完成（2026-08-10）**：macOS 一键构建脚本落地——`scripts/build-macos-x64.sh`（Intel）与 `scripts/build-macos-arm64.sh`（Apple Silicon）自动探测 Homebrew Qt 路径并部署到 `releases/macos-x64/`、`releases/macos-arm64/`，`scripts/build-all-platforms.sh` 统一入口自动检测当前平台；`releases/macos-*/README.md` 已随产物入库。`deploy_qt.ps1` 打包模板已随 `ui2cj` 引导工程自动生成并推广。仓颉中心仓发布仍待评估。
 
 ### 6.3 教程与最佳实践沉淀
 - 现状：`docs/tutorial/` 只有 2 篇快速入门。
@@ -163,7 +171,7 @@ CJQT6 的演进边界由仓颉语言特性决定，先固定几个**不可绕过
 |------|------|---------|-------------|
 | **P0（近期）** | 工程质量 | 测试入库+`cjpm test` 一键化（含 headless 基线，`# flaky` 隔离）✅；桥接字符串审计 ✅；反向失效通知 ✅；`verify_all.ps1` ✅ | 主要仓颉+脚本，少量 C++ |
 | **P1（中期）** | 异步与模型 | `runOnUiThread` 工具（`UiPoster` 单例收口）✅；QAbstractItemModel 补 `dataChanged`/`layoutChanged`（**P1-a 优先**）✅ + `QTableView::setModel(QAbstractItemModel)`；重载信号消歧 ✅（Qt6 已移除旋转框 valueChanged(QString)，文本走既有 `setOnTextChanged`）；bench 工程建基 ✅（`examples/bench`：Int32 getter≈166ns、setText≈350~790ns、emitVoid≈300ns、runOnUiThread≈2.7µs、QTimer 事件循环派发≈14µs/op，为 P3 `@FastNative` 标注提供依据） | 仓颉 + C++ 桥接 |
-| **P2（中期）** | 开发体验 | Designer→代码生成器 ✅（`examples/ui2cj_test/uic2cj.py`：控件/布局/属性/信号，已随示例编译验证）；QSS/翻译完善 ✅（应用级 QSS `QApp.setStyleSheet/styleSheet` + `QLocale` 封装）；macOS 构建链 ✅（`build-macos-x64.sh`/`build-macos-arm64.sh` 一键构建并部署 `releases/macos-*`，`build-all-platforms.sh` 自动检测平台） | 仓颉 + CMake |
+| **P2（中期）** | 开发体验 | Designer→代码生成器 ✅（纯仓颉 `tools/ui2cj`：自研 XML 解析 + 无工程自动引导生成最小可运行工程 + `deploy_qt.ps1`（UTF-8 BOM 兼容 PS5.1），已随 `examples/ui2cj_demo`/`ui2cj_demo2` 编译运行验证）；QSS/翻译完善 ✅（应用级 QSS `QApp.setStyleSheet/styleSheet` + `QLocale` 封装）；macOS 构建链 ✅（`build-macos-x64.sh`/`build-macos-arm64.sh` 一键构建并部署 `releases/macos-*`，`build-all-platforms.sh` 自动检测平台） | 仓颉 + CMake |
 | **P3（长期）** | 深度与性能 | QtCharts、自绘委托、`@FastNative` 优化（依据 P1 bench 结论标注，高频 getter 未必是热点）、进阶教程 | C++ + 仓颉 + 文档 |
 
 ---
