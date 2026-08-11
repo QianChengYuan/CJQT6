@@ -81,6 +81,15 @@ tests/.cache/
 tests/cjpm.lock
 tests/cjpm.toml
 
+# 覆盖率产物（cjcov 输出与 gcda 数据文件不入库）
+cov_output/
+0-std.testrunner.gcda
+*.gcda
+*.gcno
+
+# gendef 生成的 dll 定义文件（构建副产品，不入库）
+libxml2.def
+
 # 测试和生成目录
 test_deploy/
 test_paint/

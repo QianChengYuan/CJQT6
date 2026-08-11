@@ -14,9 +14,11 @@ foreign func qStyleLayoutSpacing(stylePtr: Int64, spacingType: Int32): Int32
 
 
 // ============================================================
-// 标准图标类型
+// 标准图标类型（QStyle::StandardPixmap）
+// 注：为避免与 cjqt6.widgets.StandardIcon（QPushButton 标准图标常量）同名，
+// 本类命名为 StyleStandardIcon。
 // ============================================================
-public class StandardIcon {
+public class StyleStandardIcon {
     public static func messageBoxInformation(): Int32 { 9 }
     public static func messageBoxWarning(): Int32 { 10 }
     public static func messageBoxCritical(): Int32 { 11 }

@@ -10,6 +10,9 @@ param(
 $base = Split-Path $PSScriptRoot -Parent
 Set-Location $base
 
+# cjpm.toml 的 ${CJQT6_ROOT} 替换依赖此变量（替代本机绝对路径）
+$env:CJQT6_ROOT = $base
+
 # ---- 检测 Qt 路径 ----
 if ([string]::IsNullOrEmpty($QtDir)) { $QtDir = $env:QTDIR }
 if ([string]::IsNullOrEmpty($QtDir)) {

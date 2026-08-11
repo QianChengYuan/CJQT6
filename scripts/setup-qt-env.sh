@@ -10,6 +10,9 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# CJQT6 仓库根目录（供 cjpm.toml 的 ${CJQT6_ROOT} 替换使用）
+export CJQT6_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
 # ---- 检测平台 ----
 detect_platform() {
     OS=$(uname -s)
@@ -86,6 +89,7 @@ echo "Qt路径: $QT_PATH"
 echo ""
 echo "环境变量:"
 echo "  QTDIR = $QT_PATH"
+echo "  CJQT6_ROOT = $CJQT6_ROOT"
 echo "  PATH 已添加: $QT_PATH/bin"
 echo ""
 echo "现在可以运行: cjpm run"

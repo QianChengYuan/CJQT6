@@ -9,6 +9,9 @@ param(
 
 Write-Host "=== 配置Qt6运行环境 (MSVC 2022) ===" -ForegroundColor Green
 
+# CJQT6 仓库根目录（供 cjpm.toml 的 ${CJQT6_ROOT} 替换使用）
+$env:CJQT6_ROOT = Split-Path -Parent $PSScriptRoot
+
 # 自动检测 Qt6 路径
 if ([string]::IsNullOrEmpty($QtDir)) {
     # 1. 环境变量 QTDIR
@@ -61,6 +64,7 @@ Write-Host "Qt路径: $QtDir" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "环境变量已设置：" -ForegroundColor Yellow
 Write-Host "PATH已添加: $QtDir\bin" -ForegroundColor White
+Write-Host "CJQT6_ROOT: $env:CJQT6_ROOT" -ForegroundColor White
 Write-Host ""
 Write-Host "现在可以运行Qt应用：" -ForegroundColor Yellow
 Write-Host "  cjpm run" -ForegroundColor White

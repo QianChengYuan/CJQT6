@@ -26,7 +26,7 @@
 
   # 编译 / 链接选项
   compile-option = "-Woff unused"
-  link-option    = "C:/CodeTools/cangjie_git/CJQT6/releases/windows-x64/cjqt6_bridge.dll"
+  link-option    = ""
 
   # 源码 / 产物路径（使用官方字段，替代原 src-dir 等自定义项）
   src-dir    = "src"
@@ -61,10 +61,12 @@
   compile-option = ""
   link-option    = "releases/windows-x64/cjqt6_bridge.lib"
 
-# Windows + MinGW（交叉编译）
-[target.x86_64-pc-windows-gnu]
+# Windows + MinGW（cjc -v 实测目标三元组 x86_64-w64-mingw32）
+# 注：link-option 使用 ${CJQT6_ROOT} 环境变量替换（仓库根目录），
+# 替代原先的本机绝对路径，换机器仅需配置 CJQT6_ROOT 即可（与 CANGJIE_STDX_PATH 同风格）。
+[target.x86_64-w64-mingw32]
   compile-option = ""
-  link-option    = "C:/CodeTools/cangjie_git/CJQT6/releases/windows-x64/cjqt6_bridge.dll"
+  link-option    = "${CJQT6_ROOT}/releases/windows-x64/cjqt6_bridge.dll"
 
 # Linux x86_64
 [target.x86_64-unknown-linux-gnu]

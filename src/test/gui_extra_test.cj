@@ -503,7 +503,7 @@ class QStyleHelperTests {
     @TestCase
     func testStandardIcon() {
         let stylePtr = QStyleHelper.applicationStyle()
-        let iconPtr = QStyleHelper.standardIcon(stylePtr, StandardIcon.infoIcon())
+        let iconPtr = QStyleHelper.standardIcon(stylePtr, StyleStandardIcon.infoIcon())
         // 标准图标应由 QApplication 样式提供（共享图标，不 delete）
         @Expect(iconPtr != 0, true)
     }
@@ -511,7 +511,7 @@ class QStyleHelperTests {
     @TestCase
     func testWidgetStandardIcon() {
         let w = QWidget()
-        let iconPtr = QStyleHelper.widgetStandardIcon(w.getPtr(), StandardIcon.warningIcon())
+        let iconPtr = QStyleHelper.widgetStandardIcon(w.getPtr(), StyleStandardIcon.warningIcon())
         @Expect(iconPtr != 0, true)
         w.close()
     }

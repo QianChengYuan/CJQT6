@@ -11,7 +11,8 @@
 # ============================================================
 param(
     [switch]$RunTest,        # 部署后运行 cjpm test
-    [switch]$SkipBuild       # 跳过 cjpm build（已构建）
+    [switch]$SkipBuild,      # 跳过 cjpm build（已构建）
+    [string]$QtDir = ""      # Qt6 安装目录（默认自动探测 C:\Qt\6.*）
 )
 
 $ErrorActionPreference = "Stop"
@@ -22,13 +23,27 @@ cmd /c "taskkill /F /IM cjqt6.test.exe /IM std.testrunner.exe 2>nul & exit 0"
 $projectRoot = Split-Path -Parent $PSScriptRoot
 Set-Location $projectRoot
 
-# Step 1. 路径配置
-$qtBin       = "C:\Qt\6.10.3\msvc2022_64\bin"
-$qtPluginDir = "C:\Qt\6.10.3\msvc2022_64\plugins\platforms"
+# Step 1. 路径配置（Qt 目录可显式指定，供 CI 使用 aqtinstall 安装的路径）
+if ([string]::IsNullOrEmpty($QtDir)) {
+    $qtDirs = @("C:\Qt\6.10.3\msvc2022_64", "C:\Qt\6.10.2\msvc2022_64", "C:\Qt\6.7.0\msvc2019_64")
+    foreach ($d in $qtDirs) {
+        if (Test-Path "$d\bin\Qt6Core.dll") { $QtDir = $d; break }
+    }
+}
+if ([string]::IsNullOrEmpty($QtDir) -or -not (Test-Path "$QtDir\bin\Qt6Core.dll")) {
+    Write-Host "错误: 未找到 Qt6，请用 -QtDir 指定（如 CI 中 aqtinstall 安装目录）" -ForegroundColor Red
+    exit 1
+}
+
+$qtBin       = "$QtDir\bin"
+$qtPluginDir = "$QtDir\plugins\platforms"
 # offscreen 平台需要 qoffscreen.dll；qminimal.dll 作为兜底
 $qtPlugins   = @("qwindows.dll", "qoffscreen.dll", "qminimal.dll")
 $bridge      = "$projectRoot\releases\windows-x64\cjqt6_bridge.dll"
 $crtDir      = "C:\Program Files\Microsoft Visual Studio\18\Community\Common7\IDE"
+if (-not (Test-Path (Join-Path $crtDir "vcruntime140.dll"))) {
+    $crtDir = "C:\Windows\System32"
+}
 
 $qtDlls  = @("Qt6Core.dll", "Qt6Gui.dll", "Qt6Widgets.dll", "Qt6Sql.dll",
              "Qt6Multimedia.dll", "Qt6MultimediaWidgets.dll")
@@ -82,7 +97,7 @@ foreach ($d in $crtDlls) { Copy-Item "$crtDir\$d" $cjqt6Dir -Force -ErrorAction 
 foreach ($p in $qtPlugins) { Copy-Item (Join-Path $qtPluginDir $p) $platformsDir -Force }
 
 # SQL 驱动插件（QSqlDatabase 需要 qsqlite.dll，依赖 Qt6Sql.dll）
-$sqlPluginDir  = "C:\Qt\6.10.3\msvc2022_64\plugins\sqldrivers"
+$sqlPluginDir  = "$QtDir\plugins\sqldrivers"
 $sqlDriversDir = "$cjqt6Dir\sqldrivers"
 if (Test-Path $sqlPluginDir) {
     New-Item -ItemType Directory -Path $sqlDriversDir -Force | Out-Null
@@ -90,7 +105,7 @@ if (Test-Path $sqlPluginDir) {
 }
 
 # 多媒体后端插件（QMediaPlayer/QSoundEffect/QCamera 需要 media 服务插件）
-$mediaPluginDir  = "C:\Qt\6.10.3\msvc2022_64\plugins\multimedia"
+$mediaPluginDir  = "$QtDir\plugins\multimedia"
 $mediaDriversDir = "$cjqt6Dir\multimedia"
 if (Test-Path $mediaPluginDir) {
     New-Item -ItemType Directory -Path $mediaDriversDir -Force | Out-Null
@@ -114,9 +129,9 @@ Write-Host "[env] QT_QPA_FONTDIR = $env:QT_QPA_FONTDIR" -ForegroundColor Cyan
 
 # Step 5. 运行测试
 if ($RunTest) {
-    Write-Host ""; Write-Host "[test] cjpm test..." -ForegroundColor Cyan
+    Write-Host ""; Write-Host "[test] cjpm test --coverage..." -ForegroundColor Cyan
     Set-Location $projectRoot
-    cjpm test 2>&1
+    cjpm test --coverage 2>&1
     if ($LASTEXITCODE -eq 0) { Write-Host "[test] PASS" -ForegroundColor Green } else { Write-Host "[test] FAIL" -ForegroundColor Red }
 } else {
     Write-Host ""

@@ -724,7 +724,7 @@ info.close()
 ```cangjie
 let stylePtr = QStyleHelper.widgetStyle(window.getPtr())  // 控件样式指针
 let iconSize = QStyleHelper.buttonIconSize(window.getPtr())  // 按钮图标大小
-let iconPtr = QStyleHelper.standardIcon(stylePtr, StandardIcon.messageBoxInformation())  // 标准图标
+let iconPtr = QStyleHelper.standardIcon(stylePtr, StyleStandardIcon.messageBoxInformation())  // 标准图标
 ```
 
 **静态方法**:
@@ -745,25 +745,25 @@ let iconPtr = QStyleHelper.standardIcon(stylePtr, StandardIcon.messageBoxInforma
 | `sliderThickness(widgetPtr): Int32` | 滑块厚度 |
 | `progressBarHeight(widgetPtr): Int32` | 进度条高度 |
 
-**StandardIcon 标准图标常量**（部分常用）:
+**StyleStandardIcon 标准图标常量**（`QStyle::StandardPixmap`，部分常用）:
 | 常量 | 值 | 说明 |
 |------|-----|------|
-| `StandardIcon.messageBoxInformation()` | 9 | 信息图标 |
-| `StandardIcon.messageBoxWarning()` | 10 | 警告图标 |
-| `StandardIcon.messageBoxCritical()` | 11 | 严重图标 |
-| `StandardIcon.messageBoxQuestion()` | 12 | 询问图标 |
-| `StandardIcon.fileIcon()` | 25 | 文件图标 |
-| `StandardIcon.folderIcon()` | 38 | 文件夹图标 |
-| `StandardIcon.arrowUp()` | 50 | 上箭头 |
-| `StandardIcon.arrowDown()` | 51 | 下箭头 |
-| `StandardIcon.arrowLeft()` | 52 | 左箭头 |
-| `StandardIcon.arrowRight()` | 53 | 右箭头 |
-| `StandardIcon.mediaPlay()` | 61 | 播放 |
-| `StandardIcon.mediaStop()` | 62 | 停止 |
-| `StandardIcon.mediaPause()` | 63 | 暂停 |
-| `StandardIcon.dialogCancel()` | 40 | 取消 |
-| `StandardIcon.dialogYes()` | 48 | 是 |
-| `StandardIcon.dialogNo()` | 49 | 否 |
+| `StyleStandardIcon.messageBoxInformation()` | 9 | 信息图标 |
+| `StyleStandardIcon.messageBoxWarning()` | 10 | 警告图标 |
+| `StyleStandardIcon.messageBoxCritical()` | 11 | 严重图标 |
+| `StyleStandardIcon.messageBoxQuestion()` | 12 | 询问图标 |
+| `StyleStandardIcon.fileIcon()` | 25 | 文件图标 |
+| `StyleStandardIcon.folderIcon()` | 38 | 文件夹图标 |
+| `StyleStandardIcon.arrowUp()` | 50 | 上箭头 |
+| `StyleStandardIcon.arrowDown()` | 51 | 下箭头 |
+| `StyleStandardIcon.arrowLeft()` | 52 | 左箭头 |
+| `StyleStandardIcon.arrowRight()` | 53 | 右箭头 |
+| `StyleStandardIcon.mediaPlay()` | 61 | 播放 |
+| `StyleStandardIcon.mediaStop()` | 62 | 停止 |
+| `StyleStandardIcon.mediaPause()` | 63 | 暂停 |
+| `StyleStandardIcon.dialogCancel()` | 40 | 取消 |
+| `StyleStandardIcon.dialogYes()` | 48 | 是 |
+| `StyleStandardIcon.dialogNo()` | 49 | 否 |
 
 **PixelMetric 像素度量常量**（部分常用，传入 `pixelMetric`/`widgetPixelMetric`）:
 | 常量 | 值 | 说明 |
