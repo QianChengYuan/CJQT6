@@ -64,6 +64,8 @@ jobs:
           echo "CANGJIE_HOME=$CANGJIE_HOME" >> "$GITHUB_ENV"
           echo "$CANGJIE_HOME/bin"      >> "$GITHUB_PATH"
           echo "$CANGJIE_HOME/tools/bin" >> "$GITHUB_PATH"
+          # cjpm/cjc 启动依赖 SDK 运行时库（libcangjie-runtime.so）
+          echo "LD_LIBRARY_PATH=$CANGJIE_HOME/lib:${LD_LIBRARY_PATH:-}" >> "$GITHUB_ENV"
           echo "已安装到: $CANGJIE_HOME"
 
       - name: 安装系统依赖（Qt offscreen 运行所需）
@@ -105,7 +107,7 @@ jobs:
           QT_QPA_PLATFORM: offscreen
           QT_QPA_PLATFORM_PLUGIN_PATH: ${{ env.QTDIR }}/plugins/platforms
           QT_PLUGIN_PATH: ${{ env.QTDIR }}/plugins
-          LD_LIBRARY_PATH: ${{ env.QTDIR }}/lib
+          LD_LIBRARY_PATH: ${{ env.QTDIR }}/lib:${{ env.CANGJIE_HOME }}/lib
         run: |
           cjpm test --coverage
 
@@ -165,7 +167,7 @@ jobs:
           python -m pip install --quiet aqtinstall
           python -m aqt install-qt windows desktop `
             "${{ env.QT_VERSION_WINDOWS }}" "${{ env.QT_ARCH_WINDOWS }}" `
-            -O "$env:RUNNER_TEMP\Qt" -m qtmultimedia qttools
+            -O "$env:RUNNER_TEMP\Qt" -m qtmultimedia
           # aqt 实际目录名可能与 arch 参数不一致（如 win64_msvc2022_64 → msvc2022_64），探测真实路径
           $qtBase = "$env:RUNNER_TEMP\Qt\${{ env.QT_VERSION_WINDOWS }}"
           $QTDIR = Get-ChildItem $qtBase -Directory | Where-Object { Test-Path "$($_.FullName)\bin\Qt6Core.dll" } | Select-Object -First 1
