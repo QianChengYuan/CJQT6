@@ -102,6 +102,18 @@ jobs:
         run: |
           QTDIR="${{ env.QTDIR }}" bash scripts/build-linux-x64.sh
 
+      - name: 编译并运行桥接层 C++ 单元测试（P0-3，ASAN）
+        shell: bash
+        env:
+          QTDIR: ${{ env.QTDIR }}
+        run: |
+          QTDIR="${{ env.QTDIR }}" bash scripts/build-native-tests.sh -asan
+
+      - name: 校验依赖可重现构建（P0-4）
+        shell: bash
+        run: |
+          cjpm check
+
       - name: 构建仓颉包
         shell: bash
         run: |
@@ -205,6 +217,16 @@ jobs:
         shell: pwsh
         run: |
           .\scripts\update-bridge.ps1 -QtDir "${{ env.QTDIR }}"
+
+      - name: 编译并运行桥接层 C++ 单元测试（P0-3）
+        shell: pwsh
+        run: |
+          .\scripts\build-native-tests.ps1 -QtDir "${{ env.QTDIR }}"
+
+      - name: 校验依赖可重现构建（P0-4）
+        shell: pwsh
+        run: |
+          cjpm check
 
       - name: 构建仓颉包
         shell: pwsh

@@ -200,6 +200,35 @@ set_target_properties(cjqt6_bridge PROPERTIES
 )
 
 # ============================================================
+# 桥接层 C++ 单元测试（P0-3）
+# 默认关闭；CI / 本机验证时用 -DCJQT6_BUILD_TESTS=ON 开启，
+# 配合 -DCJQT6_NATIVE_TESTS_ASAN=ON 可做字符串泄漏检测。
+# ============================================================
+option(CJQT6_BUILD_TESTS "构建桥接层 C++ 单元测试" OFF)
+if(CJQT6_BUILD_TESTS)
+    enable_testing()
+    add_executable(bridge_core_tests
+        native/tests/bridge_core_test.cpp
+    )
+    target_link_libraries(bridge_core_tests PRIVATE
+        cjqt6_bridge
+        Qt6::Core
+    )
+    option(CJQT6_NATIVE_TESTS_ASAN "桥接层测试启用 AddressSanitizer" OFF)
+    if(CJQT6_NATIVE_TESTS_ASAN)
+        if(MSVC)
+            target_compile_options(bridge_core_tests PRIVATE /fsanitize=address)
+            target_link_options(bridge_core_tests PRIVATE /fsanitize=address)
+        else()
+            target_compile_options(bridge_core_tests PRIVATE
+                -fsanitize=address -fno-omit-frame-pointer)
+            target_link_options(bridge_core_tests PRIVATE -fsanitize=address)
+        endif()
+    endif()
+    add_test(NAME bridge_core_tests COMMAND bridge_core_tests)
+endif()
+
+# ============================================================
 # 安装
 # ============================================================
 
