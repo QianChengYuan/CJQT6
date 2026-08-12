@@ -76,7 +76,8 @@ jobs:
             libxkbcommon0 libxkbcommon-x11-0 libegl1 libgl1 libxcb-cursor0 \
             libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 \
             libxcb-shape0 libxcb-xinerama0 libxcb-xkb1 \
-            libgl1-mesa-dev libglvnd-dev libegl-dev libopengl-dev
+            libgl1-mesa-dev libglvnd-dev libegl-dev libopengl-dev \
+            libpulse-dev
 
       - name: aqtinstall 安装 Qt ${{ env.QT_VERSION_LINUX }} (gcc_64)
         shell: bash
@@ -107,7 +108,8 @@ jobs:
           QT_QPA_PLATFORM: offscreen
           QT_QPA_PLATFORM_PLUGIN_PATH: ${{ env.QTDIR }}/plugins/platforms
           QT_PLUGIN_PATH: ${{ env.QTDIR }}/plugins
-          LD_LIBRARY_PATH: ${{ env.QTDIR }}/lib:${{ env.CANGJIE_HOME }}/runtime/lib/linux_x86_64_cjnative
+          # 运行时需能找到桥接库 libcjqt6_bridge.so（在 releases/linux-x64，cjpm 不拷贝到测试 PATH）
+          LD_LIBRARY_PATH: ${{ env.QTDIR }}/lib:${{ env.CANGJIE_HOME }}/runtime/lib/linux_x86_64_cjnative:${{ env.CJQT6_ROOT }}/releases/linux-x64
         run: |
           cjpm test --coverage
 
