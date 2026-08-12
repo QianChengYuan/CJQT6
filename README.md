@@ -286,6 +286,7 @@ CJQT6/
 | 交叉编译 | [docs/cross-compile.md](docs/cross-compile.md) | 交叉编译说明 |
 | Qt 版本矩阵 | [docs/qt-version-matrix.md](docs/qt-version-matrix.md) | Qt 版本 × 平台兼容矩阵 |
 | 性能基线 | [docs/performance-baseline.md](docs/performance-baseline.md) | FFI/信号/异步路径性能基线 |
+| 安全说明 | [SECURITY.md](SECURITY.md) | 漏洞上报渠道与已知风险声明 |
 
 ## 核心模块
 
@@ -327,7 +328,7 @@ CJQT6/
 
 ## 贡献指南
 
-欢迎贡献代码、文档或提出Issue。请参阅 [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) 了解详情。
+欢迎贡献代码、文档或提出Issue。请参阅 [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) 了解详情。发现安全问题请走 [SECURITY.md](SECURITY.md) 的私密上报渠道，勿公开发布漏洞细节。
 
 ### 贡献流程
 

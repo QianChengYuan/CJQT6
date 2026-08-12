@@ -113,11 +113,15 @@ CJQT6/
 
 ### 添加新控件
 
-1. 在 `native/src/widgets/` 添加C++桥接函数
-2. 在 `native/includes/widgets.h` 声明函数
-3. 在 `src/widgets/` 创建仓颉封装类
-4. 更新 `CMakeLists.txt`
-5. 添加示例和文档
+> **先读 [封装新控件模板（P3-4）](../docs/wrapper-template.md)**：五件套（桥接 .cpp + CMake 注册 + 仓颉类 + 测试 + docs/api）逐件照抄 QDial 范例即可 10 分钟出可编译控件。下面是简版流程。
+
+1. 在 `native/src/widgets/` 添加C++桥接函数（`extern "C"` 导出 `qXxxCreate`/`qXxxDelete`）
+2. 信号接线在 `native/src/core/bridge_signal.cpp` 添加 connect/disconnect（对照 QDial 段）
+3. 把新 .cpp 加进根 `CMakeLists.txt` 相应模块 `SOURCES` 列表
+4. 重编桥接库并同步 `releases/`（`.\scripts\update-bridge.ps1` 或 `bash scripts/build-linux-x64.sh`）
+5. 在 `src/widgets/` 创建仓颉封装类（`QtResource` + `checkValid` + `close`，照抄同模块既有类）
+6. `cjpm build` 验证，在 `src/test/` 补测试、在 `docs/api/` 补文档
+7. 更新示例和 CHANGELOG
 
 ### 添加新模块
 
@@ -156,13 +160,22 @@ cd examples/calculator && cjpm build && cjpm run
 
 ## 发布流程（维护者）
 
+> 打 tag 前先跑语义化版本门禁（P3-2）校验 CHANGELOG 与版本一致性：
+
+```powershell
+.\scripts\check-release.ps1 -Version x.y.z
+```
+
+失败（退出码非 0）说明：CHANGELOG 还没有 `## [x.y.z]` 发布节、或 `[Unreleased]` 内容未转移，先补记录再发。
+
 1. 更新版本号（cjpm.toml）
-2. 更新CHANGELOG
-3. 构建并测试
-4. 打包：`cjpm bundle`
-5. 发布到中心仓：`cjpm publish`
-6. 创建Git标签
-7. 创建GitHub Release
+2. 更新CHANGELOG（从 `[Unreleased]` 转出 `## [x.y.z]`，含 新增/修复/文档 分类小节）
+3. `powershell -File scripts\check-release.ps1 -Version x.y.z` 门禁通过
+4. 构建并测试（`verify_all.ps1`）
+5. 打包：`cjpm bundle`
+6. 发布到中心仓：`cjpm publish`
+7. 创建Git标签 `vx.y.z`（检查 tag 未重复）
+8. 创建GitHub Release（附 `releases/` 预编译产物）
 
 ## 社区
 

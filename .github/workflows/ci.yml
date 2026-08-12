@@ -156,6 +156,18 @@ jobs:
             --output=cov_output/report --html-details --json --xml
           echo "覆盖率报告已生成: cov_output/report/index.html"
 
+      - name: 覆盖率门禁（P0-1，双口径阈值）
+        shell: bash
+        # Linux CI 以 --exclude-tags=requires_audio 跑测试（无音频服务），覆盖口径低于
+        # Windows 全量，故用保守阈值（含测试 60%/库源码 42%），待回填实测精确值。
+        run: |
+          if [ -f cov_output/report/coverage.json ]; then
+            pwsh -NoProfile -File scripts/check-coverage.ps1 \
+              -CoverageThreshold 60 -LibraryCoverageThreshold 42
+          else
+            echo "::warning::coverage.json 不存在，跳过覆盖率门禁"
+          fi
+
       - name: 上传覆盖率报告
         uses: actions/upload-artifact@v4
         with:
@@ -251,6 +263,16 @@ jobs:
           cjcov --root=cov_output --source=src `
             --output=cov_output/report --html-details --json --xml
           Write-Host "覆盖率报告已生成: cov_output/report/index.html"
+
+      - name: 覆盖率门禁（P0-1，双口径阈值）
+        shell: pwsh
+        # Windows 跑全量测试，用默认阈值（含测试 70% / 库源码 52%）
+        run: |
+          if (Test-Path "cov_output\report\coverage.json") {
+            .\scripts\check-coverage.ps1
+          } else {
+            Write-Host "::warning::coverage.json 不存在，跳过覆盖率门禁"
+          }
 
       - name: 上传覆盖率报告
         uses: actions/upload-artifact@v4

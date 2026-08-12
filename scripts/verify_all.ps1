@@ -14,6 +14,7 @@
 #   powershell -ExecutionPolicy Bypass -File scripts\verify_all.ps1 -Example notepad
 #   powershell -ExecutionPolicy Bypass -File scripts\verify_all.ps1 -QtDir "C:\Qt\6.10.3\msvc2022_64"
 #   powershell -ExecutionPolicy Bypass -File scripts\verify_all.ps1 -SkipCoverage
+#   powershell -ExecutionPolicy Bypass -File scripts\verify_all.ps1 -CoverageThreshold 75
 #
 # 选项：
 #   -SkipBridge    跳过桥接库重编（仅在确定桥接层未改动时使用，加速验证）
@@ -22,6 +23,8 @@
 #   -SkipExample   跳过示例构建
 #   -Example <名>  指定冒烟示例（默认 all_controls_demo）
 #   -QtDir <路径>  Qt6 安装目录（透传给 update-bridge.ps1）
+#   -CoverageThreshold <百分比>  覆盖率门禁阈值（默认 70，低于则失败退出，含测试口径）
+#   -LibraryCoverageThreshold <百分比>  库源码口径门禁阈值（默认 52，排除 src/test/）
 # ============================================================
 
 param(
@@ -30,7 +33,9 @@ param(
     [switch]$SkipCoverage,
     [switch]$SkipExample,
     [string]$Example = "all_controls_demo",
-    [string]$QtDir = ""
+    [string]$QtDir = "",
+    [double]$CoverageThreshold = 70.0,
+    [double]$LibraryCoverageThreshold = 52.0
 )
 
 $ErrorActionPreference = "Stop"
@@ -114,17 +119,11 @@ if ($SkipTest -or $SkipCoverage) {
                 Write-Host "错误: cjcov 报告生成失败" -ForegroundColor Red
                 exit 1
             }
-            if (Test-Path "cov_output\report\coverage.json") {
-                $cov = Get-Content "cov_output\report\coverage.json" -Raw | ConvertFrom-Json
-                $total = 0; $hit = 0
-                foreach ($f in $cov.fileLists) {
-                    $total += $f.totalLines
-                    $hit += $f.hitLines.Count
-                }
-                $pct = if ($total -gt 0) { [math]::Round($hit * 100.0 / $total, 2) } else { 0 }
-                Write-Host "覆盖率: $hit / $total 行 = $pct%（含测试文件，详见 cov_output\report\index.html）" -ForegroundColor Green
-            } else {
-                Write-Host "警告: coverage.json 未生成，报告可能不完整" -ForegroundColor Yellow
+            # 覆盖率门禁（P0-1 遗留闭环）：双口径 + 阈值，低于即失败（委托 check-coverage.ps1）
+            & "$RootDir\scripts\check-coverage.ps1" -CoverageThreshold $CoverageThreshold -LibraryCoverageThreshold $LibraryCoverageThreshold
+            if ($LASTEXITCODE -ne 0) {
+                Write-Host "详细报告: cov_output\report\index.html" -ForegroundColor Yellow
+                exit 1
             }
         }
     }
