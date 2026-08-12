@@ -19,9 +19,12 @@ CJQT6通过FFI（外部函数接口）技术，将Qt6的C++ API封装为仓颉�
 | 依赖 | 版本要求 | 快速安装 |
 |------|----------|---------|
 | 仓颉编译器 | >= 1.0.0 (推荐 1.1.0) | [安装指南](docs/build-guide.md#21-安装仓颉编译器) |
-| Qt6 | >= 6.2 | [安装指南](docs/build-guide.md#22-安装qt6) |
+| Qt6 | 见 [版本兼容矩阵](docs/qt-version-matrix.md)（推荐 Windows 6.10.3 / Linux 6.4.2） | [安装指南](docs/build-guide.md#22-安装qt6) |
 | CMake | >= 3.16 | [安装指南](docs/build-guide.md#23-安装cmake) |
 | 操作系统 | Linux / Windows / macOS | - |
+
+> **注意**：CJQT6 桥接库对 Qt **小版本**敏感（存在 ABI 差异），换 Qt 版本必须重编
+> `cjqt6_bridge` 并跑全量测试。已踩坑与更换步骤见 [Qt 版本兼容矩阵](docs/qt-version-matrix.md)。
 
 <details>
 <summary>🔍 点击查看环境检查命令</summary>
