@@ -16,6 +16,7 @@
 // 可用 AddressSanitizer 校验字符串泄漏。
 // ============================================================
 
+#include <QApplication>
 #include <QObject>
 #include <atomic>
 #include <cstdint>
@@ -32,6 +33,20 @@ void qTrackObject(int64_t ptr);
 void qUntrackObject(int64_t ptr);
 int32_t qIsObjectAlive(int64_t ptr);
 void qCStringFree(const char* s);
+
+// wrange 批次信号回调清理回归（bridge_ext_wrange.cpp / bridge_values.cpp）
+int64_t qSpinBoxCreate();
+void qSpinBoxConnectTextChanged(int64_t ptr, void (*cb)(const char*));
+void qSpinBoxConnectEditingFinished(int64_t ptr, void (*cb)());
+void qSpinBoxDelete(int64_t ptr);
+int64_t qDoubleSpinBoxCreate();
+void qDoubleSpinBoxConnectTextChanged(int64_t ptr, void (*cb)(const char*));
+void qDoubleSpinBoxConnectEditingFinished(int64_t ptr, void (*cb)());
+void qDoubleSpinBoxDelete(int64_t ptr);
+int64_t qProgressBarCreate();
+void qProgressBarConnectValueChanged(int64_t ptr, void (*cb)(int32_t));
+void qProgressBarDelete(int64_t ptr);
+int32_t qWrangeSignalRegistered(int64_t ptr);
 }
 
 // ---------------- 极简断言框架 ----------------
@@ -181,11 +196,65 @@ static void testConcurrentTrackUntrack() {
     CHECK(!anyFail.load());
 }
 
-int main() {
+// ---------------- wrange 信号回调清理回归 ----------------
+// 回归：QSpinBox/QDoubleSpinBox/QProgressBar 的静态信号回调 map 必须随
+// delete 一并清理（bridge_values.cpp 调用 qWrangeSignalCleanup）。
+// 否则残留条目会让 connect 去重保护（find != end）误判，复用同一地址的
+// 新对象 connect 被跳过、回调永不触发（CI 偶发断言失败）。
+// 通过测试专用内省函数 qWrangeSignalRegistered 确定性断言，不依赖分配器复用。
+static void testWrangeSignalCleanup() {
+    // QSpinBox：textChanged / editingFinished
+    {
+        int64_t p = qSpinBoxCreate();
+        CHECK(p != 0);
+        CHECK(qWrangeSignalRegistered(p) == 0);
+
+        qSpinBoxConnectTextChanged(p, [](const char*) {});
+        qSpinBoxConnectEditingFinished(p, []() {});
+        CHECK(qWrangeSignalRegistered(p) == 1);
+
+        qSpinBoxDelete(p);
+        CHECK(qWrangeSignalRegistered(p) == 0);  // 修复点：delete 后必须清空
+    }
+
+    // QDoubleSpinBox：textChanged / editingFinished
+    {
+        int64_t p = qDoubleSpinBoxCreate();
+        CHECK(p != 0);
+        CHECK(qWrangeSignalRegistered(p) == 0);
+
+        qDoubleSpinBoxConnectTextChanged(p, [](const char*) {});
+        qDoubleSpinBoxConnectEditingFinished(p, []() {});
+        CHECK(qWrangeSignalRegistered(p) == 1);
+
+        qDoubleSpinBoxDelete(p);
+        CHECK(qWrangeSignalRegistered(p) == 0);  // 修复点：delete 后必须清空
+    }
+
+    // QProgressBar：valueChanged
+    {
+        int64_t p = qProgressBarCreate();
+        CHECK(p != 0);
+        CHECK(qWrangeSignalRegistered(p) == 0);
+
+        qProgressBarConnectValueChanged(p, [](int32_t) {});
+        CHECK(qWrangeSignalRegistered(p) == 1);
+
+        qProgressBarDelete(p);
+        CHECK(qWrangeSignalRegistered(p) == 0);  // 修复点：delete 后必须清空
+    }
+}
+
+int main(int argc, char* argv[]) {
+    // QSpinBox 等是 QWidget，需要 QApplication；CI 无显示环境走 offscreen。
+    qputenv("QT_QPA_PLATFORM", "offscreen");
+    QApplication app(argc, argv);
+
     RUN_SUITE(testStringUtils);
     RUN_SUITE(testAliveBasics);
     RUN_SUITE(testCascadeDestroy);
     RUN_SUITE(testConcurrentTrackUntrack);
+    RUN_SUITE(testWrangeSignalCleanup);
 
     std::printf("bridge_core_test: %d checks, %d failed\n", g_checks, g_failed);
     return g_failed == 0 ? 0 : 1;

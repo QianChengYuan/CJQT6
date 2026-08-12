@@ -213,6 +213,7 @@ if(CJQT6_BUILD_TESTS)
     target_link_libraries(bridge_core_tests PRIVATE
         cjqt6_bridge
         Qt6::Core
+        Qt6::Widgets
     )
     option(CJQT6_NATIVE_TESTS_ASAN "桥接层测试启用 AddressSanitizer" OFF)
     if(CJQT6_NATIVE_TESTS_ASAN)

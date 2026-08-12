@@ -13,6 +13,11 @@
 #include <unordered_map>
 #include "bridge_string_utils.h"
 
+// 由 bridge_ext_wrange.cpp 导出：清理 wrange 批次控件（QSpinBox/QDoubleSpinBox/
+// QProgressBar）在 bridge_ext_wrange.cpp 内注册的信号回调 map，避免对象 delete 后
+// ptr 地址复用导致去重保护误判、新对象 connect 被跳过。
+extern "C" void qWrangeSignalCleanup(int64_t ptr);
+
 // 回调映射
 static std::unordered_map<int64_t, std::function<void(int64_t)>> g_spinBoxCallbacks;
 static std::unordered_map<int64_t, std::function<void(int64_t)>> g_sliderCallbacks;
@@ -129,6 +134,7 @@ void qSpinBoxDelete(int64_t ptr) {
     QSpinBox* spinBox = reinterpret_cast<QSpinBox*>(ptr);
     if (spinBox) {
         g_spinBoxCallbacks.erase(ptr);
+        qWrangeSignalCleanup(ptr);
         delete spinBox;
     }
 }
@@ -389,6 +395,7 @@ void qProgressBarReset(int64_t ptr) {
 void qProgressBarDelete(int64_t ptr) {
     QProgressBar* progressBar = reinterpret_cast<QProgressBar*>(ptr);
     if (progressBar) {
+        qWrangeSignalCleanup(ptr);
         delete progressBar;
     }
 }
@@ -449,6 +456,7 @@ int32_t qDoubleSpinBoxDecimals(int64_t ptr) {
 void qDoubleSpinBoxDelete(int64_t ptr) {
     QDoubleSpinBox* spinBox = reinterpret_cast<QDoubleSpinBox*>(ptr);
     if (spinBox) {
+        qWrangeSignalCleanup(ptr);
         delete spinBox;
     }
 }

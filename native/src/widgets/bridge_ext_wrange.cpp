@@ -324,4 +324,27 @@ void qProgressBarConnectValueChanged(int64_t ptr, void (*cb)(int32_t)) {
     }
 }
 
+// 统一清理本文件内所有按 ptr 注册的信号回调。
+// 对象 delete 后残留的 map 条目会让去重保护（find != end）误判，
+// 导致复用同一地址的新对象 connect 被跳过、回调永不触发（偶发断言失败）。
+// 由 bridge_values.cpp 的 qSpinBoxDelete/qDoubleSpinBoxDelete/qProgressBarDelete 调用。
+void qWrangeSignalCleanup(int64_t ptr) {
+    g_spinTextChanged.erase(ptr);
+    g_spinEditingFinished.erase(ptr);
+    g_dspinTextChanged.erase(ptr);
+    g_dspinEditingFinished.erase(ptr);
+    g_pbValueChanged.erase(ptr);
+}
+
+// 测试专用内省：查询 ptr 是否仍注册在任一 wrange 信号回调 map 中。
+// 供 native 单测确定性验证 delete 后必须清理回调（回归保护），
+// 不依赖分配器地址复用（那正是 CI 偶发根因）。
+int32_t qWrangeSignalRegistered(int64_t ptr) {
+    return (g_spinTextChanged.find(ptr) != g_spinTextChanged.end() ||
+            g_spinEditingFinished.find(ptr) != g_spinEditingFinished.end() ||
+            g_dspinTextChanged.find(ptr) != g_dspinTextChanged.end() ||
+            g_dspinEditingFinished.find(ptr) != g_dspinEditingFinished.end() ||
+            g_pbValueChanged.find(ptr) != g_pbValueChanged.end()) ? 1 : 0;
+}
+
 } // extern "C"

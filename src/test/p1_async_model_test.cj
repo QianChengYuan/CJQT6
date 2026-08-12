@@ -309,4 +309,39 @@ class P1SpinBoxTextTests {
         @Expect(gP1SpinText, "7")
         sp.close()
     }
+
+    /// 回归：delete 后必须清理按 ptr 注册的信号回调 map。
+    /// 若不清理，新对象复用同一 ptr 地址时 connect 会被去重保护误跳过，
+    /// 回调永不触发（CI 偶发断言失败）。循环创建/关闭以触发地址复用。
+    @TestCase
+    func testSpinBoxPtrReuseAfterClose() {
+        for (i in 1..=64) {
+            gP1SpinText = ""
+            let sp = QSpinBox()
+            sp.setRange(0, 100)
+            sp.setOnTextChanged({ t: CString => gP1SpinText = t.toString() })
+            sp.setValue(Int32(i))
+            if (gP1SpinText != i.toString()) {
+                @Expect(gP1SpinText, i.toString())
+            }
+            sp.close()
+        }
+    }
+
+    /// 回归：QDoubleSpinBox 同样需要 delete 时清理回调 map
+    @TestCase
+    func testDoubleSpinBoxPtrReuseAfterClose() {
+        for (i in 1..=64) {
+            gP1DspinText = ""
+            let sp = QDoubleSpinBox()
+            sp.setRange(0.0, 100.0)
+            sp.setDecimals(0)
+            sp.setOnTextChanged({ t: CString => gP1DspinText = t.toString() })
+            sp.setValue(Float64(i))
+            if (gP1DspinText != i.toString()) {
+                @Expect(gP1DspinText, i.toString())
+            }
+            sp.close()
+        }
+    }
 }
