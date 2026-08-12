@@ -33,6 +33,7 @@ let gMediaStatusCb: Int32Callback = { v: Int32 =>
 // QAudioOutput 测试
 // =====================================================================
 @Test
+@Tag[requires_audio]
 class QAudioOutputTests {
     private static var guiEnv: ?GUITestEnvironment = None
 
@@ -94,6 +95,7 @@ class QAudioOutputTests {
 // QMediaPlayer 测试
 // =====================================================================
 @Test
+@Tag[requires_audio]
 class QMediaPlayerTests {
     private static var guiEnv: ?GUITestEnvironment = None
 
@@ -233,6 +235,7 @@ class QMediaPlayerTests {
 // QSoundEffect 测试
 // =====================================================================
 @Test
+@Tag[requires_audio]
 class QSoundEffectTests {
     private static var guiEnv: ?GUITestEnvironment = None
 
@@ -321,6 +324,7 @@ class QSoundEffectTests {
 // QMediaDevices / QCamera 测试
 // =====================================================================
 @Test
+@Tag[requires_audio]
 class QMediaDevicesCameraTests {
     private static var guiEnv: ?GUITestEnvironment = None
 
@@ -397,6 +401,7 @@ class QMediaDevicesCameraTests {
 // QImageCapture 测试
 // =====================================================================
 @Test
+@Tag[requires_audio]
 class QImageCaptureTests {
     private static var guiEnv: ?GUITestEnvironment = None
 
@@ -462,6 +467,7 @@ class QImageCaptureTests {
 // QVideoWidget 测试
 // =====================================================================
 @Test
+@Tag[requires_audio]
 class QVideoWidgetTests {
     private static var guiEnv: ?GUITestEnvironment = None
 
@@ -505,6 +511,7 @@ class QVideoWidgetTests {
 // QMediaCaptureSession 测试
 // =====================================================================
 @Test
+@Tag[requires_audio]
 class QMediaCaptureSessionTests {
     private static var guiEnv: ?GUITestEnvironment = None
 

@@ -80,12 +80,9 @@ jobs:
             libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 \
             libxcb-shape0 libxcb-xinerama0 libxcb-xkb1 \
             libgl1-mesa-dev libglvnd-dev libegl-dev libopengl-dev \
-            libpulse-dev \
             libgstreamer1.0-0 libgstreamer-plugins-base1.0-0 libgstreamer-gl1.0-0 \
             libgstreamer-plugins-good1.0-0 gstreamer1.0-gl \
-            gstreamer1.0-plugins-base gstreamer1.0-plugins-good \
-            gstreamer1.0-pulseaudio \
-            pulseaudio pulseaudio-utils
+            gstreamer1.0-plugins-base gstreamer1.0-plugins-good
 
       - name: aqtinstall 安装 Qt ${{ env.QT_VERSION_LINUX }} (gcc_64)
         shell: bash
@@ -131,7 +128,10 @@ jobs:
           # 运行时需能找桥接库 libcjqt6_bridge.so（releases/linux-x64），cjpm 不会拷到测试 PATH
           LD_LIBRARY_PATH: ${{ env.QTDIR }}/lib:${{ env.CANGJIE_HOME }}/runtime/lib/linux_x86_64_cjnative:${{ env.CJQT6_ROOT }}/releases/linux-x64
         run: |
-          timeout 600s cjpm test --coverage
+          # requires_audio 标签的多媒体测试组（QAudioOutput/QMediaPlayer/QSoundEffect/
+          # 相机采集等）依赖音频设备，CI runner 无音频服务会阻塞 gstreamer 后端枚举，
+          # 故在 Linux CI 上排除；Windows CI 无此问题，保持全量覆盖。
+          timeout 600s cjpm test --coverage --exclude-tags=requires_audio
 
       - name: 生成覆盖率报告（cjcov）
         shell: bash
