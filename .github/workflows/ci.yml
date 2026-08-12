@@ -80,7 +80,9 @@ jobs:
             libpulse-dev \
             libgstreamer1.0-0 libgstreamer-plugins-base1.0-0 libgstreamer-gl1.0-0 \
             libgstreamer-plugins-good1.0-0 gstreamer1.0-gl \
-            gstreamer1.0-plugins-base gstreamer1.0-plugins-good
+            gstreamer1.0-plugins-base gstreamer1.0-plugins-good \
+            gstreamer1.0-pulseaudio \
+            pulseaudio pulseaudio-utils
 
       - name: aqtinstall 安装 Qt ${{ env.QT_VERSION_LINUX }} (gcc_64)
         shell: bash
@@ -123,10 +125,15 @@ jobs:
           QT_QPA_PLATFORM: offscreen
           QT_QPA_PLATFORM_PLUGIN_PATH: ${{ env.QTDIR }}/plugins/platforms
           QT_PLUGIN_PATH: ${{ env.QTDIR }}/plugins
-          # 运行时需能找到桥接库 libcjqt6_bridge.so（在 releases/linux-x64，cjpm 不拷贝到测试 PATH）
+          # 运行时需能找桥接库 libcjqt6_bridge.so（releases/linux-x64），cjpm 不会拷到测试 PATH
           LD_LIBRARY_PATH: ${{ env.QTDIR }}/lib:${{ env.CANGJIE_HOME }}/runtime/lib/linux_x86_64_cjnative:${{ env.CJQT6_ROOT }}/releases/linux-x64
         run: |
-          cjpm test --coverage
+          # 无真实音频设备的 runner 上，gstreamer 后端初始化 QAudioOutput/QMediaPlayer 会阻塞，
+          # 启动 pulseaudio 虚拟设备（null sink）提供音频后端，避免测试挂起
+          pulseaudio --start --exit-idle-time=-1
+          pactl load-module module-null-sink sink_name=cjqt6_dummy
+          pactl set-default-sink cjqt6_dummy
+          timeout 600s cjpm test --coverage
 
       - name: 生成覆盖率报告（cjcov）
         shell: bash
