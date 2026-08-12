@@ -284,6 +284,8 @@ CJQT6/
 | 架构设计 | [docs/architecture.md](docs/architecture.md) | 系统架构说明 |
 | 资源管理 | [docs/resource/](docs/resource/) | 内存管理指南 |
 | 交叉编译 | [docs/cross-compile.md](docs/cross-compile.md) | 交叉编译说明 |
+| Qt 版本矩阵 | [docs/qt-version-matrix.md](docs/qt-version-matrix.md) | Qt 版本 × 平台兼容矩阵 |
+| 性能基线 | [docs/performance-baseline.md](docs/performance-baseline.md) | FFI/信号/异步路径性能基线 |
 
 ## 核心模块
 

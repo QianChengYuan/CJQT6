@@ -17,6 +17,7 @@
 
 - `docs/roadmap.md`：4.1/4.2/4.3 落地标记与 Qt6 重载结论；P1 里程碑矩阵更新（bench ✅ + 量化数据）。
 - 新增 `docs/qt-version-matrix.md`（P1-2）：Qt 版本 × 平台兼容矩阵、ABI 敏感说明（`qt_qFindChild_helper` 符号移除、`valueChanged(QString)` 重载移除、`QRegExpValidator` 移除、MinGW/MSVC ABI 不兼容）、版本更换三步指南与各锁定版本实测记录；README「环境要求」与 PUBLISHING 8.2 已链接/对齐。
+- 新增 `docs/performance-baseline.md`（P2-3）：FFI/信号/异步四条高频路径实测基线表（Windows Qt 6.10.3）、解读结论与优化优先级、复跑方法与跨平台记录表、性能 commit 前后对照门禁。
 - `docs/api/01_core.md`：新增 `UiPoster`/`runOnUiThread`/`runAsync` 章节。
 - `docs/api/05_views.md`：`QTableView::setModel(QAbstractItemModel)`、`QAbstractItemModel::notifyDataChanged`/`notifyLayoutChanged`；修正示例中不存在的 `(row*2+col).toInt64()`（仓颉数值转换用 `Int64(...)`）。
 
