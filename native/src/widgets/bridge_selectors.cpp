@@ -17,6 +17,18 @@ static std::unordered_map<int64_t, std::function<void(int64_t)>> g_radioButtonCa
 static std::unordered_map<int64_t, std::function<void(int64_t)>> g_comboBoxCallbacks;
 static std::unordered_map<int64_t, std::function<void(int64_t)>> g_buttonGroupCallbacks;
 
+// 由 bridge_ext_wmisc.cpp 导出：清理 QButtonGroup 信号回调 map，避免 delete 后
+// 地址复用导致 connect 去重误跳。
+extern "C" void qWmiscSignalCleanup(int64_t ptr);
+
+// 由 bridge_ext_wselect.cpp 导出：清理选择控件信号回调 map（QComboBox/
+// QFontComboBox/QKeySequenceEdit），避免地址复用导致 connect 去重误跳。
+extern "C" void qWselectSignalCleanup(int64_t ptr);
+
+// 由 bridge_ext_wcore.cpp 导出：清理按钮类点击回调 map（QCheckBox/QRadioButton），
+// 避免地址复用导致 connect 去重误跳。
+extern "C" void qWcoreSignalCleanup(int64_t ptr);
+
 extern "C" {
 
 // ============================================================
@@ -62,6 +74,7 @@ bool qCheckBoxIsChecked(int64_t ptr) {
 void qCheckBoxDelete(int64_t ptr) {
     QCheckBox* checkBox = reinterpret_cast<QCheckBox*>(ptr);
     if (checkBox) {
+        qWcoreSignalCleanup(ptr);
         delete checkBox;
     }
 }
@@ -109,6 +122,7 @@ bool qRadioButtonIsChecked(int64_t ptr) {
 void qRadioButtonDelete(int64_t ptr) {
     QRadioButton* radioButton = reinterpret_cast<QRadioButton*>(ptr);
     if (radioButton) {
+        qWcoreSignalCleanup(ptr);
         delete radioButton;
     }
 }
@@ -227,6 +241,7 @@ void qComboBoxSetPlaceholderText(int64_t ptr, const char* text) {
 void qComboBoxDelete(int64_t ptr) {
     QComboBox* comboBox = reinterpret_cast<QComboBox*>(ptr);
     if (comboBox) {
+        qWselectSignalCleanup(ptr);
         delete comboBox;
     }
 }
@@ -304,6 +319,7 @@ int32_t qButtonGroupButtonsCount(int64_t ptr) {
 void qButtonGroupDelete(int64_t ptr) {
     QButtonGroup* group = reinterpret_cast<QButtonGroup*>(ptr);
     if (group) {
+        qWmiscSignalCleanup(ptr);
         delete group;
     }
 }

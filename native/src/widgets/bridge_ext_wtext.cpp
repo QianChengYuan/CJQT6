@@ -455,4 +455,45 @@ void qTextBrowserConnectTextChanged(int64_t ptr, void (*cb)()) {
     }
 }
 
+// 文本控件模块统一信号回调清理：对象 delete 后残留的条目会让 connect 去重
+// 保护（find != end 跳过注册）误判，复用同一地址的新对象 connect 被跳过、
+// 回调永不触发。由 qLineEditDelete/qTextEditDelete/qPlainTextEditDelete/
+// qTextBrowserDelete 调用。
+void qWtextSignalCleanup(int64_t ptr) {
+    g_leCursorPos.erase(ptr);
+    g_leSelection.erase(ptr);
+    g_leInputRejected.erase(ptr);
+    g_teTextChanged.erase(ptr);
+    g_teUndoAvail.erase(ptr);
+    g_teRedoAvail.erase(ptr);
+    g_teCopyAvail.erase(ptr);
+    g_pteTextChanged.erase(ptr);
+    g_pteBlockCount.erase(ptr);
+    g_pteModChanged.erase(ptr);
+    g_pteCopyAvail.erase(ptr);
+    g_tbBackAvail.erase(ptr);
+    g_tbFwdAvail.erase(ptr);
+    g_tbSourceChanged.erase(ptr);
+    g_tbTextChanged.erase(ptr);
+}
+
+// 测试专用内省：查询 ptr 是否仍注册在任一本文控控件信号回调 map 中。
+int32_t qWtextSignalRegistered(int64_t ptr) {
+    return (g_leCursorPos.find(ptr) != g_leCursorPos.end() ||
+            g_leSelection.find(ptr) != g_leSelection.end() ||
+            g_leInputRejected.find(ptr) != g_leInputRejected.end() ||
+            g_teTextChanged.find(ptr) != g_teTextChanged.end() ||
+            g_teUndoAvail.find(ptr) != g_teUndoAvail.end() ||
+            g_teRedoAvail.find(ptr) != g_teRedoAvail.end() ||
+            g_teCopyAvail.find(ptr) != g_teCopyAvail.end() ||
+            g_pteTextChanged.find(ptr) != g_pteTextChanged.end() ||
+            g_pteBlockCount.find(ptr) != g_pteBlockCount.end() ||
+            g_pteModChanged.find(ptr) != g_pteModChanged.end() ||
+            g_pteCopyAvail.find(ptr) != g_pteCopyAvail.end() ||
+            g_tbBackAvail.find(ptr) != g_tbBackAvail.end() ||
+            g_tbFwdAvail.find(ptr) != g_tbFwdAvail.end() ||
+            g_tbSourceChanged.find(ptr) != g_tbSourceChanged.end() ||
+            g_tbTextChanged.find(ptr) != g_tbTextChanged.end()) ? 1 : 0;
+}
+
 } // extern "C"

@@ -8,6 +8,10 @@
 #include <QHeaderView>
 #include "bridge_string_utils.h"
 
+// 由 bridge_ext_views.cpp 导出：清理视图模块信号回调 map，避免对象 delete 后
+// ptr 地址复用导致去重保护误判、新对象 connect 被跳过。
+extern "C" void qViewsSignalCleanup(int64_t ptr);
+
 extern "C" {
 
 // ============================================================
@@ -267,6 +271,7 @@ void qTableWidgetVerticalHeaderSetDefaultSectionSize(int64_t ptr, int32_t size) 
 void qTableWidgetDelete(int64_t ptr) {
     QTableWidget* table = reinterpret_cast<QTableWidget*>(ptr);
     if (table) {
+        qViewsSignalCleanup(ptr);
         delete table;
     }
 }

@@ -1594,4 +1594,88 @@ void qHeaderViewConnectSectionHandleDoubleClicked(int64_t ptr, void (*cb)(int32_
     }
 }
 
+// 视图模块统一信号回调清理：对象 delete 后残留的条目会让 connect 去重保护
+// （find != end 跳过注册）误判，复用同一地址的新对象 connect 被跳过、回调永不
+// 触发。由 qListViewDelete/qTableViewDelete/qTreeViewDelete/qListWidgetDelete/
+// qTreeWidgetDelete/qTableWidgetDelete/qHeaderViewDelete/qFileSystemModelDelete 调用。
+void qViewsSignalCleanup(int64_t ptr) {
+    g_lvClicked.erase(ptr);
+    g_lvDoubleClicked.erase(ptr);
+    g_lvActivated.erase(ptr);
+    g_lvPressed.erase(ptr);
+    g_lwCurrentRowChanged.erase(ptr);
+    g_lwItemClicked.erase(ptr);
+    g_lwItemDoubleClicked.erase(ptr);
+    g_lwItemSelectionChanged.erase(ptr);
+    g_lwCurrentItemChanged.erase(ptr);
+    g_tvClicked.erase(ptr);
+    g_tvDoubleClicked.erase(ptr);
+    g_tvActivated.erase(ptr);
+    g_tvPressed.erase(ptr);
+    g_twCellClicked.erase(ptr);
+    g_twCellChanged.erase(ptr);
+    g_twCellDoubleClicked.erase(ptr);
+    g_twCurrentCellChanged.erase(ptr);
+    g_twItemSelectionChanged.erase(ptr);
+    g_twItemClicked.erase(ptr);
+    g_trvClicked.erase(ptr);
+    g_trvDoubleClicked.erase(ptr);
+    g_trvExpanded.erase(ptr);
+    g_trvCollapsed.erase(ptr);
+    g_trvActivated.erase(ptr);
+    g_twItemClicked2.erase(ptr);
+    g_twItemDoubleClicked2.erase(ptr);
+    g_twItemChanged2.erase(ptr);
+    g_twCurrentItemChanged2.erase(ptr);
+    g_fsmDirectoryLoaded.erase(ptr);
+    g_fsmRootPathChanged.erase(ptr);
+    g_hvSectionClicked.erase(ptr);
+    g_hvSectionDoubleClicked.erase(ptr);
+    g_hvSectionResized.erase(ptr);
+    g_hvSectionMoved.erase(ptr);
+    g_hvSortIndicatorChanged.erase(ptr);
+    g_hvSectionHandleDoubleClicked.erase(ptr);
+}
+
+// 测试专用内省：查询 ptr 是否仍注册在任一视图信号回调 map 中
+// （供 native 单测确定性验证 delete 后必须清理回调）。
+int32_t qViewsSignalRegistered(int64_t ptr) {
+    return (g_lvClicked.find(ptr) != g_lvClicked.end() ||
+            g_lvDoubleClicked.find(ptr) != g_lvDoubleClicked.end() ||
+            g_lvActivated.find(ptr) != g_lvActivated.end() ||
+            g_lvPressed.find(ptr) != g_lvPressed.end() ||
+            g_lwCurrentRowChanged.find(ptr) != g_lwCurrentRowChanged.end() ||
+            g_lwItemClicked.find(ptr) != g_lwItemClicked.end() ||
+            g_lwItemDoubleClicked.find(ptr) != g_lwItemDoubleClicked.end() ||
+            g_lwItemSelectionChanged.find(ptr) != g_lwItemSelectionChanged.end() ||
+            g_lwCurrentItemChanged.find(ptr) != g_lwCurrentItemChanged.end() ||
+            g_tvClicked.find(ptr) != g_tvClicked.end() ||
+            g_tvDoubleClicked.find(ptr) != g_tvDoubleClicked.end() ||
+            g_tvActivated.find(ptr) != g_tvActivated.end() ||
+            g_tvPressed.find(ptr) != g_tvPressed.end() ||
+            g_twCellClicked.find(ptr) != g_twCellClicked.end() ||
+            g_twCellChanged.find(ptr) != g_twCellChanged.end() ||
+            g_twCellDoubleClicked.find(ptr) != g_twCellDoubleClicked.end() ||
+            g_twCurrentCellChanged.find(ptr) != g_twCurrentCellChanged.end() ||
+            g_twItemSelectionChanged.find(ptr) != g_twItemSelectionChanged.end() ||
+            g_twItemClicked.find(ptr) != g_twItemClicked.end() ||
+            g_trvClicked.find(ptr) != g_trvClicked.end() ||
+            g_trvDoubleClicked.find(ptr) != g_trvDoubleClicked.end() ||
+            g_trvExpanded.find(ptr) != g_trvExpanded.end() ||
+            g_trvCollapsed.find(ptr) != g_trvCollapsed.end() ||
+            g_trvActivated.find(ptr) != g_trvActivated.end() ||
+            g_twItemClicked2.find(ptr) != g_twItemClicked2.end() ||
+            g_twItemDoubleClicked2.find(ptr) != g_twItemDoubleClicked2.end() ||
+            g_twItemChanged2.find(ptr) != g_twItemChanged2.end() ||
+            g_twCurrentItemChanged2.find(ptr) != g_twCurrentItemChanged2.end() ||
+            g_fsmDirectoryLoaded.find(ptr) != g_fsmDirectoryLoaded.end() ||
+            g_fsmRootPathChanged.find(ptr) != g_fsmRootPathChanged.end() ||
+            g_hvSectionClicked.find(ptr) != g_hvSectionClicked.end() ||
+            g_hvSectionDoubleClicked.find(ptr) != g_hvSectionDoubleClicked.end() ||
+            g_hvSectionResized.find(ptr) != g_hvSectionResized.end() ||
+            g_hvSectionMoved.find(ptr) != g_hvSectionMoved.end() ||
+            g_hvSortIndicatorChanged.find(ptr) != g_hvSortIndicatorChanged.end() ||
+            g_hvSectionHandleDoubleClicked.find(ptr) != g_hvSectionHandleDoubleClicked.end()) ? 1 : 0;
+}
+
 } // extern "C"

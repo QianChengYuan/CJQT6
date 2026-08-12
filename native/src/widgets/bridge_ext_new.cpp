@@ -364,4 +364,26 @@ void qRegExpValidatorSetPattern(int64_t ptr, const char* pattern) {
     if (v) v->setRegularExpression(QRegularExpression(QString::fromUtf8(pattern)));
 }
 
+// 新控件模块统一信号回调清理：对象 delete 后残留的条目会让 connect 去重
+// 保护（find != end 跳过注册）误判，复用同一地址的新对象 connect 被跳过、
+// 回调永不触发。由 qScrollBarDelete/qDialogButtonBoxDelete 调用。
+void qWnewSignalCleanup(int64_t ptr) {
+    g_sbPressed.erase(ptr);
+    g_sbMoved.erase(ptr);
+    g_sbReleased.erase(ptr);
+    g_sbRange.erase(ptr);
+    g_sbAction.erase(ptr);
+    g_dbbClicked.erase(ptr);
+}
+
+// 测试专用内省：查询 ptr 是否仍注册在任一新控件信号回调 map 中。
+int32_t qWnewSignalRegistered(int64_t ptr) {
+    return (g_sbPressed.find(ptr) != g_sbPressed.end() ||
+            g_sbMoved.find(ptr) != g_sbMoved.end() ||
+            g_sbReleased.find(ptr) != g_sbReleased.end() ||
+            g_sbRange.find(ptr) != g_sbRange.end() ||
+            g_sbAction.find(ptr) != g_sbAction.end() ||
+            g_dbbClicked.find(ptr) != g_dbbClicked.end()) ? 1 : 0;
+}
+
 } // extern "C"

@@ -47,6 +47,72 @@ int64_t qProgressBarCreate();
 void qProgressBarConnectValueChanged(int64_t ptr, void (*cb)(int32_t));
 void qProgressBarDelete(int64_t ptr);
 int32_t qWrangeSignalRegistered(int64_t ptr);
+
+// views 批次信号回调清理回归（bridge_ext_views.cpp / bridge_modelview.cpp 等）
+int64_t qListViewCreate();
+void qListViewConnectClicked(int64_t ptr, void (*cb)(int64_t));
+void qListViewDelete(int64_t ptr);
+int64_t qTreeWidgetCreate();
+void qTreeWidgetConnectItemClicked(int64_t ptr, void (*cb)(int64_t, int32_t));
+void qTreeWidgetDelete(int64_t ptr);
+int32_t qViewsSignalRegistered(int64_t ptr);
+
+// wtext 批次信号回调清理回归（bridge_ext_wtext.cpp / bridge_widgets.cpp）
+int64_t qLineEditCreate();
+void qLineEditConnectCursorPositionChanged(int64_t ptr, void (*cb)(int32_t, int32_t));
+void qLineEditDelete(int64_t ptr);
+int64_t qTextEditCreate();
+void qTextEditConnectTextChanged(int64_t ptr, void (*cb)());
+void qTextEditDelete(int64_t ptr);
+int32_t qWtextSignalRegistered(int64_t ptr);
+
+// wmisc 批次信号回调清理回归（bridge_ext_wmisc.cpp / bridge_datetime.cpp 等）
+int64_t qDateTimeEditCreate();
+void qDateTimeEditConnectDateChanged(int64_t ptr, void (*cb)(const char*));
+void qDateTimeEditDelete(int64_t ptr);
+int64_t qSystemTrayIconCreate(int64_t parentPtr);
+void qSystemTrayIconConnectActivated(int64_t ptr, void (*cb)(int32_t));
+void qSystemTrayIconDelete(int64_t ptr);
+int64_t qButtonGroupCreate();
+void qButtonGroupConnectButtonClicked(int64_t ptr, void (*cb)(int64_t));
+void qButtonGroupDelete(int64_t ptr);
+int32_t qWmiscSignalRegistered(int64_t ptr);
+
+// wlayout 批次信号回调清理回归（bridge_ext_wlayout.cpp / bridge_containers.cpp）
+int64_t qStackedWidgetCreate();
+void qStackedWidgetConnectCurrentChanged(int64_t ptr, void (*cb)(int32_t));
+void qStackedWidgetDelete(int64_t ptr);
+int64_t qDockWidgetCreate(const char* title);
+void qDockWidgetConnectTopLevelChanged(int64_t ptr, void (*cb)(bool));
+void qDockWidgetDelete(int64_t ptr);
+int32_t qWlayoutSignalRegistered(int64_t ptr);
+
+// wnew 批次信号回调清理回归（bridge_ext_new.cpp / bridge_widgets.cpp）
+int64_t qScrollBarCreate(int32_t orientation);
+void qScrollBarConnectSliderPressed(int64_t ptr, void (*cb)());
+void qScrollBarDelete(int64_t ptr);
+int64_t qDialogButtonBoxCreate();
+void qDialogButtonBoxConnectClicked(int64_t ptr, void (*cb)(int64_t));
+void qDialogButtonBoxDelete(int64_t ptr);
+int32_t qWnewSignalRegistered(int64_t ptr);
+
+// wselect 批次信号回调清理回归（bridge_ext_wselect.cpp / bridge_selectors.cpp 等）
+int64_t qComboBoxCreate();
+void qComboBoxConnectActivated(int64_t ptr, void (*cb)(int32_t));
+void qComboBoxDelete(int64_t ptr);
+int64_t qKeySequenceEditCreate(int64_t parentPtr);
+void qKeySequenceEditConnectKeySequenceChanged(int64_t ptr, void (*cb)(const char*));
+void qKeySequenceEditDelete(int64_t ptr);
+int32_t qWselectSignalRegistered(int64_t ptr);
+
+// wcore 批次信号回调清理回归（bridge_ext_wcore.cpp / bridge_selectors.cpp）
+int64_t qCheckBoxCreate();
+void qCheckBoxConnectClicked(int64_t ptr, void (*cb)(int32_t));
+void qCheckBoxDelete(int64_t ptr);
+int64_t qRadioButtonCreate();
+void qRadioButtonConnectClicked(int64_t ptr, void (*cb)(int32_t));
+void qRadioButtonDelete(int64_t ptr);
+int32_t qWcoreSignalRegistered(int64_t ptr);
 }
 
 // ---------------- 极简断言框架 ----------------
@@ -245,6 +311,222 @@ static void testWrangeSignalCleanup() {
     }
 }
 
+// ---------------- views 信号回调清理回归 ----------------
+static void testViewsSignalCleanup() {
+    // QListView：clicked
+    {
+        int64_t p = qListViewCreate();
+        CHECK(p != 0);
+        CHECK(qViewsSignalRegistered(p) == 0);
+
+        qListViewConnectClicked(p, [](int64_t) {});
+        CHECK(qViewsSignalRegistered(p) == 1);
+
+        qListViewDelete(p);
+        CHECK(qViewsSignalRegistered(p) == 0);  // 修复点：delete 后必须清空
+    }
+
+    // QTreeWidget：itemClicked
+    {
+        int64_t p = qTreeWidgetCreate();
+        CHECK(p != 0);
+        CHECK(qViewsSignalRegistered(p) == 0);
+
+        qTreeWidgetConnectItemClicked(p, [](int64_t, int32_t) {});
+        CHECK(qViewsSignalRegistered(p) == 1);
+
+        qTreeWidgetDelete(p);
+        CHECK(qViewsSignalRegistered(p) == 0);  // 修复点：delete 后必须清空
+    }
+}
+
+// ---------------- wtext 信号回调清理回归 ----------------
+static void testWtextSignalCleanup() {
+    // QLineEdit：cursorPositionChanged
+    {
+        int64_t p = qLineEditCreate();
+        CHECK(p != 0);
+        CHECK(qWtextSignalRegistered(p) == 0);
+
+        qLineEditConnectCursorPositionChanged(p, [](int32_t, int32_t) {});
+        CHECK(qWtextSignalRegistered(p) == 1);
+
+        qLineEditDelete(p);
+        CHECK(qWtextSignalRegistered(p) == 0);  // 修复点：delete 后必须清空
+    }
+
+    // QTextEdit：textChanged
+    {
+        int64_t p = qTextEditCreate();
+        CHECK(p != 0);
+        CHECK(qWtextSignalRegistered(p) == 0);
+
+        qTextEditConnectTextChanged(p, []() {});
+        CHECK(qWtextSignalRegistered(p) == 1);
+
+        qTextEditDelete(p);
+        CHECK(qWtextSignalRegistered(p) == 0);  // 修复点：delete 后必须清空
+    }
+}
+
+// ---------------- wmisc 信号回调清理回归 ----------------
+static void testWmiscSignalCleanup() {
+    // QDateTimeEdit：dateChanged
+    {
+        int64_t p = qDateTimeEditCreate();
+        CHECK(p != 0);
+        CHECK(qWmiscSignalRegistered(p) == 0);
+
+        qDateTimeEditConnectDateChanged(p, [](const char*) {});
+        CHECK(qWmiscSignalRegistered(p) == 1);
+
+        qDateTimeEditDelete(p);
+        CHECK(qWmiscSignalRegistered(p) == 0);  // 修复点：delete 后必须清空
+    }
+
+    // QSystemTrayIcon：activated
+    {
+        int64_t p = qSystemTrayIconCreate(0);
+        CHECK(p != 0);
+        CHECK(qWmiscSignalRegistered(p) == 0);
+
+        qSystemTrayIconConnectActivated(p, [](int32_t) {});
+        CHECK(qWmiscSignalRegistered(p) == 1);
+
+        qSystemTrayIconDelete(p);
+        CHECK(qWmiscSignalRegistered(p) == 0);  // 修复点：delete 后必须清空
+    }
+
+    // QButtonGroup：buttonClicked
+    {
+        int64_t p = qButtonGroupCreate();
+        CHECK(p != 0);
+        CHECK(qWmiscSignalRegistered(p) == 0);
+
+        qButtonGroupConnectButtonClicked(p, [](int64_t) {});
+        CHECK(qWmiscSignalRegistered(p) == 1);
+
+        qButtonGroupDelete(p);
+        CHECK(qWmiscSignalRegistered(p) == 0);  // 修复点：delete 后必须清空
+    }
+}
+
+// ---------------- wlayout 信号回调清理回归 ----------------
+static void testWlayoutSignalCleanup() {
+    // QStackedWidget：currentChanged
+    {
+        int64_t p = qStackedWidgetCreate();
+        CHECK(p != 0);
+        CHECK(qWlayoutSignalRegistered(p) == 0);
+
+        qStackedWidgetConnectCurrentChanged(p, [](int32_t) {});
+        CHECK(qWlayoutSignalRegistered(p) == 1);
+
+        qStackedWidgetDelete(p);
+        CHECK(qWlayoutSignalRegistered(p) == 0);  // 修复点：delete 后必须清空
+    }
+
+    // QDockWidget：topLevelChanged
+    {
+        int64_t p = qDockWidgetCreate("dock");
+        CHECK(p != 0);
+        CHECK(qWlayoutSignalRegistered(p) == 0);
+
+        qDockWidgetConnectTopLevelChanged(p, [](bool) {});
+        CHECK(qWlayoutSignalRegistered(p) == 1);
+
+        qDockWidgetDelete(p);
+        CHECK(qWlayoutSignalRegistered(p) == 0);  // 修复点：delete 后必须清空
+    }
+}
+
+// ---------------- wnew 信号回调清理回归 ----------------
+static void testWnewSignalCleanup() {
+    // QScrollBar：sliderPressed
+    {
+        int64_t p = qScrollBarCreate(1);
+        CHECK(p != 0);
+        CHECK(qWnewSignalRegistered(p) == 0);
+
+        qScrollBarConnectSliderPressed(p, []() {});
+        CHECK(qWnewSignalRegistered(p) == 1);
+
+        qScrollBarDelete(p);
+        CHECK(qWnewSignalRegistered(p) == 0);  // 修复点：delete 后必须清空
+    }
+
+    // QDialogButtonBox：clicked
+    {
+        int64_t p = qDialogButtonBoxCreate();
+        CHECK(p != 0);
+        CHECK(qWnewSignalRegistered(p) == 0);
+
+        qDialogButtonBoxConnectClicked(p, [](int64_t) {});
+        CHECK(qWnewSignalRegistered(p) == 1);
+
+        qDialogButtonBoxDelete(p);
+        CHECK(qWnewSignalRegistered(p) == 0);  // 修复点：delete 后必须清空
+    }
+}
+
+// ---------------- wselect 信号回调清理回归 ----------------
+static void testWselectSignalCleanup() {
+    // QComboBox：activated
+    {
+        int64_t p = qComboBoxCreate();
+        CHECK(p != 0);
+        CHECK(qWselectSignalRegistered(p) == 0);
+
+        qComboBoxConnectActivated(p, [](int32_t) {});
+        CHECK(qWselectSignalRegistered(p) == 1);
+
+        qComboBoxDelete(p);
+        CHECK(qWselectSignalRegistered(p) == 0);  // 修复点：delete 后必须清空
+    }
+
+    // QKeySequenceEdit：keySequenceChanged
+    {
+        int64_t p = qKeySequenceEditCreate(0);
+        CHECK(p != 0);
+        CHECK(qWselectSignalRegistered(p) == 0);
+
+        qKeySequenceEditConnectKeySequenceChanged(p, [](const char*) {});
+        CHECK(qWselectSignalRegistered(p) == 1);
+
+        qKeySequenceEditDelete(p);
+        CHECK(qWselectSignalRegistered(p) == 0);  // 修复点：delete 后必须清空
+    }
+}
+
+// ---------------- wcore 信号回调清理回归 ----------------
+static void testWcoreSignalCleanup() {
+    // QCheckBox：clicked
+    {
+        int64_t p = qCheckBoxCreate();
+        CHECK(p != 0);
+        CHECK(qWcoreSignalRegistered(p) == 0);
+
+        qCheckBoxConnectClicked(p, [](int32_t) {});
+        CHECK(qWcoreSignalRegistered(p) == 1);
+
+        qCheckBoxDelete(p);
+        CHECK(qWcoreSignalRegistered(p) == 0);  // 修复点：delete 后必须清空
+    }
+
+    // QRadioButton：clicked
+    {
+        int64_t p = qRadioButtonCreate();
+        CHECK(p != 0);
+        CHECK(qWcoreSignalRegistered(p) == 0);
+
+        qRadioButtonConnectClicked(p, [](int32_t) {});
+        CHECK(qWcoreSignalRegistered(p) == 1);
+
+        qRadioButtonDelete(p);
+        CHECK(qWcoreSignalRegistered(p) == 0);  // 修复点：delete 后必须清空
+    }
+}
+
 int main(int argc, char* argv[]) {
     // QSpinBox 等是 QWidget，需要 QApplication；CI 无显示环境走 offscreen。
     qputenv("QT_QPA_PLATFORM", "offscreen");
@@ -255,6 +537,13 @@ int main(int argc, char* argv[]) {
     RUN_SUITE(testCascadeDestroy);
     RUN_SUITE(testConcurrentTrackUntrack);
     RUN_SUITE(testWrangeSignalCleanup);
+    RUN_SUITE(testViewsSignalCleanup);
+    RUN_SUITE(testWtextSignalCleanup);
+    RUN_SUITE(testWmiscSignalCleanup);
+    RUN_SUITE(testWlayoutSignalCleanup);
+    RUN_SUITE(testWnewSignalCleanup);
+    RUN_SUITE(testWselectSignalCleanup);
+    RUN_SUITE(testWcoreSignalCleanup);
 
     std::printf("bridge_core_test: %d checks, %d failed\n", g_checks, g_failed);
     return g_failed == 0 ? 0 : 1;

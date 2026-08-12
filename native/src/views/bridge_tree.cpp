@@ -11,6 +11,10 @@
 #include <unordered_map>
 #include "bridge_string_utils.h"
 
+// 由 bridge_ext_views.cpp 导出：清理视图模块信号回调 map，避免对象 delete 后
+// ptr 地址复用导致去重保护误判、新对象 connect 被跳过。
+extern "C" void qViewsSignalCleanup(int64_t ptr);
+
 // 树形事件回调映射
 static std::unordered_map<int64_t, std::function<void(int64_t)>> g_treeItemClickedCallbacks;
 static std::unordered_map<int64_t, std::function<void(int64_t)>> g_treeItemDoubleClickedCallbacks;
@@ -36,6 +40,7 @@ int64_t qTreeWidgetCreate() {
 void qTreeWidgetDelete(int64_t ptr) {
     QTreeWidget* tree = reinterpret_cast<QTreeWidget*>(ptr);
     if (tree) {
+        qViewsSignalCleanup(ptr);
         delete tree;
     }
 }

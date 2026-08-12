@@ -200,4 +200,22 @@ void qKeySequenceEditConnectKeySequenceChanged(int64_t ptr, void (*cb)(const cha
     }
 }
 
+// 选择控件模块统一信号回调清理：对象 delete 后残留的条目会让 connect 去重
+// 保护（find != end 跳过注册）误判，复用同一地址的新对象 connect 被跳过、
+// 回调永不触发。由 qComboBoxDelete/qFontComboBoxDelete/qKeySequenceEditDelete 调用。
+void qWselectSignalCleanup(int64_t ptr) {
+    g_cbEditTextChanged.erase(ptr);
+    g_cbActivated.erase(ptr);
+    g_cbHighlighted.erase(ptr);
+    g_kseChanged.erase(ptr);
+}
+
+// 测试专用内省：查询 ptr 是否仍注册在任一选择控件信号回调 map 中。
+int32_t qWselectSignalRegistered(int64_t ptr) {
+    return (g_cbEditTextChanged.find(ptr) != g_cbEditTextChanged.end() ||
+            g_cbActivated.find(ptr) != g_cbActivated.end() ||
+            g_cbHighlighted.find(ptr) != g_cbHighlighted.end() ||
+            g_kseChanged.find(ptr) != g_kseChanged.end()) ? 1 : 0;
+}
+
 } // extern "C"

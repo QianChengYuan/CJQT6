@@ -45,6 +45,22 @@
 extern std::unordered_map<int64_t, std::function<void(int64_t)>> g_buttonCallbacks;
 extern std::unordered_map<int64_t, std::function<void(int64_t)>> g_lineEditCallbacks;
 
+// 由 bridge_ext_wtext.cpp 导出：清理文本控件信号回调 map（QLineEdit/QTextEdit/
+// QPlainTextEdit/QTextBrowser），避免 delete 后 ptr 复用导致 connect 去重误跳。
+extern "C" void qWtextSignalCleanup(int64_t ptr);
+
+// 由 bridge_ext_wmisc.cpp 导出：清理 misc 控件信号回调 map（QDateEdit/QTimeEdit/
+// QDateTimeEdit/QSystemTrayIcon/QButtonGroup），避免地址复用导致 connect 去重误跳。
+extern "C" void qWmiscSignalCleanup(int64_t ptr);
+
+// 由 bridge_ext_new.cpp 导出：清理新控件信号回调 map（QScrollBar/QDialogButtonBox），
+// 避免地址复用导致 connect 去重误跳。
+extern "C" void qWnewSignalCleanup(int64_t ptr);
+
+// 由 bridge_ext_wselect.cpp 导出：清理选择控件信号回调 map（QComboBox/
+// QFontComboBox/QKeySequenceEdit），避免地址复用导致 connect 去重误跳。
+extern "C" void qWselectSignalCleanup(int64_t ptr);
+
 // �ı��仯�ص�ӳ��
 static std::unordered_map<int64_t, std::function<void(int64_t)>> g_textChangedCallbacks;
 
@@ -580,6 +596,7 @@ void qLineEditSetFocus(int64_t ptr) {
 void qLineEditDelete(int64_t ptr) {
     QLineEdit* lineEdit = reinterpret_cast<QLineEdit*>(ptr);
     if (lineEdit) {
+        qWtextSignalCleanup(ptr);
         g_textChangedCallbacks.erase(ptr);
         g_passwordToggleCallbacks.erase(ptr);
         g_passwordToggleButtons.erase(ptr);
@@ -630,6 +647,7 @@ void qTextEditClear(int64_t ptr) {
 void qTextEditDelete(int64_t ptr) {
     QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
     if (textEdit) {
+        qWtextSignalCleanup(ptr);
         delete textEdit;
     }
 }
@@ -1057,6 +1075,7 @@ void qPlainTextEditSetMaximumBlockCount(int64_t ptr, int32_t maxBlocks) {
 void qPlainTextEditDelete(int64_t ptr) {
     QPlainTextEdit* editor = reinterpret_cast<QPlainTextEdit*>(ptr);
     if (editor) {
+        qWtextSignalCleanup(ptr);
         delete editor;
     }
 }
@@ -1248,6 +1267,7 @@ void qTextBrowserSetPlainText(int64_t ptr, const char* text) {
 void qTextBrowserDelete(int64_t ptr) {
     QTextBrowser* browser = reinterpret_cast<QTextBrowser*>(ptr);
     if (browser) {
+        qWtextSignalCleanup(ptr);
         delete browser;
     }
 }
@@ -1286,6 +1306,7 @@ void qKeySequenceEditClear(int64_t ptr) {
 void qKeySequenceEditDelete(int64_t ptr) {
     QKeySequenceEdit* edit = reinterpret_cast<QKeySequenceEdit*>(ptr);
     if (edit) {
+        qWselectSignalCleanup(ptr);
         delete edit;
     }
 }
@@ -1303,6 +1324,7 @@ int64_t qSystemTrayIconCreate(int64_t parentPtr) {
 void qSystemTrayIconDelete(int64_t ptr) {
     QSystemTrayIcon* icon = reinterpret_cast<QSystemTrayIcon*>(ptr);
     if (icon) {
+        qWmiscSignalCleanup(ptr);
         delete icon;
     }
 }
@@ -1743,7 +1765,10 @@ void qFontComboBoxSetFontFilters(int64_t ptr, int32_t filters) {
 
 void qFontComboBoxDelete(int64_t ptr) {
     QFontComboBox* combo = reinterpret_cast<QFontComboBox*>(ptr);
-    if (combo) delete combo;
+    if (combo) {
+        qWselectSignalCleanup(ptr);
+        delete combo;
+    }
 }
 
 
@@ -1806,6 +1831,7 @@ void qDialogButtonBoxConnectRejected(int64_t ptr, void (*callback)(void)) {
 void qDialogButtonBoxDelete(int64_t ptr) {
     QDialogButtonBox* box = reinterpret_cast<QDialogButtonBox*>(ptr);
     if (box) {
+        qWnewSignalCleanup(ptr);
         g_dialogBtnAcceptedCallbacks.erase(ptr);
         g_dialogBtnRejectedCallbacks.erase(ptr);
         delete box;
@@ -1905,6 +1931,7 @@ void qScrollBarConnectValueChanged(int64_t ptr, void (*callback)(int32_t)) {
 void qScrollBarDelete(int64_t ptr) {
     QScrollBar* bar = reinterpret_cast<QScrollBar*>(ptr);
     if (bar) {
+        qWnewSignalCleanup(ptr);
         g_scrollBarCallbacks.erase(ptr);
         delete bar;
     }

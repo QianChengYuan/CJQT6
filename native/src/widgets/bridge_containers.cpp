@@ -16,6 +16,11 @@
 #include <QDockWidget>
 #include "bridge_string_utils.h"
 
+// 由 bridge_ext_wlayout.cpp 导出：清理 wlayout 控件信号回调 map（QGroupBox/
+// QStackedWidget/QToolBox/QDockWidget/QMdiArea），避免 delete 后地址复用导致
+// connect 去重误跳。
+extern "C" void qWlayoutSignalCleanup(int64_t ptr);
+
 extern "C" {
 
 // ============================================================
@@ -75,6 +80,7 @@ bool qGroupBoxIsChecked(int64_t ptr) {
 void qGroupBoxDelete(int64_t ptr) {
     QGroupBox* groupBox = reinterpret_cast<QGroupBox*>(ptr);
     if (groupBox) {
+        qWlayoutSignalCleanup(ptr);
         delete groupBox;
     }
 }
@@ -479,6 +485,7 @@ int32_t qStackedWidgetCount(int64_t ptr) {
 void qStackedWidgetDelete(int64_t ptr) {
     QStackedWidget* stacked = reinterpret_cast<QStackedWidget*>(ptr);
     if (stacked) {
+        qWlayoutSignalCleanup(ptr);
         delete stacked;
     }
 }
@@ -495,6 +502,7 @@ int64_t qToolBoxCreate() {
 void qToolBoxDelete(int64_t ptr) {
     QToolBox* toolbox = reinterpret_cast<QToolBox*>(ptr);
     if (toolbox) {
+        qWlayoutSignalCleanup(ptr);
         delete toolbox;
     }
 }
@@ -590,6 +598,7 @@ int64_t qMdiAreaCreate() {
 void qMdiAreaDelete(int64_t ptr) {
     QMdiArea* mdiArea = reinterpret_cast<QMdiArea*>(ptr);
     if (mdiArea) {
+        qWlayoutSignalCleanup(ptr);
         delete mdiArea;
     }
 }
@@ -687,6 +696,7 @@ int64_t qDockWidgetCreate(const char* title) {
 void qDockWidgetDelete(int64_t ptr) {
     QDockWidget* dock = reinterpret_cast<QDockWidget*>(ptr);
     if (dock) {
+        qWlayoutSignalCleanup(ptr);
         delete dock;
     }
 }

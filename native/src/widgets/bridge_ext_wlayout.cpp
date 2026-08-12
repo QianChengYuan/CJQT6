@@ -333,4 +333,33 @@ int32_t qMdiSubWindowIsShaded(int64_t ptr) {
     return w ? (w->isShaded() ? 1 : 0) : 0;
 }
 
+// wlayout 模块统一信号回调清理：对象 delete 后残留的条目会让 connect 去重
+// 保护（find != end 跳过注册）误判，复用同一地址的新对象 connect 被跳过、
+// 回调永不触发。由 qGroupBoxDelete/qStackedWidgetDelete/qToolBoxDelete/
+// qDockWidgetDelete/qMdiAreaDelete 调用。
+void qWlayoutSignalCleanup(int64_t ptr) {
+    g_gbClicked.erase(ptr);
+    g_gbToggled.erase(ptr);
+    g_swCurrentChanged.erase(ptr);
+    g_swWidgetRemoved.erase(ptr);
+    g_tbCurrentChanged.erase(ptr);
+    g_dwTopLevel.erase(ptr);
+    g_dwVisibility.erase(ptr);
+    g_dwDockLoc.erase(ptr);
+    g_maSubWinActivated.erase(ptr);
+}
+
+// 测试专用内省：查询 ptr 是否仍注册在任一 wlayout 控件信号回调 map 中。
+int32_t qWlayoutSignalRegistered(int64_t ptr) {
+    return (g_gbClicked.find(ptr) != g_gbClicked.end() ||
+            g_gbToggled.find(ptr) != g_gbToggled.end() ||
+            g_swCurrentChanged.find(ptr) != g_swCurrentChanged.end() ||
+            g_swWidgetRemoved.find(ptr) != g_swWidgetRemoved.end() ||
+            g_tbCurrentChanged.find(ptr) != g_tbCurrentChanged.end() ||
+            g_dwTopLevel.find(ptr) != g_dwTopLevel.end() ||
+            g_dwVisibility.find(ptr) != g_dwVisibility.end() ||
+            g_dwDockLoc.find(ptr) != g_dwDockLoc.end() ||
+            g_maSubWinActivated.find(ptr) != g_maSubWinActivated.end()) ? 1 : 0;
+}
+
 } // extern "C"

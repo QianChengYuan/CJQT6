@@ -316,4 +316,43 @@ void qButtonGroupConnectIdClicked(int64_t ptr, void (*cb)(int32_t)) {
     }
 }
 
+// misc 模块统一信号回调清理：对象 delete 后残留的条目会让 connect 去重
+// 保护（find != end 跳过注册）误判，复用同一地址的新对象 connect 被跳过、
+// 回调永不触发。由 qDateEditDelete/qTimeEditDelete/qDateTimeEditDelete/
+// qSystemTrayIconDelete/qButtonGroupDelete 调用。
+void qWmiscSignalCleanup(int64_t ptr) {
+    g_deDateChanged.erase(ptr);
+    g_deDateTimeChanged.erase(ptr);
+    g_teTimeChanged.erase(ptr);
+    g_teDateTimeChanged.erase(ptr);
+    g_dteDateChanged.erase(ptr);
+    g_dteTimeChanged.erase(ptr);
+    g_dteDateTimeChanged.erase(ptr);
+    g_stiActivated.erase(ptr);
+    g_stiMessageClicked.erase(ptr);
+    g_bgClicked.erase(ptr);
+    g_bgPressed.erase(ptr);
+    g_bgReleased.erase(ptr);
+    g_bgToggled.erase(ptr);
+    g_bgIdClicked.erase(ptr);
+}
+
+// 测试专用内省：查询 ptr 是否仍注册在任一 misc 控件信号回调 map 中。
+int32_t qWmiscSignalRegistered(int64_t ptr) {
+    return (g_deDateChanged.find(ptr) != g_deDateChanged.end() ||
+            g_deDateTimeChanged.find(ptr) != g_deDateTimeChanged.end() ||
+            g_teTimeChanged.find(ptr) != g_teTimeChanged.end() ||
+            g_teDateTimeChanged.find(ptr) != g_teDateTimeChanged.end() ||
+            g_dteDateChanged.find(ptr) != g_dteDateChanged.end() ||
+            g_dteTimeChanged.find(ptr) != g_dteTimeChanged.end() ||
+            g_dteDateTimeChanged.find(ptr) != g_dteDateTimeChanged.end() ||
+            g_stiActivated.find(ptr) != g_stiActivated.end() ||
+            g_stiMessageClicked.find(ptr) != g_stiMessageClicked.end() ||
+            g_bgClicked.find(ptr) != g_bgClicked.end() ||
+            g_bgPressed.find(ptr) != g_bgPressed.end() ||
+            g_bgReleased.find(ptr) != g_bgReleased.end() ||
+            g_bgToggled.find(ptr) != g_bgToggled.end() ||
+            g_bgIdClicked.find(ptr) != g_bgIdClicked.end()) ? 1 : 0;
+}
+
 } // extern "C"

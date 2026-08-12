@@ -18,6 +18,10 @@ static const char* safeCopyString(const QString& str) {
     return cjqt6::dupUtf8(str);
 }
 
+// 由 bridge_ext_wmisc.cpp 导出：清理日期时间控件信号回调 map（QDateEdit/QTimeEdit/
+// QDateTimeEdit），避免 delete 后地址复用导致 connect 去重误跳。
+extern "C" void qWmiscSignalCleanup(int64_t ptr);
+
 extern "C" {
 
 // ============================================================
@@ -357,6 +361,7 @@ int64_t qDateEditCreateWithDate(int64_t datePtr) {
 void qDateEditDelete(int64_t ptr) {
     QDateEdit* edit = reinterpret_cast<QDateEdit*>(ptr);
     if (edit) {
+        qWmiscSignalCleanup(ptr);
         delete edit;
     }
 }
@@ -439,6 +444,7 @@ int64_t qTimeEditCreateWithTime(int64_t timePtr) {
 void qTimeEditDelete(int64_t ptr) {
     QTimeEdit* edit = reinterpret_cast<QTimeEdit*>(ptr);
     if (edit) {
+        qWmiscSignalCleanup(ptr);
         delete edit;
     }
 }
@@ -509,6 +515,7 @@ int64_t qDateTimeEditCreateWithDateTime(int64_t dtPtr) {
 void qDateTimeEditDelete(int64_t ptr) {
     QDateTimeEdit* edit = reinterpret_cast<QDateTimeEdit*>(ptr);
     if (edit) {
+        qWmiscSignalCleanup(ptr);
         delete edit;
     }
 }
