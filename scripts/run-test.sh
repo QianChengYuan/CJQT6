@@ -11,6 +11,9 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
+# 供 cjpm.toml 的 ${CJQT6_ROOT} 替换（cjpm test 链接路径依赖）
+export CJQT6_ROOT="$PROJECT_DIR"
+
 # ---- 检测平台 ----
 detect_platform() {
     OS=$(uname -s)
@@ -61,19 +64,19 @@ find_qt() {
     return 1
 }
 
-QT_DIR=$(find_qt)
-if [ -z "$QT_DIR" ]; then
+QTDIR=$(find_qt)
+if [ -z "$QTDIR" ]; then
     echo "⚠ 未找到 Qt6，仅测试无需 Qt 的项"
 else
-    echo "Qt6: $QT_DIR"
+    echo "Qt6: $QTDIR"
 
     # 设置运行时环境
     case "$PLATFORM" in
         linux-x64)
-            export LD_LIBRARY_PATH="$QT_DIR/lib:$LD_LIBRARY_PATH"
+            export LD_LIBRARY_PATH="$QTDIR/lib:$LD_LIBRARY_PATH"
             ;;
         macos-x64|macos-arm64)
-            export DYLD_LIBRARY_PATH="$QT_DIR/lib:$DYLD_LIBRARY_PATH"
+            export DYLD_LIBRARY_PATH="$QTDIR/lib:$DYLD_LIBRARY_PATH"
             ;;
     esac
 fi

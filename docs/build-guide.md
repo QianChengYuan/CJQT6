@@ -931,6 +931,9 @@ export QT_QPA_PLATFORM=xcb  # 使用X11后端
 # Qt6
 setx QTDIR "C:\Qt\6.10.3\msvc2022_64"
 
+# CJQT6_ROOT（cjpm.toml 用 ${CJQT6_ROOT} 替换桥接库链接路径，必设，否则链接失败）
+setx CJQT6_ROOT "C:\CodeTools\cangjie_git\CJQT6"
+
 # PATH
 setx PATH "%PATH%;%QTDIR%\bin;C:\Program Files\CMake\bin"
 ```

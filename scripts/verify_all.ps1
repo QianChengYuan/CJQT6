@@ -52,7 +52,7 @@ Write-Host "==============================================" -ForegroundColor Cya
 # ---- 查找 cjpm ----
 $cjpm = Get-Command cjpm -ErrorAction SilentlyContinue
 if (-not $cjpm) {
-    foreach ($c in @("$env:USERPROFILE\.cangjie\tools\bin\cjpm.exe", "C:\CodeTools\cangjie\cangjie_1.1.0\tools\bin\cjpm.exe")) {
+    foreach ($c in @("$env:CANGJIE_HOME\tools\bin\cjpm.exe", "$env:USERPROFILE\.cangjie\tools\bin\cjpm.exe", "C:\CodeTools\cangjie\cangjie_1.1.0\tools\bin\cjpm.exe")) {
         if (Test-Path $c) { $cjpm = Get-Command $c; break }
     }
 }
@@ -103,7 +103,7 @@ if ($SkipTest -or $SkipCoverage) {
     Write-Host "[4/5] 生成覆盖率报告（cjcov）..." -ForegroundColor Cyan
     $cjcov = Get-Command cjcov -ErrorAction SilentlyContinue
     if (-not $cjcov) {
-        foreach ($c in @("$env:USERPROFILE\.cangjie\tools\bin\cjcov.exe", "C:\CodeTools\cangjie\cangjie_1.1.0\tools\bin\cjcov.exe")) {
+        foreach ($c in @("$env:CANGJIE_HOME\tools\bin\cjcov.exe", "$env:USERPROFILE\.cangjie\tools\bin\cjcov.exe", "C:\CodeTools\cangjie\cangjie_1.1.0\tools\bin\cjcov.exe")) {
             if (Test-Path $c) { $cjcov = Get-Command $c; break }
         }
     }

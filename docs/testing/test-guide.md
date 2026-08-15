@@ -9,17 +9,19 @@ cd C:/CodeTools/cangjie_git/CJQT6
 cjpm test
 ```
 
-### 1.2 运行指定模块测试
+### 1.2 运行指定测试（按名称过滤）
+
+本项目测试统一在 `src/test/`（package `cjqt6.test`），用 `--filter` 按测试类/方法名通配符过滤：
 
 ```bash
-# 运行paint模块测试
-cjpm test src paint
+# 过滤含 Paint 的测试类
+cjpm test --filter "*Paint*"
 
-# 运行widgets模块测试
-cjpm test src widgets
+# 过滤含 Widget 的测试类
+cjpm test --filter "*Widget*"
 
-# 运行core模块测试
-cjpm test src core
+# 组合通配符：包含 + 排除
+cjpm test --filter "*Test* -*Audio*"
 ```
 
 ### 1.3 查看测试列表
@@ -83,11 +85,11 @@ class MyWidgetTests {
 | 命令 | 说明 |
 |------|------|
 | `cjpm test` | 运行所有测试 |
-| `cjpm test src <package>` | 运行指定包测试 |
-| `cjpm test --filter=<pattern>` | 过滤测试用例 |
-| `cjpm test --parallel` | 并行执行测试 |
+| `cjpm test --filter <pattern>` | 按测试类/方法名通配符过滤 |
+| `cjpm test --parallel <N>` | 并行执行测试（N 为并行数） |
 | `cjpm test --timeout-each=10s` | 设置单测试超时 |
-| `cjpm test --show-all-output` | 显示所有输出 |
+| `cjpm test --dry-run` | 打印测试列表不执行 |
+| `cjpm test --coverage` | 生成覆盖率信息 |
 
 ---
 
@@ -132,7 +134,7 @@ cjpm test --coverage
 
 ### 5.2 查看覆盖率统计
 
-覆盖率报告生成在`tests/reports/coverage/`目录。
+覆盖率报告由 `cjpm test --coverage` 生成在 `target/` 下默认输出目录；可用 `cjcov` 进一步生成 HTML/XML/JSON 详细报告。
 
 ---
 

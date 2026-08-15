@@ -129,9 +129,9 @@ Write-Host "[env] QT_QPA_FONTDIR = $env:QT_QPA_FONTDIR" -ForegroundColor Cyan
 
 # Step 5. 运行测试
 if ($RunTest) {
-    Write-Host ""; Write-Host "[test] cjpm test --coverage --exclude-tags=requires_gui_dialog,requires_gui_drag..." -ForegroundColor Cyan
+    Write-Host ""; Write-Host "[test] cjpm test --coverage --exclude-tags=requires_gui_dialog,requires_gui_drag,requires_audio..." -ForegroundColor Cyan
     Set-Location $projectRoot
-    cjpm test --coverage --exclude-tags=requires_gui_dialog,requires_gui_drag --timeout-each=30s 2>&1
+    cjpm test --coverage --exclude-tags=requires_gui_dialog,requires_gui_drag,requires_audio --timeout-each=30s 2>&1
     if ($LASTEXITCODE -eq 0) { Write-Host "[test] PASS" -ForegroundColor Green } else { Write-Host "[test] FAIL" -ForegroundColor Red }
 } else {
     Write-Host ""

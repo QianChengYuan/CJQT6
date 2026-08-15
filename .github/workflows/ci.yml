@@ -252,6 +252,8 @@ jobs:
           QT_QPA_FONTDIR: C:\Windows\Fonts
         run: |
           .\tests\deploy_qt_test.ps1 -RunTest -SkipBuild -QtDir "${{ env.QTDIR }}"
+        # 说明：Windows 同样排除 requires_audio（QVideoWidget.show 等依赖真实
+        # 多媒体输出设备，offscreen 环境会挂起；与 Linux 口径对齐）
 
       - name: 生成覆盖率报告（cjcov）
         shell: pwsh

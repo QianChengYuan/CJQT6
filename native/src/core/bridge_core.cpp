@@ -18,6 +18,12 @@
 #include <QSettings>
 #include <QShortcut>
 #include <QStandardPaths>
+#include <QThread>
+#if defined(Q_OS_WIN)
+#include <private/qeventdispatcher_win_p.h>
+#elif defined(Q_OS_UNIX)
+#include <private/qeventdispatcher_unix_p.h>
+#endif
 #include <QTimer>
 #include <QTranslator>
 #include <QUrl>
@@ -27,11 +33,16 @@
 #include <exception>
 #include <thread>
 #include <cstdio>
+#include <cstdarg>
 #include <cstdlib>
 #include "bridge_string_utils.h"
 
 // 全局应用程序指针
 static QApplication* g_app = nullptr;
+
+// 当前线程正在运行的事件循环（thread_local：每线程独立，
+// qApplicationQuit 精确退出本线程循环，不影响其他线程的 exec）
+thread_local QEventLoop* t_currentLoop = nullptr;
 
 // 全局翻译器
 static QTranslator* g_qtTranslator = nullptr;
@@ -143,41 +154,143 @@ int32_t qIsObjectAlive(int64_t ptr) {
 // QApplication 桥接函数
 // ============================================================
 
+
+// ---- Qt 消息拦截（调试后删除） ----
+static void cjqt6QtMsgHandler(QtMsgType type, const QMessageLogContext& ctx, const QString& msg) {
+    fprintf(stderr, "[qt-msg] type=%d %s\n", (int)type, msg.toUtf8().constData());
+    fflush(stderr);
+}
+// ---- Qt 消息拦截结束 ----
+// ---- 临时诊断（调试后删除） ----
+static inline void dbg(const char* fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+    fprintf(stderr, "[cjqt6-dbg] ");
+    vfprintf(stderr, fmt, args);
+    fprintf(stderr, "\n");
+    fflush(stderr);
+    va_end(args);
+    // 同时写文件（绕过 PowerShell stderr 管道缓冲）
+    va_start(args, fmt);
+    FILE* f = fopen("C:\\CodeTools\\cangjie_git\\CJQT6\\bridge_dbg.log", "a");
+    if (f) {
+        fprintf(f, "[dbg] ");
+        vfprintf(f, fmt, args);
+        fprintf(f, "\n");
+        fclose(f);
+    }
+    va_end(args);
+}
+// ---- 临时诊断结束 ----
 int64_t qApplicationCreate() {
+    dbg("qApplicationCreate: g_app=%p dispatcher=%p thread=%p appThread=%p sameAsApp=%d", (void*)g_app, (void*)QAbstractEventDispatcher::instance(QThread::currentThread()), (void*)QThread::currentThread(), g_app ? (void*)g_app->thread() : (void*)0, g_app ? (g_app->thread() == QThread::currentThread() ? 1 : 0) : -1);
+    // 测试框架/多线程场景：QApplication 是全局单例（线程亲和=创建线程），
+    // 其他线程复用它时本线程没有事件分发器，QEventLoop::exec 会立即返回 -1、
+    // QTimer::start 直接失败（"Timers can only be used with threads started with QThread"）。
+    // 这里为当前线程补建分发器（每线程独立，线程结束时随 QThreadData 销毁）。
+    static bool handlerInstalled = false;
+    if (!handlerInstalled) {
+        qInstallMessageHandler(cjqt6QtMsgHandler);
+        handlerInstalled = true;
+        dbg("qApplicationCreate: Qt message handler installed");
+    }
+    QThread* curThread = QThread::currentThread();
+    if (!QAbstractEventDispatcher::instance(curThread)) {
+#if defined(Q_OS_WIN)
+        QAbstractEventDispatcher* dispatcher = new QEventDispatcherWin32();
+#elif defined(Q_OS_UNIX)
+        QAbstractEventDispatcher* dispatcher = new QEventDispatcherUNIX();
+#endif
+        curThread->setEventDispatcher(dispatcher);
+        dbg("qApplicationCreate: auto-created dispatcher=%p for thread=%p", (void*)dispatcher, (void*)curThread);
+    }
+    // 多线程并发保护：QApplication 是 Qt 单例，多个线程同时 new 会触发
+    // qFatal（"instance already exists"）导致 __fastfail(0xC0000409)。
+    // 用 atomic_flag 自旋锁（项目既定模式，std::mutex 在仓颉线程会死锁）。
+    static std::atomic_flag g_appCreateLock = ATOMIC_FLAG_INIT;
+    while (g_appCreateLock.test_and_set(std::memory_order_acquire)) {
+        std::this_thread::yield();
+    }
     if (!g_app) {
-        // 注释掉软件渲染，尝试使用 OpenGL
-        // qputenv("QSG_RHI_BACKEND", "software");
-        // qputenv("QT_QUICK_BACKEND", "software");
+        // 外部（原生测试 main / 宿主程序）已创建 QApplication 时复用，
+        // 避免创建第二个实例崩溃。
+        QCoreApplication* existing = QCoreApplication::instance();
+        if (existing) {
+            g_app = static_cast<QApplication*>(existing);
+            dbg("qApplicationCreate: reuse external QApplication %p", (void*)g_app);
+        } else {
+            // 注意：QApplication(int&, char**) 不能传 argv=nullptr，否则 Qt 在解析
+            // 命令行/初始化平台插件时可能越界访问 argv[0]，触发 /GS 栈保护
+            // (__fastfail STATUS_FAIL_FAST_FATAL_STACK_BUFFER_OVERRUN = 0xC0000409)。
+            // 必须给出合法的 argv[0]。
+            static int s_argc = 1;
+            static char s_arg0[] = "cjqt6";
+            static char* s_argv[] = { s_arg0, nullptr };
 
-        // 注意：QApplication(int&, char**) 不能传 argv=nullptr，否则 Qt 在解析
-        // 命令行/初始化平台插件时可能越界访问 argv[0]，触发 /GS 栈保护
-        // (__fastfail STATUS_FAIL_FAST_FATAL_STACK_BUFFER_OVERRUN = 0xC0000409)。
-        // 必须给出合法的 argv[0]。
-        static int s_argc = 1;
-        static char s_arg0[] = "cjqt6";
-        static char* s_argv[] = { s_arg0, nullptr };
-
-        try {
-            g_app = new QApplication(s_argc, s_argv);
-        } catch (const std::exception& e) {
-            fprintf(stderr, "[cjqt6_bridge] qApplicationCreate failed: %s\n", e.what());
-            g_app = nullptr;
-        } catch (...) {
-            fprintf(stderr, "[cjqt6_bridge] qApplicationCreate failed: unknown C++ exception\n");
-            g_app = nullptr;
+            try {
+                g_app = new QApplication(s_argc, s_argv);
+                dbg("qApplicationCreate: NEW QApplication ok, after-construct dispatcher=%p", (void*)QAbstractEventDispatcher::instance(QThread::currentThread()));
+            } catch (const std::exception& e) {
+                fprintf(stderr, "[cjqt6_bridge] qApplicationCreate failed: %s\n", e.what());
+                g_app = nullptr;
+            } catch (...) {
+                fprintf(stderr, "[cjqt6_bridge] qApplicationCreate failed: unknown C++ exception\n");
+                g_app = nullptr;
+            }
         }
     }
+    g_appCreateLock.clear(std::memory_order_release);
     return reinterpret_cast<int64_t>(g_app);
 }
 
+// 由 bridge_ui_poster.cpp 提供：exec 启动时标记当前线程循环运行并补发积压
+extern "C" void qSetGuiThreadForPoster();
+// 由 bridge_ui_poster.cpp 提供：exec 退出后标记无循环运行
+extern "C" void qUnsetGuiThreadForPoster();
+
 int32_t qApplicationExec() {
-    if (g_app) {
-        return g_app->exec();
+    dbg("qApplicationExec: g_app=%p dispatcher=%p thread=%p", (void*)g_app, (void*)QAbstractEventDispatcher::instance(QThread::currentThread()), (void*)QThread::currentThread());
+    if (!g_app) {
+        return -1;
     }
-    return -1;
+    QThread* curThread = QThread::currentThread();
+    if (!QAbstractEventDispatcher::instance(curThread)) {
+#if defined(Q_OS_WIN)
+        QAbstractEventDispatcher* dispatcher = new QEventDispatcherWin32();
+#elif defined(Q_OS_UNIX)
+        QAbstractEventDispatcher* dispatcher = new QEventDispatcherUNIX();
+#endif
+        curThread->setEventDispatcher(dispatcher);
+        dbg("qApplicationExec: auto-created dispatcher=%p for thread=%p", (void*)dispatcher, (void*)curThread);
+    }
+    // QGuiApplication::exec 强制只能在进程主线程调用（"Must be called from the
+    // main thread"），而仓颉测试框架把用例分发到 worker 线程执行。
+    // 改用 QCoreApplication::exec（内部即 QEventLoop，无主线程限制），
+    // 事件循环/定时器/信号槽行为与 QApplication::exec 一致。
+    qSetGuiThreadForPoster();
+    // 用 QEventLoop 而非 QCoreApplication::exec：
+    // 1) 无主线程限制（QGuiApplication::exec 强制只能在进程主线程调用）；
+    // 2) QCoreApplication::quit() 会设置粘滞的 quitNow，导致同线程后续
+    //    exec 立即返回 -1；QEventLoop::exit 只退出当前 loop，无粘滞。
+    // thread_local：每个线程独立 loop，quit 精确退出本线程的事件循环。
+    QEventLoop loop;
+    t_currentLoop = &loop;
+    int r = loop.exec();
+    t_currentLoop = nullptr;
+    qUnsetGuiThreadForPoster();
+    dbg("qApplicationExec: returned %d", r);
+    return r;
 }
 
 void qApplicationQuit() {
+    dbg("qApplicationQuit: g_app=%p thread=%p t_currentLoop=%p", (void*)g_app, (void*)QThread::currentThread(), (void*)t_currentLoop);
+    if (t_currentLoop) {
+        // 退出当前线程正在运行的事件循环（QEventLoop::exit 线程安全，
+        // 只退出本 loop，不设置全局 quitNow，同线程后续 exec 不受影响）
+        t_currentLoop->exit(0);
+        return;
+    }
+    // 兜底：没有事件循环运行时走 QApplication::quit
     if (g_app) {
         g_app->quit();
     }
@@ -278,6 +391,7 @@ void qTimerStart(int64_t ptr) {
     QTimer* timer = reinterpret_cast<QTimer*>(ptr);
     if (timer) {
         timer->start();
+        dbg("qTimerStart: timer=%p thread=%p dispatcher=%p", (void*)timer, (void*)QThread::currentThread(), (void*)QAbstractEventDispatcher::instance(QThread::currentThread()));
     }
 }
 
@@ -294,6 +408,7 @@ void qTimerSetTimeout(int64_t ptr, void (*callback)(int64_t)) {
         int64_t timerPtr = ptr;
         g_timerCallbacks[ptr] = [callback, timerPtr](int64_t) { callback(timerPtr); };
         QObject::connect(timer, &QTimer::timeout, [timerPtr]() {
+            dbg("qTimer timeout FIRED: timer=%p thread=%p", (void*)timerPtr, (void*)QThread::currentThread());
             auto it = g_timerCallbacks.find(timerPtr);
             if (it != g_timerCallbacks.end()) {
                 it->second(timerPtr);

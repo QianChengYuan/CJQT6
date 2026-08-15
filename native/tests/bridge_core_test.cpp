@@ -18,7 +18,10 @@
 
 #include <QApplication>
 #include <QObject>
+#include <QThread>
+#include <QTimer>
 #include <atomic>
+#include <chrono>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
@@ -527,6 +530,60 @@ static void testWcoreSignalCleanup() {
     }
 }
 
+// ---------------- 跨线程事件循环复现（仓颉测试框架场景） ----------------
+// 仓颉测试框架在不同 adopted 线程里跑测试类：QApplication 创建于首个线程，
+// 后续线程里调用 qApplicationExec。验证 QEventLoop 方案在这些线程里
+// 定时器正常触发、quit 正常退出。
+extern "C" {
+int64_t qApplicationCreate();
+int32_t qApplicationExec();
+void qApplicationQuit();
+}
+
+static void testCrossThreadEventLoop() {
+    // adopted 线程里 QTimer + QEventLoop 是否正常工作。
+    // 注意：裸 std::thread（adopted 线程）默认没有事件分发器，QEventLoop::exec
+    // 会立即返回 -1；必须先经 qApplicationCreate 为当前线程补建分发器
+    // （桥接层在仓颉测试框架场景正是这么做的）。
+    std::thread worker([&] {
+        // 先经桥接 API 补建当前线程分发器（qApplicationCreate 同时复用外部
+        // QApplication 单例，不会重复创建实例）
+        int64_t app = qApplicationCreate();
+        CHECK(app != 0);
+
+        // 分发器就绪后，QEventLoop + QTimer 应在 adopted 线程正常工作
+        int fired = 0;
+        QTimer::singleShot(30, [&] {
+            ++fired;
+        });
+        QEventLoop loop;
+        QTimer::singleShot(60, [&] {
+            ++fired;
+            loop.exit(42);
+        });
+        int rc = loop.exec();
+        CHECK(rc == 42);
+        CHECK(fired == 2);
+
+        // 再通过桥接 API 验证 exec 循环
+        fired = 0;
+        QTimer timer;
+        timer.setInterval(20);
+        QObject::connect(&timer, &QTimer::timeout, [&] {
+            ++fired;
+            if (fired >= 3) {
+                timer.stop();
+                qApplicationQuit();
+            }
+        });
+        timer.start();
+        int rc2 = qApplicationExec();
+        CHECK(rc2 == 0);
+        CHECK(fired >= 3);
+    });
+    worker.join();
+}
+
 int main(int argc, char* argv[]) {
     // QSpinBox 等是 QWidget，需要 QApplication；CI 无显示环境走 offscreen。
     qputenv("QT_QPA_PLATFORM", "offscreen");
@@ -544,6 +601,7 @@ int main(int argc, char* argv[]) {
     RUN_SUITE(testWnewSignalCleanup);
     RUN_SUITE(testWselectSignalCleanup);
     RUN_SUITE(testWcoreSignalCleanup);
+    RUN_SUITE(testCrossThreadEventLoop);
 
     std::printf("bridge_core_test: %d checks, %d failed\n", g_checks, g_failed);
     return g_failed == 0 ? 0 : 1;

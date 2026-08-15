@@ -8,11 +8,13 @@
 cjpm test
 ```
 
-### Q2：如何运行指定模块的测试？
+### Q2：如何运行指定的测试？
+
+本项目测试统一在 `src/test/`（package `cjqt6.test`），用 `--filter` 按名称通配符过滤：
 
 ```bash
-cjpm test src widgets  # 运行widgets模块测试
-cjpm test src paint    # 运行paint模块测试
+cjpm test --filter "*Widget*"   # 过滤含 Widget 的测试类
+cjpm test --filter "*Paint*"    # 过滤含 Paint 的测试类
 ```
 
 ### Q3：如何过滤运行特定的测试？
@@ -188,7 +190,7 @@ cjpm test --coverage
 
 ### Q20：覆盖率报告在哪里？
 
-默认生成在`tests/reports/coverage/`目录。
+由 `cjpm test --coverage` 生成在 `target/` 下默认输出目录；可用 `cjcov` 进一步生成 HTML/XML/JSON 详细报告。
 
 ---
 
@@ -196,7 +198,7 @@ cjpm test --coverage
 
 ### Q21：测试运行很慢怎么办？
 
-1. 使用并行执行：`cjpm test --parallel`
+1. 使用并行执行：`cjpm test --parallel 4`
 2. 检查是否有资源未释放
 3. 使用`--filter`只运行相关测试
 
@@ -210,14 +212,16 @@ cjpm test --coverage
 
 ### Q23：如何查看测试详细输出？
 
+测试失败时 `cjpm test` 默认输出失败用例的断言详情与堆栈。如需聚焦查看，用 `--filter` 缩小范围：
+
 ```bash
-cjpm test --show-all-output
+cjpm test --filter "*失败的测试名*"
 ```
 
 ### Q24：测试失败时如何调试？
 
-1. 查看失败原因
-2. 使用`--no-capture-output`查看实时输出
+1. 查看失败原因（cjpm 默认输出失败用例详情）
+2. 用 `--filter` 只跑失败测试，查看完整输出
 3. 添加打印语句定位问题
 
 ### Q25：如何跳过某些测试？

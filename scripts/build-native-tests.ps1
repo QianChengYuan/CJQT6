@@ -1,4 +1,4 @@
-# 用法：在 CJQT6 根目录下运行
+﻿# 用法：在 CJQT6 根目录下运行
 # .\scripts\build-native-tests.ps1 [-Asan]
 # 编译并运行桥接层 C++ 单元测试（P0-3：存活表三件套 + 字符串工具）。
 # 使用独立构建目录 native/build_native_tests，不影响 bridge 主构建。

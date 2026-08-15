@@ -30,7 +30,7 @@ CJQT6 通过 FFI 桥接技术，把 Qt6 的 C++ API 封装成仓颉原生 API �
 
 | 模块 | 包名 | 主要内容 |
 |------|------|---------|
-| 核心 | `cjqt6.core` | `QApplication`/`QApp`、`QWidget`、`QTimer`、`QThread`/`QThreadPool`、`QSettings`、`QShortcut`、`QPropertyAnimation`、`QUndoStack`、`QJsonValue/Object/Array/Document`、`QItemSelectionModel`、`QFileSystemWatcher`、`QStandardPaths`、`QDesktopServices`、`QClipboard`、`QScreen`、`QProcess`、`QMimeData`/`QDrag`、`SignalEmitter`、信号常量与回调类型、`QtResource` 接口、异常类 |
+| 核心 | `cjqt6.core` | `QApplication`/`QApp`（含全局 QSS `setStyleSheet`/`QLocale`）、`QWidget`、`QUiLoader`（加载 Qt Designer .ui）、`QTimer`、`QThread`/`QThreadPool`、`QSettings`、`QShortcut`、`QPropertyAnimation`、`QUndoStack`、`QJsonValue/Object/Array/Document`、`QItemSelectionModel`、`QFileSystemWatcher`、`QStandardPaths`、`QDesktopServices`、`QClipboard`、`QScreen`、`QProcess`、`QMimeData`/`QDrag`、`SignalEmitter`、`UiPoster`（UI 线程投递）、对象存活表 `trackObject`/`untrackObject`/`isObjectAlive`、`freeBridgeString`、信号常量与回调类型、`QtResource` 接口、异常类 |
 | 控件 | `cjqt6.widgets` | `QLabel`、`QPushButton`、`QLineEdit`、`QTextEdit`、`QCheckBox`、`QRadioButton`、`QComboBox`、`QSlider`、`QSpinBox`、`QProgressBar`、`QGroupBox`/`QTabWidget`/`QScrollArea`/`QSplitter`、`QDockWidget`、`QMdiArea`、`QSystemTrayIcon`、`QGraphicsView`/`QGraphicsItem` 系列、日期/时间控件等（38 个文件） |
 | 图形/布局 | `cjqt6.gui` | `QVBoxLayout`/`QHBoxLayout`/`QGridLayout`/`QFormLayout`、`Alignment`/`Orientation`/`Margins`、`QCursor`、`QPalette`、`QIcon`、`QFontMetrics`/`QFontInfo`、`QStyleHelper`、`QSyntaxHighlighter`、`QTextDocument`/`QTextCursor` |
 | 对话框 | `cjqt6.dialogs` | `QMessageBox`、`QFileDialog`、`QInputDialog`、`QColorDialog`、`QFontDialog`、`QProgressDialog`、`QWizard`/`QWizardPage`、`QErrorMessage` |
@@ -38,7 +38,7 @@ CJQT6 通过 FFI 桥接技术，把 Qt6 的 C++ API 封装成仓颉原生 API �
 | 绘图 | `cjqt6.paint` | `QPainter`、`QPen`、`QBrush`、`QColor`、`QFont`、`QTransform`、`QPainterPath`、`QPixmap`/`QImage`、渐变、`QFontDatabase` |
 | QML | `cjqt6.qml` | `QQmlApplicationEngine`、`QQuickView`/`QQuickWidget`/`QQuickItem` |
 | 多媒体 | `cjqt6.multimedia` | `QMediaPlayer`、`QAudioOutput`、`QSoundEffect`、`QCamera`、`QImageCapture`、`QVideoWidget` |
-| 网络 | `cjqt6.network` | `QTcpSocket`、`QUdpSocket`、`QHostAddress`、`QNetworkAccessManager`/`QNetworkRequest`/`QNetworkReply`、`QSslSocket`、`QLocalServer`、`QNetworkProxy` |
+| 网络 | `cjqt6.network` | `QTcpSocket`、`QTcpServer`、`QUdpSocket`、`QHostAddress`、`QNetworkAccessManager`/`QNetworkRequest`/`QNetworkReply`、`QSslSocket`、`QLocalServer`、`QNetworkProxy` |
 | 数据库 | `cjqt6.sql` | `QSqlDatabase`、`QSqlQuery`、`QSqlTableModel` |
 | 视图 | `cjqt6.views` | `QListView`/`QTableView`/`QTreeView`/`QTableWidget`/`QTreeWidget`/`QListWidget`、`QAbstractItemModel`、`QStandardItemModel`、`QSortFilterProxyModel`、`QFileSystemModel`、`QHeaderView` |
 | 打印 | `cjqt6.print` | `QPrinter`、`QPrintDialog`/`QPrintPreviewDialog` |
@@ -158,6 +158,28 @@ main(): Int32 {
 
 > 注意 `CString` 回调：Qt 返回的 CString 由桥接层管理，回调内用 `.toString()` 立即转为仓颉 `String`，不要长期持有 CString。
 
+### 3.7 跨线程与 UI 更新（UiPoster）
+工作线程不能直接碰 UI。用 `cjqt6.core` 的 `UiPoster`（桥接层单例）把回调投递到 UI 线程执行：
+```
+UiPoster.runOnUiThread({ => label.setText("后台完成") })
+```
+回调可以捕获局部变量（它不是 `CFunc`，由桥接层在 UI 线程代为执行）。
+
+### 3.8 对象存活表（反向失效通知）
+桥接层维护 native 存活表：Qt 对象在 C++ 侧被析构（如父对象级联析构）时会反向标记失效。仓颉侧可查询：
+```
+trackObject(ptr)      // 封装类内部注册
+untrackObject(ptr)    // close 时注销
+isObjectAlive(ptr)    // 查询指针是否仍有效，级联析构场景防悬垂/double-free
+```
+（均在 `src/core/cstring_utils.cj` 导出。）
+
+### 3.9 其他常用入口
+- 全局 QSS：`QApp.setStyleSheet("QPushButton { color: red; }")` / `QApp.styleSheet()`。
+- 加载 Qt Designer `.ui` 文件：`QUiLoader`（`src/core/widget.cj` 同目录，见 `src/test/uiloader_test.cj`）。
+- 字符串返回释放：桥接字符串返回统一走 bridge 自持释放（修复 Windows CRT 堆不匹配崩溃），仓颉侧用完调 `freeBridgeString(c)`（见 `src/core/cstring_utils.cj`）。
+- 信号连接稳定性：桥接层在对象 `delete` 时清理全部 86 个静态信号回调 map，避免控件复用指针时 connect 偶发失效——若回调"偶发不触发"，先确认桥接库是最新重编的。
+
 ### 3.6 对话框
 `cjqt6.dialogs`：
 ```
@@ -229,6 +251,15 @@ cjpm build
 - `cjpm.toml` 已配置各平台 `link-option`：Windows 用 `releases/windows-x64/cjqt6_bridge.lib`（MSVC）/ `.dll`（MinGW），Linux 用 `-Lreleases/linux-x64 -lcjqt6_bridge`。
 - 常见链接错误 `cannot find -lcjqt6_bridge` → 桥接库没构建/没部署到 `releases/`，回到 5.1。
 - 全量重建脚本：`.\scripts\rebuild_all.ps1`（先桥接库后 cjpm + 可选示例，`-Example dormitory_manager` 指定示例，`-SkipExample` 跳过）。
+- **工程治理门禁**（提交前建议跑）：
+  - `.\scripts\verify_all.ps1` — 一键全量门禁（构建+测试，自动注入 `CJQT6_ROOT`）。
+  - `.\scripts\run-test.ps1` / `run-test.sh` — 跑根包测试。
+  - `.\scripts\check-coverage.ps1` — 覆盖率门禁（当前基线约 79%）。
+  - `.\scripts\check-release.ps1` — 发布物检查；`.\scripts\gen-api-index.ps1` — 重新生成 `docs/api/INDEX.md`。
+  - `.\scripts\build-native-tests.ps1/.sh` — 桥接层 C++ 单测（CI 也跑）。
+- **配套工具**（`tools/` 下独立 cjpm 工程）：
+  - `tools/ui2cj` — Qt Designer `.ui` 文件转仓颉代码（无工程时自动生成最小可运行工程）；入口脚本 `scripts/gen-ui.ps1`。
+  - `tools/cjqt6-diagnose` — 环境诊断。
 
 ### 5.3 运行（需要 Qt6 运行时 DLL）
 ```powershell
@@ -269,7 +300,8 @@ C:\Qt\6.10.3\msvc2022_64\bin\windeployqt.exe examples\notepad\target\release\bin
 | 程序崩溃 / 双击无反应 | 没部署 Qt6 DLL 到运行时 PATH，或没 `windeployqt`；先 `setup-qt-env.ps1` |
 | `cannot find -lcjqt6_bridge` | 桥接库未构建或未拷到 `releases/` → 重做 5.1 |
 | 桥接库改了代码但运行没变化 | 增量构建跳过链接 → 用 `cmake --build . --clean-first` 或删 `native\build_windows_x64` 重来 |
-| 回调不触发 | 信号连接方法名写错（用 `setOnClick` 而非 `connect`）；`CFunc` 闭包捕获问题 → 改顶层 `let` + 全局 `?T` 变量 |
+| 回调不触发 | 信号连接方法名写错（用 `setOnClick` 而非 `connect`）；`CFunc` 闭包捕获问题 → 改顶层 `let` + 全局 `?T` 变量；桥接库非最新（旧版 delete 不清回调 map，控件指针复用时偶发失效）→ `--clean-first` 重编 |
+| 级联析构崩溃 / double-free | 父对象析构连带删除子对象，仓颉侧再 `close()`；用 `isObjectAlive(ptr)` 先检查，封装类已内置 track/untrack |
 | 控件不显示 / 布局错乱 | `addWidget` 忘了 `.getPtr()`；窗口没 `setLayout`；没 `window.show()` |
 | 文本对齐无效 | `setAlignment` 要传 `Alignment.Center.value`（Int32），不是 `Alignment.Center` 对象 |
 | 悬垂指针崩溃 | 父控件 `close()` 后子控件指针失效；Qt 对象别依赖 GC，显式 `close()` 且保证使用期 |
@@ -280,7 +312,9 @@ C:\Qt\6.10.3\msvc2022_64\bin\windeployqt.exe examples\notepad\target\release\bin
 ## 8. 深入查阅指引（按需 Read 这些源码/文档）
 
 - 信号机制与回调类型：`src/core/signal.cj`（含 `SignalConnection`）、`src/core/emitter.cj`
-- 资源管理接口与异常：`src/core/resource.cj`
+- 资源管理接口与异常：`src/core/resource.cj`；对象存活表与桥接字符串释放：`src/core/cstring_utils.cj`
+- UI 线程投递：`src/core/uiposter.cj`；Qt Designer 加载：`src/test/uiloader_test.cj`
+- TCP 服务器（多客户端聊天范式）：`src/network/tcp_server.cj`、`examples/qq_chat_lan/`
 - 控件实现范式（任选）：`src/widgets/label.cj`、`pushbutton.cj`、`lineedit.cj`、`slider.cj`
 - 布局实现：`src/gui/layout.cj`、类型定义 `src/gui/types.cj`
 - 图形/文本：`src/gui/textdoc.cj`（QTextDocument/QTextCursor）、`src/gui/syntaxhighlighter.cj`

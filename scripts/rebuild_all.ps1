@@ -28,6 +28,7 @@ Write-Host "工作目录: $RootDir"
 $cjpm = Get-Command cjpm -ErrorAction SilentlyContinue
 if (-not $cjpm) {
     $candidates = @(
+        "$env:CANGJIE_HOME\tools\bin\cjpm.exe",
         "$env:USERPROFILE\.cangjie\tools\bin\cjpm.exe",
         "C:\CodeTools\cangjie\cangjie_1.1.0\tools\bin\cjpm.exe"
     )

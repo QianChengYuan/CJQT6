@@ -17,7 +17,8 @@ package cjqt6.core
 //   - 一次性任务执行后自动从注册表注销，避免注册表无界增长。
 // ============================================================
 
-foreign func qUiPosterPost(id: Int64): Unit
+// 投递到指定线程（threadPtr 为 QThread.currentThreadPtr 记录的目标线程）
+foreign func qUiPosterPost(threadPtr: Int64, id: Int64): Unit
 
 // 一次性任务载体：闭包捕获不可变引用、改其字段来拿注册表 id，
 // 规避 Cangjie「捕获可变变量需直接调用」的限制（与信号捕获约定一致）。
@@ -28,15 +29,21 @@ private class UiPosterTask {
 /// UI 线程投递器（单例，全部静态方法）
 public class UiPoster {
 
-    /// 把一个可捕获闭包投递到 GUI 线程事件队列（异步，先进先出）
-    public static func runOnUiThread(callback: () -> Unit): Unit {
+    /// 把一个可捕获闭包投递到指定线程的事件队列（异步，先进先出）。
+    /// threadPtr 为 0 时使用当前线程（调用方线程）。
+    internal static func runOnUiThreadOn(threadPtr: Int64, callback: () -> Unit): Unit {
         let holder = UiPosterTask()
         let id = registerVoidCallback({ =>
             callback()
             unregisterVoidCallback(holder.id)
         })
         holder.id = id
-        unsafe { qUiPosterPost(id) }
+        unsafe { qUiPosterPost(threadPtr, id) }
+    }
+
+    /// 把一个可捕获闭包投递到当前线程（调用方线程）事件队列（异步，先进先出）
+    public static func runOnUiThread(callback: () -> Unit): Unit {
+        runOnUiThreadOn(QThread.currentThreadPtr(), callback)
     }
 
     /// 别名：runOnUiThread
@@ -60,8 +67,10 @@ public func runOnUiThread(callback: () -> Unit): Unit {
 ///       label.setText("完成")
 ///   })
 public func runAsync(work: () -> Unit, onDone: () -> Unit): Unit {
+    // 记录发起线程（GUI/测试线程），工作线程完成后回投到该线程
+    let targetThread = QThread.currentThreadPtr()
     spawn { =>
         work()
-        runOnUiThread(onDone)
+        UiPoster.runOnUiThreadOn(targetThread, onDone)
     }
 }

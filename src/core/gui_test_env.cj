@@ -24,14 +24,10 @@ public class GUITestEnvironment {
     
     public func setupEnvironment(): Unit {
         refCount += 1
-        if (refCount > 1) {
-            return
-        }
-        
-        if (!isAppInstanceValid()) {
-            createAppInstance()
-        }
-        
+        // 桥接层 qApplicationCreate 会在跨线程时自动销毁旧 app 并在当前线程重建，
+        // 同线程复用返回同一指针。总是调用以正确处理测试框架跨线程跑测试类的场景，
+        // 避免后续测试类持有悬垂的旧 app 指针。
+        createAppInstance()
         ready = true
         println("[GUI测试] QApplication实例已创建")
     }

@@ -8,9 +8,9 @@
 
 | 平台 | 桥接库产物 | 锁定 Qt 版本 | 验证方式 | 状态 |
 |------|-----------|-------------|----------|------|
-| Windows x64 (MSVC 2022) | `releases/windows-x64/` | **6.10.3** (msvc2022_64) | CI（windows-2022）+ 本机 | ✅ 全量 915 用例通过 |
+| Windows x64 (MSVC 2022) | `releases/windows-x64/` | **6.10.3** (msvc2022_64) | CI（windows-2022）+ 本机 | ✅ 全量用例通过 |
 | Windows x64 (MinGW) | `releases/windows-x64/` | 6.10.3 (mingw_64) | 本机交叉验证 | ⚠️ 见 ABI 说明 |
-| Linux x86_64 (GCC) | `releases/linux-x64/` | **6.4.2** (gcc_64) | CI（ubuntu-24.04）+ WSL | ✅ 全量 876 PASSED + 39 SKIPPED |
+| Linux x86_64 (GCC) | `releases/linux-x64/` | **6.4.2** (gcc_64) | CI（ubuntu-24.04）+ WSL | ✅ 全量用例通过（requires_audio 组按需跳过） |
 | macOS x86_64 | `releases/macos-x64/` | 待定 | 无（P1-3 待做） | ⏳ 占位 |
 | macOS arm64 | `releases/macos-arm64/` | 待定 | 无（P1-3 待做） | ⏳ 占位 |
 
@@ -49,10 +49,10 @@ Qt **小版本之间存在 ABI 差异**，换版本后旧 bridge 可能**静默�
 
 | 版本 | 平台/工具链 | 实测结论 |
 |------|------------|----------|
-| Qt 6.10.3 (msvc2022_64) | Windows 10/11 + MSVC 2022 | 全量 915 用例通过；`valueChanged(QString)` 编译期报错；`qt_qFindChild_helper` 已不导出 |
+| Qt 6.10.3 (msvc2022_64) | Windows 10/11 + MSVC 2022 | 全量用例通过；`valueChanged(QString)` 编译期报错；`qt_qFindChild_helper` 已不导出 |
 | Qt 6.10.2 (msvc2022_64) | 本机历史版本 | 曾用于开发期验证 |
 | Qt 6.7.0 (msvc2019_64) | 本机历史版本 | 曾用于开发期验证 |
-| Qt 6.4.2 (gcc_64) | Ubuntu 24.04 + GCC 13.3 | 全量 876 PASSED + 39 SKIPPED（requires_audio 组）；gstreamer 1.24 下多媒体测试正常退出 |
+| Qt 6.4.2 (gcc_64) | Ubuntu 24.04 + GCC 13.3 | 全量用例通过（requires_audio 组跳过）；gstreamer 1.24 下多媒体测试正常退出 |
 
 ## 5. 维护约定
 
