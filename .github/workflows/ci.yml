@@ -4,7 +4,7 @@
 # 触发：push/PR 到 main，以及手动 workflow_dispatch。
 # 平台：
 #   - Linux   (ubuntu-22.04, GCC 13, Qt 6.4.2 gcc_64)   —— 主仓 GitCode
-#   - Windows (windows-2022, MSVC 2022, Qt 6.10.3 msvc2022_64) —— GitHub 镜像
+#   - Windows (windows-2022, MSVC 2022, Qt 6.9.1 msvc2022_64) —— GitHub 镜像
 # 流程：装仓颉 SDK → aqtinstall 装 Qt → 编译 bridge → cjpm build
 #       → offscreen 全量测试（--coverage）→ cjcov 报告 → 上传产物。
 #
@@ -30,10 +30,11 @@ on:
 
 env:
   CANGJIE_VERSION: "1.1.0"
-  # Linux: Qt 6.4.2（与 releases/linux-x64 锁定一致）；Windows: 6.10.3 msvc2022_64
+  # Linux: Qt 6.4.2（与 releases/linux-x64 锁定一致）；Windows: 6.9.1 msvc2022_64
+  # （6.10.3 的 qtbase 包含 QtNoLinkTargetHelpers.cmake，aqtinstall 3.3.0 的 py7zr 解压报 Bad7zFile）
   QT_VERSION_LINUX: "6.4.2"
   QT_ARCH_LINUX: "gcc_64"
-  QT_VERSION_WINDOWS: "6.10.3"
+  QT_VERSION_WINDOWS: "6.9.1"
   QT_ARCH_WINDOWS: "win64_msvc2022_64"
 
 jobs:
@@ -140,10 +141,13 @@ jobs:
           # 运行时需能找桥接库 libcjqt6_bridge.so（releases/linux-x64），cjpm 不会拷到测试 PATH
           LD_LIBRARY_PATH: ${{ env.QTDIR }}/lib:${{ env.CANGJIE_HOME }}/runtime/lib/linux_x86_64_cjnative:${{ env.CJQT6_ROOT }}/releases/linux-x64
         run: |
-          # requires_audio 标签的多媒体测试组（QAudioOutput/QMediaPlayer/QSoundEffect/
-          # 相机采集等）依赖音频设备，CI runner 无音频服务会阻塞 gstreamer 后端枚举，
-          # 故在 Linux CI 上排除；Windows CI 无此问题，保持全量覆盖。
-          timeout 600s cjpm test --coverage --exclude-tags=requires_audio
+          # 排除三类需交互/真实硬件的测试（与 Windows CI 口径对齐）：
+          # - requires_gui_dialog: QMessageBox/QFileDialog 等模态静态方法，offscreen 阻塞等交互
+          # - requires_gui_drag:   拖拽测试，offscreen 无鼠标输入
+          # - requires_audio:      QAudioOutput/QMediaPlayer 等依赖音频设备，CI runner 无音频服务
+          timeout 600s cjpm test --coverage \
+            --exclude-tags=requires_gui_dialog,requires_gui_drag,requires_audio \
+            --timeout-each=30s
 
       - name: 生成覆盖率报告（cjcov）
         shell: bash
@@ -158,8 +162,8 @@ jobs:
 
       - name: 覆盖率门禁（P0-1，双口径阈值）
         shell: bash
-        # Linux CI 以 --exclude-tags=requires_audio 跑测试（无音频服务），覆盖口径低于
-        # Windows 全量，故用保守阈值（含测试 60%/库源码 42%），待回填实测精确值。
+        # Linux/Windows CI 均排除 requires_gui_dialog/drag/audio（口径对齐），
+        # 用保守阈值（含测试 60%/库源码 42%），待回填实测精确值。
         run: |
           if [ -f cov_output/report/coverage.json ]; then
             pwsh -NoProfile -File scripts/check-coverage.ps1 \
@@ -176,7 +180,7 @@ jobs:
           if-no-files-found: warn
 
   windows:
-    name: Windows (MSVC 2022 · Qt 6.10.3)
+    name: Windows (MSVC 2022 · Qt 6.9.1)
     runs-on: windows-2022
     timeout-minutes: 60
     env:
@@ -252,8 +256,8 @@ jobs:
           QT_QPA_FONTDIR: C:\Windows\Fonts
         run: |
           .\tests\deploy_qt_test.ps1 -RunTest -SkipBuild -QtDir "${{ env.QTDIR }}"
-        # 说明：Windows 同样排除 requires_audio（QVideoWidget.show 等依赖真实
-        # 多媒体输出设备，offscreen 环境会挂起；与 Linux 口径对齐）
+        # 说明：Windows 排除 requires_gui_dialog/drag/audio（模态对话框需交互、
+        # 拖拽需鼠标输入、多媒体需真实设备，offscreen 环境会挂起；与 Linux 口径对齐）
 
       - name: 生成覆盖率报告（cjcov）
         shell: pwsh
@@ -268,7 +272,7 @@ jobs:
 
       - name: 覆盖率门禁（P0-1，双口径阈值）
         shell: pwsh
-        # Windows 跑全量测试，用默认阈值（含测试 70% / 库源码 52%）
+        # Windows 排除 requires_gui_dialog/drag/audio，用默认阈值（含测试 70% / 库源码 52%）
         run: |
           if (Test-Path "cov_output\report\coverage.json") {
             .\scripts\check-coverage.ps1
