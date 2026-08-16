@@ -141,12 +141,15 @@ jobs:
           # 运行时需能找桥接库 libcjqt6_bridge.so（releases/linux-x64），cjpm 不会拷到测试 PATH
           LD_LIBRARY_PATH: ${{ env.QTDIR }}/lib:${{ env.CANGJIE_HOME }}/runtime/lib/linux_x86_64_cjnative:${{ env.CJQT6_ROOT }}/releases/linux-x64
         run: |
-          # 排除三类需交互/真实硬件的测试（与 Windows CI 口径对齐）：
+          # 排除需交互/真实硬件/平台特定命令的测试：
           # - requires_gui_dialog: QMessageBox/QFileDialog 等模态静态方法，offscreen 阻塞等交互
           # - requires_gui_drag:   拖拽测试，offscreen 无鼠标输入
           # - requires_audio:      QAudioOutput/QMediaPlayer 等依赖音频设备，CI runner 无音频服务
+          # - requires_process_spawn: QProcess 测试用 cmd /c（Windows 专用），Linux 无 cmd
+          # - requires_printer:    QPrinter nativeFormat 依赖打印系统，Linux CI 无 CUPS
+          # Windows CI 不排除后两者（有 cmd 和打印系统），保持覆盖
           timeout 600s cjpm test --coverage \
-            --exclude-tags=requires_gui_dialog,requires_gui_drag,requires_audio \
+            --exclude-tags=requires_gui_dialog,requires_gui_drag,requires_audio,requires_process_spawn,requires_printer \
             --timeout-each=30s
 
       - name: 生成覆盖率报告（cjcov）

@@ -101,6 +101,7 @@ class QPrinterTests {
     }
 
     @TestCase
+    @Tag[requires_printer]
     func testOutputFormatRoundtrip() {
         let p = QPrinter()
         p.setOutputFormat(OutputFormat.pdfFormat())
