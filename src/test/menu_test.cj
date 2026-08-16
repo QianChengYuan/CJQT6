@@ -236,6 +236,7 @@ class QMenuTests {
     }
 
     @TestCase
+    @Tag[requires_gui_dialog]
     func testPopup() {
         let m = QMenu("ctx")
         m.popup(100, 200)
