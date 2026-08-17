@@ -139,39 +139,39 @@ public class QTableWidget {
         }
     }
     
-    public func show() {
+    public func show(): Unit {
         unsafe {
             qWidgetShow(ptr)
         }
     }
     
-    public func hide() {
+    public func hide(): Unit {
         unsafe {
             qWidgetHide(ptr)
         }
     }
     
-    public func resize(width: Int32, height: Int32) {
+    public func resize(width: Int32, height: Int32): Unit {
         unsafe {
             qWidgetResize(ptr, width, height)
         }
     }
 
     /// 设置最小尺寸
-    public func setMinimumSize(minw: Int32, minh: Int32) {
+    public func setMinimumSize(minw: Int32, minh: Int32): Unit {
         unsafe {
             qWidgetSetMinimumSize(ptr, minw, minh)
         }
     }
     
     // 设置行列数
-    public func setRowCount(rows: Int32) {
+    public func setRowCount(rows: Int32): Unit {
         unsafe {
             qTableWidgetSetRowCount(ptr, rows)
         }
     }
     
-    public func setColumnCount(cols: Int32) {
+    public func setColumnCount(cols: Int32): Unit {
         unsafe {
             qTableWidgetSetColumnCount(ptr, cols)
         }
@@ -190,7 +190,7 @@ public class QTableWidget {
     }
     
     // 设置表头
-    public func setHorizontalHeaderLabel(col: Int32, label: String) {
+    public func setHorizontalHeaderLabel(col: Int32, label: String): Unit {
         unsafe {
             var cstr = LibC.mallocCString(label)
             qTableWidgetSetHorizontalHeaderLabel(ptr, col, cstr)
@@ -198,7 +198,7 @@ public class QTableWidget {
         }
     }
     
-    public func setVerticalHeaderLabel(row: Int32, label: String) {
+    public func setVerticalHeaderLabel(row: Int32, label: String): Unit {
         unsafe {
             var cstr = LibC.mallocCString(label)
             qTableWidgetSetVerticalHeaderLabel(ptr, row, cstr)
@@ -207,7 +207,7 @@ public class QTableWidget {
     }
     
     // 设置单元格内容
-    public func setItem(row: Int32, col: Int32, text: String) {
+    public func setItem(row: Int32, col: Int32, text: String): Unit {
         unsafe {
             var cstr = LibC.mallocCString(text)
             qTableWidgetSetItem(ptr, row, col, cstr)
@@ -226,39 +226,39 @@ public class QTableWidget {
     }
     
     // 清空
-    public func clear() {
+    public func clear(): Unit {
         unsafe {
             qTableWidgetClear(ptr)
         }
     }
     
-    public func clearContents() {
+    public func clearContents(): Unit {
         unsafe {
             qTableWidgetClearContents(ptr)
         }
     }
     
     // 插入行列
-    public func insertRow(row: Int32) {
+    public func insertRow(row: Int32): Unit {
         unsafe {
             qTableWidgetInsertRow(ptr, row)
         }
     }
     
-    public func insertColumn(col: Int32) {
+    public func insertColumn(col: Int32): Unit {
         unsafe {
             qTableWidgetInsertColumn(ptr, col)
         }
     }
     
     // 删除行列
-    public func removeRow(row: Int32) {
+    public func removeRow(row: Int32): Unit {
         unsafe {
             qTableWidgetRemoveRow(ptr, row)
         }
     }
     
-    public func removeColumn(col: Int32) {
+    public func removeColumn(col: Int32): Unit {
         unsafe {
             qTableWidgetRemoveColumn(ptr, col)
         }
@@ -277,105 +277,105 @@ public class QTableWidget {
         }
     }
     
-    public func setCurrentCell(row: Int32, col: Int32) {
+    public func setCurrentCell(row: Int32, col: Int32): Unit {
         unsafe {
             qTableWidgetSetCurrentCell(ptr, row, col)
         }
     }
     
     // 选择设置
-    public func setSelectionBehavior(behavior: Int32) {
+    public func setSelectionBehavior(behavior: Int32): Unit {
         unsafe {
             qTableWidgetSetSelectionBehavior(ptr, behavior)
         }
     }
     
-    public func setSelectionMode(mode: Int32) {
+    public func setSelectionMode(mode: Int32): Unit {
         unsafe {
             qTableWidgetSetSelectionMode(ptr, mode)
         }
     }
     
     // 显示设置
-    public func setShowGrid(show: Bool) {
+    public func setShowGrid(show: Bool): Unit {
         unsafe {
             qTableWidgetSetShowGrid(ptr, show)
         }
     }
     
-    public func setSortingEnabled(enabled: Bool) {
+    public func setSortingEnabled(enabled: Bool): Unit {
         unsafe {
             qTableWidgetSetSortingEnabled(ptr, enabled)
         }
     }
     
-    public func setAlternatingRowColors(enabled: Bool) {
+    public func setAlternatingRowColors(enabled: Bool): Unit {
         unsafe {
             qTableWidgetSetAlternatingRowColors(ptr, enabled)
         }
     }
     
     // 调整大小
-    public func resizeColumnsToContents() {
+    public func resizeColumnsToContents(): Unit {
         unsafe {
             qTableWidgetResizeColumnsToContents(ptr)
         }
     }
     
-    public func resizeRowsToContents() {
+    public func resizeRowsToContents(): Unit {
         unsafe {
             qTableWidgetResizeRowsToContents(ptr)
         }
     }
     
-    public func setColumnWidth(col: Int32, width: Int32) {
+    public func setColumnWidth(col: Int32, width: Int32): Unit {
         unsafe {
             qTableWidgetSetColumnWidth(ptr, col, width)
         }
     }
     
-    public func setRowHeight(row: Int32, height: Int32) {
+    public func setRowHeight(row: Int32, height: Int32): Unit {
         unsafe {
             qTableWidgetSetRowHeight(ptr, row, height)
         }
     }
     
     // 水平表头设置
-    public func setHorizontalHeaderStretchLastSection(stretch: Bool) {
+    public func setHorizontalHeaderStretchLastSection(stretch: Bool): Unit {
         unsafe {
             qTableWidgetHorizontalHeaderSetStretchLastSection(ptr, stretch)
         }
     }
     
     // 设置所有列的调整模式
-    public func setHorizontalHeaderSectionResizeMode(mode: Int32) {
+    public func setHorizontalHeaderSectionResizeMode(mode: Int32): Unit {
         unsafe {
             qTableWidgetHorizontalHeaderSetSectionResizeMode(ptr, mode)
         }
     }
     
     // 设置指定列的调整模式
-    public func setColumnResizeMode(col: Int32, mode: Int32) {
+    public func setColumnResizeMode(col: Int32, mode: Int32): Unit {
         unsafe {
             qTableWidgetHorizontalHeaderSetSectionResizeModeColumn(ptr, col, mode)
         }
     }
     
     // 自动填充宽度（所有列平均分配）
-    public func setAutoFillWidth() {
+    public func setAutoFillWidth(): Unit {
         unsafe {
             qTableWidgetHorizontalHeaderSetSectionResizeMode(ptr, Stretch)
         }
     }
     
     // 垂直表头设置
-    public func setVerticalHeaderStretchLastSection(stretch: Bool) {
+    public func setVerticalHeaderStretchLastSection(stretch: Bool): Unit {
         unsafe {
             qTableWidgetVerticalHeaderSetStretchLastSection(ptr, stretch)
         }
     }
     
-    public func setDefaultRowHeight(height: Int32) {
+    public func setDefaultRowHeight(height: Int32): Unit {
         unsafe {
             qTableWidgetVerticalHeaderSetDefaultSectionSize(ptr, height)
         }
@@ -395,25 +395,25 @@ public class QTableWidget {
         }
     }
 
-    public func setItem(row: Int32, col: Int32, item: QTableWidgetItem) {
+    public func setItem(row: Int32, col: Int32, item: QTableWidgetItem): Unit {
         unsafe {
             qTableWidgetSetItemPtr(ptr, row, col, item.getPtr())
         }
     }
 
-    public func setHorizontalHeaderItem(col: Int32, item: QTableWidgetItem) {
+    public func setHorizontalHeaderItem(col: Int32, item: QTableWidgetItem): Unit {
         unsafe {
             qTableWidgetSetHorizontalHeaderItem(ptr, col, item.getPtr())
         }
     }
 
-    public func setVerticalHeaderItem(row: Int32, item: QTableWidgetItem) {
+    public func setVerticalHeaderItem(row: Int32, item: QTableWidgetItem): Unit {
         unsafe {
             qTableWidgetSetVerticalHeaderItem(ptr, row, item.getPtr())
         }
     }
 
-    public func setHorizontalHeaderLabels(labels: Array<String>) {
+    public func setHorizontalHeaderLabels(labels: Array<String>): Unit {
         unsafe {
             var joined = ""
             for (i in 0..labels.size) {
@@ -541,37 +541,37 @@ public class QTableWidget {
 
     // ========== 信号 ==========
 
-    public func setOnCellClicked(callback: CFunc<(Int32, Int32) -> Unit>) {
+    public func setOnCellClicked(callback: CFunc<(Int32, Int32) -> Unit>): Unit {
         unsafe {
             qTableWidgetConnectCellClicked(ptr, callback)
         }
     }
 
-    public func setOnCellChanged(callback: CFunc<(Int32, Int32) -> Unit>) {
+    public func setOnCellChanged(callback: CFunc<(Int32, Int32) -> Unit>): Unit {
         unsafe {
             qTableWidgetConnectCellChanged(ptr, callback)
         }
     }
 
-    public func setOnCellDoubleClicked(callback: CFunc<(Int32, Int32) -> Unit>) {
+    public func setOnCellDoubleClicked(callback: CFunc<(Int32, Int32) -> Unit>): Unit {
         unsafe {
             qTableWidgetConnectCellDoubleClicked(ptr, callback)
         }
     }
 
-    public func setOnCurrentCellChanged(callback: CFunc<(Int32, Int32) -> Unit>) {
+    public func setOnCurrentCellChanged(callback: CFunc<(Int32, Int32) -> Unit>): Unit {
         unsafe {
             qTableWidgetConnectCurrentCellChanged(ptr, callback)
         }
     }
 
-    public func setOnItemSelectionChanged(callback: CFunc<() -> Unit>) {
+    public func setOnItemSelectionChanged(callback: CFunc<() -> Unit>): Unit {
         unsafe {
             qTableWidgetConnectItemSelectionChanged(ptr, callback)
         }
     }
 
-    public func setOnItemClicked(callback: CFunc<(Int64) -> Unit>) {
+    public func setOnItemClicked(callback: CFunc<(Int64) -> Unit>): Unit {
         unsafe {
             qTableWidgetConnectItemClicked(ptr, callback)
         }
@@ -581,7 +581,7 @@ public class QTableWidget {
         ptr
     }
     
-    public func delete() {
+    public func delete(): Unit {
         if (ptr != 0) {
             unsafe {
                 qTableWidgetDelete(ptr)
@@ -633,7 +633,7 @@ public class QTableWidgetItem {
         }
     }
 
-    public func setText(text: String) {
+    public func setText(text: String): Unit {
         unsafe {
             let cstr = LibC.mallocCString(text)
             qTableWidgetItemSetText(ptr, cstr)

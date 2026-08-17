@@ -50,28 +50,28 @@ public class QCheckBox <: QtResource {
         trackObject(ptr)
     }
     
-    public func show() {
+    public func show(): Unit {
         checkValid()
         unsafe {
             qWidgetShow(ptr)
         }
     }
     
-    public func hide() {
+    public func hide(): Unit {
         checkValid()
         unsafe {
             qWidgetHide(ptr)
         }
     }
     
-    public func resize(width: Int32, height: Int32) {
+    public func resize(width: Int32, height: Int32): Unit {
         checkValid()
         unsafe {
             qWidgetResize(ptr, width, height)
         }
     }
     
-    public func setText(text: String) {
+    public func setText(text: String): Unit {
         checkValid()
         unsafe {
             let cstr = LibC.mallocCString(text)
@@ -90,7 +90,7 @@ public class QCheckBox <: QtResource {
         }
     }
     
-    public func setChecked(checked: Bool) {
+    public func setChecked(checked: Bool): Unit {
         checkValid()
         unsafe {
             qCheckBoxSetChecked(ptr, checked)
@@ -105,7 +105,7 @@ public class QCheckBox <: QtResource {
     }
     
     /// 设置启用/禁用
-    public func setEnabled(enabled: Bool) {
+    public func setEnabled(enabled: Bool): Unit {
         checkValid()
         unsafe {
             qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
@@ -121,7 +121,7 @@ public class QCheckBox <: QtResource {
     }
     
     /// 设置样式表
-    public func setStyleSheet(style: String) {
+    public func setStyleSheet(style: String): Unit {
         checkValid()
         unsafe {
             let cstr = LibC.mallocCString(style)
@@ -131,7 +131,7 @@ public class QCheckBox <: QtResource {
     }
     
     /// 设置最小尺寸
-    public func setMinimumSize(minw: Int32, minh: Int32) {
+    public func setMinimumSize(minw: Int32, minh: Int32): Unit {
         checkValid()
         unsafe {
             qWidgetSetMinimumSize(ptr, minw, minh)
@@ -139,7 +139,7 @@ public class QCheckBox <: QtResource {
     }
     
     /// 设置最大尺寸
-    public func setMaximumSize(maxw: Int32, maxh: Int32) {
+    public func setMaximumSize(maxw: Int32, maxh: Int32): Unit {
         checkValid()
         unsafe {
             qWidgetSetMaximumSize(ptr, maxw, maxh)
@@ -147,7 +147,7 @@ public class QCheckBox <: QtResource {
     }
     
     /// 设置状态变化回调
-    public func setOnStateChanged(callback: Int32Callback) {
+    public func setOnStateChanged(callback: Int32Callback): Unit {
         checkValid()
         unsafe {
             qCheckBoxConnectStateChanged(ptr, callback)
@@ -155,7 +155,7 @@ public class QCheckBox <: QtResource {
     }
     
     /// 断开状态变化信号
-    public func disconnectStateChanged() {
+    public func disconnectStateChanged(): Unit {
         if (ptr != 0) {
             unsafe {
                 qCheckBoxDisconnectStateChanged(ptr)
@@ -169,7 +169,7 @@ public class QCheckBox <: QtResource {
     }
     
     /// 设置三态勾选状态（使用 CheckState 常量）
-    public func setCheckState(state: Int32) {
+    public func setCheckState(state: Int32): Unit {
         checkValid()
         unsafe {
             qCheckBoxSetCheckState(ptr, state)
@@ -185,7 +185,7 @@ public class QCheckBox <: QtResource {
     }
     
     /// 设置是否三态
-    public func setTristate(tristate: Bool) {
+    public func setTristate(tristate: Bool): Unit {
         checkValid()
         unsafe {
             qCheckBoxSetTristate(ptr, if (tristate) { 1 } else { 0 })
@@ -201,7 +201,7 @@ public class QCheckBox <: QtResource {
     }
     
     /// 点击回调（带 checked 状态，0/1）
-    public func setOnClicked(callback: Int32Callback) {
+    public func setOnClicked(callback: Int32Callback): Unit {
         checkValid()
         unsafe {
             qCheckBoxConnectClicked(ptr, callback)

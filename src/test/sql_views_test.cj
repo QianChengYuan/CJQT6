@@ -2071,6 +2071,7 @@ class QHeaderViewTests {
     }
 
     @TestCase
+    @Tag[requires_gui_dialog]
     func testResizeModeAndVisible() {
         // 注：无 model 时按 index 调用 setSectionResizeMode(0, ...) 在 Qt 6.4.2 会触发
         //     SIGSEGV（本地 Windows Qt 6.10.3 正常），故去掉该 index 重载调用。

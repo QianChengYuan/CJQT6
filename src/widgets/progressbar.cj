@@ -61,28 +61,28 @@ public class QProgressBar <: QtResource {
         trackObject(ptr)
     }
     
-    public func show() {
+    public func show(): Unit {
         checkValid()
         unsafe {
             qWidgetShow(ptr)
         }
     }
     
-    public func hide() {
+    public func hide(): Unit {
         checkValid()
         unsafe {
             qWidgetHide(ptr)
         }
     }
     
-    public func resize(width: Int32, height: Int32) {
+    public func resize(width: Int32, height: Int32): Unit {
         checkValid()
         unsafe {
             qWidgetResize(ptr, width, height)
         }
     }
     
-    public func setValue(value: Int32) {
+    public func setValue(value: Int32): Unit {
         checkValid()
         unsafe {
             qProgressBarSetValue(ptr, value)
@@ -96,14 +96,14 @@ public class QProgressBar <: QtResource {
         }
     }
     
-    public func setRange(min: Int32, max: Int32) {
+    public func setRange(min: Int32, max: Int32): Unit {
         checkValid()
         unsafe {
             qProgressBarSetRange(ptr, min, max)
         }
     }
     
-    public func setTextVisible(visible: Bool) {
+    public func setTextVisible(visible: Bool): Unit {
         checkValid()
         unsafe {
             qProgressBarSetTextVisible(ptr, visible)
@@ -111,7 +111,7 @@ public class QProgressBar <: QtResource {
     }
     
     /// 设置显示格式（如 "%p%" 显示百分比）
-    public func setFormat(format: String) {
+    public func setFormat(format: String): Unit {
         checkValid()
         unsafe {
             let cstr = LibC.mallocCString(format)
@@ -143,7 +143,7 @@ public class QProgressBar <: QtResource {
     }
     
     /// 设置方向
-    public func setOrientation(orientation: Int32) {
+    public func setOrientation(orientation: Int32): Unit {
         checkValid()
         unsafe {
             qProgressBarSetOrientation(ptr, orientation)
@@ -151,7 +151,7 @@ public class QProgressBar <: QtResource {
     }
     
     /// 设置反向外观
-    public func setInvertedAppearance(invert: Bool) {
+    public func setInvertedAppearance(invert: Bool): Unit {
         checkValid()
         unsafe {
             qProgressBarSetInvertedAppearance(ptr, invert)
@@ -159,7 +159,7 @@ public class QProgressBar <: QtResource {
     }
     
     /// 重置进度条
-    public func reset() {
+    public func reset(): Unit {
         checkValid()
         unsafe {
             qProgressBarReset(ptr)
@@ -167,7 +167,7 @@ public class QProgressBar <: QtResource {
     }
 
     /// 设置最小值
-    public func setMinimum(value: Int32) {
+    public func setMinimum(value: Int32): Unit {
         checkValid()
         unsafe {
             qProgressBarSetMinimum(ptr, value)
@@ -183,7 +183,7 @@ public class QProgressBar <: QtResource {
     }
 
     /// 设置最大值
-    public func setMaximum(value: Int32) {
+    public func setMaximum(value: Int32): Unit {
         checkValid()
         unsafe {
             qProgressBarSetMaximum(ptr, value)
@@ -199,7 +199,7 @@ public class QProgressBar <: QtResource {
     }
 
     /// 设置文本方向
-    public func setTextDirection(direction: Int32) {
+    public func setTextDirection(direction: Int32): Unit {
         checkValid()
         unsafe {
             qProgressBarSetTextDirection(ptr, direction)
@@ -231,7 +231,7 @@ public class QProgressBar <: QtResource {
     }
 
     /// 设置文本对齐方式（Qt::Alignment 标志组合）
-    public func setAlignment(alignment: Int32) {
+    public func setAlignment(alignment: Int32): Unit {
         checkValid()
         unsafe {
             qProgressBarSetAlignment(ptr, alignment)
@@ -239,7 +239,7 @@ public class QProgressBar <: QtResource {
     }
 
     /// 设置值变化回调
-    public func setOnValueChanged(callback: Int32Callback) {
+    public func setOnValueChanged(callback: Int32Callback): Unit {
         checkValid()
         unsafe {
             qProgressBarConnectValueChanged(ptr, callback)
@@ -247,7 +247,7 @@ public class QProgressBar <: QtResource {
     }
 
     /// 设置启用/禁用
-    public func setEnabled(enabled: Bool) {
+    public func setEnabled(enabled: Bool): Unit {
         checkValid()
         unsafe {
             qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
@@ -263,7 +263,7 @@ public class QProgressBar <: QtResource {
     }
     
     /// 设置样式表
-    public func setStyleSheet(style: String) {
+    public func setStyleSheet(style: String): Unit {
         checkValid()
         unsafe {
             let cstr = LibC.mallocCString(style)
@@ -273,7 +273,7 @@ public class QProgressBar <: QtResource {
     }
     
     /// 设置最小尺寸
-    public func setMinimumSize(minw: Int32, minh: Int32) {
+    public func setMinimumSize(minw: Int32, minh: Int32): Unit {
         checkValid()
         unsafe {
             qWidgetSetMinimumSize(ptr, minw, minh)
@@ -281,7 +281,7 @@ public class QProgressBar <: QtResource {
     }
     
     /// 设置最大尺寸
-    public func setMaximumSize(maxw: Int32, maxh: Int32) {
+    public func setMaximumSize(maxw: Int32, maxh: Int32): Unit {
         checkValid()
         unsafe {
             qWidgetSetMaximumSize(ptr, maxw, maxh)

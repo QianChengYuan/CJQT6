@@ -1388,7 +1388,7 @@ class QTextBrowserTests {
     @TestCase
     func testSource() {
         let tb = QTextBrowser()
-        tb.setSource("http://example.com")
+        tb.setSource("http://example.com") // cjlint-ignore !G.OTH.03 测试用示例URL
         let src = tb.source()
         @Expect(src.contains("example.com"), true)
         tb.delete()

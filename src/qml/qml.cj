@@ -799,7 +799,7 @@ public class QQuickWindow <: QtResource {
     }
     
     /// 设置宽度变化回调
-    public func setOnWidthChanged(callback: Int32Callback) {
+    public func setOnWidthChanged(callback: Int32Callback): Unit {
         checkValid()
         unsafe {
             qQuickWindowConnectWidthChanged(ptr, callback)
@@ -807,7 +807,7 @@ public class QQuickWindow <: QtResource {
     }
     
     /// 断开宽度变化信号
-    public func disconnectWidthChanged() {
+    public func disconnectWidthChanged(): Unit {
         if (ptr != 0) {
             unsafe {
                 qQuickWindowDisconnectWidthChanged(ptr)
@@ -816,7 +816,7 @@ public class QQuickWindow <: QtResource {
     }
     
     /// 设置高度变化回调
-    public func setOnHeightChanged(callback: Int32Callback) {
+    public func setOnHeightChanged(callback: Int32Callback): Unit {
         checkValid()
         unsafe {
             qQuickWindowConnectHeightChanged(ptr, callback)
@@ -824,7 +824,7 @@ public class QQuickWindow <: QtResource {
     }
     
     /// 断开高度变化信号
-    public func disconnectHeightChanged() {
+    public func disconnectHeightChanged(): Unit {
         if (ptr != 0) {
             unsafe {
                 qQuickWindowDisconnectHeightChanged(ptr)
@@ -833,7 +833,7 @@ public class QQuickWindow <: QtResource {
     }
     
     /// 设置可见性变化回调
-    public func setOnVisibleChanged(callback: Int32Callback) {
+    public func setOnVisibleChanged(callback: Int32Callback): Unit {
         checkValid()
         unsafe {
             qQuickWindowConnectVisibleChanged(ptr, callback)
@@ -841,7 +841,7 @@ public class QQuickWindow <: QtResource {
     }
     
     /// 断开可见性变化信号
-    public func disconnectVisibleChanged() {
+    public func disconnectVisibleChanged(): Unit {
         if (ptr != 0) {
             unsafe {
                 qQuickWindowDisconnectVisibleChanged(ptr)
@@ -996,7 +996,7 @@ public class QQmlComponent <: QtResource {
     }
     
     /// 设置状态变化回调（Status.Null=0/Ready=1/Loading=2/Error=3）
-    public func setOnStatusChanged(callback: Int32Callback) {
+    public func setOnStatusChanged(callback: Int32Callback): Unit {
         checkValid()
         unsafe {
             qQmlComponentConnectStatusChanged(ptr, callback)
@@ -1004,7 +1004,7 @@ public class QQmlComponent <: QtResource {
     }
     
     /// 断开状态变化信号
-    public func disconnectStatusChanged() {
+    public func disconnectStatusChanged(): Unit {
         if (ptr != 0) {
             unsafe {
                 qQmlComponentDisconnectStatusChanged(ptr)
@@ -1623,7 +1623,7 @@ public class QQuickItem <: QtResource {
     }
     
     /// 设置X坐标变化回调
-    public func setOnXChanged(callback: VoidCallback) {
+    public func setOnXChanged(callback: VoidCallback): Unit {
         checkValid()
         unsafe {
             qQuickItemConnectXChanged(ptr, callback)
@@ -1631,7 +1631,7 @@ public class QQuickItem <: QtResource {
     }
     
     /// 断开X坐标变化信号
-    public func disconnectXChanged() {
+    public func disconnectXChanged(): Unit {
         if (ptr != 0) {
             unsafe {
                 qQuickItemDisconnectXChanged(ptr)
@@ -1640,7 +1640,7 @@ public class QQuickItem <: QtResource {
     }
     
     /// 设置Y坐标变化回调
-    public func setOnYChanged(callback: VoidCallback) {
+    public func setOnYChanged(callback: VoidCallback): Unit {
         checkValid()
         unsafe {
             qQuickItemConnectYChanged(ptr, callback)
@@ -1648,7 +1648,7 @@ public class QQuickItem <: QtResource {
     }
     
     /// 断开Y坐标变化信号
-    public func disconnectYChanged() {
+    public func disconnectYChanged(): Unit {
         if (ptr != 0) {
             unsafe {
                 qQuickItemDisconnectYChanged(ptr)
@@ -1657,7 +1657,7 @@ public class QQuickItem <: QtResource {
     }
     
     /// 设置宽度变化回调
-    public func setOnWidthChanged(callback: VoidCallback) {
+    public func setOnWidthChanged(callback: VoidCallback): Unit {
         checkValid()
         unsafe {
             qQuickItemConnectWidthChanged(ptr, callback)
@@ -1665,7 +1665,7 @@ public class QQuickItem <: QtResource {
     }
     
     /// 断开宽度变化信号
-    public func disconnectWidthChanged() {
+    public func disconnectWidthChanged(): Unit {
         if (ptr != 0) {
             unsafe {
                 qQuickItemDisconnectWidthChanged(ptr)
@@ -1674,7 +1674,7 @@ public class QQuickItem <: QtResource {
     }
     
     /// 设置高度变化回调
-    public func setOnHeightChanged(callback: VoidCallback) {
+    public func setOnHeightChanged(callback: VoidCallback): Unit {
         checkValid()
         unsafe {
             qQuickItemConnectHeightChanged(ptr, callback)
@@ -1682,7 +1682,7 @@ public class QQuickItem <: QtResource {
     }
     
     /// 断开高度变化信号
-    public func disconnectHeightChanged() {
+    public func disconnectHeightChanged(): Unit {
         if (ptr != 0) {
             unsafe {
                 qQuickItemDisconnectHeightChanged(ptr)
@@ -1691,7 +1691,7 @@ public class QQuickItem <: QtResource {
     }
     
     /// 设置不透明度变化回调
-    public func setOnOpacityChanged(callback: VoidCallback) {
+    public func setOnOpacityChanged(callback: VoidCallback): Unit {
         checkValid()
         unsafe {
             qQuickItemConnectOpacityChanged(ptr, callback)
@@ -1699,7 +1699,7 @@ public class QQuickItem <: QtResource {
     }
     
     /// 断开不透明度变化信号
-    public func disconnectOpacityChanged() {
+    public func disconnectOpacityChanged(): Unit {
         if (ptr != 0) {
             unsafe {
                 qQuickItemDisconnectOpacityChanged(ptr)
@@ -1708,7 +1708,7 @@ public class QQuickItem <: QtResource {
     }
     
     /// 设置旋转变化回调
-    public func setOnRotationChanged(callback: VoidCallback) {
+    public func setOnRotationChanged(callback: VoidCallback): Unit {
         checkValid()
         unsafe {
             qQuickItemConnectRotationChanged(ptr, callback)
@@ -1716,7 +1716,7 @@ public class QQuickItem <: QtResource {
     }
     
     /// 断开旋转变化信号
-    public func disconnectRotationChanged() {
+    public func disconnectRotationChanged(): Unit {
         if (ptr != 0) {
             unsafe {
                 qQuickItemDisconnectRotationChanged(ptr)
@@ -1725,7 +1725,7 @@ public class QQuickItem <: QtResource {
     }
     
     /// 设置缩放变化回调
-    public func setOnScaleChanged(callback: VoidCallback) {
+    public func setOnScaleChanged(callback: VoidCallback): Unit {
         checkValid()
         unsafe {
             qQuickItemConnectScaleChanged(ptr, callback)
@@ -1733,7 +1733,7 @@ public class QQuickItem <: QtResource {
     }
     
     /// 断开缩放变化信号
-    public func disconnectScaleChanged() {
+    public func disconnectScaleChanged(): Unit {
         if (ptr != 0) {
             unsafe {
                 qQuickItemDisconnectScaleChanged(ptr)
@@ -1742,7 +1742,7 @@ public class QQuickItem <: QtResource {
     }
     
     /// 设置Z轴层级变化回调
-    public func setOnZChanged(callback: VoidCallback) {
+    public func setOnZChanged(callback: VoidCallback): Unit {
         checkValid()
         unsafe {
             qQuickItemConnectZChanged(ptr, callback)
@@ -1750,7 +1750,7 @@ public class QQuickItem <: QtResource {
     }
     
     /// 断开Z轴层级变化信号
-    public func disconnectZChanged() {
+    public func disconnectZChanged(): Unit {
         if (ptr != 0) {
             unsafe {
                 qQuickItemDisconnectZChanged(ptr)
@@ -1759,7 +1759,7 @@ public class QQuickItem <: QtResource {
     }
     
     /// 设置可见性变化回调
-    public func setOnVisibleChanged(callback: VoidCallback) {
+    public func setOnVisibleChanged(callback: VoidCallback): Unit {
         checkValid()
         unsafe {
             qQuickItemConnectVisibleChanged(ptr, callback)
@@ -1767,7 +1767,7 @@ public class QQuickItem <: QtResource {
     }
     
     /// 断开可见性变化信号
-    public func disconnectVisibleChanged() {
+    public func disconnectVisibleChanged(): Unit {
         if (ptr != 0) {
             unsafe {
                 qQuickItemDisconnectVisibleChanged(ptr)
@@ -1776,7 +1776,7 @@ public class QQuickItem <: QtResource {
     }
     
     /// 设置启用状态变化回调
-    public func setOnEnabledChanged(callback: VoidCallback) {
+    public func setOnEnabledChanged(callback: VoidCallback): Unit {
         checkValid()
         unsafe {
             qQuickItemConnectEnabledChanged(ptr, callback)
@@ -1784,7 +1784,7 @@ public class QQuickItem <: QtResource {
     }
     
     /// 断开启用状态变化信号
-    public func disconnectEnabledChanged() {
+    public func disconnectEnabledChanged(): Unit {
         if (ptr != 0) {
             unsafe {
                 qQuickItemDisconnectEnabledChanged(ptr)
@@ -1793,7 +1793,7 @@ public class QQuickItem <: QtResource {
     }
     
     /// 设置焦点变化回调（参数为 Int32：1=获得焦点，0=失去焦点）
-    public func setOnFocusChanged(callback: Int32Callback) {
+    public func setOnFocusChanged(callback: Int32Callback): Unit {
         checkValid()
         unsafe {
             qQuickItemConnectFocusChanged(ptr, callback)
@@ -1801,7 +1801,7 @@ public class QQuickItem <: QtResource {
     }
     
     /// 断开焦点变化信号
-    public func disconnectFocusChanged() {
+    public func disconnectFocusChanged(): Unit {
         if (ptr != 0) {
             unsafe {
                 qQuickItemDisconnectFocusChanged(ptr)
@@ -1810,7 +1810,7 @@ public class QQuickItem <: QtResource {
     }
     
     /// 设置父项变化回调（参数为父项指针 Int64）
-    public func setOnParentChanged(callback: Int64Callback) {
+    public func setOnParentChanged(callback: Int64Callback): Unit {
         checkValid()
         unsafe {
             qQuickItemConnectParentChanged(ptr, callback)
@@ -1818,7 +1818,7 @@ public class QQuickItem <: QtResource {
     }
     
     /// 断开父项变化信号
-    public func disconnectParentChanged() {
+    public func disconnectParentChanged(): Unit {
         if (ptr != 0) {
             unsafe {
                 qQuickItemDisconnectParentChanged(ptr)
@@ -1827,7 +1827,7 @@ public class QQuickItem <: QtResource {
     }
     
     /// 设置子项变化回调
-    public func setOnChildrenChanged(callback: VoidCallback) {
+    public func setOnChildrenChanged(callback: VoidCallback): Unit {
         checkValid()
         unsafe {
             qQuickItemConnectChildrenChanged(ptr, callback)
@@ -1835,7 +1835,7 @@ public class QQuickItem <: QtResource {
     }
     
     /// 断开子项变化信号
-    public func disconnectChildrenChanged() {
+    public func disconnectChildrenChanged(): Unit {
         if (ptr != 0) {
             unsafe {
                 qQuickItemDisconnectChildrenChanged(ptr)

@@ -235,7 +235,7 @@ public class QEventWidget {
         id
     }
     
-    public func delete() {
+    public func delete(): Unit {
         if (ptr != 0) {
             unsafe {
                 qEventWidgetClearAllCallbacks(ptr)
@@ -247,19 +247,19 @@ public class QEventWidget {
     
     // ========== 继承自QWidget的方法 ==========
     
-    public func show() {
+    public func show(): Unit {
         unsafe {
             qWidgetShow(ptr)
         }
     }
     
-    public func hide() {
+    public func hide(): Unit {
         unsafe {
             qWidgetHide(ptr)
         }
     }
     
-    public func setTitle(title: String) {
+    public func setTitle(title: String): Unit {
         unsafe {
             var cstr = LibC.mallocCString(title)
             qWidgetSetTitle(ptr, cstr)
@@ -267,19 +267,19 @@ public class QEventWidget {
         }
     }
     
-    public func resize(width: Int32, height: Int32) {
+    public func resize(width: Int32, height: Int32): Unit {
         unsafe {
             qWidgetResize(ptr, width, height)
         }
     }
     
-    public func setGeometry(x: Int32, y: Int32, width: Int32, height: Int32) {
+    public func setGeometry(x: Int32, y: Int32, width: Int32, height: Int32): Unit {
         unsafe {
             qWidgetSetGeometry(ptr, x, y, width, height)
         }
     }
     
-    public func setLayout(layoutPtr: Int64) {
+    public func setLayout(layoutPtr: Int64): Unit {
         unsafe {
             qWidgetSetLayout(ptr, layoutPtr)
         }
@@ -287,19 +287,19 @@ public class QEventWidget {
     
     // ========== 鼠标事件 ==========
     
-    public func setOnMousePress(callback: CFunc<(Int32, Int32, Int32) -> Unit>) {
+    public func setOnMousePress(callback: CFunc<(Int32, Int32, Int32) -> Unit>): Unit {
         unsafe {
             qEventWidgetSetOnMousePress(ptr, callback)
         }
     }
     
-    public func setOnMouseMove(callback: CFunc<(Int32, Int32, Int32) -> Unit>) {
+    public func setOnMouseMove(callback: CFunc<(Int32, Int32, Int32) -> Unit>): Unit {
         unsafe {
             qEventWidgetSetOnMouseMove(ptr, callback)
         }
     }
     
-    public func setOnMouseRelease(callback: CFunc<(Int32, Int32, Int32) -> Unit>) {
+    public func setOnMouseRelease(callback: CFunc<(Int32, Int32, Int32) -> Unit>): Unit {
         unsafe {
             qEventWidgetSetOnMouseRelease(ptr, callback)
         }
@@ -307,13 +307,13 @@ public class QEventWidget {
     
     // ========== 键盘事件 ==========
     
-    public func setOnKeyPress(callback: CFunc<(Int32, Int32, Int32) -> Unit>) {
+    public func setOnKeyPress(callback: CFunc<(Int32, Int32, Int32) -> Unit>): Unit {
         unsafe {
             qEventWidgetSetOnKeyPress(ptr, callback)
         }
     }
     
-    public func setOnKeyRelease(callback: CFunc<(Int32, Int32, Int32) -> Unit>) {
+    public func setOnKeyRelease(callback: CFunc<(Int32, Int32, Int32) -> Unit>): Unit {
         unsafe {
             qEventWidgetSetOnKeyRelease(ptr, callback)
         }
@@ -321,7 +321,7 @@ public class QEventWidget {
     
     // ========== 绘制事件 ==========
     
-    public func setOnPaint(callback: CFunc<(Int64) -> Unit>) {
+    public func setOnPaint(callback: CFunc<(Int64) -> Unit>): Unit {
         unsafe {
             qEventWidgetSetOnPaint(ptr, callback)
         }

@@ -143,21 +143,21 @@ public class QGroupBox <: QtResource {
         trackObject(ptr)
     }
     
-    public func show() {
+    public func show(): Unit {
         checkValid()
         unsafe {
             qWidgetShow(ptr)
         }
     }
     
-    public func hide() {
+    public func hide(): Unit {
         checkValid()
         unsafe {
             qWidgetHide(ptr)
         }
     }
     
-    public func setTitle(title: String) {
+    public func setTitle(title: String): Unit {
         checkValid()
         unsafe {
             var cstr = LibC.mallocCString(title)
@@ -176,7 +176,7 @@ public class QGroupBox <: QtResource {
         }
     }
     
-    public func setCheckable(checkable: Bool) {
+    public func setCheckable(checkable: Bool): Unit {
         checkValid()
         unsafe {
             qGroupBoxSetCheckable(ptr, checkable)
@@ -190,7 +190,7 @@ public class QGroupBox <: QtResource {
         }
     }
     
-    public func setChecked(checked: Bool) {
+    public func setChecked(checked: Bool): Unit {
         checkValid()
         unsafe {
             qGroupBoxSetChecked(ptr, checked)
@@ -205,7 +205,7 @@ public class QGroupBox <: QtResource {
     }
     
     /// 设置对齐方式（Qt::Alignment 位或值）
-    public func setAlignment(alignment: Int32) {
+    public func setAlignment(alignment: Int32): Unit {
         checkValid()
         unsafe {
             qGroupBoxSetAlignment(ptr, alignment)
@@ -221,7 +221,7 @@ public class QGroupBox <: QtResource {
     }
     
     /// 点击（带选中态）回调
-    public func setOnClicked(callback: BoolCallback) {
+    public func setOnClicked(callback: BoolCallback): Unit {
         checkValid()
         unsafe {
             qGroupBoxConnectClicked(ptr, callback)
@@ -229,7 +229,7 @@ public class QGroupBox <: QtResource {
     }
     
     /// 勾选状态变化回调
-    public func setOnToggled(callback: BoolCallback) {
+    public func setOnToggled(callback: BoolCallback): Unit {
         checkValid()
         unsafe {
             qGroupBoxConnectToggled(ptr, callback)
@@ -237,7 +237,7 @@ public class QGroupBox <: QtResource {
     }
 
     /// 设置扁平样式
-    public func setFlat(flat: Bool) {
+    public func setFlat(flat: Bool): Unit {
         checkValid()
         unsafe {
             qGroupBoxSetFlat(ptr, if (flat) { 1 } else { 0 })
@@ -252,14 +252,14 @@ public class QGroupBox <: QtResource {
         }
     }
     
-    public func setLayout(layoutPtr: Int64) {
+    public func setLayout(layoutPtr: Int64): Unit {
         checkValid()
         unsafe {
             qWidgetSetLayout(ptr, layoutPtr)
         }
     }
     
-    public func resize(width: Int32, height: Int32) {
+    public func resize(width: Int32, height: Int32): Unit {
         checkValid()
         unsafe {
             qWidgetResize(ptr, width, height)
@@ -267,7 +267,7 @@ public class QGroupBox <: QtResource {
     }
     
     /// 设置启用/禁用
-    public func setEnabled(enabled: Bool) {
+    public func setEnabled(enabled: Bool): Unit {
         checkValid()
         unsafe {
             qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
@@ -283,7 +283,7 @@ public class QGroupBox <: QtResource {
     }
     
     /// 设置样式表
-    public func setStyleSheet(style: String) {
+    public func setStyleSheet(style: String): Unit {
         checkValid()
         unsafe {
             let cstr = LibC.mallocCString(style)
@@ -293,7 +293,7 @@ public class QGroupBox <: QtResource {
     }
     
     /// 设置最小尺寸
-    public func setMinimumSize(minw: Int32, minh: Int32) {
+    public func setMinimumSize(minw: Int32, minh: Int32): Unit {
         checkValid()
         unsafe {
             qWidgetSetMinimumSize(ptr, minw, minh)
@@ -301,7 +301,7 @@ public class QGroupBox <: QtResource {
     }
     
     /// 设置最大尺寸
-    public func setMaximumSize(maxw: Int32, maxh: Int32) {
+    public func setMaximumSize(maxw: Int32, maxh: Int32): Unit {
         checkValid()
         unsafe {
             qWidgetSetMaximumSize(ptr, maxw, maxh)
@@ -377,21 +377,21 @@ public class QTabWidget <: QtResource {
         trackObject(ptr)
     }
     
-    public func show() {
+    public func show(): Unit {
         checkValid()
         unsafe {
             qWidgetShow(ptr)
         }
     }
     
-    public func hide() {
+    public func hide(): Unit {
         checkValid()
         unsafe {
             qWidgetHide(ptr)
         }
     }
     
-    public func addTab(widgetPtr: Int64, title: String) {
+    public func addTab(widgetPtr: Int64, title: String): Unit {
         checkValid()
         unsafe {
             var cstr = LibC.mallocCString(title)
@@ -400,7 +400,7 @@ public class QTabWidget <: QtResource {
         }
     }
     
-    public func removeTab(index: Int32) {
+    public func removeTab(index: Int32): Unit {
         checkValid()
         unsafe {
             qTabWidgetRemoveTab(ptr, index)
@@ -414,7 +414,7 @@ public class QTabWidget <: QtResource {
         }
     }
     
-    public func setCurrentIndex(index: Int32) {
+    public func setCurrentIndex(index: Int32): Unit {
         checkValid()
         unsafe {
             qTabWidgetSetCurrentIndex(ptr, index)
@@ -429,7 +429,7 @@ public class QTabWidget <: QtResource {
     }
     
     /// 设置指定标签页的文本
-    public func setTabText(index: Int32, text: String) {
+    public func setTabText(index: Int32, text: String): Unit {
         checkValid()
         unsafe {
             let cstr = LibC.mallocCString(text)
@@ -450,7 +450,7 @@ public class QTabWidget <: QtResource {
     }
     
     /// 设置指定标签页的工具提示
-    public func setTabToolTip(index: Int32, toolTip: String) {
+    public func setTabToolTip(index: Int32, toolTip: String): Unit {
         checkValid()
         unsafe {
             let cstr = LibC.mallocCString(toolTip)
@@ -471,7 +471,7 @@ public class QTabWidget <: QtResource {
     }
     
     /// 设置标签页是否可关闭
-    public func setTabsClosable(closable: Bool) {
+    public func setTabsClosable(closable: Bool): Unit {
         checkValid()
         unsafe {
             qTabWidgetSetTabsClosable(ptr, closable)
@@ -479,7 +479,7 @@ public class QTabWidget <: QtResource {
     }
     
     /// 设置标签页是否可移动
-    public func setMovable(movable: Bool) {
+    public func setMovable(movable: Bool): Unit {
         checkValid()
         unsafe {
             qTabWidgetSetMovable(ptr, movable)
@@ -487,7 +487,7 @@ public class QTabWidget <: QtResource {
     }
     
     /// 清除所有标签页
-    public func clear() {
+    public func clear(): Unit {
         checkValid()
         unsafe {
             qTabWidgetClear(ptr)
@@ -495,7 +495,7 @@ public class QTabWidget <: QtResource {
     }
     
     /// 设置当前标签页变化回调
-    public func setOnCurrentChanged(callback: Int32Callback) {
+    public func setOnCurrentChanged(callback: Int32Callback): Unit {
         checkValid()
         unsafe {
             qTabWidgetConnectCurrentChanged(ptr, callback)
@@ -503,7 +503,7 @@ public class QTabWidget <: QtResource {
     }
     
     /// 断开当前标签页变化信号
-    public func disconnectCurrentChanged() {
+    public func disconnectCurrentChanged(): Unit {
         if (ptr != 0) {
             unsafe {
                 qTabWidgetDisconnectCurrentChanged(ptr)
@@ -517,7 +517,7 @@ public class QTabWidget <: QtResource {
     }
     
     /// 设置启用/禁用
-    public func setEnabled(enabled: Bool) {
+    public func setEnabled(enabled: Bool): Unit {
         checkValid()
         unsafe {
             qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
@@ -533,7 +533,7 @@ public class QTabWidget <: QtResource {
     }
     
     /// 设置样式表
-    public func setStyleSheet(style: String) {
+    public func setStyleSheet(style: String): Unit {
         checkValid()
         unsafe {
             let cstr = LibC.mallocCString(style)
@@ -543,21 +543,21 @@ public class QTabWidget <: QtResource {
     }
     
     /// 设置最大尺寸
-    public func setMaximumSize(maxw: Int32, maxh: Int32) {
+    public func setMaximumSize(maxw: Int32, maxh: Int32): Unit {
         checkValid()
         unsafe {
             qWidgetSetMaximumSize(ptr, maxw, maxh)
         }
     }
     
-    public func resize(width: Int32, height: Int32) {
+    public func resize(width: Int32, height: Int32): Unit {
         checkValid()
         unsafe {
             qWidgetResize(ptr, width, height)
         }
     }
 
-    public func setMinimumSize(minw: Int32, minh: Int32) {
+    public func setMinimumSize(minw: Int32, minh: Int32): Unit {
         checkValid()
         unsafe {
             qWidgetSetMinimumSize(ptr, minw, minh)
@@ -633,28 +633,28 @@ public class QScrollArea <: QtResource {
         trackObject(ptr)
     }
     
-    public func show() {
+    public func show(): Unit {
         checkValid()
         unsafe {
             qWidgetShow(ptr)
         }
     }
     
-    public func hide() {
+    public func hide(): Unit {
         checkValid()
         unsafe {
             qWidgetHide(ptr)
         }
     }
     
-    public func setWidget(widgetPtr: Int64) {
+    public func setWidget(widgetPtr: Int64): Unit {
         checkValid()
         unsafe {
             qScrollAreaSetWidget(ptr, widgetPtr)
         }
     }
     
-    public func setWidgetResizable(resizable: Bool) {
+    public func setWidgetResizable(resizable: Bool): Unit {
         checkValid()
         unsafe {
             qScrollAreaSetWidgetResizable(ptr, resizable)
@@ -685,7 +685,7 @@ public class QScrollArea <: QtResource {
     }
     
     /// 设置水平滚动条策略
-    public func setHorizontalScrollBarPolicy(policy: Int32) {
+    public func setHorizontalScrollBarPolicy(policy: Int32): Unit {
         checkValid()
         unsafe {
             qScrollAreaSetHorizontalScrollBarPolicy(ptr, policy)
@@ -693,7 +693,7 @@ public class QScrollArea <: QtResource {
     }
     
     /// 设置垂直滚动条策略
-    public func setVerticalScrollBarPolicy(policy: Int32) {
+    public func setVerticalScrollBarPolicy(policy: Int32): Unit {
         checkValid()
         unsafe {
             qScrollAreaSetVerticalScrollBarPolicy(ptr, policy)
@@ -701,7 +701,7 @@ public class QScrollArea <: QtResource {
     }
     
     /// 滚动以确保 (x,y) 处可见（w,h 为边距）
-    public func ensureVisible(x: Int32, y: Int32, w: Int32, h: Int32) {
+    public func ensureVisible(x: Int32, y: Int32, w: Int32, h: Int32): Unit {
         checkValid()
         unsafe {
             qScrollAreaEnsureVisible(ptr, x, y, w, h)
@@ -709,7 +709,7 @@ public class QScrollArea <: QtResource {
     }
     
     /// 设置内容对齐方式
-    public func setAlignment(alignment: Int32) {
+    public func setAlignment(alignment: Int32): Unit {
         checkValid()
         unsafe {
             qScrollAreaSetAlignment(ptr, alignment)
@@ -724,7 +724,7 @@ public class QScrollArea <: QtResource {
         }
     }
     
-    public func resize(width: Int32, height: Int32) {
+    public func resize(width: Int32, height: Int32): Unit {
         checkValid()
         unsafe {
             qWidgetResize(ptr, width, height)
@@ -732,7 +732,7 @@ public class QScrollArea <: QtResource {
     }
     
     /// 设置启用/禁用
-    public func setEnabled(enabled: Bool) {
+    public func setEnabled(enabled: Bool): Unit {
         checkValid()
         unsafe {
             qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
@@ -748,7 +748,7 @@ public class QScrollArea <: QtResource {
     }
     
     /// 设置样式表
-    public func setStyleSheet(style: String) {
+    public func setStyleSheet(style: String): Unit {
         checkValid()
         unsafe {
             let cstr = LibC.mallocCString(style)
@@ -758,7 +758,7 @@ public class QScrollArea <: QtResource {
     }
     
     /// 设置最小尺寸
-    public func setMinimumSize(minw: Int32, minh: Int32) {
+    public func setMinimumSize(minw: Int32, minh: Int32): Unit {
         checkValid()
         unsafe {
             qWidgetSetMinimumSize(ptr, minw, minh)
@@ -766,7 +766,7 @@ public class QScrollArea <: QtResource {
     }
     
     /// 设置最大尺寸
-    public func setMaximumSize(maxw: Int32, maxh: Int32) {
+    public func setMaximumSize(maxw: Int32, maxh: Int32): Unit {
         checkValid()
         unsafe {
             qWidgetSetMaximumSize(ptr, maxw, maxh)
@@ -853,35 +853,35 @@ public class QFrame <: QtResource {
         trackObject(ptr)
     }
     
-    public func show() {
+    public func show(): Unit {
         checkValid()
         unsafe {
             qWidgetShow(ptr)
         }
     }
     
-    public func hide() {
+    public func hide(): Unit {
         checkValid()
         unsafe {
             qWidgetHide(ptr)
         }
     }
     
-    public func setFrameShape(shape: Int32) {
+    public func setFrameShape(shape: Int32): Unit {
         checkValid()
         unsafe {
             qFrameSetFrameShape(ptr, shape)
         }
     }
     
-    public func setFrameShadow(shadow: Int32) {
+    public func setFrameShadow(shadow: Int32): Unit {
         checkValid()
         unsafe {
             qFrameSetFrameShadow(ptr, shadow)
         }
     }
     
-    public func setLineWidth(width: Int32) {
+    public func setLineWidth(width: Int32): Unit {
         checkValid()
         unsafe {
             qFrameSetLineWidth(ptr, width)
@@ -905,7 +905,7 @@ public class QFrame <: QtResource {
     }
     
     /// 设置整体边框样式（形状 | 阴影 的组合值）
-    public func setFrameStyle(style: Int32) {
+    public func setFrameStyle(style: Int32): Unit {
         checkValid()
         unsafe {
             qFrameSetFrameStyle(ptr, style)
@@ -937,7 +937,7 @@ public class QFrame <: QtResource {
     }
     
     /// 设置中线宽度
-    public func setMidLineWidth(width: Int32) {
+    public func setMidLineWidth(width: Int32): Unit {
         checkValid()
         unsafe {
             qFrameSetMidLineWidth(ptr, width)
@@ -953,21 +953,21 @@ public class QFrame <: QtResource {
     }
     
     /// 设置边框矩形
-    public func setFrameRect(x: Int32, y: Int32, w: Int32, h: Int32) {
+    public func setFrameRect(x: Int32, y: Int32, w: Int32, h: Int32): Unit {
         checkValid()
         unsafe {
             qFrameSetFrameRect(ptr, x, y, w, h)
         }
     }
     
-    public func setLayout(layoutPtr: Int64) {
+    public func setLayout(layoutPtr: Int64): Unit {
         checkValid()
         unsafe {
             qWidgetSetLayout(ptr, layoutPtr)
         }
     }
     
-    public func resize(width: Int32, height: Int32) {
+    public func resize(width: Int32, height: Int32): Unit {
         checkValid()
         unsafe {
             qWidgetResize(ptr, width, height)
@@ -975,7 +975,7 @@ public class QFrame <: QtResource {
     }
     
     /// 设置启用/禁用
-    public func setEnabled(enabled: Bool) {
+    public func setEnabled(enabled: Bool): Unit {
         checkValid()
         unsafe {
             qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
@@ -991,7 +991,7 @@ public class QFrame <: QtResource {
     }
     
     /// 设置样式表
-    public func setStyleSheet(style: String) {
+    public func setStyleSheet(style: String): Unit {
         checkValid()
         unsafe {
             let cstr = LibC.mallocCString(style)
@@ -1001,7 +1001,7 @@ public class QFrame <: QtResource {
     }
     
     /// 设置最小尺寸
-    public func setMinimumSize(minw: Int32, minh: Int32) {
+    public func setMinimumSize(minw: Int32, minh: Int32): Unit {
         checkValid()
         unsafe {
             qWidgetSetMinimumSize(ptr, minw, minh)
@@ -1009,7 +1009,7 @@ public class QFrame <: QtResource {
     }
     
     /// 设置最大尺寸
-    public func setMaximumSize(maxw: Int32, maxh: Int32) {
+    public func setMaximumSize(maxw: Int32, maxh: Int32): Unit {
         checkValid()
         unsafe {
             qWidgetSetMaximumSize(ptr, maxw, maxh)
@@ -1017,7 +1017,7 @@ public class QFrame <: QtResource {
     }
     
     /// 设置工具提示
-    public func setToolTip(toolTip: String) {
+    public func setToolTip(toolTip: String): Unit {
         checkValid()
         unsafe {
             let cstr = LibC.mallocCString(toolTip)
@@ -1142,7 +1142,7 @@ public class QSplitter <: QtResource {
         this.ptr = ptr
     }
     
-    public func addWidget(widgetPtr: Int64) {
+    public func addWidget(widgetPtr: Int64): Unit {
         checkValid()
         unsafe {
             qSplitterAddWidget(ptr, widgetPtr)
@@ -1156,14 +1156,14 @@ public class QSplitter <: QtResource {
         }
     }
     
-    public func setStretchFactor(index: Int32, stretch: Int32) {
+    public func setStretchFactor(index: Int32, stretch: Int32): Unit {
         checkValid()
         unsafe {
             qSplitterSetStretchFactor(ptr, index, stretch)
         }
     }
     
-    public func setHandleWidth(width: Int32) {
+    public func setHandleWidth(width: Int32): Unit {
         checkValid()
         unsafe {
             qSplitterSetHandleWidth(ptr, width)
@@ -1177,7 +1177,7 @@ public class QSplitter <: QtResource {
         }
     }
     
-    public func setChildrenCollapsible(collapsible: Bool) {
+    public func setChildrenCollapsible(collapsible: Bool): Unit {
         checkValid()
         unsafe {
             qSplitterSetChildrenCollapsible(ptr, if (collapsible) { 1 } else { 0 })
@@ -1191,7 +1191,7 @@ public class QSplitter <: QtResource {
         }
     }
     
-    public func setOrientation(orientation: Int32) {
+    public func setOrientation(orientation: Int32): Unit {
         checkValid()
         unsafe {
             qSplitterSetOrientation(ptr, orientation)
@@ -1205,21 +1205,21 @@ public class QSplitter <: QtResource {
         }
     }
     
-    public func show() {
+    public func show(): Unit {
         checkValid()
         unsafe {
             qWidgetShow(ptr)
         }
     }
     
-    public func hide() {
+    public func hide(): Unit {
         checkValid()
         unsafe {
             qWidgetHide(ptr)
         }
     }
     
-    public func resize(width: Int32, height: Int32) {
+    public func resize(width: Int32, height: Int32): Unit {
         checkValid()
         unsafe {
             qWidgetResize(ptr, width, height)
@@ -1227,7 +1227,7 @@ public class QSplitter <: QtResource {
     }
     
     /// 设置启用/禁用
-    public func setEnabled(enabled: Bool) {
+    public func setEnabled(enabled: Bool): Unit {
         checkValid()
         unsafe {
             qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
@@ -1243,7 +1243,7 @@ public class QSplitter <: QtResource {
     }
     
     /// 设置样式表
-    public func setStyleSheet(style: String) {
+    public func setStyleSheet(style: String): Unit {
         checkValid()
         unsafe {
             let cstr = LibC.mallocCString(style)
@@ -1253,7 +1253,7 @@ public class QSplitter <: QtResource {
     }
     
     /// 设置最小尺寸
-    public func setMinimumSize(minw: Int32, minh: Int32) {
+    public func setMinimumSize(minw: Int32, minh: Int32): Unit {
         checkValid()
         unsafe {
             qWidgetSetMinimumSize(ptr, minw, minh)
@@ -1261,7 +1261,7 @@ public class QSplitter <: QtResource {
     }
     
     /// 设置最大尺寸
-    public func setMaximumSize(maxw: Int32, maxh: Int32) {
+    public func setMaximumSize(maxw: Int32, maxh: Int32): Unit {
         checkValid()
         unsafe {
             qWidgetSetMaximumSize(ptr, maxw, maxh)

@@ -99,7 +99,7 @@ public class QAction <: QtResource {
         closed = false
     }
     
-    public func setText(text: String) {
+    public func setText(text: String): Unit {
         checkValid()
         unsafe {
             var cstr = LibC.mallocCString(text)
@@ -118,7 +118,7 @@ public class QAction <: QtResource {
         }
     }
     
-    public func setShortcut(shortcut: String) {
+    public func setShortcut(shortcut: String): Unit {
         checkValid()
         unsafe {
             var cstr = LibC.mallocCString(shortcut)
@@ -127,7 +127,7 @@ public class QAction <: QtResource {
         }
     }
     
-    public func setCheckable(checkable: Bool) {
+    public func setCheckable(checkable: Bool): Unit {
         checkValid()
         unsafe {
             qActionSetCheckable(ptr, checkable)
@@ -141,7 +141,7 @@ public class QAction <: QtResource {
         }
     }
     
-    public func setChecked(checked: Bool) {
+    public func setChecked(checked: Bool): Unit {
         checkValid()
         unsafe {
             qActionSetChecked(ptr, checked)
@@ -155,7 +155,7 @@ public class QAction <: QtResource {
         }
     }
     
-    public func setEnabled(enabled: Bool) {
+    public func setEnabled(enabled: Bool): Unit {
         checkValid()
         unsafe {
             qActionSetEnabled(ptr, enabled)
@@ -169,7 +169,7 @@ public class QAction <: QtResource {
         }
     }
     
-    public func setVisible(visible: Bool) {
+    public func setVisible(visible: Bool): Unit {
         checkValid()
         unsafe {
             qActionSetVisible(ptr, visible)
@@ -183,7 +183,7 @@ public class QAction <: QtResource {
         }
     }
     
-    public func setOnTriggered(callback: VoidCallback) {
+    public func setOnTriggered(callback: VoidCallback): Unit {
         checkValid()
         unsafe {
             qActionConnectTriggered(ptr, callback)
@@ -200,7 +200,7 @@ public class QAction <: QtResource {
         return SignalConnection.createCapturing(ptr, SIGNAL_TRIGGERED, WIDGET_TYPE_ACTION, id)
     }
     
-    public func disconnect() {
+    public func disconnect(): Unit {
         checkValid()
         unsafe {
             qActionDisconnectTriggered(ptr)
@@ -300,14 +300,14 @@ public class QMenu <: QtResource {
     }
     
     // 通过指针添加已存在的QAction
-    public func addActionPtr(actionPtr: Int64) {
+    public func addActionPtr(actionPtr: Int64): Unit {
         checkValid()
         unsafe {
             qMenuAddActionByPtr(ptr, actionPtr)
         }
     }
     
-    public func addSeparator() {
+    public func addSeparator(): Unit {
         checkValid()
         unsafe {
             qMenuAddSeparator(ptr)
@@ -324,7 +324,7 @@ public class QMenu <: QtResource {
         }
     }
     
-    public func setTitle(title: String) {
+    public func setTitle(title: String): Unit {
         checkValid()
         unsafe {
             var cstr = LibC.mallocCString(title)
@@ -496,28 +496,28 @@ public class QToolBar <: QtResource {
         trackObject(ptr)
     }
     
-    public func addAction(actionPtr: Int64) {
+    public func addAction(actionPtr: Int64): Unit {
         checkValid()
         unsafe {
             qToolBarAddAction(ptr, actionPtr)
         }
     }
     
-    public func addSeparator() {
+    public func addSeparator(): Unit {
         checkValid()
         unsafe {
             qToolBarAddSeparator(ptr)
         }
     }
     
-    public func addWidget(widgetPtr: Int64) {
+    public func addWidget(widgetPtr: Int64): Unit {
         checkValid()
         unsafe {
             qToolBarAddWidget(ptr, widgetPtr)
         }
     }
     
-    public func setMovable(movable: Bool) {
+    public func setMovable(movable: Bool): Unit {
         checkValid()
         unsafe {
             qToolBarSetMovable(ptr, movable)
@@ -590,7 +590,7 @@ public class QStatusBar <: QtResource {
         trackObject(ptr)
     }
     
-    public func showMessage(message: String) {
+    public func showMessage(message: String): Unit {
         checkValid()
         unsafe {
             var cstr = LibC.mallocCString(message)
@@ -599,7 +599,7 @@ public class QStatusBar <: QtResource {
         }
     }
     
-    public func showMessageWithTimeout(message: String, timeout: Int32) {
+    public func showMessageWithTimeout(message: String, timeout: Int32): Unit {
         checkValid()
         unsafe {
             var cstr = LibC.mallocCString(message)
@@ -608,21 +608,21 @@ public class QStatusBar <: QtResource {
         }
     }
     
-    public func clearMessage() {
+    public func clearMessage(): Unit {
         checkValid()
         unsafe {
             qStatusBarClearMessage(ptr)
         }
     }
     
-    public func addWidget(widgetPtr: Int64) {
+    public func addWidget(widgetPtr: Int64): Unit {
         checkValid()
         unsafe {
             qStatusBarAddWidget(ptr, widgetPtr, 0)
         }
     }
     
-    public func addWidgetWithStretch(widgetPtr: Int64, stretch: Int32) {
+    public func addWidgetWithStretch(widgetPtr: Int64, stretch: Int32): Unit {
         checkValid()
         unsafe {
             qStatusBarAddWidget(ptr, widgetPtr, stretch)
@@ -695,21 +695,21 @@ public class QMainWindow <: QtResource {
         trackObject(ptr)
     }
     
-    public func show() {
+    public func show(): Unit {
         checkValid()
         unsafe {
             qWidgetShow(ptr)
         }
     }
     
-    public func hide() {
+    public func hide(): Unit {
         checkValid()
         unsafe {
             qWidgetHide(ptr)
         }
     }
     
-    public func setTitle(title: String) {
+    public func setTitle(title: String): Unit {
         checkValid()
         unsafe {
             var cstr = LibC.mallocCString(title)
@@ -718,35 +718,35 @@ public class QMainWindow <: QtResource {
         }
     }
     
-    public func resize(width: Int32, height: Int32) {
+    public func resize(width: Int32, height: Int32): Unit {
         checkValid()
         unsafe {
             qWidgetResize(ptr, width, height)
         }
     }
     
-    public func setMenuBar(menuBarPtr: Int64) {
+    public func setMenuBar(menuBarPtr: Int64): Unit {
         checkValid()
         unsafe {
             qMainWindowSetMenuBar(ptr, menuBarPtr)
         }
     }
     
-    public func addToolBar(toolBarPtr: Int64) {
+    public func addToolBar(toolBarPtr: Int64): Unit {
         checkValid()
         unsafe {
             qMainWindowAddToolBar(ptr, toolBarPtr)
         }
     }
     
-    public func setStatusBar(statusBarPtr: Int64) {
+    public func setStatusBar(statusBarPtr: Int64): Unit {
         checkValid()
         unsafe {
             qMainWindowSetStatusBar(ptr, statusBarPtr)
         }
     }
     
-    public func setCentralWidget(widgetPtr: Int64) {
+    public func setCentralWidget(widgetPtr: Int64): Unit {
         checkValid()
         unsafe {
             qMainWindowSetCentralWidget(ptr, widgetPtr)

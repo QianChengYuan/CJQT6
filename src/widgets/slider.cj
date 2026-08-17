@@ -74,28 +74,28 @@ public class QSlider <: QtResource {
         trackObject(ptr)
     }
     
-    public func show() {
+    public func show(): Unit {
         checkValid()
         unsafe {
             qWidgetShow(ptr)
         }
     }
     
-    public func hide() {
+    public func hide(): Unit {
         checkValid()
         unsafe {
             qWidgetHide(ptr)
         }
     }
     
-    public func resize(width: Int32, height: Int32) {
+    public func resize(width: Int32, height: Int32): Unit {
         checkValid()
         unsafe {
             qWidgetResize(ptr, width, height)
         }
     }
     
-    public func setValue(value: Int32) {
+    public func setValue(value: Int32): Unit {
         checkValid()
         unsafe {
             qSliderSetValue(ptr, value)
@@ -109,14 +109,14 @@ public class QSlider <: QtResource {
         }
     }
     
-    public func setRange(min: Int32, max: Int32) {
+    public func setRange(min: Int32, max: Int32): Unit {
         checkValid()
         unsafe {
             qSliderSetRange(ptr, min, max)
         }
     }
     
-    public func setOrientation(orientation: Int32) {
+    public func setOrientation(orientation: Int32): Unit {
         checkValid()
         unsafe {
             qSliderSetOrientation(ptr, orientation)
@@ -124,7 +124,7 @@ public class QSlider <: QtResource {
     }
     
     /// 设置单步步长
-    public func setSingleStep(step: Int32) {
+    public func setSingleStep(step: Int32): Unit {
         checkValid()
         unsafe {
             qSliderSetSingleStep(ptr, step)
@@ -140,7 +140,7 @@ public class QSlider <: QtResource {
     }
     
     /// 设置页步步长
-    public func setPageStep(step: Int32) {
+    public func setPageStep(step: Int32): Unit {
         checkValid()
         unsafe {
             qSliderSetPageStep(ptr, step)
@@ -156,7 +156,7 @@ public class QSlider <: QtResource {
     }
     
     /// 设置刻度位置
-    public func setTickPosition(position: Int32) {
+    public func setTickPosition(position: Int32): Unit {
         checkValid()
         unsafe {
             qSliderSetTickPosition(ptr, position)
@@ -172,7 +172,7 @@ public class QSlider <: QtResource {
     }
     
     /// 设置刻度间隔
-    public func setTickInterval(interval: Int32) {
+    public func setTickInterval(interval: Int32): Unit {
         checkValid()
         unsafe {
             qSliderSetTickInterval(ptr, interval)
@@ -188,7 +188,7 @@ public class QSlider <: QtResource {
     }
     
     /// 设置反向控制
-    public func setInvertedControls(inverted: Bool) {
+    public func setInvertedControls(inverted: Bool): Unit {
         checkValid()
         unsafe {
             qSliderSetInvertedControls(ptr, inverted)
@@ -204,7 +204,7 @@ public class QSlider <: QtResource {
     }
     
     /// 设置追踪模式（为true时拖动过程中实时触发valueChanged）
-    public func setTracking(enable: Bool) {
+    public func setTracking(enable: Bool): Unit {
         checkValid()
         unsafe {
             qSliderSetTracking(ptr, enable)
@@ -220,7 +220,7 @@ public class QSlider <: QtResource {
     }
     
     /// 设置反向外观（true: 最大值在底部/左侧，最小值在顶部/右侧）
-    public func setInvertedAppearance(inverted: Bool) {
+    public func setInvertedAppearance(inverted: Bool): Unit {
         checkValid()
         unsafe {
             qSliderSetInvertedAppearance(ptr, if (inverted) { 1 } else { 0 })
@@ -236,7 +236,7 @@ public class QSlider <: QtResource {
     }
     
     /// 设置启用/禁用
-    public func setEnabled(enabled: Bool) {
+    public func setEnabled(enabled: Bool): Unit {
         checkValid()
         unsafe {
             qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
@@ -252,7 +252,7 @@ public class QSlider <: QtResource {
     }
     
     /// 设置样式表
-    public func setStyleSheet(style: String) {
+    public func setStyleSheet(style: String): Unit {
         checkValid()
         unsafe {
             let cstr = LibC.mallocCString(style)
@@ -262,7 +262,7 @@ public class QSlider <: QtResource {
     }
     
     /// 设置最小尺寸
-    public func setMinimumSize(minw: Int32, minh: Int32) {
+    public func setMinimumSize(minw: Int32, minh: Int32): Unit {
         checkValid()
         unsafe {
             qWidgetSetMinimumSize(ptr, minw, minh)
@@ -270,7 +270,7 @@ public class QSlider <: QtResource {
     }
     
     /// 设置最大尺寸
-    public func setMaximumSize(maxw: Int32, maxh: Int32) {
+    public func setMaximumSize(maxw: Int32, maxh: Int32): Unit {
         checkValid()
         unsafe {
             qWidgetSetMaximumSize(ptr, maxw, maxh)
@@ -278,7 +278,7 @@ public class QSlider <: QtResource {
     }
     
     /// 设置值变化回调
-    public func setOnValueChanged(callback: Int32Callback) {
+    public func setOnValueChanged(callback: Int32Callback): Unit {
         checkValid()
         unsafe {
             qSliderConnectValueChanged(ptr, callback)
@@ -286,7 +286,7 @@ public class QSlider <: QtResource {
     }
     
     /// 断开值变化信号
-    public func disconnectValueChanged() {
+    public func disconnectValueChanged(): Unit {
         if (ptr != 0) {
             unsafe {
                 qSliderDisconnectValueChanged(ptr)
@@ -295,7 +295,7 @@ public class QSlider <: QtResource {
     }
     
     /// 设置滑块拖动回调（拖动过程中实时触发）
-    public func setOnSliderMoved(callback: Int32Callback) {
+    public func setOnSliderMoved(callback: Int32Callback): Unit {
         checkValid()
         unsafe {
             qSliderConnectSliderMoved(ptr, callback)
@@ -303,7 +303,7 @@ public class QSlider <: QtResource {
     }
     
     /// 断开滑块拖动信号
-    public func disconnectSliderMoved() {
+    public func disconnectSliderMoved(): Unit {
         if (ptr != 0) {
             unsafe {
                 qSliderDisconnectSliderMoved(ptr)
@@ -318,7 +318,7 @@ public class QSlider <: QtResource {
     }
     
     /// 设置滑块按下回调
-    public func setOnSliderPressed(callback: Int64Callback) {
+    public func setOnSliderPressed(callback: Int64Callback): Unit {
         checkValid()
         unsafe {
             qSliderSetOnSliderPressed(ptr, callback)
@@ -326,7 +326,7 @@ public class QSlider <: QtResource {
     }
     
     /// 设置滑块释放回调
-    public func setOnSliderReleased(callback: Int64Callback) {
+    public func setOnSliderReleased(callback: Int64Callback): Unit {
         checkValid()
         unsafe {
             qSliderSetOnSliderReleased(ptr, callback)

@@ -91,7 +91,7 @@ public class QMimeData {
     }
     
     /// 设置文本数据
-    public func setText(text: String) {
+    public func setText(text: String): Unit {
         unsafe {
             let cstr = LibC.mallocCString(text)
             qMimeDataSetText(ptr, cstr)
@@ -110,7 +110,7 @@ public class QMimeData {
     }
     
     /// 设置HTML数据
-    public func setHtml(html: String) {
+    public func setHtml(html: String): Unit {
         unsafe {
             let cstr = LibC.mallocCString(html)
             qMimeDataSetHtml(ptr, cstr)
@@ -174,7 +174,7 @@ public class QMimeData {
     }
     
     /// 清空所有数据
-    public func clear() {
+    public func clear(): Unit {
         unsafe {
             qMimeDataClear(ptr)
         }
@@ -186,7 +186,7 @@ public class QMimeData {
     }
     
     /// 删除
-    public func delete() {
+    public func delete(): Unit {
         if (ptr != 0 && owned) {
             unsafe {
                 qMimeDataDelete(ptr)
@@ -211,21 +211,21 @@ public class QDrag {
     }
     
     /// 设置MIME数据
-    public func setMimeData(mimeData: QMimeData) {
+    public func setMimeData(mimeData: QMimeData): Unit {
         unsafe {
             qDragSetMimeData(ptr, mimeData.getPtr())
         }
     }
     
     /// 设置拖动图像
-    public func setPixmap(pixmapPtr: Int64) {
+    public func setPixmap(pixmapPtr: Int64): Unit {
         unsafe {
             qDragSetPixmap(ptr, pixmapPtr)
         }
     }
     
     /// 设置热点位置
-    public func setHotSpot(x: Int32, y: Int32) {
+    public func setHotSpot(x: Int32, y: Int32): Unit {
         unsafe {
             qDragSetHotSpot(ptr, x, y)
         }
@@ -261,7 +261,7 @@ public class QDrag {
     }
     
     /// 取消拖放操作
-    public static func cancel() {
+    public static func cancel(): Unit {
         unsafe {
             qDragCancel()
         }

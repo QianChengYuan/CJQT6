@@ -8,7 +8,7 @@
   # ---- 必填字段 ----
   cjc-version = "1.1.0"          # 所需 cjc 最低版本
   name        = "cjqt6"          # 模块名（须与模块 root 包名一致）
-  version     = "1.7.0"          # 模块版本（语义化）
+  version     = "1.9.0"          # 模块版本（语义化）
   output-type = "dynamic"        # static / dynamic / executable
 
   # ---- 选填字段 ----
@@ -21,7 +21,7 @@
   documentation = "https://gitcode.com/yuan_1992/CJQT6/blob/main/README.md"
 
   # 制品标签 / 分类（官方字段，原 [metadata] 内容合并至此）
-  tag      = ["qt", "gui", "widgets", "ffi", "cross-platform"]
+  tags      = ["qt", "gui", "widgets", "ffi", "cross-platform"]
   category = "gui"
 
   # 编译 / 链接选项
@@ -50,6 +50,27 @@
 
 # 构建脚本依赖（供 build.cj 使用）
 [script-dependencies]
+
+# ============================================================
+# 测试配置
+# 排除平台无关或需要特殊环境的测试标签：
+# - requires_gui_dialog: 模态对话框（QMessageBox.information/QMenu.popup）在 offscreen/无窗口环境挂起
+# - requires_gui_drag: 拖放测试需要真实窗口系统
+# - requires_audio: 音频/相机测试需要音频服务（CI runner 无）
+# - requires_process_spawn: 进程测试用 cmd /c（Windows 专用命令）
+# - requires_printer: 打印测试依赖 CUPS 打印系统（Linux CI 无）
+# ============================================================
+[profile.test]
+  exclude-tags = "requires_gui_dialog,requires_gui_drag,requires_audio,requires_process_spawn,requires_printer"
+  timeout-each = "30s"
+
+# 测试运行时环境变量（cjpm test / cjpm bundle 均生效）
+# - QT_QPA_PLATFORM=offscreen: 无窗口环境跑 GUI 测试（CI 与本地一致）
+# 注：QT_QPA_FONTDIR（offscreen 字体目录）不在此硬编码本地路径，
+#     Windows 用户需提前设置系统环境变量 QT_QPA_FONTDIR=C:\Windows\Fonts
+#     （见 docs/build-guide.md），Linux 用 fontconfig 自动定位无需设置。
+[profile.test.env]
+  QT_QPA_PLATFORM = { value = "offscreen", splice-type = "replace" }
 
 # ============================================================
 # 平台特定编译 / 链接选项

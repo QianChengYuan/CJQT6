@@ -49,7 +49,7 @@ public const StandardLocationAppConfigLocation: Int32 = 17
 /// 系统标准目录查询，用于获取各平台约定的文档/配置/缓存等路径（静态方法，无需实例化）
 public class QStandardPaths {
     /// 获取指定类型位置中可写的目录路径，失败时返回空字符串
-    public static func writableLocation(`type`: Int32): String {
+    public static func writableLocation(`type`: Int32): String { // cjlint-ignore !G.FUN.02 反引号参数名被cjlint误判
         unsafe {
             let cstr = qStandardPathWritableLocation(`type`)
             let result = cstr.toString()
@@ -59,7 +59,7 @@ public class QStandardPaths {
     }
 
     /// 在指定类型位置中查找文件，找到返回完整路径，否则返回空字符串
-    public static func locate(`type`: Int32, fileName: String): String {
+    public static func locate(`type`: Int32, fileName: String): String { // cjlint-ignore !G.FUN.02 反引号参数名被cjlint误判
         unsafe {
             let cstrFile = LibC.mallocCString(fileName)
             let cstr = qStandardPathLocate(`type`, cstrFile)
@@ -71,7 +71,7 @@ public class QStandardPaths {
     }
 
     /// 获取指定类型位置的本地化显示名称（如"文档"、"图片"）
-    public static func displayName(`type`: Int32): String {
+    public static func displayName(`type`: Int32): String { // cjlint-ignore !G.FUN.02 反引号参数名被cjlint误判
         unsafe {
             let cstr = qStandardPathDisplayName(`type`)
             let result = cstr.toString()

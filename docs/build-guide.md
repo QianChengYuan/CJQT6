@@ -934,6 +934,9 @@ setx QTDIR "C:\Qt\6.10.3\msvc2022_64"
 # CJQT6_ROOT（cjpm.toml 用 ${CJQT6_ROOT} 替换桥接库链接路径，必设，否则链接失败）
 setx CJQT6_ROOT "C:\CodeTools\cangjie_git\CJQT6"
 
+# QT_QPA_FONTDIR（测试所需：offscreen 平台字体目录，不设会导致字体相关测试失败）
+setx QT_QPA_FONTDIR "C:\Windows\Fonts"
+
 # PATH
 setx PATH "%PATH%;%QTDIR%\bin;C:\Program Files\CMake\bin"
 ```

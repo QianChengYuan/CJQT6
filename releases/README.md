@@ -55,12 +55,10 @@ export DYLD_LIBRARY_PATH=/path/to/cjqt6_bridge:$DYLD_LIBRARY_PATH
 
 ### 3. 在项目中使用
 
-**方式1: 中心仓安装 (推荐)**
-```bash
-cjpm update
-# 在cjpm.toml中添加
+**方式1: Git 依赖安装 (推荐)**
+```toml
 [dependencies]
-  cjqt6 = "1.0.0"
+  cjqt6 = { git = "https://gitcode.com/yuan_1992/CJQT6.git", tag = "v1.9.0" }
 ```
 
 **方式2: 本地路径引用**

@@ -333,6 +333,7 @@ class QWizardTests {
     }
 
     @TestCase
+    @Tag[requires_gui_dialog]
     func testAddPageAndCurrentId() {
         let wiz = QWizard()
         let p1 = QWizardPage()
@@ -362,6 +363,7 @@ class QWizardTests {
     }
 
     @TestCase
+    @Tag[requires_gui_dialog]
     func testNavigation() {
         let wiz = QWizard()
         let p1 = QWizardPage()
@@ -413,6 +415,7 @@ class QWizardTests {
     }
 
     @TestCase
+    @Tag[requires_gui_dialog]
     func testShow() {
         let wiz = QWizard()
         wiz.show()
@@ -481,6 +484,7 @@ class QErrorMessageTests {
     }
 
     @TestCase
+    @Tag[requires_gui_dialog]
     func testShowMessage() {
         let dlg = QErrorMessage()
         dlg.showMessage("发生了一个错误")

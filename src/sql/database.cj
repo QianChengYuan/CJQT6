@@ -229,7 +229,7 @@ public class QSqlDatabase <: QtResource {
     }
     
     /// 删除数据库连接（兼容旧API）
-    public func delete() {
+    public func delete(): Unit {
         close()
     }
 }
@@ -381,7 +381,7 @@ public class QSqlQuery {
     
     public func getPtr(): Int64 { ptr }
     
-    public func delete() {
+    public func delete(): Unit {
         if (ptr != 0) {
             unsafe { qSqlQueryDelete(ptr) }
             ptr = 0

@@ -253,7 +253,7 @@ public class QPrinter {
     
     public func getPtr(): Int64 { ptr }
     
-    public func delete() {
+    public func delete(): Unit {
         if (ptr != 0) {
             unsafe { qPrinterDelete(ptr) }
             ptr = 0
@@ -277,7 +277,7 @@ public class QPrintDialog {
         unsafe { qPrintDialogPrinter(ptr) }
     }
     
-    public func delete() {
+    public func delete(): Unit {
         if (ptr != 0) {
             unsafe { qPrintDialogDelete(ptr) }
             ptr = 0
@@ -306,7 +306,7 @@ public class QPrintPreviewDialog {
         unsafe { qPrintPreviewDialogPrinter(ptr) }
     }
     
-    public func delete() {
+    public func delete(): Unit {
         if (ptr != 0) {
             unsafe { qPrintPreviewDialogDelete(ptr) }
             ptr = 0

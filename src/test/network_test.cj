@@ -67,7 +67,7 @@ class QHostAddressTests {
     func testEqual() {
         let addr = QHostAddress("127.0.0.1")
         @Expect(addr.equal("127.0.0.1"), true)
-        @Expect(addr.equal("1.2.3.4"), false)
+        @Expect(addr.equal("1.2.3.4"), false) // cjlint-ignore !G.OTH.03 测试用示例URL
         addr.delete()
     }
 
@@ -594,29 +594,29 @@ class QSslSocketTests {
 class QNetworkRequestTests {
     @TestCase
     func testCreate() {
-        let req = QNetworkRequest("https://example.com")
+        let req = QNetworkRequest("https://example.com") // cjlint-ignore !G.OTH.03 测试用示例URL
         @Assert(req.getPtr() != 0)
         req.close()
     }
 
     @TestCase
     func testUrl() {
-        let req = QNetworkRequest("https://example.com/path")
-        @Expect(req.url(), "https://example.com/path")
+        let req = QNetworkRequest("https://example.com/path") // cjlint-ignore !G.OTH.03 测试用示例URL
+        @Expect(req.url(), "https://example.com/path") // cjlint-ignore !G.OTH.03 测试用示例URL
         req.close()
     }
 
     @TestCase
     func testSetUrl() {
-        let req = QNetworkRequest("https://a.com")
-        req.setUrl("https://b.com/api")
-        @Expect(req.url(), "https://b.com/api")
+        let req = QNetworkRequest("https://a.com") // cjlint-ignore !G.OTH.03 测试用示例URL
+        req.setUrl("https://b.com/api") // cjlint-ignore !G.OTH.03 测试用示例URL
+        @Expect(req.url(), "https://b.com/api") // cjlint-ignore !G.OTH.03 测试用示例URL
         req.close()
     }
 
     @TestCase
     func testSetHeader() {
-        let req = QNetworkRequest("https://example.com")
+        let req = QNetworkRequest("https://example.com") // cjlint-ignore !G.OTH.03 测试用示例URL
         req.setHeader(KnownHeaders.userAgent(), "CJQT6/1.0")
         @Expect(req.header(KnownHeaders.userAgent()), "CJQT6/1.0")
         req.close()
@@ -624,7 +624,7 @@ class QNetworkRequestTests {
 
     @TestCase
     func testContentTypeHeader() {
-        let req = QNetworkRequest("https://example.com")
+        let req = QNetworkRequest("https://example.com") // cjlint-ignore !G.OTH.03 测试用示例URL
         req.setHeader(KnownHeaders.contentType(), "application/json")
         @Expect(req.header(KnownHeaders.contentType()), "application/json")
         req.close()
@@ -632,7 +632,7 @@ class QNetworkRequestTests {
 
     @TestCase
     func testSetRawHeader() {
-        let req = QNetworkRequest("https://example.com")
+        let req = QNetworkRequest("https://example.com") // cjlint-ignore !G.OTH.03 测试用示例URL
         req.setRawHeader("X-Custom", "value")
         @Assert(req.getPtr() != 0)
         req.close()
@@ -640,7 +640,7 @@ class QNetworkRequestTests {
 
     @TestCase
     func testSetTransferTimeout() {
-        let req = QNetworkRequest("https://example.com")
+        let req = QNetworkRequest("https://example.com") // cjlint-ignore !G.OTH.03 测试用示例URL
         req.setTransferTimeout(5000)
         @Assert(req.getPtr() != 0)
         req.close()
@@ -648,7 +648,7 @@ class QNetworkRequestTests {
 
     @TestCase
     func testClose() {
-        let req = QNetworkRequest("https://example.com")
+        let req = QNetworkRequest("https://example.com") // cjlint-ignore !G.OTH.03 测试用示例URL
         req.close()
         req.close()  // 重复 close 安全
         @Assert(true)
@@ -656,7 +656,7 @@ class QNetworkRequestTests {
 
     @TestCase
     func testOperationsAfterClose() {
-        let req = QNetworkRequest("https://example.com")
+        let req = QNetworkRequest("https://example.com") // cjlint-ignore !G.OTH.03 测试用示例URL
         req.close()
         @ExpectThrows[ResourceDisposedException](req.url())
         @ExpectThrows[ResourceDisposedException](req.header(KnownHeaders.userAgent()))
@@ -692,7 +692,7 @@ class QNetworkAccessManagerTests {
     func testOperationsAfterClose() {
         let mgr = QNetworkAccessManager()
         mgr.close()
-        let req = QNetworkRequest("https://example.com")
+        let req = QNetworkRequest("https://example.com") // cjlint-ignore !G.OTH.03 测试用示例URL
         @ExpectThrows[ResourceDisposedException](mgr.get(req))
         req.close()
     }

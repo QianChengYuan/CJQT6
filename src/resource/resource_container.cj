@@ -375,7 +375,7 @@ public class ResourceContainer <: QtResource {
     /// 
     /// 注意：当前返回固定值"QtResource"
     /// 未来可通过反射获取实际类型名
-    private func getTypeName(widget: QtResource): String {
+    private func getTypeName(_: QtResource): String {
         return "QtResource"
     }
     

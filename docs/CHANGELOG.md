@@ -1,25 +1,87 @@
 ﻿# 更新日志
-## [Unreleased] - 2026-08-09
+
+> **版本号设计原则（语义化版本 SemVer）**：
+> - **major**：不兼容的 API 破坏性变更
+> - **minor**：新增功能或较大改进（新控件封装、新模块、工程基础设施等）
+> - **patch**：Bug 修复或文档调整（不新增公开 API）
+> - 每个版本对应一组逻辑相关的 git 提交，按功能里程碑划分而非按日期随意递增
+> - 版本号与 git tag 一一对应（`v1.9.0` → tag `v1.9.0`），cjpm.toml `version` 字段同步
+
+## [1.9.0] - 2026-08-16
 
 ### 新增
 
-- **P1 异步与模型（roadmap 方向二）**：
-  - `UiPoster` 单例收口跨线程回投：`UiPoster.runOnUiThread`/`post` + 顶层 `runOnUiThread`/`runAsync`（`src/core/uiposter.cj`），复用 `registerVoidCallback` 闭包注册表按 id 派发、一次性任务自动注销；native 侧新增 `bridge_ui_poster.cpp::qUiPosterPost`（`QMetaObject::invokeMethod` QueuedConnection 塞入 GUI 线程事件队列）+ `bridge_signal.cpp::qGetVoidDispatcher`；
-  - `QAbstractItemModel` 补 `notifyDataChanged(topLeftRow, topLeftCol, bottomRightRow, bottomRightCol)` / `notifyLayoutChanged()`（P1-a 局部刷新，dataChanged 索引复用回调模型 `m_indexCb` 内部 id）；`QTableView` 新增 `setModel(QAbstractItemModel)` 重载，自定义实时表可直接挂载。
-- **P1 测试**：`src/test/p1_async_model_test.cj` 12 用例（模型局部刷新通知、UiPoster 跨线程回投 FIFO/线程身份、旋转框 `textChanged`），全量 906/906 通过。
-- **P1 bench 工程**：`examples/bench` 基准工程（`std.time.MonoTime` 单调纳秒钟测时，先 warmup 再计时），量化纯 FFI 往返 / 字符串过 FFI / 信号回调吞吐 / 异步路径四条高频路径，为 P3 `@FastNative` 标注提供数据：Int32 getter≈166ns、setText≈350~790ns、Direct emitVoid 回调≈300ns、runOnUiThread 端到端≈2.7µs、QTimer(interval=0) 事件循环派发≈14µs/op——事件分发与字符串转换是热点，纯 getter 标注收益有限。
+- **CI/CD 基础设施**：GitHub Actions 双端 CI（Linux ubuntu-24.04 + Windows windows-2022），aqtinstall 固定 Qt 版本、编译 bridge、offscreen 测试 + cjcov 覆盖率上传；SDK 下载改用稳定 objectKey API（无需签名、随版本固定）+ SHA-256 校验。
+- **桥接层 C++ 单测集成 CI（P0-3）**：`native/tests/bridge_core_test.cpp` 扩展至 12 套件 / 93 checks（存活表三件套 + 字符串工具 + 级联析构 + 8 线程并发 + 8 个信号回调清理回归套件），CI 双端均加「编译并运行桥接层 C++ 单元测试」步骤（Linux 带 ASAN）。
+- **cjpm check 依赖门禁（P0-4）**：CI 双端加「校验依赖可重现构建」步骤执行 `cjpm check`。
+- **工程治理基础设施**：覆盖率门禁（`scripts/check-coverage.ps1` 双口径）、发布门禁（`scripts/check-release.ps1` tag 前检查 CHANGELOG/版本号）、API 索引门禁、安全说明（`SECURITY.md`）、封装模板（`docs/wrapper-template.md`）。
+- **Qt 版本×平台兼容矩阵（P1-2）**：新增 `docs/qt-version-matrix.md`，含平台 × 锁定版本矩阵（含本机/CI 区分）、ABI 敏感说明（`qt_qFindChild_helper`/`valueChanged(QString)`/`QRegExpValidator`/MinGW 与 MSVC ABI/aqtinstall 6.10+ 解压失败）、版本更换三步指南。
+- **性能基线文档（P2-3）**：新增 `docs/performance-baseline.md`，FFI/信号/异步四条高频路径实测基线表（Windows Qt 6.10.3）、解读结论与优化优先级、复跑方法与跨平台记录表、性能 commit 前后对照门禁。
 
 ### 修复
 
-- 移除对 Qt 6 已移除的 `QSpinBox/QDoubleSpinBox::valueChanged(QString)` 重载的桥接尝试（Qt 6.10.3 编译期即报错）；文本变化统一走既有 `setOnTextChanged`（`textChanged(const QString&)`），与数值 `setOnValueChanged` 并存互不覆盖。
+- **信号回调清理**：`bridge_signal.cpp` delete 时清理全部 86 个静态信号回调 map，修复控件 connect 偶发失效（wrange + views/wtext/wmisc/wlayout/wnew/wselect/wcore 8 套件回归验证）。
+- **跨平台编译修复**：`bridge_core.cpp` 原无条件 `#include <private/qeventdispatcher_win_p.h>` 并使用 `QEventDispatcherWin32`（Windows 专用），Linux 上不存在该头文件导致编译失败；加 `Q_OS_WIN`/`Q_OS_UNIX` 平台守卫，Linux 改用 `QEventDispatcherUNIX` + `qeventdispatcher_unix_p.h`。`CMakeLists.txt` 的 `CorePrivate` 原列为 REQUIRED 组件，但 Ubuntu 22.04 的 Qt 6.4.2 不提供独立 cmake 配置，改为可选（`QUIET`）+ 条件链接 `if(TARGET Qt6::CorePrivate)`。
+- **CI Windows Qt 版本降级**：aqtinstall 3.3.0 解压 Qt 6.10.3 报 `Bad7zFile: QtNoLinkTargetHelpers.cmake`（Qt 6.10+ 新增文件，py7zr 不兼容），CI Windows Qt 版本从 6.10.3 降到 6.9.1 后稳定。
+- **CI Linux 平台无关用例排除扩展**：原仅排除 `requires_audio`，后续发现 `QMessageBox.information()`/`QMenu.popup()` 在 offscreen 平台模态挂起、`QProcessSpawnTests` 用 `cmd /c`（Windows 专用）、`QPrinterTests.testOutputFormatRoundtrip` 依赖 CUPS 打印系统；分别加 `@Tag[requires_gui_dialog]`/`@Tag[requires_process_spawn]`/`@Tag[requires_printer]` 标签，Linux CI 排除 5 组 `--exclude-tags=requires_gui_dialog,requires_gui_drag,requires_audio,requires_process_spawn,requires_printer` + `--timeout-each=30s`。CI run #21 双端全绿（PASSED 1156/SKIPPED 63/FAILED 0）。
+- **`bridge_core.cpp` 编译错误**：补 `thread_local QEventLoop* t_currentLoop = nullptr;` 声明，修复未声明的 `t_currentLoop` 标识符错误。
+
+### 测试
+
+- 补全 13 个 0% 覆盖文件的单元测试，整体覆盖率 70.45%→79.14%。
+- 多媒体测试加 `@Tag[requires_audio]`，Linux CI 排除该组避免无音频服务阻塞挂起。
+
+### 构建
+
+- 重编 Linux/Windows 桥接库产物（`releases/linux-x64/libcjqt6_bridge.so` + `releases/windows-x64/cjqt6_bridge.dll`/`.lib`）。
+
+### 文档
+
+- README 重写优化（融合 CTQT6.MD 结构 + 修正过时数据）。
+- 测试文档修正 6 处错误 cjpm test 命令（`docs/testing/test-guide.md` + `test-faq.md`）。
+- 脚本环境变量统一（`QTDIR`/`CJQT6_ROOT`/`CANGJIE_HOME`），3 个 PowerShell 脚本加 `CANGJIE_HOME` 候选、`run-test.sh` 修 `QT_DIR`→`QTDIR`。
+- `docs/internal/CJQT6_优化点清单.md` 更新（P0-1/P0-2/P1-2 等多个条目反映 CI 修复历程）。
+
+---
+
+## [1.8.0] - 2026-08-09
+
+### 新增
+
+- **聊天示例**：`examples/qq_chat` 单机版聊天 + `examples/qq_chat_lan` 局域网聊天（历史同步/撤回/文件传输/表情/账号管理，36 项 e2e 断言），补全 `QTcpServer` 封装并修复桥接层死锁。
+- **记事本字体格式智能应用**：字体对话框保留已有格式，修复双入口冲突。
+- **音乐播放器歌词同步**：新增歌词同步显示、曲目元数据与深色主题。
+- **QML 模块完善**：`QQmlApplicationEngine`/`QQuickView`/`QQuickWidget`/`QQuickWindow`/`QQmlComponent`/`QQmlContext`/`QQuickItem` 封装（QtResource 范式 + 属性与信号），修复相对路径加载。
+- **QUiLoader 封装**：支持 Qt Designer `.ui` 文件静态加载（FFI 桥接 + 测试与文档）。
+- **反向失效通知**：native 存活表 + `trackObject`/`untrackObject`/`isObjectAlive` 三件套，修复级联析构 double-free 挂起；48 个源文件覆盖，35 个实现 `QtResource` 接口。
+- **P1 异步与模型**：`UiPoster` 单例收口跨线程回投（`runOnUiThread`/`post` + 顶层 `runOnUiThread`/`runAsync`），native 侧 `bridge_ui_poster.cpp::qUiPosterPost`（`QMetaObject::invokeMethod` QueuedConnection）；`QAbstractItemModel` 补 `notifyDataChanged`/`notifyLayoutChanged`（局部刷新），`QTableView` 新增 `setModel(QAbstractItemModel)` 重载。
+- **国际化**：`QLocale` 封装与 `QApp` 全局 QSS，补充 macOS 一键构建脚本。
+- **ui2cj 工具**：无工程自动引导（生成最小可运行工程与 `deploy_qt.ps1`，UTF-8 BOM 兼容 PowerShell 5.1）。
+- **P1 bench 工程**：`examples/bench` 基准工程（`std.time.MonoTime` 单调纳秒测时），量化纯 FFI 往返 / 字符串过 FFI / 信号回调吞吐 / 异步路径四条高频路径：Int32 getter≈166ns、setText≈350~790ns、emitVoid 回调≈300ns、runOnUiThread≈2.7µs、QTimer 事件循环派发≈14µs/op。
+
+### 修复
+
+- **桥接字符串返回统一**：走 bridge 自持释放，修复 Windows CRT 堆不匹配崩溃。
+- **Qt 6 已移除重载**：移除 `QSpinBox/QDoubleSpinBox::valueChanged(QString)` 桥接尝试（Qt 6.10.3 编译期报错）；文本变化统一走 `setOnTextChanged`。
+
+### 重构
+
+- **native 构建目录统一命名**：`build_windows_x64`，新增 `AGENTS.md`。
+
+### 测试
+
+- 测试源码迁入根包 `src/test/`（`package cjqt6.test`，34 个 `*_test.cj`），根目录 `cjpm test` 直接发现并运行。
+- P1 异步模型 12 用例（模型局部刷新通知、UiPoster 跨线程回投 FIFO/线程身份、旋转框 `textChanged`）。
+
+### 构建
+
+- 重编含 QML 桥接的 Linux(WSL)/Windows 桥接库并收窄 releases 发布物。
 
 ### 文档
 
 - `docs/roadmap.md`：4.1/4.2/4.3 落地标记与 Qt6 重载结论；P1 里程碑矩阵更新（bench ✅ + 量化数据）。
-- 新增 `docs/qt-version-matrix.md`（P1-2）：Qt 版本 × 平台兼容矩阵、ABI 敏感说明（`qt_qFindChild_helper` 符号移除、`valueChanged(QString)` 重载移除、`QRegExpValidator` 移除、MinGW/MSVC ABI 不兼容）、版本更换三步指南与各锁定版本实测记录；README「环境要求」与 PUBLISHING 8.2 已链接/对齐。
-- 新增 `docs/performance-baseline.md`（P2-3）：FFI/信号/异步四条高频路径实测基线表（Windows Qt 6.10.3）、解读结论与优化优先级、复跑方法与跨平台记录表、性能 commit 前后对照门禁。
 - `docs/api/01_core.md`：新增 `UiPoster`/`runOnUiThread`/`runAsync` 章节。
-- `docs/api/05_views.md`：`QTableView::setModel(QAbstractItemModel)`、`QAbstractItemModel::notifyDataChanged`/`notifyLayoutChanged`；修正示例中不存在的 `(row*2+col).toInt64()`（仓颉数值转换用 `Int64(...)`）。
+- `docs/api/05_views.md`：`QTableView::setModel`、`QAbstractItemModel::notifyDataChanged`/`notifyLayoutChanged`；修正示例中不存在的 `(row*2+col).toInt64()`（仓颉数值转换用 `Int64(...)`）。
 
 ## [1.7.0] - 2026-08-02
 
@@ -57,7 +119,7 @@
 
 - **API 文档全覆盖**: `docs/api/*.md` 与 `src/` 逐类对齐，302 个公开类文档覆盖率达 100%——补齐 QTimer、QTextDocument/QTextCursor/QSyntaxHighlighter、QTextEdit 富文本查找替换、图形特效（QGraphicsOpacityEffect/QGraphicsDropShadowEffect）、通用布局类型（Alignment/Orientation/Margins/Point/Size/Rect）、LabelTextFormat、SpinBoxCorrectionMode/SpinBoxButtonSymbols、QListWidgetItem/QTableWidgetItem、WidgetInfo、ResourceUtils、ScrollBarPolicy、ProcessChannel 等章节
 - **文档结构整理**: 删除 `docs/installation.md`，资源管理文档移入 `docs/resource/`，更新 `build-guide` 脚本引用
-- **安装方式变更**: 改用 Git 依赖方式安装（`cjpm.toml` 中 `git = "..."`, `tag = "..."`），替代中心仓发布；示例代码 API 用法修正并添加运行时 PATH 配置说明
+- **安装方式变更**: 改用 Git 依赖方式安装（`cjpm.toml` 中 `git = "..."`, `tag = "..."`）；示例代码 API 用法修正并添加运行时 PATH 配置说明
 - **api-completeness.md / unwrapped-controls-analysis.md**: 反映新增 API 后的覆盖度评估
 
 ---
@@ -80,7 +142,7 @@
 
 ### 文档
 
-- **双通道安装指南**: `docs/installation.md` 重写安装说明，区分中心仓源码安装与 Releases 桥接库下载
+- **安装指南**: `docs/installation.md` 重写安装说明，Git 源码安装与 Releases 桥接库下载
 - **FFI 原生库分发说明**: `docs/PUBLISHING.md` 新增第4节，解释 `cjpm bundle` 不包含 FFI 原生库的原因及双通道分发策略
 
 ### 杂项
@@ -415,7 +477,7 @@
 ## [1.0.0] - 2026-05-07
 
 ### 新增
-- 首次发布到仓颉中心仓
+
 - 支持 Linux x86_64、Windows x86_64、macOS x86_64/arm64 多平台
 - 15 个模块：core、widgets、gui、dialogs、menu、views、paint、process、qml、multimedia、sql、print、resource、network
 - 100+ 控件/类封装

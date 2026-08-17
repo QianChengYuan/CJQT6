@@ -122,7 +122,7 @@ public class QTreeWidgetItem {
     
     // ========== 文本 ==========
     
-    public func setText(column: Int32, text: String) {
+    public func setText(column: Int32, text: String): Unit {
         unsafe {
             var cstr = LibC.mallocCString(text)
             qTreeWidgetItemSetText(ptr, column, cstr)
@@ -150,7 +150,7 @@ public class QTreeWidgetItem {
         }
     }
     
-    public func addChildItem(child: QTreeWidgetItem) {
+    public func addChildItem(child: QTreeWidgetItem): Unit {
         unsafe {
             qTreeWidgetItemAddChildItem(ptr, child.getPtr())
         }
@@ -169,7 +169,7 @@ public class QTreeWidgetItem {
         }
     }
     
-    public func takeChild(index: Int32) {
+    public func takeChild(index: Int32): Unit {
         unsafe {
             qTreeWidgetItemTakeChild(ptr, index)
         }
@@ -189,7 +189,7 @@ public class QTreeWidgetItem {
     
     // ========== 用户数据 ==========
     
-    public func setData(column: Int32, data: Int64) {
+    public func setData(column: Int32, data: Int64): Unit {
         unsafe {
             qTreeWidgetItemSetData(ptr, column, data)
         }
@@ -203,7 +203,7 @@ public class QTreeWidgetItem {
     
     // ========== 展开/折叠 ==========
     
-    public func setExpanded(expanded: Bool) {
+    public func setExpanded(expanded: Bool): Unit {
         unsafe {
             qTreeWidgetItemSetExpanded(ptr, expanded)
         }
@@ -217,7 +217,7 @@ public class QTreeWidgetItem {
     
     // ========== 勾选 ==========
     
-    public func setCheckState(column: Int32, state: Int32) {
+    public func setCheckState(column: Int32, state: Int32): Unit {
         unsafe {
             qTreeWidgetItemSetCheckState(ptr, column, state)
         }
@@ -231,7 +231,7 @@ public class QTreeWidgetItem {
     
     // ========== 选中 ==========
     
-    public func setSelected(selected: Bool) {
+    public func setSelected(selected: Bool): Unit {
         unsafe {
             qTreeWidgetItemSetSelected(ptr, selected)
         }
@@ -245,7 +245,7 @@ public class QTreeWidgetItem {
     
     // ========== 隐藏 ==========
     
-    public func setHidden(hidden: Bool) {
+    public func setHidden(hidden: Bool): Unit {
         unsafe {
             qTreeWidgetItemSetHidden(ptr, hidden)
         }
@@ -274,7 +274,7 @@ public class QTreeWidget {
         ptr
     }
     
-    public func delete() {
+    public func delete(): Unit {
         if (ptr != 0) {
             unsafe {
                 qTreeWidgetDelete(ptr)
@@ -284,13 +284,13 @@ public class QTreeWidget {
     
     // ========== 列设置 ==========
     
-    public func setColumnCount(columns: Int32) {
+    public func setColumnCount(columns: Int32): Unit {
         unsafe {
             qTreeWidgetSetColumnCount(ptr, columns)
         }
     }
     
-    public func setHeaderLabel(column: Int32, label: String) {
+    public func setHeaderLabel(column: Int32, label: String): Unit {
         unsafe {
             var cstr = LibC.mallocCString(label)
             qTreeWidgetSetHeaderLabel(ptr, column, cstr)
@@ -298,7 +298,7 @@ public class QTreeWidget {
         }
     }
     
-    public func setHeaderHidden(hidden: Bool) {
+    public func setHeaderHidden(hidden: Bool): Unit {
         unsafe {
             qTreeWidgetSetHeaderHidden(ptr, hidden)
         }
@@ -315,13 +315,13 @@ public class QTreeWidget {
         }
     }
     
-    public func insertTopLevelItem(index: Int32, item: QTreeWidgetItem) {
+    public func insertTopLevelItem(index: Int32, item: QTreeWidgetItem): Unit {
         unsafe {
             qTreeWidgetInsertTopLevelItem(ptr, index, item.getPtr())
         }
     }
     
-    public func takeTopLevelItem(index: Int32) {
+    public func takeTopLevelItem(index: Int32): Unit {
         unsafe {
             qTreeWidgetTakeTopLevelItem(ptr, index)
         }
@@ -340,7 +340,7 @@ public class QTreeWidget {
         }
     }
     
-    public func clear() {
+    public func clear(): Unit {
         unsafe {
             qTreeWidgetClear(ptr)
         }
@@ -358,7 +358,7 @@ public class QTreeWidget {
         }
     }
     
-    public func setCurrentItem(item: QTreeWidgetItem) {
+    public func setCurrentItem(item: QTreeWidgetItem): Unit {
         unsafe {
             qTreeWidgetSetCurrentItem(ptr, item.getPtr())
         }
@@ -366,25 +366,25 @@ public class QTreeWidget {
     
     // ========== 展开/折叠 ==========
     
-    public func expandItem(item: QTreeWidgetItem) {
+    public func expandItem(item: QTreeWidgetItem): Unit {
         unsafe {
             qTreeWidgetExpandItem(ptr, item.getPtr())
         }
     }
     
-    public func collapseItem(item: QTreeWidgetItem) {
+    public func collapseItem(item: QTreeWidgetItem): Unit {
         unsafe {
             qTreeWidgetCollapseItem(ptr, item.getPtr())
         }
     }
     
-    public func expandAll() {
+    public func expandAll(): Unit {
         unsafe {
             qTreeWidgetExpandAll(ptr)
         }
     }
     
-    public func collapseAll() {
+    public func collapseAll(): Unit {
         unsafe {
             qTreeWidgetCollapseAll(ptr)
         }
@@ -393,35 +393,35 @@ public class QTreeWidget {
     // ========== 事件回调 ==========
     
     // 设置项点击回调
-    public func setOnItemClicked(callback: CFunc<(Int64) -> Unit>) {
+    public func setOnItemClicked(callback: CFunc<(Int64) -> Unit>): Unit {
         unsafe {
             qTreeWidgetSetOnItemClicked(ptr, callback)
         }
     }
     
     // 设置项双击回调
-    public func setOnItemDoubleClicked(callback: CFunc<(Int64) -> Unit>) {
+    public func setOnItemDoubleClicked(callback: CFunc<(Int64) -> Unit>): Unit {
         unsafe {
             qTreeWidgetSetOnItemDoubleClicked(ptr, callback)
         }
     }
     
     // 设置项展开回调
-    public func setOnItemExpanded(callback: CFunc<(Int64) -> Unit>) {
+    public func setOnItemExpanded(callback: CFunc<(Int64) -> Unit>): Unit {
         unsafe {
             qTreeWidgetSetOnItemExpanded(ptr, callback)
         }
     }
     
     // 设置项折叠回调
-    public func setOnItemCollapsed(callback: CFunc<(Int64) -> Unit>) {
+    public func setOnItemCollapsed(callback: CFunc<(Int64) -> Unit>): Unit {
         unsafe {
             qTreeWidgetSetOnItemCollapsed(ptr, callback)
         }
     }
     
     // 设置当前项变化回调
-    public func setOnCurrentItemChanged(callback: CFunc<(Int64) -> Unit>) {
+    public func setOnCurrentItemChanged(callback: CFunc<(Int64) -> Unit>): Unit {
         unsafe {
             qTreeWidgetSetOnCurrentItemChanged(ptr, callback)
         }
@@ -435,7 +435,7 @@ public class QTreeWidget {
         }
     }
 
-    public func setHeaderItem(item: QTreeWidgetItem) {
+    public func setHeaderItem(item: QTreeWidgetItem): Unit {
         unsafe {
             qTreeWidgetSetHeaderItem(ptr, item.getPtr())
         }
@@ -453,26 +453,26 @@ public class QTreeWidget {
         }
     }
 
-    public func setSelectionMode(mode: Int32) {
+    public func setSelectionMode(mode: Int32): Unit {
         unsafe {
             qTreeWidgetSetSelectionMode(ptr, mode)
         }
     }
 
     // 带列号的点击回调（区别于已有的 setOnItemClicked 仅传项指针）
-    public func setOnItemClickedWithColumn(callback: CFunc<(Int64, Int32) -> Unit>) {
+    public func setOnItemClickedWithColumn(callback: CFunc<(Int64, Int32) -> Unit>): Unit {
         unsafe {
             qTreeWidgetConnectItemClicked(ptr, callback)
         }
     }
 
-    public func setOnItemDoubleClickedWithColumn(callback: CFunc<(Int64, Int32) -> Unit>) {
+    public func setOnItemDoubleClickedWithColumn(callback: CFunc<(Int64, Int32) -> Unit>): Unit {
         unsafe {
             qTreeWidgetConnectItemDoubleClicked(ptr, callback)
         }
     }
 
-    public func setOnItemChanged(callback: CFunc<(Int64, Int32) -> Unit>) {
+    public func setOnItemChanged(callback: CFunc<(Int64, Int32) -> Unit>): Unit {
         unsafe {
             qTreeWidgetConnectItemChanged(ptr, callback)
         }
@@ -480,25 +480,25 @@ public class QTreeWidget {
 
     // ========== 继承自QWidget的方法 ==========
     
-    public func show() {
+    public func show(): Unit {
         unsafe {
             qWidgetShow(ptr)
         }
     }
     
-    public func hide() {
+    public func hide(): Unit {
         unsafe {
             qWidgetHide(ptr)
         }
     }
     
-    public func resize(width: Int32, height: Int32) {
+    public func resize(width: Int32, height: Int32): Unit {
         unsafe {
             qWidgetResize(ptr, width, height)
         }
     }
 
-    public func setMinimumSize(minw: Int32, minh: Int32) {
+    public func setMinimumSize(minw: Int32, minh: Int32): Unit {
         unsafe {
             qWidgetSetMinimumSize(ptr, minw, minh)
         }

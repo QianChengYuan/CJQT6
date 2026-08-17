@@ -34,7 +34,7 @@ foreign func qColorDialogGetColorHex(parentPtr: Int64, title: CString): CString
 public class QMessageBox {
     
     // 信息对话框
-    public static func information(parent: Int64, title: String, text: String) {
+    public static func information(parent: Int64, title: String, text: String): Unit {
         unsafe {
             var titleCstr = LibC.mallocCString(title)
             var textCstr = LibC.mallocCString(text)
@@ -45,7 +45,7 @@ public class QMessageBox {
     }
     
     // 警告对话框
-    public static func warning(parent: Int64, title: String, text: String) {
+    public static func warning(parent: Int64, title: String, text: String): Unit {
         unsafe {
             var titleCstr = LibC.mallocCString(title)
             var textCstr = LibC.mallocCString(text)
@@ -56,7 +56,7 @@ public class QMessageBox {
     }
     
     // 错误对话框
-    public static func critical(parent: Int64, title: String, text: String) {
+    public static func critical(parent: Int64, title: String, text: String): Unit {
         unsafe {
             var titleCstr = LibC.mallocCString(title)
             var textCstr = LibC.mallocCString(text)
@@ -422,7 +422,7 @@ public class QProgressDialog <: QtResource {
         trackObject(ptr)
     }
     
-    public func setValue(value: Int32) {
+    public func setValue(value: Int32): Unit {
         checkValid()
         unsafe {
             qProgressDialogSetValue(ptr, value)
@@ -436,21 +436,21 @@ public class QProgressDialog <: QtResource {
         }
     }
     
-    public func setMinimum(minimum: Int32) {
+    public func setMinimum(minimum: Int32): Unit {
         checkValid()
         unsafe {
             qProgressDialogSetMinimum(ptr, minimum)
         }
     }
     
-    public func setMaximum(maximum: Int32) {
+    public func setMaximum(maximum: Int32): Unit {
         checkValid()
         unsafe {
             qProgressDialogSetMaximum(ptr, maximum)
         }
     }
     
-    public func setLabelText(text: String) {
+    public func setLabelText(text: String): Unit {
         checkValid()
         unsafe {
             var cstr = LibC.mallocCString(text)
@@ -459,7 +459,7 @@ public class QProgressDialog <: QtResource {
         }
     }
     
-    public func setCancelButtonText(text: String) {
+    public func setCancelButtonText(text: String): Unit {
         checkValid()
         unsafe {
             var cstr = LibC.mallocCString(text)
@@ -468,7 +468,7 @@ public class QProgressDialog <: QtResource {
         }
     }
     
-    public func setWindowTitle(title: String) {
+    public func setWindowTitle(title: String): Unit {
         checkValid()
         unsafe {
             var cstr = LibC.mallocCString(title)
@@ -477,14 +477,14 @@ public class QProgressDialog <: QtResource {
         }
     }
     
-    public func setAutoClose(autoClose: Bool) {
+    public func setAutoClose(autoClose: Bool): Unit {
         checkValid()
         unsafe {
             qProgressDialogSetAutoClose(ptr, (if (autoClose) { 1 } else { 0 }))
         }
     }
     
-    public func setAutoReset(autoReset: Bool) {
+    public func setAutoReset(autoReset: Bool): Unit {
         checkValid()
         unsafe {
             qProgressDialogSetAutoReset(ptr, (if (autoReset) { 1 } else { 0 }))
@@ -498,28 +498,28 @@ public class QProgressDialog <: QtResource {
         }
     }
     
-    public func show() {
+    public func show(): Unit {
         checkValid()
         unsafe {
             qProgressDialogShow(ptr)
         }
     }
     
-    public func hide() {
+    public func hide(): Unit {
         checkValid()
         unsafe {
             qProgressDialogHide(ptr)
         }
     }
     
-    public func cancel() {
+    public func cancel(): Unit {
         checkValid()
         unsafe {
             qProgressDialogCancel(ptr)
         }
     }
     
-    public func reset() {
+    public func reset(): Unit {
         checkValid()
         unsafe {
             qProgressDialogReset(ptr)
@@ -599,7 +599,7 @@ public class QWizardPage <: QtResource {
         trackObject(ptr)
     }
 
-    public func setTitle(title: String) {
+    public func setTitle(title: String): Unit {
         checkValid()
         unsafe {
             var cstr = LibC.mallocCString(title)
@@ -608,7 +608,7 @@ public class QWizardPage <: QtResource {
         }
     }
 
-    public func setSubTitle(subTitle: String) {
+    public func setSubTitle(subTitle: String): Unit {
         checkValid()
         unsafe {
             var cstr = LibC.mallocCString(subTitle)
@@ -617,7 +617,7 @@ public class QWizardPage <: QtResource {
         }
     }
 
-    public func setCommitPage(isCommit: Bool) {
+    public func setCommitPage(isCommit: Bool): Unit {
         checkValid()
         unsafe {
             qWizardPageSetCommitPage(ptr, (if (isCommit) { 1 } else { 0 }))
@@ -745,28 +745,28 @@ public class QWizard <: QtResource {
         }
     }
 
-    public func next() {
+    public func next(): Unit {
         checkValid()
         unsafe {
             qWizardNext(ptr)
         }
     }
 
-    public func back() {
+    public func back(): Unit {
         checkValid()
         unsafe {
             qWizardBack(ptr)
         }
     }
 
-    public func restart() {
+    public func restart(): Unit {
         checkValid()
         unsafe {
             qWizardRestart(ptr)
         }
     }
 
-    public func setStartId(id: Int32) {
+    public func setStartId(id: Int32): Unit {
         checkValid()
         unsafe {
             qWizardSetStartId(ptr, id)
@@ -780,7 +780,7 @@ public class QWizard <: QtResource {
         }
     }
 
-    public func setOption(option: Int32, enabled: Bool) {
+    public func setOption(option: Int32, enabled: Bool): Unit {
         checkValid()
         unsafe {
             qWizardSetOption(ptr, option, (if (enabled) { 1 } else { 0 }))
@@ -794,7 +794,7 @@ public class QWizard <: QtResource {
         }
     }
 
-    public func setWindowTitle(title: String) {
+    public func setWindowTitle(title: String): Unit {
         checkValid()
         unsafe {
             var cstr = LibC.mallocCString(title)
@@ -803,7 +803,7 @@ public class QWizard <: QtResource {
         }
     }
 
-    public func show() {
+    public func show(): Unit {
         checkValid()
         unsafe {
             qWizardShow(ptr)
@@ -883,7 +883,7 @@ public class QErrorMessage <: QtResource {
         trackObject(ptr)
     }
 
-    public func showMessage(message: String) {
+    public func showMessage(message: String): Unit {
         checkValid()
         unsafe {
             var cstr = LibC.mallocCString(message)
@@ -892,7 +892,7 @@ public class QErrorMessage <: QtResource {
         }
     }
 
-    public func setWindowTitle(title: String) {
+    public func setWindowTitle(title: String): Unit {
         checkValid()
         unsafe {
             var cstr = LibC.mallocCString(title)
@@ -901,7 +901,7 @@ public class QErrorMessage <: QtResource {
         }
     }
 
-    public func show() {
+    public func show(): Unit {
         checkValid()
         unsafe {
             qErrorMessageShow(ptr)

@@ -1,5 +1,8 @@
 package cjqt6.core
 
+import std.env.*
+import std.fs.*
+
 // ============================================================
 // GUITestEnvironment - GUI 测试环境
 // ============================================================
@@ -24,6 +27,12 @@ public class GUITestEnvironment {
     
     public func setupEnvironment(): Unit {
         refCount += 1
+        // Windows 下 offscreen 平台需要显式指定字体目录，否则 QFontDatabase.families() 返回空，
+        // 导致字体相关测试失败。若用户未设 QT_QPA_FONTDIR 且 C:\Windows\Fonts 存在，则自动设置
+        let currentFontDir = getVariable("QT_QPA_FONTDIR") ?? ""
+        if (currentFontDir == "" && exists(Path("C:\\Windows\\Fonts"))) {
+            setVariable("QT_QPA_FONTDIR", "C:\\Windows\\Fonts")
+        }
         // 桥接层 qApplicationCreate 会在跨线程时自动销毁旧 app 并在当前线程重建，
         // 同线程复用返回同一指针。总是调用以正确处理测试框架跨线程跑测试类的场景，
         // 避免后续测试类持有悬垂的旧 app 指针。

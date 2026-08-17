@@ -65,7 +65,7 @@ public class QDate {
         ptr = p
     }
     
-    public func delete() {
+    public func delete(): Unit {
         if (ptr != 0) {
             unsafe { qDateDelete(ptr) }
             ptr = 0
@@ -146,7 +146,7 @@ public class QTime {
         ptr = p
     }
     
-    public func delete() {
+    public func delete(): Unit {
         if (ptr != 0) {
             unsafe { qTimeDelete(ptr) }
             ptr = 0
@@ -233,7 +233,7 @@ public class QDateTime {
         ptr = p
     }
     
-    public func delete() {
+    public func delete(): Unit {
         if (ptr != 0) {
             unsafe { qDateTimeDelete(ptr) }
             ptr = 0
@@ -357,12 +357,12 @@ public class QCalendarWidget {
     public func showToday(): Unit { unsafe { qCalendarWidgetShowToday(ptr) } }
     public func showSelectedDate(): Unit { unsafe { qCalendarWidgetShowSelectedDate(ptr) } }
     
-    public func show() { unsafe { qWidgetShow(ptr) } }
-    public func hide() { unsafe { qWidgetHide(ptr) } }
-    public func resize(width: Int32, height: Int32) { unsafe { qWidgetResize(ptr, width, height) } }
+    public func show(): Unit { unsafe { qWidgetShow(ptr) } }
+    public func hide(): Unit { unsafe { qWidgetHide(ptr) } }
+    public func resize(width: Int32, height: Int32): Unit { unsafe { qWidgetResize(ptr, width, height) } }
     public func getPtr(): Int64 { ptr }
     
-    public func delete() {
+    public func delete(): Unit {
         if (ptr != 0) {
             unsafe { qCalendarWidgetDelete(ptr) }
             ptr = 0
@@ -452,12 +452,12 @@ public class QDateEdit {
         this
     }
     
-    public func show() { unsafe { qWidgetShow(ptr) } }
-    public func hide() { unsafe { qWidgetHide(ptr) } }
-    public func resize(width: Int32, height: Int32) { unsafe { qWidgetResize(ptr, width, height) } }
+    public func show(): Unit { unsafe { qWidgetShow(ptr) } }
+    public func hide(): Unit { unsafe { qWidgetHide(ptr) } }
+    public func resize(width: Int32, height: Int32): Unit { unsafe { qWidgetResize(ptr, width, height) } }
     public func getPtr(): Int64 { ptr }
     
-    public func delete() {
+    public func delete(): Unit {
         if (ptr != 0) {
             unsafe { qDateEditDelete(ptr) }
             ptr = 0
@@ -540,12 +540,12 @@ public class QTimeEdit {
         this
     }
     
-    public func show() { unsafe { qWidgetShow(ptr) } }
-    public func hide() { unsafe { qWidgetHide(ptr) } }
-    public func resize(width: Int32, height: Int32) { unsafe { qWidgetResize(ptr, width, height) } }
+    public func show(): Unit { unsafe { qWidgetShow(ptr) } }
+    public func hide(): Unit { unsafe { qWidgetHide(ptr) } }
+    public func resize(width: Int32, height: Int32): Unit { unsafe { qWidgetResize(ptr, width, height) } }
     public func getPtr(): Int64 { ptr }
     
-    public func delete() {
+    public func delete(): Unit {
         if (ptr != 0) {
             unsafe { qTimeEditDelete(ptr) }
             ptr = 0
@@ -677,12 +677,12 @@ public class QDateTimeEdit {
         this
     }
     
-    public func show() { unsafe { qWidgetShow(ptr) } }
-    public func hide() { unsafe { qWidgetHide(ptr) } }
-    public func resize(width: Int32, height: Int32) { unsafe { qWidgetResize(ptr, width, height) } }
+    public func show(): Unit { unsafe { qWidgetShow(ptr) } }
+    public func hide(): Unit { unsafe { qWidgetHide(ptr) } }
+    public func resize(width: Int32, height: Int32): Unit { unsafe { qWidgetResize(ptr, width, height) } }
     public func getPtr(): Int64 { ptr }
     
-    public func delete() {
+    public func delete(): Unit {
         if (ptr != 0) {
             unsafe { qDateTimeEditDelete(ptr) }
             ptr = 0

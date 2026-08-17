@@ -172,10 +172,8 @@ cd examples/calculator && cjpm build && cjpm run
 2. 更新CHANGELOG（从 `[Unreleased]` 转出 `## [x.y.z]`，含 新增/修复/文档 分类小节）
 3. `powershell -File scripts\check-release.ps1 -Version x.y.z` 门禁通过
 4. 构建并测试（`verify_all.ps1`）
-5. 打包：`cjpm bundle`
-6. 发布到中心仓：`cjpm publish`
-7. 创建Git标签 `vx.y.z`（检查 tag 未重复）
-8. 创建GitHub Release（附 `releases/` 预编译产物）
+5. 创建Git标签 `vx.y.z`（检查 tag 未重复）
+6. 创建GitHub Release（附 `releases/` 预编译产物）
 
 ## 社区
 

@@ -53,25 +53,25 @@ public class QDockWidget {
         }
     }
 
-    public func show() {
+    public func show(): Unit {
         unsafe {
             qWidgetShow(ptr)
         }
     }
 
-    public func hide() {
+    public func hide(): Unit {
         unsafe {
             qWidgetHide(ptr)
         }
     }
 
-    public func resize(width: Int32, height: Int32) {
+    public func resize(width: Int32, height: Int32): Unit {
         unsafe {
             qWidgetResize(ptr, width, height)
         }
     }
 
-    public func setWidget(widgetPtr: Int64) {
+    public func setWidget(widgetPtr: Int64): Unit {
         unsafe {
             qDockWidgetSetWidget(ptr, widgetPtr)
         }
@@ -83,7 +83,7 @@ public class QDockWidget {
         }
     }
 
-    public func setWindowTitle(title: String) {
+    public func setWindowTitle(title: String): Unit {
         unsafe {
             var cstr = LibC.mallocCString(title)
             qDockWidgetSetWindowTitle(ptr, cstr)
@@ -91,19 +91,19 @@ public class QDockWidget {
         }
     }
 
-    public func setAllowedAreas(areas: Int32) {
+    public func setAllowedAreas(areas: Int32): Unit {
         unsafe {
             qDockWidgetSetAllowedAreas(ptr, areas)
         }
     }
 
-    public func setFeatures(features: Int32) {
+    public func setFeatures(features: Int32): Unit {
         unsafe {
             qDockWidgetSetFeatures(ptr, features)
         }
     }
 
-    public func setFloating(floating: Bool) {
+    public func setFloating(floating: Bool): Unit {
         unsafe {
             qDockWidgetSetFloating(ptr, if (floating) { 1 } else { 0 })
         }
@@ -130,7 +130,7 @@ public class QDockWidget {
     }
 
     /// 设置可见性
-    public func setVisible(visible: Bool) {
+    public func setVisible(visible: Bool): Unit {
         unsafe {
             qDockWidgetSetVisible(ptr, if (visible) { 1 } else { 0 })
         }
@@ -144,27 +144,27 @@ public class QDockWidget {
     }
 
     /// 顶层状态变化回调（是否变为浮动顶层窗口）
-    public func setOnTopLevelChanged(callback: BoolCallback) {
+    public func setOnTopLevelChanged(callback: BoolCallback): Unit {
         unsafe {
             qDockWidgetConnectTopLevelChanged(ptr, callback)
         }
     }
 
     /// 可见性变化回调
-    public func setOnVisibilityChanged(callback: BoolCallback) {
+    public func setOnVisibilityChanged(callback: BoolCallback): Unit {
         unsafe {
             qDockWidgetConnectVisibilityChanged(ptr, callback)
         }
     }
 
     /// 停靠位置变化回调（DockWidgetArea 值）
-    public func setOnDockLocationChanged(callback: Int32Callback) {
+    public func setOnDockLocationChanged(callback: Int32Callback): Unit {
         unsafe {
             qDockWidgetConnectDockLocationChanged(ptr, callback)
         }
     }
     
-    public func setLayout(layoutPtr: Int64) {
+    public func setLayout(layoutPtr: Int64): Unit {
         unsafe {
             qWidgetSetLayout(ptr, layoutPtr)
         }
@@ -174,7 +174,7 @@ public class QDockWidget {
         ptr
     }
 
-    public func delete() {
+    public func delete(): Unit {
         if (ptr != 0) {
             unsafe {
                 qDockWidgetDelete(ptr)

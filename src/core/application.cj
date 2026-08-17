@@ -116,7 +116,7 @@ public class QApplication {
     }
     
     /// 设置应用程序语言环境
-    public func setLocale(locale: String) {
+    public func setLocale(locale: String): Unit {
         unsafe {
             var cstr = LibC.mallocCString(locale)
             qApplicationSetLocale(cstr)
@@ -155,7 +155,7 @@ public class QApplication {
         }
     }
     
-    public func delete() {
+    public func delete(): Unit {
         if (ptr != 0) {
             unsafe {
                 qApplicationDelete(ptr)
@@ -254,7 +254,7 @@ public class QLocale {
     }
 
     /// 释放语言环境
-    public func close() {
+    public func close(): Unit {
         if (ptr != 0) {
             unsafe {
                 qLocaleDelete(ptr)

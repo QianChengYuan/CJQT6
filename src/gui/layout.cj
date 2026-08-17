@@ -77,42 +77,42 @@ public class QVBoxLayout <: QLayout {
         trackObject(ptr)
     }
     
-    public func addWidget(widgetPtr: Int64) {
+    public func addWidget(widgetPtr: Int64): Unit {
         checkValid()
         unsafe {
             qVBoxLayoutAddWidget(ptr, widgetPtr)
         }
     }
     
-    public func addWidget(widgetPtr: Int64, stretch: Int32) {
+    public func addWidget(widgetPtr: Int64, stretch: Int32): Unit {
         checkValid()
         unsafe {
             qVBoxLayoutAddWidgetStretch(ptr, widgetPtr, stretch)
         }
     }
     
-    public func addLayout(layoutPtr: Int64) {
+    public func addLayout(layoutPtr: Int64): Unit {
         checkValid()
         unsafe {
             qVBoxLayoutAddLayout(ptr, layoutPtr)
         }
     }
     
-    public func addStretch() {
+    public func addStretch(): Unit {
         checkValid()
         unsafe {
             qVBoxLayoutAddStretch(ptr)
         }
     }
     
-    public func setSpacing(spacing: Int32) {
+    public func setSpacing(spacing: Int32): Unit {
         checkValid()
         unsafe {
             qVBoxLayoutSetSpacing(ptr, spacing)
         }
     }
     
-    public func setMargin(margin: Int32) {
+    public func setMargin(margin: Int32): Unit {
         checkValid()
         unsafe {
             qVBoxLayoutSetMargin(ptr, margin)
@@ -187,42 +187,42 @@ public class QHBoxLayout <: QLayout {
         trackObject(ptr)
     }
     
-    public func addWidget(widgetPtr: Int64) {
+    public func addWidget(widgetPtr: Int64): Unit {
         checkValid()
         unsafe {
             qHBoxLayoutAddWidget(ptr, widgetPtr)
         }
     }
     
-    public func addWidget(widgetPtr: Int64, stretch: Int32) {
+    public func addWidget(widgetPtr: Int64, stretch: Int32): Unit {
         checkValid()
         unsafe {
             qHBoxLayoutAddWidgetStretch(ptr, widgetPtr, stretch)
         }
     }
     
-    public func addLayout(layoutPtr: Int64) {
+    public func addLayout(layoutPtr: Int64): Unit {
         checkValid()
         unsafe {
             qHBoxLayoutAddLayout(ptr, layoutPtr)
         }
     }
     
-    public func addStretch() {
+    public func addStretch(): Unit {
         checkValid()
         unsafe {
             qHBoxLayoutAddStretch(ptr)
         }
     }
     
-    public func setSpacing(spacing: Int32) {
+    public func setSpacing(spacing: Int32): Unit {
         checkValid()
         unsafe {
             qHBoxLayoutSetSpacing(ptr, spacing)
         }
     }
     
-    public func setMargin(margin: Int32) {
+    public func setMargin(margin: Int32): Unit {
         checkValid()
         unsafe {
             qHBoxLayoutSetMargin(ptr, margin)
@@ -297,28 +297,28 @@ public class QGridLayout <: QLayout {
         trackObject(ptr)
     }
     
-    public func addWidget(widgetPtr: Int64, row: Int32, col: Int32) {
+    public func addWidget(widgetPtr: Int64, row: Int32, col: Int32): Unit {
         checkValid()
         unsafe {
             qGridLayoutAddWidget(ptr, widgetPtr, row, col)
         }
     }
     
-    public func addWidgetSpan(widgetPtr: Int64, row: Int32, col: Int32, rowSpan: Int32, colSpan: Int32) {
+    public func addWidgetSpan(widgetPtr: Int64, row: Int32, col: Int32, rowSpan: Int32, colSpan: Int32): Unit {
         checkValid()
         unsafe {
             qGridLayoutAddWidgetSpan(ptr, widgetPtr, row, col, rowSpan, colSpan)
         }
     }
     
-    public func setSpacing(spacing: Int32) {
+    public func setSpacing(spacing: Int32): Unit {
         checkValid()
         unsafe {
             qGridLayoutSetSpacing(ptr, spacing)
         }
     }
     
-    public func setMargin(margin: Int32) {
+    public func setMargin(margin: Int32): Unit {
         checkValid()
         unsafe {
             qGridLayoutSetMargin(ptr, margin)

@@ -101,7 +101,7 @@ public class QListWidget {
         ptr
     }
     
-    public func delete() {
+    public func delete(): Unit {
         if (ptr != 0) {
             unsafe {
                 qListWidgetDelete(ptr)
@@ -122,7 +122,7 @@ public class QListWidget {
     }
     
     // 在指定位置插入项
-    public func insertItem(row: Int32, text: String) {
+    public func insertItem(row: Int32, text: String): Unit {
         unsafe {
             var cstr = LibC.mallocCString(text)
             qListWidgetInsertItem(ptr, row, cstr)
@@ -131,14 +131,14 @@ public class QListWidget {
     }
     
     // 移除指定行的项
-    public func removeItem(row: Int32) {
+    public func removeItem(row: Int32): Unit {
         unsafe {
             qListWidgetRemoveItem(ptr, row)
         }
     }
     
     // 清空所有项
-    public func clear() {
+    public func clear(): Unit {
         unsafe {
             qListWidgetClear(ptr)
         }
@@ -161,7 +161,7 @@ public class QListWidget {
     }
     
     // 设置当前选中行
-    public func setCurrentRow(row: Int32) {
+    public func setCurrentRow(row: Int32): Unit {
         unsafe {
             qListWidgetSetCurrentRow(ptr, row)
         }
@@ -190,7 +190,7 @@ public class QListWidget {
     }
     
     // 设置指定行的文本
-    public func setItemText(row: Int32, text: String) {
+    public func setItemText(row: Int32, text: String): Unit {
         unsafe {
             var cstr = LibC.mallocCString(text)
             qListWidgetSetItemText(ptr, row, cstr)
@@ -201,7 +201,7 @@ public class QListWidget {
     // ========== 项数据 ==========
     
     // 设置项的用户数据
-    public func setItemData(row: Int32, data: Int64) {
+    public func setItemData(row: Int32, data: Int64): Unit {
         unsafe {
             qListWidgetSetItemData(ptr, row, data)
         }
@@ -217,21 +217,21 @@ public class QListWidget {
     // ========== 外观设置 ==========
     
     // 设置选择模式
-    public func setSelectionMode(mode: Int32) {
+    public func setSelectionMode(mode: Int32): Unit {
         unsafe {
             qListWidgetSetSelectionMode(ptr, mode)
         }
     }
     
     // 设置交替行颜色
-    public func setAlternatingRowColors(enable: Bool) {
+    public func setAlternatingRowColors(enable: Bool): Unit {
         unsafe {
             qListWidgetSetAlternatingRowColors(ptr, enable)
         }
     }
     
     // 设置是否可排序
-    public func setSortingEnabled(enable: Bool) {
+    public func setSortingEnabled(enable: Bool): Unit {
         unsafe {
             qListWidgetSetSortingEnabled(ptr, enable)
         }
@@ -240,14 +240,14 @@ public class QListWidget {
     // ========== 图标 ==========
     
     // 设置项图标
-    public func setItemIcon(row: Int32, iconType: Int32) {
+    public func setItemIcon(row: Int32, iconType: Int32): Unit {
         unsafe {
             qListWidgetSetItemIcon(ptr, row, iconType)
         }
     }
 
     // 设置自定义图像图标（pixmap），支持任意用户自定义图像
-    public func setItemIconPixmap(row: Int32, pixmap: QPixmap) {
+    public func setItemIconPixmap(row: Int32, pixmap: QPixmap): Unit {
         unsafe {
             qListWidgetSetItemIconPixmap(ptr, row, pixmap.getPtr())
         }
@@ -256,7 +256,7 @@ public class QListWidget {
     // ========== 勾选 ==========
     
     // 设置项是否可勾选
-    public func setItemCheckable(row: Int32, checkable: Bool) {
+    public func setItemCheckable(row: Int32, checkable: Bool): Unit {
         unsafe {
             qListWidgetSetCheckable(ptr, row, checkable)
         }
@@ -270,7 +270,7 @@ public class QListWidget {
     }
     
     // 设置项勾选状态
-    public func setChecked(row: Int32, checked: Bool) {
+    public func setChecked(row: Int32, checked: Bool): Unit {
         unsafe {
             qListWidgetSetChecked(ptr, row, checked)
         }
@@ -279,21 +279,21 @@ public class QListWidget {
     // ========== 事件回调 ==========
     
     // 设置项点击回调
-    public func setOnItemClicked(callback: CFunc<(Int32) -> Unit>) {
+    public func setOnItemClicked(callback: CFunc<(Int32) -> Unit>): Unit {
         unsafe {
             qListWidgetSetOnItemClicked(ptr, callback)
         }
     }
     
     // 设置项双击回调
-    public func setOnItemDoubleClicked(callback: CFunc<(Int32) -> Unit>) {
+    public func setOnItemDoubleClicked(callback: CFunc<(Int32) -> Unit>): Unit {
         unsafe {
             qListWidgetSetOnItemDoubleClicked(ptr, callback)
         }
     }
     
     // 设置当前行变化回调
-    public func setOnCurrentRowChanged(callback: CFunc<(Int32) -> Unit>) {
+    public func setOnCurrentRowChanged(callback: CFunc<(Int32) -> Unit>): Unit {
         unsafe {
             qListWidgetSetOnCurrentRowChanged(ptr, callback)
         }
@@ -301,7 +301,7 @@ public class QListWidget {
     
     // ========== 批量项 API ==========
 
-    public func addItems(items: Array<String>) {
+    public func addItems(items: Array<String>): Unit {
         unsafe {
             var joined = ""
             for (i in 0..items.size) {
@@ -326,44 +326,44 @@ public class QListWidget {
         }
     }
 
-    public func removeItemWidget(item: QListWidgetItem) {
+    public func removeItemWidget(item: QListWidgetItem): Unit {
         unsafe {
             qListWidgetRemoveItemWidget(ptr, item.getPtr())
         }
     }
 
-    public func setCurrentItem(item: QListWidgetItem) {
+    public func setCurrentItem(item: QListWidgetItem): Unit {
         unsafe {
             qListWidgetSetCurrentItem(ptr, item.getPtr())
         }
     }
 
-    public func setViewMode(mode: Int32) {
+    public func setViewMode(mode: Int32): Unit {
         unsafe {
             qListWidgetSetViewMode(ptr, mode)
         }
     }
 
     // 项指针形式点击回调（区别于已有的行号形式 setOnItemClicked）
-    public func setOnItemClickedItem(callback: CFunc<(Int64) -> Unit>) {
+    public func setOnItemClickedItem(callback: CFunc<(Int64) -> Unit>): Unit {
         unsafe {
             qListWidgetConnectItemClicked(ptr, callback)
         }
     }
 
-    public func setOnItemDoubleClickedItem(callback: CFunc<(Int64) -> Unit>) {
+    public func setOnItemDoubleClickedItem(callback: CFunc<(Int64) -> Unit>): Unit {
         unsafe {
             qListWidgetConnectItemDoubleClicked(ptr, callback)
         }
     }
 
-    public func setOnItemSelectionChanged(callback: CFunc<() -> Unit>) {
+    public func setOnItemSelectionChanged(callback: CFunc<() -> Unit>): Unit {
         unsafe {
             qListWidgetConnectItemSelectionChanged(ptr, callback)
         }
     }
 
-    public func setOnCurrentItemChanged(callback: CFunc<(Int64) -> Unit>) {
+    public func setOnCurrentItemChanged(callback: CFunc<(Int64) -> Unit>): Unit {
         unsafe {
             qListWidgetConnectCurrentItemChanged(ptr, callback)
         }
@@ -371,37 +371,37 @@ public class QListWidget {
 
     // ========== 继承自QWidget的方法 ==========
     
-    public func show() {
+    public func show(): Unit {
         unsafe {
             qWidgetShow(ptr)
         }
     }
     
-    public func hide() {
+    public func hide(): Unit {
         unsafe {
             qWidgetHide(ptr)
         }
     }
     
-    public func resize(width: Int32, height: Int32) {
+    public func resize(width: Int32, height: Int32): Unit {
         unsafe {
             qWidgetResize(ptr, width, height)
         }
     }
 
-    public func setMinimumSize(minw: Int32, minh: Int32) {
+    public func setMinimumSize(minw: Int32, minh: Int32): Unit {
         unsafe {
             qWidgetSetMinimumSize(ptr, minw, minh)
         }
     }
 
-    public func setMaximumSize(maxw: Int32, maxh: Int32) {
+    public func setMaximumSize(maxw: Int32, maxh: Int32): Unit {
         unsafe {
             qWidgetSetMaximumSize(ptr, maxw, maxh)
         }
     }
 
-    public func setStyleSheet(style: String) {
+    public func setStyleSheet(style: String): Unit {
         unsafe {
             let cstr = LibC.mallocCString(style)
             qWidgetSetStyleSheet(ptr, cstr)
@@ -464,7 +464,7 @@ public class QListWidgetItem {
         }
     }
 
-    public func setText(text: String) {
+    public func setText(text: String): Unit {
         unsafe {
             let cstr = LibC.mallocCString(text)
             qListWidgetItemSetText(ptr, cstr)

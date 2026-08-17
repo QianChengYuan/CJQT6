@@ -53,19 +53,19 @@ public class QMdiArea {
         }
     }
 
-    public func show() {
+    public func show(): Unit {
         unsafe {
             qWidgetShow(ptr)
         }
     }
 
-    public func hide() {
+    public func hide(): Unit {
         unsafe {
             qWidgetHide(ptr)
         }
     }
 
-    public func resize(width: Int32, height: Int32) {
+    public func resize(width: Int32, height: Int32): Unit {
         unsafe {
             qWidgetResize(ptr, width, height)
         }
@@ -77,7 +77,7 @@ public class QMdiArea {
         }
     }
 
-    public func removeSubWindow(subWinPtr: Int64) {
+    public func removeSubWindow(subWinPtr: Int64): Unit {
         unsafe {
             qMdiAreaRemoveSubWindow(ptr, subWinPtr)
         }
@@ -89,25 +89,25 @@ public class QMdiArea {
         }
     }
 
-    public func cascadeSubWindows() {
+    public func cascadeSubWindows(): Unit {
         unsafe {
             qMdiAreaCascadeSubWindows(ptr)
         }
     }
 
-    public func tileSubWindows() {
+    public func tileSubWindows(): Unit {
         unsafe {
             qMdiAreaTileSubWindows(ptr)
         }
     }
 
-    public func closeAllSubWindows() {
+    public func closeAllSubWindows(): Unit {
         unsafe {
             qMdiAreaCloseAllSubWindows(ptr)
         }
     }
 
-    public func setViewMode(mode: Int32) {
+    public func setViewMode(mode: Int32): Unit {
         unsafe {
             qMdiAreaSetViewMode(ptr, mode)
         }
@@ -128,14 +128,14 @@ public class QMdiArea {
     }
 
     /// 设置当前激活的子窗口
-    public func setActiveSubWindow(subWinPtr: Int64) {
+    public func setActiveSubWindow(subWinPtr: Int64): Unit {
         unsafe {
             qMdiAreaSetActiveSubWindow(ptr, subWinPtr)
         }
     }
 
     /// 设置子窗口激活顺序
-    public func setActivationOrder(order: Int32) {
+    public func setActivationOrder(order: Int32): Unit {
         unsafe {
             qMdiAreaSetActivationOrder(ptr, order)
         }
@@ -149,7 +149,7 @@ public class QMdiArea {
     }
 
     /// 设置背景（按图片文件路径作为纹理笔刷）
-    public func setBackground(path: String) {
+    public func setBackground(path: String): Unit {
         unsafe {
             let cstr = LibC.mallocCString(path)
             qMdiAreaSetBackground(ptr, cstr)
@@ -158,13 +158,13 @@ public class QMdiArea {
     }
 
     /// 子窗口激活回调（子窗口指针，未激活时为 0）
-    public func setOnSubWindowActivated(callback: Int64Callback) {
+    public func setOnSubWindowActivated(callback: Int64Callback): Unit {
         unsafe {
             qMdiAreaConnectSubWindowActivated(ptr, callback)
         }
     }
     
-    public func setLayout(layoutPtr: Int64) {
+    public func setLayout(layoutPtr: Int64): Unit {
         unsafe {
             qWidgetSetLayout(ptr, layoutPtr)
         }
@@ -174,7 +174,7 @@ public class QMdiArea {
         ptr
     }
 
-    public func delete() {
+    public func delete(): Unit {
         if (ptr != 0) {
             unsafe {
                 qMdiAreaDelete(ptr)
@@ -192,25 +192,25 @@ public class QMdiSubWindow {
         this.ptr = ptr
     }
 
-    public func show() {
+    public func show(): Unit {
         unsafe {
             qWidgetShow(ptr)
         }
     }
 
-    public func hide() {
+    public func hide(): Unit {
         unsafe {
             qWidgetHide(ptr)
         }
     }
 
-    public func resize(width: Int32, height: Int32) {
+    public func resize(width: Int32, height: Int32): Unit {
         unsafe {
             qWidgetResize(ptr, width, height)
         }
     }
 
-    public func setWidget(widgetPtr: Int64) {
+    public func setWidget(widgetPtr: Int64): Unit {
         unsafe {
             qMdiSubWindowSetWidget(ptr, widgetPtr)
         }
@@ -223,7 +223,7 @@ public class QMdiSubWindow {
     }
 
     /// 以折叠（阴影）状态显示
-    public func showShaded() {
+    public func showShaded(): Unit {
         unsafe {
             qMdiSubWindowShowShaded(ptr)
         }
@@ -240,7 +240,7 @@ public class QMdiSubWindow {
         ptr
     }
 
-    public func delete() {
+    public func delete(): Unit {
         if (ptr != 0) {
             unsafe {
                 qMdiSubWindowDelete(ptr)

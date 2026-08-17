@@ -117,7 +117,7 @@ public class QProcessEnvironment {
     public func isEmpty(): Bool { unsafe { qProcessEnvironmentIsEmpty(ptr) != 0 } }
     public func getPtr(): Int64 { ptr }
     
-    public func delete() {
+    public func delete(): Unit {
         if (ptr != 0) {
             unsafe { qProcessEnvironmentDelete(ptr) }
             ptr = 0
@@ -136,7 +136,7 @@ public class QProcess {
         unsafe { ptr = qProcessCreate() }
     }
     
-    public func delete() {
+    public func delete(): Unit {
         if (ptr != 0) {
             unsafe { qProcessDelete(ptr) }
             ptr = 0

@@ -11,7 +11,7 @@ import std.unittest.*
 // =====================================================================
 var gHighlightCalled: Bool = false
 
-func highlightCallback(selfId: Int64, text: CString): Unit {
+func highlightCallback(_: Int64, _: CString): Unit {
     gHighlightCalled = true
 }
 

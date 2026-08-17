@@ -34,25 +34,25 @@ public class QToolBox {
         }
     }
 
-    public func show() {
+    public func show(): Unit {
         unsafe {
             qWidgetShow(ptr)
         }
     }
 
-    public func hide() {
+    public func hide(): Unit {
         unsafe {
             qWidgetHide(ptr)
         }
     }
 
-    public func resize(width: Int32, height: Int32) {
+    public func resize(width: Int32, height: Int32): Unit {
         unsafe {
             qWidgetResize(ptr, width, height)
         }
     }
 
-    public func setMinimumSize(minw: Int32, minh: Int32) {
+    public func setMinimumSize(minw: Int32, minh: Int32): Unit {
         unsafe {
             qWidgetSetMinimumSize(ptr, minw, minh)
         }
@@ -76,7 +76,7 @@ public class QToolBox {
         }
     }
 
-    public func removeItem(index: Int32) {
+    public func removeItem(index: Int32): Unit {
         unsafe {
             qToolBoxRemoveItem(ptr, index)
         }
@@ -94,13 +94,13 @@ public class QToolBox {
         }
     }
 
-    public func setCurrentIndex(index: Int32) {
+    public func setCurrentIndex(index: Int32): Unit {
         unsafe {
             qToolBoxSetCurrentIndex(ptr, index)
         }
     }
 
-    public func setItemText(index: Int32, text: String) {
+    public func setItemText(index: Int32, text: String): Unit {
         unsafe {
             var cstr = LibC.mallocCString(text)
             qToolBoxSetItemText(ptr, index, cstr)
@@ -117,7 +117,7 @@ public class QToolBox {
         }
     }
 
-    public func setItemToolTip(index: Int32, toolTip: String) {
+    public func setItemToolTip(index: Int32, toolTip: String): Unit {
         unsafe {
             var cstr = LibC.mallocCString(toolTip)
             qToolBoxSetItemToolTip(ptr, index, cstr)
@@ -125,7 +125,7 @@ public class QToolBox {
         }
     }
 
-    public func setItemEnabled(index: Int32, enabled: Bool) {
+    public func setItemEnabled(index: Int32, enabled: Bool): Unit {
         unsafe {
             qToolBoxSetItemEnabled(ptr, index, if (enabled) { 1 } else { 0 })
         }
@@ -138,7 +138,7 @@ public class QToolBox {
     }
 
     /// 设置指定项图标（按文件路径）
-    public func setItemIcon(index: Int32, path: String) {
+    public func setItemIcon(index: Int32, path: String): Unit {
         unsafe {
             let cstr = LibC.mallocCString(path)
             qToolBoxSetItemIcon(ptr, index, cstr)
@@ -147,7 +147,7 @@ public class QToolBox {
     }
 
     /// 设置当前显示的子部件
-    public func setCurrentWidget(widgetPtr: Int64) {
+    public func setCurrentWidget(widgetPtr: Int64): Unit {
         unsafe {
             qToolBoxSetCurrentWidget(ptr, widgetPtr)
         }
@@ -161,13 +161,13 @@ public class QToolBox {
     }
 
     /// 当前项切换回调（索引）
-    public func setOnCurrentChanged(callback: Int32Callback) {
+    public func setOnCurrentChanged(callback: Int32Callback): Unit {
         unsafe {
             qToolBoxConnectCurrentChanged(ptr, callback)
         }
     }
     
-    public func setLayout(layoutPtr: Int64) {
+    public func setLayout(layoutPtr: Int64): Unit {
         unsafe {
             qWidgetSetLayout(ptr, layoutPtr)
         }
@@ -177,7 +177,7 @@ public class QToolBox {
         ptr
     }
 
-    public func delete() {
+    public func delete(): Unit {
         if (ptr != 0) {
             unsafe {
                 qToolBoxDelete(ptr)

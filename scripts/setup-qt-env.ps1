@@ -59,12 +59,16 @@ if ([string]::IsNullOrEmpty($QtDir) -or -not (Test-Path "$QtDir\bin\Qt6Core.dll"
 $env:PATH = "$QtDir\bin;$env:PATH"
 $env:QTDIR = $QtDir
 
+# 测试所需：offscreen 平台字体目录（不设会导致字体相关测试失败）
+$env:QT_QPA_FONTDIR = "C:\Windows\Fonts"
+
 Write-Host "✅ Qt6 (MSVC 2022) 环境已配置" -ForegroundColor Green
 Write-Host "Qt路径: $QtDir" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "环境变量已设置：" -ForegroundColor Yellow
 Write-Host "PATH已添加: $QtDir\bin" -ForegroundColor White
 Write-Host "CJQT6_ROOT: $env:CJQT6_ROOT" -ForegroundColor White
+Write-Host "QT_QPA_FONTDIR: $env:QT_QPA_FONTDIR" -ForegroundColor White
 Write-Host ""
 Write-Host "现在可以运行Qt应用：" -ForegroundColor Yellow
 Write-Host "  cjpm run" -ForegroundColor White

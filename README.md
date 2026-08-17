@@ -328,7 +328,7 @@ powershell -ExecutionPolicy Bypass -File scripts\verify_all.ps1
 - [x] **v1.7** — QML / Network / SQL / Print 模块落地，千余用例 + 约 79% 覆盖率
 - [ ] **v1.8** — macOS 官方 bridge 预编译、GraphicsView 封装
 - [ ] **v2.0** — QML 深度集成、QAbstractItemModel 子类化、鸿蒙（OHOS）适配预研
-- [ ] **中心仓发布** — 申请加入 Cangjie-TPC 组织，支持 `cjpm add cjqt6`
+
 
 ---
 

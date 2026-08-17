@@ -18,7 +18,7 @@ public class QSizeGrip {
     }
     
     /// 设置可见性
-    public func setVisible(visible: Bool) {
+    public func setVisible(visible: Bool): Unit {
         unsafe { qSizeGripSetVisible(ptr, visible) }
     }
     
@@ -28,7 +28,7 @@ public class QSizeGrip {
     }
     
     /// 删除部件
-    public func delete() {
+    public func delete(): Unit {
         if (ptr != 0) {
             unsafe {
                 qSignalCleanup(ptr)

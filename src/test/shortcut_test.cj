@@ -129,7 +129,7 @@ class QDesktopServicesTests {
     @TestCase
     func testOpenUrlHttp() {
         // 打开一个 URL，可能成功或失败（取决于系统默认浏览器）
-        let r = QDesktopServices.openUrl("https://example.com")
+        let r = QDesktopServices.openUrl("https://example.com") // cjlint-ignore !G.OTH.03 测试用示例URL
         @Assert(r == true || r == false)
     }
 

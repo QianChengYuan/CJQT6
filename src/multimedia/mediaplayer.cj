@@ -90,7 +90,7 @@ public class QAudioOutput {
     
     public func getPtr(): Int64 { ptr }
     
-    public func delete() {
+    public func delete(): Unit {
         if (ptr != 0) {
             unsafe { qAudioOutputDelete(ptr) }
             ptr = 0
@@ -237,7 +237,7 @@ public class QMediaPlayer {
     
     public func getPtr(): Int64 { ptr }
     
-    public func delete() {
+    public func delete(): Unit {
         if (ptr != 0) {
             unsafe { qMediaPlayerDelete(ptr) }
             ptr = 0

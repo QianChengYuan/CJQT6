@@ -45,25 +45,25 @@ public class QScrollBar {
         }
     }
     
-    public func show() {
+    public func show(): Unit {
         unsafe { qWidgetShow(ptr) }
     }
     
-    public func hide() {
+    public func hide(): Unit {
         unsafe { qWidgetHide(ptr) }
     }
     
-    public func resize(width: Int32, height: Int32) {
+    public func resize(width: Int32, height: Int32): Unit {
         unsafe { qWidgetResize(ptr, width, height) }
     }
     
     /// 设置范围 [min, max]
-    public func setRange(min: Int32, max: Int32) {
+    public func setRange(min: Int32, max: Int32): Unit {
         unsafe { qScrollBarSetRange(ptr, min, max) }
     }
     
     /// 设置当前值
-    public func setValue(value: Int32) {
+    public func setValue(value: Int32): Unit {
         unsafe { qScrollBarSetValue(ptr, value) }
     }
     
@@ -73,27 +73,27 @@ public class QScrollBar {
     }
     
     /// 设置单步步长（箭头点击）
-    public func setSingleStep(step: Int32) {
+    public func setSingleStep(step: Int32): Unit {
         unsafe { qScrollBarSetSingleStep(ptr, step) }
     }
     
     /// 设置翻页步长（点击滑块空白区域）
-    public func setPageStep(step: Int32) {
+    public func setPageStep(step: Int32): Unit {
         unsafe { qScrollBarSetPageStep(ptr, step) }
     }
     
     /// 设置方向
-    public func setOrientation(orientation: Int32) {
+    public func setOrientation(orientation: Int32): Unit {
         unsafe { qScrollBarSetOrientation(ptr, orientation) }
     }
     
     /// 设置值变化回调
-    public func setOnValueChanged(callback: Int32Callback) {
+    public func setOnValueChanged(callback: Int32Callback): Unit {
         unsafe { qScrollBarConnectValueChanged(ptr, callback) }
     }
 
     /// 设置最小值
-    public func setMinimum(value: Int32) {
+    public func setMinimum(value: Int32): Unit {
         unsafe { qScrollBarSetMinimum(ptr, value) }
     }
 
@@ -103,7 +103,7 @@ public class QScrollBar {
     }
 
     /// 设置最大值
-    public func setMaximum(value: Int32) {
+    public func setMaximum(value: Int32): Unit {
         unsafe { qScrollBarSetMaximum(ptr, value) }
     }
 
@@ -113,7 +113,7 @@ public class QScrollBar {
     }
 
     /// 设置滑块位置
-    public func setSliderPosition(value: Int32) {
+    public func setSliderPosition(value: Int32): Unit {
         unsafe { qScrollBarSetSliderPosition(ptr, value) }
     }
 
@@ -123,7 +123,7 @@ public class QScrollBar {
     }
 
     /// 设置是否跟踪（拖动时实时触发 valueChanged）
-    public func setTracking(tracking: Bool) {
+    public func setTracking(tracking: Bool): Unit {
         unsafe { qScrollBarSetTracking(ptr, if (tracking) { 1 } else { 0 }) }
     }
 
@@ -133,7 +133,7 @@ public class QScrollBar {
     }
 
     /// 设置反向外观
-    public func setInvertedAppearance(value: Bool) {
+    public func setInvertedAppearance(value: Bool): Unit {
         unsafe { qScrollBarSetInvertedAppearance(ptr, if (value) { 1 } else { 0 }) }
     }
 
@@ -143,7 +143,7 @@ public class QScrollBar {
     }
 
     /// 设置反向控制
-    public func setInvertedControls(value: Bool) {
+    public func setInvertedControls(value: Bool): Unit {
         unsafe { qScrollBarSetInvertedControls(ptr, if (value) { 1 } else { 0 }) }
     }
 
@@ -153,7 +153,7 @@ public class QScrollBar {
     }
 
     /// 设置重复动作策略
-    public func setRepeatAction(action: Int32) {
+    public func setRepeatAction(action: Int32): Unit {
         unsafe { qScrollBarSetRepeatAction(ptr, action) }
     }
 
@@ -163,42 +163,42 @@ public class QScrollBar {
     }
 
     /// 触发指定动作
-    public func triggerAction(action: Int32) {
+    public func triggerAction(action: Int32): Unit {
         unsafe { qScrollBarTriggerAction(ptr, action) }
     }
 
     /// 滑块按下回调
-    public func setOnSliderPressed(callback: VoidCallback) {
+    public func setOnSliderPressed(callback: VoidCallback): Unit {
         unsafe { qScrollBarConnectSliderPressed(ptr, callback) }
     }
 
     /// 滑块拖动回调
-    public func setOnSliderMoved(callback: Int32Callback) {
+    public func setOnSliderMoved(callback: Int32Callback): Unit {
         unsafe { qScrollBarConnectSliderMoved(ptr, callback) }
     }
 
     /// 滑块释放回调
-    public func setOnSliderReleased(callback: VoidCallback) {
+    public func setOnSliderReleased(callback: VoidCallback): Unit {
         unsafe { qScrollBarConnectSliderReleased(ptr, callback) }
     }
 
     /// 范围变化回调 (min, max)
-    public func setOnRangeChanged(callback: Int32Int32Callback) {
+    public func setOnRangeChanged(callback: Int32Int32Callback): Unit {
         unsafe { qScrollBarConnectRangeChanged(ptr, callback) }
     }
 
     /// 动作触发回调（动作枚举值）
-    public func setOnActionTriggered(callback: Int32Callback) {
+    public func setOnActionTriggered(callback: Int32Callback): Unit {
         unsafe { qScrollBarConnectActionTriggered(ptr, callback) }
     }
     
     /// 设置启用/禁用
-    public func setEnabled(enabled: Bool) {
+    public func setEnabled(enabled: Bool): Unit {
         unsafe { qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 }) }
     }
     
     /// 设置样式表
-    public func setStyleSheet(style: String) {
+    public func setStyleSheet(style: String): Unit {
         unsafe {
             let cstr = LibC.mallocCString(style)
             qWidgetSetStyleSheet(ptr, cstr)
@@ -212,7 +212,7 @@ public class QScrollBar {
     }
     
     /// 删除部件
-    public func delete() {
+    public func delete(): Unit {
         if (ptr != 0) {
             unsafe {
                 qSignalCleanup(ptr)

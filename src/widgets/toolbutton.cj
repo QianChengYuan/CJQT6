@@ -66,21 +66,21 @@ public class QToolButton <: QtResource {
         trackObject(ptr)
     }
     
-    public func show() {
+    public func show(): Unit {
         checkValid()
         unsafe {
             qWidgetShow(ptr)
         }
     }
     
-    public func hide() {
+    public func hide(): Unit {
         checkValid()
         unsafe {
             qWidgetHide(ptr)
         }
     }
     
-    public func setText(text: String) {
+    public func setText(text: String): Unit {
         checkValid()
         unsafe {
             let cstr = LibC.mallocCString(text)
@@ -109,7 +109,7 @@ public class QToolButton <: QtResource {
     }
 
     /// 设置默认关联动作
-    public func setDefaultAction(actionPtr: Int64) {
+    public func setDefaultAction(actionPtr: Int64): Unit {
         checkValid()
         unsafe {
             qToolButtonSetDefaultAction(ptr, actionPtr)
@@ -117,7 +117,7 @@ public class QToolButton <: QtResource {
     }
 
     /// 设置图标
-    public func setIcon(iconPtr: Int64) {
+    public func setIcon(iconPtr: Int64): Unit {
         checkValid()
         unsafe {
             qToolButtonSetIcon(ptr, iconPtr)
@@ -125,7 +125,7 @@ public class QToolButton <: QtResource {
     }
     
     /// 设置图标大小
-    public func setIconSize(width: Int32, height: Int32) {
+    public func setIconSize(width: Int32, height: Int32): Unit {
         checkValid()
         unsafe {
             qToolButtonSetIconSize(ptr, width, height)
@@ -133,7 +133,7 @@ public class QToolButton <: QtResource {
     }
     
     /// 设置工具按钮样式
-    public func setToolButtonStyle(style: Int32) {
+    public func setToolButtonStyle(style: Int32): Unit {
         checkValid()
         unsafe {
             qToolButtonSetToolButtonStyle(ptr, style)
@@ -141,7 +141,7 @@ public class QToolButton <: QtResource {
     }
     
     /// 设置弹出模式
-    public func setPopupMode(mode: Int32) {
+    public func setPopupMode(mode: Int32): Unit {
         checkValid()
         unsafe {
             qToolButtonSetPopupMode(ptr, mode)
@@ -149,7 +149,7 @@ public class QToolButton <: QtResource {
     }
     
     /// 设置自动凸起
-    public func setAutoRaise(enabled: Bool) {
+    public func setAutoRaise(enabled: Bool): Unit {
         checkValid()
         unsafe {
             qToolButtonSetAutoRaise(ptr, enabled)
@@ -165,7 +165,7 @@ public class QToolButton <: QtResource {
     }
     
     /// 设置箭头类型
-    public func setArrowType(arrowType: Int32) {
+    public func setArrowType(arrowType: Int32): Unit {
         checkValid()
         unsafe {
             qToolButtonSetArrowType(ptr, arrowType)
@@ -173,7 +173,7 @@ public class QToolButton <: QtResource {
     }
     
     /// 设置关联菜单
-    public func setMenu(menuPtr: Int64) {
+    public func setMenu(menuPtr: Int64): Unit {
         checkValid()
         unsafe {
             qToolButtonSetMenu(ptr, menuPtr)
@@ -181,7 +181,7 @@ public class QToolButton <: QtResource {
     }
     
     /// 显示菜单
-    public func showMenu() {
+    public func showMenu(): Unit {
         checkValid()
         unsafe {
             qToolButtonShowMenu(ptr)
@@ -189,7 +189,7 @@ public class QToolButton <: QtResource {
     }
     
     /// 设置启用/禁用
-    public func setEnabled(enabled: Bool) {
+    public func setEnabled(enabled: Bool): Unit {
         checkValid()
         unsafe {
             qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
@@ -205,7 +205,7 @@ public class QToolButton <: QtResource {
     }
     
     /// 设置样式表
-    public func setStyleSheet(style: String) {
+    public func setStyleSheet(style: String): Unit {
         checkValid()
         unsafe {
             let cstr = LibC.mallocCString(style)
@@ -215,7 +215,7 @@ public class QToolButton <: QtResource {
     }
     
     /// 设置最小尺寸
-    public func setMinimumSize(minw: Int32, minh: Int32) {
+    public func setMinimumSize(minw: Int32, minh: Int32): Unit {
         checkValid()
         unsafe {
             qWidgetSetMinimumSize(ptr, minw, minh)
@@ -223,7 +223,7 @@ public class QToolButton <: QtResource {
     }
     
     /// 设置最大尺寸
-    public func setMaximumSize(maxw: Int32, maxh: Int32) {
+    public func setMaximumSize(maxw: Int32, maxh: Int32): Unit {
         checkValid()
         unsafe {
             qWidgetSetMaximumSize(ptr, maxw, maxh)
@@ -231,7 +231,7 @@ public class QToolButton <: QtResource {
     }
     
     /// 设置点击回调
-    public func setOnClick(callback: VoidCallback) {
+    public func setOnClick(callback: VoidCallback): Unit {
         checkValid()
         unsafe {
             qToolButtonConnectClicked(ptr, callback)
@@ -249,7 +249,7 @@ public class QToolButton <: QtResource {
     }
     
     /// 断开点击信号
-    public func disconnectClicked() {
+    public func disconnectClicked(): Unit {
         checkValid()
         unsafe {
             qToolButtonDisconnectClicked(ptr)
@@ -257,7 +257,7 @@ public class QToolButton <: QtResource {
     }
     
     /// 从文件路径设置图标
-    public func setIconFromPath(path: String) {
+    public func setIconFromPath(path: String): Unit {
         checkValid()
         unsafe {
             let cstr = LibC.mallocCString(path)

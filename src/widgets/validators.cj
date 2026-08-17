@@ -39,7 +39,7 @@ public class QIntValidator {
     }
     
     /// 设置验证范围
-    public func setRange(min: Int32, max: Int32) {
+    public func setRange(min: Int32, max: Int32): Unit {
         unsafe { qIntValidatorSetRange(ptr, min, max) }
     }
 
@@ -49,7 +49,7 @@ public class QIntValidator {
     }
 
     /// 设置下限
-    public func setBottom(value: Int32) {
+    public func setBottom(value: Int32): Unit {
         unsafe { qIntValidatorSetBottom(ptr, value) }
     }
 
@@ -59,7 +59,7 @@ public class QIntValidator {
     }
 
     /// 设置上限
-    public func setTop(value: Int32) {
+    public func setTop(value: Int32): Unit {
         unsafe { qIntValidatorSetTop(ptr, value) }
     }
 
@@ -69,7 +69,7 @@ public class QIntValidator {
     }
 
     /// 删除验证器
-    public func delete() {
+    public func delete(): Unit {
         if (ptr != 0) {
             unsafe { qValidatorDelete(ptr) }
             ptr = 0
@@ -88,7 +88,7 @@ public class QDoubleValidator {
     }
     
     /// 设置验证范围
-    public func setRange(min: Float64, max: Float64, decimals: Int32) {
+    public func setRange(min: Float64, max: Float64, decimals: Int32): Unit {
         unsafe { qDoubleValidatorSetRange(ptr, min, max, decimals) }
     }
 
@@ -98,7 +98,7 @@ public class QDoubleValidator {
     }
 
     /// 设置下限
-    public func setBottom(value: Float64) {
+    public func setBottom(value: Float64): Unit {
         unsafe { qDoubleValidatorSetBottom(ptr, value) }
     }
 
@@ -108,7 +108,7 @@ public class QDoubleValidator {
     }
 
     /// 设置上限
-    public func setTop(value: Float64) {
+    public func setTop(value: Float64): Unit {
         unsafe { qDoubleValidatorSetTop(ptr, value) }
     }
 
@@ -118,7 +118,7 @@ public class QDoubleValidator {
     }
 
     /// 设置小数位数
-    public func setDecimals(value: Int32) {
+    public func setDecimals(value: Int32): Unit {
         unsafe { qDoubleValidatorSetDecimals(ptr, value) }
     }
 
@@ -128,7 +128,7 @@ public class QDoubleValidator {
     }
 
     /// 设置记数法
-    public func setNotation(value: Int32) {
+    public func setNotation(value: Int32): Unit {
         unsafe { qDoubleValidatorSetNotation(ptr, value) }
     }
 
@@ -138,7 +138,7 @@ public class QDoubleValidator {
     }
 
     /// 删除验证器
-    public func delete() {
+    public func delete(): Unit {
         if (ptr != 0) {
             unsafe { qValidatorDelete(ptr) }
             ptr = 0
@@ -159,7 +159,7 @@ public class QRegExpValidator {
     }
 
     /// 重新设置正则表达式
-    public func setPattern(pattern: String) {
+    public func setPattern(pattern: String): Unit {
         unsafe {
             let cstr = LibC.mallocCString(pattern)
             qRegExpValidatorSetPattern(ptr, cstr)
@@ -173,7 +173,7 @@ public class QRegExpValidator {
     }
 
     /// 删除验证器
-    public func delete() {
+    public func delete(): Unit {
         if (ptr != 0) {
             unsafe { qValidatorDelete(ptr) }
             ptr = 0
@@ -182,19 +182,19 @@ public class QRegExpValidator {
 }
 
 /// QLineEdit 扩展：设置验证器（在 QLineEdit 类外部提供）
-public func setLineEditValidator(lineEdit: QLineEdit, validator: QIntValidator) {
+public func setLineEditValidator(lineEdit: QLineEdit, validator: QIntValidator): Unit {
     unsafe {
         qLineEditSetValidator(lineEdit.getPtr(), validator.getPtr())
     }
 }
 
-public func setLineEditValidator(lineEdit: QLineEdit, validator: QDoubleValidator) {
+public func setLineEditValidator(lineEdit: QLineEdit, validator: QDoubleValidator): Unit {
     unsafe {
         qLineEditSetValidator(lineEdit.getPtr(), validator.getPtr())
     }
 }
 
-public func setLineEditValidator(lineEdit: QLineEdit, validator: QRegExpValidator) {
+public func setLineEditValidator(lineEdit: QLineEdit, validator: QRegExpValidator): Unit {
     unsafe {
         qLineEditSetValidator(lineEdit.getPtr(), validator.getPtr())
     }

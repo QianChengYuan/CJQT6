@@ -144,10 +144,9 @@ CJQT6 的演进边界由仓颉语言特性决定，先固定几个**不可绕过
 - 现状：Git 依赖安装（`git = ...` + `tag`）已是主推方式，`releases/` 分平台预编译。
 - 动作：
   1. 补 macOS 桥接库与构建脚本（当前只有 windows-x64 / linux-x64）。**注意**：macOS 的 app bundle / rpath / codesign 与 linuxdeployqt 思路完全不同，`windeployqt` 经验不能直接平移；若人力紧，优先出「社区贡献指引」而非官方保证产物；
-  2. 补 `windeployqt`/`linuxdeployqt` 打包模板到示例（`deploy_qt.ps1` 已存在，文档化推广）；
-  3. 评估发布到仓颉中心仓（当前依赖 Git tag，中心仓能提升可发现性，但需与仓库维护节奏平衡）。
+  2. 补 `windeployqt`/`linuxdeployqt` 打包模板到示例（`deploy_qt.ps1` 已存在，文档化推广）。
 
-**✅ 已完成（2026-08-10）**：macOS 一键构建脚本落地——`scripts/build-macos-x64.sh`（Intel）与 `scripts/build-macos-arm64.sh`（Apple Silicon）自动探测 Homebrew Qt 路径并部署到 `releases/macos-x64/`、`releases/macos-arm64/`，`scripts/build-all-platforms.sh` 统一入口自动检测当前平台；`releases/macos-*/README.md` 已随产物入库。`deploy_qt.ps1` 打包模板已随 `ui2cj` 引导工程自动生成并推广。仓颉中心仓发布仍待评估。
+**✅ 已完成（2026-08-10）**：macOS 一键构建脚本落地——`scripts/build-macos-x64.sh`（Intel）与 `scripts/build-macos-arm64.sh`（Apple Silicon）自动探测 Homebrew Qt 路径并部署到 `releases/macos-x64/`、`releases/macos-arm64/`，`scripts/build-all-platforms.sh` 统一入口自动检测当前平台；`releases/macos-*/README.md` 已随产物入库。`deploy_qt.ps1` 打包模板已随 `ui2cj` 引导工程自动生成并推广。
 
 ### 6.3 教程与最佳实践沉淀
 - 现状：`docs/tutorial/` 只有 2 篇快速入门。

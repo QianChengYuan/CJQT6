@@ -33,20 +33,20 @@ public class QDialogButtonBox {
         }
     }
     
-    public func show() {
+    public func show(): Unit {
         unsafe { qWidgetShow(ptr) }
     }
     
-    public func hide() {
+    public func hide(): Unit {
         unsafe { qWidgetHide(ptr) }
     }
     
-    public func resize(width: Int32, height: Int32) {
+    public func resize(width: Int32, height: Int32): Unit {
         unsafe { qWidgetResize(ptr, width, height) }
     }
     
     /// 添加自定义按钮：text=按钮文字, role=按钮角色(ButtonRole枚举值)
-    public func addButton(text: String, role: Int32) {
+    public func addButton(text: String, role: Int32): Unit {
         unsafe {
             let cstr = LibC.mallocCString(text)
             qDialogButtonBoxAddButton(ptr, cstr, role)
@@ -55,7 +55,7 @@ public class QDialogButtonBox {
     }
     
     /// 设置标准按钮组合（使用 makeStandardButtons 组合 StandardButtons 值）
-    public func setStandardButtons(buttons: Int32) {
+    public func setStandardButtons(buttons: Int32): Unit {
         unsafe { qDialogButtonBoxSetStandardButtons(ptr, buttons) }
     }
 
@@ -75,27 +75,27 @@ public class QDialogButtonBox {
     }
 
     /// 任意标准按钮被点击回调（回调参数为被点击按钮的对象指针）
-    public func setOnClicked(callback: Int64Callback) {
+    public func setOnClicked(callback: Int64Callback): Unit {
         unsafe { qDialogButtonBoxConnectClicked(ptr, callback) }
     }
     
     /// 设置接受信号回调
-    public func setOnAccepted(callback: VoidCallback) {
+    public func setOnAccepted(callback: VoidCallback): Unit {
         unsafe { qDialogButtonBoxConnectAccepted(ptr, callback) }
     }
     
     /// 设置拒绝信号回调
-    public func setOnRejected(callback: VoidCallback) {
+    public func setOnRejected(callback: VoidCallback): Unit {
         unsafe { qDialogButtonBoxConnectRejected(ptr, callback) }
     }
     
     /// 设置启用/禁用
-    public func setEnabled(enabled: Bool) {
+    public func setEnabled(enabled: Bool): Unit {
         unsafe { qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 }) }
     }
     
     /// 设置样式表
-    public func setStyleSheet(style: String) {
+    public func setStyleSheet(style: String): Unit {
         unsafe {
             let cstr = LibC.mallocCString(style)
             qWidgetSetStyleSheet(ptr, cstr)
@@ -109,7 +109,7 @@ public class QDialogButtonBox {
     }
     
     /// 删除部件
-    public func delete() {
+    public func delete(): Unit {
         if (ptr != 0) {
             unsafe {
                 qSignalCleanup(ptr)

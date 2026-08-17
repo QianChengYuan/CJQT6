@@ -29,20 +29,20 @@ public class QCommandLinkButton {
         }
     }
     
-    public func show() {
+    public func show(): Unit {
         unsafe { qWidgetShow(ptr) }
     }
     
-    public func hide() {
+    public func hide(): Unit {
         unsafe { qWidgetHide(ptr) }
     }
     
-    public func resize(width: Int32, height: Int32) {
+    public func resize(width: Int32, height: Int32): Unit {
         unsafe { qWidgetResize(ptr, width, height) }
     }
     
     /// 设置按钮文本（主标题）
-    public func setText(text: String) {
+    public func setText(text: String): Unit {
         unsafe {
             let cstr = LibC.mallocCString(text)
             qCommandLinkButtonSetText(ptr, cstr)
@@ -51,7 +51,7 @@ public class QCommandLinkButton {
     }
     
     /// 设置描述文字（副标题，灰色小字）
-    public func setDescription(desc: String) {
+    public func setDescription(desc: String): Unit {
         unsafe {
             let cstr = LibC.mallocCString(desc)
             qCommandLinkButtonSetDescription(ptr, cstr)
@@ -70,7 +70,7 @@ public class QCommandLinkButton {
     }
 
     /// 设置图标（按文件路径）
-    public func setIcon(path: String) {
+    public func setIcon(path: String): Unit {
         unsafe {
             let cstr = LibC.mallocCString(path)
             qCommandLinkButtonSetIcon(ptr, cstr)
@@ -79,7 +79,7 @@ public class QCommandLinkButton {
     }
 
     /// 设置扁平样式
-    public func setFlat(flat: Bool) {
+    public func setFlat(flat: Bool): Unit {
         unsafe { qCommandLinkButtonSetFlat(ptr, if (flat) { 1 } else { 0 }) }
     }
 
@@ -89,12 +89,12 @@ public class QCommandLinkButton {
     }
     
     /// 设置启用/禁用
-    public func setEnabled(enabled: Bool) {
+    public func setEnabled(enabled: Bool): Unit {
         unsafe { qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 }) }
     }
     
     /// 设置样式表
-    public func setStyleSheet(style: String) {
+    public func setStyleSheet(style: String): Unit {
         unsafe {
             let cstr = LibC.mallocCString(style)
             qWidgetSetStyleSheet(ptr, cstr)
@@ -108,7 +108,7 @@ public class QCommandLinkButton {
     }
     
     /// 删除部件
-    public func delete() {
+    public func delete(): Unit {
         if (ptr != 0) {
             unsafe {
                 qSignalCleanup(ptr)

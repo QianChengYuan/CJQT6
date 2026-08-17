@@ -64,7 +64,7 @@ public class QRubberBand {
     }
 
     /// 设置形状（RubberBandShape.Line / .Rectangle）
-    public func setShape(shape: Int32) {
+    public func setShape(shape: Int32): Unit {
         unsafe { qRubberBandSetShape(ptr, shape) }
     }
 

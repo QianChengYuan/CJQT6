@@ -55,7 +55,7 @@ public interface QtResource {
     func isValid(): Bool
     
     /// 检查有效性，无效时抛出异常
-    func checkValid(): Unit
+    func checkValid(): Unit // cjlint-ignore !G.SEC.01 接口方法默认open
 }
 
 // ============================================================

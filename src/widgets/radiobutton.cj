@@ -28,28 +28,28 @@ public class QRadioButton <: QtResource {
         trackObject(ptr)
     }
     
-    public func show() {
+    public func show(): Unit {
         checkValid()
         unsafe {
             qWidgetShow(ptr)
         }
     }
     
-    public func hide() {
+    public func hide(): Unit {
         checkValid()
         unsafe {
             qWidgetHide(ptr)
         }
     }
     
-    public func resize(width: Int32, height: Int32) {
+    public func resize(width: Int32, height: Int32): Unit {
         checkValid()
         unsafe {
             qWidgetResize(ptr, width, height)
         }
     }
     
-    public func setText(text: String) {
+    public func setText(text: String): Unit {
         checkValid()
         unsafe {
             let cstr = LibC.mallocCString(text)
@@ -68,7 +68,7 @@ public class QRadioButton <: QtResource {
         }
     }
     
-    public func setChecked(checked: Bool) {
+    public func setChecked(checked: Bool): Unit {
         checkValid()
         unsafe {
             qRadioButtonSetChecked(ptr, checked)
@@ -83,7 +83,7 @@ public class QRadioButton <: QtResource {
     }
     
     /// 设置启用/禁用
-    public func setEnabled(enabled: Bool) {
+    public func setEnabled(enabled: Bool): Unit {
         checkValid()
         unsafe {
             qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
@@ -99,7 +99,7 @@ public class QRadioButton <: QtResource {
     }
     
     /// 设置样式表
-    public func setStyleSheet(style: String) {
+    public func setStyleSheet(style: String): Unit {
         checkValid()
         unsafe {
             let cstr = LibC.mallocCString(style)
@@ -109,7 +109,7 @@ public class QRadioButton <: QtResource {
     }
     
     /// 设置最小尺寸
-    public func setMinimumSize(minw: Int32, minh: Int32) {
+    public func setMinimumSize(minw: Int32, minh: Int32): Unit {
         checkValid()
         unsafe {
             qWidgetSetMinimumSize(ptr, minw, minh)
@@ -117,7 +117,7 @@ public class QRadioButton <: QtResource {
     }
     
     /// 设置最大尺寸
-    public func setMaximumSize(maxw: Int32, maxh: Int32) {
+    public func setMaximumSize(maxw: Int32, maxh: Int32): Unit {
         checkValid()
         unsafe {
             qWidgetSetMaximumSize(ptr, maxw, maxh)
@@ -125,7 +125,7 @@ public class QRadioButton <: QtResource {
     }
     
     /// 设置切换回调
-    public func setOnToggled(callback: Int32Callback) {
+    public func setOnToggled(callback: Int32Callback): Unit {
         checkValid()
         unsafe {
             qRadioButtonConnectToggled(ptr, callback)
@@ -133,7 +133,7 @@ public class QRadioButton <: QtResource {
     }
     
     /// 断开切换信号
-    public func disconnectToggled() {
+    public func disconnectToggled(): Unit {
         checkValid()
         unsafe {
             qRadioButtonDisconnectToggled(ptr)
@@ -146,7 +146,7 @@ public class QRadioButton <: QtResource {
     }
     
     /// 设置是否自动互斥（同父容器内自动排他）
-    public func setAutoExclusive(autoExclusive: Bool) {
+    public func setAutoExclusive(autoExclusive: Bool): Unit {
         checkValid()
         unsafe {
             qRadioButtonSetAutoExclusive(ptr, if (autoExclusive) { 1 } else { 0 })
@@ -162,7 +162,7 @@ public class QRadioButton <: QtResource {
     }
     
     /// 点击回调（带 checked 状态，0/1）
-    public func setOnClicked(callback: Int32Callback) {
+    public func setOnClicked(callback: Int32Callback): Unit {
         checkValid()
         unsafe {
             qRadioButtonConnectClicked(ptr, callback)

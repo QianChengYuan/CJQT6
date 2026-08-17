@@ -109,28 +109,28 @@ public class QComboBox <: QtResource {
         trackObject(ptr)
     }
     
-    public func show() {
+    public func show(): Unit {
         checkValid()
         unsafe {
             qWidgetShow(ptr)
         }
     }
     
-    public func hide() {
+    public func hide(): Unit {
         checkValid()
         unsafe {
             qWidgetHide(ptr)
         }
     }
     
-    public func resize(width: Int32, height: Int32) {
+    public func resize(width: Int32, height: Int32): Unit {
         checkValid()
         unsafe {
             qWidgetResize(ptr, width, height)
         }
     }
     
-    public func addItem(text: String) {
+    public func addItem(text: String): Unit {
         checkValid()
         unsafe {
             let cstr = LibC.mallocCString(text)
@@ -149,7 +149,7 @@ public class QComboBox <: QtResource {
         }
     }
     
-    public func setCurrentIndex(index: Int32) {
+    public func setCurrentIndex(index: Int32): Unit {
         checkValid()
         unsafe {
             qComboBoxSetCurrentIndex(ptr, index)
@@ -163,7 +163,7 @@ public class QComboBox <: QtResource {
         }
     }
     
-    public func clear() {
+    public func clear(): Unit {
         checkValid()
         unsafe {
             qComboBoxClear(ptr)
@@ -171,7 +171,7 @@ public class QComboBox <: QtResource {
     }
     
     /// 批量添加选项（使用换行符分隔）
-    public func addItems(items: String) {
+    public func addItems(items: String): Unit {
         checkValid()
         unsafe {
             let cstr = LibC.mallocCString(items)
@@ -181,7 +181,7 @@ public class QComboBox <: QtResource {
     }
     
     /// 在指定位置插入选项
-    public func insertItem(index: Int32, text: String) {
+    public func insertItem(index: Int32, text: String): Unit {
         checkValid()
         unsafe {
             let cstr = LibC.mallocCString(text)
@@ -191,7 +191,7 @@ public class QComboBox <: QtResource {
     }
     
     /// 设置指定索引的文本
-    public func setItemText(index: Int32, text: String) {
+    public func setItemText(index: Int32, text: String): Unit {
         checkValid()
         unsafe {
             let cstr = LibC.mallocCString(text)
@@ -201,7 +201,7 @@ public class QComboBox <: QtResource {
     }
     
     /// 通过文本设置当前选中项
-    public func setCurrentText(text: String) {
+    public func setCurrentText(text: String): Unit {
         checkValid()
         unsafe {
             let cstr = LibC.mallocCString(text)
@@ -222,7 +222,7 @@ public class QComboBox <: QtResource {
     }
     
     /// 设置占位文本
-    public func setPlaceholderText(text: String) {
+    public func setPlaceholderText(text: String): Unit {
         checkValid()
         unsafe {
             let cstr = LibC.mallocCString(text)
@@ -253,7 +253,7 @@ public class QComboBox <: QtResource {
 
 
     /// 设置是否可编辑
-    public func setEditable(editable: Bool) {
+    public func setEditable(editable: Bool): Unit {
         checkValid()
         unsafe {
             qComboBoxSetEditable(ptr, editable)
@@ -262,7 +262,7 @@ public class QComboBox <: QtResource {
 
 
     /// 移除指定索引的选项
-    public func removeItem(index: Int32) {
+    public func removeItem(index: Int32): Unit {
         checkValid()
         unsafe {
             qComboBoxRemoveItem(ptr, index)
@@ -280,7 +280,7 @@ public class QComboBox <: QtResource {
 
 
     /// 设置插入策略（ComboBoxInsertPolicy.*）
-    public func setInsertPolicy(policy: Int32) {
+    public func setInsertPolicy(policy: Int32): Unit {
         checkValid()
         unsafe {
             qComboBoxSetInsertPolicy(ptr, policy)
@@ -297,7 +297,7 @@ public class QComboBox <: QtResource {
     }
 
     /// 设置最大可见项数
-    public func setMaxVisibleItems(max: Int32) {
+    public func setMaxVisibleItems(max: Int32): Unit {
         checkValid()
         unsafe {
             qComboBoxSetMaxVisibleItems(ptr, max)
@@ -313,7 +313,7 @@ public class QComboBox <: QtResource {
     }
 
     /// 设置最大条目数
-    public func setMaxCount(max: Int32) {
+    public func setMaxCount(max: Int32): Unit {
         checkValid()
         unsafe {
             qComboBoxSetMaxCount(ptr, max)
@@ -329,7 +329,7 @@ public class QComboBox <: QtResource {
     }
 
     /// 设置是否有边框
-    public func setFrame(frame: Bool) {
+    public func setFrame(frame: Bool): Unit {
         checkValid()
         unsafe {
             qComboBoxSetFrame(ptr, if (frame) { 1 } else { 0 })
@@ -345,7 +345,7 @@ public class QComboBox <: QtResource {
     }
 
     /// 设置是否允许重复项
-    public func setDuplicatesEnabled(enabled: Bool) {
+    public func setDuplicatesEnabled(enabled: Bool): Unit {
         checkValid()
         unsafe {
             qComboBoxSetDuplicatesEnabled(ptr, if (enabled) { 1 } else { 0 })
@@ -353,7 +353,7 @@ public class QComboBox <: QtResource {
     }
 
     /// 通过用户数据设置当前项
-    public func setCurrentData(value: Int64) {
+    public func setCurrentData(value: Int64): Unit {
         checkValid()
         unsafe {
             qComboBoxSetCurrentData(ptr, value)
@@ -361,7 +361,7 @@ public class QComboBox <: QtResource {
     }
 
     /// 设置补全器（传入 QCompleter.getPtr()）
-    public func setCompleter(completerPtr: Int64) {
+    public func setCompleter(completerPtr: Int64): Unit {
         checkValid()
         unsafe {
             qComboBoxSetCompleter(ptr, completerPtr)
@@ -369,7 +369,7 @@ public class QComboBox <: QtResource {
     }
 
     /// 设置尺寸自适应策略（ComboBoxSizeAdjustPolicy.*）
-    public func setSizeAdjustPolicy(policy: Int32) {
+    public func setSizeAdjustPolicy(policy: Int32): Unit {
         checkValid()
         unsafe {
             qComboBoxSetSizeAdjustPolicy(ptr, policy)
@@ -377,7 +377,7 @@ public class QComboBox <: QtResource {
     }
 
     /// 编辑文本变化回调（可编辑模式下触发）
-    public func setOnEditTextChanged(callback: CStringCallback) {
+    public func setOnEditTextChanged(callback: CStringCallback): Unit {
         checkValid()
         unsafe {
             qComboBoxConnectEditTextChanged(ptr, callback)
@@ -385,7 +385,7 @@ public class QComboBox <: QtResource {
     }
 
     /// 用户激活（点击/回车）某项回调，参数为索引
-    public func setOnActivated(callback: Int32Callback) {
+    public func setOnActivated(callback: Int32Callback): Unit {
         checkValid()
         unsafe {
             qComboBoxConnectActivated(ptr, callback)
@@ -393,7 +393,7 @@ public class QComboBox <: QtResource {
     }
 
     /// 高亮某项回调，参数为索引
-    public func setOnHighlighted(callback: Int32Callback) {
+    public func setOnHighlighted(callback: Int32Callback): Unit {
         checkValid()
         unsafe {
             qComboBoxConnectHighlighted(ptr, callback)
@@ -401,7 +401,7 @@ public class QComboBox <: QtResource {
     }
     
     /// 设置启用/禁用
-    public func setEnabled(enabled: Bool) {
+    public func setEnabled(enabled: Bool): Unit {
         checkValid()
         unsafe {
             qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
@@ -417,7 +417,7 @@ public class QComboBox <: QtResource {
     }
 
     /// 设置样式表
-    public func setStyleSheet(style: String) {
+    public func setStyleSheet(style: String): Unit {
         checkValid()
         unsafe {
             let cstr = LibC.mallocCString(style)
@@ -427,7 +427,7 @@ public class QComboBox <: QtResource {
     }
 
     /// 设置最小尺寸
-    public func setMinimumSize(minw: Int32, minh: Int32) {
+    public func setMinimumSize(minw: Int32, minh: Int32): Unit {
         checkValid()
         unsafe {
             qWidgetSetMinimumSize(ptr, minw, minh)
@@ -435,7 +435,7 @@ public class QComboBox <: QtResource {
     }
 
     /// 设置最大尺寸
-    public func setMaximumSize(maxw: Int32, maxh: Int32) {
+    public func setMaximumSize(maxw: Int32, maxh: Int32): Unit {
         checkValid()
         unsafe {
             qWidgetSetMaximumSize(ptr, maxw, maxh)
@@ -443,7 +443,7 @@ public class QComboBox <: QtResource {
     }
 
     /// 设置当前索引变化回调
-    public func setOnCurrentIndexChanged(callback: Int32Callback) {
+    public func setOnCurrentIndexChanged(callback: Int32Callback): Unit {
         checkValid()
         unsafe {
             qComboBoxConnectCurrentIndexChanged(ptr, callback)
@@ -451,7 +451,7 @@ public class QComboBox <: QtResource {
     }
 
     /// 断开索引变化信号
-    public func disconnectCurrentIndexChanged() {
+    public func disconnectCurrentIndexChanged(): Unit {
         checkValid()
         unsafe {
             qComboBoxDisconnectCurrentIndexChanged(ptr)
@@ -459,7 +459,7 @@ public class QComboBox <: QtResource {
     }
 
     /// 设置当前文本变化回调
-    public func setOnCurrentTextChanged(callback: CStringCallback) {
+    public func setOnCurrentTextChanged(callback: CStringCallback): Unit {
         checkValid()
         unsafe {
             qComboBoxConnectCurrentTextChanged(ptr, callback)
@@ -467,7 +467,7 @@ public class QComboBox <: QtResource {
     }
 
     /// 断开当前文本变化回调
-    public func disconnectCurrentTextChanged() {
+    public func disconnectCurrentTextChanged(): Unit {
         checkValid()
         unsafe {
             qComboBoxDisconnectCurrentTextChanged(ptr)

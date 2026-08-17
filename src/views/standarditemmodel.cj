@@ -393,7 +393,7 @@ public class QStandardItem {
         }
     }
 
-    public func setText(text: String) {
+    public func setText(text: String): Unit {
         unsafe {
             let cstr = LibC.mallocCString(text)
             qStandardItemSetText(ptr, cstr)

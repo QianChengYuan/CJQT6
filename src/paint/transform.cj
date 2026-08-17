@@ -109,7 +109,7 @@ public class QTransform {
     public func getPtr(): Int64 { ptr }
     
     /// 删除变换
-    public func delete() {
+    public func delete(): Unit {
         if (ptr != 0) {
             unsafe { qTransformDelete(ptr) }
             ptr = 0
