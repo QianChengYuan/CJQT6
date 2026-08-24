@@ -1,9 +1,14 @@
 cmake_minimum_required(VERSION 3.20)
 project(CJQT6 VERSION 1.0.0 LANGUAGES CXX)
 
-# MSVC 下自动导出所有符号（MinGW 默认导出，无需此选项）
+# MSVC 下导出符号策略：
+# 不使用 CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS（会导出 C 运行时函数 fprintf/vfprintf 等，
+# 导致仓颉 main.exe 链接时从 cjqt6_bridge.dll 导入 fprintf 而非 msvcrt.dll，
+# 运行时报 STATUS_ENTRYPOINT_NOT_FOUND=0xC0000139）。
+# 改用自定义 .def 文件只导出 q* 桥接函数。
+# 新增桥接函数后，重新生成：从 build 目录的 exports.def 提取 q 开头行。
 if(MSVC)
-    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS OFF)
 endif()
 
 # 设置 C++ 标准
@@ -205,6 +210,10 @@ set_target_properties(cjqt6_bridge PROPERTIES
     OUTPUT_NAME "cjqt6_bridge"
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
 )
+# MSVC 下用自定义 .def 文件只导出 q* 桥接函数（避免导出 C 运行时函数）
+if(MSVC)
+    target_sources(cjqt6_bridge PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/native/cjqt6_bridge_exports.def")
+endif()
 
 # ============================================================
 # 桥接层 C++ 单元测试（P0-3）

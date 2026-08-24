@@ -43,6 +43,8 @@
 #include <cstdio>
 #include <cstdarg>
 #include <cstdlib>
+
+
 #include "bridge_string_utils.h"
 
 // 全局应用程序指针
@@ -356,6 +358,7 @@ static LRESULT CALLBACK cjqt6MouseHookProc(int code, WPARAM wParam, LPARAM lPara
 #endif
 
 int32_t qApplicationExec() {
+
     if (!g_app) {
         return -1;
     }
@@ -389,6 +392,13 @@ int32_t qApplicationExec() {
                     for (QWindow* win : QGuiApplication::topLevelWindows()) {
                         if (reinterpret_cast<HWND>(win->winId()) == msg->hwnd) {
                             win->close();
+                            // 检查是否还有可见顶层窗口，如果没有则退出事件循环
+                            // （QEventLoop 不像 QApplication::exec 有 quitOnLastWindowClosed 逻辑）
+                            bool hasVisible = false;
+                            for (QWindow* w : QGuiApplication::topLevelWindows()) {
+                                if (w->isVisible()) { hasVisible = true; break; }
+                            }
+                            if (!hasVisible && t_currentLoop) t_currentLoop->exit(0);
                             if (result) *result = 0;
                             return true;
                         }
@@ -401,21 +411,50 @@ int32_t qApplicationExec() {
                 if (msg->message == WM_KEYDOWN || msg->message == WM_KEYUP || msg->message == WM_CHAR) {
                     QWidget* focusWidget = QApplication::focusWidget();
                     if (focusWidget) {
-                        QEvent::Type type = QEvent::None;
-                        if (msg->message == WM_KEYDOWN) type = QEvent::KeyPress;
-                        else if (msg->message == WM_KEYUP) type = QEvent::KeyRelease;
-                        else if (msg->message == WM_CHAR) type = QEvent::KeyPress;
-                        int key = (int)msg->wParam;
-                        Qt::KeyboardModifiers mods;
-                        if (GetKeyState(VK_SHIFT) & 0x8000) mods |= Qt::ShiftModifier;
-                        if (GetKeyState(VK_CONTROL) & 0x8000) mods |= Qt::ControlModifier;
-                        if (GetKeyState(VK_MENU) & 0x8000) mods |= Qt::AltModifier;
-                        QString text;
-                        if (msg->message == WM_CHAR && msg->wParam >= 0x20 && msg->wParam < 0x10000) {
-                            text = QChar((ushort)msg->wParam);
+                        int vk = (int)msg->wParam;
+                        // WM_KEYDOWN/WM_KEYUP：只处理特殊键（非可打印字符），
+                        // 可打印字符交给 WM_CHAR 处理（提供 text）
+                        // WM_CHAR：只处理可打印字符（wParam >= 0x20）
+                        bool isPrintable = (vk >= 0x20 && vk <= 0x7E);
+                        if ((msg->message == WM_KEYDOWN || msg->message == WM_KEYUP) && isPrintable) {
+                            // 跳过，交给 WM_CHAR
+                        } else if (msg->message == WM_CHAR && !isPrintable) {
+                            // 跳过，交给 WM_KEYDOWN
+                        } else {
+                            QEvent::Type type = QEvent::None;
+                            if (msg->message == WM_KEYDOWN || msg->message == WM_CHAR) type = QEvent::KeyPress;
+                            else if (msg->message == WM_KEYUP) type = QEvent::KeyRelease;
+                            // Windows 虚拟键码 → Qt 键码（特殊键需映射，字母数字键码相同）
+                            int key;
+                            switch (vk) {
+                                case VK_BACK: key = Qt::Key_Backspace; break;
+                                case VK_TAB: key = Qt::Key_Tab; break;
+                                case VK_RETURN: key = Qt::Key_Return; break;
+                                case VK_ESCAPE: key = Qt::Key_Escape; break;
+                                case VK_INSERT: key = Qt::Key_Insert; break;
+                                case VK_DELETE: key = Qt::Key_Delete; break;
+                                case VK_HOME: key = Qt::Key_Home; break;
+                                case VK_END: key = Qt::Key_End; break;
+                                case VK_LEFT: key = Qt::Key_Left; break;
+                                case VK_UP: key = Qt::Key_Up; break;
+                                case VK_RIGHT: key = Qt::Key_Right; break;
+                                case VK_DOWN: key = Qt::Key_Down; break;
+                                case VK_PRIOR: key = Qt::Key_PageUp; break;
+                                case VK_NEXT: key = Qt::Key_PageDown; break;
+                                default: key = vk; break;
+                            }
+                            Qt::KeyboardModifiers mods;
+                            if (GetKeyState(VK_SHIFT) & 0x8000) mods |= Qt::ShiftModifier;
+                            if (GetKeyState(VK_CONTROL) & 0x8000) mods |= Qt::ControlModifier;
+                            if (GetKeyState(VK_MENU) & 0x8000) mods |= Qt::AltModifier;
+                            QString text;
+                            if (msg->message == WM_CHAR) {
+                                text = QChar((ushort)vk);
+                                key = 0;  // WM_CHAR 提供字符，key 设 0
+                            }
+                            QKeyEvent event(type, key, mods, text);
+                            QCoreApplication::sendEvent(focusWidget, &event);
                         }
-                        QKeyEvent event(type, key, mods, text);
-                        QCoreApplication::sendEvent(focusWidget, &event);
                     }
                 }
             }
@@ -442,13 +481,15 @@ int32_t qApplicationExec() {
 
     }
 #endif
-    // 用 QEventLoop 而非 QGuiApplication::exec：
-    // 1) 无主线程限制（QGuiApplication::exec 强制只能在进程主线程调用）；
-    // 2) QCoreApplication::quit() 会设置粘滞的 quitNow，导致同线程后续
-    //    exec 立即返回 -1；QEventLoop::exit 只退出当前 loop，无粘滞。
-    // thread_local：每个线程独立 loop，quit 精确退出本线程的事件循环。
+    // 统一用 QEventLoop（无主线程限制，worker 线程也能 exec）：
+    // - WM_CLOSE 处理中检查可见窗口数，全关闭则 exit(0)（见 nativeEventFilter）
+    // - lastWindowClosed 信号作为备份退出机制
+    // - qApplicationQuit 通过 t_currentLoop->exit(0) 精确退出
     QEventLoop loop;
     t_currentLoop = &loop;
+    QObject::connect(g_app, &QGuiApplication::lastWindowClosed, []() {
+        if (t_currentLoop) t_currentLoop->exit(0);
+    });
     int r = loop.exec();
     t_currentLoop = nullptr;
     qUnsetGuiThreadForPoster();
