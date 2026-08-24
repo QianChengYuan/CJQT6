@@ -380,6 +380,7 @@ int32_t qApplicationExec() {
     class WmCloseNativeFilter : public QAbstractNativeEventFilter {
     public:
         bool nativeEventFilter(const QByteArray& eventType, void* message, qintptr* result) override {
+#if defined(Q_OS_WIN)
             if (eventType == "windows_generic_MSG" && message) {
                 MSG* msg = static_cast<MSG*>(message);
                 // 拦截 WM_CLOSE 和 WM_NCLBUTTONDOWN(HTCLOSE)，调 QWindow::close()
@@ -399,7 +400,6 @@ int32_t qApplicationExec() {
                 // 手动构造 QKeyEvent 派发给 focus widget。
                 if (msg->message == WM_KEYDOWN || msg->message == WM_KEYUP || msg->message == WM_CHAR) {
                     QWidget* focusWidget = QApplication::focusWidget();
-
                     if (focusWidget) {
                         QEvent::Type type = QEvent::None;
                         if (msg->message == WM_KEYDOWN) type = QEvent::KeyPress;
@@ -419,8 +419,10 @@ int32_t qApplicationExec() {
                     }
                 }
             }
+#endif
             return false;
         }
+
     };
     static WmCloseNativeFilter wmCloseFilter;
     QCoreApplication::instance()->installNativeEventFilter(&wmCloseFilter);
