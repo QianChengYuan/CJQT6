@@ -32,26 +32,6 @@
 // bridge_signal.cpp 内 Cangjie 注册的 void 调度器（native 侧按 id 派发闭包）
 extern "C" void (*qGetVoidDispatcher())(int64_t);
 
-// ---- 临时诊断（调试后删除） ----
-static inline void dbg(const char* fmt, ...) {
-    va_list args;
-    va_start(args, fmt);
-    fprintf(stderr, "[cjqt6-dbg] ");
-    vfprintf(stderr, fmt, args);
-    fprintf(stderr, "\n");
-    fflush(stderr);
-    va_end(args);
-    va_start(args, fmt);
-    FILE* f = fopen("C:\\CodeTools\\cangjie_git\\CJQT6\\bridge_dbg.log", "a");
-    if (f) {
-        fprintf(f, "[dbg] ");
-        vfprintf(f, fmt, args);
-        fprintf(f, "\n");
-        fclose(f);
-    }
-    va_end(args);
-}
-// ---- 临时诊断结束 ----
 
 namespace {
 
@@ -107,20 +87,14 @@ extern "C" {
 /// 由 qApplicationExec 调用：标记当前线程事件循环已启动，并补发积压任务。
 /// 必须在即将运行 QEventLoop 的线程调用。
 void qSetGuiThreadForPoster() {
-    dbg("setGuiThread: enter");
     QThread* cur = QThread::currentThread();
-    dbg("setGuiThread: cur=%p", (void*)cur);
     PosterSpinLock _posterLock;
-    dbg("setGuiThread: mutex locked");
     PosterCtx* ctx = getOrCreateCtxLocked(cur);
-    dbg("setGuiThread: ctx=%p target=%p pending=%zu", (void*)ctx, (void*)ctx->target, ctx->pending.size());
     ctx->loopRunning = true;
     for (int64_t id : ctx->pending) {
         postToTargetLocked(ctx, id);
     }
     ctx->pending.clear();
-    
-    dbg("setGuiThread: done");
 }
 
 /// 由 qApplicationExec 调用：事件循环退出后标记无循环运行，

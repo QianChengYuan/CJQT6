@@ -21,13 +21,21 @@
 #include <QThread>
 #if defined(Q_OS_WIN)
 #include <private/qeventdispatcher_win_p.h>
+#include <windows.h>
 #elif defined(Q_OS_UNIX)
 #include <private/qeventdispatcher_unix_p.h>
 #endif
 #include <QTimer>
 #include <QTranslator>
 #include <QUrl>
+#include <QWindow>
+#include <QAbstractNativeEventFilter>
+#include <QMouseEvent>
+#include <QKeyEvent>
+#include <QCursor>
+#include <QObject>
 #include <QWidget>
+#include <QPushButton>
 #include <unordered_map>
 #include <atomic>
 #include <exception>
@@ -155,45 +163,11 @@ int32_t qIsObjectAlive(int64_t ptr) {
 // ============================================================
 
 
-// ---- Qt 消息拦截（调试后删除） ----
-static void cjqt6QtMsgHandler(QtMsgType type, const QMessageLogContext& ctx, const QString& msg) {
-    fprintf(stderr, "[qt-msg] type=%d %s\n", (int)type, msg.toUtf8().constData());
-    fflush(stderr);
-}
-// ---- Qt 消息拦截结束 ----
-// ---- 临时诊断（调试后删除） ----
-static inline void dbg(const char* fmt, ...) {
-    va_list args;
-    va_start(args, fmt);
-    fprintf(stderr, "[cjqt6-dbg] ");
-    vfprintf(stderr, fmt, args);
-    fprintf(stderr, "\n");
-    fflush(stderr);
-    va_end(args);
-    // 同时写文件（绕过 PowerShell stderr 管道缓冲）
-    va_start(args, fmt);
-    FILE* f = fopen("C:\\CodeTools\\cangjie_git\\CJQT6\\bridge_dbg.log", "a");
-    if (f) {
-        fprintf(f, "[dbg] ");
-        vfprintf(f, fmt, args);
-        fprintf(f, "\n");
-        fclose(f);
-    }
-    va_end(args);
-}
-// ---- 临时诊断结束 ----
 int64_t qApplicationCreate() {
-    dbg("qApplicationCreate: g_app=%p dispatcher=%p thread=%p appThread=%p sameAsApp=%d", (void*)g_app, (void*)QAbstractEventDispatcher::instance(QThread::currentThread()), (void*)QThread::currentThread(), g_app ? (void*)g_app->thread() : (void*)0, g_app ? (g_app->thread() == QThread::currentThread() ? 1 : 0) : -1);
     // 测试框架/多线程场景：QApplication 是全局单例（线程亲和=创建线程），
     // 其他线程复用它时本线程没有事件分发器，QEventLoop::exec 会立即返回 -1、
     // QTimer::start 直接失败（"Timers can only be used with threads started with QThread"）。
     // 这里为当前线程补建分发器（每线程独立，线程结束时随 QThreadData 销毁）。
-    static bool handlerInstalled = false;
-    if (!handlerInstalled) {
-        qInstallMessageHandler(cjqt6QtMsgHandler);
-        handlerInstalled = true;
-        dbg("qApplicationCreate: Qt message handler installed");
-    }
     QThread* curThread = QThread::currentThread();
     if (!QAbstractEventDispatcher::instance(curThread)) {
 #if defined(Q_OS_WIN)
@@ -202,7 +176,7 @@ int64_t qApplicationCreate() {
         QAbstractEventDispatcher* dispatcher = new QEventDispatcherUNIX();
 #endif
         curThread->setEventDispatcher(dispatcher);
-        dbg("qApplicationCreate: auto-created dispatcher=%p for thread=%p", (void*)dispatcher, (void*)curThread);
+
     }
     // 多线程并发保护：QApplication 是 Qt 单例，多个线程同时 new 会触发
     // qFatal（"instance already exists"）导致 __fastfail(0xC0000409)。
@@ -217,7 +191,7 @@ int64_t qApplicationCreate() {
         QCoreApplication* existing = QCoreApplication::instance();
         if (existing) {
             g_app = static_cast<QApplication*>(existing);
-            dbg("qApplicationCreate: reuse external QApplication %p", (void*)g_app);
+
         } else {
             // 注意：QApplication(int&, char**) 不能传 argv=nullptr，否则 Qt 在解析
             // 命令行/初始化平台插件时可能越界访问 argv[0]，触发 /GS 栈保护
@@ -229,7 +203,7 @@ int64_t qApplicationCreate() {
 
             try {
                 g_app = new QApplication(s_argc, s_argv);
-                dbg("qApplicationCreate: NEW QApplication ok, after-construct dispatcher=%p", (void*)QAbstractEventDispatcher::instance(QThread::currentThread()));
+
             } catch (const std::exception& e) {
                 fprintf(stderr, "[cjqt6_bridge] qApplicationCreate failed: %s\n", e.what());
                 g_app = nullptr;
@@ -248,8 +222,140 @@ extern "C" void qSetGuiThreadForPoster();
 // 由 bridge_ui_poster.cpp 提供：exec 退出后标记无循环运行
 extern "C" void qUnsetGuiThreadForPoster();
 
+#if defined(Q_OS_WIN)
+// ---- 窗口子类化兜底：拦截 WM_NCLBUTTONDOWN(HTCLOSE) 和 WM_CLOSE 调 QWindow::close() ----
+// 主方案是 nativeEventFilter（见 qApplicationExec），子类化作为兜底：
+// 拦截 SendMessage(WM_CLOSE) 等同步调用（不经过 nativeEventFilter 的消息路径）。
+static std::unordered_map<HWND, WNDPROC> g_subclassedWindows;
+
+// 递归查找全局坐标处最深的可见子 widget
+static QWidget* findDeepestWidgetAt(QWidget* root, const QPoint& globalPos) {
+    if (!root || !root->isVisible()) return nullptr;
+    QPoint localPos = root->mapFromGlobal(globalPos);
+    if (!root->rect().contains(localPos)) return nullptr;
+    QWidget* deepest = root;
+    for (QObject* obj : root->children()) {
+        QWidget* child = qobject_cast<QWidget*>(obj);
+        if (child) {
+            QWidget* deeper = findDeepestWidgetAt(child, globalPos);
+            if (deeper) deepest = deeper;
+        }
+    }
+    return deepest;
+}
+
+static LRESULT CALLBACK cjqt6SubclassWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    // 拦截 WM_NCLBUTTONDOWN(HTCLOSE) 和 WM_CLOSE：调 QWindow::close()
+    // （SendMessage(WM_CLOSE) 等同步调用不经过 nativeEventFilter，子类化作为兜底）
+    if (uMsg == WM_NCLBUTTONDOWN && wParam == HTCLOSE) {
+        for (QWindow* win : QGuiApplication::topLevelWindows()) {
+            if (reinterpret_cast<HWND>(win->winId()) == hwnd) {
+                win->close();
+                return 0;
+            }
+        }
+    }
+    if (uMsg == WM_CLOSE) {
+        for (QWindow* win : QGuiApplication::topLevelWindows()) {
+            if (reinterpret_cast<HWND>(win->winId()) == hwnd) {
+                win->close();
+                return 0;
+            }
+        }
+    }
+    // 鼠标消息已移到 nativeEventFilter 中处理
+    // （子类化 SetWindowLongPtrW 会被 Qt 内部操作重置，不可靠；
+    //  nativeEventFilter 在 DispatchMessage 之前调用，能拦截所有真实鼠标消息）
+
+    auto it = g_subclassedWindows.find(hwnd);
+    if (it != g_subclassedWindows.end()) {
+        return CallWindowProcW(it->second, hwnd, uMsg, wParam, lParam);
+    }
+    return DefWindowProcW(hwnd, uMsg, wParam, lParam);
+}
+
+
+static void cjqt6SubclassWindow(HWND hwnd) {
+    if (g_subclassedWindows.find(hwnd) != g_subclassedWindows.end()) return;
+    WNDPROC oldProc = (WNDPROC)SetWindowLongPtrW(hwnd, GWLP_WNDPROC, (LONG_PTR)cjqt6SubclassWndProc);
+    if (oldProc) g_subclassedWindows[hwnd] = oldProc;
+}
+
+static BOOL CALLBACK cjqt6EnumChildProc(HWND hwnd, LPARAM lParam) {
+    cjqt6SubclassWindow(hwnd);
+    return TRUE;
+}
+
+static void cjqt6SubclassTopLevelWindows() {
+    for (QWindow* win : QGuiApplication::topLevelWindows()) {
+        if (win->isVisible()) {
+            HWND hwnd = reinterpret_cast<HWND>(win->winId());
+            if (hwnd) {
+                cjqt6SubclassWindow(hwnd);
+                // 也子类化子窗口（按钮、输入框等可能有独立 HWND）
+                EnumChildWindows(hwnd, cjqt6EnumChildProc, 0);
+            }
+        }
+    }
+}
+// ---- 窗口子类化结束 ----
+
+// ---- WH_MOUSE 线程级钩子：拦截所有鼠标消息（包括弹出菜单的） ----
+// nativeEventFilter 收不到弹出菜单（QComboBoxPrivateContainer 等）的鼠标消息，
+// 因为弹出菜单有自己的消息泵。WH_MOUSE 钩子是 Win32 级别的，能拦截所有消息。
+static HHOOK g_mouseHook = NULL;
+
+static LRESULT CALLBACK cjqt6MouseHookProc(int code, WPARAM wParam, LPARAM lParam) {
+    if (code == HC_ACTION) {
+        if (wParam == WM_LBUTTONDOWN || wParam == WM_LBUTTONUP ||
+            wParam == WM_RBUTTONDOWN || wParam == WM_RBUTTONUP ||
+            wParam == WM_MOUSEMOVE) {
+            MOUSEHOOKSTRUCT* mhs = (MOUSEHOOKSTRUCT*)lParam;
+            QWidget* widget = QWidget::find(reinterpret_cast<WId>(mhs->hwnd));
+
+            if (widget) {
+                // 屏幕坐标（物理坐标）转逻辑坐标
+                qreal dpr = widget->devicePixelRatio();
+                if (dpr < 0.01) dpr = 1.0;
+                QPoint globalPos(mhs->pt.x / dpr, mhs->pt.y / dpr);
+                // 消息类型和按钮
+                Qt::MouseButton button = Qt::NoButton;
+                QEvent::Type type = QEvent::None;
+                if (wParam == WM_LBUTTONDOWN) { type = QEvent::MouseButtonPress; button = Qt::LeftButton; }
+                else if (wParam == WM_LBUTTONUP) { type = QEvent::MouseButtonRelease; button = Qt::LeftButton; }
+                else if (wParam == WM_RBUTTONDOWN) { type = QEvent::MouseButtonPress; button = Qt::RightButton; }
+                else if (wParam == WM_RBUTTONUP) { type = QEvent::MouseButtonRelease; button = Qt::RightButton; }
+                else if (wParam == WM_MOUSEMOVE) { type = QEvent::MouseMove; button = Qt::NoButton; }
+                // buttons 状态（WH_MOUSE 钩子没有 wParam 的 MK_ 标志，用 GetKeyState）
+                Qt::MouseButtons buttons;
+                if (GetKeyState(VK_LBUTTON) & 0x8000) buttons |= Qt::LeftButton;
+                if (GetKeyState(VK_RBUTTON) & 0x8000) buttons |= Qt::RightButton;
+                Qt::KeyboardModifiers mods;
+                if (GetKeyState(VK_SHIFT) & 0x8000) mods |= Qt::ShiftModifier;
+                if (GetKeyState(VK_CONTROL) & 0x8000) mods |= Qt::ControlModifier;
+                // mhs->hwnd 是 Windows 报告的鼠标所在最顶层窗口 HWND，QWidget::find
+                // 返回的就是该原生窗口对应的 widget。直接在 widget 内部递归找最深的子
+                // widget 即可——不要往上找 parentWidget：弹出菜单 QComboBoxPrivateContainer
+                // 的逻辑父是 QComboBox，往上找会到主 QMainWindow，导致在主窗口的坐标系里
+                // 找弹出菜单坐标处的 widget，找到的是被遮挡的位置（QComboBox 等）而非菜单项。
+                QWidget* target = findDeepestWidgetAt(widget, globalPos);
+
+                if (!target) target = widget;  // findDeepestWidgetAt 没找到，直接用 widget
+                QPoint localPos = target->mapFromGlobal(globalPos);
+                QMouseEvent event(type, QPointF(localPos), QPointF(globalPos), button, buttons, mods);
+                QCoreApplication::sendEvent(target, &event);
+                if (wParam == WM_LBUTTONDOWN && target->focusPolicy() != Qt::NoFocus) {
+                    target->setFocus();
+                }
+            }
+        }
+    }
+    return CallNextHookEx(g_mouseHook, code, wParam, lParam);
+}
+// ---- WH_MOUSE 钩子结束 ----
+#endif
+
 int32_t qApplicationExec() {
-    dbg("qApplicationExec: g_app=%p dispatcher=%p thread=%p", (void*)g_app, (void*)QAbstractEventDispatcher::instance(QThread::currentThread()), (void*)QThread::currentThread());
     if (!g_app) {
         return -1;
     }
@@ -261,29 +367,86 @@ int32_t qApplicationExec() {
         QAbstractEventDispatcher* dispatcher = new QEventDispatcherUNIX();
 #endif
         curThread->setEventDispatcher(dispatcher);
-        dbg("qApplicationExec: auto-created dispatcher=%p for thread=%p", (void*)dispatcher, (void*)curThread);
     }
     // QGuiApplication::exec 强制只能在进程主线程调用（"Must be called from the
     // main thread"），而仓颉测试框架把用例分发到 worker 线程执行。
     // 改用 QCoreApplication::exec（内部即 QEventLoop，无主线程限制），
     // 事件循环/定时器/信号槽行为与 QApplication::exec 一致。
     qSetGuiThreadForPoster();
-    // 用 QEventLoop 而非 QCoreApplication::exec：
-    // 1) 无主线程限制（QGuiApplication::exec 强制只能在进程主线程调用）；
-    // 2) QCoreApplication::quit() 会设置粘滞的 quitNow，导致同线程后续
-    //    exec 立即返回 -1；QEventLoop::exit 只退出当前 loop，无粘滞。
-    // thread_local：每个线程独立 loop，quit 精确退出本线程的事件循环。
-    QEventLoop loop;
-    t_currentLoop = &loop;
-    int r = loop.exec();
-    t_currentLoop = nullptr;
+    // 仓颉 M:N 线程模型下 Qt 6.10 的 QtWndProc 收到 WM_CLOSE / WM_NCLBUTTONDOWN(HTCLOSE)
+    // 不触发 QCloseEvent（QWindow::close() 能关，但这些消息不调 close()）。
+    // 用 QAbstractNativeEventFilter 拦截这些消息，手动调 QWindow::close()，
+    // 使窗口关闭后 QApplication::exec 的 quitOnLastWindowClosed 生效退出。
+    class WmCloseNativeFilter : public QAbstractNativeEventFilter {
+    public:
+        bool nativeEventFilter(const QByteArray& eventType, void* message, qintptr* result) override {
+            if (eventType == "windows_generic_MSG" && message) {
+                MSG* msg = static_cast<MSG*>(message);
+                // 拦截 WM_CLOSE 和 WM_NCLBUTTONDOWN(HTCLOSE)，调 QWindow::close()
+                if (msg->message == WM_CLOSE ||
+                    (msg->message == WM_NCLBUTTONDOWN && msg->wParam == HTCLOSE)) {
+                    for (QWindow* win : QGuiApplication::topLevelWindows()) {
+                        if (reinterpret_cast<HWND>(win->winId()) == msg->hwnd) {
+                            win->close();
+                            if (result) *result = 0;
+                            return true;
+                        }
+                    }
+                }
+                // 鼠标消息已移到 WH_MOUSE 线程级钩子中处理
+                // （nativeEventFilter 收不到弹出菜单的鼠标消息，钩子是 Win32 级别的更可靠）
+                // 键盘消息：Qt 6.10 仓颉 M:N 线程下 QtWndProc 不把 Windows 键盘消息转成 QKeyEvent。
+                // 手动构造 QKeyEvent 派发给 focus widget。
+                if (msg->message == WM_KEYDOWN || msg->message == WM_KEYUP || msg->message == WM_CHAR) {
+                    QWidget* focusWidget = QApplication::focusWidget();
+
+                    if (focusWidget) {
+                        QEvent::Type type = QEvent::None;
+                        if (msg->message == WM_KEYDOWN) type = QEvent::KeyPress;
+                        else if (msg->message == WM_KEYUP) type = QEvent::KeyRelease;
+                        else if (msg->message == WM_CHAR) type = QEvent::KeyPress;
+                        int key = (int)msg->wParam;
+                        Qt::KeyboardModifiers mods;
+                        if (GetKeyState(VK_SHIFT) & 0x8000) mods |= Qt::ShiftModifier;
+                        if (GetKeyState(VK_CONTROL) & 0x8000) mods |= Qt::ControlModifier;
+                        if (GetKeyState(VK_MENU) & 0x8000) mods |= Qt::AltModifier;
+                        QString text;
+                        if (msg->message == WM_CHAR && msg->wParam >= 0x20 && msg->wParam < 0x10000) {
+                            text = QChar((ushort)msg->wParam);
+                        }
+                        QKeyEvent event(type, key, mods, text);
+                        QCoreApplication::sendEvent(focusWidget, &event);
+                    }
+                }
+            }
+            return false;
+        }
+    };
+    static WmCloseNativeFilter wmCloseFilter;
+    QCoreApplication::instance()->installNativeEventFilter(&wmCloseFilter);
+
+#if defined(Q_OS_WIN)
+    // 子类化兜底：立即子类化已有顶层窗口，QTimer 定期子类化新创建的窗口
+    cjqt6SubclassTopLevelWindows();
+    static QTimer* subclassTimer = nullptr;
+    if (!subclassTimer) {
+        subclassTimer = new QTimer();
+        QObject::connect(subclassTimer, &QTimer::timeout, cjqt6SubclassTopLevelWindows);
+        subclassTimer->start(1000);
+    }
+    // 安装 WH_MOUSE 线程级钩子，拦截所有鼠标消息（包括弹出菜单的）
+    if (!g_mouseHook) {
+        g_mouseHook = SetWindowsHookEx(WH_MOUSE, cjqt6MouseHookProc, NULL, GetCurrentThreadId());
+
+    }
+#endif
+    int r = g_app->exec();
     qUnsetGuiThreadForPoster();
-    dbg("qApplicationExec: returned %d", r);
     return r;
 }
 
 void qApplicationQuit() {
-    dbg("qApplicationQuit: g_app=%p thread=%p t_currentLoop=%p", (void*)g_app, (void*)QThread::currentThread(), (void*)t_currentLoop);
+
     if (t_currentLoop) {
         // 退出当前线程正在运行的事件循环（QEventLoop::exit 线程安全，
         // 只退出本 loop，不设置全局 quitNow，同线程后续 exec 不受影响）
@@ -391,7 +554,7 @@ void qTimerStart(int64_t ptr) {
     QTimer* timer = reinterpret_cast<QTimer*>(ptr);
     if (timer) {
         timer->start();
-        dbg("qTimerStart: timer=%p thread=%p dispatcher=%p", (void*)timer, (void*)QThread::currentThread(), (void*)QAbstractEventDispatcher::instance(QThread::currentThread()));
+
     }
 }
 
@@ -408,7 +571,7 @@ void qTimerSetTimeout(int64_t ptr, void (*callback)(int64_t)) {
         int64_t timerPtr = ptr;
         g_timerCallbacks[ptr] = [callback, timerPtr](int64_t) { callback(timerPtr); };
         QObject::connect(timer, &QTimer::timeout, [timerPtr]() {
-            dbg("qTimer timeout FIRED: timer=%p thread=%p", (void*)timerPtr, (void*)QThread::currentThread());
+
             auto it = g_timerCallbacks.find(timerPtr);
             if (it != g_timerCallbacks.end()) {
                 it->second(timerPtr);
