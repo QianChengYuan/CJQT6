@@ -442,7 +442,15 @@ int32_t qApplicationExec() {
 
     }
 #endif
-    int r = g_app->exec();
+    // 用 QEventLoop 而非 QGuiApplication::exec：
+    // 1) 无主线程限制（QGuiApplication::exec 强制只能在进程主线程调用）；
+    // 2) QCoreApplication::quit() 会设置粘滞的 quitNow，导致同线程后续
+    //    exec 立即返回 -1；QEventLoop::exit 只退出当前 loop，无粘滞。
+    // thread_local：每个线程独立 loop，quit 精确退出本线程的事件循环。
+    QEventLoop loop;
+    t_currentLoop = &loop;
+    int r = loop.exec();
+    t_currentLoop = nullptr;
     qUnsetGuiThreadForPoster();
     return r;
 }
