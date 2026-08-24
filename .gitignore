@@ -161,3 +161,4 @@ examples/**/stderr_*.txt
 
 # 示例运行时接收目录（文件传输产物）
 examples/**/recv/
+.codegraph
