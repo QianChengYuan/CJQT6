@@ -8,6 +8,7 @@ import cjqt6.core.*
 
 foreign func qListViewCreate(): Int64
 foreign func qListViewSetModel(ptr: Int64, modelPtr: Int64): Unit
+foreign func qListViewSetItemDelegate(ptr: Int64, delegatePtr: Int64): Unit
 foreign func qListViewSetSelectionMode(ptr: Int64, mode: Int32): Unit
 foreign func qListViewDelete(ptr: Int64): Unit
 
@@ -115,6 +116,14 @@ public class QListView {
         checkValid()
         unsafe {
             qListViewSetModel(ptr, model.getPtr())
+        }
+    }
+
+    /// 设置自绘委托（QStyledItemDelegate，自定义单元格绘制/尺寸）
+    public func setItemDelegate(delegate: QStyledItemDelegate): Unit {
+        checkValid()
+        unsafe {
+            qListViewSetItemDelegate(ptr, delegate.getPtr())
         }
     }
 

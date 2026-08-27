@@ -731,6 +731,99 @@ model.endResetModel()
 
 ---
 
+### QStyledItemDelegate — 自绘委托（回调式）
+
+自定义单元格绘制（`paint`）与尺寸（`sizeHint`）的委托。注册回调后，将 `getPtr()` 通过视图的 `setItemDelegate` 挂载到 QTableView / QListView / QTreeView。
+
+```cangjie
+import cjqt6.views.*
+import cjqt6.paint.*
+
+// CFunc 回调不捕获局部变量，用全局变量共享委托引用
+var gDelegate: ?QStyledItemDelegate = None
+
+// 自绘回调：(delegatePtr) -> Unit，绘制上下文经 getter 读取（仅回调内有效）
+let paintCb: DelegatePaintCallback = { delegatePtr =>
+    if (let Some(d) <- gDelegate) {
+        // 借自 Qt 的 QPainter，勿对其 delete()/end()
+        let painter = QPainter.fromPtr(d.getPainterPtr())
+        let x = d.getRectX()
+        let y = d.getRectY()
+        let w = d.getRectW()
+        let h = d.getRectH()
+        // 自由绘制：示例绘制单元格文本（也可用 drawRect/setPenColor 等画背景/边框）
+        painter.drawText(x + 4, y + 20, "第${d.getRow()}行")
+    }
+}
+
+// 尺寸回调：(delegatePtr) -> Int64，返回 makeSizeHintValue(w, h)
+let sizeHintCb: DelegateSizeHintCallback = { _ =>
+    makeSizeHintValue(120, 36)
+}
+
+// 挂载使用
+let view = QTableView()
+let model = QStandardItemModel(4, 2)
+view.setModel(model)
+
+let delegate = QStyledItemDelegate()
+delegate.setOnPaint(paintCb)
+delegate.setOnSizeHint(sizeHintCb)
+gDelegate = Some(delegate)
+view.setItemDelegate(delegate)   // 挂载后视图接管委托所有权，delegate 无需手动 close()
+```
+
+**当前支持方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` | 创建自绘委托 |
+| `setOnPaint(callback: DelegatePaintCallback)` | 注册自绘回调；注册后该委托的单元格绘制完全由回调接管 |
+| `setOnSizeHint(callback: DelegateSizeHintCallback)` | 注册自定义尺寸回调；返回 0 表示使用默认尺寸 |
+| `getPainterPtr(): Int64` | 当前 QPainter 指针（**仅 paint 回调内有效**，用 `QPainter.fromPtr` 包装绘制） |
+| `getRectX()` / `getRectY()` / `getRectW()` / `getRectH(): Int32` | 当前单元格绘制矩形（**仅回调内有效**） |
+| `getState(): Int32` | 当前绘制状态位标志（见 PaintState，**仅回调内有效**） |
+| `getRow(): Int32` / `getCol(): Int32` | 当前单元格行/列号（**仅回调内有效**） |
+| `setOnCreateEditor(callback: DelegateCreateEditorCallback)` | 注册创建编辑器回调；双击单元格时调用，返回编辑器 widget 指针（0 表示不编辑） |
+| `setOnSetEditorData(callback: DelegateSetEditorDataCallback)` | 注册设置编辑器数据回调；编辑器打开后从 model 取数据填入编辑器 |
+| `setOnSetModelData(callback: DelegateSetModelDataCallback)` | 注册设置模型数据回调；编辑完成时从编辑器取数据写回 model |
+| `getParentPtr(): Int64` | 父 widget 指针（**仅 createEditor 回调内有效**，用于创建编辑器时指定父对象） |
+| `getEditorPtr(): Int64` | 当前编辑器指针（**仅 setEditorData/setModelData 回调内有效**） |
+| `getModelPtr(): Int64` | 当前 model 指针（**仅 setModelData 回调内有效**） |
+| `getPtr(): Int64` / `close()` | 获取指针与释放资源 |
+
+**回调类型别名**:
+```cangjie
+DelegatePaintCallback = CFunc<(Int64) -> Unit>      // 自绘回调，入参为委托指针
+DelegateSizeHintCallback = CFunc<(Int64) -> Int64>  // 尺寸回调，返回打包尺寸
+DelegateCreateEditorCallback = CFunc<(Int64) -> Int64>  // 创建编辑器，返回编辑器 widget 指针（0=不编辑）
+DelegateSetEditorDataCallback = CFunc<(Int64) -> Unit>   // 从 model 取数据填入编辑器
+DelegateSetModelDataCallback = CFunc<(Int64) -> Unit>    // 从编辑器取数据写回 model
+```
+
+**绘制状态常量** (`PaintState`，均为函数调用形式，值对齐 Qt6 `QStyle::StateFlag`):
+| 常量 | 值 | 说明 |
+|------|-----|------|
+| `PaintState.selected()` | 0x8000 | 被选中（State_Selected） |
+| `PaintState.mouseOver()` | 0x2000 | 鼠标悬浮（State_MouseOver） |
+| `PaintState.hasFocus()` | 0x0100 | 拥有焦点（State_HasFocus） |
+| `PaintState.active()` | 0x10000 | 激活状态（State_Active） |
+| `PaintState.has(state, flag)` | Bool | 判断是否包含某状态位 |
+
+**尺寸打包函数**:
+```cangjie
+makeSizeHintValue(width: Int32, height: Int32): Int64  // 高 32 位 = 高度，低 32 位 = 宽度
+```
+
+**注意事项**:
+- 绘制上下文 getter（`getPainterPtr()` / `getRect*()` / `getState()` / `getRow()` / `getCol()`）**仅在回调执行期间有效**，退出回调后为脏数据，勿在回调外读取。
+- 挂载到视图后（`setItemDelegate`），视图接管委托所有权并在视图析构时级联释放；此时 `close()` 仅标记关闭、不主动删除，避免 double-free。未挂载的委托由 `close()` 显式释放。
+- `QPainter.fromPtr` 包装的 painter 借自 Qt，**不要调用 `delete()`/`end()`**，其生命周期由 Qt 管理。
+- 编辑委托（`createEditor`/`setEditorData`/`setModelData`）为可选覆盖：未注册回调时走 `QStyledItemDelegate` 默认实现（创建 QLineEdit、自动读写 model 数据）。注册回调后完全由仓颉侧接管，可用于自定义编辑器（如 QComboBox/QSpinBox）。
+- `createEditor` 回调返回的编辑器 widget 所有权归视图，视图在编辑结束时自动释放，**勿在仓颉侧重复 `close()`**。
+- 编辑上下文 getter（`getParentPtr()`/`getEditorPtr()`/`getModelPtr()`）**仅在对应编辑回调内有效**，回调外为脏数据。
+
+---
+
 ### QFileSystemModel — 文件系统模型
 
 直接读取本地文件系统目录结构，可绑定到 QTreeView / QListView 显示文件目录树。

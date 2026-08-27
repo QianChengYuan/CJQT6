@@ -114,6 +114,7 @@ set(VIEWS_SOURCES
     native/src/views/bridge_ext_views.cpp
     native/src/views/bridge_sortfilterproxymodel.cpp
     native/src/views/bridge_abstractmodel.cpp
+    native/src/views/bridge_delegate.cpp
 )
 
 # Paint模块 - 绘图相关类

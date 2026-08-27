@@ -8,6 +8,7 @@ import cjqt6.core.*
 
 foreign func qTreeViewCreate(): Int64
 foreign func qTreeViewSetModel(ptr: Int64, modelPtr: Int64): Unit
+foreign func qTreeViewSetItemDelegate(ptr: Int64, delegatePtr: Int64): Unit
 foreign func qTreeViewExpandAll(ptr: Int64): Unit
 foreign func qTreeViewCollapseAll(ptr: Int64): Unit
 foreign func qTreeViewSetSelectionMode(ptr: Int64, mode: Int32): Unit
@@ -106,6 +107,14 @@ public class QTreeView {
         checkValid()
         unsafe {
             qTreeViewSetModel(ptr, model.getPtr())
+        }
+    }
+
+    /// 设置自绘委托（QStyledItemDelegate，自定义单元格绘制/尺寸）
+    public func setItemDelegate(delegate: QStyledItemDelegate): Unit {
+        checkValid()
+        unsafe {
+            qTreeViewSetItemDelegate(ptr, delegate.getPtr())
         }
     }
 

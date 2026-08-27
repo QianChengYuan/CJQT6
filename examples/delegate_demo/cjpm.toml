@@ -1,0 +1,14 @@
+[package]
+  cjc-version = "1.1.0"
+  name = "delegate_demo"
+  description = "QStyledItemDelegate 自绘委托绘制实测：验证 paint/sizeHint 回调在视图渲染时被真实调用"
+  version = "1.0.0"
+  target-dir = ""
+  output-type = "executable"
+  compile-option = ""
+  override-compile-option = ""
+  link-option = "-L../../releases/windows-x64 -lcjqt6_bridge"
+  package-configuration = {}
+
+[dependencies]
+  cjqt6 = { path = "../../" }

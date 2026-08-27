@@ -8,6 +8,7 @@ import cjqt6.core.*
 
 foreign func qTableViewCreate(): Int64
 foreign func qTableViewSetModel(ptr: Int64, modelPtr: Int64): Unit
+foreign func qTableViewSetItemDelegate(ptr: Int64, delegatePtr: Int64): Unit
 foreign func qTableViewSetColumnWidth(ptr: Int64, col: Int32, width: Int32): Unit
 foreign func qTableViewSetRowHeight(ptr: Int64, row: Int32, height: Int32): Unit
 foreign func qTableViewSetShowGrid(ptr: Int64, show: Int32): Unit
@@ -122,6 +123,14 @@ public class QTableView {
         checkValid()
         unsafe {
             qTableViewSetModel(ptr, model.getPtr())
+        }
+    }
+
+    /// 设置自绘委托（QStyledItemDelegate，自定义单元格绘制/尺寸）
+    public func setItemDelegate(delegate: QStyledItemDelegate): Unit {
+        checkValid()
+        unsafe {
+            qTableViewSetItemDelegate(ptr, delegate.getPtr())
         }
     }
 
