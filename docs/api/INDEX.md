@@ -490,6 +490,20 @@
 
 ---
 
+## 20_charts.md
+
+### Qt Charts 图表
+
+- **[`QChart`](20_charts.md#qchart--图表容器)** — 图表容器
+
+- **[`QChartView`](20_charts.md#qchartview--图表视图)** — 图表视图
+
+- **[`QLineSeries`](20_charts.md#qlineseries--折线序列)** — 折线序列
+
+- **[`QValueAxis`](20_charts.md#qvalueaxis--数值坐标轴)** — 数值坐标轴
+
+---
+
 ## ⚠️ src/ 中存在但 docs/api 未收录的公共类
 
 - $m（提示：请在 docs/api/ 对应章节补 ### QApp - 说明 小节）

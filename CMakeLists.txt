@@ -35,6 +35,7 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Qml Quick QuickWidgets Sql
 find_package(Qt6 COMPONENTS CorePrivate QUIET)
 find_package(Qt6 COMPONENTS Multimedia QUIET)
 find_package(Qt6 COMPONENTS MultimediaWidgets QUIET)
+find_package(Qt6 COMPONENTS Charts QUIET)
 
 # 设置 Qt6 自动 MOC、UIC、RCC
 set(CMAKE_AUTOMOC ON)
@@ -117,6 +118,17 @@ set(VIEWS_SOURCES
     native/src/views/bridge_delegate.cpp
 )
 
+# Charts模块 - Qt Charts 图表支持 (可选)
+set(CHARTS_SOURCES)
+if(Qt6Charts_FOUND)
+    set(CHARTS_SOURCES
+        native/src/charts/bridge_chart.cpp
+    )
+    message(STATUS "Qt6 Charts: Found")
+else()
+    message(STATUS "Qt6 Charts: Not found, charts support disabled")
+endif()
+
 # Paint模块 - 绘图相关类
 set(PAINT_SOURCES
     native/src/paint/bridge_painter.cpp
@@ -174,6 +186,7 @@ add_library(cjqt6_bridge SHARED
     ${SQL_SOURCES}
     ${PRINT_SOURCES}
     ${NETWORK_SOURCES}
+    ${CHARTS_SOURCES}
     # 头文件 (用于MOC处理)
     native/includes/gui.h
     native/includes/widgets.h
@@ -204,6 +217,11 @@ if(TARGET Qt6::Multimedia)
 endif()
 if(TARGET Qt6::MultimediaWidgets)
     target_link_libraries(cjqt6_bridge PRIVATE Qt6::MultimediaWidgets)
+endif()
+
+# 可选链接 Charts
+if(TARGET Qt6::Charts)
+    target_link_libraries(cjqt6_bridge PRIVATE Qt6::Charts)
 endif()
 
 # 设置输出名称
