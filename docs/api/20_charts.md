@@ -2,7 +2,7 @@
 
 > `import cjqt6.charts.*`
 >
-> 基于 Qt Charts 的图表封装，提供 QChart / QChartView / QLineSeries / QBarSeries / QBarSet / QPieSeries / QScatterSeries / QValueAxis / QBarCategoryAxis / QCategoryAxis / QLegend。
+> 基于 Qt Charts 的图表封装，提供 QChart / QChartView / QLineSeries / QBarSeries / QBarSet / QPieSeries / QScatterSeries / QAreaSeries / QSplineSeries / QPercentBarSeries / QStackedBarSeries / QValueAxis / QBarCategoryAxis / QCategoryAxis / QLegend。
 > 需 Qt Charts 组件（Qt Maintenance Tool 安装时勾选 Qt Charts）。
 
 ---
@@ -34,6 +34,10 @@ chart.createDefaultAxes()
 | `addSeries(series: QBarSeries)` | 添加柱状图序列（重载） |
 | `addSeries(series: QPieSeries)` | 添加饼图序列（重载） |
 | `addSeries(series: QScatterSeries)` | 添加散点图序列（重载） |
+| `addSeries(series: QAreaSeries)` | 添加区域图序列（重载） |
+| `addSeries(series: QSplineSeries)` | 添加样条曲线序列（重载） |
+| `addSeries(series: QPercentBarSeries)` | 添加百分比柱状图序列（重载） |
+| `addSeries(series: QStackedBarSeries)` | 添加堆叠柱状图序列（重载） |
 | `removeAllSeries()` | 移除所有序列 |
 | `setTitle(title: String)` | 设置图表标题 |
 | `setTheme(theme: Int32)` | 设置主题（见 ChartTheme 常量） |
@@ -258,6 +262,114 @@ chart.addSeries(series)
 
 ---
 
+## QAreaSeries — 区域图序列
+
+用上下两条折线围成填充区域。下边界可省略（默认为 0）。
+
+```cangjie
+let upper = QLineSeries()
+upper.append(0.0, 20.0); upper.append(1.0, 30.0); upper.append(2.0, 25.0)
+let lower = QLineSeries()
+lower.append(0.0, 5.0);  lower.append(1.0, 10.0); lower.append(2.0, 8.0)
+let area = QAreaSeries(upper, lower)
+area.setColor(100, 150, 200)
+chart.addSeries(area)
+// area 所有权转给 chart；upper/lower 需手动 close
+```
+
+**支持方法**:
+| 方法 | 说明 |
+|------|------|
+| `init(upper: QLineSeries)` | 创建区域图，指定上边界（下边界默认为 0） |
+| `init(upper: QLineSeries, lower: QLineSeries)` | 创建区域图，指定上/下边界 |
+| `setColor(r: Int32, g: Int32, b: Int32)` | 设置区域颜色（RGB） |
+| `setBorderColor(r: Int32, g: Int32, b: Int32)` | 设置边框颜色（RGB） |
+| `setPointsVisible(visible: Bool)` | 设置数据点可见性 |
+| `getPtr(): Int64` / `close()` | 获取指针与释放 |
+
+> **所有权注意**：QAreaSeries 不拥有 upper/lower QLineSeries。`addSeries` 后 chart 接管 area，但 line series 需手动 `close()`。
+
+---
+
+## QSplineSeries — 样条曲线序列
+
+绘制平滑样条曲线，API 与 QLineSeries 一致（继承 QLineSeries）。
+
+```cangjie
+let series = QSplineSeries()
+series.setName("平滑曲线")
+series.append(0.0, 10.0)
+series.append(1.0, 20.0)
+series.append(2.0, 15.0)
+chart.addSeries(series)
+```
+
+**支持方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` | 创建样条曲线序列 |
+| `append(x: Float64, y: Float64)` | 追加一个数据点 |
+| `setName(name: String)` | 设置序列名称（显示在图例中） |
+| `count(): Int32` | 当前数据点数量 |
+| `getPtr(): Int64` / `close()` | 获取指针与释放 |
+
+---
+
+## QPercentBarSeries — 百分比柱状图序列
+
+每组数据归一化为 100% 显示。API 与 QBarSeries 一致（继承 QAbstractBarSeries）。
+
+```cangjie
+let series = QPercentBarSeries()
+let set1 = QBarSet("产品A")
+set1.append(10.0); set1.append(20.0)
+let set2 = QBarSet("产品B")
+set2.append(30.0); set2.append(40.0)
+series.append(set1)
+series.append(set2)
+series.setLabelsVisible(true)
+chart.addSeries(series)
+```
+
+**支持方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` | 创建百分比柱状图序列 |
+| `append(set: QBarSet)` | 追加数据集；追加后 series 接管 set 所有权 |
+| `count(): Int32` | 数据集数量 |
+| `clear()` | 清除所有数据集 |
+| `setLabelsVisible(visible: Bool)` | 设置标签可见性 |
+| `getPtr(): Int64` / `close()` | 获取指针与释放 |
+
+---
+
+## QStackedBarSeries — 堆叠柱状图序列
+
+同组数据堆叠显示。API 与 QBarSeries 一致（继承 QAbstractBarSeries）。
+
+```cangjie
+let series = QStackedBarSeries()
+let set1 = QBarSet("产品A")
+set1.append(10.0); set1.append(20.0)
+let set2 = QBarSet("产品B")
+set2.append(15.0); set2.append(25.0)
+series.append(set1)
+series.append(set2)
+chart.addSeries(series)
+```
+
+**支持方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` | 创建堆叠柱状图序列 |
+| `append(set: QBarSet)` | 追加数据集；追加后 series 接管 set 所有权 |
+| `count(): Int32` | 数据集数量 |
+| `clear()` | 清除所有数据集 |
+| `setLabelsVisible(visible: Bool)` | 设置标签可见性 |
+| `getPtr(): Int64` / `close()` | 获取指针与释放 |
+
+---
+
 ## QValueAxis — 数值坐标轴
 
 用于折线图/柱状图的数值轴。
@@ -396,14 +508,15 @@ legend.setColor(240, 240, 240)
 
 Qt Charts 的所有权链：
 ```
-QChartView → QChart → QLineSeries / QBarSeries / QPieSeries / QScatterSeries / QValueAxis / QBarCategoryAxis / QCategoryAxis
-QBarSeries → QBarSet
+QChartView → QChart → QLineSeries / QBarSeries / QPieSeries / QScatterSeries / QAreaSeries / QSplineSeries / QPercentBarSeries / QStackedBarSeries / QValueAxis / QBarCategoryAxis / QCategoryAxis
+QBarSeries / QPercentBarSeries / QStackedBarSeries → QBarSet
 QChart → QLegend（chart 内部管理，非用户拥有）
 ```
 
 - `QChartView.setChart(chart)` 后，view 接管 chart 所有权
-- `QChart.addSeries(series)` 后，chart 接管 series 所有权（适用于 QLineSeries / QBarSeries / QPieSeries / QScatterSeries）
-- `QBarSeries.append(set)` 后，series 接管 set 所有权
+- `QChart.addSeries(series)` 后，chart 接管 series 所有权（适用于 QLineSeries / QBarSeries / QPieSeries / QScatterSeries / QAreaSeries / QSplineSeries / QPercentBarSeries / QStackedBarSeries）
+- `QBarSeries.append(set)` / `QPercentBarSeries.append(set)` / `QStackedBarSeries.append(set)` 后，series 接管 set 所有权
+- `QAreaSeries` 不拥有 upper/lower QLineSeries，需手动管理 line series 生命周期
 - `QChart.addAxis(axis, ...)` 后，chart 接管 axis 所有权（适用于 QValueAxis / QBarCategoryAxis / QCategoryAxis）
 - `QChart.getLegend()` 返回的 QLegend 是**非拥有式**引用，由 chart 管理生命周期，勿调用 close()
 

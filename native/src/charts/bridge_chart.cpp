@@ -25,6 +25,10 @@
 #include <QtCharts/QBarSet>
 #include <QtCharts/QPieSeries>
 #include <QtCharts/QScatterSeries>
+#include <QtCharts/QAreaSeries>
+#include <QtCharts/QSplineSeries>
+#include <QtCharts/QPercentBarSeries>
+#include <QtCharts/QStackedBarSeries>
 #include <QString>
 #include <QColor>
 
@@ -590,6 +594,128 @@ void qScatterSeriesSetColor(int64_t ptr, int32_t r, int32_t g, int32_t b) {
 void qScatterSeriesSetBorderColor(int64_t ptr, int32_t r, int32_t g, int32_t b) {
     QScatterSeries* series = reinterpret_cast<QScatterSeries*>(ptr);
     if (series) series->setBorderColor(QColor(r, g, b));
+}
+
+// ============================================================
+// QAreaSeries - 区域图序列
+// ============================================================
+
+int64_t qAreaSeriesCreate(int64_t upperPtr, int64_t lowerPtr) {
+    QLineSeries* upper = reinterpret_cast<QLineSeries*>(upperPtr);
+    QLineSeries* lower = lowerPtr ? reinterpret_cast<QLineSeries*>(lowerPtr) : nullptr;
+    return reinterpret_cast<int64_t>(new QAreaSeries(upper, lower));
+}
+
+void qAreaSeriesDelete(int64_t ptr) {
+    delete reinterpret_cast<QAreaSeries*>(ptr);
+}
+
+void qAreaSeriesSetColor(int64_t ptr, int32_t r, int32_t g, int32_t b) {
+    QAreaSeries* series = reinterpret_cast<QAreaSeries*>(ptr);
+    if (series) series->setColor(QColor(r, g, b));
+}
+
+void qAreaSeriesSetBorderColor(int64_t ptr, int32_t r, int32_t g, int32_t b) {
+    QAreaSeries* series = reinterpret_cast<QAreaSeries*>(ptr);
+    if (series) series->setBorderColor(QColor(r, g, b));
+}
+
+void qAreaSeriesSetPointsVisible(int64_t ptr, int32_t visible) {
+    QAreaSeries* series = reinterpret_cast<QAreaSeries*>(ptr);
+    if (series) series->setPointsVisible(visible != 0);
+}
+
+// ============================================================
+// QSplineSeries - 样条曲线序列（继承 QLineSeries）
+// ============================================================
+
+int64_t qSplineSeriesCreate() {
+    return reinterpret_cast<int64_t>(new QSplineSeries());
+}
+
+void qSplineSeriesDelete(int64_t ptr) {
+    delete reinterpret_cast<QSplineSeries*>(ptr);
+}
+
+void qSplineSeriesAppend(int64_t ptr, double x, double y) {
+    QSplineSeries* series = reinterpret_cast<QSplineSeries*>(ptr);
+    if (series) series->append(static_cast<qreal>(x), static_cast<qreal>(y));
+}
+
+void qSplineSeriesSetName(int64_t ptr, const char* name) {
+    QSplineSeries* series = reinterpret_cast<QSplineSeries*>(ptr);
+    if (series) series->setName(QString::fromUtf8(name));
+}
+
+int32_t qSplineSeriesCount(int64_t ptr) {
+    QSplineSeries* series = reinterpret_cast<QSplineSeries*>(ptr);
+    return series ? static_cast<int32_t>(series->count()) : 0;
+}
+
+// ============================================================
+// QPercentBarSeries - 百分比柱状图序列（继承 QAbstractBarSeries）
+// ============================================================
+
+int64_t qPercentBarSeriesCreate() {
+    return reinterpret_cast<int64_t>(new QPercentBarSeries());
+}
+
+void qPercentBarSeriesDelete(int64_t ptr) {
+    delete reinterpret_cast<QPercentBarSeries*>(ptr);
+}
+
+void qPercentBarSeriesAppend(int64_t ptr, int64_t setPtr) {
+    QPercentBarSeries* series = reinterpret_cast<QPercentBarSeries*>(ptr);
+    QBarSet* set = reinterpret_cast<QBarSet*>(setPtr);
+    if (series && set) series->append(set);
+}
+
+int32_t qPercentBarSeriesCount(int64_t ptr) {
+    QPercentBarSeries* series = reinterpret_cast<QPercentBarSeries*>(ptr);
+    return series ? static_cast<int32_t>(series->count()) : 0;
+}
+
+void qPercentBarSeriesClear(int64_t ptr) {
+    QPercentBarSeries* series = reinterpret_cast<QPercentBarSeries*>(ptr);
+    if (series) series->clear();
+}
+
+void qPercentBarSeriesSetLabelsVisible(int64_t ptr, int32_t visible) {
+    QPercentBarSeries* series = reinterpret_cast<QPercentBarSeries*>(ptr);
+    if (series) series->setLabelsVisible(visible != 0);
+}
+
+// ============================================================
+// QStackedBarSeries - 堆叠柱状图序列（继承 QAbstractBarSeries）
+// ============================================================
+
+int64_t qStackedBarSeriesCreate() {
+    return reinterpret_cast<int64_t>(new QStackedBarSeries());
+}
+
+void qStackedBarSeriesDelete(int64_t ptr) {
+    delete reinterpret_cast<QStackedBarSeries*>(ptr);
+}
+
+void qStackedBarSeriesAppend(int64_t ptr, int64_t setPtr) {
+    QStackedBarSeries* series = reinterpret_cast<QStackedBarSeries*>(ptr);
+    QBarSet* set = reinterpret_cast<QBarSet*>(setPtr);
+    if (series && set) series->append(set);
+}
+
+int32_t qStackedBarSeriesCount(int64_t ptr) {
+    QStackedBarSeries* series = reinterpret_cast<QStackedBarSeries*>(ptr);
+    return series ? static_cast<int32_t>(series->count()) : 0;
+}
+
+void qStackedBarSeriesClear(int64_t ptr) {
+    QStackedBarSeries* series = reinterpret_cast<QStackedBarSeries*>(ptr);
+    if (series) series->clear();
+}
+
+void qStackedBarSeriesSetLabelsVisible(int64_t ptr, int32_t visible) {
+    QStackedBarSeries* series = reinterpret_cast<QStackedBarSeries*>(ptr);
+    if (series) series->setLabelsVisible(visible != 0);
 }
 
 } // extern "C"
