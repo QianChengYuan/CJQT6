@@ -139,6 +139,18 @@ public class QChart {
         unsafe { qChartAddSeries(ptr, series.getPtr()) }
     }
 
+    /// 添加箱线图序列（重载）；添加后 chart 接管 series 所有权
+    public func addSeries(series: QBoxPlotSeries): Unit {
+        checkValid()
+        unsafe { qChartAddSeries(ptr, series.getPtr()) }
+    }
+
+    /// 添加 K 线序列（重载）；添加后 chart 接管 series 所有权
+    public func addSeries(series: QCandlestickSeries): Unit {
+        checkValid()
+        unsafe { qChartAddSeries(ptr, series.getPtr()) }
+    }
+
     /// 移除所有序列
     public func removeAllSeries(): Unit {
         checkValid()

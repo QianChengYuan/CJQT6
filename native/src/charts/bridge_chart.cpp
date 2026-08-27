@@ -29,6 +29,11 @@
 #include <QtCharts/QSplineSeries>
 #include <QtCharts/QPercentBarSeries>
 #include <QtCharts/QStackedBarSeries>
+#include <QtCharts/QBoxSet>
+#include <QtCharts/QBoxPlotSeries>
+#include <QtCharts/QCandlestickSet>
+#include <QtCharts/QCandlestickSeries>
+#include <QtCharts/QPolarChart>
 #include <QString>
 #include <QColor>
 
@@ -716,6 +721,236 @@ void qStackedBarSeriesClear(int64_t ptr) {
 void qStackedBarSeriesSetLabelsVisible(int64_t ptr, int32_t visible) {
     QStackedBarSeries* series = reinterpret_cast<QStackedBarSeries*>(ptr);
     if (series) series->setLabelsVisible(visible != 0);
+}
+
+// ============================================================
+// QBoxSet - 箱线图数据集
+// ============================================================
+
+int64_t qBoxSetCreate(const char* label) {
+    return reinterpret_cast<int64_t>(new QBoxSet(QString::fromUtf8(label)));
+}
+
+int64_t qBoxSetCreate5(double le, double lq, double m, double uq, double ue, const char* label) {
+    return reinterpret_cast<int64_t>(new QBoxSet(static_cast<qreal>(le), static_cast<qreal>(lq),
+        static_cast<qreal>(m), static_cast<qreal>(uq), static_cast<qreal>(ue), QString::fromUtf8(label)));
+}
+
+void qBoxSetDelete(int64_t ptr) {
+    delete reinterpret_cast<QBoxSet*>(ptr);
+}
+
+void qBoxSetAppend(int64_t ptr, double value) {
+    QBoxSet* set = reinterpret_cast<QBoxSet*>(ptr);
+    if (set) set->append(static_cast<qreal>(value));
+}
+
+void qBoxSetClear(int64_t ptr) {
+    QBoxSet* set = reinterpret_cast<QBoxSet*>(ptr);
+    if (set) set->clear();
+}
+
+void qBoxSetSetLabel(int64_t ptr, const char* label) {
+    QBoxSet* set = reinterpret_cast<QBoxSet*>(ptr);
+    if (set) set->setLabel(QString::fromUtf8(label));
+}
+
+void qBoxSetSetValue(int64_t ptr, int32_t index, double value) {
+    QBoxSet* set = reinterpret_cast<QBoxSet*>(ptr);
+    if (set) set->setValue(static_cast<int>(index), static_cast<qreal>(value));
+}
+
+double qBoxSetAt(int64_t ptr, int32_t index) {
+    QBoxSet* set = reinterpret_cast<QBoxSet*>(ptr);
+    return set ? static_cast<double>(set->at(static_cast<int>(index))) : 0.0;
+}
+
+int32_t qBoxSetCount(int64_t ptr) {
+    QBoxSet* set = reinterpret_cast<QBoxSet*>(ptr);
+    return set ? static_cast<int32_t>(set->count()) : 0;
+}
+
+// ============================================================
+// QBoxPlotSeries - 箱线图序列
+// ============================================================
+
+int64_t qBoxPlotSeriesCreate() {
+    return reinterpret_cast<int64_t>(new QBoxPlotSeries());
+}
+
+void qBoxPlotSeriesDelete(int64_t ptr) {
+    delete reinterpret_cast<QBoxPlotSeries*>(ptr);
+}
+
+void qBoxPlotSeriesAppend(int64_t ptr, int64_t boxPtr) {
+    QBoxPlotSeries* series = reinterpret_cast<QBoxPlotSeries*>(ptr);
+    QBoxSet* box = reinterpret_cast<QBoxSet*>(boxPtr);
+    if (series && box) series->append(box);
+}
+
+int32_t qBoxPlotSeriesCount(int64_t ptr) {
+    QBoxPlotSeries* series = reinterpret_cast<QBoxPlotSeries*>(ptr);
+    return series ? static_cast<int32_t>(series->count()) : 0;
+}
+
+void qBoxPlotSeriesClear(int64_t ptr) {
+    QBoxPlotSeries* series = reinterpret_cast<QBoxPlotSeries*>(ptr);
+    if (series) series->clear();
+}
+
+void qBoxPlotSeriesSetBoxOutlineVisible(int64_t ptr, int32_t visible) {
+    QBoxPlotSeries* series = reinterpret_cast<QBoxPlotSeries*>(ptr);
+    if (series) series->setBoxOutlineVisible(visible != 0);
+}
+
+void qBoxPlotSeriesSetBoxWidth(int64_t ptr, double width) {
+    QBoxPlotSeries* series = reinterpret_cast<QBoxPlotSeries*>(ptr);
+    if (series) series->setBoxWidth(static_cast<qreal>(width));
+}
+
+// ============================================================
+// QCandlestickSet - K线数据集
+// ============================================================
+
+int64_t qCandlestickSetCreate(double timestamp) {
+    return reinterpret_cast<int64_t>(new QCandlestickSet(static_cast<qreal>(timestamp)));
+}
+
+int64_t qCandlestickSetCreateOHLC(double open, double high, double low, double close, double timestamp) {
+    return reinterpret_cast<int64_t>(new QCandlestickSet(static_cast<qreal>(open), static_cast<qreal>(high),
+        static_cast<qreal>(low), static_cast<qreal>(close), static_cast<qreal>(timestamp)));
+}
+
+void qCandlestickSetDelete(int64_t ptr) {
+    delete reinterpret_cast<QCandlestickSet*>(ptr);
+}
+
+void qCandlestickSetSetTimestamp(int64_t ptr, double timestamp) {
+    QCandlestickSet* set = reinterpret_cast<QCandlestickSet*>(ptr);
+    if (set) set->setTimestamp(static_cast<qreal>(timestamp));
+}
+
+double qCandlestickSetTimestamp(int64_t ptr) {
+    QCandlestickSet* set = reinterpret_cast<QCandlestickSet*>(ptr);
+    return set ? static_cast<double>(set->timestamp()) : 0.0;
+}
+
+void qCandlestickSetSetOpen(int64_t ptr, double value) {
+    QCandlestickSet* set = reinterpret_cast<QCandlestickSet*>(ptr);
+    if (set) set->setOpen(static_cast<qreal>(value));
+}
+
+double qCandlestickSetOpen(int64_t ptr) {
+    QCandlestickSet* set = reinterpret_cast<QCandlestickSet*>(ptr);
+    return set ? static_cast<double>(set->open()) : 0.0;
+}
+
+void qCandlestickSetSetHigh(int64_t ptr, double value) {
+    QCandlestickSet* set = reinterpret_cast<QCandlestickSet*>(ptr);
+    if (set) set->setHigh(static_cast<qreal>(value));
+}
+
+double qCandlestickSetHigh(int64_t ptr) {
+    QCandlestickSet* set = reinterpret_cast<QCandlestickSet*>(ptr);
+    return set ? static_cast<double>(set->high()) : 0.0;
+}
+
+void qCandlestickSetSetLow(int64_t ptr, double value) {
+    QCandlestickSet* set = reinterpret_cast<QCandlestickSet*>(ptr);
+    if (set) set->setLow(static_cast<qreal>(value));
+}
+
+double qCandlestickSetLow(int64_t ptr) {
+    QCandlestickSet* set = reinterpret_cast<QCandlestickSet*>(ptr);
+    return set ? static_cast<double>(set->low()) : 0.0;
+}
+
+void qCandlestickSetSetClose(int64_t ptr, double value) {
+    QCandlestickSet* set = reinterpret_cast<QCandlestickSet*>(ptr);
+    if (set) set->setClose(static_cast<qreal>(value));
+}
+
+double qCandlestickSetClose(int64_t ptr) {
+    QCandlestickSet* set = reinterpret_cast<QCandlestickSet*>(ptr);
+    return set ? static_cast<double>(set->close()) : 0.0;
+}
+
+// ============================================================
+// QCandlestickSeries - K线序列
+// ============================================================
+
+int64_t qCandlestickSeriesCreate() {
+    return reinterpret_cast<int64_t>(new QCandlestickSeries());
+}
+
+void qCandlestickSeriesDelete(int64_t ptr) {
+    delete reinterpret_cast<QCandlestickSeries*>(ptr);
+}
+
+void qCandlestickSeriesAppend(int64_t ptr, int64_t setPtr) {
+    QCandlestickSeries* series = reinterpret_cast<QCandlestickSeries*>(ptr);
+    QCandlestickSet* set = reinterpret_cast<QCandlestickSet*>(setPtr);
+    if (series && set) series->append(set);
+}
+
+int32_t qCandlestickSeriesCount(int64_t ptr) {
+    QCandlestickSeries* series = reinterpret_cast<QCandlestickSeries*>(ptr);
+    return series ? static_cast<int32_t>(series->count()) : 0;
+}
+
+void qCandlestickSeriesClear(int64_t ptr) {
+    QCandlestickSeries* series = reinterpret_cast<QCandlestickSeries*>(ptr);
+    if (series) series->clear();
+}
+
+void qCandlestickSeriesSetBodyWidth(int64_t ptr, double width) {
+    QCandlestickSeries* series = reinterpret_cast<QCandlestickSeries*>(ptr);
+    if (series) series->setBodyWidth(static_cast<qreal>(width));
+}
+
+void qCandlestickSeriesSetBodyOutlineVisible(int64_t ptr, int32_t visible) {
+    QCandlestickSeries* series = reinterpret_cast<QCandlestickSeries*>(ptr);
+    if (series) series->setBodyOutlineVisible(visible != 0);
+}
+
+void qCandlestickSeriesSetCapsWidth(int64_t ptr, double width) {
+    QCandlestickSeries* series = reinterpret_cast<QCandlestickSeries*>(ptr);
+    if (series) series->setCapsWidth(static_cast<qreal>(width));
+}
+
+void qCandlestickSeriesSetCapsVisible(int64_t ptr, int32_t visible) {
+    QCandlestickSeries* series = reinterpret_cast<QCandlestickSeries*>(ptr);
+    if (series) series->setCapsVisible(visible != 0);
+}
+
+void qCandlestickSeriesSetIncreasingColor(int64_t ptr, int32_t r, int32_t g, int32_t b) {
+    QCandlestickSeries* series = reinterpret_cast<QCandlestickSeries*>(ptr);
+    if (series) series->setIncreasingColor(QColor(r, g, b));
+}
+
+void qCandlestickSeriesSetDecreasingColor(int64_t ptr, int32_t r, int32_t g, int32_t b) {
+    QCandlestickSeries* series = reinterpret_cast<QCandlestickSeries*>(ptr);
+    if (series) series->setDecreasingColor(QColor(r, g, b));
+}
+
+// ============================================================
+// QPolarChart - 极坐标图（继承 QChart）
+// ============================================================
+
+int64_t qPolarChartCreate() {
+    return reinterpret_cast<int64_t>(new QPolarChart());
+}
+
+void qPolarChartDelete(int64_t ptr) {
+    delete reinterpret_cast<QPolarChart*>(ptr);
+}
+
+void qPolarChartAddAxis(int64_t ptr, int64_t axisPtr, int32_t polarOrientation) {
+    QPolarChart* chart = reinterpret_cast<QPolarChart*>(ptr);
+    QAbstractAxis* axis = reinterpret_cast<QAbstractAxis*>(axisPtr);
+    if (chart && axis) {
+        chart->addAxis(axis, static_cast<QPolarChart::PolarOrientation>(polarOrientation));
+    }
 }
 
 } // extern "C"
