@@ -1,0 +1,14 @@
+[package]
+  cjc-version = "1.1.0"
+  name = "charts_demo"
+  description = "Qt Charts 全序列示例：演示 10 种序列 + 极坐标图"
+  version = "1.0.0"
+  target-dir = ""
+  output-type = "executable"
+  compile-option = ""
+  override-compile-option = ""
+  link-option = "-L../../releases/windows-x64 -lcjqt6_bridge"
+  package-configuration = {}
+
+[dependencies]
+  cjqt6 = { path = "../../" }

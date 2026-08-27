@@ -51,6 +51,12 @@ public class QChartView {
         unsafe { qChartViewSetChart(ptr, chart.getPtr()) }
     }
 
+    /// 设置极坐标图；设置后 view 接管 polar 所有权
+    public func setChart(polar: QPolarChart): Unit {
+        checkValid()
+        unsafe { qChartViewSetChart(ptr, polar.getPtr()) }
+    }
+
     /// 显示窗口
     public func show(): Unit {
         checkValid()
