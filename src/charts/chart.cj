@@ -15,6 +15,7 @@ foreign func qChartSetTheme(ptr: Int64, theme: Int32): Unit
 foreign func qChartCreateDefaultAxes(ptr: Int64): Unit
 foreign func qChartSetAnimationOptions(ptr: Int64, options: Int32): Unit
 foreign func qChartAddAxis(ptr: Int64, axisPtr: Int64, alignment: Int32): Unit
+foreign func qChartLegend(ptr: Int64): Int64
 
 // ============================================================
 // 图表主题常量（对应 QChart::ChartTheme）
@@ -134,6 +135,30 @@ public class QChart {
     public func addAxis(axis: QValueAxis, alignment: Int32): Unit {
         checkValid()
         unsafe { qChartAddAxis(ptr, axis.getPtr(), alignment) }
+    }
+
+    /// 添加分类坐标轴（重载）；添加后 chart 接管 axis 所有权
+    public func addAxis(axis: QBarCategoryAxis, alignment: Int32): Unit {
+        checkValid()
+        unsafe { qChartAddAxis(ptr, axis.getPtr(), alignment) }
+    }
+
+    /// 添加分类值轴（重载）；添加后 chart 接管 axis 所有权
+    public func addAxis(axis: QCategoryAxis, alignment: Int32): Unit {
+        checkValid()
+        unsafe { qChartAddAxis(ptr, axis.getPtr(), alignment) }
+    }
+
+    /// 获取图例（非拥有式，由 chart 管理生命周期，勿 close）
+    public func getLegend(): QLegend {
+        checkValid()
+        unsafe {
+            let legendPtr = qChartLegend(ptr)
+            if (legendPtr == 0) {
+                throw CreateFailedException("QChart.legend() returned null")
+            }
+            return QLegend(legendPtr)
+        }
     }
 
     public func getPtr(): Int64 { ptr }

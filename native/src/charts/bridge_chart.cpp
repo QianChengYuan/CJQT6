@@ -18,7 +18,11 @@
 #include <QtCharts/QValueAxis>
 #include <QtCharts/QAbstractSeries>
 #include <QtCharts/QAbstractAxis>
+#include <QtCharts/QBarCategoryAxis>
+#include <QtCharts/QCategoryAxis>
+#include <QtCharts/QLegend>
 #include <QString>
+#include <QColor>
 
 extern "C" {
 
@@ -71,6 +75,11 @@ void qChartAddAxis(int64_t ptr, int64_t axisPtr, int32_t alignment) {
     if (chart && axis) {
         chart->addAxis(axis, static_cast<Qt::AlignmentFlag>(alignment));
     }
+}
+
+int64_t qChartLegend(int64_t ptr) {
+    QChart* chart = reinterpret_cast<QChart*>(ptr);
+    return chart ? reinterpret_cast<int64_t>(chart->legend()) : 0;
 }
 
 // ============================================================
@@ -153,6 +162,204 @@ void qValueAxisSetMin(int64_t ptr, double min) {
 void qValueAxisSetMax(int64_t ptr, double max) {
     QValueAxis* axis = reinterpret_cast<QValueAxis*>(ptr);
     if (axis) axis->setMax(static_cast<qreal>(max));
+}
+
+// ============================================================
+// QBarCategoryAxis - 分类坐标轴（用于柱状图 X 轴标签）
+// ============================================================
+
+int64_t qBarCategoryAxisCreate() {
+    return reinterpret_cast<int64_t>(new QBarCategoryAxis());
+}
+
+void qBarCategoryAxisDelete(int64_t ptr) {
+    delete reinterpret_cast<QBarCategoryAxis*>(ptr);
+}
+
+void qBarCategoryAxisAppend(int64_t ptr, const char* category) {
+    QBarCategoryAxis* axis = reinterpret_cast<QBarCategoryAxis*>(ptr);
+    if (axis) axis->append(QString::fromUtf8(category));
+}
+
+void qBarCategoryAxisRemove(int64_t ptr, const char* category) {
+    QBarCategoryAxis* axis = reinterpret_cast<QBarCategoryAxis*>(ptr);
+    if (axis) axis->remove(QString::fromUtf8(category));
+}
+
+void qBarCategoryAxisInsert(int64_t ptr, int32_t index, const char* category) {
+    QBarCategoryAxis* axis = reinterpret_cast<QBarCategoryAxis*>(ptr);
+    if (axis) axis->insert(static_cast<int>(index), QString::fromUtf8(category));
+}
+
+void qBarCategoryAxisReplace(int64_t ptr, const char* oldCat, const char* newCat) {
+    QBarCategoryAxis* axis = reinterpret_cast<QBarCategoryAxis*>(ptr);
+    if (axis) axis->replace(QString::fromUtf8(oldCat), QString::fromUtf8(newCat));
+}
+
+void qBarCategoryAxisClear(int64_t ptr) {
+    QBarCategoryAxis* axis = reinterpret_cast<QBarCategoryAxis*>(ptr);
+    if (axis) axis->clear();
+}
+
+int32_t qBarCategoryAxisCount(int64_t ptr) {
+    QBarCategoryAxis* axis = reinterpret_cast<QBarCategoryAxis*>(ptr);
+    return axis ? static_cast<int32_t>(axis->count()) : 0;
+}
+
+void qBarCategoryAxisSetMin(int64_t ptr, const char* minCat) {
+    QBarCategoryAxis* axis = reinterpret_cast<QBarCategoryAxis*>(ptr);
+    if (axis) axis->setMin(QString::fromUtf8(minCat));
+}
+
+void qBarCategoryAxisSetMax(int64_t ptr, const char* maxCat) {
+    QBarCategoryAxis* axis = reinterpret_cast<QBarCategoryAxis*>(ptr);
+    if (axis) axis->setMax(QString::fromUtf8(maxCat));
+}
+
+void qBarCategoryAxisSetRange(int64_t ptr, const char* minCat, const char* maxCat) {
+    QBarCategoryAxis* axis = reinterpret_cast<QBarCategoryAxis*>(ptr);
+    if (axis) axis->setRange(QString::fromUtf8(minCat), QString::fromUtf8(maxCat));
+}
+
+// ============================================================
+// QCategoryAxis - 值轴上的分类范围（继承 QValueAxis）
+// ============================================================
+
+int64_t qCategoryAxisCreate() {
+    return reinterpret_cast<int64_t>(new QCategoryAxis());
+}
+
+void qCategoryAxisDelete(int64_t ptr) {
+    delete reinterpret_cast<QCategoryAxis*>(ptr);
+}
+
+void qCategoryAxisAppend(int64_t ptr, const char* label, double endValue) {
+    QCategoryAxis* axis = reinterpret_cast<QCategoryAxis*>(ptr);
+    if (axis) axis->append(QString::fromUtf8(label), static_cast<qreal>(endValue));
+}
+
+void qCategoryAxisRemove(int64_t ptr, const char* label) {
+    QCategoryAxis* axis = reinterpret_cast<QCategoryAxis*>(ptr);
+    if (axis) axis->remove(QString::fromUtf8(label));
+}
+
+void qCategoryAxisReplaceLabel(int64_t ptr, const char* oldLabel, const char* newLabel) {
+    QCategoryAxis* axis = reinterpret_cast<QCategoryAxis*>(ptr);
+    if (axis) axis->replaceLabel(QString::fromUtf8(oldLabel), QString::fromUtf8(newLabel));
+}
+
+void qCategoryAxisSetStartValue(int64_t ptr, double min) {
+    QCategoryAxis* axis = reinterpret_cast<QCategoryAxis*>(ptr);
+    if (axis) axis->setStartValue(static_cast<qreal>(min));
+}
+
+int32_t qCategoryAxisCount(int64_t ptr) {
+    QCategoryAxis* axis = reinterpret_cast<QCategoryAxis*>(ptr);
+    return axis ? static_cast<int32_t>(axis->count()) : 0;
+}
+
+void qCategoryAxisSetLabelsPosition(int64_t ptr, int32_t position) {
+    QCategoryAxis* axis = reinterpret_cast<QCategoryAxis*>(ptr);
+    if (axis) axis->setLabelsPosition(static_cast<QCategoryAxis::AxisLabelsPosition>(position));
+}
+
+int32_t qCategoryAxisLabelsPosition(int64_t ptr) {
+    QCategoryAxis* axis = reinterpret_cast<QCategoryAxis*>(ptr);
+    return axis ? static_cast<int32_t>(axis->labelsPosition()) : 0;
+}
+
+// ============================================================
+// QLegend - 图例（由 QChart::legend() 获取，非拥有式，不 delete）
+// ============================================================
+
+void qLegendSetAlignment(int64_t ptr, int32_t alignment) {
+    QLegend* legend = reinterpret_cast<QLegend*>(ptr);
+    if (legend) legend->setAlignment(static_cast<Qt::AlignmentFlag>(alignment));
+}
+
+int32_t qLegendAlignment(int64_t ptr) {
+    QLegend* legend = reinterpret_cast<QLegend*>(ptr);
+    return legend ? static_cast<int32_t>(legend->alignment()) : 0;
+}
+
+void qLegendSetBackgroundVisible(int64_t ptr, int32_t visible) {
+    QLegend* legend = reinterpret_cast<QLegend*>(ptr);
+    if (legend) legend->setBackgroundVisible(visible != 0);
+}
+
+int32_t qLegendIsBackgroundVisible(int64_t ptr) {
+    QLegend* legend = reinterpret_cast<QLegend*>(ptr);
+    return (legend && legend->isBackgroundVisible()) ? 1 : 0;
+}
+
+void qLegendDetachFromChart(int64_t ptr) {
+    QLegend* legend = reinterpret_cast<QLegend*>(ptr);
+    if (legend) legend->detachFromChart();
+}
+
+void qLegendAttachToChart(int64_t ptr) {
+    QLegend* legend = reinterpret_cast<QLegend*>(ptr);
+    if (legend) legend->attachToChart();
+}
+
+int32_t qLegendIsAttachedToChart(int64_t ptr) {
+    QLegend* legend = reinterpret_cast<QLegend*>(ptr);
+    return (legend && legend->isAttachedToChart()) ? 1 : 0;
+}
+
+void qLegendSetReverseMarkers(int64_t ptr, int32_t reverse) {
+    QLegend* legend = reinterpret_cast<QLegend*>(ptr);
+    if (legend) legend->setReverseMarkers(reverse != 0);
+}
+
+int32_t qLegendReverseMarkers(int64_t ptr) {
+    QLegend* legend = reinterpret_cast<QLegend*>(ptr);
+    return (legend && legend->reverseMarkers()) ? 1 : 0;
+}
+
+void qLegendSetShowToolTips(int64_t ptr, int32_t show) {
+    QLegend* legend = reinterpret_cast<QLegend*>(ptr);
+    if (legend) legend->setShowToolTips(show != 0);
+}
+
+int32_t qLegendShowToolTips(int64_t ptr) {
+    QLegend* legend = reinterpret_cast<QLegend*>(ptr);
+    return (legend && legend->showToolTips()) ? 1 : 0;
+}
+
+void qLegendSetInteractive(int64_t ptr, int32_t interactive) {
+    QLegend* legend = reinterpret_cast<QLegend*>(ptr);
+    if (legend) legend->setInteractive(interactive != 0);
+}
+
+int32_t qLegendIsInteractive(int64_t ptr) {
+    QLegend* legend = reinterpret_cast<QLegend*>(ptr);
+    return (legend && legend->isInteractive()) ? 1 : 0;
+}
+
+void qLegendSetMarkerShape(int64_t ptr, int32_t shape) {
+    QLegend* legend = reinterpret_cast<QLegend*>(ptr);
+    if (legend) legend->setMarkerShape(static_cast<QLegend::MarkerShape>(shape));
+}
+
+int32_t qLegendMarkerShape(int64_t ptr) {
+    QLegend* legend = reinterpret_cast<QLegend*>(ptr);
+    return legend ? static_cast<int32_t>(legend->markerShape()) : 0;
+}
+
+void qLegendSetColor(int64_t ptr, int32_t r, int32_t g, int32_t b) {
+    QLegend* legend = reinterpret_cast<QLegend*>(ptr);
+    if (legend) legend->setColor(QColor(r, g, b));
+}
+
+void qLegendSetBorderColor(int64_t ptr, int32_t r, int32_t g, int32_t b) {
+    QLegend* legend = reinterpret_cast<QLegend*>(ptr);
+    if (legend) legend->setBorderColor(QColor(r, g, b));
+}
+
+void qLegendSetLabelColor(int64_t ptr, int32_t r, int32_t g, int32_t b) {
+    QLegend* legend = reinterpret_cast<QLegend*>(ptr);
+    if (legend) legend->setLabelColor(QColor(r, g, b));
 }
 
 } // extern "C"
