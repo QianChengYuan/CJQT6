@@ -21,6 +21,10 @@
 #include <QtCharts/QBarCategoryAxis>
 #include <QtCharts/QCategoryAxis>
 #include <QtCharts/QLegend>
+#include <QtCharts/QBarSeries>
+#include <QtCharts/QBarSet>
+#include <QtCharts/QPieSeries>
+#include <QtCharts/QScatterSeries>
 #include <QString>
 #include <QColor>
 
@@ -360,6 +364,232 @@ void qLegendSetBorderColor(int64_t ptr, int32_t r, int32_t g, int32_t b) {
 void qLegendSetLabelColor(int64_t ptr, int32_t r, int32_t g, int32_t b) {
     QLegend* legend = reinterpret_cast<QLegend*>(ptr);
     if (legend) legend->setLabelColor(QColor(r, g, b));
+}
+
+// ============================================================
+// QBarSet - 柱状图数据集
+// ============================================================
+
+int64_t qBarSetCreate(const char* label) {
+    return reinterpret_cast<int64_t>(new QBarSet(QString::fromUtf8(label)));
+}
+
+void qBarSetDelete(int64_t ptr) {
+    delete reinterpret_cast<QBarSet*>(ptr);
+}
+
+void qBarSetAppend(int64_t ptr, double value) {
+    QBarSet* set = reinterpret_cast<QBarSet*>(ptr);
+    if (set) set->append(static_cast<qreal>(value));
+}
+
+void qBarSetInsert(int64_t ptr, int32_t index, double value) {
+    QBarSet* set = reinterpret_cast<QBarSet*>(ptr);
+    if (set) set->insert(static_cast<int>(index), static_cast<qreal>(value));
+}
+
+void qBarSetRemove(int64_t ptr, int32_t index, int32_t count) {
+    QBarSet* set = reinterpret_cast<QBarSet*>(ptr);
+    if (set) set->remove(static_cast<int>(index), static_cast<int>(count));
+}
+
+void qBarSetReplace(int64_t ptr, int32_t index, double value) {
+    QBarSet* set = reinterpret_cast<QBarSet*>(ptr);
+    if (set) set->replace(static_cast<int>(index), static_cast<qreal>(value));
+}
+
+int32_t qBarSetCount(int64_t ptr) {
+    QBarSet* set = reinterpret_cast<QBarSet*>(ptr);
+    return set ? static_cast<int32_t>(set->count()) : 0;
+}
+
+double qBarSetSum(int64_t ptr) {
+    QBarSet* set = reinterpret_cast<QBarSet*>(ptr);
+    return set ? static_cast<double>(set->sum()) : 0.0;
+}
+
+void qBarSetSetLabel(int64_t ptr, const char* label) {
+    QBarSet* set = reinterpret_cast<QBarSet*>(ptr);
+    if (set) set->setLabel(QString::fromUtf8(label));
+}
+
+void qBarSetColor(int64_t ptr, int32_t r, int32_t g, int32_t b) {
+    QBarSet* set = reinterpret_cast<QBarSet*>(ptr);
+    if (set) set->setColor(QColor(r, g, b));
+}
+
+void qBarSetSetBorderColor(int64_t ptr, int32_t r, int32_t g, int32_t b) {
+    QBarSet* set = reinterpret_cast<QBarSet*>(ptr);
+    if (set) set->setBorderColor(QColor(r, g, b));
+}
+
+// ============================================================
+// QBarSeries - 柱状图序列
+// ============================================================
+
+int64_t qBarSeriesCreate() {
+    return reinterpret_cast<int64_t>(new QBarSeries());
+}
+
+void qBarSeriesDelete(int64_t ptr) {
+    delete reinterpret_cast<QBarSeries*>(ptr);
+}
+
+void qBarSeriesAppend(int64_t ptr, int64_t setPtr) {
+    QBarSeries* series = reinterpret_cast<QBarSeries*>(ptr);
+    QBarSet* set = reinterpret_cast<QBarSet*>(setPtr);
+    if (series && set) series->append(set);
+}
+
+void qBarSeriesRemove(int64_t ptr, int64_t setPtr) {
+    QBarSeries* series = reinterpret_cast<QBarSeries*>(ptr);
+    QBarSet* set = reinterpret_cast<QBarSet*>(setPtr);
+    if (series && set) series->remove(set);
+}
+
+void qBarSeriesInsert(int64_t ptr, int32_t index, int64_t setPtr) {
+    QBarSeries* series = reinterpret_cast<QBarSeries*>(ptr);
+    QBarSet* set = reinterpret_cast<QBarSet*>(setPtr);
+    if (series && set) series->insert(static_cast<int>(index), set);
+}
+
+int32_t qBarSeriesCount(int64_t ptr) {
+    QBarSeries* series = reinterpret_cast<QBarSeries*>(ptr);
+    return series ? static_cast<int32_t>(series->count()) : 0;
+}
+
+void qBarSeriesClear(int64_t ptr) {
+    QBarSeries* series = reinterpret_cast<QBarSeries*>(ptr);
+    if (series) series->clear();
+}
+
+void qBarSeriesSetBarWidth(int64_t ptr, double width) {
+    QBarSeries* series = reinterpret_cast<QBarSeries*>(ptr);
+    if (series) series->setBarWidth(static_cast<qreal>(width));
+}
+
+void qBarSeriesSetLabelsVisible(int64_t ptr, int32_t visible) {
+    QBarSeries* series = reinterpret_cast<QBarSeries*>(ptr);
+    if (series) series->setLabelsVisible(visible != 0);
+}
+
+void qBarSeriesSetLabelsPosition(int64_t ptr, int32_t position) {
+    QBarSeries* series = reinterpret_cast<QBarSeries*>(ptr);
+    if (series) series->setLabelsPosition(static_cast<QAbstractBarSeries::LabelsPosition>(position));
+}
+
+// ============================================================
+// QPieSeries - 饼图序列
+// ============================================================
+
+int64_t qPieSeriesCreate() {
+    return reinterpret_cast<int64_t>(new QPieSeries());
+}
+
+void qPieSeriesDelete(int64_t ptr) {
+    delete reinterpret_cast<QPieSeries*>(ptr);
+}
+
+void qPieSeriesAppend(int64_t ptr, const char* label, double value) {
+    QPieSeries* series = reinterpret_cast<QPieSeries*>(ptr);
+    if (series) series->append(QString::fromUtf8(label), static_cast<qreal>(value));
+}
+
+void qPieSeriesClear(int64_t ptr) {
+    QPieSeries* series = reinterpret_cast<QPieSeries*>(ptr);
+    if (series) series->clear();
+}
+
+int32_t qPieSeriesCount(int64_t ptr) {
+    QPieSeries* series = reinterpret_cast<QPieSeries*>(ptr);
+    return series ? static_cast<int32_t>(series->count()) : 0;
+}
+
+double qPieSeriesSum(int64_t ptr) {
+    QPieSeries* series = reinterpret_cast<QPieSeries*>(ptr);
+    return series ? static_cast<double>(series->sum()) : 0.0;
+}
+
+void qPieSeriesSetHoleSize(int64_t ptr, double size) {
+    QPieSeries* series = reinterpret_cast<QPieSeries*>(ptr);
+    if (series) series->setHoleSize(static_cast<qreal>(size));
+}
+
+void qPieSeriesSetPieSize(int64_t ptr, double size) {
+    QPieSeries* series = reinterpret_cast<QPieSeries*>(ptr);
+    if (series) series->setPieSize(static_cast<qreal>(size));
+}
+
+void qPieSeriesSetHorizontalPosition(int64_t ptr, double pos) {
+    QPieSeries* series = reinterpret_cast<QPieSeries*>(ptr);
+    if (series) series->setHorizontalPosition(static_cast<qreal>(pos));
+}
+
+void qPieSeriesSetVerticalPosition(int64_t ptr, double pos) {
+    QPieSeries* series = reinterpret_cast<QPieSeries*>(ptr);
+    if (series) series->setVerticalPosition(static_cast<qreal>(pos));
+}
+
+void qPieSeriesSetPieStartAngle(int64_t ptr, double angle) {
+    QPieSeries* series = reinterpret_cast<QPieSeries*>(ptr);
+    if (series) series->setPieStartAngle(static_cast<qreal>(angle));
+}
+
+void qPieSeriesSetPieEndAngle(int64_t ptr, double angle) {
+    QPieSeries* series = reinterpret_cast<QPieSeries*>(ptr);
+    if (series) series->setPieEndAngle(static_cast<qreal>(angle));
+}
+
+void qPieSeriesSetLabelsVisible(int64_t ptr, int32_t visible) {
+    QPieSeries* series = reinterpret_cast<QPieSeries*>(ptr);
+    if (series) series->setLabelsVisible(visible != 0);
+}
+
+// ============================================================
+// QScatterSeries - 散点图序列（继承 QXYSeries）
+// ============================================================
+
+int64_t qScatterSeriesCreate() {
+    return reinterpret_cast<int64_t>(new QScatterSeries());
+}
+
+void qScatterSeriesDelete(int64_t ptr) {
+    delete reinterpret_cast<QScatterSeries*>(ptr);
+}
+
+void qScatterSeriesAppend(int64_t ptr, double x, double y) {
+    QScatterSeries* series = reinterpret_cast<QScatterSeries*>(ptr);
+    if (series) series->append(static_cast<qreal>(x), static_cast<qreal>(y));
+}
+
+void qScatterSeriesSetName(int64_t ptr, const char* name) {
+    QScatterSeries* series = reinterpret_cast<QScatterSeries*>(ptr);
+    if (series) series->setName(QString::fromUtf8(name));
+}
+
+int32_t qScatterSeriesCount(int64_t ptr) {
+    QScatterSeries* series = reinterpret_cast<QScatterSeries*>(ptr);
+    return series ? static_cast<int32_t>(series->count()) : 0;
+}
+
+void qScatterSeriesSetMarkerShape(int64_t ptr, int32_t shape) {
+    QScatterSeries* series = reinterpret_cast<QScatterSeries*>(ptr);
+    if (series) series->setMarkerShape(static_cast<QScatterSeries::MarkerShape>(shape));
+}
+
+void qScatterSeriesSetMarkerSize(int64_t ptr, double size) {
+    QScatterSeries* series = reinterpret_cast<QScatterSeries*>(ptr);
+    if (series) series->setMarkerSize(static_cast<qreal>(size));
+}
+
+void qScatterSeriesSetColor(int64_t ptr, int32_t r, int32_t g, int32_t b) {
+    QScatterSeries* series = reinterpret_cast<QScatterSeries*>(ptr);
+    if (series) series->setColor(QColor(r, g, b));
+}
+
+void qScatterSeriesSetBorderColor(int64_t ptr, int32_t r, int32_t g, int32_t b) {
+    QScatterSeries* series = reinterpret_cast<QScatterSeries*>(ptr);
+    if (series) series->setBorderColor(QColor(r, g, b));
 }
 
 } // extern "C"

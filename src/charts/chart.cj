@@ -97,6 +97,24 @@ public class QChart {
         unsafe { qChartAddSeries(ptr, series.getPtr()) }
     }
 
+    /// 添加柱状图序列（重载）；添加后 chart 接管 series 所有权
+    public func addSeries(series: QBarSeries): Unit {
+        checkValid()
+        unsafe { qChartAddSeries(ptr, series.getPtr()) }
+    }
+
+    /// 添加饼图序列（重载）；添加后 chart 接管 series 所有权
+    public func addSeries(series: QPieSeries): Unit {
+        checkValid()
+        unsafe { qChartAddSeries(ptr, series.getPtr()) }
+    }
+
+    /// 添加散点图序列（重载）；添加后 chart 接管 series 所有权
+    public func addSeries(series: QScatterSeries): Unit {
+        checkValid()
+        unsafe { qChartAddSeries(ptr, series.getPtr()) }
+    }
+
     /// 移除所有序列
     public func removeAllSeries(): Unit {
         checkValid()

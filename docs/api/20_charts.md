@@ -2,7 +2,7 @@
 
 > `import cjqt6.charts.*`
 >
-> 基于 Qt Charts 的图表封装，提供 QChart / QChartView / QLineSeries / QValueAxis / QBarCategoryAxis / QCategoryAxis / QLegend。
+> 基于 Qt Charts 的图表封装，提供 QChart / QChartView / QLineSeries / QBarSeries / QBarSet / QPieSeries / QScatterSeries / QValueAxis / QBarCategoryAxis / QCategoryAxis / QLegend。
 > 需 Qt Charts 组件（Qt Maintenance Tool 安装时勾选 Qt Charts）。
 
 ---
@@ -31,6 +31,9 @@ chart.createDefaultAxes()
 |------|------|
 | `init()` | 创建图表 |
 | `addSeries(series: QLineSeries)` | 添加折线序列；添加后 chart 接管 series 所有权 |
+| `addSeries(series: QBarSeries)` | 添加柱状图序列（重载） |
+| `addSeries(series: QPieSeries)` | 添加饼图序列（重载） |
+| `addSeries(series: QScatterSeries)` | 添加散点图序列（重载） |
 | `removeAllSeries()` | 移除所有序列 |
 | `setTitle(title: String)` | 设置图表标题 |
 | `setTheme(theme: Int32)` | 设置主题（见 ChartTheme 常量） |
@@ -115,6 +118,143 @@ println(series.count())  // 3
 | `setName(name: String)` | 设置序列名称（显示在图例中） |
 | `count(): Int32` | 当前数据点数量 |
 | `getPtr(): Int64` / `close()` | 获取指针与释放 |
+
+---
+
+## QBarSet — 柱状图数据集
+
+一组柱状图数据（如某产品各季度的销量）。
+
+```cangjie
+let set = QBarSet("产品A")
+set.append(10.0)
+set.append(20.0)
+set.append(15.0)
+println(set.count())  // 3
+println(set.sum())    // 45.0
+```
+
+**支持方法**:
+| 方法 | 说明 |
+|------|------|
+| `init(label: String)` | 创建数据集，指定标签 |
+| `append(value: Float64)` | 追加一个值 |
+| `insert(index: Int32, value: Float64)` | 在指定位置插入值 |
+| `remove(index: Int32, count!: Int32 = 1)` | 从指定位置移除 count 个值 |
+| `replace(index: Int32, value: Float64)` | 替换指定位置的值 |
+| `count(): Int32` | 值数量 |
+| `sum(): Float64` | 值总和 |
+| `setLabel(label: String)` | 设置标签 |
+| `setColor(r, g, b)` / `setBorderColor(r, g, b)` | 设置柱子/边框颜色（RGB） |
+| `getPtr(): Int64` / `close()` | 获取指针与释放 |
+
+---
+
+## QBarSeries — 柱状图序列
+
+包含多个 QBarSet，每个 QBarSet 是一组数据。
+
+```cangjie
+let series = QBarSeries()
+let set1 = QBarSet("产品A")
+set1.append(10.0); set1.append(20.0)
+let set2 = QBarSet("产品B")
+set2.append(15.0); set2.append(25.0)
+series.append(set1)
+series.append(set2)
+chart.addSeries(series)
+```
+
+**支持方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` | 创建柱状图序列 |
+| `append(set: QBarSet)` | 追加数据集；追加后 series 接管 set 所有权 |
+| `remove(set: QBarSet)` | 移除数据集 |
+| `insert(index: Int32, set: QBarSet)` | 在指定位置插入数据集 |
+| `count(): Int32` | 数据集数量 |
+| `clear()` | 清除所有数据集 |
+| `setBarWidth(width: Float64)` | 设置柱子宽度 |
+| `setLabelsVisible(visible: Bool)` | 设置标签可见性 |
+| `setLabelsPosition(position: Int32)` | 设置标签位置（见 BarLabelsPosition） |
+| `getPtr(): Int64` / `close()` | 获取指针与释放 |
+
+**标签位置常量** (`BarLabelsPosition`):
+| 常量 | 值 | 说明 |
+|------|-----|------|
+| `BarLabelsPosition.center` | 0 | 居中 |
+| `BarLabelsPosition.insideEnd` | 1 | 内端 |
+| `BarLabelsPosition.insideBase` | 2 | 内基 |
+| `BarLabelsPosition.outsideEnd` | 3 | 外端 |
+
+---
+
+## QPieSeries — 饼图序列
+
+用于绘制饼图/环形图。
+
+```cangjie
+let series = QPieSeries()
+series.append("苹果", 30.0)
+series.append("香蕉", 25.0)
+series.append("橙子", 45.0)
+series.setHoleSize(0.4)  // 环形图
+chart.addSeries(series)
+```
+
+**支持方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` | 创建饼图序列 |
+| `append(label: String, value: Float64)` | 追加一个切片 |
+| `clear()` | 清除所有切片 |
+| `count(): Int32` | 切片数量 |
+| `sum(): Float64` | 切片值总和 |
+| `setHoleSize(size: Float64)` | 中心孔大小（0~1，大于 0 为环形图） |
+| `setPieSize(size: Float64)` | 饼图大小（0~1） |
+| `setHorizontalPosition(pos)` / `setVerticalPosition(pos)` | 水平/垂直位置（0~1） |
+| `setPieStartAngle(angle)` / `setPieEndAngle(angle)` | 起始/结束角度（度） |
+| `setLabelsVisible(visible: Bool)` | 切片标签可见性 |
+| `getPtr(): Int64` / `close()` | 获取指针与释放 |
+
+---
+
+## QScatterSeries — 散点图序列
+
+用于绘制散点图，继承 QXYSeries（与 QLineSeries 同基类）。
+
+```cangjie
+let series = QScatterSeries()
+series.setName("测量点")
+series.append(1.0, 10.0)
+series.append(2.0, 25.0)
+series.append(3.0, 18.0)
+series.setMarkerShape(ScatterMarkerShape.circle)
+series.setMarkerSize(10.0)
+chart.addSeries(series)
+```
+
+**支持方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` | 创建散点图序列 |
+| `append(x: Float64, y: Float64)` | 追加一个数据点 |
+| `setName(name: String)` | 设置序列名称 |
+| `count(): Int32` | 数据点数量 |
+| `setMarkerShape(shape: Int32)` | 标记形状（见 ScatterMarkerShape） |
+| `setMarkerSize(size: Float64)` | 标记大小 |
+| `setColor(r, g, b)` / `setBorderColor(r, g, b)` | 标记/边框颜色（RGB） |
+| `getPtr(): Int64` / `close()` | 获取指针与释放 |
+
+**标记形状常量** (`ScatterMarkerShape`):
+| 常量 | 值 | 说明 |
+|------|-----|------|
+| `ScatterMarkerShape.circle` | 0 | 圆形 |
+| `ScatterMarkerShape.rectangle` | 1 | 矩形 |
+| `ScatterMarkerShape.rotatedRectangle` | 2 | 旋转矩形 |
+| `ScatterMarkerShape.triangle` | 3 | 三角形 |
+| `ScatterMarkerShape.star` | 4 | 星形 |
+| `ScatterMarkerShape.pentagon` | 5 | 五边形 |
 
 ---
 
@@ -256,12 +396,14 @@ legend.setColor(240, 240, 240)
 
 Qt Charts 的所有权链：
 ```
-QChartView → QChart → QLineSeries / QValueAxis / QBarCategoryAxis / QCategoryAxis
+QChartView → QChart → QLineSeries / QBarSeries / QPieSeries / QScatterSeries / QValueAxis / QBarCategoryAxis / QCategoryAxis
+QBarSeries → QBarSet
 QChart → QLegend（chart 内部管理，非用户拥有）
 ```
 
 - `QChartView.setChart(chart)` 后，view 接管 chart 所有权
-- `QChart.addSeries(series)` 后，chart 接管 series 所有权
+- `QChart.addSeries(series)` 后，chart 接管 series 所有权（适用于 QLineSeries / QBarSeries / QPieSeries / QScatterSeries）
+- `QBarSeries.append(set)` 后，series 接管 set 所有权
 - `QChart.addAxis(axis, ...)` 后，chart 接管 axis 所有权（适用于 QValueAxis / QBarCategoryAxis / QCategoryAxis）
 - `QChart.getLegend()` 返回的 QLegend 是**非拥有式**引用，由 chart 管理生命周期，勿调用 close()
 
