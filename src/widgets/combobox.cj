@@ -45,6 +45,8 @@ foreign func qComboBoxSetCurrentText(ptr: Int64, text: CString): Unit
 foreign func qComboBoxFindText(ptr: Int64, text: CString): Int32
 // QComboBox::setPlaceholderText() - 设置占位文本
 foreign func qComboBoxSetPlaceholderText(ptr: Int64, text: CString): Unit
+// QComboBox::setIconSize() - 设置图标尺寸
+foreign func qComboBoxSetIconSize(ptr: Int64, width: Int32, height: Int32): Unit
 // QComboBox::isEditable() - 是否可编辑
 foreign func qComboBoxIsEditable(ptr: Int64): Int32
 // QComboBox::setInsertPolicy() - 设置插入策略
@@ -228,6 +230,14 @@ public class QComboBox <: QtResource {
             let cstr = LibC.mallocCString(text)
             qComboBoxSetPlaceholderText(ptr, cstr)
             LibC.free(cstr)
+        }
+    }
+    
+    /// 设置图标尺寸
+    public func setIconSize(width: Int32, height: Int32): Unit {
+        checkValid()
+        unsafe {
+            qComboBoxSetIconSize(ptr, width, height)
         }
     }
     

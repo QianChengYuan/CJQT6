@@ -14,6 +14,8 @@
 #include <QMdiArea>
 #include <QMdiSubWindow>
 #include <QDockWidget>
+#include <QIcon>
+#include <QSize>
 #include "bridge_string_utils.h"
 
 // 由 bridge_ext_wlayout.cpp 导出：清理 wlayout 控件信号回调 map（QGroupBox/
@@ -179,6 +181,63 @@ void qTabWidgetClear(int64_t ptr) {
     QTabWidget* tabWidget = reinterpret_cast<QTabWidget*>(ptr);
     if (tabWidget) {
         tabWidget->clear();
+    }
+}
+
+// 设置指定标签页的图标（iconPtr 为 QIcon* 指针）
+void qTabWidgetSetTabIcon(int64_t ptr, int32_t index, int64_t iconPtr) {
+    QTabWidget* tabWidget = reinterpret_cast<QTabWidget*>(ptr);
+    QIcon* icon = reinterpret_cast<QIcon*>(iconPtr);
+    if (tabWidget && icon) {
+        tabWidget->setTabIcon(index, *icon);
+    }
+}
+
+// 设置标签页图标尺寸
+void qTabWidgetSetIconSize(int64_t ptr, int32_t width, int32_t height) {
+    QTabWidget* tabWidget = reinterpret_cast<QTabWidget*>(ptr);
+    if (tabWidget) {
+        tabWidget->setIconSize(QSize(width, height));
+    }
+}
+
+// 设置标签位置（0=North 1=South 2=West 3=East）
+void qTabWidgetSetTabPosition(int64_t ptr, int32_t pos) {
+    QTabWidget* tabWidget = reinterpret_cast<QTabWidget*>(ptr);
+    if (tabWidget) {
+        tabWidget->setTabPosition(static_cast<QTabWidget::TabPosition>(pos));
+    }
+}
+
+// 设置文档模式（标签页作为文档边缘装饰）
+void qTabWidgetSetDocumentMode(int64_t ptr, bool enabled) {
+    QTabWidget* tabWidget = reinterpret_cast<QTabWidget*>(ptr);
+    if (tabWidget) {
+        tabWidget->setDocumentMode(enabled);
+    }
+}
+
+// 设置标签文本省略模式（0=ElideLeft 1=ElideRight 2=ElideMiddle 3=ElideNone）
+void qTabWidgetSetElideMode(int64_t ptr, int32_t mode) {
+    QTabWidget* tabWidget = reinterpret_cast<QTabWidget*>(ptr);
+    if (tabWidget) {
+        tabWidget->setElideMode(static_cast<Qt::TextElideMode>(mode));
+    }
+}
+
+// 设置标签形状（0=Rounded 1=Triangular）
+void qTabWidgetSetTabShape(int64_t ptr, int32_t shape) {
+    QTabWidget* tabWidget = reinterpret_cast<QTabWidget*>(ptr);
+    if (tabWidget) {
+        tabWidget->setTabShape(static_cast<QTabWidget::TabShape>(shape));
+    }
+}
+
+// 设置是否使用滚动按钮（标签过多时）
+void qTabWidgetSetUsesScrollButtons(int64_t ptr, bool enabled) {
+    QTabWidget* tabWidget = reinterpret_cast<QTabWidget*>(ptr);
+    if (tabWidget) {
+        tabWidget->setUsesScrollButtons(enabled);
     }
 }
 
@@ -420,6 +479,49 @@ int32_t qSplitterRestoreState(int64_t ptr, const char* buffer, int32_t size) {
         return splitter->restoreState(state) ? 1 : 0;
     }
     return 0;
+}
+
+// 在指定位置插入控件
+void qSplitterInsertWidget(int64_t ptr, int32_t index, int64_t widgetPtr) {
+    QSplitter* splitter = reinterpret_cast<QSplitter*>(ptr);
+    QWidget* widget = reinterpret_cast<QWidget*>(widgetPtr);
+    if (splitter && widget) {
+        splitter->insertWidget(index, widget);
+    }
+}
+
+// 替换指定位置的控件，返回被替换的控件指针
+int64_t qSplitterReplaceWidget(int64_t ptr, int32_t index, int64_t widgetPtr) {
+    QSplitter* splitter = reinterpret_cast<QSplitter*>(ptr);
+    QWidget* widget = reinterpret_cast<QWidget*>(widgetPtr);
+    if (splitter && widget) {
+        QWidget* old = splitter->replaceWidget(index, widget);
+        return reinterpret_cast<int64_t>(old);
+    }
+    return 0;
+}
+
+// 获取各子控件尺寸，写入 sizes 数组（返回实际写入数量，不超过 maxCount）
+int32_t qSplitterSizes(int64_t ptr, int32_t* sizes, int32_t maxCount) {
+    QSplitter* splitter = reinterpret_cast<QSplitter*>(ptr);
+    if (splitter && sizes) {
+        QList<int> list = splitter->sizes();
+        int32_t n = static_cast<int32_t>(list.size());
+        if (n > maxCount) n = maxCount;
+        for (int32_t i = 0; i < n; ++i) {
+            sizes[i] = list[i];
+        }
+        return n;
+    }
+    return 0;
+}
+
+// 设置是否在拖动时实时调整尺寸
+void qSplitterSetOpaqueResize(int64_t ptr, bool opaque) {
+    QSplitter* splitter = reinterpret_cast<QSplitter*>(ptr);
+    if (splitter) {
+        splitter->setOpaqueResize(opaque);
+    }
 }
 
 // ============================================================

@@ -9,6 +9,7 @@ foreign func qButtonConnectClicked(ptr: Int64, callback: VoidCallback): Unit
 foreign func qButtonDisconnectClicked(ptr: Int64): Unit
 foreign func qButtonSetIcon(ptr: Int64, iconPath: CString): Unit
 foreign func qButtonSetIconSize(ptr: Int64, width: Int32, height: Int32): Unit
+foreign func qButtonSetMenu(ptr: Int64, menuPtr: Int64): Unit
 foreign func qButtonSetStandardIcon(ptr: Int64, iconType: Int32): Unit
 foreign func qButtonSetCheckable(ptr: Int64, checkable: Bool): Unit
 foreign func qButtonSetChecked(ptr: Int64, checked: Bool): Unit
@@ -140,6 +141,15 @@ public class QPushButton <: QtResource {
         checkValid()
         unsafe {
             qButtonSetIconSize(ptr, width, height)
+        }
+    }
+    
+    /// 设置按钮关联菜单（点击按钮弹出下拉菜单）
+    /// 参数 menuPtr 为 QMenu.getPtr() 返回值
+    public func setMenu(menuPtr: Int64): Unit {
+        checkValid()
+        unsafe {
+            qButtonSetMenu(ptr, menuPtr)
         }
     }
     

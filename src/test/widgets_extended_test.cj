@@ -374,6 +374,14 @@ class QComboBoxTests {
     }
 
     @TestCase
+    func testSetIconSize() {
+        let cb = QComboBox()
+        cb.setIconSize(24, 24)
+        @Assert(cb.isValid())
+        cb.close()
+    }
+
+    @TestCase
     func testClose() {
         let cb = QComboBox()
         @Expect(cb.isClosed(), false)
@@ -1322,5 +1330,112 @@ class QSplitterTests {
         @ExpectThrows[ResourceDisposedException](splitter.setEnabled(false))
         @ExpectThrows[ResourceDisposedException](splitter.setStyleSheet(""))
         @ExpectThrows[ResourceDisposedException](splitter.setMinimumSize(100, 50))
+    }
+
+    // 任务 4：insertWidget/replaceWidget/setOpaqueResize/setSizes/sizes/saveState/restoreState
+    @TestCase
+    func testInsertWidget() {
+        let splitter = QSplitter.createHorizontal(0)
+        let p1 = QLabel()
+        let p2 = QLabel()
+        splitter.addWidget(p1.getPtr())
+        splitter.insertWidget(0, p2.getPtr())  // 在头部插入
+        @Expect(splitter.count(), 2)
+        p1.close()
+        p2.close()
+        splitter.close()
+    }
+
+    @TestCase
+    func testReplaceWidget() {
+        let splitter = QSplitter.createHorizontal(0)
+        let p1 = QLabel()
+        let p2 = QLabel()
+        splitter.addWidget(p1.getPtr())
+        let oldPtr = splitter.replaceWidget(0, p2.getPtr())
+        @Expect(oldPtr != 0, true)  // 返回被替换的 p1 指针
+        @Expect(splitter.count(), 1)
+        p1.close()
+        p2.close()
+        splitter.close()
+    }
+
+    @TestCase
+    func testSetOpaqueResize() {
+        let splitter = QSplitter(0)
+        splitter.setOpaqueResize(false)
+        @Assert(splitter.isValid())
+        splitter.setOpaqueResize(true)
+        splitter.close()
+    }
+
+    @TestCase
+    func testSetSizes() {
+        let splitter = QSplitter.createHorizontal(0)
+        let p1 = QLabel()
+        let p2 = QLabel()
+        splitter.addWidget(p1.getPtr())
+        splitter.addWidget(p2.getPtr())
+        splitter.setSizes([100, 200])
+        let s = splitter.sizes()
+        @Expect(s.size, 2)
+        // 比例应近似 100:200（实际值由 Qt 分配，验证总数非 0）
+        @Expect(s[0] + s[1] > 0, true)
+        p1.close()
+        p2.close()
+        splitter.close()
+    }
+
+    @TestCase
+    func testSizes() {
+        let splitter = QSplitter.createHorizontal(0)
+        let p1 = QLabel()
+        let p2 = QLabel()
+        splitter.addWidget(p1.getPtr())
+        splitter.addWidget(p2.getPtr())
+        let s = splitter.sizes()
+        @Expect(s.size, 2)
+        p1.close()
+        p2.close()
+        splitter.close()
+    }
+
+    @TestCase
+    func testSaveState() {
+        let splitter = QSplitter.createHorizontal(0)
+        let p1 = QLabel()
+        let p2 = QLabel()
+        splitter.addWidget(p1.getPtr())
+        splitter.addWidget(p2.getPtr())
+        let state = splitter.saveState()
+        @Expect(state.size > 0, true)  // 非空状态字节
+        p1.close()
+        p2.close()
+        splitter.close()
+    }
+
+    @TestCase
+    func testSaveAndRestoreState() {
+        let splitter = QSplitter.createHorizontal(0)
+        let p1 = QLabel()
+        let p2 = QLabel()
+        splitter.addWidget(p1.getPtr())
+        splitter.addWidget(p2.getPtr())
+        splitter.setSizes([100, 300])
+        let state = splitter.saveState()
+        // 恢复到新 splitter
+        let splitter2 = QSplitter.createHorizontal(0)
+        let q1 = QLabel()
+        let q2 = QLabel()
+        splitter2.addWidget(q1.getPtr())
+        splitter2.addWidget(q2.getPtr())
+        let ok = splitter2.restoreState(state)
+        @Expect(ok, true)
+        q1.close()
+        q2.close()
+        splitter2.close()
+        p1.close()
+        p2.close()
+        splitter.close()
     }
 }

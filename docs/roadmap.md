@@ -115,11 +115,11 @@ CJQT6 的演进边界由仓颉语言特性决定，先固定几个**不可绕过
 
 | 缺口 | 仓颉可行性 | 优先级 |
 |------|-----------|--------|
-| `QStyledItemDelegate` 自绘委托 | 需派生 QObject 子类，只能回调桥接（类似 QAbstractItemModel 方案），可行但成本高 | 中 |
-| QtCharts | 纯 FFI 可封装，无 Q_OBJECT 派生需求 | 中 |
+| ✅ `QStyledItemDelegate` 自绘委托（已落地 `styleditemdelegate.cj` + 测试） | 需派生 QObject 子类，只能回调桥接（类似 QAbstractItemModel 方案），可行但成本高 | 中 |
+| ✅ QtCharts（已落地 `src/charts/` + 测试） | 纯 FFI 可封装，无 Q_OBJECT 派生需求 | 中 |
 | QSS（`setStyleSheet`）全量支持 | 纯 FFI，已有雏形，补细节即可 | 高 |
-| 国际化 `QTranslator`/`QLocale` | 纯 FFI，`QApplication` 已含翻译相关 API | 中 |
-| `QCalendarWidget` 信号 | 控件已有，补 clicked/activated/selectionChanged | 中 |
+| ⚠️ 国际化 `QTranslator`/`QLocale`（`QApplication.loadQtTranslation` 已有，缺独立 `QTranslator` 类） | 纯 FFI，`QApplication` 已含翻译相关 API | 中 |
+| ✅ `QCalendarWidget` 信号（2026-08-28 任务 2 已补 clicked/activated/selectionChanged） | 控件已有，补 clicked/activated/selectionChanged | 中 |
 | `QPlainTextEdit` 高亮渲染细化 | 已有 `QSyntaxHighlighter`，补事件信号 | 低 |
 | `QToolTip`/`QStatusTip`、`QTabWidget` 拖拽 | 纯 FFI，低难度 | 低 |
 

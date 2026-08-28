@@ -11,6 +11,12 @@ foreign func qTextEditSetText(ptr: Int64, text: CString): Unit
 foreign func qTextEditText(ptr: Int64): CString
 // QTextEdit::setReadOnly() - 设置只读模式
 foreign func qTextEditSetReadOnly(ptr: Int64, readonly: Bool): Unit
+// QTextEdit::setTabStopDistance() - 设置制表位距离(像素,Qt6)
+foreign func qTextEditSetTabStopDistance(ptr: Int64, distance: Float64): Unit
+// QTextEdit::setAcceptRichText() - 设置是否接受富文本
+foreign func qTextEditSetAcceptRichText(ptr: Int64, accept: Bool): Unit
+// QTextEdit::setPlaceholderText() - 设置占位文本
+foreign func qTextEditSetPlaceholderText(ptr: Int64, text: CString): Unit
 // QTextEdit::clear() - 清除所有内容
 foreign func qTextEditClear(ptr: Int64): Unit
 // QTextEdit::cut() - 剪切选中内容
@@ -148,6 +154,32 @@ public class QTextEdit <: QtResource {
         checkValid()
         unsafe {
             qTextEditSetReadOnly(ptr, readonly)
+        }
+    }
+    
+    /// 设置制表位距离（像素，Qt6 用 setTabStopDistance 替代 Qt5 的 setTabStopWidth）
+    public func setTabStopDistance(distance: Float64): Unit {
+        checkValid()
+        unsafe {
+            qTextEditSetTabStopDistance(ptr, distance)
+        }
+    }
+    
+    /// 设置是否接受富文本
+    public func setAcceptRichText(accept: Bool): Unit {
+        checkValid()
+        unsafe {
+            qTextEditSetAcceptRichText(ptr, accept)
+        }
+    }
+    
+    /// 设置占位文本
+    public func setPlaceholderText(text: String): Unit {
+        checkValid()
+        unsafe {
+            let cstr = LibC.mallocCString(text)
+            qTextEditSetPlaceholderText(ptr, cstr)
+            LibC.free(cstr)
         }
     }
     

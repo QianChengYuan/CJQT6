@@ -231,6 +231,7 @@ int64_t qCalendarWidgetCreate() {
 void qCalendarWidgetDelete(int64_t ptr) {
     QCalendarWidget* calendar = reinterpret_cast<QCalendarWidget*>(ptr);
     if (calendar) {
+        qWmiscSignalCleanup(ptr);
         delete calendar;
     }
 }

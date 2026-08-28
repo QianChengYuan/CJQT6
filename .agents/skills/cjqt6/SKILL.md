@@ -16,7 +16,7 @@ CJQT6 通过 FFI 桥接技术，把 Qt6 的 C++ API 封装成仓颉原生 API �
 - 构建/部署 `cjqt6_bridge` 原生桥接库、解决 `cjpm build` 链接错误
 - 排查 Qt 对象内存泄漏 / 悬垂指针 / 终结器崩溃
 
-**当前版本**：1.7.0（2026-08-02）
+**当前版本**：1.9.0（2026-08-29）
 **远程仓库（权威源）**：`https://gitcode.com/yuan_1992/CJQT6.git`（主页 `https://gitcode.com/yuan_1992/CJQT6`，Issue 反馈同页）
 **本机克隆路径**（因机器而异，下文用 `<仓库根>` 指代）：`C:\CodeTools\cangjie_git\CJQT6`
 **源码根**：`<仓库根>/src`

@@ -357,6 +357,21 @@ public class QCalendarWidget {
     public func showToday(): Unit { unsafe { qCalendarWidgetShowToday(ptr) } }
     public func showSelectedDate(): Unit { unsafe { qCalendarWidgetShowSelectedDate(ptr) } }
     
+    /// 点击日期回调（参数为选中日期字符串 yyyy-MM-dd）
+    public func setOnClicked(callback: CStringCallback): Unit {
+        unsafe { qCalendarWidgetConnectClicked(ptr, callback) }
+    }
+    
+    /// 双击/回车激活日期回调（参数为激活日期字符串 yyyy-MM-dd）
+    public func setOnActivated(callback: CStringCallback): Unit {
+        unsafe { qCalendarWidgetConnectActivated(ptr, callback) }
+    }
+    
+    /// 选择变化回调（无参数）
+    public func setOnSelectionChanged(callback: VoidCallback): Unit {
+        unsafe { qCalendarWidgetConnectSelectionChanged(ptr, callback) }
+    }
+    
     public func show(): Unit { unsafe { qWidgetShow(ptr) } }
     public func hide(): Unit { unsafe { qWidgetHide(ptr) } }
     public func resize(width: Int32, height: Int32): Unit { unsafe { qWidgetResize(ptr, width, height) } }
@@ -747,6 +762,9 @@ foreign func qCalendarWidgetSetSelectionMode(ptr: Int64, mode: Int32): Unit
 foreign func qCalendarWidgetSelectionMode(ptr: Int64): Int32
 foreign func qCalendarWidgetShowToday(ptr: Int64): Unit
 foreign func qCalendarWidgetShowSelectedDate(ptr: Int64): Unit
+foreign func qCalendarWidgetConnectClicked(ptr: Int64, callback: CStringCallback): Unit
+foreign func qCalendarWidgetConnectActivated(ptr: Int64, callback: CStringCallback): Unit
+foreign func qCalendarWidgetConnectSelectionChanged(ptr: Int64, callback: VoidCallback): Unit
 
 // QDateEdit
 foreign func qDateEditCreate(): Int64

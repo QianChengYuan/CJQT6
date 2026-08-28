@@ -7,6 +7,7 @@
 #include <QRadioButton>
 #include <QComboBox>
 #include <QButtonGroup>
+#include <QSize>
 #include <functional>
 #include <unordered_map>
 #include "bridge_string_utils.h"
@@ -235,6 +236,14 @@ void qComboBoxSetPlaceholderText(int64_t ptr, const char* text) {
     QComboBox* cb = reinterpret_cast<QComboBox*>(ptr);
     if (cb && text) {
         cb->setPlaceholderText(QString::fromUtf8(text));
+    }
+}
+
+// 设置下拉框图标尺寸
+void qComboBoxSetIconSize(int64_t ptr, int32_t width, int32_t height) {
+    QComboBox* cb = reinterpret_cast<QComboBox*>(ptr);
+    if (cb) {
+        cb->setIconSize(QSize(width, height));
     }
 }
 

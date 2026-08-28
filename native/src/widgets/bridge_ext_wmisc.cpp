@@ -16,6 +16,7 @@
 #include <QDate>
 #include <QTime>
 #include <QDateTime>
+#include <QCalendarWidget>
 #include <QDateEdit>
 #include <QDateTimeEdit>
 #include <QTimeEdit>
@@ -34,6 +35,55 @@
 #include <QAbstractButton>
 
 extern "C" {
+
+// ============================================================
+// QCalendarWidget 补充 API - 信号
+// ============================================================
+
+static std::unordered_map<int64_t, std::function<void(const char*)>> g_calClicked;
+static std::unordered_map<int64_t, std::function<void(const char*)>> g_calActivated;
+static std::unordered_map<int64_t, std::function<void()>> g_calSelectionChanged;
+
+void qCalendarWidgetConnectClicked(int64_t ptr, void (*cb)(const char*)) {
+    QCalendarWidget* cal = reinterpret_cast<QCalendarWidget*>(ptr);
+    if (cal && cb && g_calClicked.find(ptr) == g_calClicked.end()) {
+        g_calClicked[ptr] = [cb](const char* s) { cb(s); };
+        QObject::connect(cal, &QCalendarWidget::clicked, [ptr](const QDate& date) {
+            auto it = g_calClicked.find(ptr);
+            if (it != g_calClicked.end()) {
+                static QString buf;
+                buf = date.toString("yyyy-MM-dd");
+                it->second(buf.toUtf8().constData());
+            }
+        });
+    }
+}
+
+void qCalendarWidgetConnectActivated(int64_t ptr, void (*cb)(const char*)) {
+    QCalendarWidget* cal = reinterpret_cast<QCalendarWidget*>(ptr);
+    if (cal && cb && g_calActivated.find(ptr) == g_calActivated.end()) {
+        g_calActivated[ptr] = [cb](const char* s) { cb(s); };
+        QObject::connect(cal, &QCalendarWidget::activated, [ptr](const QDate& date) {
+            auto it = g_calActivated.find(ptr);
+            if (it != g_calActivated.end()) {
+                static QString buf;
+                buf = date.toString("yyyy-MM-dd");
+                it->second(buf.toUtf8().constData());
+            }
+        });
+    }
+}
+
+void qCalendarWidgetConnectSelectionChanged(int64_t ptr, void (*cb)()) {
+    QCalendarWidget* cal = reinterpret_cast<QCalendarWidget*>(ptr);
+    if (cal && cb && g_calSelectionChanged.find(ptr) == g_calSelectionChanged.end()) {
+        g_calSelectionChanged[ptr] = [cb]() { cb(); };
+        QObject::connect(cal, &QCalendarWidget::selectionChanged, [ptr]() {
+            auto it = g_calSelectionChanged.find(ptr);
+            if (it != g_calSelectionChanged.end()) it->second();
+        });
+    }
+}
 
 // ============================================================
 // QDateEdit 补充 API
@@ -335,6 +385,9 @@ void qWmiscSignalCleanup(int64_t ptr) {
     g_bgReleased.erase(ptr);
     g_bgToggled.erase(ptr);
     g_bgIdClicked.erase(ptr);
+    g_calClicked.erase(ptr);
+    g_calActivated.erase(ptr);
+    g_calSelectionChanged.erase(ptr);
 }
 
 // 测试专用内省：查询 ptr 是否仍注册在任一 misc 控件信号回调 map 中。
@@ -352,7 +405,10 @@ int32_t qWmiscSignalRegistered(int64_t ptr) {
             g_bgPressed.find(ptr) != g_bgPressed.end() ||
             g_bgReleased.find(ptr) != g_bgReleased.end() ||
             g_bgToggled.find(ptr) != g_bgToggled.end() ||
-            g_bgIdClicked.find(ptr) != g_bgIdClicked.end()) ? 1 : 0;
+            g_bgIdClicked.find(ptr) != g_bgIdClicked.end() ||
+            g_calClicked.find(ptr) != g_calClicked.end() ||
+            g_calActivated.find(ptr) != g_calActivated.end() ||
+            g_calSelectionChanged.find(ptr) != g_calSelectionChanged.end()) ? 1 : 0;
 }
 
 } // extern "C"

@@ -236,6 +236,15 @@ void qButtonSetFlat(int64_t ptr, bool flat) {
     if (btn) btn->setFlat(flat);
 }
 
+// 设置按钮关联菜单（点击按钮弹出下拉菜单，menuPtr 为 QMenu*）
+void qButtonSetMenu(int64_t ptr, int64_t menuPtr) {
+    QPushButton* button = reinterpret_cast<QPushButton*>(ptr);
+    QMenu* menu = reinterpret_cast<QMenu*>(menuPtr);
+    if (button && menu) {
+        button->setMenu(menu);
+    }
+}
+
 void qButtonDelete(int64_t ptr) {
     QPushButton* button = reinterpret_cast<QPushButton*>(ptr);
     if (button) {
@@ -634,6 +643,30 @@ void qTextEditSetReadOnly(int64_t ptr, bool readonly) {
     QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
     if (textEdit) {
         textEdit->setReadOnly(readonly);
+    }
+}
+
+// Set tab stop distance in pixels (Qt6: setTabStopDistance)
+void qTextEditSetTabStopDistance(int64_t ptr, double distance) {
+    QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
+    if (textEdit) {
+        textEdit->setTabStopDistance(distance);
+    }
+}
+
+// Set whether rich text input is accepted
+void qTextEditSetAcceptRichText(int64_t ptr, bool accept) {
+    QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
+    if (textEdit) {
+        textEdit->setAcceptRichText(accept);
+    }
+}
+
+// Set placeholder text
+void qTextEditSetPlaceholderText(int64_t ptr, const char* text) {
+    QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
+    if (textEdit && text) {
+        textEdit->setPlaceholderText(QString::fromUtf8(text));
     }
 }
 

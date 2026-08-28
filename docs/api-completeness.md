@@ -53,7 +53,9 @@
 | 信号 | `setOnTextChanged()`, `setOnUndoAvailable()`, `setOnRedoAvailable()`, `setOnCopyAvailable()` |
 | 资源 | `close()`, `isClosed()`, `isValid()`, `checkValid()` |
 
-**缺失**：`setTabStopWidth()`, `setAcceptRichText()`, `setPlaceholderText()`，信号（cursorPositionChanged/selectionChanged）
+**缺失**：信号（cursorPositionChanged/selectionChanged）
+
+**已补全**：`setTabStopDistance()`（Qt6）/`setAcceptRichText()`/`setPlaceholderText()`（2026-08-28 任务 5）
 
 **注意**：`setWidgetStyleSheet()` 是 `setStyleSheet()` 的旧别名，已标记 `@Deprecated`。请使用 `setStyleSheet()`。
 
@@ -64,7 +66,9 @@
 - QCalendarWidget: 日期选择、范围、网格、导航、星期、选择模式
 - QDateEdit/QTimeEdit/QDateTimeEdit: 日期/时间/日期时间编辑，含范围、显示格式、日历弹出、TimeSpec
 
-**缺失**：信号（clicked/activated/selectionChanged），`setMinimumSize`/`setStyleSheet`
+**已补全**：信号 `setOnClicked`/`setOnActivated`/`setOnSelectionChanged`（2026-08-28 任务 2）
+
+**缺失**：`setMinimumSize`/`setStyleSheet`
 
 ### 对话框
 **覆盖度：95%**
@@ -87,7 +91,7 @@
 
 | 已有 | 缺失 |
 |------|------|
-| `setText()`, `text()`, `setIcon()`, `setIconSize()`, `setStandardIcon()`, `iconName()` | `setMenu()` |
+| `setText()`, `text()`, `setIcon()`, `setIconSize()`, `setStandardIcon()`, `iconName()`, `setMenu()` | |
 | `setEnabled()`, `isEnabled()`, `setStyleSheet()` | |
 | `setMinimumSize()`, `setMaximumSize()` | |
 | `setCheckable()`, `isCheckable()`, `setChecked()`, `isChecked()` | |
@@ -102,14 +106,15 @@
 | `close()`, `isClosed()`, `isValid()`, `checkValid()` (QtResource) | |
 
 ### QComboBox
-**覆盖度：92%**
+**覆盖度：95%**
 
 | 已有 | 缺失 |
 |------|------|
-| `addItem()`, `addItems()`, `insertItem()`, `setItemText()` | `setIconSize()` |
+| `addItem()`, `addItems()`, `insertItem()`, `setItemText()` | |
 | `removeItem()`, `count()`, `itemText()`, `clear()` | |
 | `currentText()`, `currentIndex()`, `setCurrentIndex()` | |
 | `setCurrentText()`, `setPlaceholderText()`, `findText()` | |
+| `setIconSize()`（2026-08-28 任务 5） | |
 | `setEditable()` | |
 | `setMaxVisibleItems()`, `setMaxCount()` | |
 | `setEnabled()`, `isEnabled()`, `setStyleSheet()` | |
@@ -262,14 +267,17 @@
 | `close()`, `isClosed()`, `isValid()`, `checkValid()` (QtResource) | |
 
 ### QTabWidget
-**覆盖度：80%**
+**覆盖度：95%**
 
 | 已有 | 缺失 |
 |------|------|
-| `addTab()`, `removeTab()`, `insertTab()`, `count()` | `setTabIcon()`, `setIconSize()` |
-| `currentIndex()`, `setCurrentIndex()` | `setDocumentMode()`, `setElideMode()` |
-| `setTabText()`, `tabText()`, `setTabToolTip()` | `setTabPosition()`, `setTabShape()` |
-| `setTabsClosable()`, `setMovable()`, `clear()` | `setUsesScrollButtons()` |
+| `addTab()`, `removeTab()`, `insertTab()`, `count()` | |
+| `currentIndex()`, `setCurrentIndex()` | |
+| `setTabText()`, `tabText()`, `setTabToolTip()` | |
+| `setTabsClosable()`, `setMovable()`, `clear()` | |
+| `setTabIcon()`, `setIconSize()`（2026-08-28 任务 3） | |
+| `setTabPosition()`, `setDocumentMode()`, `setElideMode()`（2026-08-28 任务 3） | |
+| `setTabShape()`, `setUsesScrollButtons()`（2026-08-28 任务 3） | |
 | `setEnabled()`, `isEnabled()`, `setStyleSheet()` | |
 | `setMinimumSize()`, `setMaximumSize()` | |
 | `setOnCurrentChanged()` | |
@@ -291,15 +299,17 @@
 | `close()`, `isClosed()`, `isValid()`, `checkValid()` (QtResource) | |
 
 ### QSplitter
-**覆盖度：85%**
+**覆盖度：98%**
 
 | 已有 | 缺失 |
 |------|------|
-| `addWidget()`, `count()` | `insertWidget()`, `replaceWidget()` |
-| `setStretchFactor()`, `setHandleWidth()` | `setSizes()` / `sizes()` |
-| `setOrientation()` / `orientation()` | `restoreState()` / `saveState()` |
-| `setChildrenCollapsible()` / `childrenCollapsible()` | `setOpaqueResize()` |
-| `handleWidth()` | |
+| `addWidget()`, `insertWidget()`, `replaceWidget()`, `count()` | |
+| `setStretchFactor()`, `setHandleWidth()` / `handleWidth()` | |
+| `setOrientation()` / `orientation()` | |
+| `setChildrenCollapsible()` / `childrenCollapsible()` | |
+| `setSizes()` / `sizes()`（2026-08-28 任务 4，数组 FFI） | |
+| `saveState()` / `restoreState()`（2026-08-28 任务 4，字节流 FFI） | |
+| `setOpaqueResize()`（2026-08-28 任务 4） | |
 | `setEnabled()`, `isEnabled()`, `setStyleSheet()` | |
 | `setMinimumSize()`, `setMaximumSize()` | |
 

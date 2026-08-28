@@ -2,6 +2,7 @@ package cjqt6.test
 
 import cjqt6.widgets.*
 import cjqt6.core.*
+import cjqt6.menu.*
 import std.unittest.*
 
 @Test
@@ -73,6 +74,16 @@ class QPushButtonTests {
         btn.setMaximumSize(400, 300)
         @Assert(btn.isValid())
         btn.close()
+    }
+    
+    @TestCase
+    func testSetMenu() {
+        let btn = QPushButton()
+        let menu = QMenu("测试菜单")
+        btn.setMenu(menu.getPtr())
+        @Assert(btn.isValid())
+        btn.close()
+        menu.close()
     }
 }
 

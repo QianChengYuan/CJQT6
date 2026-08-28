@@ -2,6 +2,7 @@ package cjqt6.test
 
 import cjqt6.core.*
 import cjqt6.widgets.*
+import cjqt6.gui.*
 import cjqt6.paint.*
 import std.math.*
 import std.unittest.*
@@ -1677,6 +1678,69 @@ class QTabWidgetTests {
         p2.close()
         tab.close()
     }
+
+    // 任务 3：图标/定位/文档模式方法测试
+    @TestCase
+    func testSetTabIcon() {
+        let tab = QTabWidget()
+        let p = QLabel()
+        tab.addTab(p.getPtr(), "一")
+        let icon = QIcon()  // 空图标，验证不崩溃
+        tab.setTabIcon(0, icon.getPtr())
+        @Assert(tab.getPtr() != 0)
+        icon.close()
+        p.close()
+        tab.close()
+    }
+
+    @TestCase
+    func testSetIconSize() {
+        let tab = QTabWidget()
+        tab.setIconSize(16, 16)
+        @Assert(tab.getPtr() != 0)
+        tab.close()
+    }
+
+    @TestCase
+    func testSetTabPosition() {
+        let tab = QTabWidget()
+        tab.setTabPosition(1)  // South
+        @Assert(tab.getPtr() != 0)
+        tab.setTabPosition(2)  // West
+        tab.close()
+    }
+
+    @TestCase
+    func testSetDocumentMode() {
+        let tab = QTabWidget()
+        tab.setDocumentMode(true)
+        @Assert(tab.getPtr() != 0)
+        tab.close()
+    }
+
+    @TestCase
+    func testSetElideMode() {
+        let tab = QTabWidget()
+        tab.setElideMode(2)  // ElideMiddle
+        @Assert(tab.getPtr() != 0)
+        tab.close()
+    }
+
+    @TestCase
+    func testSetTabShape() {
+        let tab = QTabWidget()
+        tab.setTabShape(1)  // Triangular
+        @Assert(tab.getPtr() != 0)
+        tab.close()
+    }
+
+    @TestCase
+    func testSetUsesScrollButtons() {
+        let tab = QTabWidget()
+        tab.setUsesScrollButtons(false)
+        @Assert(tab.getPtr() != 0)
+        tab.close()
+    }
 }
 
 // =====================================================================
@@ -1772,7 +1836,7 @@ class QDateTimeTests {
         dt.delete()
     }
 
-    @TestCase
+@TestCase
     func testDateTimeToString() {
         let d = QDate(2024, 1, 2)
         let t = QTime(3, 4, 5)
@@ -1782,6 +1846,72 @@ class QDateTimeTests {
     }
 }
 
+// =====================================================================
+// QCalendarWidget 测试
+// =====================================================================
+
+// 信号回调全局状态（CFunc 无法捕获局部变量）
+var gCalClicked: String = ""
+let gCalClickedCb: CStringCallback = { v: CString =>
+    gCalClicked = v.toString()
+}
+
+var gCalActivated: String = ""
+let gCalActivatedCb: CStringCallback = { v: CString =>
+    gCalActivated = v.toString()
+}
+
+var gCalSelectionChanged: Bool = false
+let gCalSelectionChangedCb: VoidCallback = { =>
+    gCalSelectionChanged = true
+}
+
+@Test
+class QCalendarWidgetTests {
+    private static var guiEnv: ?GUITestEnvironment = None
+
+    @BeforeAll
+    static func setupGUI(): Unit {
+        let env = GUITestEnvironment.getInstance()
+        env.setupEnvironment()
+        guiEnv = Some(env)
+    }
+
+    @AfterAll
+    static func teardownGUI(): Unit {
+        if (let Some(env) <- guiEnv) {
+            env.teardownEnvironment()
+        }
+    }
+
+    @TestCase
+    func testCalendarCreate() {
+        let cal = QCalendarWidget()
+        @Expect(cal.getPtr() != 0, true)
+        cal.delete()
+    }
+
+    @TestCase
+    func testCalendarSignals() {
+        let cal = QCalendarWidget()
+        cal.setOnClicked(gCalClickedCb)
+        cal.setOnActivated(gCalActivatedCb)
+        cal.setOnSelectionChanged(gCalSelectionChangedCb)
+        @Expect(cal.getPtr() != 0, true)
+
+        // 程序化改变选中日期，触发 selectionChanged 信号
+        gCalSelectionChanged = false
+        let d = QDate(2024, 5, 20)
+        cal.setSelectedDate(d)
+        @Expect(gCalSelectionChanged, true)
+
+        d.delete()
+        cal.delete()
+    }
+}
+
+// =====================================================================
+// QTextEdit 测试
 // =====================================================================
 // QTextEdit 测试
 // =====================================================================
@@ -1916,6 +2046,32 @@ class QTextEditTests {
         @Expect(edit.currentLine(), 1)
         @Expect(edit.lineCount() >= 2, true)
         @Expect(edit.characterCount() > 0, true)
+        edit.close()
+    }
+
+    // 任务 5：setTabStopDistance/setAcceptRichText/setPlaceholderText
+    @TestCase
+    func testSetTabStopDistance() {
+        let edit = QTextEdit()
+        edit.setTabStopDistance(40.0)
+        @Assert(edit.isValid())
+        edit.close()
+    }
+
+    @TestCase
+    func testSetAcceptRichText() {
+        let edit = QTextEdit()
+        edit.setAcceptRichText(false)
+        @Assert(edit.isValid())
+        edit.setAcceptRichText(true)
+        edit.close()
+    }
+
+    @TestCase
+    func testSetPlaceholderText() {
+        let edit = QTextEdit()
+        edit.setPlaceholderText("请输入内容...")
+        @Assert(edit.isValid())
         edit.close()
     }
 }

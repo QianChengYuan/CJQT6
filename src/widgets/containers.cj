@@ -64,6 +64,20 @@ foreign func qTabWidgetSetTabsClosable(ptr: Int64, closable: Bool): Unit
 foreign func qTabWidgetSetMovable(ptr: Int64, movable: Bool): Unit
 // QTabWidget::clear() - 清除所有标签页
 foreign func qTabWidgetClear(ptr: Int64): Unit
+// QTabWidget::setTabIcon() - 设置指定标签页的图标
+foreign func qTabWidgetSetTabIcon(ptr: Int64, index: Int32, iconPtr: Int64): Unit
+// QTabWidget::setIconSize() - 设置标签页图标尺寸
+foreign func qTabWidgetSetIconSize(ptr: Int64, width: Int32, height: Int32): Unit
+// QTabWidget::setTabPosition() - 设置标签位置(0=北 1=南 2=西 3=东)
+foreign func qTabWidgetSetTabPosition(ptr: Int64, pos: Int32): Unit
+// QTabWidget::setDocumentMode() - 设置文档模式
+foreign func qTabWidgetSetDocumentMode(ptr: Int64, enabled: Bool): Unit
+// QTabWidget::setElideMode() - 设置标签文本省略模式(0=左 1=右 2=中 3=无)
+foreign func qTabWidgetSetElideMode(ptr: Int64, mode: Int32): Unit
+// QTabWidget::setTabShape() - 设置标签形状(0=圆角 1=三角)
+foreign func qTabWidgetSetTabShape(ptr: Int64, shape: Int32): Unit
+// QTabWidget::setUsesScrollButtons() - 设置是否使用滚动按钮
+foreign func qTabWidgetSetUsesScrollButtons(ptr: Int64, enabled: Bool): Unit
 // QTabWidget::connectCurrentChanged() - 连接当前标签页变化信号
 foreign func qTabWidgetConnectCurrentChanged(ptr: Int64, callback: Int32Callback): Unit
 // QTabWidget::disconnectCurrentChanged() - 断开当前标签页变化信号
@@ -483,6 +497,62 @@ public class QTabWidget <: QtResource {
         checkValid()
         unsafe {
             qTabWidgetSetMovable(ptr, movable)
+        }
+    }
+    
+    /// 设置指定标签页的图标（iconPtr 为 QIcon.getPtr() 返回的指针）
+    public func setTabIcon(index: Int32, iconPtr: Int64): Unit {
+        checkValid()
+        unsafe {
+            qTabWidgetSetTabIcon(ptr, index, iconPtr)
+        }
+    }
+    
+    /// 设置标签页图标尺寸
+    public func setIconSize(width: Int32, height: Int32): Unit {
+        checkValid()
+        unsafe {
+            qTabWidgetSetIconSize(ptr, width, height)
+        }
+    }
+    
+    /// 设置标签位置（0=北 1=南 2=西 3=东）
+    public func setTabPosition(pos: Int32): Unit {
+        checkValid()
+        unsafe {
+            qTabWidgetSetTabPosition(ptr, pos)
+        }
+    }
+    
+    /// 设置文档模式
+    public func setDocumentMode(enabled: Bool): Unit {
+        checkValid()
+        unsafe {
+            qTabWidgetSetDocumentMode(ptr, enabled)
+        }
+    }
+    
+    /// 设置标签文本省略模式（0=左 1=右 2=中 3=无）
+    public func setElideMode(mode: Int32): Unit {
+        checkValid()
+        unsafe {
+            qTabWidgetSetElideMode(ptr, mode)
+        }
+    }
+    
+    /// 设置标签形状（0=圆角 1=三角）
+    public func setTabShape(shape: Int32): Unit {
+        checkValid()
+        unsafe {
+            qTabWidgetSetTabShape(ptr, shape)
+        }
+    }
+    
+    /// 设置是否使用滚动按钮（标签过多时）
+    public func setUsesScrollButtons(enabled: Bool): Unit {
+        checkValid()
+        unsafe {
+            qTabWidgetSetUsesScrollButtons(ptr, enabled)
         }
     }
     
@@ -1109,6 +1179,20 @@ foreign func qSplitterChildrenCollapsible(ptr: Int64): Int32
 foreign func qSplitterSetOrientation(ptr: Int64, orientation: Int32): Unit
 // QSplitter::orientation() - 获取方向
 foreign func qSplitterOrientation(ptr: Int64): Int32
+// QSplitter::insertWidget() - 在指定位置插入控件
+foreign func qSplitterInsertWidget(ptr: Int64, index: Int32, widgetPtr: Int64): Unit
+// QSplitter::replaceWidget() - 替换指定位置控件，返回被替换控件指针
+foreign func qSplitterReplaceWidget(ptr: Int64, index: Int32, widgetPtr: Int64): Int64
+// QSplitter::sizes() - 获取各子控件尺寸(写入数组，返回实际数量)
+foreign func qSplitterSizes(ptr: Int64, sizes: CPointer<Int32>, maxCount: Int32): Int32
+// QSplitter::setSizes() - 设置各子控件尺寸
+foreign func qSplitterSetSizes(ptr: Int64, sizes: CPointer<Int32>, count: Int32): Unit
+// QSplitter::setOpaqueResize() - 设置拖动时是否实时调整
+foreign func qSplitterSetOpaqueResize(ptr: Int64, opaque: Bool): Unit
+// QSplitter::saveState() - 保存状态到 buffer(bufferSize inout: 传入容量,传出实际长度)
+foreign func qSplitterSaveState(ptr: Int64, buffer: CPointer<UInt8>, bufferSize: CPointer<Int32>): Unit
+// QSplitter::restoreState() - 从 buffer 恢复状态
+foreign func qSplitterRestoreState(ptr: Int64, buffer: CPointer<UInt8>, size: Int32): Int32
 
 /// 分割器部件
 /// 支持资源管理，可使用 try-with-resources 自动释放
@@ -1202,6 +1286,87 @@ public class QSplitter <: QtResource {
         checkValid()
         unsafe {
             qSplitterOrientation(ptr)
+        }
+    }
+    
+    /// 在指定位置插入控件
+    public func insertWidget(index: Int32, widgetPtr: Int64): Unit {
+        checkValid()
+        unsafe {
+            qSplitterInsertWidget(ptr, index, widgetPtr)
+        }
+    }
+    
+    /// 替换指定位置控件，返回被替换控件指针
+    public func replaceWidget(index: Int32, widgetPtr: Int64): Int64 {
+        checkValid()
+        unsafe {
+            qSplitterReplaceWidget(ptr, index, widgetPtr)
+        }
+    }
+    
+    /// 设置是否在拖动时实时调整尺寸
+    public func setOpaqueResize(opaque: Bool): Unit {
+        checkValid()
+        unsafe {
+            qSplitterSetOpaqueResize(ptr, opaque)
+        }
+    }
+    
+    /// 设置各子控件尺寸
+    public func setSizes(sizes: Array<Int32>): Unit {
+        checkValid()
+        if (sizes.size == 0) {
+            return
+        }
+        unsafe {
+            var handle = acquireArrayRawData(sizes)
+            qSplitterSetSizes(ptr, handle.pointer, Int32(sizes.size))
+            releaseArrayRawData(handle)
+        }
+    }
+    
+    /// 获取各子控件尺寸
+    public func sizes(): Array<Int32> {
+        checkValid()
+        let n = count()
+        if (n <= 0) {
+            return Array<Int32>()
+        }
+        unsafe {
+            let buf = LibC.malloc<Int32>(count: Int64(n))
+            let actual = qSplitterSizes(ptr, buf, n)
+            var result = Array<Int32>(Int64(actual), { i => buf.read(i) })
+            LibC.free(buf)
+            return result
+        }
+    }
+    
+    /// 保存状态为字节数组（可用于持久化分割比例）
+    public func saveState(): Array<UInt8> {
+        checkValid()
+        unsafe {
+            let capacity: Int32 = 4096
+            let buf = LibC.malloc<UInt8>(count: Int64(capacity))
+            var actualLen: Int32 = capacity
+            qSplitterSaveState(ptr, buf, inout actualLen)
+            var result = Array<UInt8>(Int64(actualLen), { i => buf.read(i) })
+            LibC.free(buf)
+            return result
+        }
+    }
+    
+    /// 从字节数组恢复状态
+    public func restoreState(data: Array<UInt8>): Bool {
+        checkValid()
+        if (data.size == 0) {
+            return false
+        }
+        unsafe {
+            var handle = acquireArrayRawData(data)
+            let r = qSplitterRestoreState(ptr, handle.pointer, Int32(data.size))
+            releaseArrayRawData(handle)
+            return r != 0
         }
     }
     
