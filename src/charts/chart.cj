@@ -151,6 +151,24 @@ public class QChart {
         unsafe { qChartAddSeries(ptr, series.getPtr()) }
     }
 
+    /// 添加水平柱状图序列（重载）；添加后 chart 接管 series 所有权
+    public func addSeries(series: QHorizontalBarSeries): Unit {
+        checkValid()
+        unsafe { qChartAddSeries(ptr, series.getPtr()) }
+    }
+
+    /// 添加水平百分比柱状图序列（重载）；添加后 chart 接管 series 所有权
+    public func addSeries(series: QHorizontalPercentBarSeries): Unit {
+        checkValid()
+        unsafe { qChartAddSeries(ptr, series.getPtr()) }
+    }
+
+    /// 添加水平堆叠柱状图序列（重载）；添加后 chart 接管 series 所有权
+    public func addSeries(series: QHorizontalStackedBarSeries): Unit {
+        checkValid()
+        unsafe { qChartAddSeries(ptr, series.getPtr()) }
+    }
+
     /// 移除所有序列
     public func removeAllSeries(): Unit {
         checkValid()
@@ -199,6 +217,18 @@ public class QChart {
 
     /// 添加分类值轴（重载）；添加后 chart 接管 axis 所有权
     public func addAxis(axis: QCategoryAxis, alignment: Int32): Unit {
+        checkValid()
+        unsafe { qChartAddAxis(ptr, axis.getPtr(), alignment) }
+    }
+
+    /// 添加日期时间轴（重载）；添加后 chart 接管 axis 所有权
+    public func addAxis(axis: QDateTimeAxis, alignment: Int32): Unit {
+        checkValid()
+        unsafe { qChartAddAxis(ptr, axis.getPtr(), alignment) }
+    }
+
+    /// 添加对数轴（重载）；添加后 chart 接管 axis 所有权
+    public func addAxis(axis: QLogValueAxis, alignment: Int32): Unit {
         checkValid()
         unsafe { qChartAddAxis(ptr, axis.getPtr(), alignment) }
     }

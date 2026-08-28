@@ -19,6 +19,7 @@ foreign func qPieSeriesSetVerticalPosition(ptr: Int64, pos: Float64): Unit
 foreign func qPieSeriesSetPieStartAngle(ptr: Int64, angle: Float64): Unit
 foreign func qPieSeriesSetPieEndAngle(ptr: Int64, angle: Float64): Unit
 foreign func qPieSeriesSetLabelsVisible(ptr: Int64, visible: Int32): Unit
+foreign func qPieSeriesAppendSlice(ptr: Int64, slicePtr: Int64): Unit
 
 // ============================================================
 // QPieSeries - 饼图序列
@@ -61,6 +62,12 @@ public class QPieSeries {
             qPieSeriesAppend(ptr, cstr, value)
             LibC.free(cstr)
         }
+    }
+
+    /// 追加一个 QPieSlice 对象；追加后 series 接管 slice 所有权
+    public func append(slice: QPieSlice): Unit {
+        checkValid()
+        unsafe { qPieSeriesAppendSlice(ptr, slice.getPtr()) }
     }
 
     /// 清除所有切片

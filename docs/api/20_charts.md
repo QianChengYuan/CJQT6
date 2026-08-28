@@ -2,7 +2,7 @@
 
 > `import cjqt6.charts.*`
 >
-> 基于 Qt Charts 的图表封装，提供 QChart / QChartView / QLineSeries / QBarSeries / QBarSet / QPieSeries / QScatterSeries / QAreaSeries / QSplineSeries / QPercentBarSeries / QStackedBarSeries / QBoxSet / QBoxPlotSeries / QCandlestickSet / QCandlestickSeries / QPolarChart / QValueAxis / QBarCategoryAxis / QCategoryAxis / QLegend。
+> 基于 Qt Charts 的图表封装，提供 QChart / QChartView / QLineSeries / QBarSeries / QBarSet / QPieSeries / QPieSlice / QScatterSeries / QAreaSeries / QSplineSeries / QPercentBarSeries / QStackedBarSeries / QBoxSet / QBoxPlotSeries / QCandlestickSet / QCandlestickSeries / QPolarChart / QValueAxis / QBarCategoryAxis / QCategoryAxis / QDateTimeAxis / QLogValueAxis / QHorizontalBarSeries / QHorizontalPercentBarSeries / QHorizontalStackedBarSeries / QLegend。
 > 需 Qt Charts 组件（Qt Maintenance Tool 安装时勾选 Qt Charts）。
 
 ---
@@ -40,6 +40,9 @@ chart.createDefaultAxes()
 | `addSeries(series: QStackedBarSeries)` | 添加堆叠柱状图序列（重载） |
 | `addSeries(series: QBoxPlotSeries)` | 添加箱线图序列（重载） |
 | `addSeries(series: QCandlestickSeries)` | 添加 K 线序列（重载） |
+| `addSeries(series: QHorizontalBarSeries)` | 添加水平柱状图序列（重载） |
+| `addSeries(series: QHorizontalPercentBarSeries)` | 添加水平百分比柱状图序列（重载） |
+| `addSeries(series: QHorizontalStackedBarSeries)` | 添加水平堆叠柱状图序列（重载） |
 | `removeAllSeries()` | 移除所有序列 |
 | `setTitle(title: String)` | 设置图表标题 |
 | `setTheme(theme: Int32)` | 设置主题（见 ChartTheme 常量） |
@@ -48,6 +51,8 @@ chart.createDefaultAxes()
 | `addAxis(axis: QValueAxis, alignment: Int32)` | 添加数值坐标轴到指定位置（见 AxisAlignment） |
 | `addAxis(axis: QBarCategoryAxis, alignment: Int32)` | 添加分类坐标轴（重载） |
 | `addAxis(axis: QCategoryAxis, alignment: Int32)` | 添加分类值轴（重载） |
+| `addAxis(axis: QDateTimeAxis, alignment: Int32)` | 添加日期时间轴（重载） |
+| `addAxis(axis: QLogValueAxis, alignment: Int32)` | 添加对数轴（重载） |
 | `getLegend(): QLegend` | 获取图例（非拥有式，由 chart 管理生命周期，勿 close） |
 | `getPtr(): Int64` / `close()` | 获取指针与释放 |
 
@@ -670,22 +675,174 @@ legend.setColor(240, 240, 240)
 
 ---
 
+## QPieSlice — 饼图切片
+
+表示饼图中的一个切片（扇区），可设置标签、值、颜色、爆炸等属性。
+
+```cangjie
+let slice = QPieSlice("产品A", 40.0)
+slice.setLabelVisible(true)
+slice.setExploded(true)
+slice.setColor(255, 100, 100)
+slice.setLabelPosition(PieSliceLabelPosition.outside)
+```
+
+**支持方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` / `init(label: String, value: Float64)` | 创建切片 |
+| `setLabel(label: String)` / `label(): String` | 设置/获取标签 |
+| `setValue(value: Float64)` / `value(): Float64` | 设置/获取值 |
+| `setLabelVisible(visible: Bool)` / `isLabelVisible(): Bool` | 标签可见性 |
+| `setLabelPosition(position: Int32)` / `labelPosition(): Int32` | 标签位置（见 PieSliceLabelPosition） |
+| `setExploded(exploded: Bool)` / `isExploded(): Bool` | 爆炸（分离显示） |
+| `setColor(r, g, b)` / `setColor(r, g, b, a)` | 设置切片颜色 |
+| `setBorderColor(r, g, b)` / `setBorderColor(r, g, b, a)` | 设置边框颜色 |
+| `setBorderWidth(width: Int32)` | 设置边框宽度 |
+| `setLabelColor(r, g, b)` / `setLabelColor(r, g, b, a)` | 设置标签颜色 |
+| `setLabelArmLengthFactor(factor: Float64)` / `labelArmLengthFactor(): Float64` | 标签臂长因子 |
+| `setExplodeDistanceFactor(factor: Float64)` / `explodeDistanceFactor(): Float64` | 爆炸距离因子 |
+| `percentage(): Float64` | 百分比（只读，由 series 计算） |
+| `startAngle(): Float64` / `angleSpan(): Float64` | 起始角度/角度跨度（只读） |
+| `getPtr(): Int64` / `close()` | 获取指针与释放 |
+
+**标签位置常量** (`PieSliceLabelPosition`):
+| 常量 | 值 | 说明 |
+|------|-----|------|
+| `outside` | 0 | 标签在外侧 |
+| `insideHorizontal` | 1 | 标签在内侧水平 |
+| `insideTangential` | 2 | 标签在内侧切向 |
+| `insideNormal` | 3 | 标签在内侧法向 |
+
+**所有权**: `QPieSeries.append(slice)` 后 series 接管 slice 所有权。
+
+---
+
+## QDateTimeAxis — 日期时间坐标轴
+
+用于 K 线图、时间序列等基于时间的图表。时间戳用 Unix 秒数（Float64）。
+
+```cangjie
+let axis = QDateTimeAxis()
+axis.setFormat("yyyy-MM-dd")
+axis.setRange(1787616000.0, 1787961600.0)  // 2026-08-25 ~ 2026-08-29
+axis.setTickCount(5)
+chart.addAxis(axis, AxisAlignment.bottom)
+```
+
+**支持方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` | 创建日期时间轴 |
+| `setMin(secsSinceEpoch: Float64)` / `min(): Float64` | 设置/获取最小值（Unix 秒） |
+| `setMax(secsSinceEpoch: Float64)` / `max(): Float64` | 设置/获取最大值（Unix 秒） |
+| `setRange(minSecs: Float64, maxSecs: Float64)` | 设置范围 |
+| `setFormat(format: String)` / `format(): String` | 设置/获取日期格式（如 "yyyy-MM-dd"） |
+| `setTickCount(count: Int32)` / `tickCount(): Int32` | 设置/获取刻度数量 |
+| `getPtr(): Int64` / `close()` | 获取指针与释放 |
+
+**所有权**: `addAxis` 后 QChart 接管 axis 所有权。
+
+---
+
+## QLogValueAxis — 对数坐标轴
+
+用于科学数据可视化（指数/对数刻度）。
+
+```cangjie
+let axis = QLogValueAxis()
+axis.setRange(1.0, 10000.0)
+axis.setBase(10.0)
+axis.setLabelFormat("%.0f")
+axis.setMinorTickCount(9)
+chart.addAxis(axis, AxisAlignment.bottom)
+```
+
+**支持方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` | 创建对数轴 |
+| `setMin(min: Float64)` / `min(): Float64` | 设置/获取最小值 |
+| `setMax(max: Float64)` / `max(): Float64` | 设置/获取最大值 |
+| `setRange(min: Float64, max: Float64)` | 设置范围 |
+| `setLabelFormat(format: String)` / `labelFormat(): String` | 设置/获取标签格式 |
+| `setBase(base: Float64)` / `base(): Float64` | 设置/获取对数底数（默认 10） |
+| `tickCount(): Int32` | 主刻度数量（只读） |
+| `setMinorTickCount(count: Int32)` / `minorTickCount(): Int32` | 设置/获取次刻度数量 |
+| `getPtr(): Int64` / `close()` | 获取指针与释放 |
+
+**所有权**: `addAxis` 后 QChart 接管 axis 所有权。
+
+---
+
+## QHorizontalBarSeries — 水平柱状图序列
+
+与 QBarSeries 类似，但柱子水平方向生长。API 与 QBarSeries 完全一致。
+
+```cangjie
+let series = QHorizontalBarSeries()
+let set1 = QBarSet("产品A")
+set1.append(10.0); set1.append(20.0)
+series.append(set1)
+chart.addSeries(series)
+```
+
+**支持方法**: `init()`, `append(set: QBarSet)`, `remove(set)`, `insert(index, set)`, `count(): Int32`, `clear()`, `setBarWidth(width)`, `setLabelsVisible(visible)`, `setLabelsPosition(position)`, `getPtr()` / `close()`
+
+**所有权**: `addSeries` 后 chart 接管 series；`append(set)` 后 series 接管 set。
+
+---
+
+## QHorizontalPercentBarSeries — 水平百分比柱状图序列
+
+每个类别的柱子按百分比堆叠，总和为 100%。API 与 QBarSeries 完全一致。
+
+```cangjie
+let series = QHorizontalPercentBarSeries()
+let set1 = QBarSet("产品A")
+set1.append(30.0); set1.append(40.0)
+series.append(set1)
+chart.addSeries(series)
+```
+
+**支持方法**: 同 QHorizontalBarSeries。
+
+---
+
+## QHorizontalStackedBarSeries — 水平堆叠柱状图序列
+
+每个类别的柱子按实际值堆叠。API 与 QBarSeries 完全一致。
+
+```cangjie
+let series = QHorizontalStackedBarSeries()
+let set1 = QBarSet("产品A")
+set1.append(10.0); set1.append(20.0)
+series.append(set1)
+chart.addSeries(series)
+```
+
+**支持方法**: 同 QHorizontalBarSeries。
+
+---
+
 ## 所有权与生命周期
 
 Qt Charts 的所有权链：
 ```
-QChartView → QChart / QPolarChart → QLineSeries / QBarSeries / QPieSeries / QScatterSeries / QAreaSeries / QSplineSeries / QPercentBarSeries / QStackedBarSeries / QBoxPlotSeries / QCandlestickSeries / QValueAxis / QBarCategoryAxis / QCategoryAxis
-QBarSeries / QPercentBarSeries / QStackedBarSeries → QBarSet
+QChartView → QChart / QPolarChart → QLineSeries / QBarSeries / QPieSeries / QScatterSeries / QAreaSeries / QSplineSeries / QPercentBarSeries / QStackedBarSeries / QBoxPlotSeries / QCandlestickSeries / QHorizontalBarSeries / QHorizontalPercentBarSeries / QHorizontalStackedBarSeries / QValueAxis / QBarCategoryAxis / QCategoryAxis / QDateTimeAxis / QLogValueAxis
+QBarSeries / QPercentBarSeries / QStackedBarSeries / QHorizontalBarSeries / QHorizontalPercentBarSeries / QHorizontalStackedBarSeries → QBarSet
 QBoxPlotSeries → QBoxSet
 QCandlestickSeries → QCandlestickSet
+QPieSeries → QPieSlice
 QChart / QPolarChart → QLegend（chart 内部管理，非用户拥有）
 ```
 
 - `QChartView.setChart(chart)` 后，view 接管 chart 所有权（适用于 QChart / QPolarChart）
-- `QChart.addSeries(series)` / `QPolarChart.addSeries(series)` 后，chart 接管 series 所有权（适用于全部 10 种序列类型）
-- `QBarSeries.append(set)` / `QPercentBarSeries.append(set)` / `QStackedBarSeries.append(set)` 后，series 接管 set 所有权
+- `QChart.addSeries(series)` / `QPolarChart.addSeries(series)` 后，chart 接管 series 所有权（适用于全部 13 种序列类型）
+- `QBarSeries.append(set)` / `QPercentBarSeries.append(set)` / `QStackedBarSeries.append(set)` / `QHorizontalBarSeries.append(set)` / `QHorizontalPercentBarSeries.append(set)` / `QHorizontalStackedBarSeries.append(set)` 后，series 接管 set 所有权
 - `QBoxPlotSeries.append(box)` 后，series 接管 box 所有权
 - `QCandlestickSeries.append(set)` 后，series 接管 set 所有权
+- `QPieSeries.append(slice)` 后，series 接管 slice 所有权
 - `QAreaSeries` 不拥有 upper/lower QLineSeries，需手动管理 line series 生命周期
 - `QChart.addAxis(axis, ...)` / `QPolarChart.addAxis(axis, ...)` 后，chart 接管 axis 所有权
 - `QChart.getLegend()` / `QPolarChart.getLegend()` 返回的 QLegend 是**非拥有式**引用，由 chart 管理生命周期，勿调用 close()

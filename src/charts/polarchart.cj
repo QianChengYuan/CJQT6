@@ -175,6 +175,18 @@ public class QPolarChart {
         unsafe { qPolarChartAddAxis(ptr, axis.getPtr(), polarOrientation) }
     }
 
+    /// 添加日期时间轴到指定极坐标方向（重载）
+    public func addAxis(axis: QDateTimeAxis, polarOrientation: Int32): Unit {
+        checkValid()
+        unsafe { qPolarChartAddAxis(ptr, axis.getPtr(), polarOrientation) }
+    }
+
+    /// 添加对数轴到指定极坐标方向（重载）
+    public func addAxis(axis: QLogValueAxis, polarOrientation: Int32): Unit {
+        checkValid()
+        unsafe { qPolarChartAddAxis(ptr, axis.getPtr(), polarOrientation) }
+    }
+
     /// 获取图例（非拥有式，由 chart 管理生命周期，勿 close）
     public func getLegend(): QLegend {
         checkValid()

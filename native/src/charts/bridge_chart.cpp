@@ -34,8 +34,15 @@
 #include <QtCharts/QCandlestickSet>
 #include <QtCharts/QCandlestickSeries>
 #include <QtCharts/QPolarChart>
+#include <QtCharts/QPieSlice>
+#include <QtCharts/QDateTimeAxis>
+#include <QtCharts/QLogValueAxis>
+#include <QtCharts/QHorizontalBarSeries>
+#include <QtCharts/QHorizontalPercentBarSeries>
+#include <QtCharts/QHorizontalStackedBarSeries>
 #include <QString>
 #include <QColor>
+#include <QDateTime>
 
 extern "C" {
 
@@ -554,6 +561,12 @@ void qPieSeriesSetLabelsVisible(int64_t ptr, int32_t visible) {
     if (series) series->setLabelsVisible(visible != 0);
 }
 
+void qPieSeriesAppendSlice(int64_t ptr, int64_t slicePtr) {
+    QPieSeries* series = reinterpret_cast<QPieSeries*>(ptr);
+    QPieSlice* slice = reinterpret_cast<QPieSlice*>(slicePtr);
+    if (series && slice) series->append(slice);
+}
+
 // ============================================================
 // QScatterSeries - 散点图序列（继承 QXYSeries）
 // ============================================================
@@ -951,6 +964,435 @@ void qPolarChartAddAxis(int64_t ptr, int64_t axisPtr, int32_t polarOrientation) 
     if (chart && axis) {
         chart->addAxis(axis, static_cast<QPolarChart::PolarOrientation>(polarOrientation));
     }
+}
+
+// ============================================================
+// QPieSlice - 饼图切片
+// ============================================================
+
+int64_t qPieSliceCreate() {
+    return reinterpret_cast<int64_t>(new QPieSlice());
+}
+
+int64_t qPieSliceCreateLabelValue(const char* label, double value) {
+    return reinterpret_cast<int64_t>(new QPieSlice(QString::fromUtf8(label), static_cast<qreal>(value)));
+}
+
+void qPieSliceDelete(int64_t ptr) {
+    delete reinterpret_cast<QPieSlice*>(ptr);
+}
+
+void qPieSliceSetLabel(int64_t ptr, const char* label) {
+    QPieSlice* slice = reinterpret_cast<QPieSlice*>(ptr);
+    if (slice) slice->setLabel(QString::fromUtf8(label));
+}
+
+const char* qPieSliceLabel(int64_t ptr) {
+    QPieSlice* slice = reinterpret_cast<QPieSlice*>(ptr);
+    if (!slice) return nullptr;
+    static QByteArray ba;
+    ba = slice->label().toUtf8();
+    return ba.constData();
+}
+
+void qPieSliceSetValue(int64_t ptr, double value) {
+    QPieSlice* slice = reinterpret_cast<QPieSlice*>(ptr);
+    if (slice) slice->setValue(static_cast<qreal>(value));
+}
+
+double qPieSliceValue(int64_t ptr) {
+    QPieSlice* slice = reinterpret_cast<QPieSlice*>(ptr);
+    return slice ? static_cast<double>(slice->value()) : 0.0;
+}
+
+void qPieSliceSetLabelVisible(int64_t ptr, int32_t visible) {
+    QPieSlice* slice = reinterpret_cast<QPieSlice*>(ptr);
+    if (slice) slice->setLabelVisible(visible != 0);
+}
+
+int32_t qPieSliceIsLabelVisible(int64_t ptr) {
+    QPieSlice* slice = reinterpret_cast<QPieSlice*>(ptr);
+    return slice ? (slice->isLabelVisible() ? 1 : 0) : 0;
+}
+
+void qPieSliceSetLabelPosition(int64_t ptr, int32_t position) {
+    QPieSlice* slice = reinterpret_cast<QPieSlice*>(ptr);
+    if (slice) slice->setLabelPosition(static_cast<QPieSlice::LabelPosition>(position));
+}
+
+int32_t qPieSliceLabelPosition(int64_t ptr) {
+    QPieSlice* slice = reinterpret_cast<QPieSlice*>(ptr);
+    return slice ? static_cast<int32_t>(slice->labelPosition()) : 0;
+}
+
+void qPieSliceSetExploded(int64_t ptr, int32_t exploded) {
+    QPieSlice* slice = reinterpret_cast<QPieSlice*>(ptr);
+    if (slice) slice->setExploded(exploded != 0);
+}
+
+int32_t qPieSliceIsExploded(int64_t ptr) {
+    QPieSlice* slice = reinterpret_cast<QPieSlice*>(ptr);
+    return slice ? (slice->isExploded() ? 1 : 0) : 0;
+}
+
+void qPieSliceSetColor(int64_t ptr, int32_t r, int32_t g, int32_t b, int32_t a) {
+    QPieSlice* slice = reinterpret_cast<QPieSlice*>(ptr);
+    if (slice) slice->setColor(QColor(r, g, b, a));
+}
+
+void qPieSliceSetBorderColor(int64_t ptr, int32_t r, int32_t g, int32_t b, int32_t a) {
+    QPieSlice* slice = reinterpret_cast<QPieSlice*>(ptr);
+    if (slice) slice->setBorderColor(QColor(r, g, b, a));
+}
+
+void qPieSliceSetBorderWidth(int64_t ptr, int32_t width) {
+    QPieSlice* slice = reinterpret_cast<QPieSlice*>(ptr);
+    if (slice) slice->setBorderWidth(width);
+}
+
+void qPieSliceSetLabelColor(int64_t ptr, int32_t r, int32_t g, int32_t b, int32_t a) {
+    QPieSlice* slice = reinterpret_cast<QPieSlice*>(ptr);
+    if (slice) slice->setLabelColor(QColor(r, g, b, a));
+}
+
+void qPieSliceSetLabelArmLengthFactor(int64_t ptr, double factor) {
+    QPieSlice* slice = reinterpret_cast<QPieSlice*>(ptr);
+    if (slice) slice->setLabelArmLengthFactor(static_cast<qreal>(factor));
+}
+
+double qPieSliceLabelArmLengthFactor(int64_t ptr) {
+    QPieSlice* slice = reinterpret_cast<QPieSlice*>(ptr);
+    return slice ? static_cast<double>(slice->labelArmLengthFactor()) : 0.0;
+}
+
+void qPieSliceSetExplodeDistanceFactor(int64_t ptr, double factor) {
+    QPieSlice* slice = reinterpret_cast<QPieSlice*>(ptr);
+    if (slice) slice->setExplodeDistanceFactor(static_cast<qreal>(factor));
+}
+
+double qPieSliceExplodeDistanceFactor(int64_t ptr) {
+    QPieSlice* slice = reinterpret_cast<QPieSlice*>(ptr);
+    return slice ? static_cast<double>(slice->explodeDistanceFactor()) : 0.0;
+}
+
+double qPieSlicePercentage(int64_t ptr) {
+    QPieSlice* slice = reinterpret_cast<QPieSlice*>(ptr);
+    return slice ? static_cast<double>(slice->percentage()) : 0.0;
+}
+
+double qPieSliceStartAngle(int64_t ptr) {
+    QPieSlice* slice = reinterpret_cast<QPieSlice*>(ptr);
+    return slice ? static_cast<double>(slice->startAngle()) : 0.0;
+}
+
+double qPieSliceAngleSpan(int64_t ptr) {
+    QPieSlice* slice = reinterpret_cast<QPieSlice*>(ptr);
+    return slice ? static_cast<double>(slice->angleSpan()) : 0.0;
+}
+
+// ============================================================
+// QDateTimeAxis - 日期时间轴
+// ============================================================
+
+int64_t qDateTimeAxisCreate() {
+    return reinterpret_cast<int64_t>(new QDateTimeAxis());
+}
+
+void qDateTimeAxisDelete(int64_t ptr) {
+    delete reinterpret_cast<QDateTimeAxis*>(ptr);
+}
+
+void qDateTimeAxisSetMin(int64_t ptr, double secsSinceEpoch) {
+    QDateTimeAxis* axis = reinterpret_cast<QDateTimeAxis*>(ptr);
+    if (axis) axis->setMin(QDateTime::fromSecsSinceEpoch(static_cast<qint64>(secsSinceEpoch)));
+}
+
+double qDateTimeAxisMin(int64_t ptr) {
+    QDateTimeAxis* axis = reinterpret_cast<QDateTimeAxis*>(ptr);
+    if (!axis) return 0.0;
+    return static_cast<double>(axis->min().toSecsSinceEpoch());
+}
+
+void qDateTimeAxisSetMax(int64_t ptr, double secsSinceEpoch) {
+    QDateTimeAxis* axis = reinterpret_cast<QDateTimeAxis*>(ptr);
+    if (axis) axis->setMax(QDateTime::fromSecsSinceEpoch(static_cast<qint64>(secsSinceEpoch)));
+}
+
+double qDateTimeAxisMax(int64_t ptr) {
+    QDateTimeAxis* axis = reinterpret_cast<QDateTimeAxis*>(ptr);
+    if (!axis) return 0.0;
+    return static_cast<double>(axis->max().toSecsSinceEpoch());
+}
+
+void qDateTimeAxisSetRange(int64_t ptr, double minSecs, double maxSecs) {
+    QDateTimeAxis* axis = reinterpret_cast<QDateTimeAxis*>(ptr);
+    if (axis) {
+        axis->setRange(QDateTime::fromSecsSinceEpoch(static_cast<qint64>(minSecs)),
+                       QDateTime::fromSecsSinceEpoch(static_cast<qint64>(maxSecs)));
+    }
+}
+
+void qDateTimeAxisSetFormat(int64_t ptr, const char* format) {
+    QDateTimeAxis* axis = reinterpret_cast<QDateTimeAxis*>(ptr);
+    if (axis) axis->setFormat(QString::fromUtf8(format));
+}
+
+const char* qDateTimeAxisFormat(int64_t ptr) {
+    QDateTimeAxis* axis = reinterpret_cast<QDateTimeAxis*>(ptr);
+    if (!axis) return nullptr;
+    static QByteArray ba;
+    ba = axis->format().toUtf8();
+    return ba.constData();
+}
+
+void qDateTimeAxisSetTickCount(int64_t ptr, int32_t count) {
+    QDateTimeAxis* axis = reinterpret_cast<QDateTimeAxis*>(ptr);
+    if (axis) axis->setTickCount(count);
+}
+
+int32_t qDateTimeAxisTickCount(int64_t ptr) {
+    QDateTimeAxis* axis = reinterpret_cast<QDateTimeAxis*>(ptr);
+    return axis ? axis->tickCount() : 0;
+}
+
+// ============================================================
+// QLogValueAxis - 对数轴
+// ============================================================
+
+int64_t qLogValueAxisCreate() {
+    return reinterpret_cast<int64_t>(new QLogValueAxis());
+}
+
+void qLogValueAxisDelete(int64_t ptr) {
+    delete reinterpret_cast<QLogValueAxis*>(ptr);
+}
+
+void qLogValueAxisSetMin(int64_t ptr, double min) {
+    QLogValueAxis* axis = reinterpret_cast<QLogValueAxis*>(ptr);
+    if (axis) axis->setMin(static_cast<qreal>(min));
+}
+
+double qLogValueAxisMin(int64_t ptr) {
+    QLogValueAxis* axis = reinterpret_cast<QLogValueAxis*>(ptr);
+    return axis ? static_cast<double>(axis->min()) : 0.0;
+}
+
+void qLogValueAxisSetMax(int64_t ptr, double max) {
+    QLogValueAxis* axis = reinterpret_cast<QLogValueAxis*>(ptr);
+    if (axis) axis->setMax(static_cast<qreal>(max));
+}
+
+double qLogValueAxisMax(int64_t ptr) {
+    QLogValueAxis* axis = reinterpret_cast<QLogValueAxis*>(ptr);
+    return axis ? static_cast<double>(axis->max()) : 0.0;
+}
+
+void qLogValueAxisSetRange(int64_t ptr, double min, double max) {
+    QLogValueAxis* axis = reinterpret_cast<QLogValueAxis*>(ptr);
+    if (axis) axis->setRange(static_cast<qreal>(min), static_cast<qreal>(max));
+}
+
+void qLogValueAxisSetLabelFormat(int64_t ptr, const char* format) {
+    QLogValueAxis* axis = reinterpret_cast<QLogValueAxis*>(ptr);
+    if (axis) axis->setLabelFormat(QString::fromUtf8(format));
+}
+
+const char* qLogValueAxisLabelFormat(int64_t ptr) {
+    QLogValueAxis* axis = reinterpret_cast<QLogValueAxis*>(ptr);
+    if (!axis) return nullptr;
+    static QByteArray ba;
+    ba = axis->labelFormat().toUtf8();
+    return ba.constData();
+}
+
+void qLogValueAxisSetBase(int64_t ptr, double base) {
+    QLogValueAxis* axis = reinterpret_cast<QLogValueAxis*>(ptr);
+    if (axis) axis->setBase(static_cast<qreal>(base));
+}
+
+double qLogValueAxisBase(int64_t ptr) {
+    QLogValueAxis* axis = reinterpret_cast<QLogValueAxis*>(ptr);
+    return axis ? static_cast<double>(axis->base()) : 10.0;
+}
+
+int32_t qLogValueAxisTickCount(int64_t ptr) {
+    QLogValueAxis* axis = reinterpret_cast<QLogValueAxis*>(ptr);
+    return axis ? axis->tickCount() : 0;
+}
+
+void qLogValueAxisSetMinorTickCount(int64_t ptr, int32_t count) {
+    QLogValueAxis* axis = reinterpret_cast<QLogValueAxis*>(ptr);
+    if (axis) axis->setMinorTickCount(count);
+}
+
+int32_t qLogValueAxisMinorTickCount(int64_t ptr) {
+    QLogValueAxis* axis = reinterpret_cast<QLogValueAxis*>(ptr);
+    return axis ? axis->minorTickCount() : 0;
+}
+
+// ============================================================
+// QHorizontalBarSeries - 水平柱状图序列
+// ============================================================
+
+int64_t qHorizontalBarSeriesCreate() {
+    return reinterpret_cast<int64_t>(new QHorizontalBarSeries());
+}
+
+void qHorizontalBarSeriesDelete(int64_t ptr) {
+    delete reinterpret_cast<QHorizontalBarSeries*>(ptr);
+}
+
+void qHorizontalBarSeriesAppend(int64_t ptr, int64_t setPtr) {
+    QHorizontalBarSeries* series = reinterpret_cast<QHorizontalBarSeries*>(ptr);
+    QBarSet* set = reinterpret_cast<QBarSet*>(setPtr);
+    if (series && set) series->append(set);
+}
+
+void qHorizontalBarSeriesRemove(int64_t ptr, int64_t setPtr) {
+    QHorizontalBarSeries* series = reinterpret_cast<QHorizontalBarSeries*>(ptr);
+    QBarSet* set = reinterpret_cast<QBarSet*>(setPtr);
+    if (series && set) series->remove(set);
+}
+
+void qHorizontalBarSeriesInsert(int64_t ptr, int32_t index, int64_t setPtr) {
+    QHorizontalBarSeries* series = reinterpret_cast<QHorizontalBarSeries*>(ptr);
+    QBarSet* set = reinterpret_cast<QBarSet*>(setPtr);
+    if (series && set) series->insert(static_cast<int>(index), set);
+}
+
+int32_t qHorizontalBarSeriesCount(int64_t ptr) {
+    QHorizontalBarSeries* series = reinterpret_cast<QHorizontalBarSeries*>(ptr);
+    return series ? static_cast<int32_t>(series->count()) : 0;
+}
+
+void qHorizontalBarSeriesClear(int64_t ptr) {
+    QHorizontalBarSeries* series = reinterpret_cast<QHorizontalBarSeries*>(ptr);
+    if (series) series->clear();
+}
+
+void qHorizontalBarSeriesSetBarWidth(int64_t ptr, double width) {
+    QHorizontalBarSeries* series = reinterpret_cast<QHorizontalBarSeries*>(ptr);
+    if (series) series->setBarWidth(static_cast<qreal>(width));
+}
+
+void qHorizontalBarSeriesSetLabelsVisible(int64_t ptr, int32_t visible) {
+    QHorizontalBarSeries* series = reinterpret_cast<QHorizontalBarSeries*>(ptr);
+    if (series) series->setLabelsVisible(visible != 0);
+}
+
+void qHorizontalBarSeriesSetLabelsPosition(int64_t ptr, int32_t position) {
+    QHorizontalBarSeries* series = reinterpret_cast<QHorizontalBarSeries*>(ptr);
+    if (series) series->setLabelsPosition(static_cast<QAbstractBarSeries::LabelsPosition>(position));
+}
+
+// ============================================================
+// QHorizontalPercentBarSeries - 水平百分比柱状图序列
+// ============================================================
+
+int64_t qHorizontalPercentBarSeriesCreate() {
+    return reinterpret_cast<int64_t>(new QHorizontalPercentBarSeries());
+}
+
+void qHorizontalPercentBarSeriesDelete(int64_t ptr) {
+    delete reinterpret_cast<QHorizontalPercentBarSeries*>(ptr);
+}
+
+void qHorizontalPercentBarSeriesAppend(int64_t ptr, int64_t setPtr) {
+    QHorizontalPercentBarSeries* series = reinterpret_cast<QHorizontalPercentBarSeries*>(ptr);
+    QBarSet* set = reinterpret_cast<QBarSet*>(setPtr);
+    if (series && set) series->append(set);
+}
+
+void qHorizontalPercentBarSeriesRemove(int64_t ptr, int64_t setPtr) {
+    QHorizontalPercentBarSeries* series = reinterpret_cast<QHorizontalPercentBarSeries*>(ptr);
+    QBarSet* set = reinterpret_cast<QBarSet*>(setPtr);
+    if (series && set) series->remove(set);
+}
+
+void qHorizontalPercentBarSeriesInsert(int64_t ptr, int32_t index, int64_t setPtr) {
+    QHorizontalPercentBarSeries* series = reinterpret_cast<QHorizontalPercentBarSeries*>(ptr);
+    QBarSet* set = reinterpret_cast<QBarSet*>(setPtr);
+    if (series && set) series->insert(static_cast<int>(index), set);
+}
+
+int32_t qHorizontalPercentBarSeriesCount(int64_t ptr) {
+    QHorizontalPercentBarSeries* series = reinterpret_cast<QHorizontalPercentBarSeries*>(ptr);
+    return series ? static_cast<int32_t>(series->count()) : 0;
+}
+
+void qHorizontalPercentBarSeriesClear(int64_t ptr) {
+    QHorizontalPercentBarSeries* series = reinterpret_cast<QHorizontalPercentBarSeries*>(ptr);
+    if (series) series->clear();
+}
+
+void qHorizontalPercentBarSeriesSetBarWidth(int64_t ptr, double width) {
+    QHorizontalPercentBarSeries* series = reinterpret_cast<QHorizontalPercentBarSeries*>(ptr);
+    if (series) series->setBarWidth(static_cast<qreal>(width));
+}
+
+void qHorizontalPercentBarSeriesSetLabelsVisible(int64_t ptr, int32_t visible) {
+    QHorizontalPercentBarSeries* series = reinterpret_cast<QHorizontalPercentBarSeries*>(ptr);
+    if (series) series->setLabelsVisible(visible != 0);
+}
+
+void qHorizontalPercentBarSeriesSetLabelsPosition(int64_t ptr, int32_t position) {
+    QHorizontalPercentBarSeries* series = reinterpret_cast<QHorizontalPercentBarSeries*>(ptr);
+    if (series) series->setLabelsPosition(static_cast<QAbstractBarSeries::LabelsPosition>(position));
+}
+
+// ============================================================
+// QHorizontalStackedBarSeries - 水平堆叠柱状图序列
+// ============================================================
+
+int64_t qHorizontalStackedBarSeriesCreate() {
+    return reinterpret_cast<int64_t>(new QHorizontalStackedBarSeries());
+}
+
+void qHorizontalStackedBarSeriesDelete(int64_t ptr) {
+    delete reinterpret_cast<QHorizontalStackedBarSeries*>(ptr);
+}
+
+void qHorizontalStackedBarSeriesAppend(int64_t ptr, int64_t setPtr) {
+    QHorizontalStackedBarSeries* series = reinterpret_cast<QHorizontalStackedBarSeries*>(ptr);
+    QBarSet* set = reinterpret_cast<QBarSet*>(setPtr);
+    if (series && set) series->append(set);
+}
+
+void qHorizontalStackedBarSeriesRemove(int64_t ptr, int64_t setPtr) {
+    QHorizontalStackedBarSeries* series = reinterpret_cast<QHorizontalStackedBarSeries*>(ptr);
+    QBarSet* set = reinterpret_cast<QBarSet*>(setPtr);
+    if (series && set) series->remove(set);
+}
+
+void qHorizontalStackedBarSeriesInsert(int64_t ptr, int32_t index, int64_t setPtr) {
+    QHorizontalStackedBarSeries* series = reinterpret_cast<QHorizontalStackedBarSeries*>(ptr);
+    QBarSet* set = reinterpret_cast<QBarSet*>(setPtr);
+    if (series && set) series->insert(static_cast<int>(index), set);
+}
+
+int32_t qHorizontalStackedBarSeriesCount(int64_t ptr) {
+    QHorizontalStackedBarSeries* series = reinterpret_cast<QHorizontalStackedBarSeries*>(ptr);
+    return series ? static_cast<int32_t>(series->count()) : 0;
+}
+
+void qHorizontalStackedBarSeriesClear(int64_t ptr) {
+    QHorizontalStackedBarSeries* series = reinterpret_cast<QHorizontalStackedBarSeries*>(ptr);
+    if (series) series->clear();
+}
+
+void qHorizontalStackedBarSeriesSetBarWidth(int64_t ptr, double width) {
+    QHorizontalStackedBarSeries* series = reinterpret_cast<QHorizontalStackedBarSeries*>(ptr);
+    if (series) series->setBarWidth(static_cast<qreal>(width));
+}
+
+void qHorizontalStackedBarSeriesSetLabelsVisible(int64_t ptr, int32_t visible) {
+    QHorizontalStackedBarSeries* series = reinterpret_cast<QHorizontalStackedBarSeries*>(ptr);
+    if (series) series->setLabelsVisible(visible != 0);
+}
+
+void qHorizontalStackedBarSeriesSetLabelsPosition(int64_t ptr, int32_t position) {
+    QHorizontalStackedBarSeries* series = reinterpret_cast<QHorizontalStackedBarSeries*>(ptr);
+    if (series) series->setLabelsPosition(static_cast<QAbstractBarSeries::LabelsPosition>(position));
 }
 
 } // extern "C"
