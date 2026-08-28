@@ -91,7 +91,7 @@ jobs:
           python3 -m pip install --user --quiet aqtinstall
           python3 -m aqt install-qt linux desktop \
             "${{ env.QT_VERSION_LINUX }}" "${{ env.QT_ARCH_LINUX }}" \
-            -O "$RUNNER_TEMP/Qt" -m qtmultimedia
+            -O "$RUNNER_TEMP/Qt" -m qtmultimedia qtcharts
           QTDIR="$RUNNER_TEMP/Qt/${{ env.QT_VERSION_LINUX }}/${{ env.QT_ARCH_LINUX }}"
           echo "QTDIR=$QTDIR" >> "$GITHUB_ENV"
           echo "$QTDIR/bin" >> "$GITHUB_PATH"
@@ -222,7 +222,7 @@ jobs:
           python -m pip install --quiet aqtinstall
           python -m aqt install-qt windows desktop `
             "${{ env.QT_VERSION_WINDOWS }}" "${{ env.QT_ARCH_WINDOWS }}" `
-            -O "$env:RUNNER_TEMP\Qt" -m qtmultimedia
+            -O "$env:RUNNER_TEMP\Qt" -m qtmultimedia qtcharts
           # aqt 实际目录名可能与 arch 参数不一致（如 win64_msvc2022_64 → msvc2022_64），探测真实路径
           $qtBase = "$env:RUNNER_TEMP\Qt\${{ env.QT_VERSION_WINDOWS }}"
           $QTDIR = Get-ChildItem $qtBase -Directory | Where-Object { Test-Path "$($_.FullName)\bin\Qt6Core.dll" } | Select-Object -First 1
