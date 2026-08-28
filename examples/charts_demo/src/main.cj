@@ -231,12 +231,15 @@ func createCandlestickChartView(): QChartView {
     series.setDecreasingColor(0, 200, 0)
     series.setCapsVisible(true)
 
-    // 模拟 5 天 K 线数据
-    let c1 = QCandlestickSet(100.0, 108.0, 95.0, 102.0, 1.0)
-    let c2 = QCandlestickSet(102.0, 110.0, 100.0, 98.0, 2.0)
-    let c3 = QCandlestickSet(98.0, 105.0, 92.0, 103.0, 3.0)
-    let c4 = QCandlestickSet(103.0, 115.0, 101.0, 112.0, 4.0)
-    let c5 = QCandlestickSet(112.0, 118.0, 108.0, 110.0, 5.0)
+    // 模拟 5 天 K 线数据（timestamp 为 Unix 时间戳秒数）
+    // 2026-08-25 ~ 2026-08-29 共 5 个交易日
+    let baseTime = 1787616000.0  // 2026-08-25 00:00:00 UTC
+    let day = 86400.0            // 一天的秒数
+    let c1 = QCandlestickSet(100.0, 108.0, 95.0, 102.0, baseTime)
+    let c2 = QCandlestickSet(102.0, 110.0, 100.0, 98.0, baseTime + day)
+    let c3 = QCandlestickSet(98.0, 105.0, 92.0, 103.0, baseTime + day * 2.0)
+    let c4 = QCandlestickSet(103.0, 115.0, 101.0, 112.0, baseTime + day * 3.0)
+    let c5 = QCandlestickSet(112.0, 118.0, 108.0, 110.0, baseTime + day * 4.0)
     series.append(c1)
     series.append(c2)
     series.append(c3)
@@ -303,18 +306,18 @@ main() {
     println("共 ${tabs.count()} 个图表页，3 秒后自动退出...")
 
     // 定时退出
-    let timer = QTimer()
-    timer.setInterval(3000)
-    timer.setOnTimeout({ => QApp.quit() })
-    timer.start()
+    // let timer = QTimer()
+    // timer.setInterval(3000)
+    // timer.setOnTimeout({ => QApp.quit() })
+    // timer.start()
 
     app.exec()
 
     println("[OK] Qt Charts 全序列渲染完成")
 
     // 清理：tabs.close 级联释放所有 QChartView → QChart → Series
-    timer.stop()
-    timer.close()
+    // timer.stop()
+    // timer.close()
     tabs.close()
 
     // QAreaSeries 不拥有 upper/lower，需手动释放
