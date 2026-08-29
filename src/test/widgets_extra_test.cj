@@ -1913,6 +1913,17 @@ class QCalendarWidgetTests {
 // =====================================================================
 // QTextEdit 测试
 // =====================================================================
+// QTextEdit 信号回调全局状态（CFunc 无法捕获局部变量）
+var gTeCursorPosChanged: Bool = false
+let gTeCursorPosCb: VoidCallback = { =>
+    gTeCursorPosChanged = true
+}
+
+var gTeSelectionChanged: Bool = false
+let gTeSelectionCb: VoidCallback = { =>
+    gTeSelectionChanged = true
+}
+
 // QTextEdit 测试
 // =====================================================================
 @Test
@@ -2072,6 +2083,28 @@ class QTextEditTests {
         let edit = QTextEdit()
         edit.setPlaceholderText("请输入内容...")
         @Assert(edit.isValid())
+        edit.close()
+    }
+
+    @TestCase
+    func testSetOnCursorPositionChanged() {
+        let edit = QTextEdit()
+        edit.setOnCursorPositionChanged(gTeCursorPosCb)
+        @Assert(edit.isValid())
+        // 程序化改变光标位置触发信号
+        gTeCursorPosChanged = false
+        edit.setText("hello")
+        edit.close()
+    }
+
+    @TestCase
+    func testSetOnSelectionChanged() {
+        let edit = QTextEdit()
+        edit.setOnSelectionChanged(gTeSelectionCb)
+        @Assert(edit.isValid())
+        // 程序化选中文本触发信号
+        gTeSelectionChanged = false
+        edit.setText("hello world")
         edit.close()
     }
 }

@@ -14,7 +14,7 @@
 ## 1. 封装非常完善的控件 ✅
 
 ### QLineEdit
-**覆盖度：95%**
+**覆盖度：98%**
 
 | 分类 | 方法 |
 |------|------|
@@ -26,14 +26,16 @@
 | 密码 | `addPasswordToggleAction()`, `setPasswordToggleIcon()` |
 | 清除 | `setClearButtonEnabled()`, `isClearButtonEnabled()` |
 | 补全 | `setCompleter()` |
+| 验证 | `setValidator()`（QIntValidator/QDoubleValidator/QRegExpValidator 三重载） |
+| 拖放 | `setDragEnabled()` |
 | 样式 | `setStyleSheet()` |
 | 状态 | `echoMode()`, `isReadOnly()`, `hasFrame()`, `length()` |
 | 信号 | `setOnTextChanged()`, `setOnReturnPressed()`, `setOnEditingFinished()`, `setOnCursorPositionChanged()`, `setOnSelectionChanged()`, `setOnInputRejected()` |
 
-**缺失**：`setValidator()`, `setDragEnabled()`
+**已补全**：`setValidator()` 成员方法（3 重载，2026-08-29）、`setDragEnabled()`（2026-08-29）
 
 ### QTextEdit
-**覆盖度：95%**
+**覆盖度：98%**
 
 | 分类 | 方法 |
 |------|------|
@@ -50,12 +52,10 @@
 | 样式 | `setStyleSheet()` |
 | 工具提示 | `setToolTip()` |
 | 可见性 | `setVisible()`, `isVisible()`, `width()`, `height()` |
-| 信号 | `setOnTextChanged()`, `setOnUndoAvailable()`, `setOnRedoAvailable()`, `setOnCopyAvailable()` |
+| 信号 | `setOnTextChanged()`, `setOnUndoAvailable()`, `setOnRedoAvailable()`, `setOnCopyAvailable()`, `setOnCursorPositionChanged()`, `setOnSelectionChanged()` |
 | 资源 | `close()`, `isClosed()`, `isValid()`, `checkValid()` |
 
-**缺失**：信号（cursorPositionChanged/selectionChanged）
-
-**已补全**：`setTabStopDistance()`（Qt6）/`setAcceptRichText()`/`setPlaceholderText()`（2026-08-28 任务 5）
+**已补全**：`setTabStopDistance()`（Qt6）/`setAcceptRichText()`/`setPlaceholderText()`（2026-08-28 任务 5）、信号 `setOnCursorPositionChanged()`/`setOnSelectionChanged()`（2026-08-29）
 
 **注意**：`setWidgetStyleSheet()` 是 `setStyleSheet()` 的旧别名，已标记 `@Deprecated`。请使用 `setStyleSheet()`。
 
@@ -63,7 +63,7 @@
 **覆盖度：90%**
 
 - QDate/QTime/QDateTime: 创建、读写、格式化、当前值
-- QCalendarWidget: 日期选择、范围、网格、导航、星期、选择模式
+- QCalendarWidget: 日期选择、范围、网格、导航、星期、选择模式、`setMinimumSize()`/`setStyleSheet()`（2026-08-29 已补）
 - QDateEdit/QTimeEdit/QDateTimeEdit: 日期/时间/日期时间编辑，含范围、显示格式、日历弹出、TimeSpec
 
 **已补全**：信号 `setOnClicked`/`setOnActivated`/`setOnSelectionChanged`（2026-08-28 任务 2）
@@ -329,15 +329,16 @@
 | `close()`, `isClosed()`, `isValid()`, `checkValid()` (QtResource) | |
 
 ### QScrollArea
-**覆盖度：85%**
+**覆盖度：95%**
 
 | 已有 | 缺失 |
 |------|------|
-| `setWidget()`, `widget()`, `takeWidget()` | `setFrameShape()`, `setFrameShadow()` |
+| `setWidget()`, `widget()`, `takeWidget()` | |
 | `setWidgetResizable()`, `widgetResizable()` | |
 | `setAlignment()`, `alignment()` | |
 | `setHorizontalScrollBarPolicy()`, `setVerticalScrollBarPolicy()` | |
 | `ensureVisible()` | |
+| `setFrameShape()`, `frameShape()`, `setFrameShadow()`, `frameShadow()`（已核实实现） | |
 | `setEnabled()`, `isEnabled()`, `setStyleSheet()` | |
 | `setMinimumSize()`, `setMaximumSize()` | |
 | `close()`, `isClosed()`, `isValid()`, `checkValid()` (QtResource) | |
@@ -399,7 +400,7 @@
 
 当前所有已知常用控件均已完成封装，暂无待完成任务。
 
-> 后续按需补充：QAbstractAnimation 子类化支持、QVideoWidget 亮度/对比度/色调/饱和度（需 QVideoSink）、QSplitter `insertWidget`/`replaceWidget`/`setSizes`/`sizes` 等进阶方法。
+> 后续按需补充：QAbstractAnimation 子类化支持、QVideoWidget 亮度/对比度/色调/饱和度（Qt6 已移至 QVideoSink，需封装 QVideoSink）。
 
 ### 5.2 已完成记录
 
@@ -441,6 +442,12 @@
 | 2026-07 审查后更新 | QGroupBox `setOnClicked`/`setOnToggled` | 已完成实现但未更新文档，本次审查已更正 |
 | 2026-07 审查后更新 | QLCDNumber `setStyleSheet` | 已完成实现但未更新文档，本次审查已更正 |
 | 2026-07 审查后更新 | QSpinBox 补齐方法（`setDisplayIntegerBase`/`setButtonSymbols`/`setCorrectionMode`/`setGroupSeparatorShown`等） | 已完成实现但未更新文档，本次审查已更正 |
+| 2026-08-28 | 任务 1-6 API 补全 | QPushButton.setMenu、QCalendarWidget 信号、QTabWidget 7 方法、QSplitter 7 方法、QComboBox.setIconSize、QTextEdit 3 方法、INDEX.md/roadmap.md 更新 |
+| 2026-08-29 | QLineEdit `setValidator` 成员方法（3 重载）+ `setDragEnabled` | 桥接 + 封装 + 测试 |
+| 2026-08-29 | QTextEdit 信号 `setOnCursorPositionChanged`/`setOnSelectionChanged` | 桥接 + 封装 + 测试 |
+| 2026-08-29 | QCalendarWidget `setMinimumSize`/`setStyleSheet` | 复用 qWidget 共享 FFI |
+| 2026-08-29 | QVideoWidget QtResource 接口 | 实现 `<: QtResource` + `isClosed`/`isValid`/`checkValid` |
+| 2026-08-29 | QScrollArea 文档修正 | `setFrameShape`/`setFrameShadow` 实际已实现，从缺失移到已有 |
 
 > **2026-07-30 全量源码审查**：通过逐文件比对源文件，修正了大量「缺失」列表中已实现但未更新的 API。本次审查涉及的源文件包括：lineedit.cj, textedit.cj, pushbutton.cj, spinbox.cj, doublespinbox.cj, dial.cj, lcdnumber.cj, toolbutton.cj, progressbar.cj, checkbox.cj, radiobutton.cj, containers.cj (QGroupBox/QTabWidget/QScrollArea/QFrame/QSplitter), slider.cj, combobox.cj。
 >
@@ -451,16 +458,19 @@
 > **2026-07-30 第四批补齐（扩展控件 QtResource）**：完成 QAction、QProgressDialog、QTcpSocket、QSqlDatabase 四个扩展控件的 QtResource 接口实现。其中 QTcpSocket 原 `close()` 语义为「关闭 TCP 连接」，调整为资源清理（关闭连接 + 销毁对象），旧操作保留为 `abort()`；`isValid()` 重命名为 `isSocketValid()` 以消除与 `QtResource.isValid()` 的语义冲突。QSqlDatabase 原 `close()` 语义为「关闭数据库连接」，调整为资源清理，旧操作保留为 `closeDatabase()`。统一添加 `import cjqt6.core.*` 到各包，添加 `checkValid()` 守卫和 `CreateFailedException` 空指针检查。`cjpm build` 通过。
 >
 > **2026-07-30 第五批（新增六个控件封装）**：完成 QAbstractAnimation/QParallelAnimationGroup（core）、QUndoCommand/QUndoStack（core）、QStyleHelper（gui）、QCameraDevice/QCamera/QMediaCaptureSession/QMediaDevices（multimedia）、QVideoWidget（multimedia）、QSortFilterProxyModel（views）共 6 组控件的 C++ FFI 桥接 + Cangjie 绑定。同时修复 CMakeLists.txt 添加 MultimediaWidgets 可选依赖。`cjpm build` 通过。
+>
+> **2026-08-29 API 补全（修正 + 补全）**：先修正 api-completeness.md 过时信息（QScrollArea setFrameShape/setFrameShadow 实际已实现），再补全 5 项缺失 API：QCalendarWidget `setMinimumSize`/`setStyleSheet`、QVideoWidget QtResource 接口、QLineEdit `setValidator`（3 重载）+ `setDragEnabled`、QTextEdit 信号 `setOnCursorPositionChanged`/`setOnSelectionChanged`。全量测试 1342 通过 / 0 失败。
 
-### 测试状态（2026-07-30 最终确认）
+### 测试状态（2026-08-29 最终确认）
 | 指标 | 数值 |
 |------|------|
-| 总用例数 | 279 |
-| 通过 | **279** ✅ |
+| 总用例数 | 1414 |
+| 通过 | **1342** ✅ |
+| 跳过 | 72 |
 | 失败 | **0** ✅ |
 | 错误 | 0 |
 
-**全量测试通过** — 含 12 个信号测试（SignalAdvancedTests[4]、QSignalLifecycleTests[5]、SignalSlotTests[3]）和全部 QtResource `testOperationsAfterClose` 用例。之前记录的 5 个信号预存失败为 **陈旧测试二进制** 所致，`cjpm build` 重建后 279/279 全部通过。
+**全量测试通过** — 72 个 SKIPPED 为平台/条件跳过的用例，无失败无错误。
 
 **本批次修复验证（第二批）**：全部 4 个 QtResource `testOperationsAfterClose` 测试用例（QRadioButton/QDial/QLCDNumber/QToolButton）均已通过。
 

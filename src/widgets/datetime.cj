@@ -375,6 +375,21 @@ public class QCalendarWidget {
     public func show(): Unit { unsafe { qWidgetShow(ptr) } }
     public func hide(): Unit { unsafe { qWidgetHide(ptr) } }
     public func resize(width: Int32, height: Int32): Unit { unsafe { qWidgetResize(ptr, width, height) } }
+    
+    /// 设置最小尺寸
+    public func setMinimumSize(minw: Int32, minh: Int32): Unit {
+        unsafe { qWidgetSetMinimumSize(ptr, minw, minh) }
+    }
+    
+    /// 设置样式表
+    public func setStyleSheet(style: String): Unit {
+        unsafe {
+            let cstr = LibC.mallocCString(style)
+            qWidgetSetStyleSheet(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+    
     public func getPtr(): Int64 { ptr }
     
     public func delete(): Unit {

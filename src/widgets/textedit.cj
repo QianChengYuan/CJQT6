@@ -103,6 +103,10 @@ foreign func qTextEditConnectUndoAvailable(ptr: Int64, callback: BoolCallback): 
 foreign func qTextEditConnectRedoAvailable(ptr: Int64, callback: BoolCallback): Unit
 // QTextEdit::connectCopyAvailable() - 连接复制可用性变化信号
 foreign func qTextEditConnectCopyAvailable(ptr: Int64, callback: BoolCallback): Unit
+// QTextEdit::connectCursorPositionChanged() - 连接光标位置变化信号
+foreign func qTextEditConnectCursorPositionChanged(ptr: Int64, callback: VoidCallback): Unit
+// QTextEdit::connectSelectionChanged() - 连接选区变化信号
+foreign func qTextEditConnectSelectionChanged(ptr: Int64, callback: VoidCallback): Unit
 
 /// 多行文本编辑框部件
 /// 支持资源管理，可使用 try-with-resources 自动释放
@@ -426,6 +430,22 @@ public class QTextEdit <: QtResource {
         checkValid()
         unsafe {
             qTextEditConnectCopyAvailable(ptr, callback)
+        }
+    }
+    
+    /// 光标位置变化回调
+    public func setOnCursorPositionChanged(callback: VoidCallback): Unit {
+        checkValid()
+        unsafe {
+            qTextEditConnectCursorPositionChanged(ptr, callback)
+        }
+    }
+    
+    /// 选区变化回调
+    public func setOnSelectionChanged(callback: VoidCallback): Unit {
+        checkValid()
+        unsafe {
+            qTextEditConnectSelectionChanged(ptr, callback)
         }
     }
     

@@ -42,6 +42,7 @@ foreign func qLineEditHasFrame(ptr: Int64): Bool
 foreign func qLineEditSetClearButtonEnabled(ptr: Int64, enabled: Bool): Unit
 foreign func qLineEditIsClearButtonEnabled(ptr: Int64): Bool
 foreign func qLineEditSetCompleter(ptr: Int64, completerPtr: Int64): Unit
+foreign func qLineEditSetDragEnabled(ptr: Int64, enabled: Bool): Unit
 foreign func qLineEditDisplayText(ptr: Int64): CString
 foreign func qLineEditConnectCursorPositionChanged(ptr: Int64, callback: Int32Int32Callback): Unit
 foreign func qLineEditConnectSelectionChanged(ptr: Int64, callback: VoidCallback): Unit
@@ -427,6 +428,30 @@ public class QLineEdit <: QtResource {
     public func setCompleter(completerPtr: Int64): Unit {
         checkValid()
         unsafe { qLineEditSetCompleter(ptr, completerPtr) }
+    }
+    
+    /// 设置整数验证器
+    public func setValidator(validator: QIntValidator): Unit {
+        checkValid()
+        unsafe { qLineEditSetValidator(ptr, validator.getPtr()) }
+    }
+    
+    /// 设置浮点验证器
+    public func setValidator(validator: QDoubleValidator): Unit {
+        checkValid()
+        unsafe { qLineEditSetValidator(ptr, validator.getPtr()) }
+    }
+    
+    /// 设置正则表达式验证器
+    public func setValidator(validator: QRegExpValidator): Unit {
+        checkValid()
+        unsafe { qLineEditSetValidator(ptr, validator.getPtr()) }
+    }
+    
+    /// 设置是否允许拖放
+    public func setDragEnabled(enabled: Bool): Unit {
+        checkValid()
+        unsafe { qLineEditSetDragEnabled(ptr, enabled) }
     }
     
     /// 获取显示文本（受 echoMode 影响）

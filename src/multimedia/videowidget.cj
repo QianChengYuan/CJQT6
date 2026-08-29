@@ -16,11 +16,11 @@ foreign func qVideoWidgetDelete(ptr: Int64): Unit
 // ============================================================
 // QVideoWidget - 视频显示控件
 // ============================================================
-public class QVideoWidget {
+public class QVideoWidget <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
-    private func checkValid(): Unit {
+    public func checkValid(): Unit {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QVideoWidget already deleted")
         }
@@ -67,6 +67,16 @@ public class QVideoWidget {
     /// 获取原生指针
     public func getPtr(): Int64 {
         ptr
+    }
+
+    /// 是否已关闭
+    public func isClosed(): Bool {
+        closed
+    }
+
+    /// 检查对象有效性
+    public func isValid(): Bool {
+        !closed && ptr != 0 && isObjectAlive(ptr)
     }
 
     /// 释放资源

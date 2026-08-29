@@ -974,6 +974,7 @@ qLineEditSetAlignment
 qLineEditSetClearButtonEnabled
 qLineEditSetCompleter
 qLineEditSetCursorPosition
+qLineEditSetDragEnabled
 qLineEditSetEchoMode
 qLineEditSetFocus
 qLineEditSetFrame
@@ -2302,7 +2303,9 @@ qTextEditCanUndo
 qTextEditCharacterCount
 qTextEditClear
 qTextEditConnectCopyAvailable
+qTextEditConnectCursorPositionChanged
 qTextEditConnectRedoAvailable
+qTextEditConnectSelectionChanged
 qTextEditConnectTextChanged
 qTextEditConnectUndoAvailable
 qTextEditCopy

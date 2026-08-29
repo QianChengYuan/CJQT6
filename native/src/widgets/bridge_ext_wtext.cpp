@@ -138,6 +138,12 @@ void qLineEditSetCompleter(int64_t ptr, int64_t completerPtr) {
     if (le && comp) le->setCompleter(comp);
 }
 
+// 设置是否允许拖放
+void qLineEditSetDragEnabled(int64_t ptr, bool enabled) {
+    QLineEdit* le = reinterpret_cast<QLineEdit*>(ptr);
+    if (le) le->setDragEnabled(enabled);
+}
+
 const char* qLineEditDisplayText(int64_t ptr) {
     QLineEdit* le = reinterpret_cast<QLineEdit*>(ptr);
     if (le) {
@@ -257,6 +263,8 @@ static std::unordered_map<int64_t, std::function<void()>> g_teTextChanged;
 static std::unordered_map<int64_t, std::function<void(bool)>> g_teUndoAvail;
 static std::unordered_map<int64_t, std::function<void(bool)>> g_teRedoAvail;
 static std::unordered_map<int64_t, std::function<void(bool)>> g_teCopyAvail;
+static std::unordered_map<int64_t, std::function<void()>> g_teCursorPos;
+static std::unordered_map<int64_t, std::function<void()>> g_teSelection;
 
 void qTextEditConnectTextChanged(int64_t ptr, void (*cb)()) {
     QTextEdit* te = reinterpret_cast<QTextEdit*>(ptr);
@@ -298,6 +306,28 @@ void qTextEditConnectCopyAvailable(int64_t ptr, void (*cb)(bool)) {
         QObject::connect(te, &QTextEdit::copyAvailable, [ptr](bool avail) {
             auto it = g_teCopyAvail.find(ptr);
             if (it != g_teCopyAvail.end()) it->second(avail);
+        });
+    }
+}
+
+void qTextEditConnectCursorPositionChanged(int64_t ptr, void (*cb)()) {
+    QTextEdit* te = reinterpret_cast<QTextEdit*>(ptr);
+    if (te && cb && g_teCursorPos.find(ptr) == g_teCursorPos.end()) {
+        g_teCursorPos[ptr] = [cb]() { cb(); };
+        QObject::connect(te, &QTextEdit::cursorPositionChanged, [ptr]() {
+            auto it = g_teCursorPos.find(ptr);
+            if (it != g_teCursorPos.end()) it->second();
+        });
+    }
+}
+
+void qTextEditConnectSelectionChanged(int64_t ptr, void (*cb)()) {
+    QTextEdit* te = reinterpret_cast<QTextEdit*>(ptr);
+    if (te && cb && g_teSelection.find(ptr) == g_teSelection.end()) {
+        g_teSelection[ptr] = [cb]() { cb(); };
+        QObject::connect(te, &QTextEdit::selectionChanged, [ptr]() {
+            auto it = g_teSelection.find(ptr);
+            if (it != g_teSelection.end()) it->second();
         });
     }
 }
@@ -467,6 +497,8 @@ void qWtextSignalCleanup(int64_t ptr) {
     g_teUndoAvail.erase(ptr);
     g_teRedoAvail.erase(ptr);
     g_teCopyAvail.erase(ptr);
+    g_teCursorPos.erase(ptr);
+    g_teSelection.erase(ptr);
     g_pteTextChanged.erase(ptr);
     g_pteBlockCount.erase(ptr);
     g_pteModChanged.erase(ptr);
@@ -486,6 +518,8 @@ int32_t qWtextSignalRegistered(int64_t ptr) {
             g_teUndoAvail.find(ptr) != g_teUndoAvail.end() ||
             g_teRedoAvail.find(ptr) != g_teRedoAvail.end() ||
             g_teCopyAvail.find(ptr) != g_teCopyAvail.end() ||
+            g_teCursorPos.find(ptr) != g_teCursorPos.end() ||
+            g_teSelection.find(ptr) != g_teSelection.end() ||
             g_pteTextChanged.find(ptr) != g_pteTextChanged.end() ||
             g_pteBlockCount.find(ptr) != g_pteBlockCount.end() ||
             g_pteModChanged.find(ptr) != g_pteModChanged.end() ||
