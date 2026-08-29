@@ -1,6 +1,6 @@
 # UI2CJ — Qt Designer .ui → CJQT6 仓颉代码生成器
 
-> 配套仓库：`https://gitcode.com/yuan_1992/CJQT6`（Qt6 版，v1.7.0+）
+> 配套仓库：`https://gitcode.com/yuan_1992/CJQT6`（Qt6 版，v1.9.0+）
 > 本文档描述 `tools/ui2cj` 的实际实现形态（生成独立可运行 `main()` 文件），
 > 并以仓库 `src/` 实际导出名为唯一真相源。
 > **不要参考** `Cangjie-TPC/CJQT`（Qt5.14.2）以及任何 CSDN / DevPress 文章——

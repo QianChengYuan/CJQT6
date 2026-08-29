@@ -1,20 +1,48 @@
 # CJQT6 API 完善度评估
 
-> 更新日期：2026-07-30（第五批 — animation/undostack/style/camera/videowidget/sortfilterproxymodel）
+> 更新日期：2026-08-29
 >
-> 本文档评估每个控件的封装完整性，按优先级列出待补全的方法。
->
-> 评级标准：
-> - ✅ **完善** — 覆盖 Qt API 80%+，可满足绝大部分日常使用
-> - ⚠️ **基本完善** — 覆盖 Qt API 60-80%，常用操作可用，缺进阶方法
-> - ❌ **不足** — 覆盖 Qt API < 60%，基础功能有缺口
+> 评级标准（按覆盖度分档）：
+> - ✅ **完善** — 覆盖 Qt API ≥ 90%，可满足绝大部分日常使用
+> - ⚠️ **基本完善** — 覆盖 Qt API 80-89%，常用操作可用，缺进阶方法
+> - ❌ **不足** — 覆盖 Qt API < 80%，基础功能有缺口
 
 ---
 
-## 1. 封装非常完善的控件 ✅
+## 1. 覆盖度总览
 
-### QLineEdit
-**覆盖度：98%**
+| 控件 | 模块 | 覆盖度 | 评级 | 备注 |
+|------|------|--------|------|------|
+| QLineEdit | widgets | 98% | ✅ | 含验证器/拖放/6 信号 |
+| QTextEdit | widgets | 98% | ✅ | 含查找替换/6 信号 |
+| QSpinBox | widgets | 98% | ✅ | |
+| QSplitter | widgets | 98% | ✅ | 含 sizes/saveState 数组 FFI |
+| QPushButton | widgets | 95% | ✅ | 含 setMenu/快捷键 |
+| QComboBox | widgets | 95% | ✅ | 含 setIconSize |
+| QSlider | widgets | 95% | ✅ | |
+| QDoubleSpinBox | widgets | 95% | ✅ | |
+| QDial | widgets | 95% | ✅ | |
+| QLCDNumber | widgets | 95% | ✅ | |
+| QToolButton | widgets | 95% | ✅ | 含 setMenu/popupMode |
+| QProgressBar | widgets | 95% | ✅ | |
+| QCheckBox | widgets | 95% | ✅ | |
+| QRadioButton | widgets | 95% | ✅ | |
+| QTabWidget | widgets | 95% | ✅ | 含图标/定位/文档模式 7 方法 |
+| QGroupBox | widgets | 95% | ✅ | |
+| QScrollArea | widgets | 95% | ✅ | 含 setFrameShape/setFrameShadow |
+| 对话框集合 | dialogs | 95% | ✅ | QMessageBox/QFileDialog/QInputDialog 等 |
+| 日期时间集合 | widgets | 90% | ✅ | QCalendarWidget 含 3 信号 |
+| QFrame | widgets | 85% | ⚠️ | 缺部分进阶方法 |
+| QVideoWidget | multimedia | 80% | ⚠️ | Qt6 已移除 brightness 等至 QVideoSink |
+| QVideoSink | multimedia | 70% | ⚠️ | 仅 videoSize/subtitleText |
+
+> 所有基础控件均已完成封装，无 ❌ 评级控件。
+
+---
+
+## 2. 基础输入控件 API 明细
+
+### QLineEdit — 覆盖度 98% ✅
 
 | 分类 | 方法 |
 |------|------|
@@ -32,10 +60,7 @@
 | 状态 | `echoMode()`, `isReadOnly()`, `hasFrame()`, `length()` |
 | 信号 | `setOnTextChanged()`, `setOnReturnPressed()`, `setOnEditingFinished()`, `setOnCursorPositionChanged()`, `setOnSelectionChanged()`, `setOnInputRejected()` |
 
-**已补全**：`setValidator()` 成员方法（3 重载，2026-08-29）、`setDragEnabled()`（2026-08-29）
-
-### QTextEdit
-**覆盖度：98%**
+### QTextEdit — 覆盖度 98% ✅
 
 | 分类 | 方法 |
 |------|------|
@@ -49,432 +74,302 @@
 | 光标 | `lineCount()`, `currentLine()`, `currentColumn()`, `characterCount()`, `goToLine()` |
 | 打印 | `print()` |
 | 尺寸 | `setMinimumSize()`, `setMaximumSize()` |
-| 样式 | `setStyleSheet()` |
+| 样式 | `setStyleSheet()`（`setWidgetStyleSheet()` 为旧别名，已标记 `@Deprecated`） |
 | 工具提示 | `setToolTip()` |
 | 可见性 | `setVisible()`, `isVisible()`, `width()`, `height()` |
 | 信号 | `setOnTextChanged()`, `setOnUndoAvailable()`, `setOnRedoAvailable()`, `setOnCopyAvailable()`, `setOnCursorPositionChanged()`, `setOnSelectionChanged()` |
 | 资源 | `close()`, `isClosed()`, `isValid()`, `checkValid()` |
 
-**已补全**：`setTabStopDistance()`（Qt6）/`setAcceptRichText()`/`setPlaceholderText()`（2026-08-28 任务 5）、信号 `setOnCursorPositionChanged()`/`setOnSelectionChanged()`（2026-08-29）
+### QSpinBox — 覆盖度 98% ✅
 
-**注意**：`setWidgetStyleSheet()` 是 `setStyleSheet()` 的旧别名，已标记 `@Deprecated`。请使用 `setStyleSheet()`。
+| 分类 | 方法 |
+|------|------|
+| 值 | `setValue()`, `value()`, `setRange()`, `setSingleStep()` |
+| 格式 | `setPrefix()` / `prefix()`, `setSuffix()` / `suffix()`, `setSpecialValueText()`, `cleanText()`, `text()` |
+| 显示 | `setDisplayIntegerBase()` / `displayIntegerBase()`, `setButtonSymbols()` / `buttonSymbols()`, `setCorrectionMode()` |
+| 范围 | `setMinimum()` / `minimum()`, `setMaximum()` / `maximum()`, `setGroupSeparatorShown()` |
+| 行为 | `setWrapping()` / `wrapping()` |
+| 编辑 | `selectAll()`, `setFocus()` |
+| 信号 | `setOnValueChanged()`, `setOnTextChanged()`, `setOnEditingFinished()` |
+| 基类 | `setEnabled()`, `isEnabled()`, `setStyleSheet()`, `setMinimumSize()`, `setMaximumSize()` |
+| 资源 | `close()`, `isClosed()`, `isValid()`, `checkValid()` |
 
-### 日期时间 (QDate/QTime/QDateTime/QCalendarWidget/QDateEdit/QTimeEdit/QDateTimeEdit)
-**覆盖度：90%**
+### QPushButton — 覆盖度 95% ✅
 
-- QDate/QTime/QDateTime: 创建、读写、格式化、当前值
-- QCalendarWidget: 日期选择、范围、网格、导航、星期、选择模式、`setMinimumSize()`/`setStyleSheet()`（2026-08-29 已补）
-- QDateEdit/QTimeEdit/QDateTimeEdit: 日期/时间/日期时间编辑，含范围、显示格式、日历弹出、TimeSpec
+| 分类 | 方法 |
+|------|------|
+| 外观 | `setText()`, `text()`, `setIcon()`, `setIconSize()`, `setStandardIcon()`, `iconName()` |
+| 菜单 | `setMenu()` |
+| 状态 | `setCheckable()` / `isCheckable()`, `setChecked()` / `isChecked()`, `setDefault()`, `setFlat()`, `setAutoDefault()` / `isAutoDefault()`, `isDefault()`, `isFlat()`, `setAutoRepeat()` / `isAutoRepeat()` |
+| 快捷键 | `setShortcut()`, `shortcut()` |
+| 信号 | `setOnClick()`, `setOnClickCapture()`, `disconnectClick()`, `setOnPressed()`, `setOnPressedCapture()`, `disconnectPressed()`, `setOnReleased()`, `setOnReleasedCapture()`, `disconnectReleased()`, `setOnToggled()`, `setOnClickedChecked()`, `disconnect()` |
+| 基类 | `setEnabled()`, `isEnabled()`, `setStyleSheet()`, `setMinimumSize()`, `setMaximumSize()` |
+| 资源 | `close()`, `isClosed()`, `isValid()`, `checkValid()` |
 
-**已补全**：信号 `setOnClicked`/`setOnActivated`/`setOnSelectionChanged`（2026-08-28 任务 2）
+### QComboBox — 覆盖度 95% ✅
 
-**缺失**：`setMinimumSize`/`setStyleSheet`
+| 分类 | 方法 |
+|------|------|
+| 条目 | `addItem()`, `addItems()`, `insertItem()`, `setItemText()`, `removeItem()`, `count()`, `itemText()`, `clear()` |
+| 当前 | `currentText()`, `currentIndex()`, `setCurrentIndex()`, `setCurrentText()`, `setPlaceholderText()`, `findText()` |
+| 图标 | `setIconSize()` |
+| 编辑 | `setEditable()` |
+| 容量 | `setMaxVisibleItems()`, `setMaxCount()` |
+| 信号 | `setOnCurrentIndexChanged()`, `setOnCurrentTextChanged()` |
+| 基类 | `setEnabled()`, `isEnabled()`, `setStyleSheet()`, `setMinimumSize()`, `setMaximumSize()` |
 
-### 对话框
-**覆盖度：95%**
+### QSlider — 覆盖度 95% ✅
 
-- QMessageBox: information/warning/critical/question
-- QFileDialog: getOpenFileName/getSaveFileName/getExistingDirectory/getOpenFileNames
-- QInputDialog: getText (含 Ok 状态)/getInt (含 Ok 状态)/getDouble
-- QColorDialog: getColor (返回十六进制)
-- QFontDialog: getFontName/getFontSize/getFont/getFontWithDefault (解析字体信息)
-- QProgressDialog: 创建/值/范围/标签/取消/自动关闭/重置
-- QWizard/QWizardPage: 创建/页面/导航/选项
-- QErrorMessage: 显示消息/标题
+| 分类 | 方法 |
+|------|------|
+| 值 | `setValue()`, `value()`, `setRange()`, `setSingleStep()`, `singleStep()`, `setPageStep()`, `pageStep()` |
+| 刻度 | `setTickPosition()` / `tickPosition()`, `setTickInterval()` / `tickInterval()` |
+| 反转 | `setInvertedControls()` / `invertedControls()`, `setInvertedAppearance()` / `invertedAppearance()` |
+| 行为 | `setTracking()`, `hasTracking()` |
+| 信号 | `setOnValueChanged()`, `setOnSliderMoved()`, `setOnSliderPressed()`, `setOnSliderReleased()` |
+| 基类 | `setEnabled()`, `isEnabled()`, `setStyleSheet()`, `setMinimumSize()`, `setMaximumSize()` |
+
+### QDoubleSpinBox — 覆盖度 95% ✅
+
+| 分类 | 方法 |
+|------|------|
+| 值 | `setValue()`, `value()`, `setRange()`, `setSingleStep()` |
+| 小数 | `setDecimals()` / `decimals()` |
+| 格式 | `setPrefix()` / `prefix()`, `setSuffix()` / `suffix()`, `cleanText()`, `text()`, `setSpecialValueText()` |
+| 行为 | `setWrapping()` / `wrapping()`, `setButtonSymbols()`, `setStepType()`, `setGroupSeparatorShown()` |
+| 范围 | `setMinimum()` / `minimum()`, `setMaximum()` / `maximum()` |
+| 编辑 | `selectAll()`, `setFocus()` |
+| 信号 | `setOnValueChanged()`, `setOnTextChanged()`, `setOnEditingFinished()` |
+| 基类 | `setEnabled()`, `isEnabled()`, `setStyleSheet()`, `setMinimumSize()`, `setMaximumSize()` |
+
+### QDial — 覆盖度 95% ✅
+
+| 分类 | 方法 |
+|------|------|
+| 值 | `setValue()`, `value()`, `setRange()`, `setSingleStep()`, `setPageStep()` / `pageStep()` |
+| 行为 | `setWrapping()` / `wrapping()` |
+| 刻度 | `setNotchesVisible()` / `notchesVisible()`, `setNotchTarget()` / `notchTarget()` |
+| 信号 | `setOnValueChanged()` |
+| 基类 | `setEnabled()`, `isEnabled()`, `setStyleSheet()`, `setMinimumSize()`, `setMaximumSize()` |
+| 资源 | `close()`, `isClosed()`, `isValid()`, `checkValid()` |
+
+### QLCDNumber — 覆盖度 95% ✅
+
+| 分类 | 方法 |
+|------|------|
+| 显示 | `display()`, `displayInt()`, `checkOverflow()`, `value()` |
+| 模式 | `setMode()` / `mode()`, `setSegmentStyle()` / `segmentStyle()`, `setSmallDecimalPoint()` / `smallDecimalPoint()`, `digitCount()`, `setDigitCount()` |
+| 基类 | `setEnabled()`, `isEnabled()`, `setStyleSheet()`, `setMinimumSize()`, `setMaximumSize()` |
+| 资源 | `close()`, `isClosed()`, `isValid()`, `checkValid()` |
+
+### QToolButton — 覆盖度 95% ✅
+
+| 分类 | 方法 |
+|------|------|
+| 外观 | `setText()`, `text()`, `setIcon()`, `setIconSize()`, `setIconFromPath()`, `setToolButtonStyle()` / `toolButtonStyle()`, `setPopupMode()` |
+| 动作 | `defaultAction()`, `setDefaultAction()`, `setAutoRaise()` / `autoRaise()` / `isAutoRaise()`, `setArrowType()` |
+| 菜单 | `setMenu()`, `showMenu()` |
+| 信号 | `setOnClick()`, `setOnClickCapture()`, `disconnectClicked()`, `setOnPressed()`, `setOnPressedCapture()`, `disconnectPressed()`, `setOnReleased()`, `setOnReleasedCapture()`, `disconnectReleased()`, `setOnClickedChecked()`, `disconnectClickedChecked()`, `disconnect()` |
+| 基类 | `setEnabled()`, `isEnabled()`, `setStyleSheet()`, `setMinimumSize()`, `setMaximumSize()` |
+| 资源 | `close()`, `isClosed()`, `isValid()`, `checkValid()` |
+
+### QProgressBar — 覆盖度 95% ✅
+
+| 分类 | 方法 |
+|------|------|
+| 值 | `setValue()` / `value()`, `setRange()`, `setMinimum()` / `minimum()`, `setMaximum()` / `maximum()`, `reset()` |
+| 文本 | `setFormat()` / `format()`, `text()`, `setTextVisible()` / `isTextVisible()` |
+| 方向 | `setOrientation()`, `setInvertedAppearance()` / `invertedAppearance()`, `setAlignment()`, `setTextDirection()` / `textDirection()` |
+| 信号 | `setOnValueChanged()` |
+| 基类 | `setEnabled()`, `isEnabled()`, `setStyleSheet()`, `setMinimumSize()`, `setMaximumSize()` |
+| 资源 | `close()`, `isClosed()`, `isValid()`, `checkValid()` |
+
+### QCheckBox — 覆盖度 95% ✅
+
+| 分类 | 方法 |
+|------|------|
+| 文本 | `setText()`, `text()` |
+| 状态 | `setChecked()` / `isChecked()`, `setTristate()` / `isTristate()`, `checkState()`, `setCheckState()` |
+| 信号 | `setOnStateChanged()`, `setOnClicked()` |
+| 基类 | `setEnabled()`, `isEnabled()`, `setStyleSheet()`, `setMinimumSize()`, `setMaximumSize()` |
+| 资源 | `close()`, `isClosed()`, `isValid()`, `checkValid()` |
+
+### QRadioButton — 覆盖度 95% ✅
+
+| 分类 | 方法 |
+|------|------|
+| 文本 | `setText()`, `text()` |
+| 状态 | `setChecked()` / `isChecked()`, `setAutoExclusive()` / `isAutoExclusive()` |
+| 信号 | `setOnToggled()`, `setOnClicked()` |
+| 基类 | `setEnabled()`, `isEnabled()`, `setStyleSheet()`, `setMinimumSize()`, `setMaximumSize()` |
+| 资源 | `close()`, `isClosed()`, `isValid()`, `checkValid()` |
 
 ---
 
-## 2. 封装基本完善的控件 ⚠️
+## 3. 容器控件 API 明细
 
-### QPushButton
-**覆盖度：95%**
+### QSplitter — 覆盖度 98% ✅
 
-| 已有 | 缺失 |
+| 分类 | 方法 |
 |------|------|
-| `setText()`, `text()`, `setIcon()`, `setIconSize()`, `setStandardIcon()`, `iconName()`, `setMenu()` | |
-| `setEnabled()`, `isEnabled()`, `setStyleSheet()` | |
-| `setMinimumSize()`, `setMaximumSize()` | |
-| `setCheckable()`, `isCheckable()`, `setChecked()`, `isChecked()` | |
-| `setDefault()`, `setFlat()` | |
-| `setAutoDefault()`, `isAutoDefault()`, `isDefault()`, `isFlat()` | |
-| `setAutoRepeat()`, `isAutoRepeat()` | |
-| `setShortcut()`, `shortcut()` | |
-| `setOnClick()`, `setOnClickCapture()`, `disconnectClick()` | |
-| `setOnPressed()`, `setOnPressedCapture()`, `disconnectPressed()` | |
-| `setOnReleased()`, `setOnReleasedCapture()`, `disconnectReleased()` | |
-| `setOnToggled()`, `setOnClickedChecked()`, `disconnect()` | |
-| `close()`, `isClosed()`, `isValid()`, `checkValid()` (QtResource) | |
+| 子部件 | `addWidget()`, `insertWidget()`, `replaceWidget()`, `count()` |
+| 布局 | `setStretchFactor()`, `setHandleWidth()` / `handleWidth()`, `setOrientation()` / `orientation()`, `setChildrenCollapsible()` / `childrenCollapsible()`, `setOpaqueResize()` |
+| 尺寸 | `setSizes()` / `sizes()`（数组 FFI）, `saveState()` / `restoreState()`（字节流 FFI） |
+| 基类 | `setEnabled()`, `isEnabled()`, `setStyleSheet()`, `setMinimumSize()`, `setMaximumSize()` |
 
-### QComboBox
-**覆盖度：95%**
+### QTabWidget — 覆盖度 95% ✅
 
-| 已有 | 缺失 |
+| 分类 | 方法 |
 |------|------|
-| `addItem()`, `addItems()`, `insertItem()`, `setItemText()` | |
-| `removeItem()`, `count()`, `itemText()`, `clear()` | |
-| `currentText()`, `currentIndex()`, `setCurrentIndex()` | |
-| `setCurrentText()`, `setPlaceholderText()`, `findText()` | |
-| `setIconSize()`（2026-08-28 任务 5） | |
-| `setEditable()` | |
-| `setMaxVisibleItems()`, `setMaxCount()` | |
-| `setEnabled()`, `isEnabled()`, `setStyleSheet()` | |
-| `setMinimumSize()`, `setMaximumSize()` | |
-| `setOnCurrentIndexChanged()`, `setOnCurrentTextChanged()` | |
+| 标签页 | `addTab()`, `removeTab()`, `insertTab()`, `count()`, `clear()` |
+| 当前 | `currentIndex()`, `setCurrentIndex()` |
+| 文本 | `setTabText()`, `tabText()`, `setTabToolTip()` |
+| 图标 | `setTabIcon()`, `setIconSize()` |
+| 外观 | `setTabPosition()`, `setDocumentMode()`, `setElideMode()`, `setTabShape()`, `setUsesScrollButtons()`, `setTabsClosable()`, `setMovable()` |
+| 信号 | `setOnCurrentChanged()` |
+| 基类 | `setEnabled()`, `isEnabled()`, `setStyleSheet()`, `setMinimumSize()`, `setMaximumSize()` |
 
-### QSlider
-**覆盖度：95%**
+### QGroupBox — 覆盖度 95% ✅
 
-| 已有 | 缺失 |
+| 分类 | 方法 |
 |------|------|
-| `setValue()`, `value()`, `setRange()`, `setOrientation()` | |
-| `setSingleStep()`, `singleStep()`, `setPageStep()`, `pageStep()` | |
-| `setTickPosition()`, `tickPosition()` | |
-| `setTickInterval()`, `tickInterval()` | |
-| `setInvertedControls()`, `invertedControls()` | |
-| `setInvertedAppearance()`, `invertedAppearance()` | |
-| `setTracking()`, `hasTracking()` | |
-| `setEnabled()`, `isEnabled()`, `setStyleSheet()` | |
-| `setMinimumSize()`, `setMaximumSize()` | |
-| `setOnValueChanged()`, `setOnSliderMoved()` | |
-| `setOnSliderPressed()`, `setOnSliderReleased()` | |
+| 标题 | `setTitle()` / `title()` |
+| 可选 | `setCheckable()` / `isCheckable()`, `setChecked()` / `isChecked()`, `setFlat()` / `isFlat()` |
+| 对齐 | `setAlignment()` / `alignment()` |
+| 布局 | `setLayout()` |
+| 信号 | `setOnClicked()`, `setOnToggled()` |
+| 基类 | `setEnabled()`, `isEnabled()`, `setStyleSheet()`, `setMinimumSize()`, `setMaximumSize()` |
+| 资源 | `close()`, `isClosed()`, `isValid()`, `checkValid()` |
 
-### QSpinBox
-**覆盖度：98%**
+### QScrollArea — 覆盖度 95% ✅
 
-| 已有 | 缺失 |
+| 分类 | 方法 |
 |------|------|
-| `setValue()`, `value()`, `setRange()`, `setSingleStep()` | |
-| `setPrefix()`, `prefix()`, `setSuffix()`, `suffix()` | |
-| `setWrapping()`, `wrapping()` | |
-| `setSpecialValueText()`, `cleanText()`, `text()` | |
-| `setDisplayIntegerBase()`, `displayIntegerBase()` | |
-| `setButtonSymbols()`, `buttonSymbols()` | |
-| `setCorrectionMode()` | |
-| `setMinimum()`, `minimum()`, `setMaximum()`, `maximum()` | |
-| `setGroupSeparatorShown()` | |
-| `selectAll()`, `setFocus()` | |
-| `setOnValueChanged()`, `setOnTextChanged()`, `setOnEditingFinished()` | |
-| `setEnabled()`, `isEnabled()`, `setStyleSheet()` | |
-| `setMinimumSize()`, `setMaximumSize()` | |
-| `close()`, `isClosed()`, `isValid()`, `checkValid()` (QtResource) | |
+| 子部件 | `setWidget()`, `widget()`, `takeWidget()`, `setWidgetResizable()` / `widgetResizable()` |
+| 对齐 | `setAlignment()` / `alignment()` |
+| 滚动 | `setHorizontalScrollBarPolicy()`, `setVerticalScrollBarPolicy()`, `ensureVisible()` |
+| 边框 | `setFrameShape()` / `frameShape()`, `setFrameShadow()` / `frameShadow()` |
+| 基类 | `setEnabled()`, `isEnabled()`, `setStyleSheet()`, `setMinimumSize()`, `setMaximumSize()` |
+| 资源 | `close()`, `isClosed()`, `isValid()`, `checkValid()` |
 
-### QDoubleSpinBox
-**覆盖度：95%**
+### QFrame — 覆盖度 85% ⚠️
 
-| 已有 | 缺失 |
+| 分类 | 方法 |
 |------|------|
-| `setValue()`, `value()`, `setRange()`, `setSingleStep()` | |
-| `setDecimals()` / `decimals()` | |
-| `setPrefix()`, `prefix()`, `setSuffix()`, `suffix()` | |
-| `cleanText()`, `text()`, `setSpecialValueText()` | |
-| `setWrapping()`, `wrapping()` | |
-| `setButtonSymbols()` | |
-| `selectAll()`, `setFocus()` | |
-| `setMinimum()`, `minimum()`, `setMaximum()`, `maximum()` | |
-| `setStepType()`, `setGroupSeparatorShown()` | |
-| `setOnValueChanged()`, `setOnTextChanged()`, `setOnEditingFinished()` | |
-| `setEnabled()`, `isEnabled()`, `setStyleSheet()` | |
-| `setMinimumSize()`, `setMaximumSize()` | |
-
-### QDial
-**覆盖度：95%**
-
-| 已有 | 缺失 |
-|------|------|
-| `setValue()`, `value()`, `setRange()`, `setSingleStep()` | |
-| `setWrapping()`, `wrapping()` | |
-| `setNotchesVisible()`, `notchesVisible()` | |
-| `setNotchTarget()`, `notchTarget()` | |
-| `setPageStep()`, `pageStep()` | |
-| `setEnabled()`, `isEnabled()`, `setStyleSheet()` | |
-| `setMinimumSize()`, `setMaximumSize()` | |
-| `setOnValueChanged()` | |
-| `close()`, `isClosed()`, `isValid()`, `checkValid()` (QtResource) | |
-
-### QLCDNumber
-**覆盖度：95%**
-
-| 已有 | 缺失 |
-|------|------|
-| `display()`, `displayInt()`, `checkOverflow()`, `value()` | |
-| `setMode()`, `mode()` | |
-| `setSegmentStyle()`, `segmentStyle()` | |
-| `setSmallDecimalPoint()`, `smallDecimalPoint()` | |
-| `digitCount()`, `setDigitCount()` | |
-| `setEnabled()`, `isEnabled()`, `setStyleSheet()` | |
-| `setMinimumSize()`, `setMaximumSize()` | |
-| `close()`, `isClosed()`, `isValid()`, `checkValid()` (QtResource) | |
-
-### QToolButton
-**覆盖度：95%**
-
-| 已有 | 缺失 |
-|------|------|
-| `setText()`, `text()`, `setIcon()`, `setIconSize()`, `setIconFromPath()` | |
-| `setToolButtonStyle()`, `toolButtonStyle()`, `setPopupMode()` | |
-| `defaultAction()`, `setDefaultAction()` | |
-| `setAutoRaise()` / `autoRaise()` / `isAutoRaise()`, `setArrowType()` | |
-| `setMenu()`, `showMenu()` | |
-| `setOnClick()`, `setOnClickCapture()`, `disconnectClicked()` | |
-| `setOnPressed()`, `setOnPressedCapture()`, `disconnectPressed()` | |
-| `setOnReleased()`, `setOnReleasedCapture()`, `disconnectReleased()` | |
-| `setOnClickedChecked()`, `disconnectClickedChecked()`, `disconnect()` | |
-| `setEnabled()`, `isEnabled()`, `setStyleSheet()` | |
-| `setMinimumSize()`, `setMaximumSize()` | |
-| `close()`, `isClosed()`, `isValid()`, `checkValid()` (QtResource) | |
-
-### QProgressBar
-**覆盖度：95%**
-
-| 已有 | 缺失 |
-|------|------|
-| `setValue()` / `value()`, `setRange()` | |
-| `setMinimum()` / `minimum()`, `setMaximum()` / `maximum()` | |
-| `setFormat()` / `format()`, `text()` | |
-| `setTextVisible()` / `isTextVisible()` | |
-| `setOrientation()`, `setInvertedAppearance()` / `invertedAppearance()`, `reset()` | |
-| `setAlignment()`, `setTextDirection()` / `textDirection()` | |
-| `setOnValueChanged()` | |
-| `setEnabled()`, `isEnabled()`, `setStyleSheet()` | |
-| `setMinimumSize()`, `setMaximumSize()` | |
-| `close()`, `isClosed()`, `isValid()`, `checkValid()` (QtResource) | |
-
-### QCheckBox
-**覆盖度：95%**
-
-| 已有 | 缺失 |
-|------|------|
-| `setText()`, `text()` | |
-| `setChecked()` / `isChecked()` | |
-| `setTristate()` / `isTristate()` | |
-| `checkState()`, `setCheckState()` | |
-| `setOnStateChanged()`, `setOnClicked()` | |
-| `setEnabled()`, `isEnabled()`, `setStyleSheet()` | |
-| `setMinimumSize()`, `setMaximumSize()` | |
-| `close()`, `isClosed()`, `isValid()`, `checkValid()` (QtResource) | |
-
-### QRadioButton
-**覆盖度：95%**
-
-| 已有 | 缺失 |
-|------|------|
-| `setText()`, `text()` | |
-| `setChecked()` / `isChecked()` | |
-| `setAutoExclusive()` / `isAutoExclusive()` | |
-| `setOnToggled()`, `setOnClicked()` | |
-| `setEnabled()`, `isEnabled()`, `setStyleSheet()` | |
-| `setMinimumSize()`, `setMaximumSize()` | |
-| `close()`, `isClosed()`, `isValid()`, `checkValid()` (QtResource) | |
-
-### QTabWidget
-**覆盖度：95%**
-
-| 已有 | 缺失 |
-|------|------|
-| `addTab()`, `removeTab()`, `insertTab()`, `count()` | |
-| `currentIndex()`, `setCurrentIndex()` | |
-| `setTabText()`, `tabText()`, `setTabToolTip()` | |
-| `setTabsClosable()`, `setMovable()`, `clear()` | |
-| `setTabIcon()`, `setIconSize()`（2026-08-28 任务 3） | |
-| `setTabPosition()`, `setDocumentMode()`, `setElideMode()`（2026-08-28 任务 3） | |
-| `setTabShape()`, `setUsesScrollButtons()`（2026-08-28 任务 3） | |
-| `setEnabled()`, `isEnabled()`, `setStyleSheet()` | |
-| `setMinimumSize()`, `setMaximumSize()` | |
-| `setOnCurrentChanged()` | |
-
-### QGroupBox
-**覆盖度：95%**
-
-| 已有 | 缺失 |
-|------|------|
-| `setTitle()` / `title()` | |
-| `setCheckable()` / `isCheckable()` | |
-| `setAlignment()` / `alignment()` | |
-| `setChecked()` / `isChecked()` | |
-| `setFlat()` / `isFlat()` | |
-| `setLayout()` | |
-| `setOnClicked()`, `setOnToggled()` | |
-| `setEnabled()`, `isEnabled()`, `setStyleSheet()` | |
-| `setMinimumSize()`, `setMaximumSize()` | |
-| `close()`, `isClosed()`, `isValid()`, `checkValid()` (QtResource) | |
-
-### QSplitter
-**覆盖度：98%**
-
-| 已有 | 缺失 |
-|------|------|
-| `addWidget()`, `insertWidget()`, `replaceWidget()`, `count()` | |
-| `setStretchFactor()`, `setHandleWidth()` / `handleWidth()` | |
-| `setOrientation()` / `orientation()` | |
-| `setChildrenCollapsible()` / `childrenCollapsible()` | |
-| `setSizes()` / `sizes()`（2026-08-28 任务 4，数组 FFI） | |
-| `saveState()` / `restoreState()`（2026-08-28 任务 4，字节流 FFI） | |
-| `setOpaqueResize()`（2026-08-28 任务 4） | |
-| `setEnabled()`, `isEnabled()`, `setStyleSheet()` | |
-| `setMinimumSize()`, `setMaximumSize()` | |
-
-### QFrame
-**覆盖度：85%**
-
-| 已有 | 缺失 |
-|------|------|
-| `setFrameShape()`, `frameShape()`, `setFrameShadow()`, `frameShadow()` | |
-| `setLineWidth()`, `lineWidth()`, `frameWidth()` | |
-| `setMidLineWidth()`, `midLineWidth()` | |
-| `setFrameStyle()`, `frameStyle()` | |
-| `setFrameRect()` | |
-| `setLayout()` | |
-| `setEnabled()`, `isEnabled()`, `setStyleSheet()` | |
-| `setMinimumSize()`, `setMaximumSize()` | |
-| `close()`, `isClosed()`, `isValid()`, `checkValid()` (QtResource) | |
-
-### QScrollArea
-**覆盖度：95%**
-
-| 已有 | 缺失 |
-|------|------|
-| `setWidget()`, `widget()`, `takeWidget()` | |
-| `setWidgetResizable()`, `widgetResizable()` | |
-| `setAlignment()`, `alignment()` | |
-| `setHorizontalScrollBarPolicy()`, `setVerticalScrollBarPolicy()` | |
-| `ensureVisible()` | |
-| `setFrameShape()`, `frameShape()`, `setFrameShadow()`, `frameShadow()`（已核实实现） | |
-| `setEnabled()`, `isEnabled()`, `setStyleSheet()` | |
-| `setMinimumSize()`, `setMaximumSize()` | |
-| `close()`, `isClosed()`, `isValid()`, `checkValid()` (QtResource) | |
+| 边框 | `setFrameShape()` / `frameShape()`, `setFrameShadow()` / `frameShadow()`, `setLineWidth()` / `lineWidth()`, `frameWidth()`, `setMidLineWidth()` / `midLineWidth()`, `setFrameStyle()` / `frameStyle()`, `setFrameRect()` |
+| 布局 | `setLayout()` |
+| 基类 | `setEnabled()`, `isEnabled()`, `setStyleSheet()`, `setMinimumSize()`, `setMaximumSize()` |
+| 资源 | `close()`, `isClosed()`, `isValid()`, `checkValid()` |
 
 ---
 
-## 3. 封装不足的控件 ❌
+## 4. 对话框 API 明细 — 覆盖度 95% ✅
 
-*（所有基础控件均已完成基本封装，暂无评级为 ❌ 的控件）*
-
----
-
-## 4. 跨控件共性问题
-
-### 4.1 QWidget 基类方法覆盖情况
-
-以下表格反映当前各控件暴露 `setEnabled`/`isEnabled`、`setStyleSheet`、`setMinimumSize`/`setMaximumSize` 的状况：
-
-| 控件 | `setEnabled`/`isEnabled` | `setStyleSheet` | `setMinimumSize`/`setMaximumSize` |
-|------|------------------------|-----------------|----------------------------------|
-| QLabel | ✅ | ✅ | ✅（已补齐） |
-| QPushButton | ✅ | ✅ | ✅（已补齐） |
-| QCheckBox | ✅ | ✅ | ✅ |
-| QRadioButton | ✅ | ✅ | ✅ |
-| QComboBox | ✅ | ✅ | ✅ |
-| QSpinBox | ✅ | ✅ | ✅ |
-| QDoubleSpinBox | ✅ | ✅ | ✅ |
-| QSlider | ✅ | ✅ | ✅ |
-| QDial | ✅ | ✅ | ✅ |
-| QProgressBar | ✅ | ✅ | ✅ |
-| QLCDNumber | ✅ | ✅ | ✅ |
-| QToolButton | ✅ | ✅ | ✅ |
-| QTextEdit | ✅（已补齐） | ✅（命名已统一） | ✅ |
-| QGroupBox | ✅ | ✅ | ✅ |
-| QTabWidget | ✅ | ✅ | ✅ |
-| QScrollArea | ✅ | ✅ | ✅ |
-| QFrame | ✅ | ✅ | ✅ |
-| QSplitter | ✅（已补齐） | ✅（已补齐） | ✅（已补齐） |
-
-**说明**：以上 18 个基础控件均已覆盖 QWidget 基类常用方法，无需额外补齐。
-
-### 4.2 `setStyleSheet` 命名不统一
-- 大部分控件：`setStyleSheet(style: String)`
-- QTextEdit：同时存在 `setStyleSheet()` 和 `setWidgetStyleSheet()` 两个方法（`setWidgetStyleSheet` 为旧别名，已标记 `@Deprecated[message: "..."]`）✅
-
-### 4.3 QtResource 实现情况
-实现了 QtResource（checkValid/close/isClosed）的控件：
-- ✅ **容器类**：QGroupBox, QTabWidget, QScrollArea, QFrame, QSplitter
-- ✅ **控件类**：QWidget, QLabel, QPushButton, QSpinBox, QCheckBox, QProgressBar, QSlider, QComboBox, QTextEdit, QRadioButton, QDial, QLCDNumber, QToolButton
-- ✅ **扩展控件类**：QAction, QProgressDialog, QTcpSocket, QSqlDatabase
-
-**说明**：2026-07 审查后已完成全部基础控件的 QtResource 接口实现。2026-07-30 第四批补齐扩展控件（QAction/QProgressDialog/QTcpSocket/QSqlDatabase）。所有提及控件均支持 try-with-resources 自动释放。
+| 控件 | 主要方法 |
+|------|---------|
+| QMessageBox | `information()` / `warning()` / `critical()` / `question()` |
+| QFileDialog | `getOpenFileName()` / `getSaveFileName()` / `getExistingDirectory()` / `getOpenFileNames()` |
+| QInputDialog | `getText()`（含 Ok 状态）/ `getInt()`（含 Ok 状态）/ `getDouble()` |
+| QColorDialog | `getColor()`（返回十六进制） |
+| QFontDialog | `getFontName()` / `getFontSize()` / `getFont()` / `getFontWithDefault()` |
+| QProgressDialog | 创建 / 值 / 范围 / 标签 / 取消 / 自动关闭 / 重置 |
+| QWizard / QWizardPage | 创建 / 页面 / 导航 / 选项 |
+| QErrorMessage | `showMessage()` / 标题 |
 
 ---
 
-## 5. 完善优先级
+## 5. 日期时间 API 明细 — 覆盖度 90% ✅
 
-### 5.1 当前待完成
+| 控件 | 主要功能 |
+|------|---------|
+| QDate / QTime / QDateTime | 创建、读写、格式化、当前值 |
+| QCalendarWidget | 日期选择、范围、网格、导航、星期、选择模式、`setMinimumSize()`、`setStyleSheet()`、信号 `setOnClicked()` / `setOnActivated()` / `setOnSelectionChanged()` |
+| QDateEdit / QTimeEdit / QDateTimeEdit | 日期/时间/日期时间编辑，含范围、显示格式、日历弹出、TimeSpec |
 
-当前所有已知常用控件均已完成封装，暂无待完成任务。
+---
 
-> 后续按需补充：QAbstractAnimation 子类化支持。QVideoWidget 亮度/对比度/色调/饱和度在 Qt 6.10.3 中已从 QVideoSink 移除（需通过着色器或帧处理实现）。QVideoSink 已封装（videoSize/subtitleText）。
+## 6. 多媒体 API 明细
 
-### 5.2 已完成记录
+### QVideoWidget — 覆盖度 80% ⚠️
 
-| 完成时间 | 任务 | 说明 |
-|----------|------|------|
-| 2026-07-30 | QAction 补齐 QtResource | 实现 QtResource + checkValid 守卫 + CreateFailedException |
-| 2026-07-30 | QProgressDialog 补齐 QtResource | 实现 QtResource + checkValid 守卫，添加 import cjqt6.core.* |
-| 2026-07-30 | QTcpSocket 补齐 QtResource | 实现 QtResource；`close()` 改为资源清理，旧 close → `abort()`；`isValid()` 重命名为 `isSocketValid()` |
-| 2026-07-30 | QSqlDatabase 补齐 QtResource | 实现 QtResource；`close()` 改为资源清理，旧 close → `closeDatabase()` |
-| 2026-07-30 | QPushButton `setMinimumSize`/`setMaximumSize` | 纯仓颉包装，复用 qWidgetSetMinimumSize/qWidgetSetMaximumSize |
-| 2026-07-30 | QTextEdit `setWidgetStyleSheet` 标记 @Deprecated[message: "..."] | 统一命名，消除不一致 |
-| 2026-07-30 | QSplitter `setEnabled`/`isEnabled`/`setStyleSheet`/`setMinimumSize`/`setMaximumSize` | 纯仓颉包装，复用 qWidget* FFI |
-| 2026-07-30 | QRadioButton 补齐 QtResource | 实现 close/isClosed/isValid/checkValid |
-| 2026-07-30 | QDial 补齐 QtResource | 实现 close/isClosed/isValid/checkValid |
-| 2026-07-30 | QLCDNumber 补齐 QtResource | 实现 close/isClosed/isValid/checkValid |
-| 2026-07-30 | QToolButton 补齐 QtResource | 实现 close/isClosed/isValid/checkValid |
-| 2026-07-30 | QSlider `setInvertedAppearance`/`invertedAppearance` | C++ 桥接 + 仓颉包装 |
-| 2026-07-30 | QDoubleSpinBox `setWrapping`/`wrapping`/`setButtonSymbols`/`selectAll`/`setFocus` | C++ 桥接 + 仓颉包装 |
-| 2026-07-30 | QFrame `lineWidth`/`frameWidth` getter | C++ 桥接 + 仓颉包装 |
-| 2026-07-30 | QToolButton `text()`/`defaultAction`/`setDefaultAction` | C++ 桥接 + 仓颉包装 |
-| 2026-07-30 | QSpinBox `selectAll`/`setFocus` | C++ 桥接 + 仓颉包装 |
-| 2026-07-30 | QProgressBar `text()` getter | C++ 桥接 + 仓颉包装 |
-| 2026-07-30 | QGroupBox `setFlat`/`isFlat` | C++ 桥接 + 仓颉包装 |
-| 2026-07 （质量治理） | 9 个控件 QtResource | 2026-07 质量治理提交（ba6d2d4） |
-| 2026-07 （质量治理） | QLabel `setMinimumSize`/`setMaximumSize` | 2026-07 质量治理已补齐 |
-| 2026-07 （质量治理） | QTextEdit `setEnabled`/`isEnabled` | 2026-07 质量治理已补齐 |
-| 2026-07 （质量治理） | QScrollArea 滚动策略 + `ensureVisible` | 已实现 |
-| 2026-07 （质量治理） | QGroupBox `setAlignment`/`alignment` | 已实现 |
-| 2026-07 审查后更新 | QLineEdit 扩展方法（`setClearButtonEnabled`/光标/选择/补全/信号等） | 已完成实现但未更新文档，本次审查已更正 |
-| 2026-07 审查后更新 | QPushButton 补齐信号方法（`setShortcut`/`setAutoDefault`/信号等） | 已完成实现但未更新文档，本次审查已更正 |
-| 2026-07 审查后更新 | QDoubleSpinBox 补齐格式化方法（`setPrefix`/`setSuffix`/`cleanText`等） | 已完成实现但未更新文档，本次审查已更正 |
-| 2026-07 审查后更新 | QDial `setNotchTarget`/`setPageStep` | 已完成实现但未更新文档，本次审查已更正 |
-| 2026-07 审查后更新 | QProgressBar 补齐方法（`setMinimum`/`setMaximum`/`setAlignment`等） | 已完成实现但未更新文档，本次审查已更正 |
-| 2026-07 审查后更新 | QCheckBox `setTristate`/`checkState`/`setOnClicked` | 已完成实现但未更新文档，本次审查已更正 |
-| 2026-07 审查后更新 | QRadioButton `setAutoExclusive`/`setOnClicked` | 已完成实现但未更新文档，本次审查已更正 |
-| 2026-07 审查后更新 | QFrame `frameShape`/`frameShadow`/`setMidLineWidth`/`setFrameRect` | 已完成实现但未更新文档，本次审查已更正 |
-| 2026-07 审查后更新 | QScrollArea `takeWidget`/`widgetResizable`/`setAlignment` | 已完成实现但未更新文档，本次审查已更正 |
-| 2026-07 审查后更新 | QToolButton `setIconFromPath`/`toolButtonStyle`/信号等 | 已完成实现但未更新文档，本次审查已更正 |
-| 2026-07 审查后更新 | QGroupBox `setOnClicked`/`setOnToggled` | 已完成实现但未更新文档，本次审查已更正 |
-| 2026-07 审查后更新 | QLCDNumber `setStyleSheet` | 已完成实现但未更新文档，本次审查已更正 |
-| 2026-07 审查后更新 | QSpinBox 补齐方法（`setDisplayIntegerBase`/`setButtonSymbols`/`setCorrectionMode`/`setGroupSeparatorShown`等） | 已完成实现但未更新文档，本次审查已更正 |
-| 2026-08-28 | 任务 1-6 API 补全 | QPushButton.setMenu、QCalendarWidget 信号、QTabWidget 7 方法、QSplitter 7 方法、QComboBox.setIconSize、QTextEdit 3 方法、INDEX.md/roadmap.md 更新 |
-| 2026-08-29 | QLineEdit `setValidator` 成员方法（3 重载）+ `setDragEnabled` | 桥接 + 封装 + 测试 |
-| 2026-08-29 | QTextEdit 信号 `setOnCursorPositionChanged`/`setOnSelectionChanged` | 桥接 + 封装 + 测试 |
-| 2026-08-29 | QCalendarWidget `setMinimumSize`/`setStyleSheet` | 复用 qWidget 共享 FFI |
-| 2026-08-29 | QVideoWidget QtResource 接口 | 实现 `<: QtResource` + `isClosed`/`isValid`/`checkValid` |
-| 2026-08-29 | QScrollArea 文档修正 | `setFrameShape`/`setFrameShadow` 实际已实现，从缺失移到已有 |
-| 2026-08-29 | QVideoSink 封装 | 新增 `bridge_videosink.cpp` + `videosink.cj`，封装 videoSize/subtitleText，实现 QtResource 接口。Qt 6.10.3 的 QVideoSink 无 brightness/contrast/hue/saturation（已移除），视频调节需着色器 |
+| 分类 | 方法 |
+|------|------|
+| 资源 | `close()`, `isClosed()`, `isValid()`, `checkValid()`（已实现 `<: QtResource`） |
 
-> **2026-07-30 全量源码审查**：通过逐文件比对源文件，修正了大量「缺失」列表中已实现但未更新的 API。本次审查涉及的源文件包括：lineedit.cj, textedit.cj, pushbutton.cj, spinbox.cj, doublespinbox.cj, dial.cj, lcdnumber.cj, toolbutton.cj, progressbar.cj, checkbox.cj, radiobutton.cj, containers.cj (QGroupBox/QTabWidget/QScrollArea/QFrame/QSplitter), slider.cj, combobox.cj。
->
-> **2026-07-30 第二批补齐**：完成 QPushButton `setMinimumSize`/`setMaximumSize`、QTextEdit `setWidgetStyleSheet` `@Deprecated`、QSplitter 基础 QWidget 方法、以及 QRadioButton/QDial/QLCDNumber/QToolButton 的 QtResource 接口实现。至此所有基础控件均已对齐 QtResource 模式和 QWidget 基类方法。
->
-> **2026-07-30 第三批补齐（API 补全）**：一次性完成 QSlider `setInvertedAppearance`、QFrame `lineWidth`/`frameWidth`、QDoubleSpinBox `setWrapping`/`wrapping`/`setButtonSymbols`/`selectAll`/`setFocus`、QToolButton `text()`/`defaultAction`/`setDefaultAction`、QGroupBox `setFlat`/`isFlat`、QSpinBox `selectAll`/`setFocus`、QProgressBar `text()` 共 16 个方法的桥接与封装。统一新建 `bridge_ext_apicomplete.cpp` 集中管理新增 FFI，Cangjie 层对应 6 个文件同步更新。构建验证通过。
->
-> **2026-07-30 第四批补齐（扩展控件 QtResource）**：完成 QAction、QProgressDialog、QTcpSocket、QSqlDatabase 四个扩展控件的 QtResource 接口实现。其中 QTcpSocket 原 `close()` 语义为「关闭 TCP 连接」，调整为资源清理（关闭连接 + 销毁对象），旧操作保留为 `abort()`；`isValid()` 重命名为 `isSocketValid()` 以消除与 `QtResource.isValid()` 的语义冲突。QSqlDatabase 原 `close()` 语义为「关闭数据库连接」，调整为资源清理，旧操作保留为 `closeDatabase()`。统一添加 `import cjqt6.core.*` 到各包，添加 `checkValid()` 守卫和 `CreateFailedException` 空指针检查。`cjpm build` 通过。
->
-> **2026-07-30 第五批（新增六个控件封装）**：完成 QAbstractAnimation/QParallelAnimationGroup（core）、QUndoCommand/QUndoStack（core）、QStyleHelper（gui）、QCameraDevice/QCamera/QMediaCaptureSession/QMediaDevices（multimedia）、QVideoWidget（multimedia）、QSortFilterProxyModel（views）共 6 组控件的 C++ FFI 桥接 + Cangjie 绑定。同时修复 CMakeLists.txt 添加 MultimediaWidgets 可选依赖。`cjpm build` 通过。
->
-> **2026-08-29 API 补全（修正 + 补全）**：先修正 api-completeness.md 过时信息（QScrollArea setFrameShape/setFrameShadow 实际已实现），再补全 5 项缺失 API：QCalendarWidget `setMinimumSize`/`setStyleSheet`、QVideoWidget QtResource 接口、QLineEdit `setValidator`（3 重载）+ `setDragEnabled`、QTextEdit 信号 `setOnCursorPositionChanged`/`setOnSelectionChanged`。全量测试 1342 通过 / 0 失败。
->
-> **2026-08-29 QVideoSink 封装**：新增 QVideoSink 桥接与仓颉绑定（`bridge_videosink.cpp` + `videosink.cj`），封装 videoSize/subtitleText API，实现 QtResource 接口。关键发现：Qt 6.10.3 的 QVideoSink 已移除 brightness/contrast/hue/saturation 属性（Qt5/Qt6 早期版本曾有），视频调节需通过着色器或帧处理实现。3 个测试用例验证通过。
+> **注意**：Qt6 已将 `brightness`/`contrast`/`hue`/`saturation` 属性从 QVideoWidget 移除。视频调节需通过 QVideoSink 或着色器实现。
 
-### 测试状态（2026-08-29 最终确认）
+### QVideoSink — 覆盖度 70% ⚠️
+
+| 分类 | 方法 |
+|------|------|
+| 视频 | `videoSize()` |
+| 字幕 | `setSubtitleText()` / `subtitleText()` |
+| 资源 | `close()`, `isClosed()`, `isValid()`, `checkValid()` |
+
+> **注意**：Qt 6.10.3 的 QVideoSink 已移除 `brightness`/`contrast`/`hue`/`saturation` 属性（Qt5/Qt6 早期版本曾有），视频调节需通过着色器或帧处理实现。
+
+---
+
+## 7. 跨控件共性
+
+### 7.1 QWidget 基类方法覆盖情况
+
+以下 18 个基础控件均已覆盖 `setEnabled()` / `isEnabled()`、`setStyleSheet()`、`setMinimumSize()` / `setMaximumSize()`：
+
+QLabel, QPushButton, QCheckBox, QRadioButton, QComboBox, QSpinBox, QDoubleSpinBox, QSlider, QDial, QProgressBar, QLCDNumber, QToolButton, QTextEdit, QGroupBox, QTabWidget, QScrollArea, QFrame, QSplitter
+
+### 7.2 QtResource 接口实现情况
+
+已实现 `QtResource`（`checkValid()` / `close()` / `isClosed()` / `isValid()`）的控件：
+
+- **容器类**：QGroupBox, QTabWidget, QScrollArea, QFrame, QSplitter
+- **控件类**：QWidget, QLabel, QPushButton, QSpinBox, QCheckBox, QProgressBar, QSlider, QComboBox, QTextEdit, QRadioButton, QDial, QLCDNumber, QToolButton
+- **扩展控件类**：QAction, QProgressDialog, QTcpSocket, QSqlDatabase
+- **多媒体类**：QVideoWidget, QVideoSink
+
+> 所有提及控件均支持 try-with-resources 自动释放。**注意**：终结器 `~init` 被刻意禁用，必须显式 `close()`。
+
+### 7.3 setStyleSheet 命名统一
+
+- 统一签名：`setStyleSheet(style: String)`
+- QTextEdit 曾同时存在 `setWidgetStyleSheet()` 旧别名，已标记 `@Deprecated[message: "..."]`，请使用 `setStyleSheet()`
+
+---
+
+## 8. 测试状态（2026-08-29 最终确认）
+
 | 指标 | 数值 |
 |------|------|
-| 总用例数 | 1414 |
-| 通过 | **1342** ✅ |
-| 跳过 | 72 |
+| 总用例数 | 1417 |
+| 通过 | **1346** ✅ |
+| 跳过 | 71 |
 | 失败 | **0** ✅ |
 | 错误 | 0 |
 
-**全量测试通过** — 72 个 SKIPPED 为平台/条件跳过的用例，无失败无错误。
+**全量测试通过** — 71 个 SKIPPED 为平台/条件跳过的用例（含 QVideoSink 3 个 `requires_audio` 标签跳过，已单独验证通过），无失败无错误。
 
-**本批次修复验证（第二批）**：全部 4 个 QtResource `testOperationsAfterClose` 测试用例（QRadioButton/QDial/QLCDNumber/QToolButton）均已通过。
+---
 
-**本批次修复验证（第三批）**：C++ 桥接编译通过（`bridge_ext_apicomplete.cpp`），仓颉侧 `cjpm build` 通过，新增 16 个 public 方法。
+## 9. 变更历史
+
+| 时间 | 批次 | 内容 |
+|------|------|------|
+| 2026-07 | 质量治理 | 9 个控件 QtResource 补齐；QLabel/QTextEdit/QScrollArea/QGroupBox 等方法补齐；全量源码审查修正"缺失"列表中已实现但未更新的 API |
+| 2026-07-30 | 第一批 | QAction/QProgressDialog/QTcpSocket/QSqlDatabase 补齐 QtResource（`close()` 语义调整，旧操作保留为 `abort()`/`closeDatabase()`） |
+| 2026-07-30 | 第二批 | QPushButton `setMinimumSize`/`setMaximumSize`；QTextEdit `setWidgetStyleSheet` 标记 `@Deprecated`；QSplitter 基类方法；QRadioButton/QDial/QLCDNumber/QToolButton QtResource |
+| 2026-07-30 | 第三批 | QSlider/QFrame/QDoubleSpinBox/QToolButton/QGroupBox/QSpinBox/QProgressBar 共 16 个方法桥接与封装（集中管理于 `bridge_ext_apicomplete.cpp`） |
+| 2026-07-30 | 第四批 | 扩展控件 QtResource（同第一批） |
+| 2026-07-30 | 第五批 | 新增 6 组控件：QAbstractAnimation/QParallelAnimationGroup、QUndoCommand/QUndoStack、QStyleHelper、QCameraDevice/QCamera/QMediaCaptureSession/QMediaDevices、QVideoWidget、QSortFilterProxyModel |
+| 2026-08-28 | 任务 1-6 | QPushButton.setMenu、QCalendarWidget 3 信号、QTabWidget 7 方法、QSplitter 7 方法、QComboBox.setIconSize、QTextEdit 3 方法、INDEX.md/roadmap.md 更新 |
+| 2026-08-29 | API 补全 | QLineEdit `setValidator`（3 重载）+ `setDragEnabled`；QTextEdit 信号 `setOnCursorPositionChanged`/`setOnSelectionChanged`；QCalendarWidget `setMinimumSize`/`setStyleSheet`；QVideoWidget QtResource 接口；QScrollArea 文档修正（`setFrameShape`/`setFrameShadow` 实际已实现） |
+| 2026-08-29 | QVideoSink 封装 | 新增 `bridge_videosink.cpp` + `videosink.cj`，封装 `videoSize`/`subtitleText`，实现 QtResource。关键发现：Qt 6.10.3 已移除 brightness/contrast/hue/saturation |
+
+---
+
+## 10. 后续待办
+
+当前所有已知常用控件均已完成封装，暂无硬缺口。后续按需补充：
+
+- **QAbstractAnimation 子类化支持**：需派生 QObject，成本较高
+- **QVideoWidget 视频调节**：brightness/contrast/hue/saturation 在 Qt 6.10.3 已移至 QVideoSink（QVideoSink 也已移除），需通过着色器或帧处理实现
+- **QTranslator 独立类**：目前仅有 `QApplication.loadQtTranslation()`

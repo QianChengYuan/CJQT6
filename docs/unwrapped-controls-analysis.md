@@ -1,7 +1,7 @@
 # CJQT6 未封装控件分析报告
 
 > 生成日期：2026-07-18
-> 最后更新：2026-07-30（P3 全部完成 — animation/undostack/style/camera/videowidget/sortfilterproxymodel）
+> 最后更新：2026-08-29（QVideoSink 封装完成）
 
 ## 一、整体架构模式
 
@@ -234,7 +234,7 @@ C++ 桥接实现    →  native/src/*/bridge_*.cpp   (extern "C" FFI函数实现
 | QVideoWidget | multimedia | ✅ 已完成（需 Qt6::MultimediaWidgets） |
 | QSortFilterProxyModel | views | ✅ 已完成 |
 
-**至此，CJQT6 所有已知常用控件封装已全部完成**，覆盖率达 ~98%。后续按需补充进阶方法和 QVideoSink 等深度功能。
+**至此，CJQT6 所有已知常用控件封装已全部完成**，覆盖率达 ~98%。QVideoSink 已于 2026-08-29 封装（videoSize/subtitleText）。后续按需补充进阶方法。
 
 ## 五、实施路线图（已完成）
 
