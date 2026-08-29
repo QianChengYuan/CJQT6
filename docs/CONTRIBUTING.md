@@ -113,7 +113,7 @@ CJQT6/
 
 ### 添加新控件
 
-> **先读 [封装新控件模板（P3-4）](../docs/wrapper-template.md)**：五件套（桥接 .cpp + CMake 注册 + 仓颉类 + 测试 + docs/api）逐件照抄 QDial 范例即可 10 分钟出可编译控件。下面是简版流程。
+> **先读 [封装新控件模板（P3-4）](../docs/guides/wrapper-template.md)**：五件套（桥接 .cpp + CMake 注册 + 仓颉类 + 测试 + docs/api）逐件照抄 QDial 范例即可 10 分钟出可编译控件。下面是简版流程。
 
 1. 在 `native/src/widgets/` 添加C++桥接函数（`extern "C"` 导出 `qXxxCreate`/`qXxxDelete`）
 2. 信号接线在 `native/src/core/bridge_signal.cpp` 添加 connect/disconnect（对照 QDial 段）

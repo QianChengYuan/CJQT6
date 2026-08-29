@@ -138,7 +138,7 @@ CJQT6 的演进边界由仓颉语言特性决定，先固定几个**不可绕过
 - **无工程自动引导**：`.ui` 所在目录向上查找 `cjpm.toml`——命中普通工程直接复用其包名并输出 `src/main.cj`；无工程时自动生成最小可运行工程（`cjpm.toml` 相对依赖 `..\..` + `src/main.cj`），命中库自身工程（包名 `cjqt6`，仓库根）视为无工程继续向上；
 - **顺带生成 `deploy_qt.ps1`**：一键部署 Qt6 运行时 DLL + platforms/styles/imageformats 插件 + MSVC 运行库 + cjqt6 依赖 + bridge，脚本前置 UTF-8 BOM，兼容 Windows PowerShell 5.1（无 BOM 时中文按 ANSI 解析会吞行尾引号报语法错）；
 - 布局变量名优先取 .ui 布局元素真实 `name` 属性（如 `verticalLayout_4`），缺失才派生；
-- 运行：`cd tools/ui2cj && cjpm run -- <form.ui>`，配套 `scripts/gen-ui.ps1` 一键脚本与 `docs/UI2CJ_DESIGN.md` 设计文档。
+- 运行：`cd tools/ui2cj && cjpm run -- <form.ui>`，配套 `scripts/gen-ui.ps1` 一键脚本与 `docs/internal/ui2cj-design.md` 设计文档。
 
 ### 6.2 发布与安装链路
 - 现状：Git 依赖安装（`git = ...` + `tag`）已是主推方式，`releases/` 分平台预编译。
@@ -187,4 +187,4 @@ CJQT6 的演进边界由仓颉语言特性决定，先固定几个**不可绕过
 
 ---
 
-*关联文档：`docs/architecture.md`（架构）、`docs/api-completeness.md`（覆盖度）、`docs/unwrapped-controls-analysis.md`（控件清单）、`docs/CHANGELOG.md`（演进史）、`docs/CONTRIBUTING.md`（新增控件流程）。*
+*关联文档：`docs/guides/architecture.md`（架构）、`docs/internal/api-completeness.md`（覆盖度）、`docs/internal/unwrapped-controls-analysis.md`（控件清单）、`docs/CHANGELOG.md`（演进史）、`docs/CONTRIBUTING.md`（新增控件流程）。*

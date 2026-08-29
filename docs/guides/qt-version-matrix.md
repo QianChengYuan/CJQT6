@@ -27,7 +27,7 @@ Qt **小版本之间存在 ABI 差异**，换版本后旧 bridge 可能**静默�
 | MinGW bridge 与 MSVC 运行时 ABI 不兼容 | MinGW 构建产物 | 仓颉 MSVC 运行时下 DLL 加载异常 | 一律用 MSVC 2022 构建 Windows 桥接库 |
 
 **红线**：`releases/<platform>/` 中的预编译产物**必须**与使用的 Qt 小版本匹配，
-否则 `cjpm build` 链接的是旧产物、行为与预期不符（见 `docs/build-guide.md`「增量构建陷阱」）。
+否则 `cjpm build` 链接的是旧产物、行为与预期不符（见 `docs/guides/build-guide.md`「增量构建陷阱」）。
 
 ## 3. 版本更换指南
 
@@ -57,5 +57,5 @@ Qt **小版本之间存在 ABI 差异**，换版本后旧 bridge 可能**静默�
 ## 5. 维护约定
 
 - 每引入一个新 Qt 小版本支持，必须在**该版本上跑一次全量测试**并回填本矩阵第 4 节。
-- 不承诺"全 Qt6 系列通吃"；`docs/api-completeness.md` 的 API 覆盖基于锁定版本验证。
+- 不承诺"全 Qt6 系列通吃"；`docs/internal/api-completeness.md` 的 API 覆盖基于锁定版本验证。
 - 若某版本出现 ABI 断裂且无法通过源码规避，升级方案应写入 `docs/CHANGELOG.md` 的 Unreleased 段。

@@ -275,7 +275,7 @@ cjpm run
 C:\Qt\6.10.3\msvc2022_64\bin\windeployqt.exe examples\notepad\target\release\bin\main.exe
 ```
 - 运行示例：`cd examples/notepad && cjpm run`。
-- 完整错误诊断见 `docs/build-guide.md`。
+- 完整错误诊断见 `docs/guides/build-guide.md`。
 
 ---
 
@@ -324,6 +324,6 @@ C:\Qt\6.10.3\msvc2022_64\bin\windeployqt.exe examples\notepad\target\release\bin
 - 完整示例：`examples/all_controls_demo/src/main.cj`（控件+信号全集）、`examples/notepad/src/main.cj`（菜单/对话框/打印完整 App）、`examples/dormitory_manager/src/main.cj`（宿舍管理完整业务 App）
 - API 文档：`docs/api/01_core.md`、`02_widgets_basic.md`、`04_containers_layout.md`、`05_views.md`、`12_signal_slot.md`、`15_examples_faq.md`
 - 资源管理指南：`docs/resource/scope-manager-guide.md`、`docs/resource/resource-utils-guide.md`
-- 构建细节：`docs/build-guide.md`、`README.md`、`cjpm.toml`
+- 构建细节：`docs/guides/build-guide.md`、`README.md`、`cjpm.toml`
 
 > 写新控件/排查问题时，先 Read 同模块已有 `.cj` 文件作为范式（foreign 声明 + 封装 class + `checkValid` 守卫 + `close` 释放），保持风格一致。

@@ -315,7 +315,7 @@ cjpm run --example notepad
 
 - [API参考文档](../api/) - 完整的API说明
 - [资源管理指南](../resource-management.md) - 内存管理最佳实践
-- [架构设计](../architecture.md) - 了解CJQT6内部实现
+- [架构设计](../guides/architecture.md) - 了解CJQT6内部实现
 
 ## 常见问题
 

@@ -44,7 +44,7 @@ cjpm build
 | `examples/` | 19 个独立示例工程（notepad/calculator/dormitory_manager/qq_chat_lan…） |
 | `tests/` | 只保留部署脚本 `deploy_qt_test.ps1` / `deploy_qt.ps1`（构建产物不入库） |
 | `scripts/` | `update-bridge.ps1`、`rebuild_all.ps1`、`setup-qt-env.ps1/.sh`、`build-linux-x64.sh` 等 |
-| `docs/` | `build-guide.md`、`architecture.md`、`api/01~19`、`resource/`、`testing/`、`tutorial/` |
+| `docs/` | `guides/`（构建/架构/交叉编译/性能/版本矩阵/封装模板）、`api/01~20`、`internal/`（评估/覆盖度/控件分析）、`resource/`、`testing/`、`tutorial/` |
 | `.agents/skills/cjqt6/SKILL.md` | 项目自带 skill，权威速查（必读） |
 
 ## 写仓颉代码的硬约束（仓颉 1.1.0）
