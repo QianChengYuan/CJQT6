@@ -370,6 +370,8 @@
 
 - **[`QVideoWidget`](13_multimedia.md#q---视频显示控件)** — 视频显示控件
 
+- **[`QVideoSink`](13_multimedia.md#qvideosink--视频帧接收端)** — 视频帧接收端
+
 ---
 
 ## 14_print.md

@@ -7,6 +7,31 @@
 > - 每个版本对应一组逻辑相关的 git 提交，按功能里程碑划分而非按日期随意递增
 > - 版本号与 git tag 一一对应（`v1.9.0` → tag `v1.9.0`），cjpm.toml `version` 字段同步
 
+## [1.9.1] - 2026-08-29
+
+### 新增
+
+- **QVideoSink 封装**：新增 `bridge_videosink.cpp` + `videosink.cj`，封装 videoSize/subtitleText API，实现 QtResource 接口。关键发现：Qt 6.10.3 的 QVideoSink 已移除 brightness/contrast/hue/saturation 属性，视频调节需通过着色器或帧处理实现。
+- **QLineEdit `setValidator` 成员方法**：3 重载（QIntValidator/QDoubleValidator/QRegExpValidator），原有自由函数 `setLineEditValidator` 保留。
+- **QLineEdit `setDragEnabled`**：设置是否允许拖放。
+- **QTextEdit 信号**：`setOnCursorPositionChanged`/`setOnSelectionChanged`，桥接 `bridge_ext_wtext.cpp` 加 g_teCursorPos/g_teSelection map + connect 函数 + cleanup。
+- **QCalendarWidget `setMinimumSize`/`setStyleSheet`**：复用 qWidget 共享 FFI。
+- **QVideoWidget QtResource 接口**：实现 `<: QtResource` + `isClosed`/`isValid`/`checkValid`。
+
+### 修复
+
+- **api-completeness.md 过时信息修正**：QScrollArea `setFrameShape`/`setFrameShadow` 实际已实现，从缺失列表移到已有（覆盖度 85%→95%）。
+
+### 测试
+
+- 全量测试 1342 通过 / 0 失败 / 75 跳过（QVideoSink 3 个用例被 `requires_audio` 标签跳过，已单独验证通过）。
+
+### 文档
+
+- 更新 `docs/api/02_widgets_basic.md`：QLineEdit 方法表加 `setValidator`/`setDragEnabled`，QTextEdit 方法表加信号 + `setTabStopDistance`/`setAcceptRichText`/`setPlaceholderText`。
+- 更新 `docs/api/13_multimedia.md`：QVideoWidget 方法表加 QtResource 接口方法，新增 QVideoSink 段落。
+- 更新 `docs/api-completeness.md`：QLineEdit/QTextEdit 覆盖度 95%→98%，QVideoSink 已完成记录，测试状态更新。
+
 ## [1.9.0] - 2026-08-16
 
 ### 新增

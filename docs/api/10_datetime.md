@@ -107,6 +107,11 @@ calendar.setSelectedDate(QDate.currentDate())
 | `setSelectionMode(mode: Int32)` | 设置选择模式（见 CalendarSelectionMode） |
 | `selectionMode(): Int32` | 获取选择模式 |
 | `showToday()` / `showSelectedDate()` | 显示当前日期或选中日期 |
+| `setMinimumSize(width: Int32, height: Int32)` | 设置最小尺寸 |
+| `setStyleSheet(style: String)` | 设置样式表 |
+| `setOnClicked(callback: CStringCallback)` | 点击日期回调 |
+| `setOnActivated(callback: CStringCallback)` | 激活日期回调 |
+| `setOnSelectionChanged(callback: VoidCallback)` | 选中日期变化回调 |
 | `show()` / `hide()` | 显示或隐藏控件 |
 | `resize(width, height)` | 调整大小 |
 | `getPtr(): Int64` | 获取原生指针 |

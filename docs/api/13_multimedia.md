@@ -375,6 +375,7 @@ videoWidget.close()
 | `setAspectRatioMode(mode: Int32)` | 设置宽高比模式 |
 | `aspectRatioMode(): Int32` | 获取宽高比模式 |
 | `getPtr(): Int64` | 获取指针 |
+| `isClosed(): Bool` / `isValid(): Bool` / `checkValid(): Unit` | QtResource 接口 |
 | `close()` | 释放资源 |
 
 **宽高比模式常量** (`AspectRatioMode`):
@@ -383,3 +384,39 @@ videoWidget.close()
 | `AspectRatioMode.ignore()` | 0 | 忽略宽高比 |
 | `AspectRatioMode.keep()` | 1 | 保持宽高比 |
 | `AspectRatioMode.keepByExpanding()` | 2 | 保持宽高比并扩展 |
+
+> **注意**：Qt6 已将 brightness/contrast/hue/saturation 属性从 QVideoWidget 移除。视频调节需通过 QVideoSink 或着色器实现。
+
+---
+
+## QVideoSink — 视频帧接收端
+
+Qt6 的视频帧接收端，继承自 QObject。可通过 `QMediaCaptureSession::videoSink()` 获取已绑定的实例，也可直接创建独立实例用于离屏视频处理。
+
+```cangjie
+import cjqt6.multimedia.*
+
+let sink = QVideoSink()
+
+// 设置字幕文本
+sink.setSubtitleText("字幕内容")
+
+// 获取视频帧尺寸（无视频流时返回 -1, -1）
+let w = sink.videoWidth()
+let h = sink.videoHeight()
+
+sink.close()
+```
+
+**方法**:
+| 方法 | 说明 |
+|------|------|
+| `init()` | 创建视频接收端 |
+| `videoWidth(): Int32` | 视频帧宽度（无流时 -1） |
+| `videoHeight(): Int32` | 视频帧高度（无流时 -1） |
+| `setSubtitleText(text: String)` / `subtitleText(): String` | 设置/获取字幕文本 |
+| `getPtr(): Int64` | 获取指针 |
+| `isClosed(): Bool` / `isValid(): Bool` / `checkValid(): Unit` | QtResource 接口 |
+| `close()` | 释放资源 |
+
+> **注意**：Qt 6.10.3 的 QVideoSink 已移除 brightness/contrast/hue/saturation 属性（Qt5/Qt6 早期版本曾有），视频调节需通过着色器或帧处理实现。

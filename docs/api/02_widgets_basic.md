@@ -371,6 +371,8 @@ edit.setOnTextChanged({ text: String => println(text) })
 | `setSelection(start: Int32, length: Int32)` | 设置选中区域 |
 | `setClearButtonEnabled(enabled: Bool)` / `isClearButtonEnabled(): Bool` | 设置/获取清除按钮 |
 | `setCompleter(completerPtr: Int64)` | 设置自动完成器 |
+| `setValidator(validatorPtr: Int64)` | 设置验证器（QIntValidator/QDoubleValidator/QRegExpValidator） |
+| `setDragEnabled(enabled: Bool)` | 设置是否允许拖放 |
 | `displayText(): String` | 获取显示文本 |
 | `addPasswordToggleAction(callback: VoidCallback)` | 添加密码切换按钮 |
 | `setPasswordToggleIcon(visible: Bool)` | 设置密码切换按钮图标 |
@@ -447,6 +449,15 @@ editor.setFontBold(true)
 | `goToLine(line: Int32)` | 跳转到指定行 |
 | `setStyleSheet(style: String)` | 设置样式表 |
 | `setMinimumSize(width: Int32, height: Int32)` / `setMaximumSize(width: Int32, height: Int32)` | 设置最小/最大尺寸 |
+| `setTabStopDistance(distance: Float64)` | 设置 Tab 制表距离（Qt6） |
+| `setAcceptRichText(accept: Bool)` | 设置是否接受富文本 |
+| `setPlaceholderText(text: String)` | 设置占位文本 |
+| `setOnTextChanged(callback: VoidCallback)` | 文本变化回调 |
+| `setOnUndoAvailable(callback: BoolCallback)` | 撤销可用性变化回调 |
+| `setOnRedoAvailable(callback: BoolCallback)` | 重做可用性变化回调 |
+| `setOnCopyAvailable(callback: BoolCallback)` | 复制可用性变化回调 |
+| `setOnCursorPositionChanged(callback: VoidCallback)` | 光标位置变化回调 |
+| `setOnSelectionChanged(callback: VoidCallback)` | 选区变化回调 |
 | `show()` / `hide()` / `resize(width, height)` | 控件显示与尺寸 |
 | `getPtr(): Int64` / `delete()` | 获取指针与释放资源 |
 
