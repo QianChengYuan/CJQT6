@@ -508,6 +508,58 @@ class QVideoWidgetTests {
 }
 
 // =====================================================================
+// QVideoSink 测试
+// =====================================================================
+@Test
+@Tag[requires_audio]
+class QVideoSinkTests {
+    private static var guiEnv: ?GUITestEnvironment = None
+
+    @BeforeAll
+    static func setupGUI(): Unit {
+        let env = GUITestEnvironment.getInstance()
+        env.setupEnvironment()
+        guiEnv = Some(env)
+    }
+
+    @AfterAll
+    static func teardownGUI(): Unit {
+        if (let Some(env) <- guiEnv) {
+            env.teardownEnvironment()
+        }
+    }
+
+    @TestCase
+    func testCreateClose() {
+        let sink = QVideoSink()
+        @Expect(sink.getPtr() != 0, true)
+        @Expect(sink.isValid(), true)
+        sink.close()
+        @Expect(sink.getPtr(), 0)
+        @Expect(sink.isClosed(), true)
+    }
+
+    @TestCase
+    func testSubtitleTextRoundtrip() {
+        let sink = QVideoSink()
+        sink.setSubtitleText("Hello 字幕")
+        @Expect(sink.subtitleText(), "Hello 字幕")
+        sink.setSubtitleText("")
+        @Expect(sink.subtitleText(), "")
+        sink.close()
+    }
+
+    @TestCase
+    func testVideoSizeNoStream() {
+        let sink = QVideoSink()
+        // 无视频流时 Qt 返回 QSize(-1, -1)
+        @Expect(sink.videoWidth(), -1)
+        @Expect(sink.videoHeight(), -1)
+        sink.close()
+    }
+}
+
+// =====================================================================
 // QMediaCaptureSession 测试
 // =====================================================================
 @Test

@@ -400,7 +400,7 @@
 
 当前所有已知常用控件均已完成封装，暂无待完成任务。
 
-> 后续按需补充：QAbstractAnimation 子类化支持、QVideoWidget 亮度/对比度/色调/饱和度（Qt6 已移至 QVideoSink，需封装 QVideoSink）。
+> 后续按需补充：QAbstractAnimation 子类化支持。QVideoWidget 亮度/对比度/色调/饱和度在 Qt 6.10.3 中已从 QVideoSink 移除（需通过着色器或帧处理实现）。QVideoSink 已封装（videoSize/subtitleText）。
 
 ### 5.2 已完成记录
 
@@ -448,6 +448,7 @@
 | 2026-08-29 | QCalendarWidget `setMinimumSize`/`setStyleSheet` | 复用 qWidget 共享 FFI |
 | 2026-08-29 | QVideoWidget QtResource 接口 | 实现 `<: QtResource` + `isClosed`/`isValid`/`checkValid` |
 | 2026-08-29 | QScrollArea 文档修正 | `setFrameShape`/`setFrameShadow` 实际已实现，从缺失移到已有 |
+| 2026-08-29 | QVideoSink 封装 | 新增 `bridge_videosink.cpp` + `videosink.cj`，封装 videoSize/subtitleText，实现 QtResource 接口。Qt 6.10.3 的 QVideoSink 无 brightness/contrast/hue/saturation（已移除），视频调节需着色器 |
 
 > **2026-07-30 全量源码审查**：通过逐文件比对源文件，修正了大量「缺失」列表中已实现但未更新的 API。本次审查涉及的源文件包括：lineedit.cj, textedit.cj, pushbutton.cj, spinbox.cj, doublespinbox.cj, dial.cj, lcdnumber.cj, toolbutton.cj, progressbar.cj, checkbox.cj, radiobutton.cj, containers.cj (QGroupBox/QTabWidget/QScrollArea/QFrame/QSplitter), slider.cj, combobox.cj。
 >
@@ -460,6 +461,8 @@
 > **2026-07-30 第五批（新增六个控件封装）**：完成 QAbstractAnimation/QParallelAnimationGroup（core）、QUndoCommand/QUndoStack（core）、QStyleHelper（gui）、QCameraDevice/QCamera/QMediaCaptureSession/QMediaDevices（multimedia）、QVideoWidget（multimedia）、QSortFilterProxyModel（views）共 6 组控件的 C++ FFI 桥接 + Cangjie 绑定。同时修复 CMakeLists.txt 添加 MultimediaWidgets 可选依赖。`cjpm build` 通过。
 >
 > **2026-08-29 API 补全（修正 + 补全）**：先修正 api-completeness.md 过时信息（QScrollArea setFrameShape/setFrameShadow 实际已实现），再补全 5 项缺失 API：QCalendarWidget `setMinimumSize`/`setStyleSheet`、QVideoWidget QtResource 接口、QLineEdit `setValidator`（3 重载）+ `setDragEnabled`、QTextEdit 信号 `setOnCursorPositionChanged`/`setOnSelectionChanged`。全量测试 1342 通过 / 0 失败。
+>
+> **2026-08-29 QVideoSink 封装**：新增 QVideoSink 桥接与仓颉绑定（`bridge_videosink.cpp` + `videosink.cj`），封装 videoSize/subtitleText API，实现 QtResource 接口。关键发现：Qt 6.10.3 的 QVideoSink 已移除 brightness/contrast/hue/saturation 属性（Qt5/Qt6 早期版本曾有），视频调节需通过着色器或帧处理实现。3 个测试用例验证通过。
 
 ### 测试状态（2026-08-29 最终确认）
 | 指标 | 数值 |

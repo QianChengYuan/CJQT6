@@ -166,6 +166,7 @@ if(Qt6Multimedia_FOUND)
     set(MULTIMEDIA_SOURCES
         native/src/multimedia/bridge_multimedia.cpp
         native/src/multimedia/bridge_videowidget.cpp
+        native/src/multimedia/bridge_videosink.cpp
         native/src/multimedia/bridge_camera.cpp
     )
     message(STATUS "Qt6 Multimedia: Found")

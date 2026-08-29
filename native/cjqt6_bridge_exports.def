@@ -2629,6 +2629,12 @@ qVBoxLayoutDelete
 qVBoxLayoutSetMargin
 qVBoxLayoutSetSpacing
 qValidatorDelete
+qVideoSinkCreate
+qVideoSinkDelete
+qVideoSinkSetSubtitleText
+qVideoSinkSubtitleText
+qVideoSinkVideoHeight
+qVideoSinkVideoWidth
 qVideoWidgetAspectRatioMode
 qVideoWidgetCreate
 qVideoWidgetDelete
