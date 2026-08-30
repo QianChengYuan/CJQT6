@@ -12,7 +12,7 @@
 
   # ---- 选填字段 ----
   description = "仓颉语言的 Qt6 封装库 - 让仓颉像 Python 使用 PyQt 一样便捷"
-  authors     = ["CJQT6 Team"]
+  authors     = ["yuan_1992"]
   license     = ["MIT"]         # 协议列表（官方为数组，遵循 SPDX Identifier 规范）
 
   homepage      = "https://gitcode.com/yuan_1992/CJQT6"
