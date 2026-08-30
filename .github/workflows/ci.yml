@@ -232,15 +232,10 @@ jobs:
           "$QTDIR\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
           Write-Host "QTDIR=$QTDIR"
 
-      - name: 编译 C++ FFI 桥接库
+      - name: 编译 C++ FFI 桥接库 + 桥接层单元测试（P0-3）
         shell: pwsh
         run: |
-          .\scripts\update-bridge.ps1 -QtDir "${{ env.QTDIR }}"
-
-      - name: 编译并运行桥接层 C++ 单元测试（P0-3）
-        shell: pwsh
-        run: |
-          .\scripts\build-native-tests.ps1 -QtDir "${{ env.QTDIR }}"
+          .\scripts\update-bridge.ps1 -QtDir "${{ env.QTDIR }}" -RunTests
 
       - name: 校验依赖可重现构建（P0-4）
         shell: pwsh

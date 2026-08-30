@@ -4,7 +4,8 @@
 # 首次使用或 cmake 未配置时自动运行 cmake configure
 
 param(
-    [string]$QtDir = ""
+    [string]$QtDir = "",
+    [switch]$RunTests    # 编译并运行桥接层 C++ 单元测试（复用同一构建目录，避免二次编译）
 )
 
 $base = Split-Path $PSScriptRoot -Parent
@@ -33,13 +34,24 @@ if ([string]::IsNullOrEmpty($QtDir) -or -not (Test-Path "$QtDir\bin\Qt6Core.dll"
 $buildDir = "native\build_windows_x64"
 
 # ---- Step 1: cmake configure if needed ----
+$testOpt = if ($RunTests) { "-DCJQT6_BUILD_TESTS=ON" } else { "" }
 if (-not (Test-Path "$buildDir\CMakeCache.txt")) {
     Write-Host "[1/4] 首次使用，运行 cmake configure..." -ForegroundColor Yellow
     if (-not (Test-Path $buildDir)) {
         New-Item -ItemType Directory -Force -Path $buildDir | Out-Null
     }
     Push-Location $buildDir
-    cmake ..\.. -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="$QtDir" -DCMAKE_BUILD_TYPE=Release
+    cmake ..\.. -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="$QtDir" -DCMAKE_BUILD_TYPE=Release $testOpt
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "❌ cmake 配置失败" -ForegroundColor Red
+        Pop-Location; exit 1
+    }
+    Pop-Location
+} elseif ($RunTests) {
+    # 缓存已存在，但需确保 CJQT6_BUILD_TESTS=ON（增量 configure，不触发重编）
+    Write-Host "[1/4] 重新 cmake configure（启用测试目标）..." -ForegroundColor Yellow
+    Push-Location $buildDir
+    cmake . $testOpt
     if ($LASTEXITCODE -ne 0) {
         Write-Host "❌ cmake 配置失败" -ForegroundColor Red
         Pop-Location; exit 1
@@ -67,3 +79,19 @@ Write-Host "  ✓ cjqt6_bridge.dll"
 Write-Host "  ✓ cjqt6_bridge.lib (MSVC 导入库)"
 
 Write-Host "[4/4] 完成。release 目录已更新，所有依赖项目 cjpm build 将自动使用最新 bridge (MSVC 2022)。"
+
+# ---- 可选：运行桥接层 C++ 单元测试 ----
+if ($RunTests) {
+    Write-Host ""
+    Write-Host "运行桥接层 C++ 单元测试（P0-3）..." -ForegroundColor Cyan
+    $env:PATH = "$QtDir\bin;$env:PATH"
+    Push-Location $buildDir
+    ctest --output-on-failure -C Release -R bridge_core_tests
+    $code = $LASTEXITCODE
+    Pop-Location
+    if ($code -ne 0) {
+        Write-Host "❌ 桥接层测试失败" -ForegroundColor Red
+        exit $code
+    }
+    Write-Host "✅ 桥接层 C++ 单元测试全部通过" -ForegroundColor Green
+}
