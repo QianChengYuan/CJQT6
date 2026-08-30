@@ -393,8 +393,9 @@ jobs:
         run: |
           # cjpm test 会先链接测试二进制，同样需要 SDKROOT 定位 macOS 系统库
           export SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
+          # macOS 无 GNU timeout 命令，依赖 --timeout-each=30s 控制单测超时，job timeout-minutes 兜底整体
           # 排除同 Linux：模态对话框/拖拽/音频/进程(cmd)/打印(CUPS)等环境相关测试
-          timeout 600s cjpm test \
+          cjpm test \
             --exclude-tags=requires_gui_dialog,requires_gui_drag,requires_audio,requires_process_spawn,requires_printer \
             --timeout-each=30s
 
