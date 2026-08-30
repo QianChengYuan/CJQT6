@@ -330,7 +330,8 @@ jobs:
             echo "::warning::未配 CANGJIE_SDK_SHA_MACOS，跳过 SHA-256 校验"
           fi
           tar -xzf "$RUNNER_TEMP/cangjie-sdk.tar.gz" -C "$RUNNER_TEMP/cangjie-sdk"
-          CANGJIE_HOME="$(find "$RUNNER_TEMP/cangjie-sdk" -maxdepth 2 -name envsetup.sh -printf '%h\n' | head -n1)"
+          # BSD find（macOS）不支持 -printf，用 dirname + find 兼容 GNU/BSD
+          CANGJIE_HOME="$(dirname "$(find "$RUNNER_TEMP/cangjie-sdk" -maxdepth 2 -name envsetup.sh | head -n1)")"
           echo "CANGJIE_HOME=$CANGJIE_HOME" >> "$GITHUB_ENV"
           echo "$CANGJIE_HOME/bin"      >> "$GITHUB_PATH"
           echo "$CANGJIE_HOME/tools/bin" >> "$GITHUB_PATH"
