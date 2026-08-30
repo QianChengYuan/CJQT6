@@ -341,16 +341,17 @@ jobs:
           echo "DYLD_LIBRARY_PATH=$CANGJIE_HOME/runtime/lib/mac_aarch64_cjnative:$CANGJIE_HOME/tools/lib:${DYLD_LIBRARY_PATH:-}" >> "$GITHUB_ENV"
           echo "已安装到: $CANGJIE_HOME"
 
-      - name: aqtinstall 安装 Qt 6.4.2 (macos_arm64)
+      - name: aqtinstall 安装 Qt 6.4.2 (clang_64 universal2)
         shell: bash
         run: |
           # macOS Homebrew Python 受 PEP 668 限制，pip install --user 被禁止，用 venv 规避
           python3 -m venv "$RUNNER_TEMP/aqt-venv"
           "$RUNNER_TEMP/aqt-venv/bin/pip" install --quiet aqtinstall
+          # Qt 6.4.2 无 macos_arm64 架构（6.5+ 才有），用 clang_64（universal2，含 arm64）
           "$RUNNER_TEMP/aqt-venv/bin/python3" -m aqt install-qt mac desktop \
-            "6.4.2" "macos_arm64" \
+            "6.4.2" "clang_64" \
             -O "$RUNNER_TEMP/Qt" -m qtmultimedia qtcharts
-          QTDIR="$RUNNER_TEMP/Qt/6.4.2/macos_arm64"
+          QTDIR="$RUNNER_TEMP/Qt/6.4.2/macos"
           echo "QTDIR=$QTDIR" >> "$GITHUB_ENV"
           echo "$QTDIR/bin" >> "$GITHUB_PATH"
 
