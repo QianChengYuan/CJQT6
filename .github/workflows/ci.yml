@@ -390,6 +390,8 @@ jobs:
           QT_PLUGIN_PATH: ${{ env.QTDIR }}/plugins
           # 运行时需能找桥接库 libcjqt6_bridge.dylib（releases/macos-arm64）与仓颉 runtime 库
           DYLD_LIBRARY_PATH: ${{ env.QTDIR }}/lib:${{ env.CJ_RUNTIME_LIB }}:${{ env.CJQT6_ROOT }}/releases/macos-arm64
+          # macOS Qt 以 framework 形式安装（QtCore.framework 等），需 DYLD_FRAMEWORK_PATH 定位
+          DYLD_FRAMEWORK_PATH: ${{ env.QTDIR }}/lib
         run: |
           # cjpm test 会先链接测试二进制，同样需要 SDKROOT 定位 macOS 系统库
           export SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
