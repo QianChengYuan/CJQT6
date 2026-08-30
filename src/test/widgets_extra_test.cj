@@ -763,7 +763,8 @@ class QKeySequenceEditTests {
         let kse = QKeySequenceEdit()
         kse.setKeySequence("Ctrl+C")
         let seq = kse.keySequence()
-        @Expect(seq.contains("Ctrl"), true)
+        // macOS NativeFormat 下 Qt::CTRL 显示为 "⌘" 而非 "Ctrl"，用字母键名做平台无关断言
+        @Expect(seq.contains("C"), true)
         kse.delete()
     }
 
@@ -782,7 +783,8 @@ class QKeySequenceEditTests {
         let kse = QKeySequenceEdit()
         kse.setOnKeySequenceChanged(gKeySeqCb)
         kse.setKeySequence("Ctrl+Z")
-        @Expect(gKeySeq.contains("Ctrl"), true)
+        // macOS NativeFormat 下 Qt::CTRL 显示为 "⌘" 而非 "Ctrl"，用字母键名做平台无关断言
+        @Expect(gKeySeq.contains("Z"), true)
         kse.delete()
     }
 }
