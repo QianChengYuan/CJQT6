@@ -289,3 +289,111 @@ jobs:
           name: coverage-windows
           path: cov_output/report/
           if-no-files-found: warn
+
+  # ============================================================
+  # macOS Apple Silicon (arm64)
+  # ------------------------------------------------------------
+  # 无 Mac 本地环境时，用 GitHub macOS Runner 编译桥接库 cjqt6_bridge.dylib
+  # 并跑 cjpm build/test。dylib 产物上传 artifact，手动下载后 commit 到
+  # releases/macos-arm64/（不需仓库写权限）。
+  #
+  # 前置：仓颉 Mac SDK 下载 URL 需在仓库 Variables 配 CANGJIE_SDK_URL_MACOS。
+  #   获取方式：https://cangjie-lang.cn/download/1.1.0 → macOS arm64 SDK → 复制链接
+  #   （objectKey 内嵌在页面 JS 中，与 Linux/Windows 同机制）。
+  # ============================================================
+  macos-arm64:
+    name: macOS (Apple Silicon · Qt 6.4.2)
+    runs-on: macos-14
+    timeout-minutes: 60
+    env:
+      CJQT6_ROOT: ${{ github.workspace }}
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 下载并解压仓颉 SDK 1.1.0 (macOS arm64)
+        shell: bash
+        run: |
+          set -euo pipefail
+          # 默认用稳定 objectKey API（无签名、不过期）；若官方重传导致 404，可用仓库变量覆盖
+          url="${{ vars.CANGJIE_SDK_URL_MACOS }}"
+          if [ -z "$url" ]; then
+            url="https://cangjie-lang.cn/v1/files/auth/downLoad?nsId=142267&fileName=cangjie-sdk-mac-aarch64-1.1.0.tar.gz&objectKey=69eac73121f5a8178d6fd21b"
+          fi
+          mkdir -p "$RUNNER_TEMP/cangjie-sdk"
+          curl -fL --retry 3 -o "$RUNNER_TEMP/cangjie-sdk.tar.gz" "$url"
+          # SHA-256 校验（可选）：配 CANGJIE_SDK_SHA_MACOS 变量则校验，否则跳过
+          expected_sha="${{ vars.CANGJIE_SDK_SHA_MACOS }}"
+          if [ -n "$expected_sha" ]; then
+            echo "$expected_sha  $RUNNER_TEMP/cangjie-sdk.tar.gz" | shasum -a 256 -c -
+          else
+            echo "::warning::未配 CANGJIE_SDK_SHA_MACOS，跳过 SHA-256 校验"
+          fi
+          tar -xzf "$RUNNER_TEMP/cangjie-sdk.tar.gz" -C "$RUNNER_TEMP/cangjie-sdk"
+          CANGJIE_HOME="$(find "$RUNNER_TEMP/cangjie-sdk" -maxdepth 2 -name envsetup.sh -printf '%h\n' | head -n1)"
+          echo "CANGJIE_HOME=$CANGJIE_HOME" >> "$GITHUB_ENV"
+          echo "$CANGJIE_HOME/bin"      >> "$GITHUB_PATH"
+          echo "$CANGJIE_HOME/tools/bin" >> "$GITHUB_PATH"
+          # cjpm/cjc 启动依赖 SDK 运行时库（libcangjie-runtime.dylib 在 runtime/lib/<os>_<arch>_cjnative）
+          # ⚠ 子目录名按下载文件名 mac-aarch64 推断为 mac_aarch64_cjnative，
+          #   首次跑若路径不对，解压后 ls $CANGJIE_HOME/runtime/lib 确认实际目录名再改。
+          echo "DYLD_LIBRARY_PATH=$CANGJIE_HOME/runtime/lib/mac_aarch64_cjnative:$CANGJIE_HOME/tools/lib:${DYLD_LIBRARY_PATH:-}" >> "$GITHUB_ENV"
+          echo "已安装到: $CANGJIE_HOME"
+
+      - name: aqtinstall 安装 Qt 6.4.2 (macos_arm64)
+        shell: bash
+        run: |
+          python3 -m pip install --user --quiet aqtinstall
+          python3 -m aqt install-qt mac desktop \
+            "6.4.2" "macos_arm64" \
+            -O "$RUNNER_TEMP/Qt" -m qtmultimedia qtcharts
+          QTDIR="$RUNNER_TEMP/Qt/6.4.2/macos_arm64"
+          echo "QTDIR=$QTDIR" >> "$GITHUB_ENV"
+          echo "$QTDIR/bin" >> "$GITHUB_PATH"
+
+      - name: 编译 C++ FFI 桥接库
+        shell: bash
+        env:
+          QTDIR: ${{ env.QTDIR }}
+        run: |
+          QTDIR="${{ env.QTDIR }}" bash scripts/build-macos-arm64.sh
+
+      - name: 校验依赖可重现构建
+        shell: bash
+        run: |
+          cjpm check
+
+      - name: 构建仓颉包
+        shell: bash
+        run: |
+          cjpm build
+
+      - name: 全量测试（offscreen）
+        shell: bash
+        env:
+          QT_QPA_PLATFORM: offscreen
+          QT_QPA_PLATFORM_PLUGIN_PATH: ${{ env.QTDIR }}/plugins/platforms
+          QT_PLUGIN_PATH: ${{ env.QTDIR }}/plugins
+          # 运行时需能找桥接库 libcjqt6_bridge.dylib（releases/macos-arm64）
+          DYLD_LIBRARY_PATH: ${{ env.QTDIR }}/lib:${{ env.CANGJIE_HOME }}/runtime/lib/mac_aarch64_cjnative:${{ env.CJQT6_ROOT }}/releases/macos-arm64
+        run: |
+          # 排除同 Linux：模态对话框/拖拽/音频/进程(cmd)/打印(CUPS)等环境相关测试
+          timeout 600s cjpm test \
+            --exclude-tags=requires_gui_dialog,requires_gui_drag,requires_audio,requires_process_spawn,requires_printer \
+            --timeout-each=30s
+
+      - name: 上传桥接库产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: cjqt6-bridge-macos-arm64
+          path: releases/macos-arm64/libcjqt6_bridge.dylib
+          if-no-files-found: error
+
+      - name: 上传测试产物（可选，供调试）
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-arm64-test-output
+          path: |
+            target/release/unittest_bin/
+          if-no-files-found: warn
