@@ -336,10 +336,16 @@ jobs:
           echo "$CANGJIE_HOME/bin"      >> "$GITHUB_PATH"
           echo "$CANGJIE_HOME/tools/bin" >> "$GITHUB_PATH"
           # cjpm/cjc 启动依赖 SDK 运行时库（libcangjie-runtime.dylib 在 runtime/lib/<os>_<arch>_cjnative）
-          # ⚠ 子目录名按下载文件名 mac-aarch64 推断为 mac_aarch64_cjnative，
-          #   首次跑若路径不对，解压后 ls $CANGJIE_HOME/runtime/lib 确认实际目录名再改。
-          echo "DYLD_LIBRARY_PATH=$CANGJIE_HOME/runtime/lib/mac_aarch64_cjnative:$CANGJIE_HOME/tools/lib:${DYLD_LIBRARY_PATH:-}" >> "$GITHUB_ENV"
-          echo "已安装到: $CANGJIE_HOME"
+          # 子目录名因平台而异（实测 macOS arm64 为 darwin_aarch64_cjnative），动态探测避免硬编码猜错
+          CJ_RUNTIME_LIB="$(find "$CANGJIE_HOME/runtime/lib" -maxdepth 1 -type d -name '*cjnative' | head -n1)"
+          if [ -z "$CJ_RUNTIME_LIB" ]; then
+            echo "::error::未找到仓颉 runtime lib cjnative 目录（$CANGJIE_HOME/runtime/lib 下）"
+            ls -la "$CANGJIE_HOME/runtime/lib" || true
+            exit 1
+          fi
+          echo "CJ_RUNTIME_LIB=$CJ_RUNTIME_LIB" >> "$GITHUB_ENV"
+          echo "DYLD_LIBRARY_PATH=$CJ_RUNTIME_LIB:$CANGJIE_HOME/tools/lib:${DYLD_LIBRARY_PATH:-}" >> "$GITHUB_ENV"
+          echo "已安装到: $CANGJIE_HOME (runtime lib: $CJ_RUNTIME_LIB)"
 
       - name: aqtinstall 安装 Qt 6.4.2 (clang_64 universal2)
         shell: bash
@@ -370,6 +376,10 @@ jobs:
       - name: 构建仓颉包
         shell: bash
         run: |
+          # 仓颉链接器 ld64.lld 默认 -syslibroot '/'，找不到 macOS 系统库（libSystem、libdyld 等）
+          # 显式设置 SDKROOT 指向 CommandLineTools SDK，链接器据此定位系统库
+          export SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
+          echo "SDKROOT=$SDKROOT"
           cjpm build
 
       - name: 全量测试（offscreen）
@@ -378,9 +388,11 @@ jobs:
           QT_QPA_PLATFORM: offscreen
           QT_QPA_PLATFORM_PLUGIN_PATH: ${{ env.QTDIR }}/plugins/platforms
           QT_PLUGIN_PATH: ${{ env.QTDIR }}/plugins
-          # 运行时需能找桥接库 libcjqt6_bridge.dylib（releases/macos-arm64）
-          DYLD_LIBRARY_PATH: ${{ env.QTDIR }}/lib:${{ env.CANGJIE_HOME }}/runtime/lib/mac_aarch64_cjnative:${{ env.CJQT6_ROOT }}/releases/macos-arm64
+          # 运行时需能找桥接库 libcjqt6_bridge.dylib（releases/macos-arm64）与仓颉 runtime 库
+          DYLD_LIBRARY_PATH: ${{ env.QTDIR }}/lib:${{ env.CJ_RUNTIME_LIB }}:${{ env.CJQT6_ROOT }}/releases/macos-arm64
         run: |
+          # cjpm test 会先链接测试二进制，同样需要 SDKROOT 定位 macOS 系统库
+          export SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
           # 排除同 Linux：模态对话框/拖拽/音频/进程(cmd)/打印(CUPS)等环境相关测试
           timeout 600s cjpm test \
             --exclude-tags=requires_gui_dialog,requires_gui_drag,requires_audio,requires_process_spawn,requires_printer \
