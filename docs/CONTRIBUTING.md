@@ -45,9 +45,9 @@
    # 运行测试
    cjpm test
    
-   # 运行示例验证
-   cd examples/widgets_demo
-   cjpm build
+    # 运行示例验证
+    cd examples/all_controls_demo
+    cjpm build
    ```
 
 5. **提交更改**
@@ -105,7 +105,7 @@ CJQT6/
 │   ├── src/
 │   └── includes/
 ├── examples/          # 示例程序
-├── doc/              # 文档
+├── docs/             # 文档
 └── tests/            # 测试部署脚本
 ```
 
@@ -134,7 +134,7 @@ CJQT6/
 
 ### 单元测试
 
-测试源码位于 `src/test/`（`package cjqt6.test`），根目录 `cjpm test` 直接发现并运行全部 889 用例。
+测试源码位于 `src/test/`（`package cjqt6.test`，41 个 `*_test.cj`），根目录 `cjpm test` 直接发现并运行全部用例。
 
 ```bash
 cjpm test                          # 全部用例
@@ -154,7 +154,7 @@ Linux 无显示环境：`xvfb-run cjpm test`
 运行所有示例验证功能：
 
 ```bash
-cd examples/widgets_demo && cjpm build && cjpm run
+cd examples/all_controls_demo && cjpm build && cjpm run
 cd examples/calculator && cjpm build && cjpm run
 ```
 

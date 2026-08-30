@@ -126,7 +126,8 @@ main(): Int32 {
     // 创建窗口和控件...
     
     let result = app.exec()  // 进入事件循环
-    // 不需要手动清理，终结器自动处理
+    // QApplication 不依赖终结器（终结器已全局禁用）；
+    // 程序退出时由 Qt 清理，如需提前释放用 app.delete()
     return result
 }
 ```

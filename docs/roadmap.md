@@ -29,7 +29,7 @@ CJQT6 的演进边界由仓颉语言特性决定，先固定几个**不可绕过
 
 | 维度 | 现状 |
 |------|------|
-| 覆盖 | 14 子包、142 个 `.cj` 文件、52 个 C++ 桥接 `.cpp`、API 文档 100% |
+| 覆盖 | 14 子包、142 个 `.cj` 文件、56 个 C++ 桥接 `.cpp`、API 文档 100% |
 | 控件 | 38 个 widgets 文件，基础/容器/视图/对话框/菜单/绘图基本齐备 |
 | 信号槽 | 基础回调 + `SignalConnection` 断开 + `SignalEmitter`（固定 void/int/double/string 信号 + QueuedConnection 跨线程） |
 | 数据/网络 | QJson、QProcess、QThread/QThreadPool、QTcp/Udp/Ssl、QNetworkAccessManager、QSql |

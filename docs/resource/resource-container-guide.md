@@ -212,4 +212,4 @@ for ((typeName, count) in stats.typeCounts) {
 ## 相关资源
 
 - [ResourceUtils 使用指南](./resource-utils-guide.md) - 批量释放工具
-- [资源管理最佳实践](./best-practices.md) - 完整资源管理策略
+- [资源管理最佳实践](./resource-management.md) - 完整资源管理策略

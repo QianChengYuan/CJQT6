@@ -6,12 +6,12 @@
 
 - 测试文件名：`<module>_test.cj`
 - 示例：`color_test.cj`、`widgets_test.cj`
-- 位置：与源文件同目录
+- 位置：统一在 `src/test/`（package `cjqt6.test`），不与各模块源文件混放
 
 ### 1.2 包声明
 
 ```cangjie
-package cjqt6.widgets
+package cjqt6.test
 
 // 测试模式下 unittest 和 unittest.testmacro 自动导入
 ```
@@ -95,7 +95,8 @@ class MyWidgetTests {
 
 ```cangjie
 @ExpectThrows[ResourceDisposedException](widget.show())
-@AssertThrows[NullPointerException](nullPtr.access())
+// NullPointerException 在访问无效指针时由 checkValid 等守卫抛出，
+// 具体触发场景以源码为准（勿在示例中编造不存在的 nullPtr/access API）
 ```
 
 ### 3.4 浮点数近似相等
@@ -273,7 +274,7 @@ func testRange(x: Int64) {
 ### 7.1 简单测试模板
 
 ```cangjie
-package cjqt6.module
+package cjqt6.test
 
 @Test
 class MyTests {
@@ -297,7 +298,7 @@ class MyTests {
 ### 7.2 GUI测试模板
 
 ```cangjie
-package cjqt6.widgets
+package cjqt6.test
 
 @Test
 class MyWidgetTests {

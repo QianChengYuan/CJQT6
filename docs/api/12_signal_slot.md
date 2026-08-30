@@ -131,7 +131,7 @@ lineEdit.disconnectEditingFinished()
 comboBox.disconnectCurrentIndexChanged()
 comboBox.disconnectCurrentTextChanged()
 
-// 其他控件
+// 其他控件（button 此处指 QPushButton；QToolButton 见下方说明）
 button.disconnectClick()
 slider.disconnectValueChanged()
 checkBox.disconnectStateChanged()

@@ -63,10 +63,11 @@ FFI就像一个翻译官，让仓颉语言和C++语言能够"对话"。
 - macOS: `.dylib` (Dynamic Library)
 
 **本项目的动态库**: 
-`libcjqt6_bridge.so` / `libcjqt6_bridge.dll` / `libcjqt6_bridge.dylib`
+`libcjqt6_bridge.so` (Linux) / `cjqt6_bridge.dll` (Windows) / `libcjqt6_bridge.dylib` (macOS)
 - 这是FFI桥接库的编译产物
 - 包含C++编译的Qt6封装代码
 - 仓颉程序运行时加载此库
+- 注意：Windows 动态库无 `lib` 前缀
 
 ### 1.3 什么是CMake?
 
@@ -636,15 +637,16 @@ ls target/release/
 
 ### 4.3 运行示例程序验证
 
-**运行最小窗口示例**:
+**运行示例程序验证**:
 ```bash
-cjpm run --example hello_window
+# 进入示例目录运行（cjpm 不支持 --example 参数，须 cd 到示例工程）
+cd examples/all_controls_demo
+cjpm run
 ```
 
 **预期结果**:
 - ✓ 程序启动无错误
-- ✓ 显示一个GUI窗口
-- ✓ 窗口标题为"Hello Window"或类似
+- ✓ 显示一个 GUI 窗口（all_controls_demo 展示各类控件）
 - ✓ 可正常关闭窗口
 - ✓ 程序正常退出，无崩溃
 
@@ -751,7 +753,7 @@ cp native/build_linux/lib/libcjqt6_bridge.so /usr/lib/
 
 | 错误信息 | 原因 | 解决方案 |
 |---------|------|---------|
-| `Segmentation fault (core dumped)` | 空指针访问或内存错误 | 检查对象初始化，参考[资源管理指南](resource-management.md) |
+| `Segmentation fault (core dumped)` | 空指针访问或内存错误 | 检查对象初始化，参考[资源管理指南](../resource/resource-management.md) |
 | `QWidget: Must construct a QApplication before a QWidget` | 未先创建QApplication | 确保main()中首先创建`QApplication()` |
 | `SIGSEGV: address not mapped to object` | 访问已释放的对象 | 检查对象生命周期，使用调试版本构建 |
 | `This application failed to start because no Qt platform plugin could be initialized` | Qt平台插件缺失 | Linux: `sudo apt install qt6-platform-plugins` |
@@ -774,7 +776,7 @@ cp native/build_linux/lib/libcjqt6_bridge.so /usr/lib/
 
 **原因**：旧版 bridge 源码用 `QObject::findChild<>()` 展开了对 Qt 内部符号 `qt_qFindChild_helper` 的 import，而 Qt 6.10.3 运行时已不再导出该符号。bridge DLL 在加载阶段解析导入表失败 → 整个 DLL 无法加载。
 
-**解决方案**：用已打补丁的 `native/src/qml/bridge_qml.cpp`（改为手动递归遍历 `QObject::children()` + `qobject_cast<QQuickItem*>` + `objectName()` 查找 `QQuickItem*`）**全量重编 bridge**。务必先删除 `native/build_windows_x64/cjqt6_bridge.dir` 再重新 cmake/msbuild（或运行 `scripts/build_bridge.bat`），然后用以下命令确认导入表中已无该符号：
+**解决方案**：用已打补丁的 `native/src/qml/bridge_qml.cpp`（改为手动递归遍历 `QObject::children()` + `qobject_cast<QQuickItem*>` + `objectName()` 查找 `QQuickItem*`）**全量重编 bridge**。务必先删除 `native/build_windows_x64/cjqt6_bridge.dir` 再重新 cmake/msbuild（或运行 `scripts/update-bridge.ps1`），然后用以下命令确认导入表中已无该符号：
 ```powershell
 objdump -p releases\windows-x64\cjqt6_bridge.dll | findstr qFindChild
 # 无输出即表示已修复
@@ -882,7 +884,7 @@ cd ../..
 cjpm build --release
 
 # 验证
-cjpm run --example hello_window
+cd examples/all_controls_demo; cjpm run
 ```
 
 #### 6.1.3 环境变量 (如需)
@@ -971,7 +973,7 @@ Copy-Item native\build_windows_x64\lib\cjqt6_bridge.lib releases\windows-x64\ -F
 cjpm build --release
 
 # 验证
-cjpm run --example hello_window
+cd examples/all_controls_demo; cjpm run
 ```
 
 #### 6.2.4 使用CMake GUI (可选)
@@ -1044,7 +1046,7 @@ cd ../..
 cjpm build --release
 
 # 验证
-cjpm run --example hello_window
+cd examples/all_controls_demo; cjpm run
 ```
 
 构建产物部署位置：`releases/macos-x64/libcjqt6_bridge.dylib`（Intel）或 `releases/macos-arm64/libcjqt6_bridge.dylib`（Apple Silicon）。
@@ -1160,5 +1162,5 @@ cmake .. -DCMAKE_LINKER=lld
 ## 相关文档
 
 - [项目架构设计](architecture.md) - 了解CJQT6整体架构
-- [资源管理指南](resource-management.md) - 了解内存管理和对象生命周期
-- [快速入门教程](tutorial/) - 学习如何使用CJQT6开发应用
+- [资源管理指南](../resource/resource-management.md) - 了解内存管理和对象生命周期
+- [快速入门教程](../tutorial/) - 学习如何使用CJQT6开发应用

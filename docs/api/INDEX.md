@@ -2,7 +2,7 @@
 
 > 本索引由 \scripts\gen-api-index.ps1\ 自动生成（P3-1）。手工维护，重新生成即覆盖。
 
-共 **205** 个类，分布在 19 个章节文件。
+共 **205** 个类，分布在 20 个章节文件（12 信号槽与 15 示例 FAQ 为机制说明，不含类索引）。
 
 ---
 
@@ -553,8 +553,8 @@
 
 ## ⚠️ src/ 中存在但 docs/api 未收录的公共类
 
-- **`QApp`** — 应用静态工具类（`src/core/app.cj`）
+- **`QApp`** — 应用静态工具类（`src/core/application.cj`）
 - **`QTcpServer`** — TCP 服务端（`src/network/tcp_server.cj`）
-- **`QtException`** — 仓颉 Qt 异常基类（`src/core/exceptions.cj`）
-- **`QWizardOption`** — 向导选项枚举（`src/dialogs/wizard.cj`）
+- **`QtException`** — 仓颉 Qt 异常基类（`src/core/resource.cj`）
+- **`QWizardOption`** — 向导选项枚举（`src/dialogs/dialogs.cj`）
 

@@ -47,7 +47,7 @@
                  │ FFI调用
 ┌────────────────▼────────────────────────┐
 │      FFI桥接层 (C++动态库)               │
-│  libCJQT6_bridge.so / CJQT6_bridge.dll  │
+│  libcjqt6_bridge.so / cjqt6_bridge.dll  │
 └────────────────┬────────────────────────┘
                  │ Qt C++ API
 ┌────────────────▼────────────────────────┐
@@ -74,13 +74,13 @@
 
 ```
 仓颉侧:
-let button = QPushButton("Click")
+let button = QPushButton()
 
 1. 调用 QPushButton.init()
-2. init() 调用 FFI函数: pushButtonNew(text)
-3. FFI函数创建Qt对象: new QPushButton(text)
-4. 返回Qt对象指针: CPointer
-5. 仓颉对象保存指针: this.ptr = pointer
+2. init() 调用 FFI函数: qButtonCreate()
+3. FFI函数创建Qt对象: new QPushButton()
+4. 返回Qt对象指针: Int64
+5. 仓颉对象保存指针: this.ptr = ptr
 ```
 
 #### 2. 方法调用流程
@@ -90,9 +90,11 @@ let button = QPushButton("Click")
 button.setText("New Text")
 
 1. 调用 QPushButton.setText()
-2. setText() 调用 FFI函数: pushButtonSetText(this.ptr, text)
-3. FFI函数调用Qt方法: button->setText(text)
-4. Qt对象状态更新
+2. 用 LibC.mallocCString 把 String 转成 CString
+3. setText() 调用 FFI函数: qButtonSetText(this.ptr, cstr)
+4. FFI函数调用Qt方法: button->setText(QString::fromUtf8(cstr))
+5. 用 LibC.free(cstr) 释放 CString
+6. Qt对象状态更新
 ```
 
 ### 数据类型映射
@@ -101,20 +103,22 @@ button.setText("New Text")
 
 | 仓颉类型 | C++类型 | FFI类型 | 说明 |
 |---------|--------|---------|------|
-| Int64 | long long | Int64 | 整数 |
+| Int64 | long long | Int64 | 整数 / Qt对象指针 |
+| Int32 | int | Int32 | 32位整数 |
 | Float64 | double | Float64 | 浮点数 |
 | Bool | bool | Bool | 布尔值 |
-| String | QString | CPointer | 字符串(需转换) |
-| CPointer | void* | CPointer | 原始指针 |
+| String | QString | CString | 字符串(需 LibC.mallocCString 转换) |
 | Unit | void | Unit | 无返回值 |
+
+> **说明**：CJQT6 中所有 Qt 对象指针统一用 `Int64` 承载（非 `CPointer`），布局 `addWidget`/`addLayout`/`setMenu` 等收的也是 `Int64`（由 `xxx.getPtr()` 取得）。
 
 #### 复合类型映射
 
 | 仓颉类型 | Qt类型 | 处理方式 |
 |---------|--------|---------|
-| QString | QString | C字符串转换 |
+| QString | QString | C字符串转换(LibC.mallocCString / CString.toString) |
 | QColor | QColor | 指针包装 |
-| QWidget | QWidget | 指针包装 |
+| QWidget | QWidget | 指针包装(Int64) |
 | QRect | QRect | 结构体转换 |
 | QSize | QSize | 结构体转换 |
 
@@ -123,52 +127,61 @@ button.setText("New Text")
 #### 仓颉String → QString
 
 ```cangjie
-// 仓颉侧
-func setTitle(title: String) {
-    unsafe { 
-        widgetSetTitle(this.ptr, title.cStr()) 
+// 仓颉侧：QWidget.setTitle
+public func setTitle(title: String): Unit {
+    checkValid()
+    unsafe {
+        let cstr = LibC.mallocCString(title)
+        qWidgetSetTitle(ptr, cstr)
+        LibC.free(cstr)
     }
 }
 ```
 
 ```cpp
 // C++桥接侧
-extern "C" void widgetSetTitle(void* widget, const char* title) {
+extern "C" void qWidgetSetTitle(void* widget, const char* title) {
     QWidget* w = static_cast<QWidget*>(widget);
-    w->setTitle(QString::fromUtf8(title));
+    w->setWindowTitle(QString::fromUtf8(title));
 }
 ```
 
 #### QString → 仓颉String
 
 ```cangjie
-// 仓颉侧
-func getTitle(): String {
+// 仓颉侧：QPushButton.text
+public func text(): String {
+    checkValid()
     unsafe {
-        let cstr = widgetGetTitle(this.ptr)
-        return String.fromCStr(cstr)
+        let cstr = qButtonText(ptr)
+        let result = cstr.toString()
+        freeBridgeString(cstr)
+        return result
     }
 }
 ```
 
 ```cpp
 // C++桥接侧
-extern "C" const char* widgetGetTitle(void* widget) {
-    QWidget* w = static_cast<QWidget*>(widget);
-    return w->title().toUtf8().data();
+extern "C" const char* qButtonText(void* widget) {
+    QPushButton* b = static_cast<QPushButton*>(widget);
+    // 返回由桥接层分配的字符串，仓颉侧用 freeBridgeString 释放
+    return strdup(b->text().toUtf8().data());
 }
 ```
+
+> **注意**：返回侧的 CString 由桥接层分配，仓颉侧需用 `freeBridgeString`（而非 `LibC.free`）释放，避免分配/释放器不匹配。
 
 ### 内存管理边界
 
 #### 所有权规则
 
 ```
-仓颉对象 ──拥有──> Qt指针 ──指向──> Qt对象
+仓颉对象 ──拥有──> Qt指针(Int64) ──指向──> Qt对象
 
 ├─ 仓颉对象由仓颉GC管理
-├─ Qt对象由Qt或CJQT6管理
-└─ 指针是连接两者的桥梁
+├─ Qt对象由Qt父子关系或显式 close()/delete() 管理
+└─ 指针(Int64)是连接两者的桥梁
 ```
 
 #### 对象生命周期
@@ -180,11 +193,13 @@ extern "C" const char* widgetGetTitle(void* widget) {
 使用:
 仓颉对象.method() ──FFI──> Qt对象.method()
 
-销毁:
-仓颉对象.~init() ──删除──> Qt对象
+销毁(二选一,不可依赖GC):
+仓颉对象.close() ──删除──> Qt对象          # 显式释放
     或
-Qt父对象销毁 ──自动──> Qt子对象销毁
+Qt父对象销毁 ──自动──> Qt子对象销毁          # 父子关系托管
 ```
+
+> **重要**：CJQT6 全局禁用终结器 `~init`。GC 时机不确定，依赖终结器会在 Qt 对象仍被使用时提前删除导致崩溃。用完必须显式 `close()`/`delete()`，或交给 Qt 父子关系托管。
 
 ## 资源管理策略
 
@@ -195,22 +210,38 @@ CJQT6面临两种内存管理系统:
 1. **仓颉GC** - 不确定时机的垃圾回收
 2. **Qt父子关系** - 确定性的父子对象管理
 
-### 解决方案: 终结器禁用
+### 解决方案: 终结器禁用 + 显式释放
 
-大多数Qt类禁用终结器,依赖Qt的父子关系管理:
+所有 Qt 封装类实现 `QtResource` 接口，持有 `ptr: Int64`，**不定义终结器**，依赖以下两种方式管理生命周期：
+
+- **Qt 父子关系托管**：构造时传入 parent，parent 销毁时子对象自动销毁
+- **显式释放**：调用 `close()`（实现 QtResource）或 `delete()` 释放底层对象
 
 ```cangjie
-public class QPushButton <: QWidget {
-    private var ptr: CPointer = 0
-    
-    public init(text: String, parent: QWidget = null) {
-        let parentPtr = parent != null ? parent.ptr : 0
-        ptr = unsafe { pushButtonNew(text.cStr(), parentPtr) }
-        // Qt自动管理: parent销毁时,此对象也会销毁
+public interface QtResource {
+    func isClosed(): Bool
+    func close(): Unit          // 关闭资源，释放底层Qt对象
+    func getPtr(): Int64        // 获取原生指针
+    func isValid(): Bool
+    func checkValid(): Unit     // 检查有效性，无效时抛出异常
+}
+
+public class QPushButton <: QtResource {
+    private var ptr: Int64 = 0
+    private var closed: Bool = false
+
+    public init() {
+        unsafe {
+            ptr = qButtonCreate()
+            if (ptr == 0) {
+                throw CreateFailedException("QPushButton 创建失败")
+            }
+        }
+        trackObject(ptr)
     }
-    
-    // 终结器已禁用
-    // ~init() { ... }  // 不定义终结器
+
+    // 终结器已禁用：不定义 ~init
+    // 用完须显式 close()，或交给 Qt 父子关系托管
 }
 ```
 
@@ -222,13 +253,13 @@ public class QPushButton <: QWidget {
 
 | 对象类型 | 原因 | 处理方式 |
 |---------|------|---------|
-| QTimer | 可能仍在事件循环中 | 调用stop()后delete() |
-| QMediaPlayer | 可能正在播放 | 调用stop()后delete() |
-| QColor/QPen等 | 可能被Qt引用 | 短期使用或手动delete() |
+| QTimer | 可能仍在事件循环中 | 调用stop()后close() |
+| QMediaPlayer | 可能正在播放 | 调用stop()后close() |
+| QColor/QPen等 | 可能被Qt引用 | 短期使用或手动close() |
 
 ### 最佳实践
 
-参见 [资源管理指南](./resource-management.md)
+参见 [资源管理指南](../resource/resource-management.md)
 
 ## 信号槽实现
 
@@ -238,54 +269,45 @@ Qt使用信号槽实现事件驱动编程:
 
 ```cpp
 // C++ Qt
-QObject::connect(button, &QPushButton::clicked, 
+QObject::connect(button, &QPushButton::clicked,
                  [](){ qDebug() << "Clicked!"; });
 ```
 
 ### CJQT6实现方案
 
-使用CFunc回调实现仓颉侧的信号槽:
+使用 `CFunc` 回调类型 + `setOnXxx` 注册函数实现仓颉侧的信号槽：
 
-#### 1. 定义回调类型
+#### 1. 定义回调类型（集中在 signal.cj）
 
 ```cangjie
-// 定义回调函数类型
-public type ButtonClickedCallback = CFunc<(CPointer)>
-public type LineEditTextChangedCallback = CFunc<(CPointer, CPointer)>
+// src/core/signal.cj
+public type VoidCallback = CFunc<() -> Unit>
+public type Int32Callback = CFunc<(Int32) -> Unit>
+public type CStringCallback = CFunc<(CString) -> Unit>
+public type Int64Callback = CFunc<(Int64) -> Unit>
+public type BoolCallback = CFunc<(Bool) -> Unit>
 ```
 
 #### 2. 桥接层注册回调
 
 ```cpp
 // C++桥接层
-extern "C" void pushButtonConnectClicked(
-    void* button, 
-    void (*callback)(void*)
-) {
+extern "C" void qButtonConnectClicked(void* button, void (*callback)()) {
     QPushButton* btn = static_cast<QPushButton*>(button);
-    QObject::connect(btn, &QPushButton::clicked, [callback, button]() {
-        callback(button);
+    QObject::connect(btn, &QPushButton::clicked, [callback]() {
+        callback();
     });
 }
 ```
 
-#### 3. 仓颉侧信号类
+#### 3. 仓颉侧注册函数
 
 ```cangjie
-public class Signal<T> {
-    private var ptr: CPointer = 0
-    private var callbacks: ArrayList<T> = ArrayList<T>()
-    
-    public func connect(callback: T) {
-        callbacks.add(callback)
-        // 注册到Qt
-    }
-    
-    public func emit(args: ...) {
-        // 触发所有回调
-        for (cb in callbacks) {
-            cb(args)
-        }
+// src/widgets/pushbutton.cj
+public func setOnClicked(callback: VoidCallback): Unit {
+    checkValid()
+    unsafe {
+        qButtonConnectClicked(ptr, callback)
     }
 }
 ```
@@ -293,19 +315,22 @@ public class Signal<T> {
 #### 4. 使用示例
 
 ```cangjie
-let button = QPushButton("Click")
-button.clicked.connect(func() {
+let button = QPushButton()
+button.setOnClicked(cFunc() {
     println("Button clicked!")
 })
 ```
+
+> **约束**：`CFunc` 回调不能捕获局部变量。需要共享状态时，用顶层 `let` 绑定 + 全局 `?T` 变量传递。
 
 ### 回调类型定义
 
 | 信号 | 回调类型 | 参数 |
 |-----|---------|------|
-| clicked | CFunc<(CPointer)> | 无 |
-| textChanged | CFunc<(CPointer, CPointer)> | 新文本 |
-| valueChanged | CFunc<(CPointer, Int64)> | 新值 |
+| clicked | VoidCallback | 无 |
+| textChanged | CStringCallback | 新文本(CString) |
+| valueChanged | Int32Callback | 新值 |
+| toggled | Int32Callback | 是否选中 |
 
 ## 模块划分
 
@@ -315,26 +340,63 @@ button.clicked.connect(func() {
 |-----|------|-------|
 | application.cj | 应用管理 | QApplication |
 | widget.cj | 窗口基类 | QWidget |
+| resource.cj | 资源管理 | QtResource, QtException |
+| signal.cj | 信号槽 | VoidCallback 等回调类型 |
 | timer.cj | 定时器 | QTimer |
-| signal.cj | 信号槽 | Signal, Slot |
 | events.cj | 事件系统 | QEvent |
 | process.cj | 进程管理 | QProcess |
+| emitter.cj | 信号发射器 | SignalEmitter |
+| callback.cj | 回调调度 | 回调注册/分发 |
+| animation.cj | 动画 | QPropertyAnimation |
+| settings.cj | 配置 | QSettings |
+| shortcut.cj | 快捷键 | QShortcut |
+| clipboard.cj | 剪贴板 | QClipboard |
+| screen.cj | 屏幕 | QScreen |
+| json.cj | JSON | QJsonObject |
+| thread.cj | 线程 | QThread |
+| undostack.cj | 撤销栈 | QUndoStack |
+| filewatcher.cj | 文件监视 | QFileSystemWatcher |
+| standardpaths.cj | 标准路径 | QStandardPaths |
+| gui_test_env.cj | 测试环境 | GUITestEnvironment |
+| common.cj | 公共声明 | 公共 FFI |
+| cstring_utils.cj | 字符串工具 | freeBridgeString 等 |
+| 其他 | dragdrop/uiposter/itemselectionmodel/propertyanimation/desktopservices | … |
 
 ### 控件模块 (src/widgets)
 
 | 文件 | 功能 | 主要类 |
 |-----|------|-------|
-| common.cj | 通用控件 | - |
+| common.cj | 通用控件 | 公共声明 |
 | label.cj | 文本标签 | QLabel |
 | pushbutton.cj | 按钮 | QPushButton |
 | lineedit.cj | 单行输入 | QLineEdit |
 | textedit.cj | 多行文本 | QTextEdit |
+| plaintextedit.cj | 纯文本编辑 | QPlainTextEdit |
+| textbrowser.cj | 文本浏览 | QTextBrowser |
 | checkbox.cj | 复选框 | QCheckBox |
 | radiobutton.cj | 单选按钮 | QRadioButton |
 | spinbox.cj | 数值框 | QSpinBox |
+| doublespinbox.cj | 双精度数值框 | QDoubleSpinBox |
 | slider.cj | 滑块 | QSlider |
 | combobox.cj | 下拉框 | QComboBox |
 | progressbar.cj | 进度条 | QProgressBar |
+| validators.cj | 验证器 | QValidator |
+| containers.cj | 容器 | QGroupBox/QFrame 等 |
+| toolbutton.cj | 工具按钮 | QToolButton |
+| toolbox.cj | 工具箱 | QToolBox |
+| dial.cj | 旋钮 | QDial |
+| scrollbar.cj | 滚动条 | QScrollBar |
+| stackedwidget.cj | 堆叠窗口 | QStackedWidget |
+| datetime.cj | 日期时间 | QDateTimeEdit |
+| graphicsview.cj | 图形视图 | QGraphicsView |
+| graphicsitem.cj | 图形项 | QGraphicsItem |
+| graphiceffect.cj | 图形效果 | QGraphicsEffect |
+| fontcombobox.cj | 字体下拉框 | QFontComboBox |
+| completer.cj | 补全器 | QCompleter |
+| systemtrayicon.cj | 系统托盘 | QSystemTrayIcon |
+| splashscreen.cj | 启动画面 | QSplashScreen |
+| uiloader.cj | UI加载器 | QUiLoader |
+| 其他 | commandlinkbutton/dialogbuttonbox/dockwidget/lcdnumber/mdiarea/rubberband/sizegrip/buttongroup/keysequenceedit | … |
 
 ### GUI模块 (src/gui)
 
@@ -342,19 +404,29 @@ button.clicked.connect(func() {
 |-----|------|-------|
 | types.cj | 基础类型 | QColor, QSize, QRect |
 | layout.cj | 布局管理 | QVBoxLayout, QHBoxLayout, QGridLayout |
+| font.cj | 字体 | QFont |
+| icon.cj | 图标 | QIcon |
+| cursor.cj | 光标 | QCursor |
+| palette.cj | 调色板 | QPalette |
+| style.cj | 样式 | QStyle |
+| textdoc.cj | 文档 | QTextDocument |
+| syntaxhighlighter.cj | 语法高亮 | QSyntaxHighlighter |
 
-### 绘图模块 (src/paint)
+### 其他模块
 
-| 文件 | 功能 | 主要类 |
-|-----|------|-------|
-| painter.cj | 绘图系统 | QPainter, QPen, QBrush, QImage |
-
-### 多媒体模块
-
-| 类 | 功能 |
-|----|------|
-| QMediaPlayer | 媒体播放 |
-| QAudioOutput | 音频输出 |
+| 模块 | 路径 | 主要内容 |
+|------|------|---------|
+| 对话框 | src/dialogs | QMessageBox/QFileDialog 等对话框 |
+| 菜单 | src/menu | QMenuBar/QMenu/QAction |
+| 绘图 | src/paint | QPainter/QPen/QBrush/QImage |
+| 多媒体 | src/multimedia | QMediaPlayer/QCamera/QAudioOutput 等 |
+| 视图 | src/views | QTreeView/QListView/QTableView |
+| 网络 | src/network | QTcpSocket/QNetworkAccessManager 等 |
+| SQL | src/sql | QSqlDatabase/QSqlQuery |
+| QML | src/qml | QQmlApplicationEngine |
+| 打印 | src/print | QPrinter/QPrintDialog |
+| 资源 | src/resource | 资源管理辅助 |
+| 图表 | src/charts | QtCharts 封装 |
 
 ## 性能考量
 
@@ -414,7 +486,8 @@ class MyWidget {
 仓颉对象 (仓颉堆)
 ├─ vtable
 ├─ 字段
-│   ├─ ptr: CPointer (8字节)
+│   ├─ ptr: Int64 (8字节)
+│   ├─ closed: Bool
 │   └─ 其他字段
 └─ ...
 
@@ -440,16 +513,20 @@ Qt对象 (C++堆)
 #### 1. C++桥接层
 
 ```cpp
-// native/src/widgets/new_widget.cpp
-extern "C" void* newWidgetNew(const char* text, void* parent) {
+// native/src/widgets/bridge_new_widget.cpp
+extern "C" void* qNewWidgetCreate(const char* text, void* parent) {
     QWidget* p = static_cast<QWidget*>(parent);
     NewWidget* w = new NewWidget(QString::fromUtf8(text), p);
     return w;
 }
 
-extern "C" void newWidgetSetText(void* widget, const char* text) {
+extern "C" void qNewWidgetSetText(void* widget, const char* text) {
     NewWidget* w = static_cast<NewWidget*>(widget);
     w->setText(QString::fromUtf8(text));
+}
+
+extern "C" void qNewWidgetDelete(void* widget) {
+    delete static_cast<NewWidget*>(widget);
 }
 ```
 
@@ -457,16 +534,51 @@ extern "C" void newWidgetSetText(void* widget, const char* text) {
 
 ```cangjie
 // src/widgets/new_widget.cj
-public class NewWidget <: QWidget {
-    private var ptr: CPointer = 0
-    
-    public init(text: String, parent: QWidget = null) {
-        let parentPtr = parent != null ? parent.ptr : 0
-        ptr = unsafe { newWidgetNew(text.cStr(), parentPtr) }
+package cjqt6.widgets
+
+import cjqt6.core.*
+
+foreign func qNewWidgetCreate(text: CString, parent: Int64): Int64
+foreign func qNewWidgetSetText(ptr: Int64, text: CString): Unit
+foreign func qNewWidgetDelete(ptr: Int64): Unit
+
+public class NewWidget <: QtResource {
+    private var ptr: Int64 = 0
+    private var closed: Bool = false
+
+    public init(text: String, parent!: Int64 = 0) {
+        unsafe {
+            let cstr = LibC.mallocCString(text)
+            ptr = qNewWidgetCreate(cstr, parent)
+            LibC.free(cstr)
+            if (ptr == 0) {
+                throw CreateFailedException("NewWidget 创建失败")
+            }
+        }
+        trackObject(ptr)
     }
-    
-    public func setText(text: String) {
-        unsafe { newWidgetSetText(ptr, text.cStr()) }
+
+    public func setText(text: String): Unit {
+        checkValid()
+        unsafe {
+            let cstr = LibC.mallocCString(text)
+            qNewWidgetSetText(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+
+    public func close(): Unit {
+        if (!closed) {
+            unsafe { qNewWidgetDelete(ptr) }
+            closed = true
+        }
+    }
+
+    public func getPtr(): Int64 { ptr }
+    public func isClosed(): Bool { closed }
+    public func isValid(): Bool { ptr != 0 && !closed }
+    public func checkValid(): Unit {
+        if (!isValid()) { throw ResourceDisposedException("NewWidget 已释放") }
     }
 }
 ```
@@ -475,8 +587,10 @@ public class NewWidget <: QWidget {
 
 ```cmake
 # native/CMakeLists.txt
-SOURCES += src/widgets/new_widget.cpp
+SOURCES += src/widgets/bridge_new_widget.cpp
 ```
+
+> 完整流程见 [CONTRIBUTING.md](../CONTRIBUTING.md) 与项目根 `AGENTS.md`。
 
 ## 未来展望
 
@@ -496,4 +610,4 @@ SOURCES += src/widgets/new_widget.cpp
 
 ---
 
-*最后更新: 2026-05-06*
+*最后更新: 2026-08-29*

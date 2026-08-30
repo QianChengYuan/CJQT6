@@ -49,14 +49,15 @@ main(): Int32 {
     table.setItem(0, 0, "名称")
     table.setItem(0, 1, "CJQT6")
     table.setItem(1, 0, "版本")
-    table.setItem(1, 1, "1.0.0")
+    table.setItem(1, 1, "1.9.0")
     table.setAutoFillWidth()
     mainLayout.addWidget(table.getPtr())
     
     window.setLayout(mainLayout.getPtr())
     window.show()
     
-    // 不需要手动清理，终结器自动处理
+    // 终结器已全局禁用；本示例控件挂到 window 布局下，由 Qt 父子关系托管。
+    // 程序退出时由 Qt 清理。QApplication 不实现 QtResource，如需提前释放用 app.delete()。
     let result = app.exec()
     return result
 }
@@ -78,12 +79,22 @@ layout.addWidget(bottomWidget.getPtr())
 
 ### Q: 如何实现控件之间的联动？
 
-A: 使用信号槽机制：
+A: 使用信号槽机制。注意 CFunc 回调不能捕获局部变量，需用全局变量中转：
 ```cangjie
+var gProgressBar: ?QProgressBar = None
+
 let sliderCallback: Int32Callback = { value: Int32 =>
-    progressBar.setValue(value)
+    if (let Some(pb) <- gProgressBar) {
+        pb.setValue(value)
+    }
 }
 slider.setOnValueChanged(sliderCallback)
+
+main(): Int32 {
+    // ...
+    gProgressBar = progressBar  // 存入全局变量
+    // ...
+}
 ```
 
 ### Q: 为什么CFunc回调不能访问外部变量？

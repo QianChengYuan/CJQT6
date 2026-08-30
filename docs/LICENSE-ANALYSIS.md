@@ -30,7 +30,7 @@ Qt6采用双重许可模式：
 | QtSql | LGPL v3 | 数据库 |
 | QtPrintSupport | LGPL v3 | 打印 |
 
-> **注意**：CJQT6使用的所有模块均为LGPL v3
+> **注意**：CJQT6 使用的大多数模块为 LGPL v3；但 **QtCharts 模块为 GPL v3**，CJQT6 已封装 QtCharts（`src/charts/`），使用 charts 模块的应用需注意 GPL v3 的传染性要求（静态链接或整体开源）。仅使用 LGPL 模块（core/widgets/gui/dialogs/menu/paint/qml/multimedia/network/sql/views/print/resource）则不受 GPL 约束。
 
 ## MIT与LGPL v3兼容性
 
@@ -145,13 +145,11 @@ This software is provided "as is", without warranty of any kind.
 ```toml
 [package]
   name = "cjqt6"
-  version = "1.0.0"
+  version = "1.9.0"
   license = "MIT"
-  
-[requirements]
-  qt6 = ">=6.2"
-  qt6-license = "LGPL-3.0-or-later"
 ```
+
+> 注：`qt6` 版本与许可证约束不在 cjpm.toml 中声明（cjpm 无 `[requirements]` 段），Qt 版本与许可证由构建环境与 `docs/guides/qt-version-matrix.md` 约定。
 
 ### 法律合规性结论
 

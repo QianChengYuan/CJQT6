@@ -21,7 +21,7 @@ CJQT6需要为每个平台编译对应的桥接库：
 |------|--------|----------|
 | Linux x64 | `libcjqt6_bridge.so` | `releases/linux-x64/` |
 | Linux ARM64 | `libcjqt6_bridge.so` | `releases/linux-arm64/` |
-| Windows x64 | `libcjqt6_bridge.dll` | `releases/windows-x64/` |
+| Windows x64 | `cjqt6_bridge.dll` | `releases/windows-x64/` |
 | macOS x64 | `libcjqt6_bridge.dylib` | `releases/macos-x64/` |
 | macOS ARM64 | `libcjqt6_bridge.dylib` | `releases/macos-arm64/` |
 
@@ -144,7 +144,7 @@ cmake ..\.. `
 mingw32-make -j4
 
 # 安装到 releases/
-Copy-Item bin\libcjqt6_bridge.dll ..\..\releases\windows-x64\
+Copy-Item bin\cjqt6_bridge.dll ..\..\releases\windows-x64\
 ```
 
 ### 交叉编译（从Linux到Windows）
@@ -172,7 +172,7 @@ cmake .. \
 make -j$(nproc)
 
 # 转换DLL格式（可选）
-# 结果：libcjqt6_bridge.dll
+# 结果：cjqt6_bridge.dll
 ```
 
 ---
@@ -444,7 +444,7 @@ ldd releases/linux-x64/libcjqt6_bridge.so
 file releases/linux-x64/libcjqt6_bridge.so
 
 # Windows (在Git Bash中)
-objdump -p releases/windows-x64/libcjqt6_bridge.dll | grep "DLL Name"
+objdump -p releases/windows-x64/cjqt6_bridge.dll | grep "DLL Name"
 
 # macOS
 otool -L releases/macos-x64/libcjqt6_bridge.dylib
@@ -456,11 +456,11 @@ file releases/macos-x64/libcjqt6_bridge.dylib
 ## 相关文档
 
 - [构建指南](build-guide.md)
-- [安装说明](../releases/README.md)
-- [API文档](api/)
+- [安装说明](../../releases/README.md)
+- [API文档](../api/)
 
 ---
 
 ## 许可证
 
-本指南遵循 [MIT License](LICENSE)。
+本指南遵循 [MIT License](../LICENSE)。

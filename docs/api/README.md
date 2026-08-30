@@ -25,6 +25,7 @@ CJQT6 是仓颉语言的 Qt6 封装库，提供跨平台 GUI 开发能力。
 | [17_dragdrop.md](./17_dragdrop.md) | 拖放支持 - QMimeData、QDrag |
 | [18_sql.md](./18_sql.md) | SQL数据库 - QSqlDatabase、QSqlQuery |
 | [19_network.md](./19_network.md) | 网络模块 - QTcpSocket、QUdpSocket、QHostAddress |
+| [20_charts.md](./20_charts.md) | 图表模块 - QChart、QChartView、QLineSeries、QValueAxis |
 
 ## 快速开始
 

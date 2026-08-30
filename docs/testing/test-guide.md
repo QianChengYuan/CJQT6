@@ -98,10 +98,12 @@ class MyWidgetTests {
 ### 4.1 成功输出
 
 ```
-Summary: TOTAL: 49
-    PASSED: 49, SKIPPED: 0, ERROR: 0
+Summary: TOTAL: 1417
+    PASSED: 1417, SKIPPED: 0, ERROR: 0
     FAILED: 0
 ```
+
+> 注：用例总数随版本迭代持续增长，以上为近期统计（`@TestCase` 注解计数，参数化测试运行时可能更多）。
 
 ### 4.2 失败输出
 

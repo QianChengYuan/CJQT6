@@ -23,7 +23,7 @@ Qt **小版本之间存在 ABI 差异**，换版本后旧 bridge 可能**静默�
 |--------|----------|------|----------|
 | `qt_qFindChild_helper` 符号移除 | ≥ 6.5（6.10.3 实测） | bridge DLL 加载时报「无法定位程序输入点 qt_qFindChild_helper」，整个 DLL 无法加载 | 已改用手动递归遍历 `QObject::children()` + `qobject_cast`（`native/src/qml/bridge_qml.cpp`） |
 | `QSpinBox/QDoubleSpinBox::valueChanged(QString)` 重载移除 | Qt 6 全系 | 编译期报错 | 文本变化走既有 `setOnTextChanged`（`textChanged(const QString&)`），与数值 `setOnValueChanged` 并存 |
-| `QRegExpValidator` 移除 | Qt 6 全系 | 编译期报错 | 改用 `QRegularExpressionValidator` |
+| `QRegExpValidator`（C++ 类）移除 | Qt 6 全系 | C++ 桥接层编译期报错 | 桥接层改用 `QRegularExpressionValidator` 实现；仓颉侧保留 `QRegExpValidator` 类名作为兼容封装（底层已是 `QRegularExpressionValidator`），仓颉用户无需改动 |
 | MinGW bridge 与 MSVC 运行时 ABI 不兼容 | MinGW 构建产物 | 仓颉 MSVC 运行时下 DLL 加载异常 | 一律用 MSVC 2022 构建 Windows 桥接库 |
 
 **红线**：`releases/<platform>/` 中的预编译产物**必须**与使用的 Qt 小版本匹配，

@@ -18,18 +18,22 @@ CJQT6通过FFI桥接技术连接仓颉语言和Qt6 C++库,这带来了独特的�
 
 1. **Qt对象**由C++管理,使用QObject父子关系自动管理生命周期
 2. **仓颉对象**由仓颉GC管理,GC时机不确定
-3. **桥接对象**同时持有Qt指针和仓颉引用,需要协调两种内存管理机制
+3. **桥接对象**同时持有Qt指针(Int64)和仓颉引用,需要协调两种内存管理机制
+
+所有 Qt 封装类实现 `QtResource` 接口（`isClosed/close/getPtr:Int64/isValid/checkValid`），持有 `ptr: Int64`。
 
 ## Qt对象生命周期
 
 ### Qt父子关系
 
-Qt使用父子对象树管理内存:
+Qt使用父子对象树管理内存。在 CJQT6 中，父子关系通过 `setParent` 或布局 `setLayout` 建立（控件构造均为无参，不通过构造传 parent）：
 
 ```cangjie
 let parent = QWidget()
-let child = QPushButton(parent)  // parent成为child的父对象
-// parent销毁时,自动销毁所有子对象
+let child = QPushButton()
+child.setText("按钮")
+// 通过 setParent 或加入父对象的布局建立父子关系
+// parent 销毁时,自动销毁所有子对象
 ```
 
 **优点:**
@@ -46,7 +50,7 @@ let child = QPushButton(parent)  // parent成为child的父对象
 | 类型 | 生命周期管理 | 示例 |
 |-----|------------|------|
 | QObject派生类 | 父子关系自动管理 | QWidget, QPushButton |
-| 值类型 | 需手动管理或禁用终结器 | QColor, QPen, QBrush |
+| 值类型 | 需手动管理（终结器已禁用） | QColor, QPen, QBrush |
 | 非QObject类 | 需手动管理或特殊处理 | QTimer, QMediaPlayer |
 
 ## 仓颉GC特性
@@ -66,22 +70,23 @@ let child = QPushButton(parent)  // parent成为child的父对象
 ```cangjie
 let color = QColor(255, 0, 0)  // 创建Qt颜色对象
 // ... 使用color
-// GC可能在此时触发,调用color的终结器
+// 若定义了终结器，GC可能在此时触发,调用color的终结器
 // 如果Qt仍在使用该颜色对象,会访问已释放内存 -> 崩溃!
+// 因此 CJQT6 全局禁用终结器，改由显式 delete()/close() 或 Qt 父子关系管理
 ```
 
 ## 终结器机制
 
 ### 终结器状态表
 
-以下是CJQT6中各类的终结器启用状态:
+CJQT6 **全局禁用终结器 `~init`**。以下是各类的终结器状态:
 
 #### 核心类 (已禁用终结器)
 
 | 类 | 终结器状态 | 原因 |
 |----|----------|------|
 | QWidget | ❌ 已禁用 | Qt父子关系管理 |
-| QApplication | ❌ 已禁用 | 全局唯一对象 |
+| QApplication | ❌ 已禁用 | 全局唯一对象，用 delete() 释放 |
 | QTimer | ❌ 已禁用 | 可能仍被事件循环使用 |
 | QProcess | ❌ 已禁用 | 可能仍运行中 |
 | QSettings | ❌ 已禁用 | 可能仍被使用 |
@@ -100,20 +105,20 @@ let color = QColor(255, 0, 0)  // 创建Qt颜色对象
 | QRadioButton | ❌ 已禁用 | Qt父子关系管理 |
 | QComboBox | ❌ 已禁用 | Qt父子关系管理 |
 
-#### 绘图类 (待禁用终结器) ⚠️
+#### 绘图类 (已禁用终结器)
 
-| 类 | 终结器状态 | 风险等级 |
-|----|----------|---------|
-| QColor | ❌ 需禁用 | 🔴 高 |
-| QPen | ❌ 需禁用 | 🔴 高 |
-| QBrush | ❌ 需禁用 | 🔴 高 |
-| QLinearGradient | ❌ 需禁用 | 🔴 高 |
-| QRadialGradient | ❌ 需禁用 | 🔴 高 |
-| QConicalGradient | ❌ 需禁用 | 🔴 高 |
-| QFont | ❌ 需禁用 | 🔴 高 |
-| QPainterPath | ❌ 需禁用 | 🔴 高 |
-| QPixmap | ❌ 需禁用 | 🔴 高 |
-| QImage | ❌ 需禁用 | 🔴 高 |
+| 类 | 终结器状态 | 原因 |
+|----|----------|------|
+| QColor | ❌ 已禁用 | GC 时机不确定，须显式 delete() |
+| QPen | ❌ 已禁用 | 同上 |
+| QBrush | ❌ 已禁用 | 同上 |
+| QLinearGradient | ❌ 已禁用 | 同上 |
+| QRadialGradient | ❌ 已禁用 | 同上 |
+| QConicalGradient | ❌ 已禁用 | 同上 |
+| QFont | ❌ 已禁用 | 同上 |
+| QPainterPath | ❌ 已禁用 | 同上 |
+| QPixmap | ❌ 已禁用 | 同上 |
+| QImage | ❌ 已禁用 | 同上 |
 
 #### 多媒体类 (已禁用终结器)
 
@@ -126,12 +131,12 @@ let color = QColor(255, 0, 0)  // 创建Qt颜色对象
 
 ```cangjie
 public class QColor {
-    private var ptr: CPointer = 0
-    
-    public init(r: Int64, g: Int64, b: Int64) {
-        ptr = unsafe { qColorNew(r, g, b) }
+    private var ptr: Int64 = 0
+
+    public init(r: Int32, g: Int32, b: Int32) {
+        unsafe { ptr = qColorCreateRgb(r, g, b, 255) }
     }
-    
+
     // 终结器 - 已禁用
     // 原因: 仓颉GC时机不确定,可能导致崩溃
     // 解决方案: 使用短期对象或手动释放
@@ -141,8 +146,8 @@ public class QColor {
     //         ptr = 0
     //     }
     // }
-    
-    public func delete() {
+
+    public func delete(): Unit {
         if (ptr != 0) {
             unsafe { qColorDelete(ptr) }
             ptr = 0
@@ -204,11 +209,11 @@ func paintEvent(event: QPaintEvent) {
     let painter = QPainter(widget)
     let pen = QPen(QColor(255, 0, 0), 2)
     let brush = QBrush(QColor(0, 255, 0))
-    
+
     painter.setPen(pen)
     painter.setBrush(brush)
     painter.drawRect(10, 10, 100, 100)
-    
+
     painter.end()  // 结束绘图
     // pen和brush在painter.end()后可安全释放
 }
@@ -218,13 +223,16 @@ func paintEvent(event: QPaintEvent) {
 
 ```cangjie
 func createUI() {
-    let label = QLabel("Hello")
+    let label = QLabel()
+    label.setText("Hello")
     let color = QColor(255, 0, 0)
-    let font = QFont("Arial", 12)
-    
-    let style = QString("color: red; font-size: 12px;")
-    label.setStyleSheet(style)
-    
+    let font = QFont()
+    font.setFamily("Arial")
+    font.setPointSize(12)
+
+    // 仓颉侧用 String 设置样式表（无 QString 类型）
+    label.setStyleSheet("color: red; font-size: 12px;")
+
     // color和font对象在使用后可释放
     color.delete()
     font.delete()
@@ -239,26 +247,33 @@ func createUI() {
 
 ```cangjie
 let window = QWidget()
-let layout = QVBoxLayout(window)
+let layout = QVBoxLayout()
 
-let label = QLabel("Label", window)  // window为父对象
-let button = QPushButton("Button", window)  // window为父对象
+let label = QLabel()
+label.setText("Label")
+let button = QPushButton()
+button.setText("Button")
 
-layout.addWidget(label)
-layout.addWidget(button)
+// 加入布局（addWidget 收 Int64 指针）
+layout.addWidget(label.getPtr())
+layout.addWidget(button.getPtr())
+window.setLayout(layout.getPtr())  // 布局挂到 window，建立父子关系
 
 window.show()
-// window销毁时,自动销毁label和button
+// window销毁时,自动销毁layout、label和button
 ```
 
 #### 2. 布局类
 
 ```cangjie
 let widget = QWidget()
-let layout = QVBoxLayout(widget)  // widget为父对象
+let layout = QVBoxLayout()
 
-layout.addWidget(QLabel("Label"))
-layout.addWidget(QPushButton("Button"))
+let label = QLabel()
+let button = QPushButton()
+layout.addWidget(label.getPtr())
+layout.addWidget(button.getPtr())
+widget.setLayout(layout.getPtr())  // widget 为父对象
 
 // widget销毁时,自动销毁layout及其管理的所有控件
 ```
@@ -281,15 +296,15 @@ func paintEvent(event: QPaintEvent) {
 // 正确示例
 class MyWidget <: QWidget {
     private let penColor = QColor(255, 0, 0)  // 成员变量复用
-    
+
     func paintEvent(event: QPaintEvent) {
         let painter = QPainter(this)
         painter.setPen(QPen(penColor, 2))
         painter.end()
     }
-    
+
     func cleanup() {
-        penColor.delete()  // 析构时释放
+        penColor.delete()  // 显式释放
     }
 }
 ```
@@ -306,12 +321,12 @@ timer.start()
 // 正确示例
 class MyApp {
     private let timer = QTimer()
-    
+
     init() {
         timer.setInterval(100)
         timer.start()
     }
-    
+
     func cleanup() {
         timer.stop()
         timer.delete()
@@ -333,11 +348,18 @@ valgrind --leak-check=full ./your_app
 
 #### 2. 运行时监控
 
+在关键位置打印对象指针或自定义计数（CJQT6 未提供 `instanceCount` 内建 API，可自行维护计数）：
+
 ```cangjie
-// 在关键位置打印对象计数
+var gColorCount: Int64 = 0
+
+func createColor(r: Int32, g: Int32, b: Int32): QColor {
+    gColorCount = gColorCount + 1
+    return QColor(r, g, b)
+}
+
 func checkMemory() {
-    println("QColor count: ${QColor.instanceCount}")
-    println("QTimer count: ${QTimer.instanceCount}")
+    println("QColor count: ${gColorCount}")
 }
 ```
 
@@ -346,12 +368,16 @@ func checkMemory() {
 ### 1. 使用父子关系管理控件
 
 ```cangjie
-// 推荐: 使用父子关系
+// 推荐: 通过布局建立父子关系
 let window = QWidget()
-let button = QPushButton("Click", window)  // window为父对象
+let layout = QVBoxLayout()
+let button = QPushButton()
+button.setText("Click")
+layout.addWidget(button.getPtr())
+window.setLayout(layout.getPtr())  // window 托管 button
 
-// 避免: 无父子关系的控件
-let button2 = QPushButton()  // 需手动管理
+// 避免: 无父子关系的独立控件，需手动管理
+let button2 = QPushButton()  // 需手动 close/delete
 ```
 
 ### 2. 短期对象立即释放
@@ -361,7 +387,7 @@ func drawSomething() {
     let color = QColor(255, 0, 0)
     // 使用color
     useColor(color)
-    
+
     color.delete()  // 使用完毕立即释放
 }
 ```
@@ -372,12 +398,12 @@ func drawSomething() {
 class MyWidget <: QWidget {
     private let bgColor = QColor(240, 240, 240)  // 成员变量
     private let timer = QTimer()
-    
+
     init() {
         timer.setInterval(1000)
         timer.start()
     }
-    
+
     func cleanup() {
         timer.stop()
         timer.delete()
@@ -400,7 +426,7 @@ func paintEvent(event: QPaintEvent) {
 // 正确: 复用成员变量
 class MyWidget <: QWidget {
     private let pen = QPen(QColor(255, 0, 0), 2)  // 只创建一次
-    
+
     func paintEvent(event: QPaintEvent) {
         let painter = QPainter(this)
         painter.setPen(pen)
@@ -409,30 +435,18 @@ class MyWidget <: QWidget {
 }
 ```
 
-### 5. 使用RAII模式
+### 5. 使用 try-with-resources（RAII）
+
+实现 `QtResource` 接口的类可用 `try-with-resources` 自动释放（仓颉原生支持）：
 
 ```cangjie
-class ScopedTimer {
-    private let timer: QTimer
-    
-    init(interval: Int64) {
-        timer = QTimer()
-        timer.setInterval(interval)
-        timer.start()
-    }
-    
-    ~init() {
-        timer.stop()
-        timer.delete()
-    }
-}
-
-// 使用
-func doWork() {
-    let scoped = ScopedTimer(1000)
-    // timer自动管理
-}  // 离开作用域时自动清理
+// try-with-resources 自动调用 close()
+try (color = QColor(255, 0, 0)) {
+    useColor(color)
+}  // 离开作用域时自动 color.close()
 ```
+
+> 注意：CJQT6 全局禁用终结器 `~init`，不要依赖 GC 自动清理。`try-with-resources` 是编译期确定性的释放，与 GC 终结器不同，可安全使用。
 
 ### 6. 异常安全
 
@@ -459,8 +473,8 @@ func riskyOperation() {
 | QObject控件 | Qt父子关系 | 父对象销毁时 |
 | QTimer | 手动管理 | 停止后立即释放 |
 | QMediaPlayer | 手动管理 | 停止后立即释放 |
-| 绘图对象 | 短期/成员变量 | 使用后立即/析构时 |
-| 颜色/字体 | 短期/成员变量 | 使用后立即/析构时 |
+| 绘图对象 | 短期/成员变量 | 使用后立即/显式释放 |
+| 颜色/字体 | 短期/成员变量 | 使用后立即/显式释放 |
 
 ### 记住的原则
 
@@ -468,9 +482,8 @@ func riskyOperation() {
 2. **定时器要停止释放** - 避免后台运行
 3. **绘图对象短期用** - 用完立即释放
 4. **成员变量复用** - 避免热路径创建
-5. **终结器已禁用** - 必须手动释放或依赖Qt管理
+5. **终结器已禁用** - 必须手动释放或依赖Qt管理，勿依赖 GC
 
 ---
 
-*最后更新: 2026-05-06*
-*基于CODE_REVIEW.md第七轮审查报告*
+*最后更新: 2026-08-29*

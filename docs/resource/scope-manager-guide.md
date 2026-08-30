@@ -269,4 +269,4 @@ ScopeManager 内部登记控件的元数据类，记录每个注册控件的底�
 
 - [ResourceContainer 使用指南](./resource-container-guide.md) - 资源容器
 - [ResourceUtils 使用指南](./resource-utils-guide.md) - 批量释放工具
-- [资源管理最佳实践](./best-practices.md) - 完整资源管理策略
+- [资源管理最佳实践](./resource-management.md) - 完整资源管理策略
