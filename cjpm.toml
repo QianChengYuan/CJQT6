@@ -1,7 +1,6 @@
 # ============================================================
 # cjpm.toml —— CJQT6（仓颉 Qt6 封装库）
 # 本文件仅包含仓颉官方 cjpm 认可的字段，确保 cjpm 解析零警告。
-# 非官方扩展配置请见同目录下的 cjqt6-ext.toml。
 # ============================================================
 
 [package]
@@ -14,15 +13,16 @@
   # ---- 选填字段 ----
   description = "仓颉语言的 Qt6 封装库 - 让仓颉像 Python 使用 PyQt 一样便捷"
   authors     = ["CJQT6 Team"]
-  license     = "MIT"            # 遵循 SPDX Identifier 规范
+  license     = ["MIT"]         # 协议列表（官方为数组，遵循 SPDX Identifier 规范）
 
   homepage      = "https://gitcode.com/yuan_1992/CJQT6"
   repository    = "https://gitcode.com/yuan_1992/CJQT6.git"
   documentation = "https://gitcode.com/yuan_1992/CJQT6/blob/main/README.md"
 
-  # 制品标签 / 分类（官方字段，原 [metadata] 内容合并至此）
-  tags      = ["qt", "gui", "widgets", "ffi", "cross-platform"]
-  category = "gui"
+  # 制品标签 / 分类（官方制品元数据字段，见 pkgdocs 中心仓元数据规格；
+  # tag/category/license 均为数组，字段名为 tag 单数）
+  tag      = ["qt", "gui", "widgets", "ffi", "cross-platform"]
+  category = ["UI"]
 
   # 编译 / 链接选项
   compile-option = "-Woff unused"
@@ -32,9 +32,11 @@
   src-dir    = "src"
   target-dir = "target"
 
-  # 打包范围（gitignore 风格匹配规则）
-  include = ["src", "docs", "examples", "native/includes", "releases"]
-  exclude = ["*.txt", "*.log", "*.bak", "*.tmp", "test_*", "build_*"]
+  # 打包范围（gitignore 风格匹配规则，见 pkgdocs 中心仓制品包发布 include/exclude 说明）
+  # 含 C++ 桥接源码 + 构建脚本，使制品包具备完整可重建性（macOS / 不同 Qt 版本 / 预编译库不可用场景）
+  include = ["src", "docs", "native/includes", "native/src", "native/cjqt6_bridge_exports.def", "scripts", "CMakeLists.txt", "releases"]
+  # 注：移除原 "*.txt"——入库 .txt 仅 CMakeLists.txt 一个，该规则与 include CMakeLists.txt 冲突
+  exclude = ["*.log", "*.bak", "*.tmp", "test_*", "build_*"]
 
 # ============================================================
 # 依赖管理
@@ -77,14 +79,10 @@
 # 三元组可通过在对应平台执行 `cjc -v` 获取
 # ============================================================
 
-# Windows + MSVC
-[target.x86_64-pc-windows-msvc]
-  compile-option = ""
-  link-option    = "releases/windows-x64/cjqt6_bridge.lib"
-
-# Windows + MinGW（cjc -v 实测目标三元组 x86_64-w64-mingw32）
+# Windows + MinGW（cjc -v 实测目标三元组 x86_64-w64-mingw32，当前仓颉 Windows 工具链唯一后端）
 # 注：link-option 使用 ${CJQT6_ROOT} 环境变量替换（仓库根目录），
 # 替代原先的本机绝对路径，换机器仅需配置 CJQT6_ROOT 即可（与 CANGJIE_STDX_PATH 同风格）。
+#     顶层 link-option 已置空，Windows 桥接库由此块链接 cjqt6_bridge.dll。
 [target.x86_64-w64-mingw32]
   compile-option = ""
   link-option    = "${CJQT6_ROOT}/releases/windows-x64/cjqt6_bridge.dll"
@@ -116,5 +114,5 @@
 # [target.x86_64-unknown-linux-gnu.dependencies]
 #   some-linux-only-lib = "1.0.0"
 #
-# [target.x86_64-pc-windows-msvc.dependencies]
+# [target.x86_64-w64-mingw32.dependencies]
 #   some-windows-only-lib = "1.0.0"

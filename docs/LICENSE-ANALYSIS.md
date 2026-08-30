@@ -146,7 +146,7 @@ This software is provided "as is", without warranty of any kind.
 [package]
   name = "cjqt6"
   version = "1.9.0"
-  license = "MIT"
+  license = ["MIT"]
 ```
 
 > 注：`qt6` 版本与许可证约束不在 cjpm.toml 中声明（cjpm 无 `[requirements]` 段），Qt 版本与许可证由构建环境与 `docs/guides/qt-version-matrix.md` 约定。
