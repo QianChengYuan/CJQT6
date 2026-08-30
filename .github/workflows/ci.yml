@@ -344,8 +344,10 @@ jobs:
       - name: aqtinstall 安装 Qt 6.4.2 (macos_arm64)
         shell: bash
         run: |
-          python3 -m pip install --user --quiet aqtinstall
-          python3 -m aqt install-qt mac desktop \
+          # macOS Homebrew Python 受 PEP 668 限制，pip install --user 被禁止，用 venv 规避
+          python3 -m venv "$RUNNER_TEMP/aqt-venv"
+          "$RUNNER_TEMP/aqt-venv/bin/pip" install --quiet aqtinstall
+          "$RUNNER_TEMP/aqt-venv/bin/python3" -m aqt install-qt mac desktop \
             "6.4.2" "macos_arm64" \
             -O "$RUNNER_TEMP/Qt" -m qtmultimedia qtcharts
           QTDIR="$RUNNER_TEMP/Qt/6.4.2/macos_arm64"
