@@ -40,6 +40,7 @@ public class QDoubleSpinBox <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
     
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
         unsafe {
             ptr = qDoubleSpinBoxCreate()
@@ -371,6 +372,8 @@ public class QDoubleSpinBox <: QtResource {
     }
 
     /// 检查有效性，无效时抛出异常
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
+    /// throws: NullPointerException 空指针访问时抛出
     public func checkValid(): Unit {
         if (closed) {
             throw ResourceDisposedException("QDoubleSpinBox 已经被释放")

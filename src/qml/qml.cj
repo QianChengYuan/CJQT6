@@ -199,6 +199,7 @@ public class QQmlApplicationEngine <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
     
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
         unsafe {
             ptr = qQmlEngineCreate()
@@ -359,6 +360,8 @@ public class QQmlApplicationEngine <: QtResource {
     }
     
     /// 检查有效性，无效时抛出异常
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
+    /// throws: NullPointerException 空指针访问时抛出
     public func checkValid(): Unit {
         if (closed) {
             throw ResourceDisposedException("QQmlApplicationEngine 已经被释放")
@@ -405,6 +408,7 @@ public class QQuickView <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
     
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
         unsafe {
             ptr = qQuickViewCreate()
@@ -529,6 +533,8 @@ public class QQuickView <: QtResource {
     }
     
     /// 检查有效性，无效时抛出异常
+    /// throws: NullPointerException 空指针访问时抛出
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     public func checkValid(): Unit {
         if (closed) {
             throw ResourceDisposedException("QQuickView 已经被释放")
@@ -580,6 +586,7 @@ public class QQuickWidget <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
     
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
         unsafe {
             ptr = qQuickWidgetCreate()
@@ -667,6 +674,8 @@ public class QQuickWidget <: QtResource {
     }
     
     /// 检查有效性，无效时抛出异常
+    /// throws: NullPointerException 空指针访问时抛出
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     public func checkValid(): Unit {
         if (closed) {
             throw ResourceDisposedException("QQuickWidget 已经被释放")
@@ -713,6 +722,7 @@ public class QQuickWindow <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
     
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
         unsafe {
             ptr = qQuickWindowCreate()
@@ -867,6 +877,8 @@ public class QQuickWindow <: QtResource {
     }
     
     /// 检查有效性，无效时抛出异常
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
+    /// throws: NullPointerException 空指针访问时抛出
     public func checkValid(): Unit {
         if (closed) {
             throw ResourceDisposedException("QQuickWindow 已经被释放")
@@ -919,6 +931,7 @@ public class QQmlComponent <: QtResource {
     private var closed: Bool = false
     
     /// 创建组件（需要引擎指针，可用 QQmlApplicationEngine.getPtr() 或 QQuickView.engine()）
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(enginePtr: Int64) {
         unsafe {
             ptr = qQmlComponentCreate(enginePtr)
@@ -1023,6 +1036,8 @@ public class QQmlComponent <: QtResource {
     }
     
     /// 检查有效性，无效时抛出异常
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
+    /// throws: NullPointerException 空指针访问时抛出
     public func checkValid(): Unit {
         if (closed) {
             throw ResourceDisposedException("QQmlComponent 已经被释放")
@@ -1184,6 +1199,8 @@ public class QQmlContext <: QtResource {
     }
     
     /// 检查有效性，无效时抛出异常
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
+    /// throws: NullPointerException 空指针访问时抛出
     public func checkValid(): Unit {
         if (closed) {
             throw ResourceDisposedException("QQmlContext 已经被释放")
@@ -1272,6 +1289,8 @@ public class QQuickItem <: QtResource {
     }
     
     /// 检查有效性，无效时抛出异常
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
+    /// throws: NullPointerException 空指针访问时抛出
     public func checkValid(): Unit {
         if (closed) {
             throw ResourceDisposedException("QQuickItem 已经被释放")

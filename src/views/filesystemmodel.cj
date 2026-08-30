@@ -32,12 +32,14 @@ foreign func qFileSystemModelConnectRootPathChanged(ptr: Int64, callback: CStrin
 public class QFileSystemModel {
     private var ptr: Int64 = 0
 
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     private func checkValid(): Unit {
         if (ptr == 0) {
             throw ResourceDisposedException("QFileSystemModel already deleted")
         }
     }
 
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
         unsafe {
             ptr = qFileSystemModelCreate()

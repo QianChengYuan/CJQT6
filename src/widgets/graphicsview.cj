@@ -120,6 +120,7 @@ public class QGraphicsView <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(parent!: Int64 = 0) {
         unsafe {
             ptr = qGraphicsViewCreate(parent)
@@ -299,6 +300,8 @@ public class QGraphicsView <: QtResource {
         return !closed && ptr != 0 && isObjectAlive(ptr)
     }
 
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
+    /// throws: NullPointerException 空指针访问时抛出
     public func checkValid(): Unit {
         if (closed) {
             throw ResourceDisposedException("QGraphicsView 已经被释放")
@@ -342,6 +345,7 @@ public class QGraphicsScene <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
         unsafe {
             ptr = qGraphicsSceneCreate()
@@ -476,6 +480,8 @@ public class QGraphicsScene <: QtResource {
         return !closed && ptr != 0 && isObjectAlive(ptr)
     }
 
+    /// throws: NullPointerException 空指针访问时抛出
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     public func checkValid(): Unit {
         if (closed) {
             throw ResourceDisposedException("QGraphicsScene 已经被释放")

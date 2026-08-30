@@ -16,6 +16,7 @@ public class QShortcut <: QtResource {
     private var closed: Bool = false
 
     /// 为指定父控件创建快捷键
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(parent: QWidget) {
         unsafe {
             ptr = qShortcutCreate(parent.getPtr())
@@ -64,6 +65,8 @@ public class QShortcut <: QtResource {
         return !closed && ptr != 0 && isObjectAlive(ptr)
     }
 
+    /// throws: NullPointerException 空指针访问时抛出
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     public func checkValid(): Unit {
         if (closed) {
             throw ResourceDisposedException("QShortcut 已经被释放")

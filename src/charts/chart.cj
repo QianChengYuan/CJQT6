@@ -76,6 +76,7 @@ public class QChart {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     private func checkValid(): Unit {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QChart already deleted")
@@ -83,6 +84,7 @@ public class QChart {
     }
 
     /// 创建图表
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
         unsafe { ptr = qChartCreate() }
         if (ptr == 0) {
@@ -234,6 +236,7 @@ public class QChart {
     }
 
     /// 获取图例（非拥有式，由 chart 管理生命周期，勿 close）
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public func getLegend(): QLegend {
         checkValid()
         unsafe {

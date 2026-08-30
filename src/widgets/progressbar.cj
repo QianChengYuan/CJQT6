@@ -304,6 +304,8 @@ public class QProgressBar <: QtResource {
     }
     
     /// 检查有效性，无效时抛出异常
+    /// throws: NullPointerException 空指针访问时抛出
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     public func checkValid(): Unit {
         if (closed) {
             throw ResourceDisposedException("QProgressBar 已经被释放")

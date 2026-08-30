@@ -58,6 +58,7 @@ public class QPieSlice {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     private func checkValid(): Unit {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QPieSlice already deleted")
@@ -65,6 +66,7 @@ public class QPieSlice {
     }
 
     /// 创建空切片
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
         unsafe { ptr = qPieSliceCreate() }
         if (ptr == 0) {
@@ -74,6 +76,7 @@ public class QPieSlice {
     }
 
     /// 创建带标签和值的切片
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(label: String, value: Float64) {
         unsafe {
             let cstr = LibC.mallocCString(label)

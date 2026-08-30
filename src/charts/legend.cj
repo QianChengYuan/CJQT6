@@ -56,6 +56,7 @@ public class LegendMarkerShape {
 public class QLegend {
     private var ptr: Int64 = 0
 
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     private func checkValid(): Unit {
         if (ptr == 0) {
             throw ResourceDisposedException("QLegend is null")

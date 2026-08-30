@@ -98,6 +98,7 @@ public open class QGraphicsItem {
     protected var ptr: Int64 = 0
     protected var closed: Bool = false
 
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     protected func checkValid(): Unit {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QGraphicsItem already deleted")

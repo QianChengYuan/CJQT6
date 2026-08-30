@@ -39,6 +39,7 @@ public class QUndoCommand {
     private var ptr: Int64 = 0
     private var pushed: Bool = false
 
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     private func checkValid(): Unit {
         if (ptr == 0) {
             throw ResourceDisposedException("QUndoCommand already deleted or pushed")
@@ -46,6 +47,7 @@ public class QUndoCommand {
     }
 
     /// 创建撤销命令
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     /// undoCallback: 撤销回调 (userData: Int64)
     /// redoCallback: 重做回调 (userData: Int64)
     /// userData: 用户数据（传递给回调）
@@ -111,6 +113,7 @@ public class QUndoStack {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     private func checkValid(): Unit {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QUndoStack already deleted")
@@ -120,6 +123,7 @@ public class QUndoStack {
         }
     }
 
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
         unsafe { ptr = qUndoStackCreate() }
         if (ptr == 0) {

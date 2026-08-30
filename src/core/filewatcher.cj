@@ -15,6 +15,7 @@ public class QFileSystemWatcher <: QtResource {
     private var closed: Bool = false
 
     /// 创建文件系统监视器
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
         unsafe {
             ptr = qFileSystemWatcherCreate()
@@ -57,6 +58,8 @@ public class QFileSystemWatcher <: QtResource {
         return !closed && ptr != 0 && isObjectAlive(ptr)
     }
 
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
+    /// throws: NullPointerException 空指针访问时抛出
     public func checkValid(): Unit {
         if (closed) {
             throw ResourceDisposedException("QFileSystemWatcher 已经被释放")

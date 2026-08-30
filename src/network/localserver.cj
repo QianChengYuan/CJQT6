@@ -41,6 +41,7 @@ public class QLocalServer {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     private func checkValid(): Unit {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QLocalServer already deleted")
@@ -51,6 +52,7 @@ public class QLocalServer {
     }
 
     /// 创建本地服务器
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
         unsafe {
             ptr = qLocalServerCreate()

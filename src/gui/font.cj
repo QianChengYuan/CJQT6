@@ -37,6 +37,7 @@ public class QFontMetrics {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     private func checkValid(): Unit {
         if (ptr == 0 || closed) { throw ResourceDisposedException("QFontMetrics already deleted") }
     }
@@ -98,6 +99,7 @@ public class QFontInfo {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     private func checkValid(): Unit {
         if (ptr == 0 || closed) { throw ResourceDisposedException("QFontInfo already deleted") }
     }

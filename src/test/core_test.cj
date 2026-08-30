@@ -56,6 +56,7 @@ class HelperFunctionTests {
     }
     
     @TestCase
+    /// throws: IllegalArgumentException 参数非法时抛出
     func testSafeExecuteException() {
         let result = safeExecute({ =>
             throw IllegalArgumentException("test error")
@@ -74,6 +75,7 @@ class HelperFunctionTests {
     }
     
     @TestCase
+    /// throws: IllegalArgumentException 参数非法时抛出
     func testSafeRunException() {
         let result = safeRun({ =>
             throw IllegalArgumentException("test error")

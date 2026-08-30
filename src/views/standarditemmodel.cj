@@ -72,12 +72,14 @@ public class SelectionMode {
 public class QStandardItemModel {
     private var ptr: Int64 = 0
 
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     private func checkValid(): Unit {
         if (ptr == 0) {
             throw ResourceDisposedException("QStandardItemModel already deleted")
         }
     }
 
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
         unsafe {
             ptr = qStandardItemModelCreate()
@@ -87,6 +89,7 @@ public class QStandardItemModel {
         }
     }
 
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(rows: Int32, cols: Int32) {
         unsafe {
             ptr = qStandardItemModelCreateWithSize(rows, cols)

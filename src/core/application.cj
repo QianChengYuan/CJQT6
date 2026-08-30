@@ -69,6 +69,7 @@ public class Language {
 public class QApplication {
     private var ptr: Int64 = 0
     
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
         unsafe {
             ptr = qApplicationCreate()
@@ -170,6 +171,7 @@ public class QLocale {
     private var ptr: Int64 = 0
 
     /// 创建语言环境；name 为空字符串时使用系统默认语言环境（如 "zh_CN"、"en_US"）
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(name: String) {
         unsafe {
             let cstr = LibC.mallocCString(name)
@@ -182,6 +184,7 @@ public class QLocale {
     }
 
     /// 使用系统默认语言环境创建
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
         unsafe {
             let cstr = LibC.mallocCString("")

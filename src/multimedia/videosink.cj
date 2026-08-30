@@ -27,6 +27,7 @@ public class QVideoSink <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     public func checkValid(): Unit {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QVideoSink already deleted")
@@ -37,6 +38,7 @@ public class QVideoSink <: QtResource {
     }
 
     /// 创建视频接收端
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
         unsafe {
             ptr = qVideoSinkCreate()

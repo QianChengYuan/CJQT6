@@ -67,6 +67,7 @@ public class QWidget <: QtResource {
     }
     
     /// 创建窗口部件
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
         unsafe {
             ptr = qWidgetCreate()
@@ -78,6 +79,7 @@ public class QWidget <: QtResource {
     }
     
     /// 从指针创建（用于继承）
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     protected init(ptr: Int64) {
         if (ptr == 0) {
             throw CreateFailedException("QWidget 指针无效")
@@ -166,6 +168,8 @@ public class QWidget <: QtResource {
     }
     
     /// 检查有效性，无效时抛出异常
+    /// throws: NullPointerException 空指针访问时抛出
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     public func checkValid(): Unit {
         if (closed) {
             throw ResourceDisposedException("QWidget 已经被释放")

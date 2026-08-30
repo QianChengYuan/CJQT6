@@ -42,6 +42,7 @@ public class QPolarChart {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     private func checkValid(): Unit {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QPolarChart already deleted")
@@ -49,6 +50,7 @@ public class QPolarChart {
     }
 
     /// 创建极坐标图
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
         unsafe { ptr = qPolarChartCreate() }
         if (ptr == 0) {
@@ -188,6 +190,7 @@ public class QPolarChart {
     }
 
     /// 获取图例（非拥有式，由 chart 管理生命周期，勿 close）
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public func getLegend(): QLegend {
         checkValid()
         unsafe {

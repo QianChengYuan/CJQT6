@@ -207,6 +207,8 @@ public class QSqlDatabase <: QtResource {
     }
     
     /// 检查有效性，无效时抛出异常
+    /// throws: NullPointerException 空指针访问时抛出
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     public func checkValid(): Unit {
         if (closed) {
             throw ResourceDisposedException("QSqlDatabase 已经被释放")
@@ -369,6 +371,7 @@ public class QSqlQuery {
     }
     
     /// 获取当前查询的记录元数据
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public func record(): QSqlRecord {
         unsafe {
             let recordPtr = qSqlQueryRecord(ptr)
@@ -400,6 +403,7 @@ public class QSqlRecord {
         ptr = p
     }
 
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     private func checkValid(): Unit {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QSqlRecord already deleted")
@@ -464,6 +468,7 @@ public class QSqlRecord {
     }
 
     /// 获取字段对象
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public func field(index: Int32): QSqlField {
         checkValid()
         unsafe {
@@ -497,6 +502,7 @@ public class QSqlField {
         ptr = p
     }
 
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     private func checkValid(): Unit {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QSqlField already deleted")

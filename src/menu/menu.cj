@@ -78,6 +78,7 @@ public class QAction <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
     
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(text: String) {
         unsafe {
             var cstr = LibC.mallocCString(text)
@@ -91,6 +92,7 @@ public class QAction <: QtResource {
     }
     
     // 内部构造函数（从指针创建，不获取所有权）
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(ptr: Int64) {
         if (ptr == 0) {
             throw CreateFailedException("QAction 指针为空")
@@ -219,6 +221,8 @@ public class QAction <: QtResource {
         return !closed && ptr != 0 && isObjectAlive(ptr)
     }
     
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
+    /// throws: NullPointerException 空指针访问时抛出
     public func checkValid(): Unit {
         if (closed) {
             throw ResourceDisposedException("QAction 已经被释放")
@@ -266,6 +270,7 @@ public class QMenu <: QtResource {
     private var closed: Bool = false
     private let ownsPtr: Bool
     
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(title: String) {
         unsafe {
             var cstr = LibC.mallocCString(title)
@@ -280,6 +285,7 @@ public class QMenu <: QtResource {
     }
     
     // 内部构造函数（从指针创建，不获取所有权）
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(ptr: Int64) {
         if (ptr == 0) {
             throw CreateFailedException("QMenu 指针为空")
@@ -352,6 +358,8 @@ public class QMenu <: QtResource {
         return !closed && ptr != 0 && isObjectAlive(ptr)
     }
     
+    /// throws: NullPointerException 空指针访问时抛出
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     public func checkValid(): Unit {
         if (closed) {
             throw ResourceDisposedException("QMenu 已经被释放")
@@ -396,6 +404,7 @@ public class QMenuBar <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
     
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
         unsafe {
             ptr = qMenuBarCreate()
@@ -428,6 +437,8 @@ public class QMenuBar <: QtResource {
         return !closed && ptr != 0 && isObjectAlive(ptr)
     }
     
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
+    /// throws: NullPointerException 空指针访问时抛出
     public func checkValid(): Unit {
         if (closed) {
             throw ResourceDisposedException("QMenuBar 已经被释放")
@@ -472,6 +483,7 @@ public class QToolBar <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
     
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(title: String) {
         unsafe {
             var cstr = LibC.mallocCString(title)
@@ -484,6 +496,7 @@ public class QToolBar <: QtResource {
         trackObject(ptr)
     }
     
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
         unsafe {
             var cstr = LibC.mallocCString("")
@@ -536,6 +549,8 @@ public class QToolBar <: QtResource {
         return !closed && ptr != 0 && isObjectAlive(ptr)
     }
     
+    /// throws: NullPointerException 空指针访问时抛出
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     public func checkValid(): Unit {
         if (closed) {
             throw ResourceDisposedException("QToolBar 已经被释放")
@@ -580,6 +595,7 @@ public class QStatusBar <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
     
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
         unsafe {
             ptr = qStatusBarCreate()
@@ -641,6 +657,8 @@ public class QStatusBar <: QtResource {
         return !closed && ptr != 0 && isObjectAlive(ptr)
     }
     
+    /// throws: NullPointerException 空指针访问时抛出
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     public func checkValid(): Unit {
         if (closed) {
             throw ResourceDisposedException("QStatusBar 已经被释放")
@@ -685,6 +703,7 @@ public class QMainWindow <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
     
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
         unsafe {
             ptr = qMainWindowCreate()
@@ -765,6 +784,8 @@ public class QMainWindow <: QtResource {
         return !closed && ptr != 0 && isObjectAlive(ptr)
     }
     
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
+    /// throws: NullPointerException 空指针访问时抛出
     public func checkValid(): Unit {
         if (closed) {
             throw ResourceDisposedException("QMainWindow 已经被释放")

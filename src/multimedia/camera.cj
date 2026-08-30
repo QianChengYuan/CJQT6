@@ -94,6 +94,7 @@ public class QCamera {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     private func checkValid(): Unit {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QCamera already deleted")
@@ -104,6 +105,7 @@ public class QCamera {
     }
 
     /// 创建摄像头（使用默认设备）
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
         unsafe { ptr = qCameraCreate(0) }
         if (ptr == 0) {
@@ -113,6 +115,7 @@ public class QCamera {
     }
 
     /// 创建摄像头（指定设备）
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(device: QCameraDevice) {
         unsafe { ptr = qCameraCreate(device.getPtr()) }
         if (ptr == 0) {
@@ -184,6 +187,7 @@ public class QMediaCaptureSession {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     private func checkValid(): Unit {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QMediaCaptureSession already deleted")
@@ -193,6 +197,7 @@ public class QMediaCaptureSession {
         }
     }
 
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
         unsafe { ptr = qMediaCaptureSessionCreate() }
         if (ptr == 0) {

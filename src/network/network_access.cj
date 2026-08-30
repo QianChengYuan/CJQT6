@@ -62,6 +62,7 @@ public class QNetworkRequest {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     private func checkValid(): Unit {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QNetworkRequest already deleted")
@@ -69,6 +70,7 @@ public class QNetworkRequest {
     }
 
     /// 从URL创建网络请求
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(url: String) {
         unsafe {
             let cstr = LibC.mallocCString(url)
@@ -159,6 +161,7 @@ public class QNetworkReply {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     private func checkValid(): Unit {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QNetworkReply already deleted")
@@ -291,6 +294,7 @@ public class QNetworkAccessManager {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     private func checkValid(): Unit {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QNetworkAccessManager already deleted")
@@ -300,6 +304,7 @@ public class QNetworkAccessManager {
         }
     }
 
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
         unsafe {
             ptr = qNetworkAccessManagerCreate()
@@ -311,6 +316,7 @@ public class QNetworkAccessManager {
     }
 
     /// 发送GET请求
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public func get(request: QNetworkRequest): QNetworkReply {
         checkValid()
         unsafe {
@@ -323,6 +329,7 @@ public class QNetworkAccessManager {
     }
 
     /// 发送POST请求
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public func post(request: QNetworkRequest, data: String): QNetworkReply {
         checkValid()
         unsafe {
@@ -337,6 +344,7 @@ public class QNetworkAccessManager {
     }
 
     /// 发送PUT请求
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public func put(request: QNetworkRequest, data: String): QNetworkReply {
         checkValid()
         unsafe {
@@ -351,6 +359,7 @@ public class QNetworkAccessManager {
     }
 
     /// 发送DELETE请求
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public func deleteResource(request: QNetworkRequest): QNetworkReply {
         checkValid()
         unsafe {

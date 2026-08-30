@@ -20,12 +20,14 @@ public class QSyntaxHighlighter {
     private static var nextId: Int64 = 1
     private var closed: Bool = false
 
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     private func checkValid(): Unit {
         if (ptr == 0 || closed) { throw ResourceDisposedException("QSyntaxHighlighter already deleted") }
         if (!isObjectAlive(ptr)) { throw ResourceDisposedException("QSyntaxHighlighter 底层 Qt 对象已失效") }
     }
 
     /// 创建语法高亮器，docPtr 为关联的 QTextDocument 指针
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(docPtr: Int64) {
         selfId = QSyntaxHighlighter.nextId
         QSyntaxHighlighter.nextId += 1

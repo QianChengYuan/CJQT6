@@ -48,6 +48,7 @@ public class SignalEmitter <: QtResource {
     private var closed: Bool = false
 
     /// 创建发射器
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
         unsafe {
             ptr = qEmitterCreate()
@@ -171,6 +172,8 @@ public class SignalEmitter <: QtResource {
 
     public func isClosed(): Bool { closed }
     public func isValid(): Bool { !closed && ptr != 0 && isObjectAlive(ptr) }
+    /// throws: NullPointerException 空指针访问时抛出
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     public func checkValid(): Unit {
         if (closed) { throw ResourceDisposedException("SignalEmitter 已经被释放") }
         if (ptr == 0) { throw NullPointerException("SignalEmitter 指针为空") }

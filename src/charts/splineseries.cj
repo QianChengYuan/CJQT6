@@ -29,6 +29,7 @@ public class QSplineSeries {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     private func checkValid(): Unit {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QSplineSeries already deleted")
@@ -36,6 +37,7 @@ public class QSplineSeries {
     }
 
     /// 创建样条曲线序列
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
         unsafe { ptr = qSplineSeriesCreate() }
         if (ptr == 0) {

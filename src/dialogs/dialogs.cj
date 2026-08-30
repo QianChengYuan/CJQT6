@@ -408,6 +408,7 @@ public class QProgressDialog <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
     
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(parent: Int64, labelText: String, cancelButtonText: String, minimum: Int32, maximum: Int32) {
         unsafe {
             var labelCstr = LibC.mallocCString(labelText)
@@ -538,6 +539,8 @@ public class QProgressDialog <: QtResource {
         return !closed && ptr != 0 && isObjectAlive(ptr)
     }
     
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
+    /// throws: NullPointerException 空指针访问时抛出
     public func checkValid(): Unit {
         if (closed) {
             throw ResourceDisposedException("QProgressDialog 已经被释放")
@@ -589,6 +592,7 @@ public class QWizardPage <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(parent!: Int64 = 0) {
         unsafe {
             ptr = qWizardPageCreate(parent)
@@ -643,6 +647,8 @@ public class QWizardPage <: QtResource {
         return !closed && ptr != 0 && isObjectAlive(ptr)
     }
 
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
+    /// throws: NullPointerException 空指针访问时抛出
     public func checkValid(): Unit {
         if (closed) {
             throw ResourceDisposedException("QWizardPage 已经被释放")
@@ -714,6 +720,7 @@ public class QWizard <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(parent!: Int64 = 0) {
         unsafe {
             ptr = qWizardCreate(parent)
@@ -822,6 +829,8 @@ public class QWizard <: QtResource {
         return !closed && ptr != 0 && isObjectAlive(ptr)
     }
 
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
+    /// throws: NullPointerException 空指针访问时抛出
     public func checkValid(): Unit {
         if (closed) {
             throw ResourceDisposedException("QWizard 已经被释放")
@@ -873,6 +882,7 @@ public class QErrorMessage <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(parent!: Int64 = 0) {
         unsafe {
             ptr = qErrorMessageCreate(parent)
@@ -920,6 +930,8 @@ public class QErrorMessage <: QtResource {
         return !closed && ptr != 0 && isObjectAlive(ptr)
     }
 
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
+    /// throws: NullPointerException 空指针访问时抛出
     public func checkValid(): Unit {
         if (closed) {
             throw ResourceDisposedException("QErrorMessage 已经被释放")

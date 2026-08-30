@@ -42,6 +42,7 @@ public class QNetworkProxy {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     private func checkValid(): Unit {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QNetworkProxy already deleted")
@@ -49,6 +50,7 @@ public class QNetworkProxy {
     }
 
     /// 创建默认代理配置（NoProxy）
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
         unsafe {
             ptr = qNetworkProxyCreate()
@@ -59,6 +61,7 @@ public class QNetworkProxy {
     }
 
     /// 创建指定类型的代理配置
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(proxyType: Int32) {
         unsafe {
             ptr = qNetworkProxyCreateWithType(proxyType)

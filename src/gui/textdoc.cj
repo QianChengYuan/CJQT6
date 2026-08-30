@@ -94,6 +94,7 @@ public class QTextDocument {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     private func checkValid(): Unit {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QTextDocument already deleted")
@@ -103,6 +104,7 @@ public class QTextDocument {
         }
     }
 
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
         unsafe {
             ptr = qTextDocumentCreate()
@@ -113,6 +115,7 @@ public class QTextDocument {
         trackObject(ptr)
     }
 
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(text: String) {
         unsafe {
             let cstr = LibC.mallocCString(text)
@@ -237,12 +240,14 @@ public class QTextCursor {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     private func checkValid(): Unit {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QTextCursor already deleted")
         }
     }
 
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(doc: QTextDocument) {
         unsafe {
             ptr = qTextCursorCreate(doc.getPtr())

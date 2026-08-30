@@ -25,6 +25,7 @@ public class QSettings <: QtResource {
     private init() {}
 
     /// 按应用名称创建配置存储（读写平台约定的应用配置位置）
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(appName: String) {
         unsafe {
             let cstr = LibC.mallocCString(appName)
@@ -38,6 +39,7 @@ public class QSettings <: QtResource {
     }
 
     /// 从指定 INI 格式文件创建配置存储
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public static func fromFile(fileName: String): QSettings {
         let s = QSettings()
         unsafe {
@@ -160,6 +162,8 @@ public class QSettings <: QtResource {
         return !closed && ptr != 0 && isObjectAlive(ptr)
     }
 
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
+    /// throws: NullPointerException 空指针访问时抛出
     public func checkValid(): Unit {
         if (closed) {
             throw ResourceDisposedException("QSettings 已经被释放")

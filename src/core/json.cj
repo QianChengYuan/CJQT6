@@ -84,6 +84,7 @@ public class QJsonValue {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     private func checkValid(): Unit {
         if (ptr == 0 || closed) { throw ResourceDisposedException("QJsonValue already deleted") }
     }
@@ -165,6 +166,7 @@ public class QJsonObject {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     private func checkValid(): Unit {
         if (ptr == 0 || closed) { throw ResourceDisposedException("QJsonObject already deleted") }
     }
@@ -228,6 +230,7 @@ public class QJsonArray {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     private func checkValid(): Unit {
         if (ptr == 0 || closed) { throw ResourceDisposedException("QJsonArray already deleted") }
     }
@@ -279,6 +282,7 @@ public class QJsonDocument {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     private func checkValid(): Unit {
         if (ptr == 0 || closed) { throw ResourceDisposedException("QJsonDocument already deleted") }
     }

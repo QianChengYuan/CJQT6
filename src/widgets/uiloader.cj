@@ -17,6 +17,7 @@ public class QUiLoader <: QtResource {
     private var closed: Bool = false
 
     /// 创建加载器
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
         unsafe {
             ptr = qUiLoaderCreate()
@@ -28,6 +29,7 @@ public class QUiLoader <: QtResource {
     }
 
     /// 加载 .ui 文件，返回根控件
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     /// @param filePath .ui 文件路径
     /// @param parentPtr 父控件指针（0 表示无父，返回的控件作为独立顶层窗口）
     /// @return 根控件（fromPtr 包装，不拥有所有权，生命周期由 Qt 父子关系管理）
@@ -81,6 +83,8 @@ public class QUiLoader <: QtResource {
     }
 
     /// 检查有效性，无效时抛出异常
+    /// throws: NullPointerException 空指针访问时抛出
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     public func checkValid(): Unit {
         if (closed) {
             throw ResourceDisposedException("QUiLoader 已经被释放")

@@ -35,6 +35,7 @@ public class QHorizontalBarSeries {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     private func checkValid(): Unit {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QHorizontalBarSeries already deleted")
@@ -42,6 +43,7 @@ public class QHorizontalBarSeries {
     }
 
     /// 创建水平柱状图序列
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
         unsafe { ptr = qHorizontalBarSeriesCreate() }
         if (ptr == 0) {

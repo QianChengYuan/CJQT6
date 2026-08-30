@@ -98,6 +98,7 @@ public class QTcpSocket <: QtResource {
     private var closed: Bool = false
     
     /// 创建TCP套接字
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
         unsafe {
             ptr = qTcpSocketCreate()
@@ -109,6 +110,7 @@ public class QTcpSocket <: QtResource {
     }
     
     /// 包装已存在的原生套接字指针
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     /// 用于 QTcpServer.nextPendingConnection() 返回的连接，
     /// 其生命周期由本包装对象接管（释放时调用 close()）
     public init(nativePtr: Int64) {
@@ -411,6 +413,8 @@ public class QTcpSocket <: QtResource {
     }
     
     /// 检查有效性，无效时抛出异常
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
+    /// throws: NullPointerException 空指针访问时抛出
     public func checkValid(): Unit {
         if (closed) {
             throw ResourceDisposedException("QTcpSocket 已经被释放")

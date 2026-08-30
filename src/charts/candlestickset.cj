@@ -41,6 +41,7 @@ public class QCandlestickSet {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     private func checkValid(): Unit {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QCandlestickSet already deleted")
@@ -48,6 +49,7 @@ public class QCandlestickSet {
     }
 
     /// 创建 K 线数据集，指定时间戳
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(timestamp: Float64) {
         unsafe { ptr = qCandlestickSetCreate(timestamp) }
         if (ptr == 0) {
@@ -57,6 +59,7 @@ public class QCandlestickSet {
     }
 
     /// 创建 K 线数据集，直接指定 OHLC + 时间戳
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(open: Float64, high: Float64, low: Float64, close: Float64, timestamp: Float64) {
         unsafe { ptr = qCandlestickSetCreateOHLC(open, high, low, close, timestamp) }
         if (ptr == 0) {

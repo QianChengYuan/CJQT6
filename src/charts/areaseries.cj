@@ -28,6 +28,7 @@ public class QAreaSeries {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     private func checkValid(): Unit {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QAreaSeries already deleted")
@@ -35,6 +36,7 @@ public class QAreaSeries {
     }
 
     /// 创建区域图，指定上边界折线（下边界默认为 0）
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(upper: QLineSeries) {
         unsafe { ptr = qAreaSeriesCreate(upper.getPtr(), 0) }
         if (ptr == 0) {
@@ -44,6 +46,7 @@ public class QAreaSeries {
     }
 
     /// 创建区域图，指定上/下边界折线
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(upper: QLineSeries, lower: QLineSeries) {
         unsafe { ptr = qAreaSeriesCreate(upper.getPtr(), lower.getPtr()) }
         if (ptr == 0) {

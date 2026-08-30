@@ -139,6 +139,7 @@ public class QVBoxLayout <: QLayout {
         !closed && ptr != 0 && isObjectAlive(ptr)
     }
     
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     public func checkValid(): Unit {
         if (closed) {
             throw Exception("QVBoxLayout 已经被释放")
@@ -249,6 +250,7 @@ public class QHBoxLayout <: QLayout {
         !closed && ptr != 0 && isObjectAlive(ptr)
     }
     
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     public func checkValid(): Unit {
         if (closed) {
             throw Exception("QHBoxLayout 已经被释放")
@@ -345,6 +347,7 @@ public class QGridLayout <: QLayout {
         !closed && ptr != 0 && isObjectAlive(ptr)
     }
     
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     public func checkValid(): Unit {
         if (closed) {
             throw Exception("QGridLayout 已经被释放")
@@ -563,6 +566,7 @@ public class QFormLayout <: QLayout {
         !closed && ptr != 0 && isObjectAlive(ptr)
     }
     
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     public func checkValid(): Unit {
         if (closed) {
             throw Exception("QFormLayout 已经被释放")

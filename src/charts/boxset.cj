@@ -39,6 +39,7 @@ public class QBoxSet {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     private func checkValid(): Unit {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QBoxSet already deleted")
@@ -46,6 +47,7 @@ public class QBoxSet {
     }
 
     /// 创建箱线图数据集，指定标签
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(label: String) {
         unsafe {
             let cstr = LibC.mallocCString(label)
@@ -59,6 +61,7 @@ public class QBoxSet {
     }
 
     /// 创建箱线图数据集，直接指定五值（标签默认为空）
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(le: Float64, lq: Float64, m: Float64, uq: Float64, ue: Float64) {
         unsafe {
             let cstr = LibC.mallocCString("")

@@ -60,6 +60,7 @@ public class QRunnable {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     private func checkValid(): Unit {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QRunnable already deleted")
@@ -67,6 +68,7 @@ public class QRunnable {
     }
 
     /// 创建可运行任务，传入回调函数
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(callback: VoidCallback) {
         unsafe {
             ptr = qRunnableCreate(callback)
@@ -95,6 +97,7 @@ public class QThread {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     private func checkValid(): Unit {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QThread already deleted")
@@ -104,6 +107,7 @@ public class QThread {
         }
     }
 
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
         unsafe {
             ptr = qThreadCreate()
