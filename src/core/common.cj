@@ -40,3 +40,9 @@ foreign func qWidgetSetMaximumSize(ptr: Int64, width: Int32, height: Int32): Uni
 foreign func qWidgetWidth(ptr: Int64): Int32
 // QWidget::height() - 获取高度
 foreign func qWidgetHeight(ptr: Int64): Int32
+// QWidget::setSizePolicy() - 设置尺寸策略（水平/垂直）
+foreign func qWidgetSetSizePolicy(ptr: Int64, hPolicy: Int32, vPolicy: Int32): Unit
+// QWidget::sizePolicy() - 获取水平尺寸策略
+foreign func qWidgetSizePolicyH(ptr: Int64): Int32
+// QWidget::sizePolicy() - 获取垂直尺寸策略
+foreign func qWidgetSizePolicyV(ptr: Int64): Int32

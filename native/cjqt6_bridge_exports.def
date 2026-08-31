@@ -2668,6 +2668,7 @@ qWidgetSetLayout
 qWidgetSetMaximumSize
 qWidgetSetMinimumSize
 qWidgetSetParent
+qWidgetSetSizePolicy
 qWidgetSetStyleSheet
 qWidgetSetTitle
 qWidgetSetToolTip
@@ -2675,6 +2676,8 @@ qWidgetSetVisible
 qWidgetSetWindowFlags
 qWidgetSetWindowIcon
 qWidgetShow
+qWidgetSizePolicyH
+qWidgetSizePolicyV
 qWidgetStyle
 qWidgetStyleSheet
 qWidgetUpdate

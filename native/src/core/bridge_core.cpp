@@ -35,6 +35,7 @@
 #include <QCursor>
 #include <QObject>
 #include <QWidget>
+#include <QSizePolicy>
 #include <QPushButton>
 #include <unordered_map>
 #include <atomic>
@@ -721,6 +722,30 @@ void qWidgetSetMaximumSize(int64_t ptr, int32_t width, int32_t height) {
     if (widget) {
         widget->setMaximumSize(width, height);
     }
+}
+
+void qWidgetSetSizePolicy(int64_t ptr, int32_t hPolicy, int32_t vPolicy) {
+    QWidget* widget = reinterpret_cast<QWidget*>(ptr);
+    if (widget) {
+        widget->setSizePolicy(QSizePolicy(static_cast<QSizePolicy::Policy>(hPolicy),
+                                           static_cast<QSizePolicy::Policy>(vPolicy)));
+    }
+}
+
+int32_t qWidgetSizePolicyH(int64_t ptr) {
+    QWidget* widget = reinterpret_cast<QWidget*>(ptr);
+    if (widget) {
+        return static_cast<int32_t>(widget->sizePolicy().horizontalPolicy());
+    }
+    return -1;
+}
+
+int32_t qWidgetSizePolicyV(int64_t ptr) {
+    QWidget* widget = reinterpret_cast<QWidget*>(ptr);
+    if (widget) {
+        return static_cast<int32_t>(widget->sizePolicy().verticalPolicy());
+    }
+    return -1;
 }
 
 int32_t qWidgetWidth(int64_t ptr) {
