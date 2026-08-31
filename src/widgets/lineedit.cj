@@ -2,51 +2,92 @@ package cjqt6.widgets
 
 import cjqt6.core.*
 import cjqt6.gui.Alignment
+import cjqt6.gui.HAlign
 
 // QLineEdit - 单行文本输入框
 foreign func qLineEditCreate(): Int64
+
 foreign func qLineEditSetText(ptr: Int64, text: CString): Unit
+
 foreign func qLineEditText(ptr: Int64): CString
+
 foreign func qLineEditSetPlaceholder(ptr: Int64, text: CString): Unit
+
 foreign func qLineEditSetMaxLength(ptr: Int64, length: Int32): Unit
+
 foreign func qLineEditSetReadOnly(ptr: Int64, readonly: Bool): Unit
+
 foreign func qLineEditSetEchoMode(ptr: Int64, mode: Int32): Unit
+
 foreign func qLineEditClear(ptr: Int64): Unit
+
 foreign func qLineEditConnectTextChanged(ptr: Int64, callback: CStringCallback): Unit
+
 foreign func qLineEditDisconnectTextChanged(ptr: Int64): Unit
+
 foreign func qLineEditConnectReturnPressed(ptr: Int64, callback: VoidCallback): Unit
+
 foreign func qLineEditDisconnectReturnPressed(ptr: Int64): Unit
+
 foreign func qLineEditConnectEditingFinished(ptr: Int64, callback: VoidCallback): Unit
+
 foreign func qLineEditDisconnectEditingFinished(ptr: Int64): Unit
 
 // P1c：闭包捕获 id 版连接（native 仅保存 id，信号触发时回调顶层调度器）
 foreign func qLineEditConnectReturnPressedId(ptr: Int64, id: Int64): Unit
+
 foreign func qLineEditConnectEditingFinishedId(ptr: Int64, id: Int64): Unit
+
 foreign func qLineEditAddPasswordToggleAction(ptr: Int64, callback: VoidCallback): Unit
+
 foreign func qLineEditSetPasswordToggleIcon(ptr: Int64, visible: Bool): Unit
+
 foreign func qLineEditSetInputMask(ptr: Int64, mask: CString): Unit
+
 foreign func qLineEditSetFrame(ptr: Int64, enabled: Bool): Unit
+
 foreign func qLineEditSetAlignment(ptr: Int64, alignment: Int32): Unit
+
 foreign func qLineEditLength(ptr: Int64): Int32
+
 foreign func qLineEditMaxLength(ptr: Int64): Int32
+
 foreign func qLineEditHasSelectedText(ptr: Int64): Bool
+
 foreign func qLineEditSelectedText(ptr: Int64): CString
+
 foreign func qLineEditSelectAll(ptr: Int64): Unit
+
 foreign func qLineEditSetFocus(ptr: Int64): Unit
+
 foreign func qLineEditEchoMode(ptr: Int64): Int32
+
 foreign func qLineEditIsReadOnly(ptr: Int64): Bool
+
 foreign func qLineEditCursorPosition(ptr: Int64): Int32
+
 foreign func qLineEditSetCursorPosition(ptr: Int64, pos: Int32): Unit
+
 foreign func qLineEditSetSelection(ptr: Int64, start: Int32, length: Int32): Unit
+
 foreign func qLineEditHasFrame(ptr: Int64): Bool
+
 foreign func qLineEditSetClearButtonEnabled(ptr: Int64, enabled: Bool): Unit
+
 foreign func qLineEditIsClearButtonEnabled(ptr: Int64): Bool
+
 foreign func qLineEditSetCompleter(ptr: Int64, completerPtr: Int64): Unit
+
 foreign func qLineEditSetDragEnabled(ptr: Int64, enabled: Bool): Unit
+
 foreign func qLineEditDisplayText(ptr: Int64): CString
+
 foreign func qLineEditConnectCursorPositionChanged(ptr: Int64, callback: Int32Int32Callback): Unit
+
 foreign func qLineEditConnectSelectionChanged(ptr: Int64, callback: VoidCallback): Unit
+
 foreign func qLineEditConnectInputRejected(ptr: Int64, callback: VoidCallback): Unit
+
 foreign func qLineEditDelete(ptr: Int64): Unit
 
 /// 输入掩码预设模板
@@ -65,7 +106,6 @@ public class InputMask {
     public static let LicenseKey: String = ">AAAAA-AAAAA-AAAAA-AAAAA-AAAAA;#"
 }
 
-
 /// 单行文本框回显模式常量（对应 QLineEdit::EchoMode）
 public class LineEditEchoMode {
     public static let Normal: Int32 = 0
@@ -79,7 +119,7 @@ public class LineEditEchoMode {
 public class QLineEdit <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
-    
+
     /// 创建文本输入框
     /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
@@ -91,7 +131,7 @@ public class QLineEdit <: QtResource {
         }
         trackObject(ptr)
     }
-    
+
     /// 显示
     public func show(): Unit {
         checkValid()
@@ -99,7 +139,7 @@ public class QLineEdit <: QtResource {
             qWidgetShow(ptr)
         }
     }
-    
+
     /// 隐藏
     public func hide(): Unit {
         checkValid()
@@ -107,7 +147,7 @@ public class QLineEdit <: QtResource {
             qWidgetHide(ptr)
         }
     }
-    
+
     /// 设置文本
     public func setText(text: String): Unit {
         checkValid()
@@ -117,7 +157,7 @@ public class QLineEdit <: QtResource {
             LibC.free(cstr)
         }
     }
-    
+
     /// 获取文本
     public func text(): String {
         checkValid()
@@ -128,7 +168,7 @@ public class QLineEdit <: QtResource {
             return result
         }
     }
-    
+
     /// 设置样式表
     public func setStyleSheet(styleSheet: String): Unit {
         checkValid()
@@ -138,7 +178,7 @@ public class QLineEdit <: QtResource {
             LibC.free(cstr)
         }
     }
-    
+
     /// 设置占位文本
     public func setPlaceholder(text: String): Unit {
         checkValid()
@@ -148,7 +188,7 @@ public class QLineEdit <: QtResource {
             LibC.free(cstr)
         }
     }
-    
+
     /// 设置最大长度
     public func setMaxLength(length: Int32): Unit {
         checkValid()
@@ -156,7 +196,7 @@ public class QLineEdit <: QtResource {
             qLineEditSetMaxLength(ptr, length)
         }
     }
-    
+
     /// 设置只读
     public func setReadOnly(readonly: Bool): Unit {
         checkValid()
@@ -164,7 +204,7 @@ public class QLineEdit <: QtResource {
             qLineEditSetReadOnly(ptr, readonly)
         }
     }
-    
+
     /// 设置回显模式
     public func setEchoMode(mode: Int32): Unit {
         checkValid()
@@ -172,7 +212,7 @@ public class QLineEdit <: QtResource {
             qLineEditSetEchoMode(ptr, mode)
         }
     }
-    
+
     /// 清空文本
     public func clear(): Unit {
         checkValid()
@@ -180,7 +220,7 @@ public class QLineEdit <: QtResource {
             qLineEditClear(ptr)
         }
     }
-    
+
     /// 调整大小
     public func resize(width: Int32, height: Int32): Unit {
         checkValid()
@@ -188,7 +228,7 @@ public class QLineEdit <: QtResource {
             qWidgetResize(ptr, width, height)
         }
     }
-    
+
     /// 设置文本变化回调
     public func setOnTextChanged(callback: CStringCallback): Unit {
         checkValid()
@@ -196,7 +236,7 @@ public class QLineEdit <: QtResource {
             qLineEditConnectTextChanged(ptr, callback)
         }
     }
-    
+
     /// 断开文本变化信号
     public func disconnectTextChanged(): Unit {
         if (ptr != 0) {
@@ -205,7 +245,7 @@ public class QLineEdit <: QtResource {
             }
         }
     }
-    
+
     /// 设置回车键按下回调
     public func setOnReturnPressed(callback: VoidCallback): Unit {
         checkValid()
@@ -223,7 +263,7 @@ public class QLineEdit <: QtResource {
         }
         return SignalConnection.createCapturing(ptr, SIGNAL_RETURN_PRESSED, WIDGET_TYPE_LINEEDIT, id)
     }
-    
+
     /// 断开回车键按下回调
     public func disconnectReturnPressed(): Unit {
         if (ptr != 0) {
@@ -232,7 +272,7 @@ public class QLineEdit <: QtResource {
             }
         }
     }
-    
+
     /// 设置编辑完成回调（失去焦点或回车）
     public func setOnEditingFinished(callback: VoidCallback): Unit {
         checkValid()
@@ -250,7 +290,7 @@ public class QLineEdit <: QtResource {
         }
         return SignalConnection.createCapturing(ptr, SIGNAL_EDITING_FINISHED, WIDGET_TYPE_LINEEDIT, id)
     }
-    
+
     /// 断开编辑完成回调
     public func disconnectEditingFinished(): Unit {
         if (ptr != 0) {
@@ -259,14 +299,14 @@ public class QLineEdit <: QtResource {
             }
         }
     }
-    
+
     /// 断开该输入框的全部信号（textChanged/returnPressed/editingFinished）
     public func disconnect(): Unit {
         disconnectTextChanged()
         disconnectReturnPressed()
         disconnectEditingFinished()
     }
-    
+
     /// 添加密码可见性切换按钮到输入框右侧
     /// 点击按钮时会触发回调，用于切换密码显示/隐藏
     public func addPasswordToggleAction(callback: VoidCallback): Unit {
@@ -275,7 +315,7 @@ public class QLineEdit <: QtResource {
             qLineEditAddPasswordToggleAction(ptr, callback)
         }
     }
-    
+
     /// 设置密码切换按钮图标
     /// visible: true 表示当前密码可见，显示"隐藏"图标
     public func setPasswordToggleIcon(visible: Bool): Unit {
@@ -284,7 +324,7 @@ public class QLineEdit <: QtResource {
             qLineEditSetPasswordToggleIcon(ptr, visible)
         }
     }
-    
+
     /// 设置输入掩码（格式化输入）
     /// 掩码字符说明：
     /// 0 - 数字（必填）    9 - 数字（可选）
@@ -308,7 +348,7 @@ public class QLineEdit <: QtResource {
             LibC.free(cstr)
         }
     }
-    
+
     /// 设置是否显示边框
     public func setFrame(enabled: Bool): Unit {
         checkValid()
@@ -316,7 +356,7 @@ public class QLineEdit <: QtResource {
             qLineEditSetFrame(ptr, enabled)
         }
     }
-    
+
     /// 设置文本对齐方式
     /// 使用 Alignment 类中的常量
     public func setAlignment(alignment: Int32): Unit {
@@ -325,7 +365,12 @@ public class QLineEdit <: QtResource {
             qLineEditSetAlignment(ptr, alignment)
         }
     }
-    
+
+    /// 设置水平文本对齐（简洁数字常量，见 HAlign：0=居中 1=左对齐 2=右对齐）
+    public func setTextAlign(align: Int32): Unit {
+        setAlignment(HAlign.toAlignment(align))
+    }
+
     /// 获取文本长度
     public func length(): Int32 {
         checkValid()
@@ -333,7 +378,7 @@ public class QLineEdit <: QtResource {
             return qLineEditLength(ptr)
         }
     }
-    
+
     /// 获取最大长度
     public func maxLength(): Int32 {
         checkValid()
@@ -341,7 +386,7 @@ public class QLineEdit <: QtResource {
             return qLineEditMaxLength(ptr)
         }
     }
-    
+
     /// 是否有选中文本
     public func hasSelectedText(): Bool {
         checkValid()
@@ -349,7 +394,7 @@ public class QLineEdit <: QtResource {
             return qLineEditHasSelectedText(ptr)
         }
     }
-    
+
     /// 获取选中的文本
     public func selectedText(): String {
         checkValid()
@@ -360,7 +405,7 @@ public class QLineEdit <: QtResource {
             return result
         }
     }
-    
+
     /// 选中所有文本
     public func selectAll(): Unit {
         checkValid()
@@ -368,7 +413,7 @@ public class QLineEdit <: QtResource {
             qLineEditSelectAll(ptr)
         }
     }
-    
+
     /// 设置焦点
     public func setFocus(): Unit {
         checkValid()
@@ -376,85 +421,85 @@ public class QLineEdit <: QtResource {
             qLineEditSetFocus(ptr)
         }
     }
-    
+
     /// 获取回显模式
     public func echoMode(): Int32 {
         checkValid()
         unsafe { qLineEditEchoMode(ptr) }
     }
-    
+
     /// 是否只读
     public func isReadOnly(): Bool {
         checkValid()
         unsafe { qLineEditIsReadOnly(ptr) }
     }
-    
+
     /// 获取光标位置
     public func cursorPosition(): Int32 {
         checkValid()
         unsafe { qLineEditCursorPosition(ptr) }
     }
-    
+
     /// 设置光标位置
     public func setCursorPosition(pos: Int32): Unit {
         checkValid()
         unsafe { qLineEditSetCursorPosition(ptr, pos) }
     }
-    
+
     /// 选中 [start, start+length) 区间文本
     public func setSelection(start: Int32, length: Int32): Unit {
         checkValid()
         unsafe { qLineEditSetSelection(ptr, start, length) }
     }
-    
+
     /// 是否显示边框
     public func hasFrame(): Bool {
         checkValid()
         unsafe { qLineEditHasFrame(ptr) }
     }
-    
+
     /// 设置是否显示清除按钮
     public func setClearButtonEnabled(enabled: Bool): Unit {
         checkValid()
         unsafe { qLineEditSetClearButtonEnabled(ptr, enabled) }
     }
-    
+
     /// 清除按钮是否启用
     public func isClearButtonEnabled(): Bool {
         checkValid()
         unsafe { qLineEditIsClearButtonEnabled(ptr) }
     }
-    
+
     /// 设置自动补全器（传入 QCompleter 指针）
     public func setCompleter(completerPtr: Int64): Unit {
         checkValid()
         unsafe { qLineEditSetCompleter(ptr, completerPtr) }
     }
-    
+
     /// 设置整数验证器
     public func setValidator(validator: QIntValidator): Unit {
         checkValid()
         unsafe { qLineEditSetValidator(ptr, validator.getPtr()) }
     }
-    
+
     /// 设置浮点验证器
     public func setValidator(validator: QDoubleValidator): Unit {
         checkValid()
         unsafe { qLineEditSetValidator(ptr, validator.getPtr()) }
     }
-    
+
     /// 设置正则表达式验证器
     public func setValidator(validator: QRegExpValidator): Unit {
         checkValid()
         unsafe { qLineEditSetValidator(ptr, validator.getPtr()) }
     }
-    
+
     /// 设置是否允许拖放
     public func setDragEnabled(enabled: Bool): Unit {
         checkValid()
         unsafe { qLineEditSetDragEnabled(ptr, enabled) }
     }
-    
+
     /// 获取显示文本（受 echoMode 影响）
     public func displayText(): String {
         checkValid()
@@ -465,40 +510,40 @@ public class QLineEdit <: QtResource {
             return result
         }
     }
-    
+
     /// 光标位置变化回调 (oldPos, newPos)
     public func setOnCursorPositionChanged(callback: Int32Int32Callback): Unit {
         checkValid()
         unsafe { qLineEditConnectCursorPositionChanged(ptr, callback) }
     }
-    
+
     /// 选区变化回调
     public func setOnSelectionChanged(callback: VoidCallback): Unit {
         checkValid()
         unsafe { qLineEditConnectSelectionChanged(ptr, callback) }
     }
-    
+
     /// 输入被拒绝回调（超出输入掩码/验证器）
     public func setOnInputRejected(callback: VoidCallback): Unit {
         checkValid()
         unsafe { qLineEditConnectInputRejected(ptr, callback) }
     }
-    
+
     /// 获取原生指针
     public func getPtr(): Int64 {
         return ptr
     }
-    
+
     /// 是否已关闭
     public func isClosed(): Bool {
         return closed
     }
-    
+
     /// 检查对象有效性
     public func isValid(): Bool {
         return !closed && ptr != 0 && isObjectAlive(ptr)
     }
-    
+
     /// 检查有效性，无效时抛出异常
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     /// throws: NullPointerException 空指针访问时抛出
@@ -513,7 +558,7 @@ public class QLineEdit <: QtResource {
             throw ResourceDisposedException("QLineEdit 底层 Qt 对象已失效")
         }
     }
-    
+
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
@@ -532,12 +577,12 @@ public class QLineEdit <: QtResource {
             ptr = 0
         }
     }
-    
+
     /// 删除文本框（兼容旧API）
     public func delete(): Unit {
         close()
     }
-    
+
     /// 终结器 - 已禁用
     /// 注意：仓颉 GC 调用终结器的时机不确定，可能在 Qt 对象仍被使用时提前删除导致崩溃
     /// 请在不需要时显式调用 delete() 或 close() 释放资源

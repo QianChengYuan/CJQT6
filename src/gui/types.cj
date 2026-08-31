@@ -7,57 +7,65 @@ package cjqt6.gui
 /// 对齐方式（可组合标志）
 public struct Alignment {
     public let value: Int32
-    
-    public init(v: Int32) { value = v }
-    
+
+    public init(v: Int32) {
+        value = v
+    }
+
     // 水平对齐
     public static let Left: Alignment = Alignment(0x0001)
     public static let Right: Alignment = Alignment(0x0002)
     public static let HCenter: Alignment = Alignment(0x0004)
-    
+
     // 垂直对齐
     public static let Top: Alignment = Alignment(0x0020)
     public static let Bottom: Alignment = Alignment(0x0040)
     public static let VCenter: Alignment = Alignment(0x0080)
-    
+
     // 常用组合
-    public static let Center: Alignment = Alignment(0x0084)      // HCenter | VCenter
-    public static let TopLeft: Alignment = Alignment(0x0021)     // Left | Top
-    public static let TopRight: Alignment = Alignment(0x0022)    // Right | Top
-    public static let BottomLeft: Alignment = Alignment(0x0041)  // Left | Bottom
+    public static let Center: Alignment = Alignment(0x0084) // HCenter | VCenter
+    public static let TopLeft: Alignment = Alignment(0x0021) // Left | Top
+    public static let TopRight: Alignment = Alignment(0x0022) // Right | Top
+    public static let BottomLeft: Alignment = Alignment(0x0041) // Left | Bottom
     public static let BottomRight: Alignment = Alignment(0x0042) // Right | Bottom
-    public static let Default: Alignment = Alignment(0x0081)     // Left | VCenter
-    
+    public static let Default: Alignment = Alignment(0x0081) // Left | VCenter
+
     /// 位或运算 - 组合对齐标志
     public operator func |(other: Alignment): Alignment {
         Alignment(value | other.value)
     }
-    
+
     /// 检查是否包含某标志
     public func has(flag: Alignment): Bool {
         (value & flag.value) != 0
     }
-    
+
     /// 是否水平居中
-    public func isHCenter(): Bool { has(HCenter) }
+    public func isHCenter(): Bool {
+        has(HCenter)
+    }
     /// 是否垂直居中
-    public func isVCenter(): Bool { has(VCenter) }
+    public func isVCenter(): Bool {
+        has(VCenter)
+    }
     /// 是否完全居中
-    public func isCenter(): Bool { isHCenter() && isVCenter() }
+    public func isCenter(): Bool {
+        isHCenter() && isVCenter()
+    }
 }
 
 /// 方向枚举
 public enum Orientation {
     | Horizontal
     | Vertical
-    
+
     public func value(): Int32 {
         match (this) {
             case Horizontal => 1
             case Vertical => 2
         }
     }
-    
+
     public static func fromValue(v: Int32): Orientation {
         match (v) {
             case 1 => Horizontal
@@ -65,11 +73,11 @@ public enum Orientation {
             case _ => Horizontal
         }
     }
-    
+
     public operator func ==(other: Orientation): Bool {
         this.value() == other.value()
     }
-    
+
     public operator func !=(other: Orientation): Bool {
         this.value() != other.value()
     }
@@ -81,16 +89,19 @@ public struct Margins {
     public let top: Int32
     public let right: Int32
     public let bottom: Int32
-    
+
     public init(left: Int32, top: Int32, right: Int32, bottom: Int32) {
         this.left = left
         this.top = top
         this.right = right
         this.bottom = bottom
     }
-    
+
     public init(all: Int32) {
-        left = all; top = all; right = all; bottom = all
+        left = all
+        top = all
+        right = all
+        bottom = all
     }
 }
 
@@ -98,7 +109,7 @@ public struct Margins {
 public struct Point {
     public let x: Int32
     public let y: Int32
-    
+
     public init(x: Int32, y: Int32) {
         this.x = x
         this.y = y
@@ -109,7 +120,7 @@ public struct Point {
 public struct Size {
     public let width: Int32
     public let height: Int32
-    
+
     public init(width: Int32, height: Int32) {
         this.width = width
         this.height = height
@@ -122,19 +133,29 @@ public struct Rect {
     public let y: Int32
     public let width: Int32
     public let height: Int32
-    
+
     public init(x: Int32, y: Int32, width: Int32, height: Int32) {
         this.x = x
         this.y = y
         this.width = width
         this.height = height
     }
-    
-    public func left(): Int32 { x }
-    public func top(): Int32 { y }
-    public func right(): Int32 { x + width }
-    public func bottom(): Int32 { y + height }
-    public func center(): Point { Point(x + width / 2, y + height / 2) }
+
+    public func left(): Int32 {
+        x
+    }
+    public func top(): Int32 {
+        y
+    }
+    public func right(): Int32 {
+        x + width
+    }
+    public func bottom(): Int32 {
+        y + height
+    }
+    public func center(): Point {
+        Point(x + width / 2, y + height / 2)
+    }
 }
 
 /// 刻度位置常量（对应 QSlider::TickPosition）
@@ -184,4 +205,30 @@ public class FrameShadow {
     public static let Raised: Int32 = 32
     /// 凹陷效果
     public static let Sunken: Int32 = 48
+}
+
+/// 水平文本对齐（简洁数字常量，方便调用，避免记 Qt 长位标志）
+/// 数字约定：0=居中, 1=左对齐, 2=右对齐
+/// 默认左对齐由 Qt 原生保障（QLineEdit/QTextEdit 默认即左对齐）
+public class HAlign {
+    /// 居中对齐
+    public static let Center: Int32 = 0
+    /// 左对齐（Qt 默认行为）
+    public static let Left: Int32 = 1
+    /// 右对齐
+    public static let Right: Int32 = 2
+
+    /// 转换为 Qt 对齐位标志（Int32），供各控件 setAlignment 使用
+    /// 非左/中/右的非法值回落为左对齐（水平默认）
+    public static func toAlignment(align: Int32): Int32 {
+        if (align == Center) {
+            return Alignment.Center.value
+        } else if (align == Left) {
+            return Alignment.Default.value
+        } else if (align == Right) {
+            return Alignment.Right.value + Alignment.VCenter.value
+        } else {
+            return Alignment.Default.value
+        }
+    }
 }

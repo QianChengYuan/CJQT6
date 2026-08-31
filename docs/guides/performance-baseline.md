@@ -63,3 +63,13 @@ cjpm run                          # 无需显示，默认 offscreen
   `perf: setText 批量桥接 408→210 ns/op（见 docs/performance-baseline.md 基线）`。
 - 引入新热点 API 前先跑本基线，避免劣化超 30% 未被发现。
 - P3 `@FastNative` 标注前，必须按第 2 节结论判断是否为真热点并附 bench 数据。
+
+## 6. DPI 高清渲染（P0-b，2026-08-31 验证）
+
+- **Qt6 默认启用 High-DPI scaling**：Qt 6 已移除 Qt5 遗留的 `AA_EnableHighDpiScaling`/`AA_UseHighDpiPixmaps` 属性，默认开启，`QApplication` **无需**再显式 `setAttribute`。
+- 库已封装 DPI 基础设施（`cjqt6.core.QScreen`）：
+  - `primaryDpiX/Y`、`primaryPhysicalDpiX/Y`、`primaryDevicePixelRatio`、`scaleFactor()`；
+  - `logicalToPhysical` / `physicalToLogical` 逻辑↔物理像素换算（内部走 `devicePixelRatio`）；
+  - `QWidget.resizeDp` / `setMinimumSizeDp` / `setMaximumSizeDp` 用逻辑像素做 DPI 感知布局，内部调用 `QScreen.logicalToPhysical`。
+- **清晰度最佳实践**：图标优先 SVG / @2x 位图资源，避免在 125%/150%/200% 缩放下放大发糊；文本由 Qt raster 引擎按 `devicePixelRatio` 处理，默认清晰，无需干预。
+- 验证：`src/test/dpi_test.cj` 覆盖 DPI 查询有效性、逻辑→物理不缩小、逻辑↔物理往返一致性。
