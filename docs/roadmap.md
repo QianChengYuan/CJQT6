@@ -1,6 +1,6 @@
 # CJQT6 发展路线规划（Roadmap）
 
-> 更新日期：2026-08-29
+> 更新日期：2026-08-31
 > 依据：仓颉 1.1.0 语言实际能力与限制 + 库当前覆盖度基线（v1.9.0）
 > 说明：本文档的每个方向都先论证「仓颉能不能做、怎么做」，避免把 Qt 生态习惯直接照搬。
 
@@ -172,10 +172,51 @@ CJQT6 的演进边界由仓颉语言特性决定，先固定几个**不可绕过
 | **P1（中期）** | 异步与模型 | `runOnUiThread` 工具（`UiPoster` 单例收口）✅；QAbstractItemModel 补 `dataChanged`/`layoutChanged`（**P1-a 优先**）✅ + `QTableView::setModel(QAbstractItemModel)`；重载信号消歧 ✅（Qt6 已移除旋转框 valueChanged(QString)，文本走既有 `setOnTextChanged`）；bench 工程建基 ✅（`examples/bench`：Int32 getter≈166ns、setText≈350~790ns、emitVoid≈300ns、runOnUiThread≈2.7µs、QTimer 事件循环派发≈14µs/op，为 P3 `@FastNative` 标注提供依据） | 仓颉 + C++ 桥接 |
 | **P2（中期）** | 开发体验 | Designer→代码生成器 ✅（纯仓颉 `tools/ui2cj`：自研 XML 解析 + 无工程自动引导生成最小可运行工程 + `deploy_qt.ps1`（UTF-8 BOM 兼容 PS5.1），已随 `examples/ui2cj_demo`/`ui2cj_demo2` 编译运行验证）；QSS/翻译完善 ✅（应用级 QSS `QApp.setStyleSheet/styleSheet` + `QLocale` 封装）；macOS 构建链 ✅（`build-macos-x64.sh`/`build-macos-arm64.sh` 一键构建并部署 `releases/macos-*`，`build-all-platforms.sh` 自动检测平台） | 仓颉 + CMake |
 | **P3（长期）** | 深度与性能 | QtCharts、自绘委托、`@FastNative` 优化（依据 P1 bench 结论标注，高频 getter 未必是热点）、进阶教程 | C++ + 仓颉 + 文档 |
+| **P4（v1.9 之后）** | rich-widgets + 渲染/布局深化 | QSizePolicy 封装（布局不越界）、DPI 高清渲染验证、文本对齐（简洁数字常量、默认左对齐）、`cjqt6.richwidgets` 组合组件库 | 仓颉组合层 + 少量 C++ 桥接 |
 
 ---
 
-## 九、反方向清单（不建议做）
+## 九、方向六：rich-widgets 组件库 + 渲染/布局深化（v1.9 之后新方向）
+
+> 依据：控件基本齐全（14 子包、~98% 覆盖）后，价值向「高层复用组件」与「渲染/布局体验」迁移。本方向贴合实际需求偏好：rich-widgets 组件库封装、DPI 高清渲染、布局缩放不越界、文本对齐简洁数字常量（默认左对齐）。**全部在纯仓颉组合层或最小桥接改动内实现，不引入 Q_OBJECT 派生**，风险低、见效快。
+
+### 9.1 P0-a 布局不越界：QSizePolicy 封装（布局管理硬缺口）
+- 现状：布局容器与 `setMinimumSize`/`setMaximumSize` 已有，但 **`QSizePolicy` 未封装**，控件在窗口缩放时无法精确表达伸缩/收缩策略——这是「缩放不越界」的核心机制。
+- 可行性：纯 FFI，无 Q_OBJECT 派生，仅需补 `setSizePolicy`/`sizePolicy` 桥接函数 + `QSizePolicy.Policy` 枚举映射。
+- 动作：
+  1. 桥接层补 `qWidgetSetSizePolicy`（`native/includes/*.h` + `bridge_*.cpp`）；
+  2. 仓颉侧 `cjqt6.gui` 定义 `SizePolicy` 枚举（固定值对齐 Qt，补「枚举值对齐」对照测试）+ `QWidget.setSizePolicy`；
+  3. 补「缩放不越界」验证示例（扩展 `all_controls_demo` 或新建 `examples/layout_resize_demo`）。
+
+### 9.2 P0-b DPI 高清渲染验证（渲染清晰度）
+- 现状：Qt6 默认启用 High-DPI scaling，但库侧无清晰度回归基线。
+- 动作：
+  1. 确认 `QApplication` 透传像素策略与图标缩放（⚠️ 具体属性名需在 Qt6 对应版本核对，Qt6 中 high-DPI 默认开启，无需再显式 `setAttribute`）；
+  2. 补 125%/150%/200% DPI 缩放下字体与图标清晰度测试，记录到 `docs/guides/performance-baseline.md`；
+  3. 图标走 SVG / @2x 资源，避免位图放大发糊。
+
+### 9.3 P0-c 文本对齐默认统一（简洁数字常量 + 默认左对齐）
+- 现状：`Alignment` 已按 Qt 位标志实现（`Left=0x0001` 等），`setAlignment` 收 `Int32`；`QLineEdit`/`QTextEdit` 默认左对齐（Qt 原生默认）。
+- 动作：
+  1. 默认左对齐由 Qt 原生保障，无代码改动；
+  2. 提供 `HAlign` 简洁数字常量（`0=居中`/`1=左对齐`/`2=右对齐`）+ `toAlignment()` 转 Qt 位标志，方便调用（避免记长位标志）。
+- ✅ 已完成（2026-08-31）：`HAlign` 简洁数字常量 + 映射；默认左对齐（Qt 原生）。
+
+### 9.4 P1 rich-widgets 高层组件库（主方向）
+- 定位：在 `cjqt6.*` 基础控件之上新增**纯仓颉组合层**（`src/richwidgets/`，`cjqt6.richwidgets`），**不新增桥接函数**，复用现有控件组合，成本低、可快速成库。
+- 组件（按优先级）：`Switch`（开关）/ `Toast`（轻提示）/ `SearchBox`（搜索框）/ `Form`（表单）/ 日期范围选择器 / 分页 / `GroupCard`（卡片）。
+- 约定：统一走 `QtResource` 生命周期 + 按 Qt 习惯的风格（对齐/方向枚举值对齐 Qt），作为后续前端控件封装主战场。
+
+### 9.5 P2 工具链与环境变量治理
+- 环境变量命名统一梳理（`CJQT6_ROOT`/`QTDIR` 等）；
+- 脚本收敛 kebab-case + PowerShell（`verify_all.ps1`/`run-test.ps1` 已完成）；
+- `cjqt6-cli` 脚手架（`cjpm init --template qt6`）。
+
+**✅ 已完成（2026-08-31）**：`cangjie-format.toml` 统一格式化配置；`config/cjlint_rule_list.json` 白名单规则（排除项目结构/Qt 风格误报，0 告警）；cjlint 接入三端 CI（ci.yml）；环境变量命名确认统一（`CJQT6_ROOT`+`QTDIR`）；`docs/guides/toolchain.md` 工具链指南。脚手架待后续。
+
+---
+
+## 十、反方向清单（不建议做）
 
 | 方向 | 原因 |
 |------|------|

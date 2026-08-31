@@ -16,11 +16,11 @@ CJQT6 通过 FFI 桥接技术，把 Qt6 的 C++ API 封装成仓颉原生 API �
 - 构建/部署 `cjqt6_bridge` 原生桥接库、解决 `cjpm build` 链接错误
 - 排查 Qt 对象内存泄漏 / 悬垂指针 / 终结器崩溃
 
-**当前版本**：1.9.0（2026-08-29）
+**当前版本**：1.9.0（2026-08-31）
 **远程仓库（权威源）**：`https://gitcode.com/yuan_1992/CJQT6.git`（主页 `https://gitcode.com/yuan_1992/CJQT6`，Issue 反馈同页）
 **本机克隆路径**（因机器而异，下文用 `<仓库根>` 指代）：`C:\CodeTools\cangjie_git\CJQT6`
 **源码根**：`<仓库根>/src`
-**API 文档**：`<仓库根>/docs/api/`（01_core.md ~ 19_network.md + 12_signal_slot.md，已覆盖全部公开类 100%）
+**API 文档**：`<仓库根>/docs/api/`（01_core.md ~ 20_charts.md + INDEX.md + README.md，已覆盖全部公开类 100%）
 
 ---
 
@@ -31,7 +31,7 @@ CJQT6 通过 FFI 桥接技术，把 Qt6 的 C++ API 封装成仓颉原生 API �
 | 模块 | 包名 | 主要内容 |
 |------|------|---------|
 | 核心 | `cjqt6.core` | `QApplication`/`QApp`（含全局 QSS `setStyleSheet`/`QLocale`）、`QWidget`、`QUiLoader`（加载 Qt Designer .ui）、`QTimer`、`QThread`/`QThreadPool`、`QSettings`、`QShortcut`、`QPropertyAnimation`、`QUndoStack`、`QJsonValue/Object/Array/Document`、`QItemSelectionModel`、`QFileSystemWatcher`、`QStandardPaths`、`QDesktopServices`、`QClipboard`、`QScreen`、`QProcess`、`QMimeData`/`QDrag`、`SignalEmitter`、`UiPoster`（UI 线程投递）、对象存活表 `trackObject`/`untrackObject`/`isObjectAlive`、`freeBridgeString`、信号常量与回调类型、`QtResource` 接口、异常类 |
-| 控件 | `cjqt6.widgets` | `QLabel`、`QPushButton`、`QLineEdit`、`QTextEdit`、`QCheckBox`、`QRadioButton`、`QComboBox`、`QSlider`、`QSpinBox`、`QProgressBar`、`QGroupBox`/`QTabWidget`/`QScrollArea`/`QSplitter`、`QDockWidget`、`QMdiArea`、`QSystemTrayIcon`、`QGraphicsView`/`QGraphicsItem` 系列、日期/时间控件等（38 个文件） |
+| 控件 | `cjqt6.widgets` | `QLabel`、`QPushButton`、`QLineEdit`、`QTextEdit`、`QCheckBox`、`QRadioButton`、`QComboBox`、`QSlider`、`QSpinBox`、`QProgressBar`、`QGroupBox`/`QTabWidget`/`QScrollArea`/`QSplitter`、`QDockWidget`、`QMdiArea`、`QSystemTrayIcon`、`QGraphicsView`/`QGraphicsItem` 系列、日期/时间控件等（39 个文件） |
 | 图形/布局 | `cjqt6.gui` | `QVBoxLayout`/`QHBoxLayout`/`QGridLayout`/`QFormLayout`、`Alignment`/`Orientation`/`Margins`、`QCursor`、`QPalette`、`QIcon`、`QFontMetrics`/`QFontInfo`、`QStyleHelper`、`QSyntaxHighlighter`、`QTextDocument`/`QTextCursor` |
 | 对话框 | `cjqt6.dialogs` | `QMessageBox`、`QFileDialog`、`QInputDialog`、`QColorDialog`、`QFontDialog`、`QProgressDialog`、`QWizard`/`QWizardPage`、`QErrorMessage` |
 | 菜单 | `cjqt6.menu` | `QMainWindow`、`QMenu`/`QMenuBar`、`QToolBar`、`QStatusBar`、`QAction` |
@@ -43,6 +43,7 @@ CJQT6 通过 FFI 桥接技术，把 Qt6 的 C++ API 封装成仓颉原生 API �
 | 视图 | `cjqt6.views` | `QListView`/`QTableView`/`QTreeView`/`QTableWidget`/`QTreeWidget`/`QListWidget`、`QAbstractItemModel`、`QStandardItemModel`、`QSortFilterProxyModel`、`QFileSystemModel`、`QHeaderView` |
 | 打印 | `cjqt6.print` | `QPrinter`、`QPrintDialog`/`QPrintPreviewDialog` |
 | 资源 | `cjqt6.resource` | 资源容器、作用域管理器（RAII 辅助）、`ResourceUtils` |
+| 图表 | `cjqt6.charts` | `QChart`/`QChartView`、折线/柱状/饼图/散点/面积/样条/百分比/堆叠/箱线/蜡烛图等系列、坐标轴（`QValueAxis`/`QBarCategoryAxis`/`QCategoryAxis`/`QDateTimeAxis`/`QLogValueAxis`）、`QLegend` |
 
 > 最小示例里通常 import：`cjqt6.core.*`、`cjqt6.widgets.*`、`cjqt6.gui.*`。
 

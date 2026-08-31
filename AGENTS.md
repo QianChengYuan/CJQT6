@@ -28,7 +28,7 @@ cjpm build
 
 - **增量构建陷阱**：`native\build_windows_x64` 有 CMake 缓存时，`cmake --build` 可能判定"已最新"跳过链接，导致改了 C++ 代码但行为不变。强制重编：`cmake --build . --config Release --clean-first`，或删掉 `native\build_windows_x64` 重来。
 - **`cjpm.toml` 用 `${CJQT6_ROOT}` 环境变量替换链接路径**（Windows 目标段 `[target.x86_64-w64-mingw32]`：`link-option = "${CJQT6_ROOT}/releases/windows-x64/cjqt6_bridge.dll"`）。构建前必须设置 `CJQT6_ROOT` 指向仓库根目录（`scripts/update-bridge.ps1`、`scripts/verify_all.ps1`、`scripts/setup-qt-env.ps1/.sh` 已自动注入，CI 用 `github.workspace`）；**不设置会拼成 `/releases/...` 直接链接失败**。cjc 实际目标三元组是 `x86_64-w64-mingw32`（`cjc -v` 实测），顶层 `link-option` 已置空。
-- **`tests/` 目录只保留部署脚本，测试源码已迁入根包 `src/test/`**（`package cjqt6.test`，23 个 `*_test.cj`），根目录 `cjpm test` 直接发现并运行；`docs/internal/`、`PUBLISHING.md`、`.agents/skills/`（除 `cjqt6/SKILL.md`）不入库。
+- **`tests/` 目录只保留部署脚本，测试源码已迁入根包 `src/test/`**（`package cjqt6.test`，41 个 `*_test.cj`），根目录 `cjpm test` 直接发现并运行；`docs/internal/`、`PUBLISHING.md`、`.agents/skills/`（除 `cjqt6/SKILL.md`）不入库。
 - 示例（`examples/`）是独立 cjpm 工程，通过 `cjqt6 = { path = "../../" }` 依赖根包；其 `link-option` 也含本机绝对路径。
 - `src/main.cj` 只是打印占位，不是入口；库本身是 `output-type = "dynamic"`，真正的运行入口在各示例。
 
@@ -36,12 +36,12 @@ cjpm build
 
 | 路径 | 说明 |
 |------|------|
-| `src/<module>/` | 仓颉封装源码（13 子包：core/widgets/gui/dialogs/menu/paint/qml/multimedia/network/sql/views/print/resource；`process` 仅在桥接层 `native/src/process/`，仓颉封装未单独建包） |
-| `src/test/` | 测试源码（`package cjqt6.test`，23 个 `*_test.cj`，根目录 `cjpm test` 发现） |
-| `native/src/<module>/bridge_*.cpp` | C++ FFI 桥接实现（53 个 .cpp，模块含 core/gui/widgets/views/multimedia/network/paint/print/process/qml/sql/tools），`extern "C"` 导出 `qXxx*` 函数；改它必须重编 bridge |
+| `src/<module>/` | 仓颉封装源码（14 子包：core/widgets/gui/dialogs/menu/paint/qml/multimedia/network/sql/views/print/resource/charts；`process` 仅在桥接层 `native/src/process/`，仓颉封装未单独建包） |
+| `src/test/` | 测试源码（`package cjqt6.test`，41 个 `*_test.cj`，根目录 `cjpm test` 发现） |
+| `native/src/<module>/bridge_*.cpp` | C++ FFI 桥接实现（56 个 .cpp，模块含 core/gui/widgets/views/multimedia/network/paint/print/process/qml/sql/tools/charts），`extern "C"` 导出 `qXxx*` 函数；改它必须重编 bridge |
 | `native/includes/*.h` | 桥接头文件（含 MOC 类 gui.h/widgets.h/signalemitter.h） |
 | `releases/<platform>/` | 预编译桥接库（入库），cjpm 链接目标；现有 `windows-x64/`、`linux-x64/` 含实际产物，`macos-arm64/`、`macos-x64/` 仅占位 README |
-| `examples/` | 19 个独立示例工程（notepad/calculator/dormitory_manager/qq_chat_lan…） |
+| `examples/` | 25 个示例/工具工程目录（notepad/calculator/dormitory_manager/qq_chat_lan/all_controls_demo/music_player/snake_game/tank_battle/todo_list/charts_demo…） |
 | `tests/` | 只保留部署脚本 `deploy_qt_test.ps1` / `deploy_qt.ps1`（构建产物不入库） |
 | `scripts/` | `update-bridge.ps1`、`rebuild_all.ps1`、`setup-qt-env.ps1/.sh`、`build-linux-x64.sh` 等 |
 | `docs/` | `guides/`（构建/架构/交叉编译/性能/版本矩阵/封装模板）、`api/01~20`、`internal/`（评估/覆盖度/控件分析）、`resource/`、`testing/`、`tutorial/` |
@@ -60,7 +60,7 @@ cjpm build
 
 ## 测试
 
-- 测试源码已迁入根包 `src/test/`（`package cjqt6.test`，23 个 `*_test.cj`，约 1684 个 `@Expect` 断言），**根目录 `cjpm test` 直接发现并运行**，随仓库版本化。
+- 测试源码已迁入根包 `src/test/`（`package cjqt6.test`，41 个 `*_test.cj`，约 2443 个 `@Expect` 断言），**根目录 `cjpm test` 直接发现并运行**，随仓库版本化。
 - Windows 一键跑测试：`powershell -File tests\deploy_qt_test.ps1 -RunTest`（部署 Qt 运行时 + offscreen 平台 + 跑全量）；Linux 无显示环境用 `xvfb-run cjpm test`。
 - GUI 测试类用 `GUITestEnvironment`（`src/core/gui_test_env.cj`）在 `@BeforeAll` 里建 `QApplication`。规范见 `docs/testing/test-guide.md` 与 `test-specification.md`（`@TestCase`/`@Expect`/`@ExpectThrows`）。
 - 崩溃退出码 3221227010 通常是缺 QApplication 实例。
