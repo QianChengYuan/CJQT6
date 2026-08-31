@@ -120,6 +120,11 @@ jobs:
         run: |
           cjpm build
 
+      - name: 静态检查（cjlint）
+        shell: bash
+        run: |
+          cjlint -f src/ -c .
+
       - name: 诊断 Qt6Multimedia gstreamer 后端依赖
         shell: bash
         run: |
@@ -246,6 +251,11 @@ jobs:
         shell: pwsh
         run: |
           cjpm build
+
+      - name: 静态检查（cjlint）
+        shell: pwsh
+        run: |
+          cjlint -f src/ -c .
 
       - name: 部署 Qt 运行时 + 全量测试（offscreen，--coverage）
         shell: pwsh
@@ -376,6 +386,11 @@ jobs:
           export SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
           echo "SDKROOT=$SDKROOT"
           cjpm build
+
+      - name: 静态检查（cjlint）
+        shell: bash
+        run: |
+          cjlint -f src/ -c .
 
       - name: 全量测试（offscreen）
         shell: bash

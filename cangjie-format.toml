@@ -1,0 +1,10 @@
+# CJQT6 仓颉代码格式化配置
+# 用法: cjfmt -d src/ -c cangjie-format.toml
+# 文档: https://docs.cangjie-lang.cn（cjfmt 章节）
+
+indentWidth = 4                                # 缩进宽度（与现有代码一致）
+linelimitLength = 120                          # 行长度限制
+lineBreakType = "LF"                           # 换行类型（跨平台一致用 LF）
+allowMultiLineMethodChain = false              # 不强制多行方法链
+multipleLineMethodChainLevel = 5               # 方法链层级达到 5 时考虑多行
+multipleLineMethodChainOverLineLength = true   # 超过行长度时自动多行方法链
