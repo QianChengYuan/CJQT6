@@ -43,6 +43,7 @@
 #include <QString>
 #include <QColor>
 #include <QDateTime>
+#include "bridge_string_utils.h"
 
 extern "C" {
 
@@ -989,10 +990,8 @@ void qPieSliceSetLabel(int64_t ptr, const char* label) {
 
 const char* qPieSliceLabel(int64_t ptr) {
     QPieSlice* slice = reinterpret_cast<QPieSlice*>(ptr);
-    if (!slice) return nullptr;
-    static QByteArray ba;
-    ba = slice->label().toUtf8();
-    return ba.constData();
+    if (!slice) return cjqt6::emptyString();
+    return cjqt6::dupUtf8(slice->label());
 }
 
 void qPieSliceSetValue(int64_t ptr, double value) {
@@ -1139,10 +1138,8 @@ void qDateTimeAxisSetFormat(int64_t ptr, const char* format) {
 
 const char* qDateTimeAxisFormat(int64_t ptr) {
     QDateTimeAxis* axis = reinterpret_cast<QDateTimeAxis*>(ptr);
-    if (!axis) return nullptr;
-    static QByteArray ba;
-    ba = axis->format().toUtf8();
-    return ba.constData();
+    if (!axis) return cjqt6::emptyString();
+    return cjqt6::dupUtf8(axis->format());
 }
 
 void qDateTimeAxisSetTickCount(int64_t ptr, int32_t count) {
@@ -1199,10 +1196,8 @@ void qLogValueAxisSetLabelFormat(int64_t ptr, const char* format) {
 
 const char* qLogValueAxisLabelFormat(int64_t ptr) {
     QLogValueAxis* axis = reinterpret_cast<QLogValueAxis*>(ptr);
-    if (!axis) return nullptr;
-    static QByteArray ba;
-    ba = axis->labelFormat().toUtf8();
-    return ba.constData();
+    if (!axis) return cjqt6::emptyString();
+    return cjqt6::dupUtf8(axis->labelFormat());
 }
 
 void qLogValueAxisSetBase(int64_t ptr, double base) {

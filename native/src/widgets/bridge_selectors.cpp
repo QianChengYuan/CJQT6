@@ -51,10 +51,7 @@ void qCheckBoxSetText(int64_t ptr, const char* text) {
 const char* qCheckBoxText(int64_t ptr) {
     QCheckBox* checkBox = reinterpret_cast<QCheckBox*>(ptr);
     if (!checkBox) return cjqt6::emptyString();
-    QByteArray arr = checkBox->text().toUtf8();
-    char* result = (char*)malloc(arr.size() + 1);
-    if (result) memcpy(result, arr.constData(), arr.size() + 1);
-    return result;
+    return cjqt6::dupUtf8(checkBox->text());
 }
 
 void qCheckBoxSetChecked(int64_t ptr, bool checked) {
@@ -99,10 +96,7 @@ void qRadioButtonSetText(int64_t ptr, const char* text) {
 const char* qRadioButtonText(int64_t ptr) {
     QRadioButton* radioButton = reinterpret_cast<QRadioButton*>(ptr);
     if (!radioButton) return cjqt6::emptyString();
-    QByteArray arr = radioButton->text().toUtf8();
-    char* result = (char*)malloc(arr.size() + 1);
-    if (result) memcpy(result, arr.constData(), arr.size() + 1);
-    return result;
+    return cjqt6::dupUtf8(radioButton->text());
 }
 
 void qRadioButtonSetChecked(int64_t ptr, bool checked) {
@@ -180,11 +174,8 @@ int32_t qComboBoxCount(int64_t ptr) {
 }
 const char* qComboBoxItemText(int64_t ptr, int32_t index) {
     QComboBox* cb = reinterpret_cast<QComboBox*>(ptr);
-    if (!cb || index < 0 || index >= cb->count()) return nullptr;
-    QByteArray arr = cb->itemText(index).toUtf8();
-    char* result = (char*)malloc(arr.size() + 1);
-    if (result) memcpy(result, arr.constData(), arr.size() + 1);
-    return result;
+    if (!cb || index < 0 || index >= cb->count()) return cjqt6::emptyString();
+    return cjqt6::dupUtf8(cb->itemText(index));
 }
 void qComboBoxSetEditable(int64_t ptr, bool editable) {
     QComboBox* cb = reinterpret_cast<QComboBox*>(ptr);

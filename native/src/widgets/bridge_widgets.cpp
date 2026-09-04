@@ -64,6 +64,22 @@ extern "C" void qWselectSignalCleanup(int64_t ptr);
 // �ı��仯�ص�ӳ��
 static std::unordered_map<int64_t, std::function<void(int64_t)>> g_textChangedCallbacks;
 
+// 信号连接句柄注册表：SetOnXxx/ConnectXxx 重复调用时先断开旧连接，
+// 避免同一信号叠加多个 connect 导致回调被多次触发。
+static void disconnectPrev(std::unordered_map<int64_t, QMetaObject::Connection>& conns, int64_t ptr) {
+    auto it = conns.find(ptr);
+    if (it != conns.end()) {
+        QObject::disconnect(it->second);
+        conns.erase(it);
+    }
+}
+
+static std::unordered_map<int64_t, QMetaObject::Connection> g_buttonClickConns;
+static std::unordered_map<int64_t, QMetaObject::Connection> g_textChangedConns;
+static std::unordered_map<int64_t, QMetaObject::Connection> g_dialogBtnAcceptedConns;
+static std::unordered_map<int64_t, QMetaObject::Connection> g_dialogBtnRejectedConns;
+static std::unordered_map<int64_t, QMetaObject::Connection> g_scrollBarConns;
+
 extern "C" {
 
 // ============================================================
@@ -99,11 +115,8 @@ void qLabelSetPixmap(int64_t ptr, int64_t pixmapPtr) {
 
 const char* qLabelText(int64_t ptr) {
     QLabel* label = reinterpret_cast<QLabel*>(ptr);
-    if (!label) return nullptr;
-    QByteArray arr = label->text().toUtf8();
-    char* result = (char*)malloc(arr.size() + 1);
-    if (result) memcpy(result, arr.constData(), arr.size() + 1);
-    return result;
+    if (!label) return cjqt6::emptyString();
+    return cjqt6::dupUtf8(label->text());
 }
 void qLabelSetWordWrap(int64_t ptr, bool wrap) {
     QLabel* label = reinterpret_cast<QLabel*>(ptr);
@@ -140,18 +153,16 @@ void qButtonSetText(int64_t ptr, const char* text) {
 const char* qButtonText(int64_t ptr) {
     QPushButton* button = reinterpret_cast<QPushButton*>(ptr);
     if (!button) return cjqt6::emptyString();
-    QByteArray arr = button->text().toUtf8();
-    char* result = (char*)malloc(arr.size() + 1);
-    if (result) memcpy(result, arr.constData(), arr.size() + 1);
-    return result;
+    return cjqt6::dupUtf8(button->text());
 }
 
 void qButtonSetOnClick(int64_t ptr, void (*callback)(int64_t)) {
     QPushButton* button = reinterpret_cast<QPushButton*>(ptr);
     if (button) {
         int64_t widgetPtr = ptr;
+        disconnectPrev(g_buttonClickConns, ptr);
         g_buttonCallbacks[ptr] = [callback, widgetPtr](int64_t) { callback(widgetPtr); };
-        QObject::connect(button, &QPushButton::clicked, [widgetPtr]() {
+        g_buttonClickConns[ptr] = QObject::connect(button, &QPushButton::clicked, [widgetPtr]() {
             auto it = g_buttonCallbacks.find(widgetPtr);
             if (it != g_buttonCallbacks.end()) {
                 it->second(widgetPtr);
@@ -249,6 +260,7 @@ void qButtonDelete(int64_t ptr) {
     QPushButton* button = reinterpret_cast<QPushButton*>(ptr);
     if (button) {
         g_buttonCallbacks.erase(ptr);
+        g_buttonClickConns.erase(ptr);
         delete button;
     }
 }
@@ -360,11 +372,8 @@ void qLineEditSetText(int64_t ptr, const char* text) {
 
 const char* qLineEditText(int64_t ptr) {
     QLineEdit* lineEdit = reinterpret_cast<QLineEdit*>(ptr);
-    if (!lineEdit) return nullptr;
-    QByteArray arr = lineEdit->text().toUtf8();
-    char* result = (char*)malloc(arr.size() + 1);
-    if (result) memcpy(result, arr.constData(), arr.size() + 1);
-    return result;
+    if (!lineEdit) return cjqt6::emptyString();
+    return cjqt6::dupUtf8(lineEdit->text());
 }
 
 void qLineEditSetPlaceholder(int64_t ptr, const char* text) {
@@ -406,8 +415,9 @@ void qLineEditSetOnTextChanged(int64_t ptr, void (*callback)(int64_t)) {
     QLineEdit* lineEdit = reinterpret_cast<QLineEdit*>(ptr);
     if (lineEdit) {
         int64_t widgetPtr = ptr;
+        disconnectPrev(g_textChangedConns, ptr);
         g_textChangedCallbacks[ptr] = [callback, widgetPtr](int64_t) { callback(widgetPtr); };
-        QObject::connect(lineEdit, &QLineEdit::textChanged, [widgetPtr](const QString&) {
+        g_textChangedConns[ptr] = QObject::connect(lineEdit, &QLineEdit::textChanged, [widgetPtr](const QString&) {
             auto it = g_textChangedCallbacks.find(widgetPtr);
             if (it != g_textChangedCallbacks.end()) {
                 it->second(widgetPtr);
@@ -579,11 +589,8 @@ bool qLineEditHasSelectedText(int64_t ptr) {
 // ��ȡѡ�е��ı�
 const char* qLineEditSelectedText(int64_t ptr) {
     QLineEdit* lineEdit = reinterpret_cast<QLineEdit*>(ptr);
-    if (!lineEdit) return nullptr;
-    QByteArray arr = lineEdit->selectedText().toUtf8();
-    char* result = (char*)malloc(arr.size() + 1);
-    if (result) memcpy(result, arr.constData(), arr.size() + 1);
-    return result;
+    if (!lineEdit) return cjqt6::emptyString();
+    return cjqt6::dupUtf8(lineEdit->selectedText());
 }
 
 // ѡ�������ı�
@@ -607,6 +614,7 @@ void qLineEditDelete(int64_t ptr) {
     if (lineEdit) {
         qWtextSignalCleanup(ptr);
         g_textChangedCallbacks.erase(ptr);
+        g_textChangedConns.erase(ptr);
         g_passwordToggleCallbacks.erase(ptr);
         g_passwordToggleButtons.erase(ptr);
         delete lineEdit;
@@ -631,11 +639,8 @@ void qTextEditSetText(int64_t ptr, const char* text) {
 
 const char* qTextEditText(int64_t ptr) {
     QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
-    if (!textEdit) return nullptr;
-    QByteArray arr = textEdit->toPlainText().toUtf8();
-    char* result = (char*)malloc(arr.size() + 1);
-    if (result) memcpy(result, arr.constData(), arr.size() + 1);
-    return result;
+    if (!textEdit) return cjqt6::emptyString();
+    return cjqt6::dupUtf8(textEdit->toPlainText());
 }
 
 
@@ -991,11 +996,8 @@ void qPlainTextEditSetPlainText(int64_t ptr, const char* text) {
 
 const char* qPlainTextEditToPlainText(int64_t ptr) {
     QPlainTextEdit* editor = reinterpret_cast<QPlainTextEdit*>(ptr);
-    if (!editor) return nullptr;
-    QByteArray arr = editor->toPlainText().toUtf8();
-    char* result = (char*)malloc(arr.size() + 1);
-    if (result) memcpy(result, arr.constData(), arr.size() + 1);
-    return result;
+    if (!editor) return cjqt6::emptyString();
+    return cjqt6::dupUtf8(editor->toPlainText());
 }
 
 void qPlainTextEditSetReadOnly(int64_t ptr, bool readonly) {
@@ -1181,11 +1183,8 @@ void qCompleterSetCompletionPrefix(int64_t ptr, const char* prefix) {
 
 const char* qCompleterCompletionPrefix(int64_t ptr) {
     QCompleter* completer = reinterpret_cast<QCompleter*>(ptr);
-    if (!completer) return nullptr;
-    QByteArray arr = completer->completionPrefix().toUtf8();
-    char* result = (char*)malloc(arr.size() + 1);
-    if (result) memcpy(result, arr.constData(), arr.size() + 1);
-    return result;
+    if (!completer) return cjqt6::emptyString();
+    return cjqt6::dupUtf8(completer->completionPrefix());
 }
 
 int32_t qCompleterCompletionCount(int64_t ptr) {
@@ -1225,11 +1224,8 @@ void qTextBrowserSetText(int64_t ptr, const char* text) {
 
 const char* qTextBrowserToPlainText(int64_t ptr) {
     QTextBrowser* browser = reinterpret_cast<QTextBrowser*>(ptr);
-    if (!browser) return nullptr;
-    QByteArray arr = browser->toPlainText().toUtf8();
-    char* result = (char*)malloc(arr.size() + 1);
-    if (result) memcpy(result, arr.constData(), arr.size() + 1);
-    return result;
+    if (!browser) return cjqt6::emptyString();
+    return cjqt6::dupUtf8(browser->toPlainText());
 }
 
 void qTextBrowserSetHtml(int64_t ptr, const char* html) {
@@ -1241,11 +1237,8 @@ void qTextBrowserSetHtml(int64_t ptr, const char* html) {
 
 const char* qTextBrowserToHtml(int64_t ptr) {
     QTextBrowser* browser = reinterpret_cast<QTextBrowser*>(ptr);
-    if (!browser) return nullptr;
-    QByteArray arr = browser->toHtml().toUtf8();
-    char* result = (char*)malloc(arr.size() + 1);
-    if (result) memcpy(result, arr.constData(), arr.size() + 1);
-    return result;
+    if (!browser) return cjqt6::emptyString();
+    return cjqt6::dupUtf8(browser->toHtml());
 }
 
 void qTextBrowserSetSource(int64_t ptr, const char* url) {
@@ -1317,11 +1310,8 @@ int64_t qKeySequenceEditCreate(int64_t parentPtr) {
 
 const char* qKeySequenceEditKeySequence(int64_t ptr) {
     QKeySequenceEdit* edit = reinterpret_cast<QKeySequenceEdit*>(ptr);
-    if (!edit) return nullptr;
-    QByteArray arr = edit->keySequence().toString(QKeySequence::NativeText).toUtf8();
-    char* result = (char*)malloc(arr.size() + 1);
-    if (result) memcpy(result, arr.constData(), arr.size() + 1);
-    return result;
+    if (!edit) return cjqt6::emptyString();
+    return cjqt6::dupUtf8(edit->keySequence().toString(QKeySequence::NativeText));
 }
 
 void qKeySequenceEditSetKeySequence(int64_t ptr, const char* text) {
@@ -1837,8 +1827,9 @@ void qDialogButtonBoxConnectAccepted(int64_t ptr, void (*callback)(void)) {
     QDialogButtonBox* box = reinterpret_cast<QDialogButtonBox*>(ptr);
     if (box && callback) {
         int64_t widgetPtr = ptr;
+        disconnectPrev(g_dialogBtnAcceptedConns, ptr);
         g_dialogBtnAcceptedCallbacks[ptr] = [callback, widgetPtr]() { callback(); };
-        QObject::connect(box, &QDialogButtonBox::accepted, [widgetPtr]() {
+        g_dialogBtnAcceptedConns[ptr] = QObject::connect(box, &QDialogButtonBox::accepted, [widgetPtr]() {
             auto it = g_dialogBtnAcceptedCallbacks.find(widgetPtr);
             if (it != g_dialogBtnAcceptedCallbacks.end()) {
                 it->second();
@@ -1851,8 +1842,9 @@ void qDialogButtonBoxConnectRejected(int64_t ptr, void (*callback)(void)) {
     QDialogButtonBox* box = reinterpret_cast<QDialogButtonBox*>(ptr);
     if (box && callback) {
         int64_t widgetPtr = ptr;
+        disconnectPrev(g_dialogBtnRejectedConns, ptr);
         g_dialogBtnRejectedCallbacks[ptr] = [callback, widgetPtr]() { callback(); };
-        QObject::connect(box, &QDialogButtonBox::rejected, [widgetPtr]() {
+        g_dialogBtnRejectedConns[ptr] = QObject::connect(box, &QDialogButtonBox::rejected, [widgetPtr]() {
             auto it = g_dialogBtnRejectedCallbacks.find(widgetPtr);
             if (it != g_dialogBtnRejectedCallbacks.end()) {
                 it->second();
@@ -1867,6 +1859,8 @@ void qDialogButtonBoxDelete(int64_t ptr) {
         qWnewSignalCleanup(ptr);
         g_dialogBtnAcceptedCallbacks.erase(ptr);
         g_dialogBtnRejectedCallbacks.erase(ptr);
+        g_dialogBtnAcceptedConns.erase(ptr);
+        g_dialogBtnRejectedConns.erase(ptr);
         delete box;
     }
 }
@@ -1951,8 +1945,9 @@ void qScrollBarConnectValueChanged(int64_t ptr, void (*callback)(int32_t)) {
     QScrollBar* bar = reinterpret_cast<QScrollBar*>(ptr);
     if (bar && callback) {
         int64_t widgetPtr = ptr;
+        disconnectPrev(g_scrollBarConns, ptr);
         g_scrollBarCallbacks[ptr] = [callback, widgetPtr](int32_t v) { callback(v); };
-        QObject::connect(bar, &QScrollBar::valueChanged, [widgetPtr](int v) {
+        g_scrollBarConns[ptr] = QObject::connect(bar, &QScrollBar::valueChanged, [widgetPtr](int v) {
             auto it = g_scrollBarCallbacks.find(widgetPtr);
             if (it != g_scrollBarCallbacks.end()) {
                 it->second(static_cast<int32_t>(v));
@@ -1966,6 +1961,7 @@ void qScrollBarDelete(int64_t ptr) {
     if (bar) {
         qWnewSignalCleanup(ptr);
         g_scrollBarCallbacks.erase(ptr);
+        g_scrollBarConns.erase(ptr);
         delete bar;
     }
 }

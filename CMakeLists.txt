@@ -31,8 +31,9 @@ endforeach()
 # CorePrivate 在部分 Linux 发行版（如 Ubuntu 22.04 的 Qt 6.4.2）不提供独立 cmake 配置，
 # 改为可选：找到则链接私有库，找不到时桥接代码用平台宏守卫跳过私有 API。
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Qml Quick QuickWidgets Sql PrintSupport Network UiTools)
-# CorePrivate / Multimedia / MultimediaWidgets 是可选的
+# CorePrivate / GuiPrivate / Multimedia / MultimediaWidgets 是可选的
 find_package(Qt6 COMPONENTS CorePrivate QUIET)
+find_package(Qt6 COMPONENTS GuiPrivate QUIET)
 find_package(Qt6 COMPONENTS Multimedia QUIET)
 find_package(Qt6 COMPONENTS MultimediaWidgets QUIET)
 find_package(Qt6 COMPONENTS Charts QUIET)
@@ -210,6 +211,10 @@ target_link_libraries(cjqt6_bridge PRIVATE
 # CorePrivate 可选链接（Windows / 自编译 Qt6 提供，部分 Linux 发行版缺失）
 if(TARGET Qt6::CorePrivate)
     target_link_libraries(cjqt6_bridge PRIVATE Qt6::CorePrivate)
+endif()
+# GuiPrivate 可选链接（提供 QtGui qpa 头文件，如 qwindowsysteminterface.h）
+if(TARGET Qt6::GuiPrivate)
+    target_link_libraries(cjqt6_bridge PRIVATE Qt6::GuiPrivate)
 endif()
 
 # 可选链接 Multimedia / MultimediaWidgets
