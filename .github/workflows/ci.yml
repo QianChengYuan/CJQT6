@@ -254,9 +254,8 @@ jobs:
           cjpm build
 
       - name: 静态检查（cjlint）
-        shell: bash
-        run: |
-          cjlint -f src/ -c .
+        shell: cmd
+        run: cjlint -f src/ -c .
 
       - name: 部署 Qt 运行时 + 全量测试（offscreen，--coverage）
         shell: pwsh
