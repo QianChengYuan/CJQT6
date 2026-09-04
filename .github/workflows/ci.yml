@@ -273,17 +273,12 @@ jobs:
       - name: 静态检查（cjlint）
         shell: pwsh
         run: |
-          # pwsh 7 native command 非零退出码被当作 ErrorRecord 致输出被吞。
-          # 用 Start-Process 完全控制 stdout/stderr 捕获和退出码。
-          $psi = Start-Process -FilePath "cjlint" -ArgumentList "-f","src/","-c","." `
-            -NoNewWindow -Wait -PassThru `
-            -RedirectStandardOutput "cjlint_out.txt" -RedirectStandardError "cjlint_err.txt"
-          Write-Host "=== cjlint stdout ==="
-          if (Test-Path cjlint_out.txt) { Get-Content cjlint_out.txt | ForEach-Object { Write-Host $_ } }
-          Write-Host "=== cjlint stderr ==="
-          if (Test-Path cjlint_err.txt) { Get-Content cjlint_err.txt | ForEach-Object { Write-Host $_ } }
-          Write-Host "Exit code: $($psi.ExitCode)"
-          if ($psi.ExitCode -ne 0) { exit $psi.ExitCode }
+          # pwsh 7 native command 非零退出码被当作 ErrorRecord，用 2>&1 合并 stderr 并显式捕获退出码
+          $output = & cjlint -f src/ -c . 2>&1 | Out-String
+          $code = $LASTEXITCODE
+          Write-Host $output
+          Write-Host "cjlint exit code: $code"
+          if ($code -ne 0) { exit $code }
 
       - name: 部署 Qt 运行时 + 全量测试（offscreen，--coverage）
         shell: pwsh
