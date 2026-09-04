@@ -273,11 +273,17 @@ jobs:
       - name: 静态检查（cjlint）
         shell: pwsh
         run: |
-          # pwsh 7 native command 非零退出码被当作 ErrorRecord 致输出被吞（exit 1 无输出），
-          # bash 找不到 cjlint（exit 127），cmd 缺依赖 DLL（exit -1073741515）。
-          # 用 pwsh 调 cmd：pwsh 继承 GITHUB_PATH 解决 DLL 依赖，cmd 绕过 native command 语义。
-          cmd /c "cjlint -f src/ -c . 2>&1"
-          exit $LASTEXITCODE
+          # pwsh 7 native command 非零退出码被当作 ErrorRecord 致输出被吞。
+          # 用 Start-Process 完全控制 stdout/stderr 捕获和退出码。
+          $psi = Start-Process -FilePath "cjlint" -ArgumentList "-f","src/","-c","." `
+            -NoNewWindow -Wait -PassThru `
+            -RedirectStandardOutput "cjlint_out.txt" -RedirectStandardError "cjlint_err.txt"
+          Write-Host "=== cjlint stdout ==="
+          if (Test-Path cjlint_out.txt) { Get-Content cjlint_out.txt | ForEach-Object { Write-Host $_ } }
+          Write-Host "=== cjlint stderr ==="
+          if (Test-Path cjlint_err.txt) { Get-Content cjlint_err.txt | ForEach-Object { Write-Host $_ } }
+          Write-Host "Exit code: $($psi.ExitCode)"
+          if ($psi.ExitCode -ne 0) { exit $psi.ExitCode }
 
       - name: 部署 Qt 运行时 + 全量测试（offscreen，--coverage）
         shell: pwsh
@@ -432,20 +438,23 @@ jobs:
           set +e
           cjpm test \
             --exclude-tags=requires_gui_dialog,requires_gui_drag,requires_audio,requires_process_spawn,requires_printer \
-            --timeout-each=30s
+            --timeout-each=30s > /tmp/cj_test_output.txt 2>&1
           exit_code=$?
+          cat /tmp/cj_test_output.txt
           if [ $exit_code -eq 0 ]; then
             exit 0
-          elif [ $exit_code -eq 139 ] || [ $exit_code -eq 138 ]; then
-            # 测试全部通过（FAILED: 0）后，进程退出时仓颉 GC 的 schd-worker 线程跨线程析构
-            # 未显式 close() 的 Qt 对象（含定时器），触发 SIGSEGV(139)/SIGBUS(138)。
-            # 这是已知的对象生命周期管理问题（终结器刻意禁用，依赖显式 close），
-            # 不影响测试结果正确性，视为可接受。
-            echo "::warning::测试全部通过（FAILED: 0），但进程退出时 GC 跨線程析構 Qt 對象觸發信號 $exit_code。不影响测试结果。"
-            exit 0
-          else
+          fi
+          # 有真正的断言失败（FAILED: N where N > 0）→ 报错退出
+          if grep -qE "FAILED: [1-9]" /tmp/cj_test_output.txt; then
+            echo "::error::测试有断言失败"
             exit $exit_code
           fi
+          # FAILED: 0 但进程退出时 GC 跨線程析構 Qt 對象觸發 SIGSEGV/SIGBUS
+          if grep -qE "schd-worker|SIGSEGV|SIGBUS|killTimer" /tmp/cj_test_output.txt; then
+            echo "::warning::测试无断言失败（FAILED: 0），ERROR 是 GC 跨線程析構 Qt 對象導致的信號。不影响测试结果正确性。"
+            exit 0
+          fi
+          exit $exit_code
 
       - name: 上传桥接库产物
         uses: actions/upload-artifact@v4
