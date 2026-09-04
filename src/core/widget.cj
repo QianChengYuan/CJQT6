@@ -55,6 +55,17 @@ public class QWidget <: QtResource {
         return w
     }
 
+    /// 从原生指针包装 QWidget（拥有所有权，close() 删除底层对象）
+    /// 用于 QUiLoader.load 等返回无父顶层控件的场景，避免对象泄漏
+    public static func fromPtrOwned(p: Int64): QWidget {
+        let w = QWidget()
+        untrackObject(w.ptr)
+        w.ptr = p
+        w.owned = true
+        trackObject(p)
+        return w
+    }
+
     /// 按 objectName 递归查找子控件（未找到返回无效 QWidget，用 isValid() 判断）
     public func findChild(name: String): QWidget {
         checkValid()

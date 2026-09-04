@@ -183,7 +183,7 @@ class DescriptionsTests {
         let d = Descriptions("用户详情")
         d.addItem("姓名", "张三")
         d.addItem("年龄", "28")
-        d.addItem("邮箱", "zhangsan@example.com")
+        d.addItem("邮箱", "zhangsan-mail")
         @Expect(d.itemCount(), Int64(3))
         d.close()
     }

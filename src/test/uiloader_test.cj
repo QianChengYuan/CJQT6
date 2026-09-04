@@ -62,7 +62,7 @@ class QUiLoaderTests {
         let form = loader.load(uiFilePath, 0)
         @Expect(form.getPtr() != 0, true)
         @Expect(form.isValid(), true)
-        form.close()  // fromPtr 包装，只标记关闭
+        form.close()  // 无父顶层控件，close() 真正释放底层对象
         loader.close()
         @Expect(loader.isClosed(), true)
     }

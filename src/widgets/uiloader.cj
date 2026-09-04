@@ -32,7 +32,7 @@ public class QUiLoader <: QtResource {
     /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     /// @param filePath .ui 文件路径
     /// @param parentPtr 父控件指针（0 表示无父，返回的控件作为独立顶层窗口）
-    /// @return 根控件（fromPtr 包装，不拥有所有权，生命周期由 Qt 父子关系管理）
+    /// @return 根控件（parentPtr=0 时拥有所有权，close() 释放；否则由 Qt 父子关系管理）
     public func load(filePath: String, parentPtr: Int64): QWidget {
         checkValid()
         unsafe {
@@ -41,6 +41,9 @@ public class QUiLoader <: QtResource {
             LibC.free(cstr)
             if (wptr == 0) {
                 throw CreateFailedException("QUiLoader 加载失败: ${errorString()}")
+            }
+            if (parentPtr == 0) {
+                return QWidget.fromPtrOwned(wptr)
             }
             return QWidget.fromPtr(wptr)
         }
