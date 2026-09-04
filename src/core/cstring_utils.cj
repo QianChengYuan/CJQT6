@@ -17,6 +17,25 @@ public func freeBridgeString(s: CString): Unit {
 }
 
 // ============================================================
+// 输入字符串借用助手（P2 样板收敛）
+//
+// 调用带 CString 入参的 FFI 函数的标准三连（malloc -> call -> free）
+// 收敛为单个尾随 Lambda 调用，free 集中在助手内保证不遗漏：
+//     withCString(text) { c => unsafe { qLabelSetText(ptr, c) } }
+// 或外层已有 unsafe 上下文时：
+//     unsafe { withCString(text) { c => qLabelSetText(ptr, c) } }
+// ============================================================
+
+/// 借用 String 的 CString 视图执行 FFI 调用，调用结束自动释放
+public func withCString(s: String, f: (CString) -> Unit): Unit {
+    unsafe {
+        let cstr = LibC.mallocCString(s)
+        f(cstr)
+        LibC.free(cstr)
+    }
+}
+
+// ============================================================
 // QObject 存活注册表（P0 反向失效通知）
 //
 // native 侧维护存活注册表：trackObject 在对象创建后调用，注册
