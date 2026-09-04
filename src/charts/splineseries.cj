@@ -56,9 +56,7 @@ public class QSplineSeries {
     public func setName(name: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(name)
-            qSplineSeriesSetName(ptr, cstr)
-            LibC.free(cstr)
+            withCString(name) { c => qSplineSeriesSetName(ptr, c) }
         }
     }
 

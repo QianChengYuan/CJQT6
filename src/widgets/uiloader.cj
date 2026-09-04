@@ -50,9 +50,7 @@ public class QUiLoader <: QtResource {
     public func setWorkingDirectory(dir: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(dir)
-            qUiLoaderSetWorkingDirectory(ptr, cstr)
-            LibC.free(cstr)
+            withCString(dir) { c => qUiLoaderSetWorkingDirectory(ptr, c) }
         }
     }
 

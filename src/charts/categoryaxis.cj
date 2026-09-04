@@ -66,9 +66,7 @@ public class QCategoryAxis {
     public func append(label: String, endValue: Float64): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(label)
-            qCategoryAxisAppend(ptr, cstr, endValue)
-            LibC.free(cstr)
+            withCString(label) { c => qCategoryAxisAppend(ptr, c, endValue) }
         }
     }
 
@@ -76,9 +74,7 @@ public class QCategoryAxis {
     public func remove(label: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(label)
-            qCategoryAxisRemove(ptr, cstr)
-            LibC.free(cstr)
+            withCString(label) { c => qCategoryAxisRemove(ptr, c) }
         }
     }
 
@@ -136,9 +132,7 @@ public class QCategoryAxis {
     public func setLabelFormat(format: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(format)
-            qValueAxisSetLabelFormat(ptr, cstr)
-            LibC.free(cstr)
+            withCString(format) { c => qValueAxisSetLabelFormat(ptr, c) }
         }
     }
 

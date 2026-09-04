@@ -151,9 +151,7 @@ public class QMdiArea {
     /// 设置背景（按图片文件路径作为纹理笔刷）
     public func setBackground(path: String): Unit {
         unsafe {
-            let cstr = LibC.mallocCString(path)
-            qMdiAreaSetBackground(ptr, cstr)
-            LibC.free(cstr)
+            withCString(path) { c => qMdiAreaSetBackground(ptr, c) }
         }
     }
 

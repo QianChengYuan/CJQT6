@@ -73,9 +73,7 @@ public class QNetworkRequest {
     /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(url: String) {
         unsafe {
-            let cstr = LibC.mallocCString(url)
-            ptr = qNetworkRequestCreate(cstr)
-            LibC.free(cstr)
+            withCString(url) { c => ptr = qNetworkRequestCreate(c) }
             if (ptr == 0) {
                 throw CreateFailedException("QNetworkRequest create failed")
             }
@@ -86,9 +84,7 @@ public class QNetworkRequest {
     public func setUrl(url: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(url)
-            qNetworkRequestSetUrl(ptr, cstr)
-            LibC.free(cstr)
+            withCString(url) { c => qNetworkRequestSetUrl(ptr, c) }
         }
     }
 
@@ -107,9 +103,7 @@ public class QNetworkRequest {
     public func setHeader(header: Int32, value: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(value)
-            qNetworkRequestSetHeader(ptr, header, cstr)
-            LibC.free(cstr)
+            withCString(value) { c => qNetworkRequestSetHeader(ptr, header, c) }
         }
     }
 

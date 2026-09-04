@@ -37,18 +37,14 @@ public class QSystemTrayIcon {
     /// 设置图标（从文件路径）
     public func setIcon(iconPath: String): Unit {
         unsafe {
-            let cstr = LibC.mallocCString(iconPath)
-            qSystemTrayIconSetIcon(ptr, cstr)
-            LibC.free(cstr)
+            withCString(iconPath) { c => qSystemTrayIconSetIcon(ptr, c) }
         }
     }
 
     /// 设置工具提示
     public func setToolTip(tip: String): Unit {
         unsafe {
-            let cstr = LibC.mallocCString(tip)
-            qSystemTrayIconSetToolTip(ptr, cstr)
-            LibC.free(cstr)
+            withCString(tip) { c => qSystemTrayIconSetToolTip(ptr, c) }
         }
     }
 

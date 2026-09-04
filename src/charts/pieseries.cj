@@ -60,9 +60,7 @@ public class QPieSeries {
     public func append(label: String, value: Float64): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(label)
-            qPieSeriesAppend(ptr, cstr, value)
-            LibC.free(cstr)
+            withCString(label) { c => qPieSeriesAppend(ptr, c, value) }
         }
     }
 

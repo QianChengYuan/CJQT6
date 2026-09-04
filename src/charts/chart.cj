@@ -181,9 +181,7 @@ public class QChart {
     public func setTitle(title: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(title)
-            qChartSetTitle(ptr, cstr)
-            LibC.free(cstr)
+            withCString(title) { c => qChartSetTitle(ptr, c) }
         }
     }
 

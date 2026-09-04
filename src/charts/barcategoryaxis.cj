@@ -56,9 +56,7 @@ public class QBarCategoryAxis {
     public func append(category: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(category)
-            qBarCategoryAxisAppend(ptr, cstr)
-            LibC.free(cstr)
+            withCString(category) { c => qBarCategoryAxisAppend(ptr, c) }
         }
     }
 
@@ -66,9 +64,7 @@ public class QBarCategoryAxis {
     public func remove(category: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(category)
-            qBarCategoryAxisRemove(ptr, cstr)
-            LibC.free(cstr)
+            withCString(category) { c => qBarCategoryAxisRemove(ptr, c) }
         }
     }
 
@@ -76,9 +72,7 @@ public class QBarCategoryAxis {
     public func insert(index: Int32, category: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(category)
-            qBarCategoryAxisInsert(ptr, index, cstr)
-            LibC.free(cstr)
+            withCString(category) { c => qBarCategoryAxisInsert(ptr, index, c) }
         }
     }
 
@@ -110,9 +104,7 @@ public class QBarCategoryAxis {
     public func setMin(minCategory: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(minCategory)
-            qBarCategoryAxisSetMin(ptr, cstr)
-            LibC.free(cstr)
+            withCString(minCategory) { c => qBarCategoryAxisSetMin(ptr, c) }
         }
     }
 
@@ -120,9 +112,7 @@ public class QBarCategoryAxis {
     public func setMax(maxCategory: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(maxCategory)
-            qBarCategoryAxisSetMax(ptr, cstr)
-            LibC.free(cstr)
+            withCString(maxCategory) { c => qBarCategoryAxisSetMax(ptr, c) }
         }
     }
 

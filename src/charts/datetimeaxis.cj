@@ -88,9 +88,7 @@ public class QDateTimeAxis {
     public func setFormat(format: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(format)
-            qDateTimeAxisSetFormat(ptr, cstr)
-            LibC.free(cstr)
+            withCString(format) { c => qDateTimeAxisSetFormat(ptr, c) }
         }
     }
 
@@ -99,7 +97,9 @@ public class QDateTimeAxis {
         checkValid()
         unsafe {
             let cstr = qDateTimeAxisFormat(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 

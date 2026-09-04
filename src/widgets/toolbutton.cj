@@ -83,9 +83,7 @@ public class QToolButton <: QtResource {
     public func setText(text: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(text)
-            qToolButtonSetText(ptr, cstr)
-            LibC.free(cstr)
+            withCString(text) { c => qToolButtonSetText(ptr, c) }
         }
     }
     
@@ -208,9 +206,7 @@ public class QToolButton <: QtResource {
     public func setStyleSheet(style: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(style)
-            qWidgetSetStyleSheet(ptr, cstr)
-            LibC.free(cstr)
+            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
         }
     }
     
@@ -260,9 +256,7 @@ public class QToolButton <: QtResource {
     public func setIconFromPath(path: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(path)
-            qToolButtonSetIconPath(ptr, cstr)
-            LibC.free(cstr)
+            withCString(path) { c => qToolButtonSetIconPath(ptr, c) }
         }
     }
     

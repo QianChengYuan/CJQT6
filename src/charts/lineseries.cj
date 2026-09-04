@@ -57,9 +57,7 @@ public class QLineSeries {
     public func setName(name: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(name)
-            qLineSeriesSetName(ptr, cstr)
-            LibC.free(cstr)
+            withCString(name) { c => qLineSeriesSetName(ptr, c) }
         }
     }
 

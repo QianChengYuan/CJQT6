@@ -126,9 +126,7 @@ public class QTcpSocket <: QtResource {
     public func connectToHost(host: String, port: UInt16): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(host)
-            qTcpSocketConnectToHost(ptr, cstr, port)
-            LibC.free(cstr)
+            withCString(host) { c => qTcpSocketConnectToHost(ptr, c, port) }
         }
     }
     

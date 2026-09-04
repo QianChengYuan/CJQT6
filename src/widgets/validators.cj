@@ -152,18 +152,14 @@ public class QRegExpValidator {
 
     public init(pattern: String) {
         unsafe {
-            let cstr = LibC.mallocCString(pattern)
-            ptr = qRegExpValidatorCreate(cstr)
-            LibC.free(cstr)
+            withCString(pattern) { c => ptr = qRegExpValidatorCreate(c) }
         }
     }
 
     /// 重新设置正则表达式
     public func setPattern(pattern: String): Unit {
         unsafe {
-            let cstr = LibC.mallocCString(pattern)
-            qRegExpValidatorSetPattern(ptr, cstr)
-            LibC.free(cstr)
+            withCString(pattern) { c => qRegExpValidatorSetPattern(ptr, c) }
         }
     }
 

@@ -114,9 +114,7 @@ public class QProgressBar <: QtResource {
     public func setFormat(format: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(format)
-            qProgressBarSetFormat(ptr, cstr)
-            LibC.free(cstr)
+            withCString(format) { c => qProgressBarSetFormat(ptr, c) }
         }
     }
     
@@ -266,9 +264,7 @@ public class QProgressBar <: QtResource {
     public func setStyleSheet(style: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(style)
-            qWidgetSetStyleSheet(ptr, cstr)
-            LibC.free(cstr)
+            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
         }
     }
     

@@ -46,9 +46,7 @@ public class QBarSet {
     /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(label: String) {
         unsafe {
-            let cstr = LibC.mallocCString(label)
-            ptr = qBarSetCreate(cstr)
-            LibC.free(cstr)
+            withCString(label) { c => ptr = qBarSetCreate(c) }
         }
         if (ptr == 0) {
             throw CreateFailedException("QBarSet create failed")
@@ -96,9 +94,7 @@ public class QBarSet {
     public func setLabel(label: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(label)
-            qBarSetSetLabel(ptr, cstr)
-            LibC.free(cstr)
+            withCString(label) { c => qBarSetSetLabel(ptr, c) }
         }
     }
 

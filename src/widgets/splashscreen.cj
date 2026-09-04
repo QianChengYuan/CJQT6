@@ -56,9 +56,7 @@ public class QSplashScreen <: QtResource {
     public func showMessage(message: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(message)
-            qSplashScreenShowMessage(ptr, cstr)
-            LibC.free(cstr)
+            withCString(message) { c => qSplashScreenShowMessage(ptr, c) }
         }
     }
 
@@ -66,9 +64,7 @@ public class QSplashScreen <: QtResource {
     public func showMessage(message: String, alignment: Int32): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(message)
-            qSplashScreenShowMessageAlign(ptr, cstr, alignment)
-            LibC.free(cstr)
+            withCString(message) { c => qSplashScreenShowMessageAlign(ptr, c, alignment) }
         }
     }
 
@@ -102,9 +98,7 @@ public class QSplashScreen <: QtResource {
     public func setStyleSheet(style: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(style)
-            qWidgetSetStyleSheet(ptr, cstr)
-            LibC.free(cstr)
+            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
         }
     }
 

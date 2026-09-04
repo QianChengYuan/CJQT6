@@ -64,9 +64,7 @@ public class QValueAxis {
     public func setLabelFormat(format: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(format)
-            qValueAxisSetLabelFormat(ptr, cstr)
-            LibC.free(cstr)
+            withCString(format) { c => qValueAxisSetLabelFormat(ptr, c) }
         }
     }
 

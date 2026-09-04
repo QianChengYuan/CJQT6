@@ -300,9 +300,7 @@ public class QGroupBox <: QtResource {
     public func setStyleSheet(style: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(style)
-            qWidgetSetStyleSheet(ptr, cstr)
-            LibC.free(cstr)
+            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
         }
     }
     
@@ -448,9 +446,7 @@ public class QTabWidget <: QtResource {
     public func setTabText(index: Int32, text: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(text)
-            qTabWidgetSetTabText(ptr, index, cstr)
-            LibC.free(cstr)
+            withCString(text) { c => qTabWidgetSetTabText(ptr, index, c) }
         }
     }
     
@@ -469,9 +465,7 @@ public class QTabWidget <: QtResource {
     public func setTabToolTip(index: Int32, toolTip: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(toolTip)
-            qTabWidgetSetTabToolTip(ptr, index, cstr)
-            LibC.free(cstr)
+            withCString(toolTip) { c => qTabWidgetSetTabToolTip(ptr, index, c) }
         }
     }
     
@@ -608,9 +602,7 @@ public class QTabWidget <: QtResource {
     public func setStyleSheet(style: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(style)
-            qWidgetSetStyleSheet(ptr, cstr)
-            LibC.free(cstr)
+            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
         }
     }
     
@@ -825,9 +817,7 @@ public class QScrollArea <: QtResource {
     public func setStyleSheet(style: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(style)
-            qWidgetSetStyleSheet(ptr, cstr)
-            LibC.free(cstr)
+            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
         }
     }
     
@@ -1070,9 +1060,7 @@ public class QFrame <: QtResource {
     public func setStyleSheet(style: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(style)
-            qWidgetSetStyleSheet(ptr, cstr)
-            LibC.free(cstr)
+            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
         }
     }
     
@@ -1096,9 +1084,7 @@ public class QFrame <: QtResource {
     public func setToolTip(toolTip: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(toolTip)
-            qWidgetSetToolTip(ptr, cstr)
-            LibC.free(cstr)
+            withCString(toolTip) { c => qWidgetSetToolTip(ptr, c) }
         }
     }
     
@@ -1419,9 +1405,7 @@ public class QSplitter <: QtResource {
     public func setStyleSheet(style: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(style)
-            qWidgetSetStyleSheet(ptr, cstr)
-            LibC.free(cstr)
+            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
         }
     }
     

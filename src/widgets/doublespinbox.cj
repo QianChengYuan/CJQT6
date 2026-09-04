@@ -126,9 +126,7 @@ public class QDoubleSpinBox <: QtResource {
     public func setPrefix(prefix: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(prefix)
-            qDoubleSpinBoxSetPrefix(ptr, cstr)
-            LibC.free(cstr)
+            withCString(prefix) { c => qDoubleSpinBoxSetPrefix(ptr, c) }
         }
     }
 
@@ -147,9 +145,7 @@ public class QDoubleSpinBox <: QtResource {
     public func setSuffix(suffix: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(suffix)
-            qDoubleSpinBoxSetSuffix(ptr, cstr)
-            LibC.free(cstr)
+            withCString(suffix) { c => qDoubleSpinBoxSetSuffix(ptr, c) }
         }
     }
 
@@ -168,9 +164,7 @@ public class QDoubleSpinBox <: QtResource {
     public func setSpecialValueText(text: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(text)
-            qDoubleSpinBoxSetSpecialValueText(ptr, cstr)
-            LibC.free(cstr)
+            withCString(text) { c => qDoubleSpinBoxSetSpecialValueText(ptr, c) }
         }
     }
 
@@ -312,9 +306,7 @@ public class QDoubleSpinBox <: QtResource {
     public func setStyleSheet(style: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(style)
-            qWidgetSetStyleSheet(ptr, cstr)
-            LibC.free(cstr)
+            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
         }
     }
     

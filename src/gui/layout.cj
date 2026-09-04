@@ -447,9 +447,7 @@ public class QFormLayout <: QLayout {
     public func addRow(label: String, widgetPtr: Int64): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(label)
-            qFormLayoutAddRow(ptr, cstr, widgetPtr)
-            LibC.free(cstr)
+            withCString(label) { c => qFormLayoutAddRow(ptr, c, widgetPtr) }
         }
     }
 
@@ -465,9 +463,7 @@ public class QFormLayout <: QLayout {
     public func addRowLayout(label: String, layoutPtr: Int64): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(label)
-            qFormLayoutAddRowLayout(ptr, cstr, layoutPtr)
-            LibC.free(cstr)
+            withCString(label) { c => qFormLayoutAddRowLayout(ptr, c, layoutPtr) }
         }
     }
 
@@ -475,9 +471,7 @@ public class QFormLayout <: QLayout {
     public func insertRow(row: Int32, label: String, widgetPtr: Int64): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(label)
-            qFormLayoutInsertRow(ptr, row, cstr, widgetPtr)
-            LibC.free(cstr)
+            withCString(label) { c => qFormLayoutInsertRow(ptr, row, c, widgetPtr) }
         }
     }
 

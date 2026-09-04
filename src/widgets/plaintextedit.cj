@@ -79,18 +79,14 @@ public class QPlainTextEdit {
     /// 设置样式表
     public func setStyleSheet(style: String): Unit {
         unsafe {
-            let cstr = LibC.mallocCString(style)
-            qWidgetSetStyleSheet(ptr, cstr)
-            LibC.free(cstr)
+            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
         }
     }
 
     /// 设置纯文本内容
     public func setPlainText(text: String): Unit {
         unsafe {
-            let cstr = LibC.mallocCString(text)
-            qPlainTextEditSetPlainText(ptr, cstr)
-            LibC.free(cstr)
+            withCString(text) { c => qPlainTextEditSetPlainText(ptr, c) }
         }
     }
 
@@ -107,9 +103,7 @@ public class QPlainTextEdit {
     /// 追加文本
     public func appendPlainText(text: String): Unit {
         unsafe {
-            let cstr = LibC.mallocCString(text)
-            qPlainTextEditAppendPlainText(ptr, cstr)
-            LibC.free(cstr)
+            withCString(text) { c => qPlainTextEditAppendPlainText(ptr, c) }
         }
     }
 
@@ -195,9 +189,7 @@ public class QPlainTextEdit {
     /// 追加 HTML 片段
     public func appendHtml(html: String): Unit {
         unsafe {
-            let cstr = LibC.mallocCString(html)
-            qPlainTextEditAppendHtml(ptr, cstr)
-            LibC.free(cstr)
+            withCString(html) { c => qPlainTextEditAppendHtml(ptr, c) }
         }
     }
 

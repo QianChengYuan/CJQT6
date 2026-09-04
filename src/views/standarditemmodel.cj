@@ -130,9 +130,7 @@ public class QStandardItemModel {
     public func setStyleSheet(style: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(style)
-            qWidgetSetStyleSheet(ptr, cstr)
-            LibC.free(cstr)
+            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
         }
     }
 
@@ -167,9 +165,7 @@ public class QStandardItemModel {
     public func setItem(row: Int32, col: Int32, text: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(text)
-            qStandardItemModelSetItem(ptr, row, col, cstr)
-            LibC.free(cstr)
+            withCString(text) { c => qStandardItemModelSetItem(ptr, row, col, c) }
         }
     }
 
@@ -193,18 +189,14 @@ public class QStandardItemModel {
     public func setHorizontalHeaderLabel(col: Int32, label: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(label)
-            qStandardItemModelSetHorizontalHeaderLabel(ptr, col, cstr)
-            LibC.free(cstr)
+            withCString(label) { c => qStandardItemModelSetHorizontalHeaderLabel(ptr, col, c) }
         }
     }
 
     public func setVerticalHeaderLabel(row: Int32, label: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(label)
-            qStandardItemModelSetVerticalHeaderLabel(ptr, row, cstr)
-            LibC.free(cstr)
+            withCString(label) { c => qStandardItemModelSetVerticalHeaderLabel(ptr, row, c) }
         }
     }
 
@@ -368,9 +360,7 @@ public class QStandardItem {
 
     public init(text: String) {
         unsafe {
-            let cstr = LibC.mallocCString(text)
-            ptr = qStandardItemCreateWithText(cstr)
-            LibC.free(cstr)
+            withCString(text) { c => ptr = qStandardItemCreateWithText(c) }
         }
     }
 
@@ -398,9 +388,7 @@ public class QStandardItem {
 
     public func setText(text: String): Unit {
         unsafe {
-            let cstr = LibC.mallocCString(text)
-            qStandardItemSetText(ptr, cstr)
-            LibC.free(cstr)
+            withCString(text) { c => qStandardItemSetText(ptr, c) }
         }
     }
 

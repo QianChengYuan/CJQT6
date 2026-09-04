@@ -87,9 +87,7 @@ public class QNetworkProxy {
     public func setHostName(host: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(host)
-            qNetworkProxySetHostName(ptr, cstr)
-            LibC.free(cstr)
+            withCString(host) { c => qNetworkProxySetHostName(ptr, c) }
         }
     }
 
@@ -120,9 +118,7 @@ public class QNetworkProxy {
     public func setUser(user: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(user)
-            qNetworkProxySetUser(ptr, cstr)
-            LibC.free(cstr)
+            withCString(user) { c => qNetworkProxySetUser(ptr, c) }
         }
     }
 
@@ -141,9 +137,7 @@ public class QNetworkProxy {
     public func setPassword(pass: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(pass)
-            qNetworkProxySetPassword(ptr, cstr)
-            LibC.free(cstr)
+            withCString(pass) { c => qNetworkProxySetPassword(ptr, c) }
         }
     }
 
@@ -161,9 +155,7 @@ public class QNetworkProxy {
     /// 设置为应用级代理（静态方法，影响所有网络请求）
     public static func setApplicationProxy(host: String, port: UInt16): Unit {
         unsafe {
-            let cstr = LibC.mallocCString(host)
-            qNetworkProxySetApplicationProxy(cstr, port)
-            LibC.free(cstr)
+            withCString(host) { c => qNetworkProxySetApplicationProxy(c, port) }
         }
     }
 

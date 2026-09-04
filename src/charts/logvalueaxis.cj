@@ -90,9 +90,7 @@ public class QLogValueAxis {
     public func setLabelFormat(format: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(format)
-            qLogValueAxisSetLabelFormat(ptr, cstr)
-            LibC.free(cstr)
+            withCString(format) { c => qLogValueAxisSetLabelFormat(ptr, c) }
         }
     }
 
@@ -101,7 +99,9 @@ public class QLogValueAxis {
         checkValid()
         unsafe {
             let cstr = qLogValueAxisLabelFormat(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 

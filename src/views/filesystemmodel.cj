@@ -80,18 +80,14 @@ public class QFileSystemModel {
     public func setStyleSheet(style: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(style)
-            qWidgetSetStyleSheet(ptr, cstr)
-            LibC.free(cstr)
+            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
         }
     }
 
     public func setRootPath(path: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(path)
-            qFileSystemModelSetRootPath(ptr, cstr)
-            LibC.free(cstr)
+            withCString(path) { c => qFileSystemModelSetRootPath(ptr, c) }
         }
     }
 
@@ -126,9 +122,7 @@ public class QFileSystemModel {
                 }
                 joined += filters[i]
             }
-            let cstr = LibC.mallocCString(joined)
-            qFileSystemModelSetNameFilters(ptr, cstr)
-            LibC.free(cstr)
+            withCString(joined) { c => qFileSystemModelSetNameFilters(ptr, c) }
         }
     }
 

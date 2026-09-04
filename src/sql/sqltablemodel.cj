@@ -54,9 +54,7 @@ public class QSqlTableModel {
     /// 创建模型，dbName 为数据库连接名（空串使用默认连接）
     public init(dbName: String) {
         unsafe {
-            let cstr = LibC.mallocCString(dbName)
-            ptr = qSqlTableModelCreate(0, cstr)
-            LibC.free(cstr)
+            withCString(dbName) { c => ptr = qSqlTableModelCreate(0, c) }
         }
         trackObject(ptr)
     }

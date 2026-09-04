@@ -336,9 +336,7 @@ public class QGraphicsTextItem <: QGraphicsItem {
     public func setFont(family: String, pointSize: Float64, bold: Bool): Unit {
         checkValid()
         unsafe {
-            let c = LibC.mallocCString(family)
-            qGraphicsTextItemSetFont(ptr, c, pointSize, bold)
-            LibC.free(c)
+            withCString(family) { c => qGraphicsTextItemSetFont(ptr, c, pointSize, bold) }
         }
     }
 

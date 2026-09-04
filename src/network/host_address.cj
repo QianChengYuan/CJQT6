@@ -38,18 +38,14 @@ public class QHostAddress {
     /// 支持格式："127.0.0.1"、"::1"、"192.168.1.1"
     public init(address: String) {
         unsafe {
-            let cstr = LibC.mallocCString(address)
-            ptr = qHostAddressCreateWithString(cstr)
-            LibC.free(cstr)
+            withCString(address) { c => ptr = qHostAddressCreateWithString(c) }
         }
     }
     
     /// 设置地址
     public func setAddress(address: String): Unit {
         unsafe {
-            let cstr = LibC.mallocCString(address)
-            qHostAddressSetAddress(ptr, cstr)
-            LibC.free(cstr)
+            withCString(address) { c => qHostAddressSetAddress(ptr, c) }
         }
     }
     

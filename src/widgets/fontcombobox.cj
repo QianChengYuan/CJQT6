@@ -58,17 +58,13 @@ public class QFontComboBox {
 
     public func setStyleSheet(styleSheet: String): Unit {
         unsafe {
-            let cstr = LibC.mallocCString(styleSheet)
-            qWidgetSetStyleSheet(ptr, cstr)
-            LibC.free(cstr)
+            withCString(styleSheet) { c => qWidgetSetStyleSheet(ptr, c) }
         }
     }
 
     public func setCurrentFont(family: String): Unit {
         unsafe {
-            let cstr = LibC.mallocCString(family)
-            qFontComboBoxSetCurrentFont(ptr, cstr)
-            LibC.free(cstr)
+            withCString(family) { c => qFontComboBoxSetCurrentFont(ptr, c) }
         }
     }
 

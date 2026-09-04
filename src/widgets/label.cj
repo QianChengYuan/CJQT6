@@ -61,9 +61,7 @@ public class QLabel <: QtResource {
     public func setStyleSheet(style: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(style)
-            qWidgetSetStyleSheet(ptr, cstr)
-            LibC.free(cstr)
+            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
         }
     }
 
@@ -71,9 +69,7 @@ public class QLabel <: QtResource {
     public func setText(text: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(text)
-            qLabelSetText(ptr, cstr)
-            LibC.free(cstr)
+            withCString(text) { c => qLabelSetText(ptr, c) }
         }
     }
     
@@ -103,9 +99,7 @@ public class QLabel <: QtResource {
     public func setPixmapByPath(path: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(path)
-            qLabelSetPixmapByPath(ptr, cstr)
-            LibC.free(cstr)
+            withCString(path) { c => qLabelSetPixmapByPath(ptr, c) }
         }
     }
     
@@ -229,9 +223,7 @@ public class QLabel <: QtResource {
     public func setToolTip(toolTip: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(toolTip)
-            qWidgetSetToolTip(ptr, cstr)
-            LibC.free(cstr)
+            withCString(toolTip) { c => qWidgetSetToolTip(ptr, c) }
         }
     }
     

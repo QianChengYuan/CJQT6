@@ -31,9 +31,7 @@ public class QIcon {
     /// 从文件路径创建图标
     public init(filename: String) {
         unsafe {
-            let cstr = LibC.mallocCString(filename)
-            ptr = qIconCreateFromFile(cstr)
-            LibC.free(cstr)
+            withCString(filename) { c => ptr = qIconCreateFromFile(c) }
         }
     }
 
@@ -47,9 +45,7 @@ public class QIcon {
     public func addFile(filename: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(filename)
-            qIconAddFile(ptr, cstr)
-            LibC.free(cstr)
+            withCString(filename) { c => qIconAddFile(ptr, c) }
         }
     }
 

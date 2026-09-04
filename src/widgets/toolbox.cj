@@ -140,9 +140,7 @@ public class QToolBox {
     /// 设置指定项图标（按文件路径）
     public func setItemIcon(index: Int32, path: String): Unit {
         unsafe {
-            let cstr = LibC.mallocCString(path)
-            qToolBoxSetItemIcon(ptr, index, cstr)
-            LibC.free(cstr)
+            withCString(path) { c => qToolBoxSetItemIcon(ptr, index, c) }
         }
     }
 

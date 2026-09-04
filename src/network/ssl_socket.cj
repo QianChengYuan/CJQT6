@@ -83,9 +83,7 @@ public class QSslSocket {
     public func connectToHostEncrypted(host: String, port: UInt16): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(host)
-            qSslSocketConnectToHostEncrypted(ptr, cstr, port)
-            LibC.free(cstr)
+            withCString(host) { c => qSslSocketConnectToHostEncrypted(ptr, c, port) }
         }
     }
 

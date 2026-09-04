@@ -152,9 +152,7 @@ public class QLineEdit <: QtResource {
     public func setText(text: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(text)
-            qLineEditSetText(ptr, cstr)
-            LibC.free(cstr)
+            withCString(text) { c => qLineEditSetText(ptr, c) }
         }
     }
 
@@ -173,9 +171,7 @@ public class QLineEdit <: QtResource {
     public func setStyleSheet(styleSheet: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(styleSheet)
-            qWidgetSetStyleSheet(ptr, cstr)
-            LibC.free(cstr)
+            withCString(styleSheet) { c => qWidgetSetStyleSheet(ptr, c) }
         }
     }
 
@@ -183,9 +179,7 @@ public class QLineEdit <: QtResource {
     public func setPlaceholder(text: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(text)
-            qLineEditSetPlaceholder(ptr, cstr)
-            LibC.free(cstr)
+            withCString(text) { c => qLineEditSetPlaceholder(ptr, c) }
         }
     }
 
@@ -343,9 +337,7 @@ public class QLineEdit <: QtResource {
     public func setInputMask(mask: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(mask)
-            qLineEditSetInputMask(ptr, cstr)
-            LibC.free(cstr)
+            withCString(mask) { c => qLineEditSetInputMask(ptr, c) }
         }
     }
 

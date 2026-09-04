@@ -118,9 +118,7 @@ public class QTextDocument {
     /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(text: String) {
         unsafe {
-            let cstr = LibC.mallocCString(text)
-            ptr = qTextDocumentCreateWithText(cstr)
-            LibC.free(cstr)
+            withCString(text) { c => ptr = qTextDocumentCreateWithText(c) }
             if (ptr == 0) {
                 throw CreateFailedException("QTextDocument create failed")
             }
@@ -131,9 +129,7 @@ public class QTextDocument {
     public func setPlainText(text: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(text)
-            qTextDocumentSetPlainText(ptr, cstr)
-            LibC.free(cstr)
+            withCString(text) { c => qTextDocumentSetPlainText(ptr, c) }
         }
     }
 
@@ -150,9 +146,7 @@ public class QTextDocument {
     public func setHtml(html: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(html)
-            qTextDocumentSetHtml(ptr, cstr)
-            LibC.free(cstr)
+            withCString(html) { c => qTextDocumentSetHtml(ptr, c) }
         }
     }
 
@@ -204,9 +198,7 @@ public class QTextDocument {
     public func setDefaultFont(family: String, pointSize: Int32): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(family)
-            qTextDocumentSetDefaultFont(ptr, cstr, pointSize)
-            LibC.free(cstr)
+            withCString(family) { c => qTextDocumentSetDefaultFont(ptr, c, pointSize) }
         }
     }
 
@@ -275,9 +267,7 @@ public class QTextCursor {
     public func insertText(text: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(text)
-            qTextCursorInsertText(ptr, cstr)
-            LibC.free(cstr)
+            withCString(text) { c => qTextCursorInsertText(ptr, c) }
         }
     }
 

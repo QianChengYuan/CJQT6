@@ -308,9 +308,7 @@ public class QListWidget {
                 if (i > 0) { joined += "\n" }
                 joined += items[i]
             }
-            let cstr = LibC.mallocCString(joined)
-            qListWidgetAddItems(ptr, cstr)
-            LibC.free(cstr)
+            withCString(joined) { c => qListWidgetAddItems(ptr, c) }
         }
     }
 
@@ -403,9 +401,7 @@ public class QListWidget {
 
     public func setStyleSheet(style: String): Unit {
         unsafe {
-            let cstr = LibC.mallocCString(style)
-            qWidgetSetStyleSheet(ptr, cstr)
-            LibC.free(cstr)
+            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
         }
     }
 }
@@ -436,9 +432,7 @@ public class QListWidgetItem {
 
     public init(text: String) {
         unsafe {
-            let cstr = LibC.mallocCString(text)
-            ptr = qListWidgetItemCreateWithText(cstr)
-            LibC.free(cstr)
+            withCString(text) { c => ptr = qListWidgetItemCreateWithText(c) }
         }
     }
 
@@ -466,9 +460,7 @@ public class QListWidgetItem {
 
     public func setText(text: String): Unit {
         unsafe {
-            let cstr = LibC.mallocCString(text)
-            qListWidgetItemSetText(ptr, cstr)
-            LibC.free(cstr)
+            withCString(text) { c => qListWidgetItemSetText(ptr, c) }
         }
     }
 

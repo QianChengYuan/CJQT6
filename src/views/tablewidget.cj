@@ -420,9 +420,7 @@ public class QTableWidget {
                 if (i > 0) { joined += "\n" }
                 joined += labels[i]
             }
-            let cstr = LibC.mallocCString(joined)
-            qTableWidgetSetHorizontalHeaderLabels(ptr, cstr)
-            LibC.free(cstr)
+            withCString(joined) { c => qTableWidgetSetHorizontalHeaderLabels(ptr, c) }
         }
     }
 
@@ -605,9 +603,7 @@ public class QTableWidgetItem {
 
     public init(text: String) {
         unsafe {
-            let cstr = LibC.mallocCString(text)
-            ptr = qTableWidgetItemCreateWithText(cstr)
-            LibC.free(cstr)
+            withCString(text) { c => ptr = qTableWidgetItemCreateWithText(c) }
         }
     }
 
@@ -635,9 +631,7 @@ public class QTableWidgetItem {
 
     public func setText(text: String): Unit {
         unsafe {
-            let cstr = LibC.mallocCString(text)
-            qTableWidgetItemSetText(ptr, cstr)
-            LibC.free(cstr)
+            withCString(text) { c => qTableWidgetItemSetText(ptr, c) }
         }
     }
 

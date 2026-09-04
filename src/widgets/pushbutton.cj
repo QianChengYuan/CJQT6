@@ -109,9 +109,7 @@ public class QPushButton <: QtResource {
     public func setText(text: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(text)
-            qButtonSetText(ptr, cstr)
-            LibC.free(cstr)
+            withCString(text) { c => qButtonSetText(ptr, c) }
         }
     }
     
@@ -131,9 +129,7 @@ public class QPushButton <: QtResource {
     public func setIcon(iconPath: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(iconPath)
-            qButtonSetIcon(ptr, cstr)
-            LibC.free(cstr)
+            withCString(iconPath) { c => qButtonSetIcon(ptr, c) }
         }
     }
     
@@ -175,9 +171,7 @@ public class QPushButton <: QtResource {
     public func setStyleSheet(style: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(style)
-            qWidgetSetStyleSheet(ptr, cstr)
-            LibC.free(cstr)
+            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
         }
     }
 
@@ -295,9 +289,7 @@ public class QPushButton <: QtResource {
     public func setShortcut(key: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(key)
-            qButtonSetShortcut(ptr, cstr)
-            LibC.free(cstr)
+            withCString(key) { c => qButtonSetShortcut(ptr, c) }
         }
     }
     

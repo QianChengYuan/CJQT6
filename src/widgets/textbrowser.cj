@@ -59,18 +59,14 @@ public class QTextBrowser {
     /// 设置样式表
     public func setStyleSheet(style: String): Unit {
         unsafe {
-            let cstr = LibC.mallocCString(style)
-            qWidgetSetStyleSheet(ptr, cstr)
-            LibC.free(cstr)
+            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
         }
     }
 
     /// 设置纯文本内容
     public func setText(text: String): Unit {
         unsafe {
-            let cstr = LibC.mallocCString(text)
-            qTextBrowserSetText(ptr, cstr)
-            LibC.free(cstr)
+            withCString(text) { c => qTextBrowserSetText(ptr, c) }
         }
     }
 
@@ -87,9 +83,7 @@ public class QTextBrowser {
     /// 设置HTML内容
     public func setHtml(html: String): Unit {
         unsafe {
-            let cstr = LibC.mallocCString(html)
-            qTextBrowserSetHtml(ptr, cstr)
-            LibC.free(cstr)
+            withCString(html) { c => qTextBrowserSetHtml(ptr, c) }
         }
     }
 
@@ -106,9 +100,7 @@ public class QTextBrowser {
     /// 导航到指定源URL
     public func setSource(url: String): Unit {
         unsafe {
-            let cstr = LibC.mallocCString(url)
-            qTextBrowserSetSource(ptr, cstr)
-            LibC.free(cstr)
+            withCString(url) { c => qTextBrowserSetSource(ptr, c) }
         }
     }
 
@@ -181,9 +173,7 @@ public class QTextBrowser {
     /// 设置纯文本
     public func setPlainText(text: String): Unit {
         unsafe {
-            let cstr = LibC.mallocCString(text)
-            qTextBrowserSetPlainText(ptr, cstr)
-            LibC.free(cstr)
+            withCString(text) { c => qTextBrowserSetPlainText(ptr, c) }
         }
     }
 

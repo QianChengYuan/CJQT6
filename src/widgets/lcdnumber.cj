@@ -160,9 +160,7 @@ public class QLCDNumber <: QtResource {
     public func setStyleSheet(style: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(style)
-            qWidgetSetStyleSheet(ptr, cstr)
-            LibC.free(cstr)
+            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
         }
     }
     
@@ -218,9 +216,7 @@ public class QLCDNumber <: QtResource {
     public func display(value: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(value)
-            qLCDNumberDisplayString(ptr, cstr)
-            LibC.free(cstr)
+            withCString(value) { c => qLCDNumberDisplayString(ptr, c) }
         }
     }
     

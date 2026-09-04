@@ -44,18 +44,14 @@ public class QCommandLinkButton {
     /// 设置按钮文本（主标题）
     public func setText(text: String): Unit {
         unsafe {
-            let cstr = LibC.mallocCString(text)
-            qCommandLinkButtonSetText(ptr, cstr)
-            LibC.free(cstr)
+            withCString(text) { c => qCommandLinkButtonSetText(ptr, c) }
         }
     }
     
     /// 设置描述文字（副标题，灰色小字）
     public func setDescription(desc: String): Unit {
         unsafe {
-            let cstr = LibC.mallocCString(desc)
-            qCommandLinkButtonSetDescription(ptr, cstr)
-            LibC.free(cstr)
+            withCString(desc) { c => qCommandLinkButtonSetDescription(ptr, c) }
         }
     }
 
@@ -72,9 +68,7 @@ public class QCommandLinkButton {
     /// 设置图标（按文件路径）
     public func setIcon(path: String): Unit {
         unsafe {
-            let cstr = LibC.mallocCString(path)
-            qCommandLinkButtonSetIcon(ptr, cstr)
-            LibC.free(cstr)
+            withCString(path) { c => qCommandLinkButtonSetIcon(ptr, c) }
         }
     }
 
@@ -96,9 +90,7 @@ public class QCommandLinkButton {
     /// 设置样式表
     public func setStyleSheet(style: String): Unit {
         unsafe {
-            let cstr = LibC.mallocCString(style)
-            qWidgetSetStyleSheet(ptr, cstr)
-            LibC.free(cstr)
+            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
         }
     }
     

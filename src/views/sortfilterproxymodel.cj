@@ -83,9 +83,7 @@ public class QSortFilterProxyModel {
     public func setFilterRegularExpression(pattern: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(pattern)
-            qSortFilterProxyModelSetFilterRegularExpression(ptr, cstr)
-            LibC.free(cstr)
+            withCString(pattern) { c => qSortFilterProxyModelSetFilterRegularExpression(ptr, c) }
         }
     }
 
@@ -93,9 +91,7 @@ public class QSortFilterProxyModel {
     public func setFilterFixedString(pattern: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(pattern)
-            qSortFilterProxyModelSetFilterFixedString(ptr, cstr)
-            LibC.free(cstr)
+            withCString(pattern) { c => qSortFilterProxyModelSetFilterFixedString(ptr, c) }
         }
     }
 
@@ -103,9 +99,7 @@ public class QSortFilterProxyModel {
     public func setFilterWildcard(pattern: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(pattern)
-            qSortFilterProxyModelSetFilterWildcard(ptr, cstr)
-            LibC.free(cstr)
+            withCString(pattern) { c => qSortFilterProxyModelSetFilterWildcard(ptr, c) }
         }
     }
 

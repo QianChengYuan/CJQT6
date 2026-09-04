@@ -384,9 +384,7 @@ public class QCalendarWidget {
     /// 设置样式表
     public func setStyleSheet(style: String): Unit {
         unsafe {
-            let cstr = LibC.mallocCString(style)
-            qWidgetSetStyleSheet(ptr, cstr)
-            LibC.free(cstr)
+            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
         }
     }
     

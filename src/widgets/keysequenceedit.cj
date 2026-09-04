@@ -35,9 +35,7 @@ public class QKeySequenceEdit {
     /// 设置样式表
     public func setStyleSheet(style: String): Unit {
         unsafe {
-            let cstr = LibC.mallocCString(style)
-            qWidgetSetStyleSheet(ptr, cstr)
-            LibC.free(cstr)
+            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
         }
     }
 
@@ -54,9 +52,7 @@ public class QKeySequenceEdit {
     /// 设置快捷键序列（如 "Ctrl+C", "Alt+Shift+X"）
     public func setKeySequence(text: String): Unit {
         unsafe {
-            let cstr = LibC.mallocCString(text)
-            qKeySequenceEditSetKeySequence(ptr, cstr)
-            LibC.free(cstr)
+            withCString(text) { c => qKeySequenceEditSetKeySequence(ptr, c) }
         }
     }
 

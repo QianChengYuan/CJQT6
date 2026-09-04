@@ -76,9 +76,7 @@ public class QScatterSeries {
     public func setName(name: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(name)
-            qScatterSeriesSetName(ptr, cstr)
-            LibC.free(cstr)
+            withCString(name) { c => qScatterSeriesSetName(ptr, c) }
         }
     }
 

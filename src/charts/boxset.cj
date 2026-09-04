@@ -50,9 +50,7 @@ public class QBoxSet {
     /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(label: String) {
         unsafe {
-            let cstr = LibC.mallocCString(label)
-            ptr = qBoxSetCreate(cstr)
-            LibC.free(cstr)
+            withCString(label) { c => ptr = qBoxSetCreate(c) }
         }
         if (ptr == 0) {
             throw CreateFailedException("QBoxSet create failed")
@@ -64,9 +62,7 @@ public class QBoxSet {
     /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(le: Float64, lq: Float64, m: Float64, uq: Float64, ue: Float64) {
         unsafe {
-            let cstr = LibC.mallocCString("")
-            ptr = qBoxSetCreate5(le, lq, m, uq, ue, cstr)
-            LibC.free(cstr)
+            withCString("") { c => ptr = qBoxSetCreate5(le, lq, m, uq, ue, c) }
         }
         if (ptr == 0) {
             throw CreateFailedException("QBoxSet create failed")
@@ -90,9 +86,7 @@ public class QBoxSet {
     public func setLabel(label: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(label)
-            qBoxSetSetLabel(ptr, cstr)
-            LibC.free(cstr)
+            withCString(label) { c => qBoxSetSetLabel(ptr, c) }
         }
     }
 

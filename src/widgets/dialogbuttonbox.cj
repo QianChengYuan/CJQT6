@@ -48,9 +48,7 @@ public class QDialogButtonBox {
     /// 添加自定义按钮：text=按钮文字, role=按钮角色(ButtonRole枚举值)
     public func addButton(text: String, role: Int32): Unit {
         unsafe {
-            let cstr = LibC.mallocCString(text)
-            qDialogButtonBoxAddButton(ptr, cstr, role)
-            LibC.free(cstr)
+            withCString(text) { c => qDialogButtonBoxAddButton(ptr, c, role) }
         }
     }
     
@@ -97,9 +95,7 @@ public class QDialogButtonBox {
     /// 设置样式表
     public func setStyleSheet(style: String): Unit {
         unsafe {
-            let cstr = LibC.mallocCString(style)
-            qWidgetSetStyleSheet(ptr, cstr)
-            LibC.free(cstr)
+            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
         }
     }
     

@@ -79,9 +79,7 @@ public class QPieSlice {
     /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(label: String, value: Float64) {
         unsafe {
-            let cstr = LibC.mallocCString(label)
-            ptr = qPieSliceCreateLabelValue(cstr, value)
-            LibC.free(cstr)
+            withCString(label) { c => ptr = qPieSliceCreateLabelValue(c, value) }
         }
         if (ptr == 0) {
             throw CreateFailedException("QPieSlice create failed")
@@ -93,9 +91,7 @@ public class QPieSlice {
     public func setLabel(label: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(label)
-            qPieSliceSetLabel(ptr, cstr)
-            LibC.free(cstr)
+            withCString(label) { c => qPieSliceSetLabel(ptr, c) }
         }
     }
 
@@ -104,7 +100,9 @@ public class QPieSlice {
         checkValid()
         unsafe {
             let cstr = qPieSliceLabel(ptr)
-            return cstr.toString()
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
         }
     }
 

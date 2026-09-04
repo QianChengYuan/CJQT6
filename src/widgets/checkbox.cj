@@ -74,9 +74,7 @@ public class QCheckBox <: QtResource {
     public func setText(text: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(text)
-            qCheckBoxSetText(ptr, cstr)
-            LibC.free(cstr)
+            withCString(text) { c => qCheckBoxSetText(ptr, c) }
         }
     }
     
@@ -124,9 +122,7 @@ public class QCheckBox <: QtResource {
     public func setStyleSheet(style: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(style)
-            qWidgetSetStyleSheet(ptr, cstr)
-            LibC.free(cstr)
+            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
         }
     }
     

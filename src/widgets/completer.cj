@@ -71,9 +71,7 @@ public class QCompleter {
     /// items: 用换行符分隔的候选词列表
     public init(items: String) {
         unsafe {
-            let cstr = LibC.mallocCString(items)
-            ptr = qCompleterCreateWithStrings(cstr)
-            LibC.free(cstr)
+            withCString(items) { c => ptr = qCompleterCreateWithStrings(c) }
         }
     }
 
@@ -90,9 +88,7 @@ public class QCompleter {
     /// 更新候选词列表
     public func setModel(items: String): Unit {
         unsafe {
-            let cstr = LibC.mallocCString(items)
-            qCompleterSetModel(ptr, cstr)
-            LibC.free(cstr)
+            withCString(items) { c => qCompleterSetModel(ptr, c) }
         }
     }
 
@@ -134,9 +130,7 @@ public class QCompleter {
     /// 设置补全前缀
     public func setCompletionPrefix(prefix: String): Unit {
         unsafe {
-            let cstr = LibC.mallocCString(prefix)
-            qCompleterSetCompletionPrefix(ptr, cstr)
-            LibC.free(cstr)
+            withCString(prefix) { c => qCompleterSetCompletionPrefix(ptr, c) }
         }
     }
 

@@ -219,9 +219,7 @@ public class QQmlApplicationEngine <: QtResource {
     public func loadFile(filePath: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(filePath)
-            qQmlEngineLoadFile(ptr, cstr)
-            LibC.free(cstr)
+            withCString(filePath) { c => qQmlEngineLoadFile(ptr, c) }
         }
     }
     
@@ -229,9 +227,7 @@ public class QQmlApplicationEngine <: QtResource {
     public func loadUrl(url: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(url)
-            qQmlEngineLoadUrl(ptr, cstr)
-            LibC.free(cstr)
+            withCString(url) { c => qQmlEngineLoadUrl(ptr, c) }
         }
     }
     
@@ -239,9 +235,7 @@ public class QQmlApplicationEngine <: QtResource {
     public func loadData(qmlData: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(qmlData)
-            qQmlEngineLoadData(ptr, cstr)
-            LibC.free(cstr)
+            withCString(qmlData) { c => qQmlEngineLoadData(ptr, c) }
         }
     }
     
@@ -283,9 +277,7 @@ public class QQmlApplicationEngine <: QtResource {
     public func setContextProperty(name: String, valuePtr: Int64): Unit {
         checkValid()
         unsafe {
-            let nameStr = LibC.mallocCString(name)
-            qQmlEngineSetContextProperty(ptr, nameStr, valuePtr)
-            LibC.free(nameStr)
+            withCString(name) { c => qQmlEngineSetContextProperty(ptr, c, valuePtr) }
         }
     }
     
@@ -305,9 +297,7 @@ public class QQmlApplicationEngine <: QtResource {
     public func setContextPropertyInt(name: String, value: Int32): Unit {
         checkValid()
         unsafe {
-            let nameStr = LibC.mallocCString(name)
-            qQmlEngineSetContextPropertyInt(ptr, nameStr, value)
-            LibC.free(nameStr)
+            withCString(name) { c => qQmlEngineSetContextPropertyInt(ptr, c, value) }
         }
     }
     
@@ -315,9 +305,7 @@ public class QQmlApplicationEngine <: QtResource {
     public func setContextPropertyDouble(name: String, value: Float64): Unit {
         checkValid()
         unsafe {
-            let nameStr = LibC.mallocCString(name)
-            qQmlEngineSetContextPropertyDouble(ptr, nameStr, value)
-            LibC.free(nameStr)
+            withCString(name) { c => qQmlEngineSetContextPropertyDouble(ptr, c, value) }
         }
     }
     
@@ -335,9 +323,7 @@ public class QQmlApplicationEngine <: QtResource {
     public func addImportPath(path: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(path)
-            qQmlEngineAddImportPath(ptr, cstr)
-            LibC.free(cstr)
+            withCString(path) { c => qQmlEngineAddImportPath(ptr, c) }
         }
     }
     
@@ -423,9 +409,7 @@ public class QQuickView <: QtResource {
     public func setSource(source: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(source)
-            qQuickViewSetSource(ptr, cstr)
-            LibC.free(cstr)
+            withCString(source) { c => qQuickViewSetSource(ptr, c) }
         }
     }
     
@@ -433,9 +417,7 @@ public class QQuickView <: QtResource {
     public func setSourceUrl(url: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(url)
-            qQuickViewSetSourceUrl(ptr, cstr)
-            LibC.free(cstr)
+            withCString(url) { c => qQuickViewSetSourceUrl(ptr, c) }
         }
     }
     
@@ -459,9 +441,7 @@ public class QQuickView <: QtResource {
     public func setTitle(title: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(title)
-            qQuickViewSetTitle(ptr, cstr)
-            LibC.free(cstr)
+            withCString(title) { c => qQuickViewSetTitle(ptr, c) }
         }
     }
     
@@ -601,9 +581,7 @@ public class QQuickWidget <: QtResource {
     public func setSource(source: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(source)
-            qQuickWidgetSetSource(ptr, cstr)
-            LibC.free(cstr)
+            withCString(source) { c => qQuickWidgetSetSource(ptr, c) }
         }
     }
     
@@ -611,9 +589,7 @@ public class QQuickWidget <: QtResource {
     public func setSourceUrl(url: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(url)
-            qQuickWidgetSetSourceUrl(ptr, cstr)
-            LibC.free(cstr)
+            withCString(url) { c => qQuickWidgetSetSourceUrl(ptr, c) }
         }
     }
     
@@ -753,9 +729,7 @@ public class QQuickWindow <: QtResource {
     public func setTitle(title: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(title)
-            qQuickWindowSetTitle(ptr, cstr)
-            LibC.free(cstr)
+            withCString(title) { c => qQuickWindowSetTitle(ptr, c) }
         }
     }
     
@@ -946,9 +920,7 @@ public class QQmlComponent <: QtResource {
     public func loadUrl(url: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(url)
-            qQmlComponentLoadUrl(ptr, cstr)
-            LibC.free(cstr)
+            withCString(url) { c => qQmlComponentLoadUrl(ptr, c) }
         }
     }
     
@@ -1116,9 +1088,7 @@ public class QQmlContext <: QtResource {
     public func setContextProperty(name: String, valuePtr: Int64): Unit {
         checkValid()
         unsafe {
-            let nameStr = LibC.mallocCString(name)
-            qQmlContextSetContextProperty(ptr, nameStr, valuePtr)
-            LibC.free(nameStr)
+            withCString(name) { c => qQmlContextSetContextProperty(ptr, c, valuePtr) }
         }
     }
     
@@ -1138,9 +1108,7 @@ public class QQmlContext <: QtResource {
     public func setContextPropertyInt(name: String, value: Int32): Unit {
         checkValid()
         unsafe {
-            let nameStr = LibC.mallocCString(name)
-            qQmlContextSetContextPropertyInt(ptr, nameStr, value)
-            LibC.free(nameStr)
+            withCString(name) { c => qQmlContextSetContextPropertyInt(ptr, c, value) }
         }
     }
     
@@ -1148,9 +1116,7 @@ public class QQmlContext <: QtResource {
     public func setContextPropertyDouble(name: String, value: Float64): Unit {
         checkValid()
         unsafe {
-            let nameStr = LibC.mallocCString(name)
-            qQmlContextSetContextPropertyDouble(ptr, nameStr, value)
-            LibC.free(nameStr)
+            withCString(name) { c => qQmlContextSetContextPropertyDouble(ptr, c, value) }
         }
     }
     
@@ -1493,9 +1459,7 @@ public class QQuickItem <: QtResource {
     public func setObjectName(name: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(name)
-            qQuickItemSetObjectName(ptr, cstr)
-            LibC.free(cstr)
+            withCString(name) { c => qQuickItemSetObjectName(ptr, c) }
         }
     }
     
@@ -1569,9 +1533,7 @@ public class QQuickItem <: QtResource {
     public func setPropertyInt(name: String, value: Int32): Unit {
         checkValid()
         unsafe {
-            let nameStr = LibC.mallocCString(name)
-            qQuickItemSetPropertyInt(ptr, nameStr, value)
-            LibC.free(nameStr)
+            withCString(name) { c => qQuickItemSetPropertyInt(ptr, c, value) }
         }
     }
     
@@ -1579,9 +1541,7 @@ public class QQuickItem <: QtResource {
     public func setPropertyDouble(name: String, value: Float64): Unit {
         checkValid()
         unsafe {
-            let nameStr = LibC.mallocCString(name)
-            qQuickItemSetPropertyDouble(ptr, nameStr, value)
-            LibC.free(nameStr)
+            withCString(name) { c => qQuickItemSetPropertyDouble(ptr, c, value) }
         }
     }
     
