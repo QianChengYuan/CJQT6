@@ -793,7 +793,7 @@ let onExit: VoidCallback = { =>
 main(): Int32 {
     let app = QApplication()
     gApp = app
-    
+
     app.loadQtTranslation("zh_CN")
     
     let window = QMainWindow()
@@ -1094,6 +1094,8 @@ main(): Int32 {
     window.setCentralWidget(edit.getPtr())
     
     window.show()
+    // 启动焦点落在文本编辑区，而非工具栏第一个可聚焦控件（QFontComboBox 字体下拉框）
+    edit.setFocus()
     updateDocumentStats()
     updateStatus("就绪 - Ctrl+N 新建, Ctrl+O 打开, Ctrl+= 放大, Ctrl+- 缩小")
     

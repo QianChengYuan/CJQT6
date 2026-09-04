@@ -11,10 +11,9 @@ main() {
     window.resize(400, 300)
 
     let label = QLabel()
-    label.setText("欢迎使用CJQT6!")
+    label.setText("欢迎使用 CJQT6!")
     label.setAlignment(Alignment.Center.value)
 
-    // 将 label 添加到窗口布局
     let layout = QVBoxLayout()
     layout.addWidget(label.getPtr())
     window.setLayout(layout.getPtr())
@@ -22,3 +21,4 @@ main() {
     window.show()
     app.exec()
 }
+
