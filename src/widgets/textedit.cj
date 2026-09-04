@@ -75,6 +75,8 @@ foreign func qTextEditCharacterCount(ptr: Int64): Int32
 foreign func qTextEditPrint(ptr: Int64, printerPtr: Int64): Unit
 // QTextEdit::goToLine() - 跳转到指定行
 foreign func qTextEditGoToLine(ptr: Int64, line: Int32): Unit
+// QTextEdit::setFocus() - 设置键盘焦点
+foreign func qTextEditSetFocus(ptr: Int64): Unit
 // QTextEdit析构 - 删除控件
 foreign func qTextEditDelete(ptr: Int64): Unit
 // QTextEdit::setHtml() - 设置HTML内容
@@ -181,9 +183,7 @@ public class QTextEdit <: QtResource {
     public func setPlaceholderText(text: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(text)
-            qTextEditSetPlaceholderText(ptr, cstr)
-            LibC.free(cstr)
+            withCString(text) { c => qTextEditSetPlaceholderText(ptr, c) }
         }
     }
     
@@ -542,6 +542,14 @@ public class QTextEdit <: QtResource {
             qTextEditGoToLine(ptr, line)
         }
     }
+
+    /// 设置键盘焦点（QWidget::setFocus，常用在窗口 show 后把焦点落到本控件）
+    public func setFocus(): Unit {
+        checkValid()
+        unsafe {
+            qTextEditSetFocus(ptr)
+        }
+    }
     
     /// 打印文档
     public func print(printerPtr: Int64): Unit {
@@ -670,9 +678,7 @@ public class QTextEdit <: QtResource {
     public func setToolTip(toolTip: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(toolTip)
-            qWidgetSetToolTip(ptr, cstr)
-            LibC.free(cstr)
+            withCString(toolTip) { c => qWidgetSetToolTip(ptr, c) }
         }
     }
     

@@ -170,4 +170,11 @@ void qDoubleSpinBoxSetFocus(int64_t ptr) {
     if (w) w->setFocus();
 }
 
+void qTextEditSetFocus(int64_t ptr) {
+    // QTextEdit 无独立头文件依赖：QWidget::setFocus() 为 QWidget 槽，
+    // QTextEdit* 可直接按 QWidget 处理
+    QWidget* w = reinterpret_cast<QWidget*>(ptr);
+    if (w) w->setFocus();
+}
+
 } // extern "C"

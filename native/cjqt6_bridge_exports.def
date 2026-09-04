@@ -198,6 +198,7 @@ qComboBoxAddItems
 qComboBoxClear
 qComboBoxConnectActivated
 qComboBoxConnectCurrentIndexChanged
+qComboBoxConnectCurrentIndexChangedId
 qComboBoxConnectCurrentTextChanged
 qComboBoxConnectEditTextChanged
 qComboBoxConnectHighlighted
@@ -2332,6 +2333,7 @@ qTextEditSetFontBold
 qTextEditSetFontFamily
 qTextEditSetFontItalic
 qTextEditSetFontSize
+qTextEditSetFocus
 qTextEditSetHtml
 qTextEditSetLineWrapMode
 qTextEditSetModified

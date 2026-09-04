@@ -60,6 +60,7 @@ public const SIGNAL_CLICKED_CHECKED: String = "clickedChecked"
 // P1c：QLineEdit 扩展信号（用于路由断开）
 public const SIGNAL_RETURN_PRESSED: String = "returnPressed"
 public const SIGNAL_EDITING_FINISHED: String = "editingFinished"
+public const SIGNAL_CURRENT_INDEX_CHANGED: String = "currentIndexChanged"
 
 // ============================================================
 // QWidget::destroyed 信号连接

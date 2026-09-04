@@ -17,6 +17,8 @@ foreign func qComboBoxCurrentIndex(ptr: Int64): Int32
 foreign func qComboBoxClear(ptr: Int64): Unit
 // QComboBox::connectCurrentIndexChanged() - 连接当前索引变化信号
 foreign func qComboBoxConnectCurrentIndexChanged(ptr: Int64, callback: Int32Callback): Unit
+// QComboBox::connectCurrentIndexChangedId() - id 版（支持闭包捕获）
+foreign func qComboBoxConnectCurrentIndexChangedId(ptr: Int64, id: Int64): Unit
 // QComboBox::disconnectCurrentIndexChanged() - 断开当前索引变化信号
 foreign func qComboBoxDisconnectCurrentIndexChanged(ptr: Int64): Unit
 // QComboBox::connectCurrentTextChanged() - 连接当前文本变化信号
@@ -135,9 +137,7 @@ public class QComboBox <: QtResource {
     public func addItem(text: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(text)
-            qComboBoxAddItem(ptr, cstr)
-            LibC.free(cstr)
+            withCString(text) { c => qComboBoxAddItem(ptr, c) }
         }
     }
     
@@ -176,9 +176,7 @@ public class QComboBox <: QtResource {
     public func addItems(items: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(items)
-            qComboBoxAddItems(ptr, cstr)
-            LibC.free(cstr)
+            withCString(items) { c => qComboBoxAddItems(ptr, c) }
         }
     }
     
@@ -186,9 +184,7 @@ public class QComboBox <: QtResource {
     public func insertItem(index: Int32, text: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(text)
-            qComboBoxInsertItem(ptr, index, cstr)
-            LibC.free(cstr)
+            withCString(text) { c => qComboBoxInsertItem(ptr, index, c) }
         }
     }
     
@@ -196,9 +192,7 @@ public class QComboBox <: QtResource {
     public func setItemText(index: Int32, text: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(text)
-            qComboBoxSetItemText(ptr, index, cstr)
-            LibC.free(cstr)
+            withCString(text) { c => qComboBoxSetItemText(ptr, index, c) }
         }
     }
     
@@ -206,9 +200,7 @@ public class QComboBox <: QtResource {
     public func setCurrentText(text: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(text)
-            qComboBoxSetCurrentText(ptr, cstr)
-            LibC.free(cstr)
+            withCString(text) { c => qComboBoxSetCurrentText(ptr, c) }
         }
     }
     
@@ -227,9 +219,7 @@ public class QComboBox <: QtResource {
     public func setPlaceholderText(text: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(text)
-            qComboBoxSetPlaceholderText(ptr, cstr)
-            LibC.free(cstr)
+            withCString(text) { c => qComboBoxSetPlaceholderText(ptr, c) }
         }
     }
     
@@ -430,9 +420,7 @@ public class QComboBox <: QtResource {
     public func setStyleSheet(style: String): Unit {
         checkValid()
         unsafe {
-            let cstr = LibC.mallocCString(style)
-            qWidgetSetStyleSheet(ptr, cstr)
-            LibC.free(cstr)
+            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
         }
     }
 
@@ -458,6 +446,16 @@ public class QComboBox <: QtResource {
         unsafe {
             qComboBoxConnectCurrentIndexChanged(ptr, callback)
         }
+    }
+
+    /// 设置当前索引变化回调（可捕获局部变量；回调内用 currentIndex() 读取新索引），返回 SignalConnection 句柄
+    public func setOnCurrentIndexChangedCapture(callback: () -> Unit): SignalConnection {
+        checkValid()
+        let id = registerVoidCallback(callback)
+        unsafe {
+            qComboBoxConnectCurrentIndexChangedId(ptr, id)
+        }
+        return SignalConnection.createCapturing(ptr, SIGNAL_CURRENT_INDEX_CHANGED, WIDGET_TYPE_COMBOBOX, id)
     }
 
     /// 断开索引变化信号
