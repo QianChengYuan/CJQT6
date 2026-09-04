@@ -235,7 +235,8 @@ jobs:
           "CANGJIE_HOME=$CANGJIE_HOME" | Out-File -FilePath $env:GITHUB_ENV -Append
           "$CANGJIE_HOME\bin"       | Out-File -FilePath $env:GITHUB_PATH -Append
           "$CANGJIE_HOME\tools\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
-          # cjpm/cjc 启动依赖 SDK 运行时库（libcangjie-runtime.dll 在 runtime\lib\windows_x86_64_cjnative）
+          # cjlint 依赖 libcjlint.dll 在 tools\lib，cjpm/cjc 依赖 libcangjie-runtime.dll 在 runtime\lib
+          "$CANGJIE_HOME\tools\lib" | Out-File -FilePath $env:GITHUB_PATH -Append
           "$CANGJIE_HOME\runtime\lib\windows_x86_64_cjnative" | Out-File -FilePath $env:GITHUB_PATH -Append
           Write-Host "已安装到: $CANGJIE_HOME"
 
