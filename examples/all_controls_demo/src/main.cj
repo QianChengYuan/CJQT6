@@ -42,9 +42,8 @@ var gNewSplash: ?QSplashScreen = None
 var gNewTimer: ?QTimer = None
 var gNewFsModel: ?QFileSystemModel = None
 
-// 懒加载：页面创建状态与占位 widget 指针
-var gPageCreated: Array<Bool> = [false, false, false, false, false, false, false, false, false]
-var gPlaceholderPtrs: Array<Int64> = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+// 懒加载：每页在 QStackedWidget 中的实际索引（-1 表示未创建）
+var gPageStackIndex: Array<Int32> = [-1, -1, -1, -1, -1, -1, -1, -1, -1]
 
 // ============================================================
 // 页面名称列表（与createPages顺序一致）
@@ -70,8 +69,8 @@ let onSidebarChanged: CFunc<(Int32) -> Unit> = { row: Int32 =>
     if (row >= 0) {
         let r = Int64(row)
         if (let Some(stack) <- gStackedWidget) {
-            // 懒加载：首次切换时才创建页面，避免初始化时一次性创建所有页面导致 UI 卡死
-            if (r < gPageCreated.size && !gPageCreated[r]) {
+            // 懒加载：首次切换时才创建页面，addWidget 到 stack 末尾，记录实际索引
+            if (r < gPageStackIndex.size && gPageStackIndex[r] < 0) {
                 let page = match (row) {
                     case 0 => createPageBasic()
                     case 1 => createPageText()
@@ -84,15 +83,13 @@ let onSidebarChanged: CFunc<(Int32) -> Unit> = { row: Int32 =>
                     case 8 => createPageRichWidgets()
                     case _ => createPageBasic()
                 }
-                // 移除占位 widget，插入真实页面
-                let placeholderPtr = gPlaceholderPtrs[r]
-                if (placeholderPtr != 0) {
-                    stack.removeWidget(placeholderPtr)
-                }
-                stack.insertWidget(row, page.getPtr())
-                gPageCreated[r] = true
+                let idx = stack.addWidget(page.getPtr())
+                gPageStackIndex[r] = idx
             }
-            stack.setCurrentIndex(row)
+            // 切换到对应页面
+            if (gPageStackIndex[r] >= 0) {
+                stack.setCurrentIndex(gPageStackIndex[r])
+            }
         }
         if (let Some(status) <- gStatusLabel) {
             if (r < Int64(pageNames.size)) {
@@ -416,17 +413,11 @@ main(): Int32 {
     let stackedWidget = QStackedWidget()
     gStackedWidget = stackedWidget
 
-    // 懒加载：先创建占位 widget 保持索引，首次切换时才创建真实页面
-    for (i in 0..9) {
-        let placeholder = QWidget()
-        gPlaceholderPtrs[i] = placeholder.getPtr()
-        stackedWidget.addWidget(placeholder.getPtr())
-    }
-    // 预创建第 1 页（初始显示）
+    // 懒加载：初始只创建第 1 页，其余页面首次切换时才创建
     let firstPage = createPageBasic()
-    stackedWidget.removeWidget(gPlaceholderPtrs[0])
-    stackedWidget.insertWidget(0, firstPage.getPtr())
-    gPageCreated[0] = true
+    let firstIdx = stackedWidget.addWidget(firstPage.getPtr())
+    gPageStackIndex[0] = firstIdx
+    stackedWidget.setCurrentIndex(firstIdx)
 
     // 侧边栏切换事件
     sidebar.setOnCurrentRowChanged(onSidebarChanged)
