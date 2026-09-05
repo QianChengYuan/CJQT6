@@ -807,7 +807,7 @@ objdump -p releases\windows-x64\cjqt6_bridge.dll | findstr qFindChild
    - 是否在正确目录执行命令
     ↓
 5. 搜索解决方案
-   - 项目Issue: https://gitcode.com/yuan_1992/CJQT6/issues
+   - 项目Issue: https://gitcode.com/Cangjie-TPC/CJQT6/issues
    - 仓颉社区
    - Qt论坛
     ↓
@@ -871,7 +871,7 @@ pkg-config --modversion Qt6
 
 ```bash
 # 完整构建流程
-git clone https://gitcode.com/yuan_1992/CJQT6.git
+git clone https://gitcode.com/Cangjie-TPC/CJQT6.git
 cd CJQT6
 
 # 构建FFI桥接库
@@ -947,7 +947,7 @@ setx PATH "%PATH%;%QTDIR%\bin;C:\Program Files\CMake\bin"
 
 ```powershell
 # 克隆项目
-git clone https://gitcode.com/yuan_1992/CJQT6.git
+git clone https://gitcode.com/Cangjie-TPC/CJQT6.git
 cd CJQT6
 
 # 设置 Qt6 路径环境变量（请将 path\to\Qt6 替换为实际路径）
@@ -1025,7 +1025,7 @@ brew install cmake qt
 
 ```bash
 # 克隆项目
-git clone https://gitcode.com/yuan_1992/CJQT6.git
+git clone https://gitcode.com/Cangjie-TPC/CJQT6.git
 cd CJQT6
 
 # 方式1: 一键脚本（自动探测Qt路径并部署到 releases/）

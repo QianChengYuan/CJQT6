@@ -46,6 +46,6 @@ CJQT6 是 FFI 库，安全性很大程度上取决于**调用方是否遵守资�
 
 ## 联系维护者
 
-- 项目主页：https://gitcode.com/yuan_1992/CJQT6
-- 私密漏洞上报：https://gitcode.com/yuan_1992/CJQT6/issues（选「安全漏洞上报」模板）
+- 项目主页：https://gitcode.com/Cangjie-TPC/CJQT6
+- 私密漏洞上报：https://gitcode.com/Cangjie-TPC/CJQT6/issues（选「安全漏洞上报」模板）
 - 社区交流：QQ 群 1023882445（仅讨论使用，不用于漏洞细节）

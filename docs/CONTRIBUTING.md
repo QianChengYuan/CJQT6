@@ -8,7 +8,7 @@
 
 如果您发现了Bug或有功能建议：
 
-1. 在 [Issues](https://gitcode.com/yuan_1992/CJQT6/issues) 中搜索是否已有相关问题
+1. 在 [Issues](https://gitcode.com/Cangjie-TPC/CJQT6/issues) 中搜索是否已有相关问题
 2. 如果没有，创建新Issue并详细描述：
    - 问题描述
    - 复现步骤
@@ -178,7 +178,7 @@ cd examples/calculator && cjpm build && cjpm run
 ## 社区
 
 - QQ群：1023882445
-- Issues：https://gitcode.com/yuan_1992/CJQT6/issues
+- Issues：https://gitcode.com/Cangjie-TPC/CJQT6/issues
 
 ## 许可证
 

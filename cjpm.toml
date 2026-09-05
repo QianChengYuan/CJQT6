@@ -15,9 +15,9 @@
   authors     = ["yuan_1992"]
   license     = ["MIT"]         # 协议列表（官方为数组，遵循 SPDX Identifier 规范）
 
-  homepage      = "https://gitcode.com/yuan_1992/CJQT6"
-  repository    = "https://gitcode.com/yuan_1992/CJQT6.git"
-  documentation = "https://gitcode.com/yuan_1992/CJQT6/blob/main/README.md"
+  homepage      = "https://gitcode.com/Cangjie-TPC/CJQT6"
+  repository    = "https://gitcode.com/Cangjie-TPC/CJQT6.git"
+  documentation = "https://gitcode.com/Cangjie-TPC/CJQT6/blob/main/README.md"
 
   # 制品标签 / 分类（官方制品元数据字段，见 pkgdocs 中心仓元数据规格；
   # tag/category/license 均为数组，字段名为 tag 单数）

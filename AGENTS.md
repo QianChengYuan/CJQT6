@@ -1,6 +1,6 @@
 # AGENTS.md — CJQT6
 
-CJQT6（版本 1.9.0）是仓颉(Cangjie)语言的 Qt6 封装库：仓颉源码（`src/`）通过 FFI 调用 C++ 桥接动态库（`cjqt6_bridge`，`native/`）包装 Qt6 API。远端仓库在 **GitCode**（`https://gitcode.com/yuan_1992/CJQT6.git`）；GitHub 镜像仓（`QianChengYuan/CJQT6`）挂载 `.github/workflows/ci.yml` 跑三端无人值守 CI（Linux 主仓、Windows 镜像仓）。
+CJQT6（版本 1.9.0）是仓颉(Cangjie)语言的 Qt6 封装库：仓颉源码（`src/`）通过 FFI 调用 C++ 桥接动态库（`cjqt6_bridge`，`native/`）包装 Qt6 API。远端仓库在 **GitCode**（`https://gitcode.com/Cangjie-TPC/CJQT6.git`）；GitHub 镜像仓（`QianChengYuan/CJQT6`）挂载 `.github/workflows/ci.yml` 跑三端无人值守 CI（Linux 主仓、Windows 镜像仓）。
 
 > **最重要参考**：本仓库自带 `.agents/skills/cjqt6/SKILL.md`（随 git 版本化），包含模块地图、API 约定、信号槽写法、内存管理陷阱与常见错误速查。写任何 cjqt6 代码前先读它，再以同模块已有 `.cj` 文件为范式。
 

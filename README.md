@@ -9,7 +9,7 @@
 
 CJQT6（版本 1.7.0）是为 [仓颉编程语言](https://cangjie-lang.cn/) 提供的 **Qt6 封装库**：仓颉源码（`src/`）通过 FFI 调用 C++ 桥接动态库（`cjqt6_bridge`，`native/`）包装 Qt6 API。项目采用三层架构（仓颉封装层 → C ABI 桥接层 → Qt6 原生层），在主流桌面平台上提供接近原生的性能与开发体验。
 
-远端仓库在 **GitCode**（`https://gitcode.com/yuan_1992/CJQT6.git`）；GitHub 镜像仓（`QianChengYuan/CJQT6`）挂载 `.github/workflows/ci.yml` 跑三端无人值守 CI（Linux 主仓、Windows 镜像仓）。
+远端仓库在 **GitCode**（`https://gitcode.com/Cangjie-TPC/CJQT6.git`）；GitHub 镜像仓（`QianChengYuan/CJQT6`）挂载 `.github/workflows/ci.yml` 跑三端无人值守 CI（Linux 主仓、Windows 镜像仓）。
 
 > 💡 CJQT6 与 Cangjie-TPC 组织下的 CJQT（Qt5.15 绑定）是**并行关系**——CJQT6 面向 Qt6 新特性，覆盖 QML / Network / SQL / Print 等更完整的模块体系。
 >
@@ -64,7 +64,7 @@ echo $env:QTDIR           # Qt6 路径，如 C:\Qt\6.10.3\msvc2022_64
 ### 1. 克隆仓库
 
 ```bash
-git clone https://gitcode.com/yuan_1992/CJQT6.git
+git clone https://gitcode.com/Cangjie-TPC/CJQT6.git
 cd CJQT6
 ```
 
@@ -386,9 +386,9 @@ powershell -ExecutionPolicy Bypass -File scripts\verify_all.ps1
 
 ## 📮 联系与社区
 
-- **GitCode 主仓**：https://gitcode.com/yuan_1992/CJQT6
+- **GitCode 主仓**：https://gitcode.com/Cangjie-TPC/CJQT6
 - **GitHub 镜像**：https://github.com/QianChengYuan/CJQT6
-- **问题反馈**：https://gitcode.com/yuan_1992/CJQT6/issues
+- **问题反馈**：https://gitcode.com/Cangjie-TPC/CJQT6/issues
 - **QQ 交流群**：1023882445
 
 欢迎加入 QQ 群交流讨论！

@@ -22,7 +22,7 @@ releases/
 
 ### 1. 下载对应平台的桥接库
 
-从 [Releases](https://gitcode.com/yuan_1992/CJQT6/releases) 页面下载对应平台的压缩包。
+从 [Releases](https://gitcode.com/Cangjie-TPC/CJQT6/releases) 页面下载对应平台的压缩包。
 
 ### 2. 安装到系统路径
 
@@ -58,7 +58,7 @@ export DYLD_LIBRARY_PATH=/path/to/cjqt6_bridge:$DYLD_LIBRARY_PATH
 **方式1: Git 依赖安装 (推荐)**
 ```toml
 [dependencies]
-  cjqt6 = { git = "https://gitcode.com/yuan_1992/CJQT6.git", tag = "v1.9.0" }
+  cjqt6 = { git = "https://gitcode.com/Cangjie-TPC/CJQT6.git", tag = "v1.9.0" }
 ```
 
 **方式2: 本地路径引用**
@@ -109,7 +109,7 @@ export QTDIR=/opt/homebrew/opt/qt@6
 
 ```bash
 # 克隆项目
-git clone https://gitcode.com/yuan_1992/CJQT6.git
+git clone https://gitcode.com/Cangjie-TPC/CJQT6.git
 cd CJQT6
 
 # 编译桥接库

@@ -17,7 +17,7 @@ CJQT6 通过 FFI 桥接技术，把 Qt6 的 C++ API 封装成仓颉原生 API �
 - 排查 Qt 对象内存泄漏 / 悬垂指针 / 终结器崩溃
 
 **当前版本**：1.9.0（2026-08-31）
-**远程仓库（权威源）**：`https://gitcode.com/yuan_1992/CJQT6.git`（主页 `https://gitcode.com/yuan_1992/CJQT6`，Issue 反馈同页）
+**远程仓库（权威源）**：`https://gitcode.com/Cangjie-TPC/CJQT6.git`（主页 `https://gitcode.com/Cangjie-TPC/CJQT6`，Issue 反馈同页）
 **本机克隆路径**（因机器而异，下文用 `<仓库根>` 指代）：`C:\CodeTools\cangjie_git\CJQT6`
 **源码根**：`<仓库根>/src`
 **API 文档**：`<仓库根>/docs/api/`（01_core.md ~ 20_charts.md + INDEX.md + README.md，已覆盖全部公开类 100%）
