@@ -285,7 +285,7 @@ powershell -ExecutionPolicy Bypass -File scripts\verify_all.ps1
 | qq_chat_lan | 局域网聊天 |
 | snake_game / tank_battle | 游戏 |
 | qml / qml_test | QML 示例 |
-| signal_smoke / bench / resource / my_qy_app | 信号冒烟/基准/资源/综合 |
+| hello_cjqt6 / signal_smoke / bench / resource | 最小演示/信号冒烟/基准/资源 |
 
 ---
 

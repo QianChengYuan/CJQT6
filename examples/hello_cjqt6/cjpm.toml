@@ -1,11 +1,9 @@
 [package]
   cjc-version = "1.1.0"
-  name = "my_qy_app"
-  organization = ""
-  description = "nothing here"
+  name = "hello_cjqt6"
+  description = "CJQT6 最小演示实例 - Hello CJQT6"
   version = "1.0.0"
   target-dir = ""
-  script-dir = ""
   output-type = "executable"
   compile-option = ""
   override-compile-option = ""
@@ -13,4 +11,4 @@
   package-configuration = {}
 
 [dependencies]
-  cjqt6 = { git = "https://gitcode.com/yuan_1992/CJQT6.git", tag = "v1.6.0" }
+  cjqt6 = { path = "../../" }
