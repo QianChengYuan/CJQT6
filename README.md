@@ -274,18 +274,20 @@ powershell -ExecutionPolicy Bypass -File scripts\verify_all.ps1
 
 | 示例 | 说明 |
 |---|---|
-| ui2cj_demo | UI 转仓颉工具链（uic2cj 脚手架演示） |
-| all_controls_demo | 控件大全 |
+| hello_cjqt6 | 最小演示（Hello CJQT6） |
+| all_controls_demo | 控件大全（含组合控件页） |
 | notepad | 记事本 |
 | calculator | 计算器 |
 | music_player | 音乐播放器 |
 | paint_app | 绘图应用 |
 | analog_clock | 模拟时钟 |
+| chart_demo / charts_demo | Qt Charts 图表 |
+| delegate_demo | 自绘委托 |
 | dormitory_manager / expense_tracker / todo_list | 业务应用 |
 | qq_chat_lan | 局域网聊天 |
 | snake_game / tank_battle | 游戏 |
-| qml / qml_test | QML 示例 |
-| hello_cjqt6 / signal_smoke / bench / resource | 最小演示/信号冒烟/基准/资源 |
+| ui2cj_demo | UI 转仓颉工具链（uic2cj 脚手架） |
+| signal_smoke / bench / resource | 信号冒烟/基准/资源 |
 
 ---
 

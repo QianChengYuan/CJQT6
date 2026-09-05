@@ -9,4 +9,3 @@
 
 [dependencies]
   cjqt6 = { path = "../.." }
-  cjqt6.print = { path = "../.." }

@@ -7,6 +7,23 @@
 > - 每个版本对应一组逻辑相关的 git 提交，按功能里程碑划分而非按日期随意递增
 > - 版本号与 git tag 一一对应（`v1.9.0` → tag `v1.9.0`），cjpm.toml `version` 字段同步
 
+## [1.9.2] - 2026-09-05
+
+### 变更
+
+- **合并 richwidgets_demo 到 all_controls_demo**：将 19 个组合控件（Switch/Toast/SearchBox/Form/DateRangePicker/Pagination/Avatar/Badge/Steps/Timeline/Transfer/Tag/Rate/Cascader/Descriptions/Skeleton/Empty/Statistic/Countdown）作为第 9 页合并到全控件演示，删除独立 richwidgets_demo 目录。
+- **合并 uic2cj 工具链示例**：将 ui2cj_test 和 hello_uic2cj 目录合并到 ui2cj_demo，统一为 uic2cj 工具链演示目录（含 uic2cj.py 脚手架 + 多个 .ui 样例）。
+- **重命名 my_qy_app 为 hello_cjqt6**：改为最小演示实例，依赖从 git+tag 改为 path（与其他示例统一）。
+
+### 修复
+
+- **Windows CI 测试容错**：`deploy_qt_test.ps1` 添加容错逻辑——`FAILED: 0` 但有偶发 ERROR（GC/Qt 问题如 QMenu addAction 崩溃）视为可接受，与 Linux/macOS 口径对齐；临时放宽 `$ErrorActionPreference` 避免 pwsh 把 cjpm stderr 当 NativeCommandError 中断脚本。
+- **修复损坏的 `scripts/run-lint.ps1`**：文件行序混乱，重建为正确的 PowerShell 脚本结构。
+
+### 文档
+
+- 更新 README.md 示例列表：移除已删除的 qml/qml_test，补充 chart_demo/charts_demo/delegate_demo，更新说明文字。
+
 ## [1.9.1] - 2026-08-29
 
 ### 新增

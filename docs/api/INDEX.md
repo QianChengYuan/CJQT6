@@ -2,7 +2,7 @@
 
 > 本索引由 \scripts\gen-api-index.ps1\ 自动生成（P3-1）。手工维护，重新生成即覆盖。
 
-共 **205** 个类，分布在 20 个章节文件（12 信号槽与 15 示例 FAQ 为机制说明，不含类索引）。
+共 **207** 个类，分布在 20 个章节文件。
 
 ---
 
@@ -10,29 +10,29 @@
 
 ### 异常处理
 
-- **[`QApplication`](01_core.md#q---)** — 应用程序对象
+- **[`QApplication`](01_core.md#q---)**
 
 ### QApp 静态类
 
-- **[`QLocale`](01_core.md#q---)** — 区域设置
+- **[`QLocale`](01_core.md#q---)**
 
-- **[`QWidget`](01_core.md#q---)** — 部件基类
+- **[`QWidget`](01_core.md#q---)**
 
-- **[`QTimer`](01_core.md#q---)** — 定时器
+- **[`QTimer`](01_core.md#q---)**
 
-- **[`QAbstractAnimation`](01_core.md#qabstractanimation---)** — 动画基类
+- **[`QAbstractAnimation`](01_core.md#qabstractanimation---)**
 
-- **[`QParallelAnimationGroup`](01_core.md#qabstractanimation---)** — 并行动画组
+- **[`QParallelAnimationGroup`](01_core.md#qabstractanimation---)**
 
-- **[`QUndoCommand`](01_core.md#qundocommand---)** — 撤销命令
+- **[`QUndoCommand`](01_core.md#qundocommand---)**
 
-- **[`QUndoStack`](01_core.md#qundocommand---)** — 撤销栈
+- **[`QUndoStack`](01_core.md#qundocommand---)**
 
-- **[`QThread`](01_core.md#qthread---)** — 线程
+- **[`QThread`](01_core.md#qthread---)**
 
-- **[`QThreadPool`](01_core.md#qthread---)** — 线程池
+- **[`QThreadPool`](01_core.md#qthread---)**
 
-- **[`QRunnable`](01_core.md#qthread---)** — 可运行任务
+- **[`QRunnable`](01_core.md#qthread---)**
 
 - **[`QSettings`](01_core.md#q---应用配置持久化)** — 应用配置持久化
 
@@ -50,13 +50,13 @@
 
 - **[`QPropertyAnimation`](01_core.md#q---属性动画)** — 属性动画
 
-- **[`QJsonDocument`](01_core.md#qjsondocument---)** — JSON 文档
+- **[`QJsonDocument`](01_core.md#qjsondocument---)**
 
-- **[`QJsonObject`](01_core.md#qjsondocument---)** — JSON 对象
+- **[`QJsonObject`](01_core.md#qjsondocument---)**
 
-- **[`QJsonArray`](01_core.md#qjsondocument---)** — JSON 数组
+- **[`QJsonArray`](01_core.md#qjsondocument---)**
 
-- **[`QJsonValue`](01_core.md#qjsondocument---)** — JSON 值
+- **[`QJsonValue`](01_core.md#qjsondocument---)**
 
 - **[`QItemSelectionModel`](01_core.md#q---选择模型)** — 选择模型
 
@@ -162,29 +162,29 @@
 
 ### 表格控件
 
-- **[`QTableWidget`](05_views.md#q---)** — 表格控件
+- **[`QTableWidget`](05_views.md#q---)**
 
-- **[`QTableWidgetItem`](05_views.md#q---)** — 表格项
+- **[`QTableWidgetItem`](05_views.md#q---)**
 
-- **[`QTableView`](05_views.md#q---)** — 表格视图
+- **[`QTableView`](05_views.md#q---)**
 
 ### 列表控件
 
-- **[`QListWidget`](05_views.md#q---)** — 列表控件
+- **[`QListWidget`](05_views.md#q---)**
 
-- **[`QListWidgetItem`](05_views.md#q---)** — 列表项
+- **[`QListWidgetItem`](05_views.md#q---)**
 
-- **[`QListView`](05_views.md#q---)** — 列表视图
+- **[`QListView`](05_views.md#q---)**
 
 ### 树形控件
 
-- **[`QTreeWidget`](05_views.md#q---)** — 树形控件
+- **[`QTreeWidget`](05_views.md#q---)**
 
-- **[`QTreeWidgetItem`](05_views.md#q---)** — 树形项
+- **[`QTreeWidgetItem`](05_views.md#q---)**
 
-- **[`QTreeView`](05_views.md#q---)** — 树形视图
+- **[`QTreeView`](05_views.md#q---)**
 
-- **[`QHeaderView`](05_views.md#q---)** — 表头视图
+- **[`QHeaderView`](05_views.md#q---)**
 
 - **[`QSortFilterProxyModel`](05_views.md#q---排序过滤代理模型)** — 排序过滤代理模型
 
@@ -196,6 +196,8 @@
 
 - **[`QAbstractItemModel`](05_views.md#q---回调式自定义模型)** — 回调式自定义模型
 
+- **[`QStyledItemDelegate`](05_views.md#q---自绘委托回调式)** — 自绘委托（回调式）
+
 - **[`QFileSystemModel`](05_views.md#q---文件系统模型)** — 文件系统模型
 
 - **[`QModelIndex`](05_views.md#q---索引句柄)** — 索引句柄
@@ -206,17 +208,17 @@
 
 ### 主窗口与菜单
 
-- **[`QMainWindow`](06_menu_dialogs.md#q---)** — 主窗口
+- **[`QMainWindow`](06_menu_dialogs.md#q---)**
 
-- **[`QMenuBar`](06_menu_dialogs.md#q---)** — 菜单栏
+- **[`QMenuBar`](06_menu_dialogs.md#q---)**
 
-- **[`QMenu`](06_menu_dialogs.md#q---)** — 菜单
+- **[`QMenu`](06_menu_dialogs.md#q---)**
 
-- **[`QAction`](06_menu_dialogs.md#q---)** — 动作
+- **[`QAction`](06_menu_dialogs.md#q---)**
 
-- **[`QToolBar`](06_menu_dialogs.md#q---)** — 工具栏
+- **[`QToolBar`](06_menu_dialogs.md#q---)**
 
-- **[`QStatusBar`](06_menu_dialogs.md#q---)** — 状态栏
+- **[`QStatusBar`](06_menu_dialogs.md#q---)**
 
 ### 对话框
 
@@ -248,7 +250,7 @@
 
 ## 07_events.md
 
-- **[`QEventWidget`](07_events.md#q---)** — 事件测试部件
+- **[`QEventWidget`](07_events.md#q---)**
 
 ---
 
@@ -302,11 +304,11 @@
 
 ## 09_process.md
 
-- **[`QProcess`](09_process.md#q---)** — 进程
+- **[`QProcess`](09_process.md#q---)**
 
 ### 常量
 
-- **[`QProcessEnvironment`](09_process.md#q---)** — 进程环境变量
+- **[`QProcessEnvironment`](09_process.md#q---)**
 
 ---
 
@@ -332,19 +334,19 @@
 
 ## 11_qml.md
 
-- **[`QQmlApplicationEngine`](11_qml.md#q---)** — QML 应用引擎
+- **[`QQmlApplicationEngine`](11_qml.md#q---)**
 
-- **[`QQuickView`](11_qml.md#q---)** — Quick 视图
+- **[`QQuickView`](11_qml.md#q---)**
 
-- **[`QQuickWidget`](11_qml.md#q---)** — Quick 部件
+- **[`QQuickWidget`](11_qml.md#q---)**
 
-- **[`QQuickWindow`](11_qml.md#q---)** — Quick 窗口
+- **[`QQuickWindow`](11_qml.md#q---)**
 
-- **[`QQmlComponent`](11_qml.md#q---)** — QML 组件
+- **[`QQmlComponent`](11_qml.md#q---)**
 
-- **[`QQmlContext`](11_qml.md#q---)** — QML 上下文
+- **[`QQmlContext`](11_qml.md#q---)**
 
-- **[`QQuickItem`](11_qml.md#q---)** — Quick 项
+- **[`QQuickItem`](11_qml.md#q---)**
 
 ---
 
@@ -370,7 +372,7 @@
 
 - **[`QVideoWidget`](13_multimedia.md#q---视频显示控件)** — 视频显示控件
 
-- **[`QVideoSink`](13_multimedia.md#qvideosink--视频帧接收端)** — 视频帧接收端
+- **[`QVideoSink`](13_multimedia.md#q---视频帧接收端)** — 视频帧接收端
 
 ---
 
@@ -494,67 +496,64 @@
 
 ## 20_charts.md
 
-### Qt Charts 图表
+- **[`QChart`](20_charts.md#q---图表容器)** — 图表容器
 
-- **[`QChart`](20_charts.md#qchart--图表容器)** — 图表容器
+- **[`QChartView`](20_charts.md#q---图表视图)** — 图表视图
 
-- **[`QChartView`](20_charts.md#qchartview--图表视图)** — 图表视图
+- **[`QLineSeries`](20_charts.md#q---折线序列)** — 折线序列
 
-- **[`QLineSeries`](20_charts.md#qlineseries--折线序列)** — 折线序列
+- **[`QBarSet`](20_charts.md#q---柱状图数据集)** — 柱状图数据集
 
-- **[`QValueAxis`](20_charts.md#qvalueaxis--数值坐标轴)** — 数值坐标轴
+- **[`QBarSeries`](20_charts.md#q---柱状图序列)** — 柱状图序列
 
-- **[`QPolarChart`](20_charts.md#qpolarchart--极坐标图表)** — 极坐标图表
+- **[`QPieSeries`](20_charts.md#q---饼图序列)** — 饼图序列
 
-- **[`QLegend`](20_charts.md#qlegend--图例)** — 图例
+- **[`QScatterSeries`](20_charts.md#q---散点图序列)** — 散点图序列
 
-- **[`QAreaSeries`](20_charts.md#qareaseries--区域序列)** — 区域序列
+- **[`QAreaSeries`](20_charts.md#q---区域图序列)** — 区域图序列
 
-- **[`QBarSeries`](20_charts.md#qbarseries--柱状序列)** — 柱状序列
+- **[`QSplineSeries`](20_charts.md#q---样条曲线序列)** — 样条曲线序列
 
-- **[`QStackedBarSeries`](20_charts.md#qstackedbarseries--堆叠柱状序列)** — 堆叠柱状序列
+- **[`QPercentBarSeries`](20_charts.md#q---百分比柱状图序列)** — 百分比柱状图序列
 
-- **[`QPercentBarSeries`](20_charts.md#qpercentbarseries--百分比柱状序列)** — 百分比柱状序列
+- **[`QStackedBarSeries`](20_charts.md#q---堆叠柱状图序列)** — 堆叠柱状图序列
 
-- **[`QHorizontalBarSeries`](20_charts.md#qhorizontalbarseries--水平柱状序列)** — 水平柱状序列
+- **[`QBoxSet`](20_charts.md#q---箱线图数据集)** — 箱线图数据集
 
-- **[`QHorizontalStackedBarSeries`](20_charts.md#qhorizontalstackedbarseries--水平堆叠柱状序列)** — 水平堆叠柱状序列
+- **[`QBoxPlotSeries`](20_charts.md#q---箱线图序列)** — 箱线图序列
 
-- **[`QHorizontalPercentBarSeries`](20_charts.md#qhorizontalpercentbarseries--水平百分比柱状序列)** — 水平百分比柱状序列
+- **[`QCandlestickSet`](20_charts.md#q---k线数据集)** — K线数据集
 
-- **[`QBarSet`](20_charts.md#qbarset--柱状集合)** — 柱状集合
+- **[`QCandlestickSeries`](20_charts.md#q---k线序列)** — K线序列
 
+- **[`QPolarChart`](20_charts.md#q---极坐标图)** — 极坐标图
 
-- **[`QSplineSeries`](20_charts.md#qsplineseries--样条序列)** — 样条序列
+- **[`QValueAxis`](20_charts.md#q---数值坐标轴)** — 数值坐标轴
 
-- **[`QScatterSeries`](20_charts.md#qscatterseries--散点序列)** — 散点序列
+- **[`QBarCategoryAxis`](20_charts.md#q---分类坐标轴)** — 分类坐标轴
 
-- **[`QPieSeries`](20_charts.md#qpieseries--饼图序列)** — 饼图序列
+- **[`QCategoryAxis`](20_charts.md#q---分类值轴)** — 分类值轴
 
-- **[`QPieSlice`](20_charts.md#qpieslice--饼图切片)** — 饼图切片
+- **[`QLegend`](20_charts.md#q---图例)** — 图例
 
-- **[`QBoxPlotSeries`](20_charts.md#qboxplotseries--箱线图序列)** — 箱线图序列
+- **[`QPieSlice`](20_charts.md#q---饼图切片)** — 饼图切片
 
-- **[`QBoxSet`](20_charts.md#qboxset--箱线图集合)** — 箱线图集合
+- **[`QDateTimeAxis`](20_charts.md#q---日期时间坐标轴)** — 日期时间坐标轴
 
-- **[`QCandlestickSeries`](20_charts.md#qcandlestickseries--K线序列)** — K线序列
+- **[`QLogValueAxis`](20_charts.md#q---对数坐标轴)** — 对数坐标轴
 
-- **[`QCandlestickSet`](20_charts.md#qcandlestickset--K线集合)** — K线集合
+- **[`QHorizontalBarSeries`](20_charts.md#q---水平柱状图序列)** — 水平柱状图序列
 
-- **[`QCategoryAxis`](20_charts.md#qcategoryaxis--分类坐标轴)** — 分类坐标轴
+- **[`QHorizontalPercentBarSeries`](20_charts.md#q---水平百分比柱状图序列)** — 水平百分比柱状图序列
 
-- **[`QBarCategoryAxis`](20_charts.md#qbarcategoryaxis--柱状分类坐标轴)** — 柱状分类坐标轴
-
-- **[`QLogValueAxis`](20_charts.md#qlogvalueaxis--对数坐标轴)** — 对数坐标轴
-
-- **[`QDateTimeAxis`](20_charts.md#qdatetimeaxis--日期时间坐标轴)** — 日期时间坐标轴
+- **[`QHorizontalStackedBarSeries`](20_charts.md#q---水平堆叠柱状图序列)** — 水平堆叠柱状图序列
 
 ---
 
 ## ⚠️ src/ 中存在但 docs/api 未收录的公共类
 
-- **`QApp`** — 应用静态工具类（`src/core/application.cj`）
-- **`QTcpServer`** — TCP 服务端（`src/network/tcp_server.cj`）
-- **`QtException`** — 仓颉 Qt 异常基类（`src/core/resource.cj`）
-- **`QWizardOption`** — 向导选项枚举（`src/dialogs/dialogs.cj`）
+- $m（提示：请在 docs/api/ 对应章节补 ### QApp - 说明 小节）
+- $m（提示：请在 docs/api/ 对应章节补 ### QTcpServer - 说明 小节）
+- $m（提示：请在 docs/api/ 对应章节补 ### QtException - 说明 小节）
+- $m（提示：请在 docs/api/ 对应章节补 ### QWizardOption - 说明 小节）
 
