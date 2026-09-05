@@ -315,38 +315,18 @@ static LRESULT CALLBACK cjqt6MouseHookProc(int code, WPARAM wParam, LPARAM lPara
             const bool isRelease = (wParam == WM_LBUTTONUP || wParam == WM_RBUTTONUP);
             const bool isButtonEvent = isPress || isRelease;
 
-            // 注意：消息自带的 hwnd 在弹出菜单激活期间不可信 —— Windows 隐式鼠标抓取
+            // 注意：消息自带的 hwnd 不可信 —— 弹出菜单激活期间 Windows 隐式鼠标抓取
             // 会把后续 mouse 消息都路由给 popup HWND，哪怕光标实际在主窗口上方。
-            // 但在无 popup 时 hwnd 是可信的，且比 widgetAt 更可靠：
-            // widgetAt 在 QScrollArea/QStackedWidget 等复杂层级下可能返回错误 widget，
-            // 而 hwnd 直接对应顶层 QWidget，QPA 的 handleMouseEvent 会自动在窗口内
-            // 找到正确的子 widget。
+            // 这里不基于 hwnd 选 widget，而是统一用 QApplication::widgetAt(QCursor::pos())
+            // 取光标实际位置的 widget。popup 激活时的处理策略按事件类型分支：
+            //   - move：改派给 popup，保持 Qt 隐式抓取语义（悬停别的菜单项引起的切菜单
+            //     是 Qt 内部在 popup 抓取下自行完成的，钩子不干预；也绝不在钩子里同步
+            //     flush move —— 那会重入 Qt 事件派发，导致菜单内移动"跳菜单"）
+            //   - button：光标落在 QMenuBar 上 → 先关旧菜单再把事件交给菜单栏，由 Qt
+            //     完成"切到别的菜单"或"重开同一菜单"；后者由 g_menubarCloseTarget 补关
             QPoint cursorPos = QCursor::pos();
+            QWidget* widget = QApplication::widgetAt(cursorPos);
             QWidget* popup = QApplication::activePopupWidget();
-
-            // 获取鼠标消息的目标窗口
-            MOUSEHOOKSTRUCT* mhs = reinterpret_cast<MOUSEHOOKSTRUCT*>(lParam);
-            HWND msgHwnd = mhs ? mhs->hwnd : NULL;
-
-            QWidget* widget = nullptr;
-            if (popup) {
-                // 有弹出菜单：用 widgetAt 确定光标实际位置的 widget
-                widget = QApplication::widgetAt(cursorPos);
-            } else {
-                // 无弹出菜单：用消息 hwnd 找到顶层 QWidget
-                if (msgHwnd) {
-                    for (QWidget* w : QApplication::topLevelWidgets()) {
-                        if (w->winId() && reinterpret_cast<HWND>(w->winId()) == msgHwnd) {
-                            widget = w;
-                            break;
-                        }
-                    }
-                }
-                if (!widget) {
-                    // 兜底：hwnd 没找到对应 widget 时用 widgetAt
-                    widget = QApplication::widgetAt(cursorPos);
-                }
-            }
 
             if (widget || popup) {
                 QWidget* targetForDispatch = widget;
@@ -427,6 +407,16 @@ static LRESULT CALLBACK cjqt6MouseHookProc(int code, WPARAM wParam, LPARAM lPara
                         if (tlWin && !tlWin->isActive()) {
                             tlWin->requestActivate();
                         }
+                    }
+                    // 无弹出菜单时，直接用 sendEvent 派发 QMouseEvent 给光标位置的 widget。
+                    // QPA handleMouseEvent 在仓颉 M:N 线程下不正确派发事件到子控件，
+                    // sendEvent 直接派发给 QApplication::widgetAt 返回的控件更可靠。
+                    // 有 popup 时仍走 QPA 通道（QMenu 弹出需要 QPA 的 popup 管理）。
+                    if (!popup && widget) {
+                        QMouseEvent mouseEvent(type, widget->mapFromGlobal(globalPos),
+                                               QPointF(globalPos), button, buttons, mods);
+                        QCoreApplication::sendEvent(widget, &mouseEvent);
+                        return 1;
                     }
                     // 走 Qt 官方 QPA 鼠标事件通道（Windows 平台插件 QWindowsContext 即用此接口）：
                     // 正确触发隐式鼠标捕获 + popup 管理 + spontaneous 标志，修复原
