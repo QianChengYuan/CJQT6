@@ -42,6 +42,10 @@ var gNewSplash: ?QSplashScreen = None
 var gNewTimer: ?QTimer = None
 var gNewFsModel: ?QFileSystemModel = None
 
+// 懒加载：页面创建状态与占位 widget 指针
+var gPageCreated: Array<Bool> = [false, false, false, false, false, false, false, false, false]
+var gPlaceholderPtrs: Array<Int64> = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+
 // ============================================================
 // 页面名称列表（与createPages顺序一致）
 // ============================================================
@@ -61,15 +65,38 @@ let pageNames: Array<String> = [
 // 回调函数
 // ============================================================
 
-// 侧边栏切换回调
+// 侧边栏切换回调（懒加载：首次切换时才创建页面内容）
 let onSidebarChanged: CFunc<(Int32) -> Unit> = { row: Int32 =>
     if (row >= 0) {
+        let r = Int64(row)
         if (let Some(stack) <- gStackedWidget) {
+            // 懒加载：首次切换时才创建页面，避免初始化时一次性创建所有页面导致 UI 卡死
+            if (r < gPageCreated.size && !gPageCreated[r]) {
+                let page = match (row) {
+                    case 0 => createPageBasic()
+                    case 1 => createPageText()
+                    case 2 => createPageNumeric()
+                    case 3 => createPageSelection()
+                    case 4 => createPageContainers()
+                    case 5 => createPageAdvanced()
+                    case 6 => createPageDialogs()
+                    case 7 => createPageNewWidgets()
+                    case 8 => createPageRichWidgets()
+                    case _ => createPageBasic()
+                }
+                // 移除占位 widget，插入真实页面
+                let placeholderPtr = gPlaceholderPtrs[r]
+                if (placeholderPtr != 0) {
+                    stack.removeWidget(placeholderPtr)
+                }
+                stack.insertWidget(row, page.getPtr())
+                gPageCreated[r] = true
+            }
             stack.setCurrentIndex(row)
         }
         if (let Some(status) <- gStatusLabel) {
-            if (row < Int32(pageNames.size)) {
-                status.setText("当前页面: ${pageNames[Int64(row)]}")
+            if (r < Int64(pageNames.size)) {
+                status.setText("当前页面: ${pageNames[r]}")
             }
         }
     }
@@ -1581,21 +1608,17 @@ main(): Int32 {
     let stackedWidget = QStackedWidget()
     gStackedWidget = stackedWidget
 
-    // 创建所有页面并添加到堆叠控件
-    let pages = [
-        createPageBasic(),
-        createPageText(),
-        createPageNumeric(),
-        createPageSelection(),
-        createPageContainers(),
-        createPageAdvanced(),
-        createPageDialogs(),
-        createPageNewWidgets(),
-        createPageRichWidgets()
-    ]
-    for (page in pages) {
-        stackedWidget.addWidget(page.getPtr())
+    // 懒加载：先创建占位 widget 保持索引，首次切换时才创建真实页面
+    for (i in 0..9) {
+        let placeholder = QWidget()
+        gPlaceholderPtrs[i] = placeholder.getPtr()
+        stackedWidget.addWidget(placeholder.getPtr())
     }
+    // 预创建第 1 页（初始显示）
+    let firstPage = createPageBasic()
+    stackedWidget.removeWidget(gPlaceholderPtrs[0])
+    stackedWidget.insertWidget(0, firstPage.getPtr())
+    gPageCreated[0] = true
 
     // 侧边栏切换事件
     sidebar.setOnCurrentRowChanged(onSidebarChanged)
