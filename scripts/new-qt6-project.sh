@@ -35,7 +35,7 @@ cat > "$PROJECT_DIR/cjpm.toml" << EOF
 
 [dependencies]
   # 方式一：git 依赖（推荐，发布时用）
-  cjqt6 = { git = "https://gitcode.com/Cangjie-TPC/CJQT6.git", tag = "v1.9.0" }
+  cjqt6 = { git = "https://gitcode.com/Cangjie-TPC/CJQT6.git", branch = "main" }
   # 方式二：本地路径依赖（开发调试时用，取消注释并调整路径）
   # cjqt6 = { path = "../CJQT6" }
 EOF

@@ -58,7 +58,7 @@ export DYLD_LIBRARY_PATH=/path/to/cjqt6_bridge:$DYLD_LIBRARY_PATH
 **方式1: Git 依赖安装 (推荐)**
 ```toml
 [dependencies]
-  cjqt6 = { git = "https://gitcode.com/Cangjie-TPC/CJQT6.git", tag = "v1.9.0" }
+  cjqt6 = { git = "https://gitcode.com/Cangjie-TPC/CJQT6.git", branch = "main" }
 ```
 
 **方式2: 本地路径引用**
