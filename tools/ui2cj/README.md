@@ -1,7 +1,7 @@
 # ui2cj —— Qt Designer (.ui) → CJQT6 仓颉源码 转换工具（纯仓颉实现）
 
 把 Qt Designer 生成的 `.ui` 文件一键转换成 CJQT6 仓颉源码，免去手写控件创建/属性/布局/信号连接。
-本工具为**纯仓颉实现**（含自研轻量 XML 解析器），零第三方依赖，是 `examples/ui2cj_test/uic2cj.py`（Python 脚手架）的仓颉版，生成逻辑与之一致。
+本工具为**纯仓颉实现**（含自研轻量 XML 解析器），零第三方依赖，是 `examples/ui2cj_demo/uic2cj.py`（Python 脚手架）的仓颉版，生成逻辑与之一致。
 
 ## 构建
 
@@ -98,8 +98,8 @@ main(): Int64 {
 
 ## 验证示例
 
-- `examples/ui2cj_test/untitled.ui`：绝对定位形态（`setWidgetGeometry` + `setWidgetParent`）；
-- `examples/ui2cj_test/login_form.ui`：QFormLayout 嵌套 + 信号回调（参考输出 `login_form_gen.cj`）；
+- `examples/ui2cj_demo/untitled.ui`：绝对定位形态（`setWidgetGeometry` + `setWidgetParent`）；
+- `examples/ui2cj_demo/login_form.ui`：QFormLayout 嵌套 + 信号回调（参考输出 `login_form_gen.cj`）；
 - `mainwindow.ui`（QMainWindow + 菜单栏/状态栏）：生成 `setCentralWidget`/`setMenuBar`/`setStatusBar` 与 `import cjqt6.menu.*`。
 
 以上用例已端到端验证：生成代码在独立 cjpm 工程中 `cjpm build` 编译通过并可运行（窗口正常显示）。
@@ -125,5 +125,5 @@ tools/ui2cj/
 
 ## 与 Python 脚手架的关系
 
-- 本工具生成逻辑移植自 `examples/ui2cj_test/uic2cj.py`，命令行参数与自动探测行为保持一致；
+- 本工具生成逻辑移植自 `examples/ui2cj_demo/uic2cj.py`，命令行参数与自动探测行为保持一致；
 - 区别：纯仓颉可执行文件，无需 Python 环境；XML 解析不依赖任何第三方库。

@@ -1,6 +1,7 @@
 [package]
   cjc-version = "1.1.0"
   name = "ui2cj_demo"
+  description = "uic2cj 工具链演示：Qt Designer .ui → 仓颉代码脚手架（含 uic2cj.py + 多个 .ui 样例）"
   version = "0.1.0"
   output-type = "executable"
   compile-option = ""

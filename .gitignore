@@ -95,7 +95,7 @@ test_deploy/
 test_paint/
 examples/*uic2cj/
 examples/qml/
-examples/ui2cj_test/
+
 ui/
 native/src/tools/
 

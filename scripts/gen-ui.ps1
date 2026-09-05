@@ -2,8 +2,8 @@
 # gen-ui.ps1 - Designer (.ui) 一键转仓颉代码
 #
 # 用法:
-#   .\scripts\gen-ui.ps1 examples\ui2cj_test\login_form.ui
-#   .\scripts\gen-ui.ps1 .\login_form.ui -ProjectDir examples\ui2cj_test
+#   .\scripts\gen-ui.ps1 examples\ui2cj_demo\login_form.ui
+#   .\scripts\gen-ui.ps1 .\login_form.ui -ProjectDir examples\ui2cj_demo
 #
 # 行为:
 #   1. 自动探测 ui 所在 cjpm 工程（向上找 cjpm.toml），自动填 package
@@ -60,6 +60,6 @@ if (-not $python) {
     exit 1
 }
 
-$script = Join-Path $Root "examples\ui2cj_test\uic2cj.py"
+$script = Join-Path $Root "examples\ui2cj_demo\uic2cj.py"
 & $python.Source $script @pyArgs
 exit $LASTEXITCODE

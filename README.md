@@ -274,7 +274,7 @@ powershell -ExecutionPolicy Bypass -File scripts\verify_all.ps1
 
 | 示例 | 说明 |
 |---|---|
-| hello_uic2cj / ui2cj_demo / ui2cj_test | UI 转仓颉工具链 |
+| ui2cj_demo | UI 转仓颉工具链（uic2cj 脚手架演示） |
 | all_controls_demo | 控件大全 |
 | notepad | 记事本 |
 | calculator | 计算器 |

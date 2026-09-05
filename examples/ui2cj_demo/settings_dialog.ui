@@ -1,0 +1,568 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SettingsDialog</class>
+ <widget class="QMainWindow" name="SettingsDialog">
+  <property name="geometry">
+   <rect>
+    <x>100</x>
+    <y>100</y>
+    <width>720</width>
+    <height>560</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>用户设置 - CJQT6 Demo</string>
+  </property>
+  <property name="styleSheet">
+   <string>QMainWindow { background-color: #f5f5f5; }
+QGroupBox { font-weight: bold; border: 1px solid #ccc; border-radius: 6px; margin-top: 10px; }
+QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 4px; color: #333; }
+QPushButton { background-color: #4a86d8; color: white; border-radius: 4px; padding: 6px 14px; }
+QPushButton:hover { background-color: #3a76c8; }
+QLineEdit, QComboBox, QSpinBox { border: 1px solid #bbb; border-radius: 3px; padding: 3px 6px; }
+QTabWidget::pane { border: 1px solid #ccc; border-radius: 4px; }</string>
+  </property>
+  <widget class="QMenuBar" name="menuBar">
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>文件(&amp;F)</string>
+    </property>
+    <addaction name="actionOpen"/>
+    <addaction name="actionSave"/>
+    <addaction name="separator"/>
+    <addaction name="actionExit"/>
+   </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>编辑(&amp;E)</string>
+    </property>
+    <addaction name="actionUndo"/>
+    <addaction name="actionRedo"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>帮助(&amp;H)</string>
+    </property>
+    <addaction name="actionAbout"/>
+   </widget>
+  </widget>
+  <widget class="QStatusBar" name="statusBar">
+   <property name="statusTip">
+    <string>就绪</string>
+   </property>
+  </widget>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QVBoxLayout" name="mainVLayout">
+    <property name="spacing">
+     <number>10</number>
+    </property>
+    <property name="contentsMargins">
+     <rect>
+      <left>12</left>
+      <top>12</top>
+      <right>12</right>
+      <bottom>12</bottom>
+     </rect>
+    </property>
+    <item>
+     <widget class="QGroupBox" name="titleGroup">
+      <property name="title">
+       <string>账户信息</string>
+      </property>
+      <layout class="QFormLayout" name="titleForm">
+       <property name="fieldGrowthPolicy">
+        <enum>QFormLayout::ExpandingFieldsGrow</enum>
+       </property>
+       <item row="0" column="0">
+        <widget class="QLabel" name="lblUsername">
+         <property name="text">
+          <string>用户名：</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight</set>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="editUsername">
+         <property name="placeholderText">
+          <string>请输入用户名</string>
+         </property>
+         <property name="toolTip">
+          <string>3-20 个字符</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="lblEmail">
+         <property name="text">
+          <string>邮箱：</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight</set>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="editEmail">
+         <property name="placeholderText">
+          <string>user@example.com</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="lblRole">
+         <property name="text">
+          <string>角色：</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QComboBox" name="comboRole">
+         <item>
+          <property name="text">
+           <string>普通用户</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>管理员</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>访客</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="tabAppearance">
+       <attribute name="title">
+        <string>外观</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="tabAppearanceVBox">
+        <item>
+         <widget class="QCheckBox" name="chkDarkMode">
+          <property name="text">
+           <string>启用深色主题</string>
+          </property>
+          <property name="checked">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="chkShowToolbar">
+          <property name="text">
+           <string>显示工具栏</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="grpFontSize">
+          <property name="title">
+           <string>字体大小</string>
+          </property>
+          <layout class="QHBoxLayout" name="fontSizeHBox">
+           <item>
+            <widget class="QLabel" name="lblFontSizeVal">
+             <property name="text">
+              <string>14 px</string>
+             </property>
+             <property name="minimumWidth">
+              <number>60</number>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSlider" name="sliderFontSize">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="minimum">
+              <number>8</number>
+             </property>
+             <property name="maximum">
+              <number>32</number>
+             </property>
+             <property name="value">
+              <number>14</number>
+             </property>
+             <property name="tickInterval">
+              <number>2</number>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="grpOpacity">
+          <property name="title">
+           <string>窗口透明度</string>
+          </property>
+          <layout class="QHBoxLayout" name="opacityHBox">
+           <item>
+            <widget class="QProgressBar" name="progressOpacity">
+             <property name="minimum">
+              <number>0</number>
+             </property>
+             <property name="maximum">
+              <number>100</number>
+             </property>
+             <property name="value">
+              <number>90</number>
+             </property>
+             <property name="format">
+              <string>%p%</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSpinBox" name="spinOpacity">
+             <property name="minimum">
+              <number>0</number>
+             </property>
+             <property name="maximum">
+              <number>100</number>
+             </property>
+             <property name="value">
+              <number>90</number>
+             </property>
+             <property name="suffix">
+              <string>%</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="grpPreview">
+          <property name="title">
+           <string>预览</string>
+          </property>
+          <layout class="QVBoxLayout" name="previewVBox">
+           <item>
+            <widget class="QLabel" name="lblPreview">
+             <property name="text">
+              <string>这是一段预览文本，用于展示当前字体与配色效果。</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+             <property name="styleSheet">
+              <string>QLabel { padding: 18px; border: 1px dashed #aaa; border-radius: 6px; color: #222; }</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tabNotifications">
+       <attribute name="title">
+        <string>通知</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="tabNotifVBox">
+        <item>
+         <widget class="QRadioButton" name="radioNotifAll">
+          <property name="text">
+           <string>接收所有通知</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="radioNotifMention">
+          <property name="text">
+           <string>仅@我时通知</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="radioNotifNone">
+          <property name="text">
+           <string>不接收通知</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="chkSound">
+          <property name="text">
+           <string>启用提示音</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="chkDesktop">
+          <property name="text">
+           <string>桌面弹窗提醒</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tabAdvanced">
+       <attribute name="title">
+        <string>高级</string>
+       </attribute>
+       <layout class="QFormLayout" name="tabAdvForm">
+        <item row="0" column="0">
+         <widget class="QLabel" name="lblCache">
+          <property name="text">
+           <string>缓存目录：</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLineEdit" name="editCacheDir">
+          <property name="text">
+           <string>~/.cache/cjqt6-app</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="lblLogLevel">
+          <property name="text">
+           <string>日志级别：</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QComboBox" name="comboLogLevel">
+          <item>
+           <property name="text">
+            <string>DEBUG</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>INFO</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>WARN</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>ERROR</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="lblMaxConn">
+          <property name="text">
+           <string>最大连接数：</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QSpinBox" name="spinMaxConn">
+          <property name="minimum">
+           <number>1</number>
+          </property>
+          <property name="maximum">
+           <number>1024</number>
+          </property>
+          <property name="value">
+           <number>64</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="grpActions">
+      <property name="title">
+       <string>操作</string>
+      </property>
+      <layout class="QHBoxLayout" name="actionsHBox">
+       <property name="spacing">
+        <number>12</number>
+       </property>
+       <item>
+        <widget class="QPushButton" name="btnApply">
+         <property name="text">
+          <string>应用</string>
+         </property>
+         <property name="shortcut">
+          <string>Ctrl+S</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnReset">
+         <property name="text">
+          <string>恢复默认</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnCancel">
+         <property name="text">
+          <string>取消</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnAbout">
+         <property name="text">
+          <string>关于</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <connections>
+   <connection>
+    <sender>btnApply</sender>
+    <signal>clicked()</signal>
+    <receiver>SettingsDialog</receiver>
+    <slot>onApply()</slot>
+   </connection>
+   <connection>
+    <sender>btnReset</sender>
+    <signal>clicked()</signal>
+    <receiver>SettingsDialog</receiver>
+    <slot>onReset()</slot>
+   </connection>
+   <connection>
+    <sender>btnCancel</sender>
+    <signal>clicked()</signal>
+    <receiver>SettingsDialog</receiver>
+    <slot>close()</slot>
+   </connection>
+   <connection>
+    <sender>btnAbout</sender>
+    <signal>clicked()</signal>
+    <receiver>SettingsDialog</receiver>
+    <slot>onAbout()</slot>
+   </connection>
+   <connection>
+    <sender>sliderFontSize</sender>
+    <signal>valueChanged(int)</signal>
+    <receiver>SettingsDialog</receiver>
+    <slot>onFontSizeChanged(int)</slot>
+   </connection>
+   <connection>
+    <sender>spinOpacity</sender>
+    <signal>valueChanged(int)</signal>
+    <receiver>SettingsDialog</receiver>
+    <slot>onOpacityChanged(int)</slot>
+   </connection>
+   <connection>
+    <sender>comboRole</sender>
+    <signal>currentIndexChanged(int)</signal>
+    <receiver>SettingsDialog</receiver>
+    <slot>onRoleChanged(int)</slot>
+   </connection>
+   <connection>
+    <sender>editUsername</sender>
+    <signal>textChanged(QString)</signal>
+    <receiver>SettingsDialog</receiver>
+    <slot>onUsernameChanged(QString)</slot>
+   </connection>
+   <connection>
+    <sender>chkDarkMode</sender>
+    <signal>toggled(bool)</signal>
+    <receiver>SettingsDialog</receiver>
+    <slot>onDarkModeToggled(bool)</slot>
+   </connection>
+   <connection>
+    <sender>actionOpen</sender>
+    <signal>triggered()</signal>
+    <receiver>SettingsDialog</receiver>
+    <slot>onOpen()</slot>
+   </connection>
+   <connection>
+    <sender>actionSave</sender>
+    <signal>triggered()</signal>
+    <receiver>SettingsDialog</receiver>
+    <slot>onSave()</slot>
+   </connection>
+   <connection>
+    <sender>actionExit</sender>
+    <signal>triggered()</signal>
+    <receiver>SettingsDialog</receiver>
+    <slot>close()</slot>
+   </connection>
+   <connection>
+    <sender>actionAbout</sender>
+    <signal>triggered()</signal>
+    <receiver>SettingsDialog</receiver>
+    <slot>onAbout()</slot>
+   </connection>
+  </connections>
+  <action name="actionOpen">
+   <property name="text">
+    <string>打开(&amp;O)...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="text">
+    <string>保存(&amp;S)</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>退出(&amp;X)</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="actionUndo">
+   <property name="text">
+    <string>撤销(&amp;U)</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Z</string>
+   </property>
+  </action>
+  <action name="actionRedo">
+   <property name="text">
+    <string>重做(&amp;R)</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+Z</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>关于(&amp;A)</string>
+   </property>
+  </action>
+ </widget>
+</ui>
