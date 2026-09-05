@@ -315,6 +315,14 @@ static LRESULT CALLBACK cjqt6MouseHookProc(int code, WPARAM wParam, LPARAM lPara
             const bool isRelease = (wParam == WM_LBUTTONUP || wParam == WM_RBUTTONUP);
             const bool isButtonEvent = isPress || isRelease;
 
+            // 无弹出菜单时，鼠标消息由 nativeEventFilter 处理（更可靠，不依赖线程钩子）。
+            // 钩子只为弹出菜单（QMenu 等）的鼠标消息而存在——弹出菜单有自己的消息泵，
+            // nativeEventFilter 收不到，需要 WH_MOUSE 钩子在 Win32 级别拦截。
+            QWidget* popup = QApplication::activePopupWidget();
+            if (!popup) {
+                return CallNextHookEx(g_mouseHook, code, wParam, lParam);
+            }
+
             // 注意：消息自带的 hwnd 不可信 —— 弹出菜单激活期间 Windows 隐式鼠标抓取
             // 会把后续 mouse 消息都路由给 popup HWND，哪怕光标实际在主窗口上方。
             // 这里不基于 hwnd 选 widget，而是统一用 QApplication::widgetAt(QCursor::pos())
@@ -326,7 +334,7 @@ static LRESULT CALLBACK cjqt6MouseHookProc(int code, WPARAM wParam, LPARAM lPara
             //     完成"切到别的菜单"或"重开同一菜单"；后者由 g_menubarCloseTarget 补关
             QPoint cursorPos = QCursor::pos();
             QWidget* widget = QApplication::widgetAt(cursorPos);
-            QWidget* popup = QApplication::activePopupWidget();
+
 
             if (widget || popup) {
                 QWidget* targetForDispatch = widget;
@@ -522,8 +530,42 @@ int32_t qApplicationExec() {
                         }
                     }
                 }
-                // 鼠标消息已移到 WH_MOUSE 线程级钩子中处理
-                // （nativeEventFilter 收不到弹出菜单的鼠标消息，钩子是 Win32 级别的更可靠）
+                // 鼠标消息：Qt 6.10 仓颉 M:N 线程下 QtWndProc 不把 Windows 鼠标消息转成 QMouseEvent。
+                // WH_MOUSE 钩子可能因线程不匹配（仓颉 worker 线程 vs 窗口创建线程）而拦截不到。
+                // nativeEventFilter 在 DispatchMessage 之前调用，能拦截普通控件的鼠标消息
+                // （弹出菜单有自己的消息泵，nativeEventFilter 收不到，仍由 WH_MOUSE 钩子处理）。
+                // 无 popup 时用 sendEvent 直接派发 QMouseEvent 给 widgetAt 返回的控件。
+                if (msg->message == WM_LBUTTONDOWN || msg->message == WM_LBUTTONUP ||
+                    msg->message == WM_RBUTTONDOWN || msg->message == WM_RBUTTONUP ||
+                    msg->message == WM_MOUSEMOVE) {
+                    QWidget* popup = QApplication::activePopupWidget();
+                    if (!popup) {
+                        QPoint cursorPos = QCursor::pos();
+                        QWidget* widget = QApplication::widgetAt(cursorPos);
+                        if (widget) {
+                            QEvent::Type type = QEvent::None;
+                            Qt::MouseButton button = Qt::NoButton;
+                            if (msg->message == WM_LBUTTONDOWN) { type = QEvent::MouseButtonPress; button = Qt::LeftButton; }
+                            else if (msg->message == WM_LBUTTONUP) { type = QEvent::MouseButtonRelease; button = Qt::LeftButton; }
+                            else if (msg->message == WM_RBUTTONDOWN) { type = QEvent::MouseButtonPress; button = Qt::RightButton; }
+                            else if (msg->message == WM_RBUTTONUP) { type = QEvent::MouseButtonRelease; button = Qt::RightButton; }
+                            else if (msg->message == WM_MOUSEMOVE) { type = QEvent::MouseMove; button = Qt::NoButton; }
+                            Qt::MouseButtons buttons;
+                            if (GetKeyState(VK_LBUTTON) & 0x8000) buttons |= Qt::LeftButton;
+                            if (GetKeyState(VK_RBUTTON) & 0x8000) buttons |= Qt::RightButton;
+                            if (GetKeyState(VK_MBUTTON) & 0x8000) buttons |= Qt::MiddleButton;
+                            Qt::KeyboardModifiers mods;
+                            if (GetKeyState(VK_SHIFT) & 0x8000) mods |= Qt::ShiftModifier;
+                            if (GetKeyState(VK_CONTROL) & 0x8000) mods |= Qt::ControlModifier;
+                            if (GetKeyState(VK_MENU) & 0x8000) mods |= Qt::AltModifier;
+                            QMouseEvent mouseEvent(type, widget->mapFromGlobal(cursorPos),
+                                                   QPointF(cursorPos), button, buttons, mods);
+                            QCoreApplication::sendEvent(widget, &mouseEvent);
+                            if (result) *result = 0;
+                            return true;
+                        }
+                    }
+                }
                 // 键盘消息：Qt 6.10 仓颉 M:N 线程下 QtWndProc 不把 Windows 键盘消息转成 QKeyEvent。
                 // 手动构造 QKeyEvent 派发给 focus widget。
                 if (msg->message == WM_KEYDOWN || msg->message == WM_KEYUP || msg->message == WM_CHAR) {
