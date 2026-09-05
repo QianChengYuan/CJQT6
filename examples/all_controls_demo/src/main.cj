@@ -1287,17 +1287,19 @@ func createPageNewWidgets(): QScrollArea {
     // QFileSystemModel
     layout.addWidget(sectionTitle("Model/View: QFileSystemModel").getPtr())
     let fsModel = QFileSystemModel()
-    fsModel.setRootPath("C:/")
+    // 注意：setRootPath 会启动后台线程扫描文件系统。
+    // 设置为 "."（当前目录）而非 "C:/"，避免扫描整个 C 盘导致 UI 卡死。
+    fsModel.setRootPath(".")
     gNewFsModel = fsModel
     let fsInfo = QLabel()
     fsInfo.setText("文件系统模型根路径: ${fsModel.rootPath()}")
     setLabelStyle(fsInfo, "color: #7f8c8d; font-size: 12px;")
     layout.addWidget(fsInfo.getPtr())
     let fsBtn = QPushButton()
-    fsBtn.setText("获取 C:/ 路径索引 (验证 API)")
+    fsBtn.setText("获取当前目录路径索引 (验证 API)")
     fsBtn.setOnClick({ =>
         if (let Some(m) <- gNewFsModel) {
-            let idx = m.index("C:/")
+            let idx = m.index(".")
             if (let Some(status) <- gStatusLabel) {
                 status.setText("QFileSystemModel index 获取成功 (ptr=${idx})")
             }
