@@ -150,6 +150,9 @@ if ($RunTest) {
         # FAILED: 0 但有 ERROR — 偶发的 GC/Qt 问题（如 QMenu addAction 崩溃、killTimer warning），
         # 不影响测试正确性，与 Linux/macOS CI 容错口径对齐
         Write-Host "[test] PASS (with warnings - FAILED: 0, ERROR is sporadic GC/Qt issue)" -ForegroundColor Yellow
+        # 必须显式 exit 0 覆盖 $LASTEXITCODE（cjpm 返回 1），
+        # 否则 GitHub Actions pwsh shell wrapper 会以 $LASTEXITCODE 退出导致 CI 失败
+        exit 0
     }
 } else {
     Write-Host ""
