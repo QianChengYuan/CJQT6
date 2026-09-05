@@ -328,6 +328,22 @@ static LRESULT CALLBACK cjqt6MouseHookProc(int code, WPARAM wParam, LPARAM lPara
             QWidget* widget = QApplication::widgetAt(cursorPos);
             QWidget* popup = QApplication::activePopupWidget();
 
+            // 优化：无弹出菜单且光标不在 QMenuBar 上时，让 Qt 原生处理鼠标事件。
+            // 钩子只为解决 QMenu 弹出菜单的鼠标派发问题而存在，
+            // 对普通控件（QScrollArea/QStackedWidget 等）的鼠标事件不干预，
+            // 避免 widgetAt 在复杂层级下返回错误 widget 导致事件丢失。
+            if (!popup) {
+                bool hasMenuBar = false;
+                if (widget) {
+                    for (QWidget* w = widget; w; w = w->parentWidget()) {
+                        if (qobject_cast<QMenuBar*>(w)) { hasMenuBar = true; break; }
+                    }
+                }
+                if (!hasMenuBar) {
+                    return CallNextHookEx(g_mouseHook, code, wParam, lParam);
+                }
+            }
+
             if (widget || popup) {
                 QWidget* targetForDispatch = widget;
                 if (popup && !isButtonEvent) {
