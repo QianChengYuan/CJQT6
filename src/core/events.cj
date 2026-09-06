@@ -364,4 +364,12 @@ public class QEventWidget {
             qWidgetUpdate(ptr)
         }
     }
+
+    // ========== 焦点 ==========
+    
+    public func setFocus(): Unit {
+        unsafe {
+            qEventWidgetSetFocus(ptr)
+        }
+    }
 }

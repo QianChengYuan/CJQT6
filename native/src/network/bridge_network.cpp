@@ -61,6 +61,26 @@ static QHash<int64_t, int64_t> g_tcpReadyReadIds;
 static QHash<int64_t, int64_t> g_tcpErrorIds;
 static QHash<int64_t, int64_t> g_tcpServerNewConnIds;
 
+// S5 修复：各信号分别保存连接句柄。原先每次 ConnectXxx 都 QObject::connect 新
+// lambda 且不断开旧连接（替换回调后重复派发）；DisconnectCallbacks/Delete 只清
+// 回调表不断开连接（lambda 永久挂在 socket 上泄漏）。统一改为替换式连接 +
+// 断开时逐个 QObject::disconnect。
+static QHash<int64_t, QMetaObject::Connection> g_tcpConnectedConns;
+static QHash<int64_t, QMetaObject::Connection> g_tcpDisconnectedConns;
+static QHash<int64_t, QMetaObject::Connection> g_tcpReadyReadConns;
+static QHash<int64_t, QMetaObject::Connection> g_tcpErrorConns;
+static QHash<int64_t, QMetaObject::Connection> g_tcpServerConns;
+static QHash<int64_t, QMetaObject::Connection> g_udpReadyReadConns;
+static QHash<int64_t, QMetaObject::Connection> g_udpErrorConns;
+static QHash<int64_t, QMetaObject::Connection> g_sslEncryptedConns;
+static QHash<int64_t, QMetaObject::Connection> g_sslPeerVerifyConns;
+// SSL peerVerifyError 回调表（原先 callback 被直接捕获进 lambda，断开后仍持有悬垂指针）
+static QHash<int64_t, std::function<void(const char*)>> g_sslPeerVerifyCbs;
+// UDP 独立回调表：原先 readyRead / error 共用 g_networkVoidCallbacks[ptr] 同一键，
+// 后注册的覆盖先注册的（与 S3 串台同型），拆分为独立表。
+static QHash<int64_t, std::function<void()>> g_udpReadyReadCbs;
+static QHash<int64_t, std::function<void()>> g_udpErrorCbs;
+
 #define LOCK_NETWORK_CALLBACKS() NetworkSpinLock _netLock
 
 // 前向声明：id 回调表清理辅助（定义在文件尾部；调用方必须已持有网络回调自旋锁（LOCK_NETWORK_CALLBACKS））
@@ -142,6 +162,7 @@ int64_t qTcpSocketCreate() {
 void qTcpSocketDelete(int64_t ptr) {
     QTcpSocket* socket = reinterpret_cast<QTcpSocket*>(ptr);
     if (socket) {
+        QMetaObject::Connection conns[4];
         {
             LOCK_NETWORK_CALLBACKS();
             g_networkVoidCallbacks.remove(ptr);
@@ -149,7 +170,21 @@ void qTcpSocketDelete(int64_t ptr) {
             g_tcpDisconnectedCbs.remove(ptr);
             g_tcpReadyReadCbs.remove(ptr);
             g_tcpErrorCbs.remove(ptr);
+            auto take = [ptr](QHash<int64_t, QMetaObject::Connection>& table, QMetaObject::Connection& out) {
+                auto it = table.find(ptr);
+                if (it != table.end()) {
+                    out = it.value();
+                    table.erase(it);
+                }
+            };
+            take(g_tcpConnectedConns, conns[0]);
+            take(g_tcpDisconnectedConns, conns[1]);
+            take(g_tcpReadyReadConns, conns[2]);
+            take(g_tcpErrorConns, conns[3]);
             removeTcpSocketIdEntriesLocked(ptr);
+        }
+        for (auto& c : conns) {
+            if (c) QObject::disconnect(c);
         }
         delete socket;
     }
@@ -278,67 +313,128 @@ uint16_t qTcpSocketLocalPort(int64_t ptr) {
     return socket ? socket->localPort() : 0;
 }
 
-// 信号连接（四类信号各自独立回调表，可同时注册）
+// 信号连接（S5 修复版：各信号独立回调表 + 保存连接句柄，替换式断开旧连接）
 void qTcpSocketConnectConnected(int64_t ptr, void (*callback)()) {
     QTcpSocket* socket = reinterpret_cast<QTcpSocket*>(ptr);
     if (socket && callback) {
+        QMetaObject::Connection oldConn;
         {
             LOCK_NETWORK_CALLBACKS();
+            auto cit = g_tcpConnectedConns.find(ptr);
+            if (cit != g_tcpConnectedConns.end()) {
+                oldConn = cit.value();
+                g_tcpConnectedConns.erase(cit);
+            }
             g_tcpConnectedCbs[ptr] = callback;
         }
-        QObject::connect(socket, &QTcpSocket::connected, [ptr]() {
+        if (oldConn) {
+            QObject::disconnect(oldConn);
+        }
+        QMetaObject::Connection conn = QObject::connect(socket, &QTcpSocket::connected, [ptr]() {
             invokeTcpCallback(g_tcpConnectedCbs, ptr);
         });
+        LOCK_NETWORK_CALLBACKS();
+        g_tcpConnectedConns[ptr] = conn;
     }
 }
 
 void qTcpSocketConnectDisconnected(int64_t ptr, void (*callback)()) {
     QTcpSocket* socket = reinterpret_cast<QTcpSocket*>(ptr);
     if (socket && callback) {
+        QMetaObject::Connection oldConn;
         {
             LOCK_NETWORK_CALLBACKS();
+            auto cit = g_tcpDisconnectedConns.find(ptr);
+            if (cit != g_tcpDisconnectedConns.end()) {
+                oldConn = cit.value();
+                g_tcpDisconnectedConns.erase(cit);
+            }
             g_tcpDisconnectedCbs[ptr] = callback;
         }
-        QObject::connect(socket, &QTcpSocket::disconnected, [ptr]() {
+        if (oldConn) {
+            QObject::disconnect(oldConn);
+        }
+        QMetaObject::Connection conn = QObject::connect(socket, &QTcpSocket::disconnected, [ptr]() {
             invokeTcpCallback(g_tcpDisconnectedCbs, ptr);
         });
+        LOCK_NETWORK_CALLBACKS();
+        g_tcpDisconnectedConns[ptr] = conn;
     }
 }
 
 void qTcpSocketConnectReadyRead(int64_t ptr, void (*callback)()) {
     QTcpSocket* socket = reinterpret_cast<QTcpSocket*>(ptr);
     if (socket && callback) {
+        QMetaObject::Connection oldConn;
         {
             LOCK_NETWORK_CALLBACKS();
+            auto cit = g_tcpReadyReadConns.find(ptr);
+            if (cit != g_tcpReadyReadConns.end()) {
+                oldConn = cit.value();
+                g_tcpReadyReadConns.erase(cit);
+            }
             g_tcpReadyReadCbs[ptr] = callback;
         }
-        QObject::connect(socket, &QTcpSocket::readyRead, [ptr]() {
+        if (oldConn) {
+            QObject::disconnect(oldConn);
+        }
+        QMetaObject::Connection conn = QObject::connect(socket, &QTcpSocket::readyRead, [ptr]() {
             invokeTcpCallback(g_tcpReadyReadCbs, ptr);
         });
+        LOCK_NETWORK_CALLBACKS();
+        g_tcpReadyReadConns[ptr] = conn;
     }
 }
 
 void qTcpSocketConnectError(int64_t ptr, void (*callback)()) {
     QTcpSocket* socket = reinterpret_cast<QTcpSocket*>(ptr);
     if (socket && callback) {
+        QMetaObject::Connection oldConn;
         {
             LOCK_NETWORK_CALLBACKS();
+            auto cit = g_tcpErrorConns.find(ptr);
+            if (cit != g_tcpErrorConns.end()) {
+                oldConn = cit.value();
+                g_tcpErrorConns.erase(cit);
+            }
             g_tcpErrorCbs[ptr] = callback;
         }
-        QObject::connect(socket, &QTcpSocket::errorOccurred, [ptr](QAbstractSocket::SocketError) {
+        if (oldConn) {
+            QObject::disconnect(oldConn);
+        }
+        QMetaObject::Connection conn = QObject::connect(socket, &QTcpSocket::errorOccurred, [ptr](QAbstractSocket::SocketError) {
             invokeTcpCallback(g_tcpErrorCbs, ptr);
         });
+        LOCK_NETWORK_CALLBACKS();
+        g_tcpErrorConns[ptr] = conn;
     }
 }
 
 void qTcpSocketDisconnectCallbacks(int64_t ptr) {
-    LOCK_NETWORK_CALLBACKS();
-    g_networkVoidCallbacks.remove(ptr);
-    g_tcpConnectedCbs.remove(ptr);
-    g_tcpDisconnectedCbs.remove(ptr);
-    g_tcpReadyReadCbs.remove(ptr);
-    g_tcpErrorCbs.remove(ptr);
-    removeTcpSocketIdEntriesLocked(ptr);
+    QMetaObject::Connection conns[4];
+    {
+        LOCK_NETWORK_CALLBACKS();
+        g_networkVoidCallbacks.remove(ptr);
+        g_tcpConnectedCbs.remove(ptr);
+        g_tcpDisconnectedCbs.remove(ptr);
+        g_tcpReadyReadCbs.remove(ptr);
+        g_tcpErrorCbs.remove(ptr);
+        auto take = [ptr](QHash<int64_t, QMetaObject::Connection>& table, QMetaObject::Connection& out) {
+            auto it = table.find(ptr);
+            if (it != table.end()) {
+                out = it.value();
+                table.erase(it);
+            }
+        };
+        take(g_tcpConnectedConns, conns[0]);
+        take(g_tcpDisconnectedConns, conns[1]);
+        take(g_tcpReadyReadConns, conns[2]);
+        take(g_tcpErrorConns, conns[3]);
+        removeTcpSocketIdEntriesLocked(ptr);
+    }
+    for (auto& c : conns) {
+        if (c) QObject::disconnect(c);
+    }
 }
 
 // ============================================================
@@ -356,10 +452,19 @@ int64_t qTcpServerCreate() {
 void qTcpServerDelete(int64_t ptr) {
     QTcpServer* server = reinterpret_cast<QTcpServer*>(ptr);
     if (server) {
+        QMetaObject::Connection conn;
         {
             LOCK_NETWORK_CALLBACKS();
             g_tcpServerCallbacks.remove(ptr);
             g_tcpServerNewConnIds.remove(ptr);
+            auto cit = g_tcpServerConns.find(ptr);
+            if (cit != g_tcpServerConns.end()) {
+                conn = cit.value();
+                g_tcpServerConns.erase(cit);
+            }
+        }
+        if (conn) {
+            QObject::disconnect(conn);
         }
         delete server;
     }
@@ -456,9 +561,20 @@ void qTcpServerWaitForNewConnection(int64_t ptr, int32_t msec, bool* result) {
 void qTcpServerConnectNewConnection(int64_t ptr, void (*callback)()) {
     QTcpServer* server = reinterpret_cast<QTcpServer*>(ptr);
     if (server && callback) {
-        LOCK_NETWORK_CALLBACKS();
-        g_tcpServerCallbacks[ptr] = callback;
-        QObject::connect(server, &QTcpServer::newConnection, [ptr]() {
+        QMetaObject::Connection oldConn;
+        {
+            LOCK_NETWORK_CALLBACKS();
+            auto cit = g_tcpServerConns.find(ptr);
+            if (cit != g_tcpServerConns.end()) {
+                oldConn = cit.value();
+                g_tcpServerConns.erase(cit);
+            }
+            g_tcpServerCallbacks[ptr] = callback;
+        }
+        if (oldConn) {
+            QObject::disconnect(oldConn);
+        }
+        QMetaObject::Connection conn = QObject::connect(server, &QTcpServer::newConnection, [ptr]() {
             std::function<void()> cb;
             {
                 LOCK_NETWORK_CALLBACKS();
@@ -469,13 +585,26 @@ void qTcpServerConnectNewConnection(int64_t ptr, void (*callback)()) {
             }
             if (cb) cb();
         });
+        LOCK_NETWORK_CALLBACKS();
+        g_tcpServerConns[ptr] = conn;
     }
 }
 
 void qTcpServerDisconnectCallbacks(int64_t ptr) {
-    LOCK_NETWORK_CALLBACKS();
-    g_tcpServerCallbacks.remove(ptr);
-    g_tcpServerNewConnIds.remove(ptr);
+    QMetaObject::Connection conn;
+    {
+        LOCK_NETWORK_CALLBACKS();
+        g_tcpServerCallbacks.remove(ptr);
+        g_tcpServerNewConnIds.remove(ptr);
+        auto cit = g_tcpServerConns.find(ptr);
+        if (cit != g_tcpServerConns.end()) {
+            conn = cit.value();
+            g_tcpServerConns.erase(cit);
+        }
+    }
+    if (conn) {
+        QObject::disconnect(conn);
+    }
 }
 
 // ============================================================
@@ -585,45 +714,90 @@ bool qUdpSocketIsValid(int64_t ptr) {
 void qUdpSocketConnectReadyRead(int64_t ptr, void (*callback)()) {
     QUdpSocket* socket = reinterpret_cast<QUdpSocket*>(ptr);
     if (socket && callback) {
-        LOCK_NETWORK_CALLBACKS();
-        g_networkVoidCallbacks[ptr] = callback;
-        QObject::connect(socket, &QUdpSocket::readyRead, [ptr]() {
+        QMetaObject::Connection oldConn;
+        {
+            LOCK_NETWORK_CALLBACKS();
+            auto cit = g_udpReadyReadConns.find(ptr);
+            if (cit != g_udpReadyReadConns.end()) {
+                oldConn = cit.value();
+                g_udpReadyReadConns.erase(cit);
+            }
+            g_udpReadyReadCbs[ptr] = callback;
+        }
+        if (oldConn) {
+            QObject::disconnect(oldConn);
+        }
+        QMetaObject::Connection conn = QObject::connect(socket, &QUdpSocket::readyRead, [ptr]() {
             std::function<void()> cb;
             {
                 LOCK_NETWORK_CALLBACKS();
-                auto it = g_networkVoidCallbacks.find(ptr);
-                if (it != g_networkVoidCallbacks.end()) {
+                auto it = g_udpReadyReadCbs.find(ptr);
+                if (it != g_udpReadyReadCbs.end()) {
                     cb = it.value();
                 }
             }
             if (cb) cb();
         });
+        LOCK_NETWORK_CALLBACKS();
+        g_udpReadyReadConns[ptr] = conn;
     }
 }
 
 void qUdpSocketConnectError(int64_t ptr, void (*callback)()) {
     QUdpSocket* socket = reinterpret_cast<QUdpSocket*>(ptr);
     if (socket && callback) {
-        LOCK_NETWORK_CALLBACKS();
-        g_networkVoidCallbacks[ptr] = callback;
-        QObject::connect(socket, &QUdpSocket::errorOccurred, [ptr](QAbstractSocket::SocketError) {
+        QMetaObject::Connection oldConn;
+        {
+            LOCK_NETWORK_CALLBACKS();
+            auto cit = g_udpErrorConns.find(ptr);
+            if (cit != g_udpErrorConns.end()) {
+                oldConn = cit.value();
+                g_udpErrorConns.erase(cit);
+            }
+            g_udpErrorCbs[ptr] = callback;
+        }
+        if (oldConn) {
+            QObject::disconnect(oldConn);
+        }
+        QMetaObject::Connection conn = QObject::connect(socket, &QUdpSocket::errorOccurred, [ptr](QAbstractSocket::SocketError) {
             std::function<void()> cb;
             {
                 LOCK_NETWORK_CALLBACKS();
-                auto it = g_networkVoidCallbacks.find(ptr);
-                if (it != g_networkVoidCallbacks.end()) {
+                auto it = g_udpErrorCbs.find(ptr);
+                if (it != g_udpErrorCbs.end()) {
                     cb = it.value();
                 }
             }
             if (cb) cb();
         });
+        LOCK_NETWORK_CALLBACKS();
+        g_udpErrorConns[ptr] = conn;
     }
 }
 
 void qUdpSocketDisconnectCallbacks(int64_t ptr) {
-    LOCK_NETWORK_CALLBACKS();
-    g_networkVoidCallbacks.remove(ptr);
-}
+    QMetaObject::Connection conns[2];
+    {
+        LOCK_NETWORK_CALLBACKS();
+            g_networkVoidCallbacks.remove(ptr);
+            g_udpReadyReadCbs.remove(ptr);
+            g_udpErrorCbs.remove(ptr);
+            auto take = [ptr](QHash<int64_t, QMetaObject::Connection>& table, QMetaObject::Connection& out) {
+                auto it = table.find(ptr);
+                if (it != table.end()) {
+                    out = it.value();
+                    table.erase(it);
+                }
+            };
+            take(g_udpReadyReadConns, conns[0]);
+            take(g_udpErrorConns, conns[1]);
+        }
+        for (auto& c : conns) {
+            if (c) QObject::disconnect(c);
+        }
+    }
+
+
 
 // ============================================================
 // QSslSocket - SSL/TLS加密套接字
@@ -636,9 +810,23 @@ int64_t qSslSocketCreate() {
 void qSslSocketDelete(int64_t ptr) {
     QSslSocket* socket = reinterpret_cast<QSslSocket*>(ptr);
     if (socket) {
+        QMetaObject::Connection conns[2];
         {
             LOCK_NETWORK_CALLBACKS();
             g_networkVoidCallbacks.remove(ptr);
+            g_sslPeerVerifyCbs.remove(ptr);
+            auto take = [ptr](QHash<int64_t, QMetaObject::Connection>& table, QMetaObject::Connection& out) {
+                auto it = table.find(ptr);
+                if (it != table.end()) {
+                    out = it.value();
+                    table.erase(it);
+                }
+            };
+            take(g_sslEncryptedConns, conns[0]);
+            take(g_sslPeerVerifyConns, conns[1]);
+        }
+        for (auto& c : conns) {
+            if (c) QObject::disconnect(c);
         }
         delete socket;
     }
@@ -699,9 +887,20 @@ const char* qSslSocketPeerCertificateInfo(int64_t ptr) {
 void qSslSocketConnectEncrypted(int64_t ptr, void (*callback)()) {
     QSslSocket* socket = reinterpret_cast<QSslSocket*>(ptr);
     if (socket && callback) {
-        LOCK_NETWORK_CALLBACKS();
-        g_networkVoidCallbacks[ptr] = callback;
-        QObject::connect(socket, &QSslSocket::encrypted, [ptr]() {
+        QMetaObject::Connection oldConn;
+        {
+            LOCK_NETWORK_CALLBACKS();
+            auto cit = g_sslEncryptedConns.find(ptr);
+            if (cit != g_sslEncryptedConns.end()) {
+                oldConn = cit.value();
+                g_sslEncryptedConns.erase(cit);
+            }
+            g_networkVoidCallbacks[ptr] = callback;
+        }
+        if (oldConn) {
+            QObject::disconnect(oldConn);
+        }
+        QMetaObject::Connection conn = QObject::connect(socket, &QSslSocket::encrypted, [ptr]() {
             std::function<void()> cb;
             {
                 LOCK_NETWORK_CALLBACKS();
@@ -712,16 +911,41 @@ void qSslSocketConnectEncrypted(int64_t ptr, void (*callback)()) {
             }
             if (cb) cb();
         });
+        LOCK_NETWORK_CALLBACKS();
+        g_sslEncryptedConns[ptr] = conn;
     }
 }
 
 void qSslSocketConnectPeerVerifyError(int64_t ptr, void (*callback)(const char*)) {
     QSslSocket* socket = reinterpret_cast<QSslSocket*>(ptr);
     if (socket && callback) {
-        QObject::connect(socket, &QSslSocket::peerVerifyError, [ptr, callback](const QSslError& error) {
-            QByteArray errStr = error.errorString().toUtf8();
-            callback(errStr.constData());
+        QMetaObject::Connection oldConn;
+        {
+            LOCK_NETWORK_CALLBACKS();
+            auto cit = g_sslPeerVerifyConns.find(ptr);
+            if (cit != g_sslPeerVerifyConns.end()) {
+                oldConn = cit.value();
+                g_sslPeerVerifyConns.erase(cit);
+            }
+            // S5 修复：callback 不再直接捕获进 lambda（断开后仍持有悬垂指针），改为查表派发
+            g_sslPeerVerifyCbs[ptr] = callback;
+        }
+        if (oldConn) {
+            QObject::disconnect(oldConn);
+        }
+        QMetaObject::Connection conn = QObject::connect(socket, &QSslSocket::peerVerifyError, [ptr](const QSslError& error) {
+            QByteArray errStr;
+            {
+                LOCK_NETWORK_CALLBACKS();
+                auto it = g_sslPeerVerifyCbs.find(ptr);
+                if (it != g_sslPeerVerifyCbs.end()) {
+                    errStr = error.errorString().toUtf8();
+                    it.value()(errStr.constData());
+                }
+            }
         });
+        LOCK_NETWORK_CALLBACKS();
+        g_sslPeerVerifyConns[ptr] = conn;
     }
 }
 

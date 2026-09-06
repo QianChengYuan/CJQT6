@@ -21,8 +21,15 @@ private var gNextId: Int64 = 1
 private var gDispatcherSet: Bool = false
 
 // 顶层调度器（CFunc，仅引用全局注册表、不捕获局部变量）：native 触发信号时回调此函数
+// 线程安全：native 侧可能在任意线程调用本调度器（如 UiPoster 队列投递到 GUI 线程、
+// 信号在发射线程直接派发），必须持 gRegistryLock 读取注册表，避免与
+// registerVoidCallback / unregisterVoidCallback 的写操作并发导致 HashMap 数据竞争。
+// 锁内只取出闭包、锁外调用：回调体内再 register/unregister 时不重入死锁。
 private let gVoidDispatcher: CFunc<(Int64) -> Unit> = { id: Int64 =>
-    let cb = gVoidRegistry.get(id)
+    var cb: ?(() -> Unit) = None
+    synchronized (gRegistryLock) {
+        cb = gVoidRegistry.get(id)
+    }
     match (cb) {
         case Some(f) => f()
         case None => ()

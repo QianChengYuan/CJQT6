@@ -105,6 +105,18 @@ protected:
     }
 };
 
+// M1 修复：resolveEventWidget 兼容 ptr 与 id 双值域
+// 先按 id 查 g_eventWidgets（兼容误传 id 的情况，id 为小整数 1,2,3...），
+// 命中则返回对应 widget；miss 则按指针 reinterpret（保持原行为）。
+// 正常路径（仓颉侧传 qEventWidgetGetPtr 返回的真实指针）仅多一次 hash find miss。
+static EventWidget* resolveEventWidget(int64_t p) {
+    auto it = g_eventWidgets.find(p);
+    if (it != g_eventWidgets.end()) {
+        return static_cast<EventWidget*>(it->second);
+    }
+    return reinterpret_cast<EventWidget*>(p);
+}
+
 extern "C" {
 
 // ============================================================
@@ -125,7 +137,7 @@ int64_t qEventWidgetGetPtr(int64_t id) {
 }
 
 void qEventWidgetDelete(int64_t ptr) {
-    EventWidget* widget = reinterpret_cast<EventWidget*>(ptr);
+    EventWidget* widget = resolveEventWidget(ptr);
     if (widget) {
         g_mousePressCallbacks.erase(widget->id());
         g_mouseMoveCallbacks.erase(widget->id());
@@ -142,21 +154,21 @@ void qEventWidgetDelete(int64_t ptr) {
 // ============================================================
 
 void qEventWidgetSetOnMousePress(int64_t ptr, void (*callback)(int32_t, int32_t, int32_t)) {
-    EventWidget* widget = reinterpret_cast<EventWidget*>(ptr);
+    EventWidget* widget = resolveEventWidget(ptr);
     if (widget) {
         g_mousePressCallbacks[widget->id()] = callback;
     }
 }
 
 void qEventWidgetSetOnMouseMove(int64_t ptr, void (*callback)(int32_t, int32_t, int32_t)) {
-    EventWidget* widget = reinterpret_cast<EventWidget*>(ptr);
+    EventWidget* widget = resolveEventWidget(ptr);
     if (widget) {
         g_mouseMoveCallbacks[widget->id()] = callback;
     }
 }
 
 void qEventWidgetSetOnMouseRelease(int64_t ptr, void (*callback)(int32_t, int32_t, int32_t)) {
-    EventWidget* widget = reinterpret_cast<EventWidget*>(ptr);
+    EventWidget* widget = resolveEventWidget(ptr);
     if (widget) {
         g_mouseReleaseCallbacks[widget->id()] = callback;
     }
@@ -167,14 +179,14 @@ void qEventWidgetSetOnMouseRelease(int64_t ptr, void (*callback)(int32_t, int32_
 // ============================================================
 
 void qEventWidgetSetOnKeyPress(int64_t ptr, void (*callback)(int32_t, int32_t, int32_t)) {
-    EventWidget* widget = reinterpret_cast<EventWidget*>(ptr);
+    EventWidget* widget = resolveEventWidget(ptr);
     if (widget) {
         g_keyPressCallbacks[widget->id()] = callback;
     }
 }
 
 void qEventWidgetSetOnKeyRelease(int64_t ptr, void (*callback)(int32_t, int32_t, int32_t)) {
-    EventWidget* widget = reinterpret_cast<EventWidget*>(ptr);
+    EventWidget* widget = resolveEventWidget(ptr);
     if (widget) {
         g_keyReleaseCallbacks[widget->id()] = callback;
     }
@@ -185,56 +197,56 @@ void qEventWidgetSetOnKeyRelease(int64_t ptr, void (*callback)(int32_t, int32_t,
 // ============================================================
 
 void qEventWidgetSetOnPaint(int64_t ptr, void (*callback)(int64_t)) {
-    EventWidget* widget = reinterpret_cast<EventWidget*>(ptr);
+    EventWidget* widget = resolveEventWidget(ptr);
     if (widget) {
         g_paintCallbacks[widget->id()] = callback;
     }
 }
 
 void qEventWidgetClearPaintCallback(int64_t ptr) {
-    EventWidget* widget = reinterpret_cast<EventWidget*>(ptr);
+    EventWidget* widget = resolveEventWidget(ptr);
     if (widget) {
         g_paintCallbacks.erase(widget->id());
     }
 }
 
 void qEventWidgetClearMousePressCallback(int64_t ptr) {
-    EventWidget* widget = reinterpret_cast<EventWidget*>(ptr);
+    EventWidget* widget = resolveEventWidget(ptr);
     if (widget) {
         g_mousePressCallbacks.erase(widget->id());
     }
 }
 
 void qEventWidgetClearMouseMoveCallback(int64_t ptr) {
-    EventWidget* widget = reinterpret_cast<EventWidget*>(ptr);
+    EventWidget* widget = resolveEventWidget(ptr);
     if (widget) {
         g_mouseMoveCallbacks.erase(widget->id());
     }
 }
 
 void qEventWidgetClearMouseReleaseCallback(int64_t ptr) {
-    EventWidget* widget = reinterpret_cast<EventWidget*>(ptr);
+    EventWidget* widget = resolveEventWidget(ptr);
     if (widget) {
         g_mouseReleaseCallbacks.erase(widget->id());
     }
 }
 
 void qEventWidgetClearKeyPressCallback(int64_t ptr) {
-    EventWidget* widget = reinterpret_cast<EventWidget*>(ptr);
+    EventWidget* widget = resolveEventWidget(ptr);
     if (widget) {
         g_keyPressCallbacks.erase(widget->id());
     }
 }
 
 void qEventWidgetClearKeyReleaseCallback(int64_t ptr) {
-    EventWidget* widget = reinterpret_cast<EventWidget*>(ptr);
+    EventWidget* widget = resolveEventWidget(ptr);
     if (widget) {
         g_keyReleaseCallbacks.erase(widget->id());
     }
 }
 
 void qEventWidgetClearAllCallbacks(int64_t ptr) {
-    EventWidget* widget = reinterpret_cast<EventWidget*>(ptr);
+    EventWidget* widget = resolveEventWidget(ptr);
     if (widget) {
         g_mousePressCallbacks.erase(widget->id());
         g_mouseMoveCallbacks.erase(widget->id());
@@ -246,7 +258,7 @@ void qEventWidgetClearAllCallbacks(int64_t ptr) {
 }
 
 void qEventWidgetSetFocus(int64_t ptr) {
-    EventWidget* widget = reinterpret_cast<EventWidget*>(ptr);
+    EventWidget* widget = resolveEventWidget(ptr);
     if (widget) {
         widget->setFocus();
     }

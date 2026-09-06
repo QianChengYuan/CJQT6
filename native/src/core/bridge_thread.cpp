@@ -33,7 +33,14 @@ public:
     }
 };
 
-static QHash<int64_t, std::function<void()>> g_threadVoidCallbacks;
+// S3 修复：started / finished 的回调原先共用同一 QHash 键（ptr），
+// 后连接的覆盖先连接的 → started 触发时执行的是 finished 的回调（串台）。
+// 拆分为独立回调表 + 各自保存连接句柄，重连时替换式断开旧连接（与
+// bridge_signal.cpp connectVoidSignal 的替换式语义一致）。
+static QHash<int64_t, std::function<void()>>     g_threadStartedCallbacks;
+static QHash<int64_t, std::function<void()>>     g_threadFinishedCallbacks;
+static QHash<int64_t, QMetaObject::Connection>   g_threadStartedConns;
+static QHash<int64_t, QMetaObject::Connection>   g_threadFinishedConns;
 
 #define LOCK_THREAD_CALLBACKS() ThreadSpinLock _threadLock
 
@@ -78,9 +85,19 @@ int64_t qThreadCreate() {
 void qThreadDelete(int64_t ptr) {
     QThread* thread = reinterpret_cast<QThread*>(ptr);
     if (thread) {
+        // T3 修复：线程仍在运行时 delete 会触发 Qt qFatal("Thread destroyed
+        // while still running") 进程崩溃。先请求退出事件循环并等待线程结束。
+        if (thread->isRunning()) {
+            thread->quit();
+            thread->wait();
+        }
         {
             LOCK_THREAD_CALLBACKS();
-            g_threadVoidCallbacks.remove(ptr);
+
+            g_threadStartedCallbacks.remove(ptr);
+            g_threadFinishedCallbacks.remove(ptr);
+            g_threadStartedConns.remove(ptr);
+            g_threadFinishedConns.remove(ptr);
         }
         delete thread;
     }
@@ -167,48 +184,97 @@ void qThreadMsleep(int32_t ms) {
     QThread::msleep(static_cast<unsigned long>(ms));
 }
 
-// 信号连接
+// 信号连接（S3 修复版：started / finished 各用独立回调表与连接句柄，
+// 替换式语义——重复连接先断开旧连接，避免 lambda 叠加导致重复派发）
 void qThreadConnectStarted(int64_t ptr, void (*callback)()) {
     QThread* thread = reinterpret_cast<QThread*>(ptr);
     if (thread && callback) {
-        LOCK_THREAD_CALLBACKS();
-        g_threadVoidCallbacks[ptr] = callback;
-        QObject::connect(thread, &QThread::started, [ptr]() {
+        QMetaObject::Connection oldConn;
+        {
+            LOCK_THREAD_CALLBACKS();
+            auto cit = g_threadStartedConns.find(ptr);
+            if (cit != g_threadStartedConns.end()) {
+                oldConn = cit.value();
+                g_threadStartedConns.erase(cit);
+            }
+            g_threadStartedCallbacks[ptr] = callback;
+        }
+        if (oldConn) {
+            QObject::disconnect(oldConn);
+        }
+        QMetaObject::Connection conn = QObject::connect(thread, &QThread::started, [ptr]() {
             std::function<void()> cb;
             {
                 LOCK_THREAD_CALLBACKS();
-                auto it = g_threadVoidCallbacks.find(ptr);
-                if (it != g_threadVoidCallbacks.end()) {
+                auto it = g_threadStartedCallbacks.find(ptr);
+                if (it != g_threadStartedCallbacks.end()) {
                     cb = it.value();
                 }
             }
             if (cb) cb();
         });
+        LOCK_THREAD_CALLBACKS();
+        g_threadStartedConns[ptr] = conn;
     }
 }
 
 void qThreadConnectFinished(int64_t ptr, void (*callback)()) {
     QThread* thread = reinterpret_cast<QThread*>(ptr);
     if (thread && callback) {
-        LOCK_THREAD_CALLBACKS();
-        g_threadVoidCallbacks[ptr] = callback;
-        QObject::connect(thread, &QThread::finished, [ptr]() {
+        QMetaObject::Connection oldConn;
+        {
+            LOCK_THREAD_CALLBACKS();
+            auto cit = g_threadFinishedConns.find(ptr);
+            if (cit != g_threadFinishedConns.end()) {
+                oldConn = cit.value();
+                g_threadFinishedConns.erase(cit);
+            }
+            g_threadFinishedCallbacks[ptr] = callback;
+        }
+        if (oldConn) {
+            QObject::disconnect(oldConn);
+        }
+        QMetaObject::Connection conn = QObject::connect(thread, &QThread::finished, [ptr]() {
             std::function<void()> cb;
             {
                 LOCK_THREAD_CALLBACKS();
-                auto it = g_threadVoidCallbacks.find(ptr);
-                if (it != g_threadVoidCallbacks.end()) {
+                auto it = g_threadFinishedCallbacks.find(ptr);
+                if (it != g_threadFinishedCallbacks.end()) {
                     cb = it.value();
                 }
             }
             if (cb) cb();
         });
+        LOCK_THREAD_CALLBACKS();
+        g_threadFinishedConns[ptr] = conn;
     }
 }
 
 void qThreadDisconnectCallbacks(int64_t ptr) {
-    LOCK_THREAD_CALLBACKS();
-    g_threadVoidCallbacks.remove(ptr);
+    QMetaObject::Connection startedConn;
+    QMetaObject::Connection finishedConn;
+    {
+        LOCK_THREAD_CALLBACKS();
+
+        g_threadStartedCallbacks.remove(ptr);
+        g_threadFinishedCallbacks.remove(ptr);
+        auto sit = g_threadStartedConns.find(ptr);
+        if (sit != g_threadStartedConns.end()) {
+            startedConn = sit.value();
+            g_threadStartedConns.erase(sit);
+        }
+        auto fit = g_threadFinishedConns.find(ptr);
+        if (fit != g_threadFinishedConns.end()) {
+            finishedConn = fit.value();
+            g_threadFinishedConns.erase(fit);
+        }
+    }
+    if (startedConn) {
+        QObject::disconnect(startedConn);
+    }
+    if (finishedConn) {
+        QObject::disconnect(finishedConn);
+    }
 }
 
 // ============================================================

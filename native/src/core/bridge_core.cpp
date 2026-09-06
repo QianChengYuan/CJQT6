@@ -295,7 +295,11 @@ static void cjqt6SubclassTopLevelWindows() {
 // ---- WH_MOUSE 线程级钩子：拦截所有鼠标消息（包括弹出菜单的） ----
 // nativeEventFilter 收不到弹出菜单（QComboBoxPrivateContainer 等）的鼠标消息，
 // 因为弹出菜单有自己的消息泵。WH_MOUSE 钩子是 Win32 级别的，能拦截所有消息。
+// D1 修复：线程级钩子只对安装线程生效。记录安装线程 ID，exec 在其他线程调用时
+// 卸载重装——否则首次 exec 的线程退出后钩子随线程卸载，但 g_mouseHook 残留非空，
+// 此后任何线程都装不上钩子，鼠标拦截永久失效。
 static HHOOK g_mouseHook = NULL;
+static DWORD g_mouseHookThreadId = 0;
 
 // "再点一次关闭"的状态：为响应"光标落在菜单栏上的 press"，我们主动 hide 掉的旧 popup。
 // 若用户点的正是打开它的那个菜单项（想再点一次关闭），Qt 收到我们转发的 press 后会
@@ -306,35 +310,124 @@ static HHOOK g_mouseHook = NULL;
 // Qt 可能销毁该 QMenu）。
 static QPointer<QWidget> g_menubarCloseTarget;
 
+// 异步窗口拖拽：仓颉 M:N 线程下 DefWindowProc 的拖拽 modal loop 不工作
+// （modal loop 内部 GetMessage/DispatchMessage 与仓颉调度器冲突）。
+// 改为钩子拦截 WM_NCLBUTTONDOWN(HTCAPTION) 不进入 modal loop，
+// 在 WM_NCMOUSEMOVE 中手动 SetWindowPos 移动窗口。
+static bool g_windowDragging = false;
+static HWND g_dragHwnd = NULL;
+static POINT g_dragStartMouse;
+static POINT g_dragStartWindow;
+
+// sendEvent 方式下的鼠标捕获：sendEvent 不走 QPA 通道，Qt 不会建立隐式鼠标捕获，
+
 static LRESULT CALLBACK cjqt6MouseHookProc(int code, WPARAM wParam, LPARAM lParam) {
     if (code == HC_ACTION) {
-        if (wParam == WM_LBUTTONDOWN || wParam == WM_LBUTTONUP ||
-            wParam == WM_RBUTTONDOWN || wParam == WM_RBUTTONUP ||
-            wParam == WM_MOUSEMOVE) {
-            const bool isPress = (wParam == WM_LBUTTONDOWN || wParam == WM_RBUTTONDOWN);
-            const bool isRelease = (wParam == WM_LBUTTONUP || wParam == WM_RBUTTONUP);
-            const bool isButtonEvent = isPress || isRelease;
-
-            // 无弹出菜单时，鼠标消息由 nativeEventFilter 处理（更可靠，不依赖线程钩子）。
-            // 钩子只为弹出菜单（QMenu 等）的鼠标消息而存在——弹出菜单有自己的消息泵，
-            // nativeEventFilter 收不到，需要 WH_MOUSE 钩子在 Win32 级别拦截。
-            QWidget* popup = QApplication::activePopupWidget();
-            if (!popup) {
-                return CallNextHookEx(g_mouseHook, code, wParam, lParam);
+            // 异步窗口拖拽：拦截 WM_NCLBUTTONDOWN(HTCAPTION) 不进入 DefWindowProc modal loop
+            if (wParam == WM_NCLBUTTONDOWN) {
+                MOUSEHOOKSTRUCT* mhs = (MOUSEHOOKSTRUCT*)lParam;
+                if (mhs && mhs->wHitTestCode == HTCAPTION && mhs->hwnd) {
+                    g_windowDragging = true;
+                    g_dragHwnd = mhs->hwnd;
+                    g_dragStartMouse = mhs->pt;
+                    RECT rect;
+                    GetWindowRect(mhs->hwnd, &rect);
+                    g_dragStartWindow.x = rect.left;
+                    g_dragStartWindow.y = rect.top;
+                    return 1;
+                }
             }
+            // 拖拽中：WM_NCMOUSEMOVE 手动移动窗口
+            if (g_windowDragging && wParam == WM_NCMOUSEMOVE) {
+                MOUSEHOOKSTRUCT* mhs = (MOUSEHOOKSTRUCT*)lParam;
+                if (mhs && g_dragHwnd) {
+                    int newX = g_dragStartWindow.x + (mhs->pt.x - g_dragStartMouse.x);
+                    int newY = g_dragStartWindow.y + (mhs->pt.y - g_dragStartMouse.y);
+                    SetWindowPos(g_dragHwnd, NULL, newX, newY, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
+                    return 1;
+                }
+            }
+            // 拖拽结束：WM_NCLBUTTONUP 或 WM_LBUTTONUP
+            if (g_windowDragging && (wParam == WM_NCLBUTTONUP || wParam == WM_LBUTTONUP)) {
+                g_windowDragging = false;
+                g_dragHwnd = NULL;
+                return 1;
+            }
+            if (wParam == WM_LBUTTONDOWN || wParam == WM_LBUTTONUP || wParam == WM_LBUTTONDBLCLK ||
+                wParam == WM_RBUTTONDOWN || wParam == WM_RBUTTONUP || wParam == WM_RBUTTONDBLCLK ||
+                wParam == WM_MBUTTONDOWN || wParam == WM_MBUTTONUP || wParam == WM_MBUTTONDBLCLK ||
+                wParam == WM_XBUTTONDOWN || wParam == WM_XBUTTONUP || wParam == WM_XBUTTONDBLCLK ||
+                wParam == WM_MOUSEMOVE) {
+                // D2 修复：补中键/侧键/双击
+                const bool isPress = (wParam == WM_LBUTTONDOWN || wParam == WM_RBUTTONDOWN ||
+                                      wParam == WM_MBUTTONDOWN || wParam == WM_XBUTTONDOWN);
+                const bool isRelease = (wParam == WM_LBUTTONUP || wParam == WM_RBUTTONUP ||
+                                        wParam == WM_MBUTTONUP || wParam == WM_XBUTTONUP);
+                const bool isDblClick = (wParam == WM_LBUTTONDBLCLK || wParam == WM_RBUTTONDBLCLK ||
+                                         wParam == WM_MBUTTONDBLCLK || wParam == WM_XBUTTONDBLCLK);
+                const bool isButtonEvent = isPress || isRelease || isDblClick;
 
-            // 注意：消息自带的 hwnd 不可信 —— 弹出菜单激活期间 Windows 隐式鼠标抓取
-            // 会把后续 mouse 消息都路由给 popup HWND，哪怕光标实际在主窗口上方。
-            // 这里不基于 hwnd 选 widget，而是统一用 QApplication::widgetAt(QCursor::pos())
-            // 取光标实际位置的 widget。popup 激活时的处理策略按事件类型分支：
-            //   - move：改派给 popup，保持 Qt 隐式抓取语义（悬停别的菜单项引起的切菜单
-            //     是 Qt 内部在 popup 抓取下自行完成的，钩子不干预；也绝不在钩子里同步
-            //     flush move —— 那会重入 Qt 事件派发，导致菜单内移动"跳菜单"）
-            //   - button：光标落在 QMenuBar 上 → 先关旧菜单再把事件交给菜单栏，由 Qt
-            //     完成"切到别的菜单"或"重开同一菜单"；后者由 g_menubarCloseTarget 补关
-            QPoint cursorPos = QCursor::pos();
-            QWidget* widget = QApplication::widgetAt(cursorPos);
+                // 构造事件类型和按钮（无 popup 和有 popup 分支共用）
+                Qt::MouseButton button = Qt::NoButton;
+                QEvent::Type type = QEvent::None;
+                if (wParam == WM_LBUTTONDOWN) { type = QEvent::MouseButtonPress; button = Qt::LeftButton; }
+                else if (wParam == WM_LBUTTONUP) { type = QEvent::MouseButtonRelease; button = Qt::LeftButton; }
+                else if (wParam == WM_LBUTTONDBLCLK) { type = QEvent::MouseButtonDblClick; button = Qt::LeftButton; }
+                else if (wParam == WM_RBUTTONDOWN) { type = QEvent::MouseButtonPress; button = Qt::RightButton; }
+                else if (wParam == WM_RBUTTONUP) { type = QEvent::MouseButtonRelease; button = Qt::RightButton; }
+                else if (wParam == WM_RBUTTONDBLCLK) { type = QEvent::MouseButtonDblClick; button = Qt::RightButton; }
+                else if (wParam == WM_MBUTTONDOWN) { type = QEvent::MouseButtonPress; button = Qt::MiddleButton; }
+                else if (wParam == WM_MBUTTONUP) { type = QEvent::MouseButtonRelease; button = Qt::MiddleButton; }
+                else if (wParam == WM_MBUTTONDBLCLK) { type = QEvent::MouseButtonDblClick; button = Qt::MiddleButton; }
+                else if (wParam == WM_XBUTTONDOWN) { type = QEvent::MouseButtonPress; button = (HIWORD(wParam) == 1) ? Qt::BackButton : Qt::ForwardButton; }
+                else if (wParam == WM_XBUTTONUP) { type = QEvent::MouseButtonRelease; button = (HIWORD(wParam) == 1) ? Qt::BackButton : Qt::ForwardButton; }
+                else if (wParam == WM_XBUTTONDBLCLK) { type = QEvent::MouseButtonDblClick; button = (HIWORD(wParam) == 1) ? Qt::BackButton : Qt::ForwardButton; }
+                else if (wParam == WM_MOUSEMOVE) { type = QEvent::MouseMove; button = Qt::NoButton; }
+                // buttons 状态（WH_MOUSE 钩子没有 wParam 的 MK_ 标志，用 GetKeyState）
+                Qt::MouseButtons buttons;
+                if (GetKeyState(VK_LBUTTON) & 0x8000) buttons |= Qt::LeftButton;
+                if (GetKeyState(VK_RBUTTON) & 0x8000) buttons |= Qt::RightButton;
+                if (GetKeyState(VK_MBUTTON) & 0x8000) buttons |= Qt::MiddleButton;
+                if (GetKeyState(VK_XBUTTON1) & 0x8000) buttons |= Qt::BackButton;
+                if (GetKeyState(VK_XBUTTON2) & 0x8000) buttons |= Qt::ForwardButton;
+                Qt::KeyboardModifiers mods;
+                if (GetKeyState(VK_SHIFT) & 0x8000) mods |= Qt::ShiftModifier;
+                if (GetKeyState(VK_CONTROL) & 0x8000) mods |= Qt::ControlModifier;
+                if (GetKeyState(VK_MENU) & 0x8000) mods |= Qt::AltModifier;
 
+                QPoint globalPos = QCursor::pos();
+                QWidget* widget = QApplication::widgetAt(globalPos);
+                QWidget* popup = QApplication::activePopupWidget();
+
+                // 无弹出菜单：用 sendEvent 直接派发到光标位置的 widget。
+                // 仓颉 M:N 线程下 Qt 原生（QtWndProc）不派发 QMouseEvent 到控件，
+                // 钩子必须主动 sendEvent 才能触发 clicked 等信号。
+                if (!popup) {
+                    if (widget) {
+                        // 点击激活：吞掉原生 mouse 消息后 QtWndProc 收不到 WM_MOUSEACTIVATE，
+                        // press 时主动请求激活目标顶层窗口。
+                        if (isPress) {
+                            QWidget* tlw = widget->window();
+                            QWindow* tlWin = tlw ? tlw->windowHandle() : nullptr;
+                            if (tlWin && !tlWin->isActive()) {
+                                tlWin->requestActivate();
+                            }
+                        }
+                        // move + 无 mouseGrabber（纯 hover）：不 sendEvent，让 Qt 原生
+                        // 处理 WM_SETCURSOR 更新光标形状。
+                        // move + 有 mouseGrabber（控件拖拽中如 slider）：sendEvent + 吞掉，
+                        // 避免 Qt 原生 move 干扰控件拖拽状态。
+                        // button：sendEvent + 吞掉，避免双重派发致控件状态错乱。
+                        if (!isButtonEvent && !QWidget::mouseGrabber()) {
+                            return CallNextHookEx(g_mouseHook, code, wParam, lParam);
+                        }
+                        QMouseEvent seEvent(type, widget->mapFromGlobal(globalPos),
+                                             QPointF(globalPos), button, buttons, mods);
+                        QCoreApplication::sendEvent(widget, &seEvent);
+                        return 1;
+                    }
+                    return CallNextHookEx(g_mouseHook, code, wParam, lParam);
+                }
 
             if (widget || popup) {
                 QWidget* targetForDispatch = widget;
@@ -383,49 +476,7 @@ static LRESULT CALLBACK cjqt6MouseHookProc(int code, WPARAM wParam, LPARAM lPara
                     if (topLevel) window = topLevel->windowHandle();
                 }
                 if (window) {
-                    // 用 QCursor::pos() 取逻辑全局坐标（Qt 自动处理 DPI 缩放/多屏坐标原点），
-                    // 避免物理坐标 ÷ devicePixelRatio 的舍入/DPI 误差导致菜单
-                    // "实际位置与点击位置轻微错位" 与 "移动鼠标误跳菜单"。
-                    QPoint globalPos = QCursor::pos();
-                    // 消息类型和按钮
-                    Qt::MouseButton button = Qt::NoButton;
-                    QEvent::Type type = QEvent::None;
-                    if (wParam == WM_LBUTTONDOWN) { type = QEvent::MouseButtonPress; button = Qt::LeftButton; }
-                    else if (wParam == WM_LBUTTONUP) { type = QEvent::MouseButtonRelease; button = Qt::LeftButton; }
-                    else if (wParam == WM_RBUTTONDOWN) { type = QEvent::MouseButtonPress; button = Qt::RightButton; }
-                    else if (wParam == WM_RBUTTONUP) { type = QEvent::MouseButtonRelease; button = Qt::RightButton; }
-                    else if (wParam == WM_MOUSEMOVE) { type = QEvent::MouseMove; button = Qt::NoButton; }
-                    // buttons 状态（WH_MOUSE 钩子没有 wParam 的 MK_ 标志，用 GetKeyState）
-                    Qt::MouseButtons buttons;
-                    if (GetKeyState(VK_LBUTTON) & 0x8000) buttons |= Qt::LeftButton;
-                    if (GetKeyState(VK_RBUTTON) & 0x8000) buttons |= Qt::RightButton;
-                    if (GetKeyState(VK_MBUTTON) & 0x8000) buttons |= Qt::MiddleButton;
-                    Qt::KeyboardModifiers mods;
-                    if (GetKeyState(VK_SHIFT) & 0x8000) mods |= Qt::ShiftModifier;
-                    if (GetKeyState(VK_CONTROL) & 0x8000) mods |= Qt::ControlModifier;
-                    if (GetKeyState(VK_MENU) & 0x8000) mods |= Qt::AltModifier;
-                    // 点击激活：我们吞掉了原生 mouse 消息，QtWndProc 收不到 WM_MOUSEACTIVATE，
-                    // 被点击的顶层窗口不会像原生那样自动激活（表现为：后台窗口点菜单栏不置前、
-                    // 之后的键盘事件如 ESC 也不进本窗口，菜单关不掉）。press 时若目标顶层窗口
-                    // 未激活且当前无 popup（有 popup 说明本来就在交互中），主动请求激活，恢复
-                    // "点一下窗口→激活+打开菜单"的原生语义。
-                    if (isPress && !QApplication::activePopupWidget() && targetForDispatch) {
-                        QWidget* tlw = targetForDispatch->window();
-                        QWindow* tlWin = tlw ? tlw->windowHandle() : nullptr;
-                        if (tlWin && !tlWin->isActive()) {
-                            tlWin->requestActivate();
-                        }
-                    }
-                    // 无弹出菜单时，直接用 sendEvent 派发 QMouseEvent 给光标位置的 widget。
-                    // QPA handleMouseEvent 在仓颉 M:N 线程下不正确派发事件到子控件，
-                    // sendEvent 直接派发给 QApplication::widgetAt 返回的控件更可靠。
-                    // 有 popup 时仍走 QPA 通道（QMenu 弹出需要 QPA 的 popup 管理）。
-                    if (!popup && widget) {
-                        QMouseEvent mouseEvent(type, widget->mapFromGlobal(globalPos),
-                                               QPointF(globalPos), button, buttons, mods);
-                        QCoreApplication::sendEvent(widget, &mouseEvent);
-                        return 1;
-                    }
+
                     // 走 Qt 官方 QPA 鼠标事件通道（Windows 平台插件 QWindowsContext 即用此接口）：
                     // 正确触发隐式鼠标捕获 + popup 管理 + spontaneous 标志，修复原
                     // sendEvent 合成事件在 QMenu 弹出时 setMouseGrabEnabled 报错的问题。
@@ -433,7 +484,7 @@ static LRESULT CALLBACK cjqt6MouseHookProc(int code, WPARAM wParam, LPARAM lPara
                     // Qt 内部会用 QHighDpi::fromNativePosition 再除以 devicePixelRatio
                     // 转回逻辑坐标。若直接传 QCursor::pos() 的 logical 值，会再次 ÷dpr
                     // (1.25)，使 QMenuBar::mousePressEvent 收到的 e->pos() 缩小 1.25 倍，
-                    // actionAt 命中前一项 → “点插入/帮助开成格式/插入”(实测)。
+                    // actionAt 命中前一项 → "点插入/帮助开成格式/插入"(实测)。
                     QPointF localPos = window->mapFromGlobal(globalPos);      // logical
                     qreal hookDpr = window->devicePixelRatio();               // 1.25 @120%
                     QPointF nativeLocal = QPointF(localPos.x() * hookDpr, localPos.y() * hookDpr);
@@ -465,14 +516,7 @@ static LRESULT CALLBACK cjqt6MouseHookProc(int code, WPARAM wParam, LPARAM lPara
                     if (isRelease && g_menubarCloseTarget) {
                         g_menubarCloseTarget = nullptr;
                     }
-                    // 吞掉 button/move 事件的原始消息：钩子已通过 QPA 合成并派发 Qt 事件，
-                    // 若再 CallNextHookEx 让原始 WM_LBUTTON*/WM_MOUSEMOVE 继续传递，
-                    // QtWndProc 会二次转成 Qt 事件：
-                    //  - button 二次派发 → QMenuBar 收到第二个 press（currentAction==action
-                    //    && popupState）把刚弹出的菜单立即 hide —— 即"菜单闪一下不见"；
-                    //  - move 二次派发 → 若 Qt 内部未正确建立 popup 抓取，QtWndProc 按光标
-                    //    位置路由，move 又被送到 QMenuBar，再次触发 setCurrentAction 跳菜单。
-                    // 统一由 QPA 单一路由，避免双重派发干扰 Qt 内部状态机。
+                    // 有 popup 时吞掉原始消息，避免 Qt 原生二次派发干扰菜单状态机
                     return 1;
                 }
             }
@@ -530,42 +574,8 @@ int32_t qApplicationExec() {
                         }
                     }
                 }
-                // 鼠标消息：Qt 6.10 仓颉 M:N 线程下 QtWndProc 不把 Windows 鼠标消息转成 QMouseEvent。
-                // WH_MOUSE 钩子可能因线程不匹配（仓颉 worker 线程 vs 窗口创建线程）而拦截不到。
-                // nativeEventFilter 在 DispatchMessage 之前调用，能拦截普通控件的鼠标消息
-                // （弹出菜单有自己的消息泵，nativeEventFilter 收不到，仍由 WH_MOUSE 钩子处理）。
-                // 无 popup 时用 sendEvent 直接派发 QMouseEvent 给 widgetAt 返回的控件。
-                if (msg->message == WM_LBUTTONDOWN || msg->message == WM_LBUTTONUP ||
-                    msg->message == WM_RBUTTONDOWN || msg->message == WM_RBUTTONUP ||
-                    msg->message == WM_MOUSEMOVE) {
-                    QWidget* popup = QApplication::activePopupWidget();
-                    if (!popup) {
-                        QPoint cursorPos = QCursor::pos();
-                        QWidget* widget = QApplication::widgetAt(cursorPos);
-                        if (widget) {
-                            QEvent::Type type = QEvent::None;
-                            Qt::MouseButton button = Qt::NoButton;
-                            if (msg->message == WM_LBUTTONDOWN) { type = QEvent::MouseButtonPress; button = Qt::LeftButton; }
-                            else if (msg->message == WM_LBUTTONUP) { type = QEvent::MouseButtonRelease; button = Qt::LeftButton; }
-                            else if (msg->message == WM_RBUTTONDOWN) { type = QEvent::MouseButtonPress; button = Qt::RightButton; }
-                            else if (msg->message == WM_RBUTTONUP) { type = QEvent::MouseButtonRelease; button = Qt::RightButton; }
-                            else if (msg->message == WM_MOUSEMOVE) { type = QEvent::MouseMove; button = Qt::NoButton; }
-                            Qt::MouseButtons buttons;
-                            if (GetKeyState(VK_LBUTTON) & 0x8000) buttons |= Qt::LeftButton;
-                            if (GetKeyState(VK_RBUTTON) & 0x8000) buttons |= Qt::RightButton;
-                            if (GetKeyState(VK_MBUTTON) & 0x8000) buttons |= Qt::MiddleButton;
-                            Qt::KeyboardModifiers mods;
-                            if (GetKeyState(VK_SHIFT) & 0x8000) mods |= Qt::ShiftModifier;
-                            if (GetKeyState(VK_CONTROL) & 0x8000) mods |= Qt::ControlModifier;
-                            if (GetKeyState(VK_MENU) & 0x8000) mods |= Qt::AltModifier;
-                            QMouseEvent mouseEvent(type, widget->mapFromGlobal(cursorPos),
-                                                   QPointF(cursorPos), button, buttons, mods);
-                            QCoreApplication::sendEvent(widget, &mouseEvent);
-                            if (result) *result = 0;
-                            return true;
-                        }
-                    }
-                }
+                // 鼠标消息已移到 WH_MOUSE 线程级钩子中处理
+                // （nativeEventFilter 收不到弹出菜单的鼠标消息，钩子是 Win32 级别的更可靠）
                 // 键盘消息：Qt 6.10 仓颉 M:N 线程下 QtWndProc 不把 Windows 键盘消息转成 QKeyEvent。
                 // 手动构造 QKeyEvent 派发给 focus widget。
                 if (msg->message == WM_KEYDOWN || msg->message == WM_KEYUP || msg->message == WM_CHAR) {
@@ -575,44 +585,64 @@ int32_t qApplicationExec() {
                         // WM_KEYDOWN/WM_KEYUP：只处理特殊键（非可打印字符），
                         // 可打印字符交给 WM_CHAR 处理（提供 text）
                         // WM_CHAR：只处理可打印字符（wParam >= 0x20）
-                        bool isPrintable = (vk >= 0x20 && vk <= 0x7E);
-                        if ((msg->message == WM_KEYDOWN || msg->message == WM_KEYUP) && isPrintable) {
-                            // 跳过，交给 WM_CHAR
-                        } else if (msg->message == WM_CHAR && !isPrintable) {
-                            // 跳过，交给 WM_KEYDOWN
-                        } else {
-                            QEvent::Type type = QEvent::None;
-                            if (msg->message == WM_KEYDOWN || msg->message == WM_CHAR) type = QEvent::KeyPress;
-                            else if (msg->message == WM_KEYUP) type = QEvent::KeyRelease;
-                            // Windows 虚拟键码 → Qt 键码（特殊键需映射，字母数字键码相同）
-                            int key;
-                            switch (vk) {
-                                case VK_BACK: key = Qt::Key_Backspace; break;
-                                case VK_TAB: key = Qt::Key_Tab; break;
-                                case VK_RETURN: key = Qt::Key_Return; break;
-                                case VK_ESCAPE: key = Qt::Key_Escape; break;
-                                case VK_INSERT: key = Qt::Key_Insert; break;
-                                case VK_DELETE: key = Qt::Key_Delete; break;
-                                case VK_HOME: key = Qt::Key_Home; break;
-                                case VK_END: key = Qt::Key_End; break;
-                                case VK_LEFT: key = Qt::Key_Left; break;
-                                case VK_UP: key = Qt::Key_Up; break;
-                                case VK_RIGHT: key = Qt::Key_Right; break;
-                                case VK_DOWN: key = Qt::Key_Down; break;
-                                case VK_PRIOR: key = Qt::Key_PageUp; break;
-                                case VK_NEXT: key = Qt::Key_PageDown; break;
-                                default: key = vk; break;
+                        // D3 修复：区分特殊键与可打印字符
+                        // WM_KEYDOWN/UP：特殊键直接映射 VK→Qt::Key 派发；可打印字符跳过交给 WM_CHAR
+                        // WM_CHAR：可打印字符派发（key=0, text=字符）
+                        // 原 isPrintable=(vk>=0x20&&vk<=0x7E) 把 F1-F12(VK 0x70-0x7B) 和方向键
+                        // (VK 0x25-0x28) 误判为可打印 → WM_KEYDOWN 跳过但无 WM_CHAR 补位 → 事件丢失
+                        if (msg->message == WM_KEYDOWN || msg->message == WM_KEYUP) {
+                            int key = -1;  // -1 表示可打印字符，交给 WM_CHAR
+                            // F1-F24 连续映射（VK_F1..VK_F24 → Qt::Key_F1..F24）
+                            if (vk >= VK_F1 && vk <= VK_F24) {
+                                key = Qt::Key_F1 + (vk - VK_F1);
+                            } else {
+                                switch (vk) {
+                                    case VK_BACK: key = Qt::Key_Backspace; break;
+                                    case VK_TAB: key = Qt::Key_Tab; break;
+                                    case VK_RETURN: key = Qt::Key_Return; break;
+                                    case VK_ESCAPE: key = Qt::Key_Escape; break;
+                                    case VK_INSERT: key = Qt::Key_Insert; break;
+                                    case VK_DELETE: key = Qt::Key_Delete; break;
+                                    case VK_HOME: key = Qt::Key_Home; break;
+                                    case VK_END: key = Qt::Key_End; break;
+                                    case VK_LEFT: key = Qt::Key_Left; break;
+                                    case VK_UP: key = Qt::Key_Up; break;
+                                    case VK_RIGHT: key = Qt::Key_Right; break;
+                                    case VK_DOWN: key = Qt::Key_Down; break;
+                                    case VK_PRIOR: key = Qt::Key_PageUp; break;
+                                    case VK_NEXT: key = Qt::Key_PageDown; break;
+                                    // D3 修复：补修饰键、锁定键、空格、暂停、PrintScreen
+                                    case VK_SHIFT: key = Qt::Key_Shift; break;
+                                    case VK_CONTROL: key = Qt::Key_Control; break;
+                                    case VK_MENU: key = Qt::Key_Alt; break;
+                                    case VK_LWIN: key = Qt::Key_Meta; break;
+                                    case VK_RWIN: key = Qt::Key_Meta; break;
+                                    case VK_CAPITAL: key = Qt::Key_CapsLock; break;
+                                    case VK_NUMLOCK: key = Qt::Key_NumLock; break;
+                                    case VK_SCROLL: key = Qt::Key_ScrollLock; break;
+                                    case VK_SPACE: key = Qt::Key_Space; break;
+                                    case VK_PAUSE: key = Qt::Key_Pause; break;
+                                    case VK_SNAPSHOT: key = Qt::Key_Print; break;
+                                    default: break;  // key 保持 -1，交给 WM_CHAR
+                                }
                             }
+                            if (key != -1) {
+                                QEvent::Type type = (msg->message == WM_KEYDOWN) ? QEvent::KeyPress : QEvent::KeyRelease;
+                                Qt::KeyboardModifiers mods;
+                                if (GetKeyState(VK_SHIFT) & 0x8000) mods |= Qt::ShiftModifier;
+                                if (GetKeyState(VK_CONTROL) & 0x8000) mods |= Qt::ControlModifier;
+                                if (GetKeyState(VK_MENU) & 0x8000) mods |= Qt::AltModifier;
+                                QKeyEvent event(type, key, mods);
+                                QCoreApplication::sendEvent(focusWidget, &event);
+                            }
+                            // else 跳过，交给 WM_CHAR 处理
+                        } else if (msg->message == WM_CHAR) {
                             Qt::KeyboardModifiers mods;
                             if (GetKeyState(VK_SHIFT) & 0x8000) mods |= Qt::ShiftModifier;
                             if (GetKeyState(VK_CONTROL) & 0x8000) mods |= Qt::ControlModifier;
                             if (GetKeyState(VK_MENU) & 0x8000) mods |= Qt::AltModifier;
-                            QString text;
-                            if (msg->message == WM_CHAR) {
-                                text = QChar((ushort)vk);
-                                key = 0;  // WM_CHAR 提供字符，key 设 0
-                            }
-                            QKeyEvent event(type, key, mods, text);
+                            QString text = QChar((ushort)vk);
+                            QKeyEvent event(QEvent::KeyPress, 0, mods, text);
                             QCoreApplication::sendEvent(focusWidget, &event);
                         }
                     }
@@ -632,6 +662,8 @@ int32_t qApplicationExec() {
                         if (GetKeyState(VK_LBUTTON) & 0x8000) buttons |= Qt::LeftButton;
                         if (GetKeyState(VK_RBUTTON) & 0x8000) buttons |= Qt::RightButton;
                         if (GetKeyState(VK_MBUTTON) & 0x8000) buttons |= Qt::MiddleButton;
+                        if (GetKeyState(VK_XBUTTON1) & 0x8000) buttons |= Qt::BackButton;
+                        if (GetKeyState(VK_XBUTTON2) & 0x8000) buttons |= Qt::ForwardButton;
                         Qt::KeyboardModifiers mods;
                         if (GetKeyState(VK_SHIFT) & 0x8000) mods |= Qt::ShiftModifier;
                         if (GetKeyState(VK_CONTROL) & 0x8000) mods |= Qt::ControlModifier;
@@ -663,7 +695,14 @@ int32_t qApplicationExec() {
 
     };
     static WmCloseNativeFilter wmCloseFilter;
-    QCoreApplication::instance()->installNativeEventFilter(&wmCloseFilter);
+    // E1 修复：Qt 对重复安装同一 nativeEventFilter 不去重，二次 exec 起每条 native 消息
+    // 会被过滤两次（键盘 WM_KEYDOWN/WM_CHAR 被双派发 → 文本框字符重复输入）。
+    // 用静态标志保证只安装一次；filter 对象为函数级 static，生命周期与进程一致。
+    static bool s_nativeFilterInstalled = false;
+    if (!s_nativeFilterInstalled) {
+        QCoreApplication::instance()->installNativeEventFilter(&wmCloseFilter);
+        s_nativeFilterInstalled = true;
+    }
 
 #if defined(Q_OS_WIN)
     // 子类化兜底：立即子类化已有顶层窗口，QTimer 定期子类化新创建的窗口
@@ -675,9 +714,23 @@ int32_t qApplicationExec() {
         subclassTimer->start(1000);
     }
     // 安装 WH_MOUSE 线程级钩子，拦截所有鼠标消息（包括弹出菜单的）
-    if (!g_mouseHook) {
-        g_mouseHook = SetWindowsHookEx(WH_MOUSE, cjqt6MouseHookProc, NULL, GetCurrentThreadId());
-
+    // D1 修复：线程级钩子绑定安装线程。若当前线程 != 首次安装线程（仓颉 M:N
+    // 测试场景 / 二次 exec），旧钩子已随旧线程失效或仍在错误线程上，必须
+    // 卸载重装到当前线程；exec 返回时不卸载——对话框模态循环（Qt 内部
+    // QEventLoop）不经过本函数，卸载会导致其鼠标拦截断档。线程退出后钩子
+    // 由系统自动卸载，残留的 g_mouseHook 由下次 exec 的线程 ID 检测兜底。
+    {
+        DWORD curId = GetCurrentThreadId();
+        if (g_mouseHook && g_mouseHookThreadId != curId) {
+            UnhookWindowsHookEx(g_mouseHook);
+            g_mouseHook = NULL;
+        }
+        if (!g_mouseHook) {
+            g_mouseHook = SetWindowsHookEx(WH_MOUSE, cjqt6MouseHookProc, NULL, curId);
+            if (g_mouseHook) {
+                g_mouseHookThreadId = curId;
+            }
+        }
     }
 #endif
     // 统一用 QEventLoop（无主线程限制，worker 线程也能 exec）：
@@ -686,9 +739,16 @@ int32_t qApplicationExec() {
     // - qApplicationQuit 通过 t_currentLoop->exit(0) 精确退出
     QEventLoop loop;
     t_currentLoop = &loop;
-    QObject::connect(g_app, &QGuiApplication::lastWindowClosed, []() {
-        if (t_currentLoop) t_currentLoop->exit(0);
-    });
+    // E2 修复：g_app 生命周期贯穿进程，每次 exec 都 connect 会无界累积连接；
+    // lastWindowClosed 的处理逻辑与线程无关（lambda 只引用 thread_local 的
+    // t_currentLoop，在触发线程求值），因此全局只连接一次即可。
+    static bool s_lastWindowConnected = false;
+    if (!s_lastWindowConnected) {
+        QObject::connect(g_app, &QGuiApplication::lastWindowClosed, []() {
+            if (t_currentLoop) t_currentLoop->exit(0);
+        });
+        s_lastWindowConnected = true;
+    }
     int r = loop.exec();
     t_currentLoop = nullptr;
     qUnsetGuiThreadForPoster();
@@ -815,12 +875,23 @@ void qTimerStop(int64_t ptr) {
     }
 }
 
+// S2 修复：原先每次 setOnTimeout 都 QObject::connect 新 lambda 且不断开旧连接、
+// 不保存句柄——替换回调后旧 lambda 仍挂在 timer 上，timeout 触发时多个 lambda
+// 均查到同一最新回调 → 回调被执行多次。改为保存连接句柄的替换式语义
+//（与 bridge_signal.cpp connectVoidSignal 一致）。
+static std::unordered_map<int64_t, QMetaObject::Connection> g_timerConns;
+
 void qTimerSetTimeout(int64_t ptr, void (*callback)(int64_t)) {
     QTimer* timer = reinterpret_cast<QTimer*>(ptr);
     if (timer) {
         int64_t timerPtr = ptr;
+        auto cit = g_timerConns.find(ptr);
+        if (cit != g_timerConns.end()) {
+            if (cit->second) QObject::disconnect(cit->second);
+            g_timerConns.erase(cit);
+        }
         g_timerCallbacks[ptr] = [callback, timerPtr](int64_t) { callback(timerPtr); };
-        QObject::connect(timer, &QTimer::timeout, [timerPtr]() {
+        g_timerConns[ptr] = QObject::connect(timer, &QTimer::timeout, [timerPtr]() {
 
             auto it = g_timerCallbacks.find(timerPtr);
             if (it != g_timerCallbacks.end()) {
@@ -833,6 +904,11 @@ void qTimerSetTimeout(int64_t ptr, void (*callback)(int64_t)) {
 void qTimerDelete(int64_t ptr) {
     QTimer* timer = reinterpret_cast<QTimer*>(ptr);
     if (timer) {
+        auto cit = g_timerConns.find(ptr);
+        if (cit != g_timerConns.end()) {
+            if (cit->second) QObject::disconnect(cit->second);
+            g_timerConns.erase(cit);
+        }
         g_timerCallbacks.erase(ptr);
         delete timer;
     }

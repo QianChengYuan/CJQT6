@@ -18,6 +18,39 @@ static std::unordered_map<int64_t, std::function<void()>> g_readyReadStdErrCallb
 static std::unordered_map<int64_t, std::function<void(int)>> g_errorCallbacks;
 static std::unordered_map<int64_t, std::function<void(int)>> g_stateChangedCallbacks;
 
+// S4 修复：各信号分别保存连接句柄。原先每次 SetOnXxx 都 QObject::connect 新
+// lambda 且不断开旧连接——替换回调后旧 lambda 仍挂在 process 上，同一信号
+// 触发时回调被执行多次。改为替换式语义（与 bridge_signal.cpp 一致）。
+static std::unordered_map<int64_t, QMetaObject::Connection> g_procFinishedConns;
+static std::unordered_map<int64_t, QMetaObject::Connection> g_procStartedConns;
+static std::unordered_map<int64_t, QMetaObject::Connection> g_procStdOutConns;
+static std::unordered_map<int64_t, QMetaObject::Connection> g_procStdErrConns;
+static std::unordered_map<int64_t, QMetaObject::Connection> g_procErrorConns;
+static std::unordered_map<int64_t, QMetaObject::Connection> g_procStateConns;
+
+// 替换式登记连接：断开同 (表, ptr) 的旧连接后登记新连接
+static void replaceConn(std::unordered_map<int64_t, QMetaObject::Connection>& conns,
+                        int64_t ptr, QMetaObject::Connection conn) {
+    auto cit = conns.find(ptr);
+    if (cit != conns.end()) {
+        if (cit->second) QObject::disconnect(cit->second);
+        cit->second = conn;
+    } else {
+        conns.emplace(ptr, conn);
+    }
+}
+
+// 断开并移除同 (表, ptr) 的连接；返回是否确有连接被断开
+static bool dropConn(std::unordered_map<int64_t, QMetaObject::Connection>& conns, int64_t ptr) {
+    auto cit = conns.find(ptr);
+    if (cit != conns.end()) {
+        if (cit->second) QObject::disconnect(cit->second);
+        conns.erase(cit);
+        return true;
+    }
+    return false;
+}
+
 extern "C" {
 
 // ============================================================
@@ -32,6 +65,12 @@ int64_t qProcessCreate() {
 void qProcessDelete(int64_t ptr) {
     QProcess* process = reinterpret_cast<QProcess*>(ptr);
     if (process) {
+        dropConn(g_procFinishedConns, ptr);
+        dropConn(g_procStartedConns, ptr);
+        dropConn(g_procStdOutConns, ptr);
+        dropConn(g_procStdErrConns, ptr);
+        dropConn(g_procErrorConns, ptr);
+        dropConn(g_procStateConns, ptr);
         g_finishedCallbacks.erase(ptr);
         g_startedCallbacks.erase(ptr);
         g_readyReadStdOutCallbacks.erase(ptr);
@@ -337,81 +376,93 @@ int qProcessReadChannel(int64_t ptr) {
 void qProcessSetOnFinished(int64_t ptr, void (*callback)(int, int)) {
     QProcess* process = reinterpret_cast<QProcess*>(ptr);
     if (process && callback) {
+        dropConn(g_procFinishedConns, ptr);
         g_finishedCallbacks[ptr] = [callback](int exitCode, int exitStatus) {
             callback(exitCode, exitStatus);
         };
-        QObject::connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
-            [ptr](int exitCode, QProcess::ExitStatus exitStatus) {
-                auto it = g_finishedCallbacks.find(ptr);
-                if (it != g_finishedCallbacks.end()) {
-                    it->second(exitCode, static_cast<int>(exitStatus));
-                }
-            });
+        replaceConn(g_procFinishedConns, ptr,
+            QObject::connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+                [ptr](int exitCode, QProcess::ExitStatus exitStatus) {
+                    auto it = g_finishedCallbacks.find(ptr);
+                    if (it != g_finishedCallbacks.end()) {
+                        it->second(exitCode, static_cast<int>(exitStatus));
+                    }
+                }));
     }
 }
 
 void qProcessSetOnStarted(int64_t ptr, void (*callback)()) {
     QProcess* process = reinterpret_cast<QProcess*>(ptr);
     if (process && callback) {
+        dropConn(g_procStartedConns, ptr);
         g_startedCallbacks[ptr] = callback;
-        QObject::connect(process, &QProcess::started, [ptr]() {
-            auto it = g_startedCallbacks.find(ptr);
-            if (it != g_startedCallbacks.end()) {
-                it->second();
-            }
-        });
+        replaceConn(g_procStartedConns, ptr,
+            QObject::connect(process, &QProcess::started, [ptr]() {
+                auto it = g_startedCallbacks.find(ptr);
+                if (it != g_startedCallbacks.end()) {
+                    it->second();
+                }
+            }));
     }
 }
 
 void qProcessSetOnReadyReadStandardOutput(int64_t ptr, void (*callback)()) {
     QProcess* process = reinterpret_cast<QProcess*>(ptr);
     if (process && callback) {
+        dropConn(g_procStdOutConns, ptr);
         g_readyReadStdOutCallbacks[ptr] = callback;
-        QObject::connect(process, &QProcess::readyReadStandardOutput, [ptr]() {
-            auto it = g_readyReadStdOutCallbacks.find(ptr);
-            if (it != g_readyReadStdOutCallbacks.end()) {
-                it->second();
-            }
-        });
+        replaceConn(g_procStdOutConns, ptr,
+            QObject::connect(process, &QProcess::readyReadStandardOutput, [ptr]() {
+                auto it = g_readyReadStdOutCallbacks.find(ptr);
+                if (it != g_readyReadStdOutCallbacks.end()) {
+                    it->second();
+                }
+            }));
     }
 }
 
 void qProcessSetOnReadyReadStandardError(int64_t ptr, void (*callback)()) {
     QProcess* process = reinterpret_cast<QProcess*>(ptr);
     if (process && callback) {
+        dropConn(g_procStdErrConns, ptr);
         g_readyReadStdErrCallbacks[ptr] = callback;
-        QObject::connect(process, &QProcess::readyReadStandardError, [ptr]() {
-            auto it = g_readyReadStdErrCallbacks.find(ptr);
-            if (it != g_readyReadStdErrCallbacks.end()) {
-                it->second();
-            }
-        });
+        replaceConn(g_procStdErrConns, ptr,
+            QObject::connect(process, &QProcess::readyReadStandardError, [ptr]() {
+                auto it = g_readyReadStdErrCallbacks.find(ptr);
+                if (it != g_readyReadStdErrCallbacks.end()) {
+                    it->second();
+                }
+            }));
     }
 }
 
 void qProcessSetOnErrorOccurred(int64_t ptr, void (*callback)(int)) {
     QProcess* process = reinterpret_cast<QProcess*>(ptr);
     if (process && callback) {
+        dropConn(g_procErrorConns, ptr);
         g_errorCallbacks[ptr] = callback;
-        QObject::connect(process, &QProcess::errorOccurred, [ptr](QProcess::ProcessError error) {
-            auto it = g_errorCallbacks.find(ptr);
-            if (it != g_errorCallbacks.end()) {
-                it->second(static_cast<int>(error));
-            }
-        });
+        replaceConn(g_procErrorConns, ptr,
+            QObject::connect(process, &QProcess::errorOccurred, [ptr](QProcess::ProcessError error) {
+                auto it = g_errorCallbacks.find(ptr);
+                if (it != g_errorCallbacks.end()) {
+                    it->second(static_cast<int>(error));
+                }
+            }));
     }
 }
 
 void qProcessSetOnStateChanged(int64_t ptr, void (*callback)(int)) {
     QProcess* process = reinterpret_cast<QProcess*>(ptr);
     if (process && callback) {
+        dropConn(g_procStateConns, ptr);
         g_stateChangedCallbacks[ptr] = callback;
-        QObject::connect(process, &QProcess::stateChanged, [ptr](QProcess::ProcessState state) {
-            auto it = g_stateChangedCallbacks.find(ptr);
-            if (it != g_stateChangedCallbacks.end()) {
-                it->second(static_cast<int>(state));
-            }
-        });
+        replaceConn(g_procStateConns, ptr,
+            QObject::connect(process, &QProcess::stateChanged, [ptr](QProcess::ProcessState state) {
+                auto it = g_stateChangedCallbacks.find(ptr);
+                if (it != g_stateChangedCallbacks.end()) {
+                    it->second(static_cast<int>(state));
+                }
+            }));
     }
 }
 

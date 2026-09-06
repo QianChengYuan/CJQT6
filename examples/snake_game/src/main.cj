@@ -132,38 +132,22 @@ func updateGame(): Unit {
         }
     }
     
-    gSnake.add((newX, newY))  // 添加到头部
-    gSnake = reverseList(gSnake)  // 反转使新元素在头部
+    // 修复：原逻辑 add 到末尾再 reverseList 整个列表，顺序错乱致蛇身乱跳。
+    // 正确逻辑：新头插入头部（index 0），没吃到食物则移除末尾。
+    gSnake.add((newX, newY), at: 0)
     
     let (foodX, foodY) = gFood
     if (newX == foodX && newY == foodY) {
         gScore += 10
         spawnFood()
     } else {
-        // 没吃到食物，移除尾部（反转后的第一个元素）
-        if (gSnake.size > 0) {
-            gSnake = removeLast(gSnake)
+        // 没吃到食物，移除尾部
+        if (gSnake.size > 1) {
+            gSnake.remove(at: gSnake.size - 1)
         }
     }
 }
 
-// 反转列表
-func reverseList(list: ArrayList<(Int32, Int32)>): ArrayList<(Int32, Int32)> {
-    let result = ArrayList<(Int32, Int32)>()
-    for (i in list.size - 1..=0) {
-        result.add(list[i])
-    }
-    return result
-}
-
-// 移除最后一个元素
-func removeLast(list: ArrayList<(Int32, Int32)>): ArrayList<(Int32, Int32)> {
-    let result = ArrayList<(Int32, Int32)>()
-    for (i in 1..list.size) {
-        result.add(list[i])
-    }
-    return result
-}
 
 // ============================================================
 // 回调函数
@@ -230,6 +214,9 @@ public class SnakeRenderer {
     public init() {
         pen = QPen()
         brush = QBrush()
+        // 修复：QBrush() 默认 Qt::NoBrush 不填充，drawRect/drawEllipse 只画边框
+        // 不填充颜色，致蛇身和食物显示为黑色边框无填充。设为 SolidPattern 才填充。
+        brush.setStyle(BrushStyle.SolidPattern.value())
         colorBackground = QColor(20, 20, 30)
         colorGrid = QColor(40, 40, 50)
         colorSnakeHead = QColor(50, 205, 50)
@@ -417,6 +404,7 @@ main(): Int32 {
         w.setOnKeyPress({ key, modifiers, unicode => onKeyPress(key, modifiers, unicode) })
         w.setOnPaint({ painterPtr => onPaint(painterPtr) })
         w.show()
+        w.setFocus()
     }
     
     if (let Some(t) <- gTimer) {
