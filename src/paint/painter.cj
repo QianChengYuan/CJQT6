@@ -717,6 +717,22 @@ public class QPainter {
         QPainter(ptr, false)  // 直接使用私有构造函数，无泄漏
     }
     
+    /// 释放 QPainter 原生对象（仅拥有所有权的实例；fromPtr 借用指针不释放）
+    /// 修复：此前 QPainter 无任何释放路径，每次 QPainter()/QPainter(device)
+    /// 创建的原生 QPainter 永久泄漏（native 已导出 qPainterDelete 但未接入）
+    public func close(): Unit {
+        if (ptr != 0 && owned) {
+            unsafe { qPainterDelete(ptr) }
+            ptr = 0
+            owned = false
+        }
+    }
+    
+    /// 删除 QPainter（兼容旧 API，等同 close()）
+    public func delete(): Unit {
+        close()
+    }
+    
     public func begin(device: Int64): Bool { unsafe { qPainterBegin(ptr, device) != 0 } }
     public func end(): Bool { unsafe { qPainterEnd(ptr) != 0 } }
     public func isActive(): Bool { unsafe { qPainterIsActive(ptr) != 0 } }
@@ -842,6 +858,7 @@ foreign func qPainterFromPtr(ptr: Int64): Int64
 foreign func qPainterBegin(p: Int64, d: Int64): Int32
 foreign func qPainterEnd(p: Int64): Int32
 foreign func qPainterIsActive(p: Int64): Int32
+foreign func qPainterDelete(p: Int64): Unit
 foreign func qPainterSetPen(p: Int64, pen: Int64): Unit
 foreign func qPainterSetPenColor(p: Int64, c: Int64): Unit
 foreign func qPainterSetBrush(p: Int64, b: Int64): Unit

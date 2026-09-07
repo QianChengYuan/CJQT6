@@ -53,12 +53,13 @@ foreign func qModelIndexDelete(ptr: Int64): Unit
 // ============================================================
 // QListView
 // ============================================================
-public class QListView {
+public class QListView <: QtResource {
     private var ptr: Int64 = 0
+    private var closed: Bool = false
 
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
-    private func checkValid(): Unit {
-        if (ptr == 0) {
+    public func checkValid(): Unit {
+        if (ptr == 0 || closed) {
             throw ResourceDisposedException("QListView already deleted")
         }
         if (!isObjectAlive(ptr)) {
@@ -341,11 +342,25 @@ public class QListView {
         ptr
     }
 
+    /// 是否已关闭（资源已释放）
+    public func isClosed(): Bool { closed }
+
+    /// 检查对象有效性（未关闭且指针有效）
+    public func isValid(): Bool {
+        return !closed && ptr != 0 && isObjectAlive(ptr)
+    }
+
+    /// 关闭资源（幂等）
+    public func close(): Unit {
+        delete()
+    }
+
     public func delete(): Unit {
-        if (ptr != 0) {
+        if (!closed && ptr != 0) {
             if (!isObjectAlive(ptr)) {
                 untrackObject(ptr)
                 ptr = 0
+                closed = true
                 return
             }
             untrackObject(ptr)
@@ -354,6 +369,7 @@ public class QListView {
                 qListViewDelete(ptr)
             }
             ptr = 0
+            closed = true
         }
     }
 }

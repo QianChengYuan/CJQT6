@@ -46,6 +46,9 @@ foreign func qActionDelete(ptr: Int64): Unit
 // P1c：闭包捕获 id 版连接（native 仅保存 id，信号触发时回调顶层调度器）
 foreign func qActionConnectTriggeredId(ptr: Int64, id: Int64): Unit
 
+// 统一信号表清理（native bridge_signal.cpp；与 core 各封装类 close 范式一致）
+foreign func qSignalCleanup(ptr: Int64): Unit
+
 // QToolBar
 foreign func qToolBarCreate(title: CString): Int64
 foreign func qToolBarAddAction(ptr: Int64, actionPtr: Int64): Unit
@@ -77,6 +80,9 @@ foreign func qMainWindowDelete(ptr: Int64): Unit
 public class QAction <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
+    /// 是否拥有原生对象所有权：init(text) 创建的对象为 true；init(ptr) 包装（menu.addAction 等返回）为 false，
+    /// close() 只标记关闭、不删除底层对象（避免删除仍被菜单/工具栏引用的动作导致悬垂或二次释放）
+    private var owned: Bool = true
     
     /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(text: String) {
@@ -88,6 +94,7 @@ public class QAction <: QtResource {
                 throw CreateFailedException("QAction 创建失败")
             }
         }
+        owned = true
         trackObject(ptr)
     }
     
@@ -98,6 +105,7 @@ public class QAction <: QtResource {
             throw CreateFailedException("QAction 指针为空")
         }
         this.ptr = ptr
+        this.owned = false
         closed = false
     }
     
@@ -193,9 +201,10 @@ public class QAction <: QtResource {
     }
 
     /// 设置触发回调（可捕获局部变量；P1c 闭包捕获），返回 SignalConnection 句柄
+    /// 闭包注册到对象名下，close() 时自动注销（即使句柄被丢弃也不滞留注册表）
     public func setOnTriggeredCapture(callback: () -> Unit): SignalConnection {
         checkValid()
-        let id = registerVoidCallback(callback)
+        let id = registerObjectVoidCallback(ptr, callback)
         unsafe {
             qActionConnectTriggeredId(ptr, id)
         }
@@ -235,9 +244,11 @@ public class QAction <: QtResource {
         }
     }
     
-    /// 关闭资源，释放Qt对象
+    /// 关闭资源，释放Qt对象（仅 owned 动作删除底层对象；借用包装只标记关闭）
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            // 统一注销本对象名下 Capture 闭包
+            unregisterObjectVoidCallbacks(ptr)
             if (!isObjectAlive(ptr)) {
                 untrackObject(ptr)
                 ptr = 0
@@ -246,7 +257,10 @@ public class QAction <: QtResource {
             }
             untrackObject(ptr)
             unsafe {
-                qActionDelete(ptr)
+                qSignalCleanup(ptr)
+                if (owned) {
+                    qActionDelete(ptr)
+                }
             }
             closed = true
             ptr = 0

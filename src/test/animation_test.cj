@@ -30,22 +30,25 @@ class AnimationConstantsTests {
 
     @TestCase
     func testEasingCurveConstants() {
+        // 值对齐 Qt 官方 QEasingCurve::Type（native 侧 static_cast 直传）
         @Expect(EasingCurve.Linear, 0)
         @Expect(EasingCurve.InQuad, 1)
         @Expect(EasingCurve.OutQuad, 2)
         @Expect(EasingCurve.InOutQuad, 3)
-        @Expect(EasingCurve.InCubic, 4)
-        @Expect(EasingCurve.OutCubic, 5)
-        @Expect(EasingCurve.InOutCubic, 6)
-        @Expect(EasingCurve.InSine, 7)
-        @Expect(EasingCurve.OutSine, 8)
-        @Expect(EasingCurve.InOutSine, 9)
-        @Expect(EasingCurve.InElastic, 14)
-        @Expect(EasingCurve.OutElastic, 15)
-        @Expect(EasingCurve.InOutElastic, 16)
-        @Expect(EasingCurve.InBounce, 17)
-        @Expect(EasingCurve.OutBounce, 18)
-        @Expect(EasingCurve.InOutBounce, 19)
+        @Expect(EasingCurve.OutInQuad, 4)
+        @Expect(EasingCurve.InCubic, 5)
+        @Expect(EasingCurve.OutCubic, 6)
+        @Expect(EasingCurve.InOutCubic, 7)
+        @Expect(EasingCurve.OutInCubic, 8)
+        @Expect(EasingCurve.InSine, 17)
+        @Expect(EasingCurve.OutSine, 18)
+        @Expect(EasingCurve.InOutSine, 19)
+        @Expect(EasingCurve.InElastic, 29)
+        @Expect(EasingCurve.OutElastic, 30)
+        @Expect(EasingCurve.InOutElastic, 31)
+        @Expect(EasingCurve.InBounce, 37)
+        @Expect(EasingCurve.OutBounce, 38)
+        @Expect(EasingCurve.InOutBounce, 39)
     }
 }
 

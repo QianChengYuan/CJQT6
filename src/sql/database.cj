@@ -237,8 +237,9 @@ public class QSqlDatabase <: QtResource {
 }
 
 /// SQL查询
-public class QSqlQuery {
+public class QSqlQuery <: QtResource {
     private var ptr: Int64 = 0
+    private var closed: Bool = false
     
     public init() {
         unsafe { ptr = qSqlQueryCreate() }
@@ -342,6 +343,10 @@ public class QSqlQuery {
     }
     
     public func isValid(): Bool {
+        // QtResource 语义融合：对象已释放/指针为空即无效；否则按 Qt 查询有效性返回
+        if (closed || ptr == 0) {
+            return false
+        }
         unsafe { qSqlQueryIsValid(ptr) }
     }
     
@@ -383,19 +388,40 @@ public class QSqlQuery {
     }
     
     public func getPtr(): Int64 { ptr }
-    
-    public func delete(): Unit {
-        if (ptr != 0) {
+
+    /// 是否已关闭（资源已释放）
+    public func isClosed(): Bool { closed }
+
+    /// 检查有效性，无效时抛出异常
+    /// throws: ResourceDisposedException 对象已释放时抛出
+    /// throws: NullPointerException 空指针访问时抛出
+    public func checkValid(): Unit {
+        if (closed) {
+            throw ResourceDisposedException("QSqlQuery 已经被释放")
+        }
+        if (ptr == 0) {
+            throw NullPointerException("QSqlQuery 指针为空")
+        }
+    }
+
+    /// 关闭资源（幂等）
+    public func close(): Unit {
+        if (!closed && ptr != 0) {
             unsafe { qSqlQueryDelete(ptr) }
             ptr = 0
+            closed = true
         }
+    }
+    
+    public func delete(): Unit {
+        close()
     }
 }
 
 // ============================================================
 // QSqlRecord - 数据库记录（字段集合）
 // ============================================================
-public class QSqlRecord {
+public class QSqlRecord <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
@@ -404,10 +430,18 @@ public class QSqlRecord {
     }
 
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
-    private func checkValid(): Unit {
+    public func checkValid(): Unit {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QSqlRecord already deleted")
         }
+    }
+
+    /// 是否已关闭
+    public func isClosed(): Bool { closed }
+
+    /// 检查对象有效性（非 QObject 值包装）
+    public func isValid(): Bool {
+        return !closed && ptr != 0
     }
 
     /// 获取字段数量
@@ -494,7 +528,7 @@ public class QSqlRecord {
 // ============================================================
 // QSqlField - 数据库字段
 // ============================================================
-public class QSqlField {
+public class QSqlField <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
@@ -503,10 +537,18 @@ public class QSqlField {
     }
 
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
-    private func checkValid(): Unit {
+    public func checkValid(): Unit {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QSqlField already deleted")
         }
+    }
+
+    /// 是否已关闭
+    public func isClosed(): Bool { closed }
+
+    /// 检查对象有效性（非 QObject 值包装）
+    public func isValid(): Bool {
+        return !closed && ptr != 0
     }
 
     /// 获取字段名

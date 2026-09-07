@@ -465,9 +465,14 @@ void qSplitterSaveState(int64_t ptr, char* buffer, int32_t* bufferSize) {
     if (splitter && buffer && bufferSize) {
         QByteArray state = splitter->saveState();
         int len = state.size();
+        // 修复：原实现当 len >= *bufferSize 时不写不更新，调用方读未初始化堆内存。
+        // 现约定：放得下 -> 写入并把 *bufferSize 置为实际长度；
+        //          放不下 -> 不改写缓冲，把 *bufferSize 置 0（Cangjie 侧据此返回空结果）。
         if (len < *bufferSize) {
             std::memcpy(buffer, state.constData(), len);
             *bufferSize = len;
+        } else {
+            *bufferSize = 0;
         }
     }
 }

@@ -301,16 +301,20 @@ public class ScopeManager <: QtResource {
     }
     
     /// 生成唯一作用域ID
-    /// 
-    /// 格式：scope_${时间戳}
-    /// 注意：当前时间戳实现返回固定值，生产环境需要真实时间戳
+    ///
+    /// 格式：scope_${自增序号}
+    /// 修复：原实现依赖 currentTimeMillis()（固定返回 0），导致所有 ScopeManager
+    /// 的 scopeId 恒为 "scope_0"，多作用域并存时注册表会互删对方的管理标记；
+    /// 改为模块级自增计数器，保证同一进程内作用域 ID 唯一。
+    private static var gScopeSeq: Int64 = 0
     private static func generateScopeId(): String {
-        return "scope_${currentTimeMillis()}"
+        gScopeSeq = gScopeSeq + 1
+        return "scope_${gScopeSeq}"
     }
 }
 
 /// 获取当前时间戳（毫秒）
-/// 
+///
 /// 注意：当前返回固定值0
 /// 生产环境需要调用系统时间API
 private func currentTimeMillis(): Int64 {

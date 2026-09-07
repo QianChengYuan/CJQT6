@@ -1,4 +1,4 @@
-﻿/**
+/**
  * @file bridge_core.cpp
  * @brief 核心模块桥接函数 - QApplication, QWidget, QTimer
  */
@@ -837,9 +837,16 @@ void qWidgetSetLayout(int64_t widgetPtr, int64_t layoutPtr) {
     }
 }
 
+// 由 bridge_signal.cpp 导出的统一信号表清理（本文件 qWidgetDelete 兜底调用）
+void qSignalCleanup(int64_t ptr);
+
 void qWidgetDelete(int64_t ptr) {
     QWidget* widget = reinterpret_cast<QWidget*>(ptr);
     if (widget) {
+        // 修复：删除前清掉统一信号表（bridge_signal.cpp qSignalCleanup）中该控件的
+        // 残留条目。仓颉 wrapper close() 已先行调用；此处兜底级联删除/漏调路径，
+        // 避免 {ptr,SIG_*} 条目永久驻留（重复调用无害）。
+        qSignalCleanup(ptr);
         delete widget;
     }
 }

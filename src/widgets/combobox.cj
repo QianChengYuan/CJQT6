@@ -451,7 +451,7 @@ public class QComboBox <: QtResource {
     /// 设置当前索引变化回调（可捕获局部变量；回调内用 currentIndex() 读取新索引），返回 SignalConnection 句柄
     public func setOnCurrentIndexChangedCapture(callback: () -> Unit): SignalConnection {
         checkValid()
-        let id = registerVoidCallback(callback)
+        let id = registerObjectVoidCallback(ptr, callback)
         unsafe {
             qComboBoxConnectCurrentIndexChangedId(ptr, id)
         }
@@ -522,6 +522,8 @@ public class QComboBox <: QtResource {
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            // 统一注销本对象名下 Capture 闭包（避免 gVoidRegistry 滞留闭包与捕获对象图）
+            unregisterObjectVoidCallbacks(ptr)
             if (!isObjectAlive(ptr)) {
                 untrackObject(ptr)
                 ptr = 0

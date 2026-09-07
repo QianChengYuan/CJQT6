@@ -618,9 +618,26 @@ int64_t qUdpSocketCreate() {
 void qUdpSocketDelete(int64_t ptr) {
     QUdpSocket* socket = reinterpret_cast<QUdpSocket*>(ptr);
     if (socket) {
+        // 修复：原实现只清 g_networkVoidCallbacks，漏清 UDP 专用回调表
+        // （g_udpReadyReadCbs/g_udpErrorCbs 及其连接句柄），对象删除后条目残留。
+        QMetaObject::Connection conns[2];
         {
             LOCK_NETWORK_CALLBACKS();
             g_networkVoidCallbacks.remove(ptr);
+            g_udpReadyReadCbs.remove(ptr);
+            g_udpErrorCbs.remove(ptr);
+            auto take = [ptr](QHash<int64_t, QMetaObject::Connection>& table, QMetaObject::Connection& out) {
+                auto it = table.find(ptr);
+                if (it != table.end()) {
+                    out = it.value();
+                    table.erase(it);
+                }
+            };
+            take(g_udpReadyReadConns, conns[0]);
+            take(g_udpErrorConns, conns[1]);
+        }
+        for (auto& c : conns) {
+            if (c) QObject::disconnect(c);
         }
         delete socket;
     }

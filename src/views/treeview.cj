@@ -48,12 +48,13 @@ foreign func qTreeViewConnectActivated(ptr: Int64, callback: Int64Callback): Uni
 // ============================================================
 // QTreeView
 // ============================================================
-public class QTreeView {
+public class QTreeView <: QtResource {
     private var ptr: Int64 = 0
+    private var closed: Bool = false
 
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
-    private func checkValid(): Unit {
-        if (ptr == 0) {
+    public func checkValid(): Unit {
+        if (ptr == 0 || closed) {
             throw ResourceDisposedException("QTreeView already deleted")
         }
     }
@@ -346,13 +347,27 @@ public class QTreeView {
         ptr
     }
 
+    /// 是否已关闭（资源已释放）
+    public func isClosed(): Bool { closed }
+
+    /// 检查对象有效性（未关闭且指针有效）
+    public func isValid(): Bool {
+        return !closed && ptr != 0
+    }
+
+    /// 关闭资源（幂等）
+    public func close(): Unit {
+        delete()
+    }
+
     public func delete(): Unit {
-        if (ptr != 0) {
+        if (!closed && ptr != 0) {
             unsafe {
                 qSignalCleanup(ptr)
                 qTreeViewDelete(ptr)
             }
             ptr = 0
+            closed = true
         }
     }
 }

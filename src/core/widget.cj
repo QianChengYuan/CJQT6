@@ -49,7 +49,9 @@ public class QWidget <: QtResource {
     /// 从原生指针包装 QWidget（不拥有所有权，close() 不删除底层对象）
     public static func fromPtr(p: Int64): QWidget {
         let w = QWidget()
+        // 释放临时构造产生的原生 QWidget（init() 已真实分配），避免每次调用泄漏一个原生对象
         untrackObject(w.ptr)
+        unsafe { qWidgetDelete(w.ptr) }
         w.ptr = p
         w.owned = false
         return w
@@ -59,7 +61,9 @@ public class QWidget <: QtResource {
     /// 用于 QUiLoader.load 等返回无父顶层控件的场景，避免对象泄漏
     public static func fromPtrOwned(p: Int64): QWidget {
         let w = QWidget()
+        // 释放临时构造产生的原生 QWidget（init() 已真实分配），避免每次调用泄漏一个原生对象
         untrackObject(w.ptr)
+        unsafe { qWidgetDelete(w.ptr) }
         w.ptr = p
         w.owned = true
         trackObject(p)
@@ -218,6 +222,8 @@ public class QWidget <: QtResource {
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            // 统一注销本对象名下 Capture 闭包（避免 gVoidRegistry 滞留闭包与捕获对象图）
+            unregisterObjectVoidCallbacks(ptr)
             if (!isObjectAlive(ptr)) {
                 untrackObject(ptr)
                 ptr = 0
@@ -438,9 +444,10 @@ public class QWidget <: QtResource {
     }
 
     /// 设置控件销毁回调（可捕获局部变量；P1c 闭包捕获）
+    /// 闭包注册到对象名下，close() 时自动注销，避免注册表滞留
     public func setOnDestroyedCapture(callback: () -> Unit): Unit {
         checkValid()
-        let id = registerVoidCallback(callback)
+        let id = registerObjectVoidCallback(ptr, callback)
         unsafe {
             qWidgetConnectDestroyedId(ptr, id)
         }
@@ -459,7 +466,7 @@ public class QWidget <: QtResource {
     /// 返回注册表 id，断开连接时传给 disconnectClose 以清理闭包注册
     public func setOnCloseCapture(callback: () -> Unit): Int64 {
         checkValid()
-        let id = registerVoidCallback(callback)
+        let id = registerObjectVoidCallback(ptr, callback)
         unsafe {
             qWidgetConnectCloseId(ptr, id)
         }
@@ -468,13 +475,14 @@ public class QWidget <: QtResource {
 
     /// 断开窗口关闭回调
     public func disconnectClose(callbackId: Int64): Unit {
-        if (ptr != 0) {
+        let objectPtr = ptr
+        if (objectPtr != 0) {
             unsafe {
-                qWidgetDisconnectClose(ptr)
+                qWidgetDisconnectClose(objectPtr)
             }
         }
         if (callbackId != 0) {
-            unregisterVoidCallback(callbackId)
+            unregisterObjectVoidCallback(objectPtr, callbackId)
         }
     }
 

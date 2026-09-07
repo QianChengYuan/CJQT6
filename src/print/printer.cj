@@ -89,15 +89,28 @@ public class ColorMode {
 }
 
 /// 打印机
-public class QPrinter {
+public class QPrinter <: QtResource {
     private var ptr: Int64 = 0
+    private var closed: Bool = false
     
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
-        unsafe { ptr = qPrinterCreate() }
+        unsafe {
+            ptr = qPrinterCreate()
+            if (ptr == 0) {
+                throw CreateFailedException("QPrinter 创建失败")
+            }
+        }
     }
     
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(mode: Int32) {
-        unsafe { ptr = qPrinterCreateWithMode(mode) }
+        unsafe {
+            ptr = qPrinterCreateWithMode(mode)
+            if (ptr == 0) {
+                throw CreateFailedException("QPrinter 创建失败")
+            }
+        }
     }
     
     public func setOutputFormat(format: Int32): Unit {
@@ -253,41 +266,98 @@ public class QPrinter {
     
     public func getPtr(): Int64 { ptr }
     
-    public func delete(): Unit {
-        if (ptr != 0) {
+    /// 是否已关闭（资源已释放）
+    public func isClosed(): Bool { closed }
+    
+    /// 检查对象有效性（QPrinter 非 QObject，不查存活表）
+    public func isValid(): Bool {
+        return !closed && ptr != 0
+    }
+    
+    /// 检查有效性，无效时抛出异常
+    /// throws: ResourceDisposedException 对象已释放时抛出
+    /// throws: NullPointerException 空指针访问时抛出
+    public func checkValid(): Unit {
+        if (closed) {
+            throw ResourceDisposedException("QPrinter 已经被释放")
+        }
+        if (ptr == 0) {
+            throw NullPointerException("QPrinter 指针为空")
+        }
+    }
+    
+    /// 关闭资源（幂等）
+    public func close(): Unit {
+        if (!closed && ptr != 0) {
             unsafe { qPrinterDelete(ptr) }
             ptr = 0
+            closed = true
         }
+    }
+    
+    public func delete(): Unit {
+        close()
     }
 }
 
 /// 打印对话框
-public class QPrintDialog {
+public class QPrintDialog <: QtResource {
     private var ptr: Int64 = 0
+    private var closed: Bool = false
     
     public init(printer: QPrinter) {
         unsafe { ptr = qPrintDialogCreate(printer.getPtr()) }
     }
     
     public func exec(): Int32 {
+        checkValid()
         unsafe { qPrintDialogExec(ptr) }
     }
     
     public func printer(): Int64 {
+        checkValid()
         unsafe { qPrintDialogPrinter(ptr) }
     }
     
-    public func delete(): Unit {
-        if (ptr != 0) {
+    /// 获取原生指针
+    public func getPtr(): Int64 { ptr }
+    
+    /// 是否已关闭
+    public func isClosed(): Bool { closed }
+    
+    /// 检查对象有效性（对话框自身借用 QPrinter，不 track/不删 printer）
+    public func isValid(): Bool {
+        return !closed && ptr != 0
+    }
+    
+    /// 检查有效性，无效时抛出异常
+    public func checkValid(): Unit {
+        if (closed) {
+            throw ResourceDisposedException("QPrintDialog 已经被释放")
+        }
+        if (ptr == 0) {
+            throw NullPointerException("QPrintDialog 指针为空")
+        }
+    }
+    
+    /// 关闭资源（幂等；只删对话框自身，不删借用来的 QPrinter）
+    public func close(): Unit {
+        if (!closed && ptr != 0) {
             unsafe { qPrintDialogDelete(ptr) }
             ptr = 0
+            closed = true
         }
+    }
+    
+    public func delete(): Unit {
+        close()
     }
 }
 
 /// 打印预览对话框
-public class QPrintPreviewDialog {
+public class QPrintPreviewDialog <: QtResource {
     private var ptr: Int64 = 0
+    private var closed: Bool = false
     
     public init(printer: QPrinter) {
         unsafe { ptr = qPrintPreviewDialogCreate(printer.getPtr()) }
@@ -299,17 +369,46 @@ public class QPrintPreviewDialog {
     }
     
     public func exec(): Int32 {
+        checkValid()
         unsafe { qPrintPreviewDialogExec(ptr) }
     }
     
     public func printer(): Int64 {
+        checkValid()
         unsafe { qPrintPreviewDialogPrinter(ptr) }
     }
     
-    public func delete(): Unit {
-        if (ptr != 0) {
+    /// 获取原生指针
+    public func getPtr(): Int64 { ptr }
+    
+    /// 是否已关闭
+    public func isClosed(): Bool { closed }
+    
+    /// 检查对象有效性（对话框自身借用 QPrinter，不 track/不删 printer）
+    public func isValid(): Bool {
+        return !closed && ptr != 0
+    }
+    
+    /// 检查有效性，无效时抛出异常
+    public func checkValid(): Unit {
+        if (closed) {
+            throw ResourceDisposedException("QPrintPreviewDialog 已经被释放")
+        }
+        if (ptr == 0) {
+            throw NullPointerException("QPrintPreviewDialog 指针为空")
+        }
+    }
+    
+    /// 关闭资源（幂等；只删对话框自身，不删借用来的 QPrinter）
+    public func close(): Unit {
+        if (!closed && ptr != 0) {
             unsafe { qPrintPreviewDialogDelete(ptr) }
             ptr = 0
+            closed = true
         }
+    }
+    
+    public func delete(): Unit {
+        close()
     }
 }

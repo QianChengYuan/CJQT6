@@ -74,9 +74,10 @@ public func DropActionIgnore(): Int32 {
 // ============================================================
 
 /// MIME数据类，用于拖放操作中传递数据
-public class QMimeData {
+public class QMimeData <: QtResource {
     private var ptr: Int64 = 0
     private var owned: Bool = true
+    private var closed: Bool = false
     
     public init() {
         unsafe {
@@ -185,13 +186,43 @@ public class QMimeData {
         return ptr
     }
     
+    /// 是否已关闭（资源已释放）
+    public func isClosed(): Bool {
+        return closed
+    }
+    
+    /// 检查对象有效性（QMimeData 未接入存活表，只查 closed/ptr；QDrag 移交所有权场景请遵循 Qt 语义）
+    public func isValid(): Bool {
+        return !closed && ptr != 0
+    }
+    
+    /// 检查有效性，无效时抛出异常
+    /// throws: ResourceDisposedException 对象已释放时抛出
+    /// throws: NullPointerException 空指针访问时抛出
+    public func checkValid(): Unit {
+        if (closed) {
+            throw ResourceDisposedException("QMimeData 已经被释放")
+        }
+        if (ptr == 0) {
+            throw NullPointerException("QMimeData 指针为空")
+        }
+    }
+    
+    /// 关闭资源（幂等；仅 owned 时删除底层对象，借用包装只置位）
+    public func close(): Unit {
+        delete()
+    }
+    
     /// 删除
     public func delete(): Unit {
-        if (ptr != 0 && owned) {
-            unsafe {
-                qMimeDataDelete(ptr)
+        if (!closed && ptr != 0) {
+            if (owned) {
+                unsafe {
+                    qMimeDataDelete(ptr)
+                }
             }
             ptr = 0
+            closed = true
         }
     }
 }
@@ -201,8 +232,9 @@ public class QMimeData {
 // ============================================================
 
 /// 拖放操作类
-public class QDrag {
+public class QDrag <: QtResource {
     private var ptr: Int64 = 0
+    private var closed: Bool = false
     
     public init(sourcePtr: Int64) {
         unsafe {
@@ -270,6 +302,41 @@ public class QDrag {
     /// 获取指针
     public func getPtr(): Int64 {
         return ptr
+    }
+    
+    /// 是否已关闭（已结束/释放）
+    public func isClosed(): Bool {
+        return closed
+    }
+    
+    /// 检查对象有效性（QDrag 由 Qt 在 exec 结束后自行回收，不删除也不 track）
+    public func isValid(): Bool {
+        return !closed && ptr != 0
+    }
+    
+    /// 检查有效性，无效时抛出异常
+    /// throws: ResourceDisposedException 对象已释放时抛出
+    /// throws: NullPointerException 空指针访问时抛出
+    public func checkValid(): Unit {
+        if (closed) {
+            throw ResourceDisposedException("QDrag 已经被释放")
+        }
+        if (ptr == 0) {
+            throw NullPointerException("QDrag 指针为空")
+        }
+    }
+    
+    /// 结束拖放句柄（幂等；底层 QDrag 由 Qt 生命周期管理，此处只置位不删除）
+    public func close(): Unit {
+        if (!closed) {
+            ptr = 0
+            closed = true
+        }
+    }
+    
+    /// 删除（兼容旧 API，等同 close()；不做 native 删除）
+    public func delete(): Unit {
+        close()
     }
 }
 

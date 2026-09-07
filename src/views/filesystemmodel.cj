@@ -29,12 +29,13 @@ foreign func qFileSystemModelConnectRootPathChanged(ptr: Int64, callback: CStrin
 // ============================================================
 // QFileSystemModel
 // ============================================================
-public class QFileSystemModel {
+public class QFileSystemModel <: QtResource {
     private var ptr: Int64 = 0
+    private var closed: Bool = false
 
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
-    private func checkValid(): Unit {
-        if (ptr == 0) {
+    public func checkValid(): Unit {
+        if (ptr == 0 || closed) {
             throw ResourceDisposedException("QFileSystemModel already deleted")
         }
     }
@@ -46,41 +47,6 @@ public class QFileSystemModel {
         }
         if (ptr == 0) {
             throw CreateFailedException("QFileSystemModel create failed")
-        }
-    }
-
-    public func show(): Unit {
-        checkValid()
-        unsafe {
-            qWidgetShow(ptr)
-        }
-    }
-
-    public func hide(): Unit {
-        checkValid()
-        unsafe {
-            qWidgetHide(ptr)
-        }
-    }
-
-    public func resize(width: Int32, height: Int32): Unit {
-        checkValid()
-        unsafe {
-            qWidgetResize(ptr, width, height)
-        }
-    }
-
-    public func setEnabled(enabled: Bool): Unit {
-        checkValid()
-        unsafe {
-            qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
-        }
-    }
-
-    public func setStyleSheet(style: String): Unit {
-        checkValid()
-        unsafe {
-            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
         }
     }
 
@@ -213,13 +179,27 @@ public class QFileSystemModel {
         ptr
     }
 
+    /// 是否已关闭（资源已释放）
+    public func isClosed(): Bool { closed }
+
+    /// 检查对象有效性（未关闭且指针有效）
+    public func isValid(): Bool {
+        return !closed && ptr != 0
+    }
+
+    /// 关闭资源（幂等）
+    public func close(): Unit {
+        delete()
+    }
+
     public func delete(): Unit {
-        if (ptr != 0) {
+        if (!closed && ptr != 0) {
             unsafe {
                 qSignalCleanup(ptr)
                 qFileSystemModelDelete(ptr)
             }
             ptr = 0
+            closed = true
         }
     }
 }

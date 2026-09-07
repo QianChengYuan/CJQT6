@@ -85,13 +85,17 @@ public class CheckState {
 // ============================================================
 // QTreeWidgetItem - 树形项
 // ============================================================
-public class QTreeWidgetItem {
-    private let ptr: Int64
+public class QTreeWidgetItem <: QtResource {
+    private var ptr: Int64 = 0
+    private var closed: Bool = false
+    /// 是否拥有原生对象：自建 init 为 true；fromPtr 借用（归树控件管理）为 false
+    private var owned: Bool = true
     
     public init() {
         unsafe {
             ptr = qTreeWidgetItemCreate()
         }
+        owned = true
     }
     
     public init(text: String) {
@@ -100,6 +104,7 @@ public class QTreeWidgetItem {
             ptr = qTreeWidgetItemCreateWithText(cstr)
             LibC.free(cstr)
         }
+        owned = true
     }
     
     // 从指针创建（不拥有所有权）
@@ -110,6 +115,7 @@ public class QTreeWidgetItem {
     // 内部构造函数
     private init(ptr: Int64, _: Unit) {
         this.ptr = ptr
+        this.owned = false
     }
     
     public static func __fromPtr(ptr: Int64): QTreeWidgetItem {
@@ -256,13 +262,49 @@ public class QTreeWidgetItem {
             qTreeWidgetItemIsHidden(ptr)
         }
     }
+
+    /// 是否已关闭
+    public func isClosed(): Bool { closed }
+
+    /// 检查对象有效性（借用 item 由树控件管理，close 只置位不删除）
+    public func isValid(): Bool {
+        return !closed && ptr != 0
+    }
+
+    /// 检查有效性，无效时抛出异常
+    public func checkValid(): Unit {
+        if (closed) {
+            throw ResourceDisposedException("QTreeWidgetItem 已经被释放")
+        }
+        if (ptr == 0) {
+            throw NullPointerException("QTreeWidgetItem 指针为空")
+        }
+    }
+
+    /// 关闭资源（幂等；仅自建 item 删除底层对象，借用 item 只置位）
+    public func close(): Unit {
+        delete()
+    }
+
+    public func delete(): Unit {
+        if (!closed && ptr != 0) {
+            if (owned) {
+                unsafe {
+                    qTreeWidgetItemDelete(ptr)
+                }
+            }
+            ptr = 0
+            closed = true
+        }
+    }
 }
 
 // ============================================================
 // QTreeWidget - 树形部件
 // ============================================================
-public class QTreeWidget {
-    private let ptr: Int64
+public class QTreeWidget <: QtResource {
+    private var ptr: Int64 = 0
+    private var closed: Bool = false
     
     public init() {
         unsafe {
@@ -274,11 +316,36 @@ public class QTreeWidget {
         ptr
     }
     
+    /// 是否已关闭（资源已释放）
+    public func isClosed(): Bool { closed }
+    
+    /// 检查对象有效性（未关闭且指针有效）
+    public func isValid(): Bool {
+        return !closed && ptr != 0
+    }
+    
+    /// 检查有效性，无效时抛出异常
+    public func checkValid(): Unit {
+        if (closed) {
+            throw ResourceDisposedException("QTreeWidget 已经被释放")
+        }
+        if (ptr == 0) {
+            throw NullPointerException("QTreeWidget 指针为空")
+        }
+    }
+    
+    /// 关闭资源（幂等）
+    public func close(): Unit {
+        delete()
+    }
+    
     public func delete(): Unit {
-        if (ptr != 0) {
+        if (!closed && ptr != 0) {
             unsafe {
                 qTreeWidgetDelete(ptr)
             }
+            ptr = 0
+            closed = true
         }
     }
     

@@ -40,7 +40,10 @@ public class ItemDataRole {
     public static func backgroundRole(): Int32 { 8 }
     public static func foregroundRole(): Int32 { 9 }
     public static func checkStateRole(): Int32 { 10 }
-    public static func sizeHintRole(): Int32 { 11 }
+    public static func accessibleTextRole(): Int32 { 11 }
+    public static func accessibleDescriptionRole(): Int32 { 12 }
+    public static func sizeHintRole(): Int32 { 13 }
+    public static func initialSortOrderRole(): Int32 { 14 }
 }
 
 

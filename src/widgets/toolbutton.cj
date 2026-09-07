@@ -237,7 +237,7 @@ public class QToolButton <: QtResource {
     /// 设置点击回调（可捕获局部变量；P1c 闭包捕获），返回 SignalConnection 句柄
     public func setOnClickCapture(callback: () -> Unit): SignalConnection {
         checkValid()
-        let id = registerVoidCallback(callback)
+        let id = registerObjectVoidCallback(ptr, callback)
         unsafe {
             qToolButtonConnectClickedId(ptr, id)
         }
@@ -288,7 +288,7 @@ public class QToolButton <: QtResource {
     /// 按下回调（可捕获局部变量；P1c 闭包捕获），返回 SignalConnection 句柄
     public func setOnPressedCapture(callback: () -> Unit): SignalConnection {
         checkValid()
-        let id = registerVoidCallback(callback)
+        let id = registerObjectVoidCallback(ptr, callback)
         unsafe {
             qToolButtonConnectPressedId(ptr, id)
         }
@@ -316,7 +316,7 @@ public class QToolButton <: QtResource {
     /// 释放回调（可捕获局部变量；P1c 闭包捕获），返回 SignalConnection 句柄
     public func setOnReleasedCapture(callback: () -> Unit): SignalConnection {
         checkValid()
-        let id = registerVoidCallback(callback)
+        let id = registerObjectVoidCallback(ptr, callback)
         unsafe {
             qToolButtonConnectReleasedId(ptr, id)
         }
@@ -391,6 +391,8 @@ public class QToolButton <: QtResource {
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            // 统一注销本对象名下 Capture 闭包（避免 gVoidRegistry 滞留闭包与捕获对象图）
+            unregisterObjectVoidCallbacks(ptr)
             if (!isObjectAlive(ptr)) {
                 untrackObject(ptr)
                 ptr = 0

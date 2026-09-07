@@ -213,9 +213,13 @@ void qActionSetOnTriggered(int64_t ptr, void (*callback)(int64_t)) {
     }
 }
 
+// 由 bridge_signal.cpp 导出的统一信号表清理（QAction 信号走 core 注册表，删除时兜底清理）
+void qSignalCleanup(int64_t ptr);
+
 void qActionDelete(int64_t ptr) {
     QAction* action = reinterpret_cast<QAction*>(ptr);
     if (action) {
+        qSignalCleanup(ptr);
         g_actionCallbacks.erase(ptr);
         delete action;
     }

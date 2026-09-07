@@ -14,6 +14,7 @@
 
 #include <QVideoSink>
 #include <QSize>
+#include "bridge_string_utils.h"
 
 extern "C" {
 
@@ -67,11 +68,11 @@ void qVideoSinkSetSubtitleText(int64_t ptr, const char* text) {
 const char* qVideoSinkSubtitleText(int64_t ptr) {
     QVideoSink* sink = reinterpret_cast<QVideoSink*>(ptr);
     if (sink) {
-        static QString tmp;
-        tmp = sink->subtitleText();
-        return tmp.toUtf8().constData();
+        // 修复：原实现返回临时 QByteArray 的 constData（悬垂）与字面量 ""（free 崩溃），
+        // 统一改为 dupUtf8/emptyString（std::malloc，仓颉侧 freeBridgeString 释放）
+        return cjqt6::dupUtf8(sink->subtitleText());
     }
-    return "";
+    return cjqt6::emptyString();
 }
 
 } // extern "C"

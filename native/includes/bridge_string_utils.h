@@ -4,10 +4,13 @@
 // 桥接层字符串返回统一工具
 //
 // 约定（P0 桥接内存安全审计定稿）：
-//   - 所有导出为 const char* 的字符串返回函数，一律用 malloc+memcpy 分配堆内存；
-//   - 永不返回字符串字面量 / 静态缓冲 / 调用方入参指针；
-//   - 对象为空或空串时返回 qEmptyCString()（malloc 的 1 字节 '\0'）；
-//   - 调用方（Cangjie FFI 侧）读取后必须 LibC.free 释放，见 src/ 封装。
+//   - 所有导出为 const char* 的字符串返回函数，一律用 dupUtf8/emptyString 分配
+//     std::malloc 堆内存；
+//   - 永不返回字符串字面量 / 静态缓冲 / 调用方入参指针（toUtf8().constData() 临时
+//     缓冲亦禁止，临时 QByteArray 析构后指针悬垂）；
+//   - 对象为空或空串时返回 emptyString()（malloc 的 1 字节 '\0'）；
+//   - 调用方（Cangjie FFI 侧）读取后必须经 freeBridgeString -> qCStringFree
+//     （std::free）释放，与分配同堆，见 src/core/cstring_utils.cj。
 
 #include <QByteArray>
 #include <QString>

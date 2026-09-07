@@ -65,45 +65,102 @@ public class Loops {
 }
 
 /// 音频输出设备
-public class QAudioOutput {
+public class QAudioOutput <: QtResource {
     private var ptr: Int64 = 0
-    
+    private var closed: Bool = false
+
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
-        unsafe { ptr = qAudioOutputCreate() }
+        unsafe {
+            ptr = qAudioOutputCreate()
+            if (ptr == 0) {
+                throw CreateFailedException("QAudioOutput 创建失败")
+            }
+        }
+        trackObject(ptr)
     }
     
     public func setVolume(volume: Float32): Unit {
+        checkValid()
         unsafe { qAudioOutputSetVolume(ptr, volume) }
     }
     
     public func volume(): Float32 {
+        checkValid()
         unsafe { qAudioOutputVolume(ptr) }
     }
     
     public func setMuted(muted: Bool): Unit {
+        checkValid()
         unsafe { qAudioOutputSetMuted(ptr, muted) }
     }
     
     public func isMuted(): Bool {
+        checkValid()
         unsafe { qAudioOutputIsMuted(ptr) }
     }
     
     public func getPtr(): Int64 { ptr }
     
-    public func delete(): Unit {
-        if (ptr != 0) {
+    /// 是否已关闭（资源已释放）
+    public func isClosed(): Bool { closed }
+    
+    /// 检查对象有效性（未关闭且指针有效）
+    public func isValid(): Bool {
+        return !closed && ptr != 0 && isObjectAlive(ptr)
+    }
+    
+    /// 检查有效性，无效时抛出异常
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
+    /// throws: NullPointerException 空指针访问时抛出
+    public func checkValid(): Unit {
+        if (closed) {
+            throw ResourceDisposedException("QAudioOutput 已经被释放")
+        }
+        if (ptr == 0) {
+            throw NullPointerException("QAudioOutput 指针为空")
+        }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QAudioOutput 底层 Qt 对象已失效")
+        }
+    }
+    
+    /// 关闭资源，释放Qt对象（幂等）
+    public func close(): Unit {
+        if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe { qAudioOutputDelete(ptr) }
+            closed = true
             ptr = 0
         }
+    }
+    
+    /// 删除音频输出（兼容旧 API，等同 close()）
+    public func delete(): Unit {
+        close()
     }
 }
 
 /// 媒体播放器
-public class QMediaPlayer {
+public class QMediaPlayer <: QtResource {
     private var ptr: Int64 = 0
+    private var closed: Bool = false
     
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
-        unsafe { ptr = qMediaPlayerCreate() }
+        unsafe {
+            ptr = qMediaPlayerCreate()
+            if (ptr == 0) {
+                throw CreateFailedException("QMediaPlayer 创建失败")
+            }
+        }
+        trackObject(ptr)
     }
     
     // 设置媒体源（URL）
@@ -237,10 +294,46 @@ public class QMediaPlayer {
     
     public func getPtr(): Int64 { ptr }
     
-    public func delete(): Unit {
-        if (ptr != 0) {
+    /// 是否已关闭（资源已释放）
+    public func isClosed(): Bool { closed }
+    
+    /// 检查对象有效性（未关闭且指针有效）
+    public func isValid(): Bool {
+        return !closed && ptr != 0 && isObjectAlive(ptr)
+    }
+    
+    /// 检查有效性，无效时抛出异常
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
+    /// throws: NullPointerException 空指针访问时抛出
+    public func checkValid(): Unit {
+        if (closed) {
+            throw ResourceDisposedException("QMediaPlayer 已经被释放")
+        }
+        if (ptr == 0) {
+            throw NullPointerException("QMediaPlayer 指针为空")
+        }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QMediaPlayer 底层 Qt 对象已失效")
+        }
+    }
+    
+    /// 关闭资源，释放Qt对象（幂等）
+    public func close(): Unit {
+        if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe { qMediaPlayerDelete(ptr) }
+            closed = true
             ptr = 0
         }
+    }
+    
+    public func delete(): Unit {
+        close()
     }
 }

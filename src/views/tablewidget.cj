@@ -124,8 +124,9 @@ public const ResizeToContents: Int32 = 3  // 根据内容调整
 // ============================================================
 // QTableWidget - 表格控件
 // ============================================================
-public class QTableWidget {
+public class QTableWidget <: QtResource {
     private var ptr: Int64 = 0
+    private var closed: Bool = false
     
     public init() {
         unsafe {
@@ -578,13 +579,37 @@ public class QTableWidget {
     public func getPtr(): Int64 {
         ptr
     }
-    
+
+    /// 是否已关闭（资源已释放）
+    public func isClosed(): Bool { closed }
+
+    /// 检查对象有效性（未关闭且指针有效）
+    public func isValid(): Bool {
+        return !closed && ptr != 0
+    }
+
+    /// 检查有效性，无效时抛出异常
+    public func checkValid(): Unit {
+        if (closed) {
+            throw ResourceDisposedException("QTableWidget 已经被释放")
+        }
+        if (ptr == 0) {
+            throw NullPointerException("QTableWidget 指针为空")
+        }
+    }
+
+    /// 关闭资源（幂等）
+    public func close(): Unit {
+        delete()
+    }
+
     public func delete(): Unit {
-        if (ptr != 0) {
+        if (!closed && ptr != 0) {
             unsafe {
                 qTableWidgetDelete(ptr)
             }
             ptr = 0
+            closed = true
         }
     }
 }
@@ -592,23 +617,29 @@ public class QTableWidget {
 // ============================================================
 // QTableWidgetItem 最小封装（复用 listwidget.cj 的 ItemFlag、treewidget.cj 的 CheckState）
 // ============================================================
-public class QTableWidgetItem {
+public class QTableWidgetItem <: QtResource {
     private var ptr: Int64 = 0
+    private var closed: Bool = false
+    /// 是否拥有原生对象：自建 init 为 true；fromPtr 借用（归控件管理）为 false
+    private var owned: Bool = true
 
     public init() {
         unsafe {
             ptr = qTableWidgetItemCreate()
         }
+        owned = true
     }
 
     public init(text: String) {
         unsafe {
             withCString(text) { c => ptr = qTableWidgetItemCreateWithText(c) }
         }
+        owned = true
     }
 
     private init(ptr: Int64) {
         this.ptr = ptr
+        this.owned = false
     }
 
     // 从控件返回的指针构造（不拥有所有权，调用方不应 delete）
@@ -677,12 +708,38 @@ public class QTableWidgetItem {
         }
     }
 
+    /// 是否已关闭
+    public func isClosed(): Bool { closed }
+
+    /// 检查对象有效性（借用 item 由控件管理，close 只置位不删除）
+    public func isValid(): Bool {
+        return !closed && ptr != 0
+    }
+
+    /// 检查有效性，无效时抛出异常
+    public func checkValid(): Unit {
+        if (closed) {
+            throw ResourceDisposedException("QTableWidgetItem 已经被释放")
+        }
+        if (ptr == 0) {
+            throw NullPointerException("QTableWidgetItem 指针为空")
+        }
+    }
+
+    /// 关闭资源（幂等；仅自建 item 删除底层对象，借用 item 只置位）
+    public func close(): Unit {
+        delete()
+    }
+
     public func delete(): Unit {
-        if (ptr != 0) {
-            unsafe {
-                qTableWidgetItemDelete(ptr)
+        if (!closed && ptr != 0) {
+            if (owned) {
+                unsafe {
+                    qTableWidgetItemDelete(ptr)
+                }
             }
             ptr = 0
+            closed = true
         }
     }
 }

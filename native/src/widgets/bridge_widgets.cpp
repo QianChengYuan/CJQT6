@@ -1,4 +1,4 @@
-﻿
+
 /**
  * @file bridge_widgets.cpp
  * @brief ���������ŽӺ��� - QLabel, QPushButton, QToolButton, QLineEdit, QTextEdit
@@ -60,6 +60,11 @@ extern "C" void qWnewSignalCleanup(int64_t ptr);
 // 由 bridge_ext_wselect.cpp 导出：清理选择控件信号回调 map（QComboBox/
 // QFontComboBox/QKeySequenceEdit），避免地址复用导致 connect 去重误跳。
 extern "C" void qWselectSignalCleanup(int64_t ptr);
+
+// 由 bridge_ext_wcore.cpp 导出：清理按钮/勾选控件信号回调 map（QPushButton
+// pressed/released/toggled/clickedChecked、QToolButton 同族、QCheckBox/QRadioButton
+// clicked），避免 delete 后条目残留与地址复用导致 connect 去重误跳。
+extern "C" void qWcoreSignalCleanup(int64_t ptr);
 
 // �ı��仯�ص�ӳ��
 static std::unordered_map<int64_t, std::function<void(int64_t)>> g_textChangedCallbacks;
@@ -259,6 +264,7 @@ void qButtonSetMenu(int64_t ptr, int64_t menuPtr) {
 void qButtonDelete(int64_t ptr) {
     QPushButton* button = reinterpret_cast<QPushButton*>(ptr);
     if (button) {
+        qWcoreSignalCleanup(ptr);  // 清理 ext_wcore 中 pressed/released/toggled/clickedChecked 表
         g_buttonCallbacks.erase(ptr);
         g_buttonClickConns.erase(ptr);
         delete button;
@@ -350,6 +356,7 @@ void qToolButtonShowMenu(int64_t ptr) {
 void qToolButtonDelete(int64_t ptr) {
     QToolButton* button = reinterpret_cast<QToolButton*>(ptr);
     if (button) {
+        qWcoreSignalCleanup(ptr);  // 清理 ext_wcore 中 QToolButton pressed/released/clickedChecked 表
         delete button;
     }
 }

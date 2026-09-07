@@ -69,12 +69,13 @@ public class SelectionMode {
 // ============================================================
 // QStandardItemModel
 // ============================================================
-public class QStandardItemModel {
+public class QStandardItemModel <: QtResource {
     private var ptr: Int64 = 0
+    private var closed: Bool = false
 
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
-    private func checkValid(): Unit {
-        if (ptr == 0) {
+    public func checkValid(): Unit {
+        if (ptr == 0 || closed) {
             throw ResourceDisposedException("QStandardItemModel already deleted")
         }
     }
@@ -96,41 +97,6 @@ public class QStandardItemModel {
         }
         if (ptr == 0) {
             throw CreateFailedException("QStandardItemModel create failed")
-        }
-    }
-
-    public func show(): Unit {
-        checkValid()
-        unsafe {
-            qWidgetShow(ptr)
-        }
-    }
-
-    public func hide(): Unit {
-        checkValid()
-        unsafe {
-            qWidgetHide(ptr)
-        }
-    }
-
-    public func resize(width: Int32, height: Int32): Unit {
-        checkValid()
-        unsafe {
-            qWidgetResize(ptr, width, height)
-        }
-    }
-
-    public func setEnabled(enabled: Bool): Unit {
-        checkValid()
-        unsafe {
-            qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
-        }
-    }
-
-    public func setStyleSheet(style: String): Unit {
-        checkValid()
-        unsafe {
-            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
         }
     }
 
@@ -335,13 +301,27 @@ public class QStandardItemModel {
         ptr
     }
 
+    /// 是否已关闭（资源已释放）
+    public func isClosed(): Bool { closed }
+
+    /// 检查对象有效性（未关闭且指针有效）
+    public func isValid(): Bool {
+        return !closed && ptr != 0
+    }
+
+    /// 关闭资源（幂等）
+    public func close(): Unit {
+        delete()
+    }
+
     public func delete(): Unit {
-        if (ptr != 0) {
+        if (!closed && ptr != 0) {
             unsafe {
                 qSignalCleanup(ptr)
                 qStandardItemModelDelete(ptr)
             }
             ptr = 0
+            closed = true
         }
     }
 }
@@ -349,23 +329,29 @@ public class QStandardItemModel {
 // ============================================================
 // QStandardItem 最小封装（复用 listwidget.cj 的 ItemFlag、treewidget.cj 的 CheckState）
 // ============================================================
-public class QStandardItem {
+public class QStandardItem <: QtResource {
     private var ptr: Int64 = 0
+    private var closed: Bool = false
+    /// 是否拥有原生对象：init()/init(text) 自建为 true；fromPtr 借用（归模型管理）为 false
+    private var owned: Bool = true
 
     public init() {
         unsafe {
             ptr = qStandardItemCreate()
         }
+        owned = true
     }
 
     public init(text: String) {
         unsafe {
             withCString(text) { c => ptr = qStandardItemCreateWithText(c) }
         }
+        owned = true
     }
 
     private init(ptr: Int64) {
         this.ptr = ptr
+        this.owned = false
     }
 
     // 从模型返回的指针构造（不拥有所有权，调用方不应 delete）
@@ -452,12 +438,39 @@ public class QStandardItem {
         }
     }
 
+    /// 是否已关闭
+    public func isClosed(): Bool { closed }
+
+    /// 检查对象有效性（借用 item 由模型管理，close 只置位不删除）
+    public func isValid(): Bool {
+        return !closed && ptr != 0
+    }
+
+    /// 检查有效性，无效时抛出异常
+    public func checkValid(): Unit {
+        if (closed) {
+            throw ResourceDisposedException("QStandardItem 已经被释放")
+        }
+        if (ptr == 0) {
+            throw NullPointerException("QStandardItem 指针为空")
+        }
+    }
+
+    /// 关闭资源（幂等；仅自建 item 删除底层对象，借用 item 只置位）
+    public func close(): Unit {
+        delete()
+    }
+
     public func delete(): Unit {
-        if (ptr != 0) {
+        if (!closed && ptr != 0 && owned) {
             unsafe {
                 qStandardItemDelete(ptr)
             }
             ptr = 0
+            closed = true
+        } else if (!closed) {
+            ptr = 0
+            closed = true
         }
     }
 }

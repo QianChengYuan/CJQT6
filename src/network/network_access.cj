@@ -58,12 +58,12 @@ public class KnownHeaders {
 // ============================================================
 // QNetworkRequest - 网络请求
 // ============================================================
-public class QNetworkRequest {
+public class QNetworkRequest <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
-    private func checkValid(): Unit {
+    public func checkValid(): Unit {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QNetworkRequest already deleted")
         }
@@ -138,6 +138,14 @@ public class QNetworkRequest {
 
     public func getPtr(): Int64 { ptr }
 
+    /// 是否已关闭（资源已释放）
+    public func isClosed(): Bool { closed }
+
+    /// 检查对象有效性（QNetworkRequest 非 QObject 值对象）
+    public func isValid(): Bool {
+        return !closed && ptr != 0
+    }
+
     public func close(): Unit {
         if (!closed && ptr != 0) {
             unsafe { qNetworkRequestDelete(ptr) }
@@ -151,12 +159,12 @@ public class QNetworkRequest {
 // ============================================================
 // QNetworkReply - 网络响应
 // ============================================================
-public class QNetworkReply {
+public class QNetworkReply <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
-    private func checkValid(): Unit {
+    public func checkValid(): Unit {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QNetworkReply already deleted")
         }
@@ -260,6 +268,14 @@ public class QNetworkReply {
 
     public func getPtr(): Int64 { ptr }
 
+    /// 是否已关闭（资源已释放）
+    public func isClosed(): Bool { closed }
+
+    /// 检查对象有效性（未关闭且指针有效）
+    public func isValid(): Bool {
+        return !closed && ptr != 0 && isObjectAlive(ptr)
+    }
+
     /// 释放资源（使用deleteLater确保线程安全）
     public func close(): Unit {
         if (!closed && ptr != 0) {
@@ -284,12 +300,12 @@ public class QNetworkReply {
 // ============================================================
 // QNetworkAccessManager - 网络访问管理器
 // ============================================================
-public class QNetworkAccessManager {
+public class QNetworkAccessManager <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
-    private func checkValid(): Unit {
+    public func checkValid(): Unit {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QNetworkAccessManager already deleted")
         }
@@ -372,6 +388,14 @@ public class QNetworkAccessManager {
     }
 
     public func getPtr(): Int64 { ptr }
+
+    /// 是否已关闭（资源已释放）
+    public func isClosed(): Bool { closed }
+
+    /// 检查对象有效性（未关闭且指针有效）
+    public func isValid(): Bool {
+        return !closed && ptr != 0 && isObjectAlive(ptr)
+    }
 
     public func close(): Unit {
         if (!closed && ptr != 0) {

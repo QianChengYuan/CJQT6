@@ -80,12 +80,12 @@ public class JsonType {
 // ============================================================
 
 /// JSON 值，可表示字符串、整数、浮点、布尔、数组、对象或 null
-public class QJsonValue {
+public class QJsonValue <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
-    private func checkValid(): Unit {
+    public func checkValid(): Unit {
         if (ptr == 0 || closed) { throw ResourceDisposedException("QJsonValue already deleted") }
     }
 
@@ -155,6 +155,14 @@ public class QJsonValue {
     public func close(): Unit {
         if (!closed && ptr != 0) { unsafe { qJsonValueDelete(ptr) }; ptr = 0; closed = true }
     }
+
+    /// 是否已关闭（资源已释放）
+    public func isClosed(): Bool { closed }
+
+    /// 检查对象有效性（JSON 值非 QObject 值包装）
+    public func isValid(): Bool {
+        return !closed && ptr != 0
+    }
 }
 
 // ============================================================
@@ -162,12 +170,12 @@ public class QJsonValue {
 // ============================================================
 
 /// JSON 对象（键值对集合）
-public class QJsonObject {
+public class QJsonObject <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
-    private func checkValid(): Unit {
+    public func checkValid(): Unit {
         if (ptr == 0 || closed) { throw ResourceDisposedException("QJsonObject already deleted") }
     }
 
@@ -219,6 +227,14 @@ public class QJsonObject {
     public func close(): Unit {
         if (!closed && ptr != 0) { unsafe { qJsonObjectDelete(ptr) }; ptr = 0; closed = true }
     }
+
+    /// 是否已关闭（资源已释放）
+    public func isClosed(): Bool { closed }
+
+    /// 检查对象有效性（JSON 对象非 QObject 值包装）
+    public func isValid(): Bool {
+        return !closed && ptr != 0
+    }
 }
 
 // ============================================================
@@ -226,12 +242,12 @@ public class QJsonObject {
 // ============================================================
 
 /// JSON 数组（有序值集合）
-public class QJsonArray {
+public class QJsonArray <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
-    private func checkValid(): Unit {
+    public func checkValid(): Unit {
         if (ptr == 0 || closed) { throw ResourceDisposedException("QJsonArray already deleted") }
     }
 
@@ -271,6 +287,14 @@ public class QJsonArray {
     public func close(): Unit {
         if (!closed && ptr != 0) { unsafe { qJsonArrayDelete(ptr) }; ptr = 0; closed = true }
     }
+
+    /// 是否已关闭（资源已释放）
+    public func isClosed(): Bool { closed }
+
+    /// 检查对象有效性（JSON 数组非 QObject 值包装）
+    public func isValid(): Bool {
+        return !closed && ptr != 0
+    }
 }
 
 // ============================================================
@@ -278,12 +302,12 @@ public class QJsonArray {
 // ============================================================
 
 /// JSON 文档，可从 JSON 字符串解析，支持序列化回字符串
-public class QJsonDocument {
+public class QJsonDocument <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
-    private func checkValid(): Unit {
+    public func checkValid(): Unit {
         if (ptr == 0 || closed) { throw ResourceDisposedException("QJsonDocument already deleted") }
     }
 
@@ -329,5 +353,13 @@ public class QJsonDocument {
     /// 释放资源
     public func close(): Unit {
         if (!closed && ptr != 0) { unsafe { qJsonDocumentDelete(ptr) }; ptr = 0; closed = true }
+    }
+
+    /// 是否已关闭（资源已释放）
+    public func isClosed(): Bool { closed }
+
+    /// 检查对象有效性（JSON 文档非 QObject 值包装）
+    public func isValid(): Bool {
+        return !closed && ptr != 0
     }
 }

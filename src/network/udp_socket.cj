@@ -45,11 +45,18 @@ public class Datagram {
 /// 提供UDP通信功能，支持数据报收发
 public class QUdpSocket {
     private var ptr: Int64 = 0
-    
+    private var closed: Bool = false
+
+    // 说明：QtResource 接口的 close() 语义是“释放对象”，而 QUdpSocket.close()
+    // 是“关闭底层 socket（可再次 bind 复用）”，二者冲突，故本类不实现 QtResource；
+    // 资源释放仍走 delete()。已补 closed/isClosed/checkValid 守卫与幂等 delete。
     /// 创建UDP套接字
     public init() {
         unsafe {
             ptr = qUdpSocketCreate()
+            if (ptr == 0) {
+                throw CreateFailedException("QUdpSocket 创建失败")
+            }
         }
         trackObject(ptr)
     }
@@ -184,8 +191,26 @@ public class QUdpSocket {
         }
     }
     
-    /// 是否有效
+    /// 是否已释放（delete() 之后为 true）
+    public func isClosed(): Bool { closed }
+
+    /// 检查有效性，无效时抛出异常
+    /// throws: ResourceDisposedException 对象已释放时抛出
+    /// throws: NullPointerException 空指针访问时抛出
+    public func checkValid(): Unit {
+        if (closed) {
+            throw ResourceDisposedException("QUdpSocket 已经被释放")
+        }
+        if (ptr == 0) {
+            throw NullPointerException("QUdpSocket 指针为空")
+        }
+    }
+
+    /// 是否有效（已释放时恒为 false）
     public func isValid(): Bool {
+        if (closed || ptr == 0) {
+            return false
+        }
         unsafe {
             return qUdpSocketIsValid(ptr)
         }
@@ -217,12 +242,13 @@ public class QUdpSocket {
         return ptr
     }
     
-    /// 删除套接字
+    /// 删除套接字（幂等）
     public func delete(): Unit {
-        if (ptr != 0) {
+        if (!closed && ptr != 0) {
             if (!isObjectAlive(ptr)) {
                 untrackObject(ptr)
                 ptr = 0
+                closed = true
                 return
             }
             untrackObject(ptr)
@@ -231,6 +257,7 @@ public class QUdpSocket {
                 qUdpSocketDelete(ptr)
             }
             ptr = 0
+            closed = true
         }
     }
 }

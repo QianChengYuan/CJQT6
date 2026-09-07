@@ -251,7 +251,7 @@ public class QLineEdit <: QtResource {
     /// 设置回车键按下回调（可捕获局部变量；P1c 闭包捕获），返回 SignalConnection 句柄
     public func setOnReturnPressedCapture(callback: () -> Unit): SignalConnection {
         checkValid()
-        let id = registerVoidCallback(callback)
+        let id = registerObjectVoidCallback(ptr, callback)
         unsafe {
             qLineEditConnectReturnPressedId(ptr, id)
         }
@@ -278,7 +278,7 @@ public class QLineEdit <: QtResource {
     /// 设置编辑完成回调（可捕获局部变量；P1c 闭包捕获），返回 SignalConnection 句柄
     public func setOnEditingFinishedCapture(callback: () -> Unit): SignalConnection {
         checkValid()
-        let id = registerVoidCallback(callback)
+        let id = registerObjectVoidCallback(ptr, callback)
         unsafe {
             qLineEditConnectEditingFinishedId(ptr, id)
         }
@@ -554,6 +554,8 @@ public class QLineEdit <: QtResource {
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            // 统一注销本对象名下 Capture 闭包（避免 gVoidRegistry 滞留闭包与捕获对象图）
+            unregisterObjectVoidCallbacks(ptr)
             if (!isObjectAlive(ptr)) {
                 untrackObject(ptr)
                 ptr = 0

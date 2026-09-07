@@ -93,18 +93,26 @@ public class QRunnable {
 // ============================================================
 // QThread - 线程
 // ============================================================
-public class QThread {
+public class QThread <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
-    private func checkValid(): Unit {
+    public func checkValid(): Unit {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QThread already deleted")
         }
         if (!isObjectAlive(ptr)) {
             throw ResourceDisposedException("QThread 底层 Qt 对象已失效")
         }
+    }
+
+    /// 是否已关闭（资源已释放）
+    public func isClosed(): Bool { closed }
+
+    /// 检查对象有效性（未关闭且指针有效）
+    public func isValid(): Bool {
+        return !closed && ptr != 0 && isObjectAlive(ptr)
     }
 
     /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
@@ -255,18 +263,18 @@ public class QThread {
 // ============================================================
 // QThreadPool - 线程池
 // ============================================================
-public class QThreadPool {
+public class QThreadPool <: QtResource {
     private var ptr: Int64 = 0
+    private var closed: Bool = false
 
     private init(p: Int64) {
         ptr = p
     }
 
-    /// 获取全局线程池实例
+    /// 获取全局线程池实例（单例借用，不 track、close() 只标记关闭不删除全局池）
     public static func globalInstance(): QThreadPool {
         let pool = QThreadPool(0)
         unsafe { pool.ptr = qThreadPoolGlobalInstance() }
-        trackObject(pool.ptr)
         return pool
     }
 
@@ -311,4 +319,37 @@ public class QThreadPool {
     }
 
     public func getPtr(): Int64 { ptr }
+
+    /// 是否已关闭
+    public func isClosed(): Bool { closed }
+
+    /// 检查对象有效性（全局单例借用语义：只查 closed/ptr）
+    public func isValid(): Bool {
+        return !closed && ptr != 0
+    }
+
+    /// 检查有效性，无效时抛出异常
+    /// throws: ResourceDisposedException 对象已释放时抛出
+    /// throws: NullPointerException 空指针访问时抛出
+    public func checkValid(): Unit {
+        if (closed) {
+            throw ResourceDisposedException("QThreadPool 已经被释放")
+        }
+        if (ptr == 0) {
+            throw NullPointerException("QThreadPool 指针为空")
+        }
+    }
+
+    /// 关闭资源（借用/单例语义：只标记关闭，不删除全局线程池）
+    public func close(): Unit {
+        if (!closed) {
+            ptr = 0
+            closed = true
+        }
+    }
+
+    /// 删除（兼容旧 API，等同 close()）
+    public func delete(): Unit {
+        close()
+    }
 }

@@ -863,25 +863,30 @@ group.start()
 | `setEasingCurve(curveType: Int32)` | 设置缓动曲线 |
 | `getPtr(): Int64` / `close()` / `delete()` | 指针与资源释放 |
 
-**缓动曲线常量** (`EasingCurve`):
+**缓动曲线常量** (`EasingCurve`，值对齐 Qt 官方 `QEasingCurve::Type`，native 侧 `static_cast` 直传):
 ```cangjie
 EasingCurve.Linear       // 0  线性
 EasingCurve.InQuad       // 1  二次缓入
 EasingCurve.OutQuad      // 2  二次缓出
 EasingCurve.InOutQuad    // 3  二次缓入缓出
-EasingCurve.InCubic      // 4  三次缓入
-EasingCurve.OutCubic     // 5  三次缓出
-EasingCurve.InOutCubic   // 6  三次缓入缓出
-EasingCurve.InSine       // 7  正弦缓入
-EasingCurve.OutSine      // 8  正弦缓出
-EasingCurve.InOutSine    // 9  正弦缓入缓出
-EasingCurve.InElastic    // 14 弹性缓入
-EasingCurve.OutElastic   // 15 弹性缓出
-EasingCurve.InOutElastic // 16 弹性缓入缓出
-EasingCurve.InBounce     // 17 弹跳缓入
-EasingCurve.OutBounce    // 18 弹跳缓出
-EasingCurve.InOutBounce  // 19 弹跳缓入缓出
+EasingCurve.OutInQuad    // 4  二次缓出缓入
+EasingCurve.InCubic      // 5  三次缓入
+EasingCurve.OutCubic     // 6  三次缓出
+EasingCurve.InOutCubic   // 7  三次缓入缓出
+EasingCurve.OutInCubic   // 8  三次缓出缓入
+EasingCurve.InQuart      // 9  四次缓入（…至 OutInQuint=16）
+EasingCurve.InSine       // 17 正弦缓入
+EasingCurve.OutSine      // 18 正弦缓出
+EasingCurve.InOutSine    // 19 正弦缓入缓出
+EasingCurve.InElastic    // 29 弹性缓入
+EasingCurve.OutElastic   // 30 弹性缓出
+EasingCurve.InOutElastic // 31 弹性缓入缓出
+EasingCurve.InBounce     // 37 弹跳缓入
+EasingCurve.OutBounce    // 38 弹跳缓出
+EasingCurve.InOutBounce  // 39 弹跳缓入缓出
 ```
+> 完整列表另含 Quart/Quint/Expo/Circ/Back 等曲线（10-16、21-28、33-36、40），
+> 取值与 Qt 官方枚举一致。
 
 ---
 

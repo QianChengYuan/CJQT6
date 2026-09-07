@@ -342,11 +342,13 @@ public class QTcpSocket <: QtResource {
     }
     
     /// 断开所有信号连接
+    /// 同时注销 Cangjie 侧捕获闭包注册表条目（避免闭包滞留；close 内也会执行，幂等）
     public func disconnectCallbacks(): Unit {
         checkValid()
         unsafe {
             qTcpSocketDisconnectCallbacks(ptr)
         }
+        unregisterObjectVoidCallbacks(ptr)
     }
     
     /// 设置连接成功回调（闭包捕获版，可捕获局部变量）
@@ -354,7 +356,7 @@ public class QTcpSocket <: QtResource {
     public func setOnConnectedCapture(callback: () -> Unit): Int64 {
         checkValid()
         ensureNetDispatcher()
-        let id = registerVoidCallback(callback)
+        let id = registerObjectVoidCallback(ptr, callback)
         unsafe {
             qTcpSocketConnectConnectedId(ptr, id)
         }
@@ -365,7 +367,7 @@ public class QTcpSocket <: QtResource {
     public func setOnDisconnectedCapture(callback: () -> Unit): Int64 {
         checkValid()
         ensureNetDispatcher()
-        let id = registerVoidCallback(callback)
+        let id = registerObjectVoidCallback(ptr, callback)
         unsafe {
             qTcpSocketConnectDisconnectedId(ptr, id)
         }
@@ -377,7 +379,7 @@ public class QTcpSocket <: QtResource {
     public func setOnReadyReadCapture(callback: () -> Unit): Int64 {
         checkValid()
         ensureNetDispatcher()
-        let id = registerVoidCallback(callback)
+        let id = registerObjectVoidCallback(ptr, callback)
         unsafe {
             qTcpSocketConnectReadyReadId(ptr, id)
         }
@@ -388,7 +390,7 @@ public class QTcpSocket <: QtResource {
     public func setOnErrorCapture(callback: () -> Unit): Int64 {
         checkValid()
         ensureNetDispatcher()
-        let id = registerVoidCallback(callback)
+        let id = registerObjectVoidCallback(ptr, callback)
         unsafe {
             qTcpSocketConnectErrorId(ptr, id)
         }
@@ -428,6 +430,8 @@ public class QTcpSocket <: QtResource {
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            // 统一注销本对象名下 Capture 闭包
+            unregisterObjectVoidCallbacks(ptr)
             if (!isObjectAlive(ptr)) {
                 untrackObject(ptr)
                 ptr = 0

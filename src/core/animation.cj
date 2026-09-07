@@ -49,12 +49,12 @@ public class AnimationDirection {
 // ============================================================
 // QAbstractAnimation - 动画基类
 // ============================================================
-public class QAbstractAnimation {
+public class QAbstractAnimation <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
-    private func checkValid(): Unit {
+    public func checkValid(): Unit {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QAbstractAnimation already deleted")
         }
@@ -149,7 +149,15 @@ public class QAbstractAnimation {
     /// 获取原生指针
     public func getPtr(): Int64 { ptr }
 
-    /// 释放资源
+    /// 是否已关闭（资源已释放）
+    public func isClosed(): Bool { closed }
+
+    /// 检查对象有效性（未关闭且指针有效）
+    public func isValid(): Bool {
+        return !closed && ptr != 0 && isObjectAlive(ptr)
+    }
+
+    /// 释放资源（幂等）
     public func delete(): Unit {
         if (!closed && ptr != 0) {
             if (!isObjectAlive(ptr)) {
@@ -164,18 +172,23 @@ public class QAbstractAnimation {
             closed = true
         }
     }
+
+    /// 关闭资源（兼容 QtResource 接口，等同 delete()）
+    public func close(): Unit {
+        delete()
+    }
 }
 
 
 // ============================================================
 // QParallelAnimationGroup - 并行动画组
 // ============================================================
-public class QParallelAnimationGroup {
+public class QParallelAnimationGroup <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
-    private func checkValid(): Unit {
+    public func checkValid(): Unit {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QParallelAnimationGroup already deleted")
         }
@@ -276,7 +289,15 @@ public class QParallelAnimationGroup {
     /// 获取原生指针
     public func getPtr(): Int64 { ptr }
 
-    /// 释放资源
+    /// 是否已关闭（资源已释放）
+    public func isClosed(): Bool { closed }
+
+    /// 检查对象有效性（未关闭且指针有效）
+    public func isValid(): Bool {
+        return !closed && ptr != 0 && isObjectAlive(ptr)
+    }
+
+    /// 释放资源（幂等）
     public func close(): Unit {
         if (!closed && ptr != 0) {
             if (!isObjectAlive(ptr)) {
@@ -290,5 +311,10 @@ public class QParallelAnimationGroup {
             ptr = 0
             closed = true
         }
+    }
+
+    /// 删除（兼容旧 API，等同 close()）
+    public func delete(): Unit {
+        close()
     }
 }

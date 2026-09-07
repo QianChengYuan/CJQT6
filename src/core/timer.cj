@@ -59,9 +59,10 @@ public class QTimer <: QtResource {
     }
 
     /// 设置超时回调（可捕获局部变量；P1c 闭包捕获），返回 SignalConnection 句柄
+    /// 闭包注册到对象名下，close() 时自动注销（即使句柄被丢弃也不滞留注册表）
     public func setOnTimeoutCapture(callback: () -> Unit): SignalConnection {
         checkValid()
-        let id = registerVoidCallback(callback)
+        let id = registerObjectVoidCallback(ptr, callback)
         unsafe {
             qTimerConnectTimeoutId(ptr, id)
         }
@@ -115,6 +116,8 @@ public class QTimer <: QtResource {
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            // 统一注销本对象名下 Capture 闭包
+            unregisterObjectVoidCallbacks(ptr)
             if (!isObjectAlive(ptr)) {
                 untrackObject(ptr)
                 ptr = 0

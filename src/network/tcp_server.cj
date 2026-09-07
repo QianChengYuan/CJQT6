@@ -176,7 +176,7 @@ public class QTcpServer <: QtResource {
     public func setOnNewConnectionCapture(callback: () -> Unit): Int64 {
         checkValid()
         ensureNetDispatcher()
-        let id = registerVoidCallback(callback)
+        let id = registerObjectVoidCallback(ptr, callback)
         unsafe {
             qTcpServerConnectNewConnectionId(ptr, id)
         }
@@ -184,11 +184,13 @@ public class QTcpServer <: QtResource {
     }
 
     /// 断开所有信号连接
+    /// 同时注销 Cangjie 侧捕获闭包注册表条目（避免闭包滞留；close 内也会执行，幂等）
     public func disconnectCallbacks(): Unit {
         checkValid()
         unsafe {
             qTcpServerDisconnectCallbacks(ptr)
         }
+        unregisterObjectVoidCallbacks(ptr)
     }
 
     /// 获取原生指针
@@ -225,6 +227,8 @@ public class QTcpServer <: QtResource {
     /// 先停止监听、断开信号，再删除底层 QTcpServer
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            // 统一注销本对象名下 Capture 闭包
+            unregisterObjectVoidCallbacks(ptr)
             if (!isObjectAlive(ptr)) {
                 untrackObject(ptr)
                 ptr = 0

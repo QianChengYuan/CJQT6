@@ -324,18 +324,34 @@ void qRadioButtonConnectClicked(int64_t ptr, void (*cb)(int32_t)) {
 
 // wcore 模块统一信号回调清理：对象 delete 后残留的条目会让 connect 去重
 // 保护（find != end 跳过注册）误判，复用同一地址的新对象 connect 被跳过、
-// 回调永不触发。由 qCheckBoxDelete/qRadioButtonDelete 调用。
-// （QPushButton/QToolButton 的 ExtSlot 映射为替换式连接，先 disconnect 后覆盖，
-//   不存在去重守卫问题，无需在此清理。）
+// 回调永不触发。由 qCheckBoxDelete/qRadioButtonDelete 及
+// qButtonDelete/qToolButtonDelete 调用。
+// 修复：原实现只清 g_cbClicked/g_rbClicked 两张表，漏清 QPushButton/QToolButton
+// 的 7 张 ExtSlot 表——替换式连接虽不存在去重误判，但对象删除后（未显式
+// disconnect 时）表条目仍残留，长时间运行累积内存；现一并清理。
 void qWcoreSignalCleanup(int64_t ptr) {
     g_cbClicked.erase(ptr);
     g_rbClicked.erase(ptr);
+    g_btnPressed.erase(ptr);
+    g_btnReleased.erase(ptr);
+    g_btnToggled.erase(ptr);
+    g_btnClickedChecked.erase(ptr);
+    g_tbPressed.erase(ptr);
+    g_tbReleased.erase(ptr);
+    g_tbClickedChecked.erase(ptr);
 }
 
 // 测试专用内省：查询 ptr 是否仍注册在任一 wcore 去重守卫回调 map 中。
 int32_t qWcoreSignalRegistered(int64_t ptr) {
     return (g_cbClicked.find(ptr) != g_cbClicked.end() ||
-            g_rbClicked.find(ptr) != g_rbClicked.end()) ? 1 : 0;
+            g_rbClicked.find(ptr) != g_rbClicked.end() ||
+            g_btnPressed.find(ptr) != g_btnPressed.end() ||
+            g_btnReleased.find(ptr) != g_btnReleased.end() ||
+            g_btnToggled.find(ptr) != g_btnToggled.end() ||
+            g_btnClickedChecked.find(ptr) != g_btnClickedChecked.end() ||
+            g_tbPressed.find(ptr) != g_tbPressed.end() ||
+            g_tbReleased.find(ptr) != g_tbReleased.end() ||
+            g_tbClickedChecked.find(ptr) != g_tbClickedChecked.end()) ? 1 : 0;
 }
 
 } // extern "C"

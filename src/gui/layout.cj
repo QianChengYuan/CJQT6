@@ -142,10 +142,10 @@ public class QVBoxLayout <: QLayout {
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     public func checkValid(): Unit {
         if (closed) {
-            throw Exception("QVBoxLayout 已经被释放")
+            throw ResourceDisposedException("QVBoxLayout 已经被释放")
         }
         if (ptr == 0) {
-            throw Exception("QVBoxLayout 指针为空")
+            throw NullPointerException("QVBoxLayout 指针为空")
         }
         if (!isObjectAlive(ptr)) {
             throw ResourceDisposedException("QVBoxLayout 底层 Qt 对象已失效")
@@ -253,10 +253,10 @@ public class QHBoxLayout <: QLayout {
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     public func checkValid(): Unit {
         if (closed) {
-            throw Exception("QHBoxLayout 已经被释放")
+            throw ResourceDisposedException("QHBoxLayout 已经被释放")
         }
         if (ptr == 0) {
-            throw Exception("QHBoxLayout 指针为空")
+            throw NullPointerException("QHBoxLayout 指针为空")
         }
         if (!isObjectAlive(ptr)) {
             throw ResourceDisposedException("QHBoxLayout 底层 Qt 对象已失效")
@@ -350,10 +350,10 @@ public class QGridLayout <: QLayout {
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     public func checkValid(): Unit {
         if (closed) {
-            throw Exception("QGridLayout 已经被释放")
+            throw ResourceDisposedException("QGridLayout 已经被释放")
         }
         if (ptr == 0) {
-            throw Exception("QGridLayout 指针为空")
+            throw NullPointerException("QGridLayout 指针为空")
         }
         if (!isObjectAlive(ptr)) {
             throw ResourceDisposedException("QGridLayout 底层 Qt 对象已失效")
@@ -563,10 +563,10 @@ public class QFormLayout <: QLayout {
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     public func checkValid(): Unit {
         if (closed) {
-            throw Exception("QFormLayout 已经被释放")
+            throw ResourceDisposedException("QFormLayout 已经被释放")
         }
         if (ptr == 0) {
-            throw Exception("QFormLayout 指针为空")
+            throw NullPointerException("QFormLayout 指针为空")
         }
         if (!isObjectAlive(ptr)) {
             throw ResourceDisposedException("QFormLayout 底层 Qt 对象已失效")

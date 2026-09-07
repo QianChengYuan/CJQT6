@@ -57,23 +57,31 @@ public class ProcessChannelMode {
 // QProcessEnvironment - 进程环境变量
 // ============================================================
 
-public class QProcessEnvironment {
+public class QProcessEnvironment <: QtResource {
     private var ptr: Int64 = 0
-    
+    private var closed: Bool = false
+
+    /// throws: CreateFailedException 底层对象创建失败时抛出
     public init() {
-        unsafe { ptr = qProcessEnvironmentCreate() }
-    }
-    
-    public static func system(): QProcessEnvironment {
-        let env = QProcessEnvironment()
-        unsafe { 
-            qProcessEnvironmentDelete(env.ptr)
-            env.ptr = qProcessEnvironmentCreateSystem() 
+        unsafe {
+            ptr = qProcessEnvironmentCreate()
+            if (ptr == 0) {
+                throw CreateFailedException("QProcessEnvironment 创建失败")
+            }
         }
-        return env
+    }
+
+    // 内部包装构造：直接持有 FFI 返回指针（system() 用，避免多余临时对象）
+    private init(native: Int64) {
+        this.ptr = native
+    }
+
+    public static func system(): QProcessEnvironment {
+        unsafe { QProcessEnvironment(qProcessEnvironmentCreateSystem()) }
     }
     
     public func insert(name: String, value: String): QProcessEnvironment {
+        checkValid()
         unsafe {
             var n = LibC.mallocCString(name)
             var v = LibC.mallocCString(value)
@@ -85,6 +93,7 @@ public class QProcessEnvironment {
     }
     
     public func remove(name: String): QProcessEnvironment {
+        checkValid()
         unsafe {
             var n = LibC.mallocCString(name)
             qProcessEnvironmentRemove(ptr, n)
@@ -94,6 +103,7 @@ public class QProcessEnvironment {
     }
     
     public func value(name: String): String {
+        checkValid()
         unsafe {
             var n = LibC.mallocCString(name)
             let cstr = qProcessEnvironmentValue(ptr, n)
@@ -105,6 +115,7 @@ public class QProcessEnvironment {
     }
     
     public func contains(name: String): Bool {
+        checkValid()
         unsafe {
             var n = LibC.mallocCString(name)
             let result = qProcessEnvironmentContains(ptr, n) != 0
@@ -113,15 +124,42 @@ public class QProcessEnvironment {
         }
     }
     
-    public func clear(): QProcessEnvironment { unsafe { qProcessEnvironmentClear(ptr) }; this }
-    public func isEmpty(): Bool { unsafe { qProcessEnvironmentIsEmpty(ptr) != 0 } }
+    public func clear(): QProcessEnvironment { checkValid(); unsafe { qProcessEnvironmentClear(ptr) }; this }
+    public func isEmpty(): Bool { checkValid(); unsafe { qProcessEnvironmentIsEmpty(ptr) != 0 } }
     public func getPtr(): Int64 { ptr }
-    
-    public func delete(): Unit {
-        if (ptr != 0) {
+
+    /// 是否已关闭（资源已释放）
+    public func isClosed(): Bool { closed }
+
+    /// 检查对象有效性（QProcessEnvironment 非 QObject，不做存活表查询）
+    public func isValid(): Bool {
+        return !closed && ptr != 0
+    }
+
+    /// 检查有效性，无效时抛出异常
+    /// throws: ResourceDisposedException 对象已释放时抛出
+    /// throws: NullPointerException 空指针访问时抛出
+    public func checkValid(): Unit {
+        if (closed) {
+            throw ResourceDisposedException("QProcessEnvironment 已经被释放")
+        }
+        if (ptr == 0) {
+            throw NullPointerException("QProcessEnvironment 指针为空")
+        }
+    }
+
+    /// 关闭资源，释放底层对象（幂等）
+    public func close(): Unit {
+        if (!closed && ptr != 0) {
             unsafe { qProcessEnvironmentDelete(ptr) }
             ptr = 0
+            closed = true
         }
+    }
+
+    /// 删除环境变量集（兼容旧API）
+    public func delete(): Unit {
+        close()
     }
 }
 
@@ -129,18 +167,62 @@ public class QProcessEnvironment {
 // QProcess - 进程管理
 // ============================================================
 
-public class QProcess {
+public class QProcess <: QtResource {
     private var ptr: Int64 = 0
+    private var closed: Bool = false
     
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
-        unsafe { ptr = qProcessCreate() }
+        unsafe {
+            ptr = qProcessCreate()
+            if (ptr == 0) {
+                throw CreateFailedException("QProcess 创建失败")
+            }
+        }
+        trackObject(ptr)
+    }
+    
+    /// 是否已关闭（资源已释放）
+    public func isClosed(): Bool { closed }
+    
+    /// 检查对象有效性（未关闭且指针有效）
+    public func isValid(): Bool {
+        return !closed && ptr != 0 && isObjectAlive(ptr)
+    }
+    
+    /// 检查有效性，无效时抛出异常
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
+    /// throws: NullPointerException 空指针访问时抛出
+    public func checkValid(): Unit {
+        if (closed) {
+            throw ResourceDisposedException("QProcess 已经被释放")
+        }
+        if (ptr == 0) {
+            throw NullPointerException("QProcess 指针为空")
+        }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QProcess 底层 Qt 对象已失效")
+        }
+    }
+    
+    /// 关闭资源，释放Qt对象（幂等；native qProcessDelete 内部会断开信号并清理回调表）
+    public func close(): Unit {
+        if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
+            unsafe { qProcessDelete(ptr) }
+            ptr = 0
+            closed = true
+        }
     }
     
     public func delete(): Unit {
-        if (ptr != 0) {
-            unsafe { qProcessDelete(ptr) }
-            ptr = 0
-        }
+        close()
     }
     
     // ========== 启动进程 ==========

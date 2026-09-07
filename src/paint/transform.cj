@@ -37,6 +37,12 @@ public class QTransform {
         unsafe { ptr = qTransformCreateWithValues(m11, m12, m13, m21, m22, m23, m31, m32, m33) }
     }
     
+    // 内部包装构造：直接持有 FFI 返回的原生指针（不额外分配临时对象，
+    // 修复 translate/scale/rotate/shear/inverted/multiply 每调泄漏一个 QTransform 的问题）
+    private init(wrap: Int64) {
+        this.ptr = wrap
+    }
+    
     /// 设置矩阵值
     public func setMatrix(m11: Float32, m12: Float32, m13: Float32, m21: Float32, m22: Float32, m23: Float32, m31: Float32, m32: Float32, m33: Float32): Unit {
         unsafe { qTransformSetMatrix(ptr, m11, m12, m13, m21, m22, m23, m31, m32, m33) }
@@ -44,30 +50,22 @@ public class QTransform {
     
     /// 平移变换，返回新变换
     public func translate(dx: Float32, dy: Float32): QTransform {
-        let t = QTransform()
-        unsafe { t.ptr = qTransformTranslate(ptr, dx, dy) }
-        return t
+        unsafe { QTransform(qTransformTranslate(ptr, dx, dy)) }
     }
     
     /// 缩放变换，返回新变换
     public func scale(sx: Float32, sy: Float32): QTransform {
-        let t = QTransform()
-        unsafe { t.ptr = qTransformScale(ptr, sx, sy) }
-        return t
+        unsafe { QTransform(qTransformScale(ptr, sx, sy)) }
     }
     
     /// 旋转变换，返回新变换
     public func rotate(angle: Float32): QTransform {
-        let t = QTransform()
-        unsafe { t.ptr = qTransformRotate(ptr, angle) }
-        return t
+        unsafe { QTransform(qTransformRotate(ptr, angle)) }
     }
     
     /// 扭曲变换，返回新变换
     public func shear(sh: Float32, sv: Float32): QTransform {
-        let t = QTransform()
-        unsafe { t.ptr = qTransformShear(ptr, sh, sv) }
-        return t
+        unsafe { QTransform(qTransformShear(ptr, sh, sv)) }
     }
     
     /// 获取矩阵元素
@@ -93,16 +91,12 @@ public class QTransform {
     
     /// 获取逆变换
     public func inverted(): QTransform {
-        let t = QTransform()
-        unsafe { t.ptr = qTransformInverted(ptr) }
-        return t
+        unsafe { QTransform(qTransformInverted(ptr)) }
     }
     
     /// 矩阵乘法
     public func multiply(other: QTransform): QTransform {
-        let t = QTransform()
-        unsafe { t.ptr = qTransformMultiply(ptr, other.getPtr()) }
-        return t
+        unsafe { QTransform(qTransformMultiply(ptr, other.getPtr())) }
     }
     
     /// 获取对象指针

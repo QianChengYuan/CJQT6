@@ -216,15 +216,21 @@ public class Modifier {
 // ============================================================
 // QEventWidget - 支持事件的Widget
 // ============================================================
-public class QEventWidget {
+public class QEventWidget <: QtResource {
     private let id: Int64
     private var ptr: Int64 = 0
+    private var closed: Bool = false
     
+    /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
         unsafe {
             id = qEventWidgetCreate()
             ptr = qEventWidgetGetPtr(id)
+            if (ptr == 0) {
+                throw CreateFailedException("QEventWidget 创建失败")
+            }
         }
+        trackObject(ptr)
     }
     
     public func getPtr(): Int64 {
@@ -235,14 +241,52 @@ public class QEventWidget {
         id
     }
     
-    public func delete(): Unit {
-        if (ptr != 0) {
+    /// 是否已关闭（资源已释放）
+    public func isClosed(): Bool {
+        closed
+    }
+    
+    /// 检查对象有效性（未关闭且指针有效）
+    public func isValid(): Bool {
+        return !closed && ptr != 0 && isObjectAlive(ptr)
+    }
+    
+    /// 检查有效性，无效时抛出异常
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
+    /// throws: NullPointerException 空指针访问时抛出
+    public func checkValid(): Unit {
+        if (closed) {
+            throw ResourceDisposedException("QEventWidget 已经被释放")
+        }
+        if (ptr == 0) {
+            throw NullPointerException("QEventWidget 指针为空")
+        }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QEventWidget 底层 Qt 对象已失效")
+        }
+    }
+    
+    /// 关闭资源，释放Qt对象（幂等）
+    public func close(): Unit {
+        if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qEventWidgetClearAllCallbacks(ptr)
                 qEventWidgetDelete(ptr)
             }
             ptr = 0
+            closed = true
         }
+    }
+    
+    public func delete(): Unit {
+        close()
     }
     
     // ========== 继承自QWidget的方法 ==========

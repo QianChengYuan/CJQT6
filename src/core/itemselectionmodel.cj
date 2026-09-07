@@ -50,12 +50,12 @@ public class SelectionFlag {
 // ============================================================
 
 /// 项目选择模型，管理模型中的选中项、当前项（常与 QTableView 等视图配合使用）
-public class QItemSelectionModel {
+public class QItemSelectionModel <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
-    private func checkValid(): Unit {
+    public func checkValid(): Unit {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QItemSelectionModel already deleted")
         }
@@ -136,6 +136,14 @@ public class QItemSelectionModel {
 
     /// 获取底层指针
     public func getPtr(): Int64 { ptr }
+
+    /// 是否已关闭（资源已释放）
+    public func isClosed(): Bool { closed }
+
+    /// 检查对象有效性（未关闭且指针有效）
+    public func isValid(): Bool {
+        return !closed && ptr != 0 && isObjectAlive(ptr)
+    }
 
     /// 释放资源
     public func close(): Unit {

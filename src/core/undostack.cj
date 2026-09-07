@@ -35,12 +35,13 @@ foreign func qUndoStackDelete(ptr: Int64): Unit
 // ============================================================
 // QUndoCommand - 撤销命令
 // ============================================================
-public class QUndoCommand {
+public class QUndoCommand <: QtResource {
     private var ptr: Int64 = 0
     private var pushed: Bool = false
+    private var closed: Bool = false
 
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
-    private func checkValid(): Unit {
+    public func checkValid(): Unit {
         if (ptr == 0) {
             throw ResourceDisposedException("QUndoCommand already deleted or pushed")
         }
@@ -95,13 +96,26 @@ public class QUndoCommand {
     /// 是否已入栈
     public func isPushed(): Bool { pushed }
 
-    /// 释放资源（仅当未入栈时可用）
-    public func delete(): Unit {
-        if (ptr != 0 && !pushed) {
+    /// 是否已关闭（入栈后的命令归栈管理，视为不可由包装释放）
+    public func isClosed(): Bool { closed || pushed }
 
+    /// 检查对象有效性（未释放且未入栈时才可由包装管理）
+    public func isValid(): Bool {
+        return !closed && ptr != 0 && !pushed
+    }
+
+    /// 释放资源（仅当未入栈时可用；幂等）
+    public func delete(): Unit {
+        if (!closed && ptr != 0 && !pushed) {
             unsafe { qUndoCommandDelete(ptr) }
             ptr = 0
+            closed = true
         }
+    }
+
+    /// 关闭资源（兼容 QtResource 接口，等同 delete()；入栈命令由栈管理，不删除）
+    public func close(): Unit {
+        delete()
     }
 }
 
@@ -109,12 +123,12 @@ public class QUndoCommand {
 // ============================================================
 // QUndoStack - 撤销栈
 // ============================================================
-public class QUndoStack {
+public class QUndoStack <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
-    private func checkValid(): Unit {
+    public func checkValid(): Unit {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QUndoStack already deleted")
         }
@@ -246,7 +260,15 @@ public class QUndoStack {
     /// 获取原生指针
     public func getPtr(): Int64 { ptr }
 
-    /// 释放资源
+    /// 是否已关闭（资源已释放）
+    public func isClosed(): Bool { closed }
+
+    /// 检查对象有效性（未关闭且指针有效）
+    public func isValid(): Bool {
+        return !closed && ptr != 0 && isObjectAlive(ptr)
+    }
+
+    /// 释放资源（幂等）
     public func close(): Unit {
         if (!closed && ptr != 0) {
             if (!isObjectAlive(ptr)) {
@@ -260,5 +282,10 @@ public class QUndoStack {
             ptr = 0
             closed = true
         }
+    }
+
+    /// 删除（兼容旧 API，等同 close()）
+    public func delete(): Unit {
+        close()
     }
 }
