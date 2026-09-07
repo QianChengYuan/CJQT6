@@ -6,8 +6,9 @@
 #   - Linux   (ubuntu-22.04, GCC 13, Qt 6.4.2 gcc_64)   —— 主仓 GitCode
 #   - Windows (windows-2022, MSVC 2022, Qt 6.9.1 msvc2022_64) —— GitHub 镜像
 # 流程：装仓颉 SDK → aqtinstall 装 Qt → 编译 bridge → cjpm build
-#       → offscreen 全量测试 → 上传产物。
+#       → offscreen 全量测试 → 上传桥接库产物。
 # 注意：Linux 不带 --coverage（SDK 1.1.0 在 Linux x64 触发 schd-worker 运行时 bug），与 macOS 对齐。
+#       Windows 独保留 --coverage + 覆盖率门禁（唯一不触发 bug 的端）。
 #
 # 前置说明（SDK 下载）：
 #   官网下载页直链（https://cangjie-lang.cn/download/1.1.0/cangjie-sdk-*.tar.gz|zip）会 404，
@@ -179,35 +180,12 @@ jobs:
           fi
           exit $exit_code
 
-      - name: 生成覆盖率报告（cjcov）
-        shell: bash
-        run: |
-          if [ ! -d cov_output ]; then
-            echo "::warning::cov_output/ 不存在，跳过覆盖率报告"
-            exit 0
-          fi
-          cjcov --root=cov_output --source=src \
-            --output=cov_output/report --html-details --json --xml
-          echo "覆盖率报告已生成: cov_output/report/index.html"
-
-      - name: 覆盖率门禁（P0-1，双口径阈值）
-        shell: bash
-        # Linux/Windows CI 均排除 requires_gui_dialog/drag/audio（口径对齐），
-        # 用保守阈值（含测试 60%/库源码 42%），待回填实测精确值。
-        run: |
-          if [ -f cov_output/report/coverage.json ]; then
-            pwsh -NoProfile -File scripts/check-coverage.ps1 \
-              -CoverageThreshold 60 -LibraryCoverageThreshold 42
-          else
-            echo "::warning::coverage.json 不存在，跳过覆盖率门禁"
-          fi
-
-      - name: 上传覆盖率报告
+      - name: 上传桥接库产物
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-linux
-          path: cov_output/report/
-          if-no-files-found: warn
+          name: cjqt6-bridge-linux-x64
+          path: releases/linux-x64/libcjqt6_bridge.so
+          if-no-files-found: error
 
   windows:
     name: Windows (MSVC 2022 · Qt 6.9.1)
@@ -323,6 +301,13 @@ jobs:
           path: cov_output/report/
           if-no-files-found: warn
 
+      - name: 上传桥接库产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: cjqt6-bridge-windows-x64
+          path: releases/windows-x64/cjqt6_bridge.dll
+          if-no-files-found: error
+
   # ============================================================
   # macOS Apple Silicon (arm64)
   # ------------------------------------------------------------
@@ -400,6 +385,15 @@ jobs:
           QTDIR: ${{ env.QTDIR }}
         run: |
           QTDIR="${{ env.QTDIR }}" bash scripts/build-macos-arm64.sh
+
+      - name: 编译并运行桥接层 C++ 单元测试（P0-3）
+        shell: bash
+        env:
+          QTDIR: ${{ env.QTDIR }}
+          DYLD_LIBRARY_PATH: ${{ env.QTDIR }}/lib:${{ env.CJ_RUNTIME_LIB }}
+          DYLD_FRAMEWORK_PATH: ${{ env.QTDIR }}/lib
+        run: |
+          QTDIR="${{ env.QTDIR }}" bash scripts/build-native-tests.sh
 
       - name: 校验依赖可重现构建
         shell: bash

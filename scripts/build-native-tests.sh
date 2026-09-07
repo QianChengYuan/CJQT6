@@ -46,11 +46,17 @@ cmake "$PROJECT_DIR" \
     -DCJQT6_NATIVE_TESTS_ASAN="$ASAN"
 
 echo "[2/3] 编译 bridge_core_tests ..."
-cmake --build . --config Release --target bridge_core_tests -j"$(nproc)"
+if command -v nproc &> /dev/null; then
+    JOBS=$(nproc)
+else
+    JOBS=$(sysctl -n hw.ncpu 2>/dev/null || echo 4)
+fi
+cmake --build . --config Release --target bridge_core_tests -j"$JOBS"
 
 echo "[3/3] ctest 运行 ..."
 export ASAN_OPTIONS=detect_leaks=1
 export LD_LIBRARY_PATH="$BUILD_DIR/lib:$QTDIR/lib:${LD_LIBRARY_PATH:-}"
+export DYLD_LIBRARY_PATH="$BUILD_DIR/lib:$QTDIR/lib:${DYLD_LIBRARY_PATH:-}"
 ctest --output-on-failure -C Release -R bridge_core_tests
 
 echo "✅ 桥接层 C++ 单元测试全部通过"
