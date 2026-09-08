@@ -553,6 +553,7 @@ jobs:
           QT_QPA_PLATFORM: offscreen
           QT_QPA_PLATFORM_PLUGIN_PATH: /usr/lib/aarch64-linux-gnu/qt6/plugins/platforms
           QT_PLUGIN_PATH: /usr/lib/aarch64-linux-gnu/qt6/plugins
+          QML2_IMPORT_PATH: /usr/lib/aarch64-linux-gnu/qt6/qml
           LD_LIBRARY_PATH: /usr/lib/aarch64-linux-gnu:${{ env.CANGJIE_HOME }}/runtime/lib/linux_aarch64_cjnative:${{ env.CJQT6_ROOT }}/releases/linux-arm64
         run: |
           # 与 Linux x64 / macOS 对齐：排除模态对话框/拖拽/音频/进程/打印等环境相关测试

@@ -224,6 +224,13 @@ class ScopeManagerTests {
         }
     }
     
+    @BeforeEach
+    func clearRegistry(): Unit {
+        // 全局注册表在测试间可能残留（如 autoRelease=false 的 scope 不清理控件标记），
+        // 每个用例前清空，避免指针复用导致 isManaged 误判（ARM64 上尤为明显）
+        ScopeManagerRegistry.clear()
+    }
+    
     @TestCase
     func testCreate() {
         let scope = ScopeManager()
