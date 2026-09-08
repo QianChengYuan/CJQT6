@@ -25,7 +25,8 @@ GitHub Actions 的 `linux-arm64` job 会在原生 ARM64 runner（`ubuntu-24.04-a
 
 ```bash
 # 安装 Qt6 开发包（Ubuntu/Debian）
-sudo apt-get install qt6-base-dev qt6-declarative-dev qt6-tools-dev \
+sudo apt-get install qt6-base-dev qt6-base-private-dev \
+  qt6-declarative-dev qt6-tools-dev \
   qt6-multimedia-dev qt6-charts-dev qt6-svg-dev
 
 # 构建（QTDIR 指向 multiarch 系统库目录，含 cmake/Qt6）
