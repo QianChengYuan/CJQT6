@@ -42,7 +42,8 @@ fi
 if [ -z "$QTDIR" ]; then
     echo "错误: 未找到 Qt6 安装路径"
     echo "请设置环境变量 QTDIR 指向 Qt6 安装目录（含 lib/cmake/Qt6）"
-    echo "或通过 aqtinstall 安装: aqt install-qt linux desktop 6.4.2 gcc_arm64"
+    echo "或通过 apt 安装（推荐）: sudo apt-get install qt6-base-dev qt6-declarative-dev qt6-multimedia-dev qt6-charts-dev"
+    echo "  然后设置 QTDIR=/usr/lib/aarch64-linux-gnu"
     exit 1
 fi
 

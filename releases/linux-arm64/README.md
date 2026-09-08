@@ -21,13 +21,21 @@ GitHub Actions 的 `linux-arm64` job 会在原生 ARM64 runner（`ubuntu-24.04-a
 
 ### 方式二：本地原生构建
 
-在 ARM64 Linux 主机上执行：
+在 ARM64 Linux 主机上执行（Qt6 通过 apt 安装）：
 
 ```bash
-QTDIR=/path/to/Qt6 bash scripts/build-linux-arm64.sh
+# 安装 Qt6 开发包（Ubuntu/Debian）
+sudo apt-get install qt6-base-dev qt6-declarative-dev qt6-tools-dev \
+  qt6-multimedia-dev qt6-charts-dev qt6-svg-dev
+
+# 构建（QTDIR 指向 multiarch 系统库目录，含 cmake/Qt6）
+QTDIR=/usr/lib/aarch64-linux-gnu bash scripts/build-linux-arm64.sh
 ```
 
 脚本会自动将产物部署到 `releases/linux-arm64/`。
+
+> **注意**：Qt 官方公共镜像（aqtinstall）不提供 ARM64 Linux 预编译包，
+> 因此 ARM64 上需通过系统包管理器（apt）安装 Qt6。
 
 ### 方式三：交叉编译（从 x64 主机）
 
