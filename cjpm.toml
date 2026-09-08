@@ -92,10 +92,11 @@
   compile-option = ""
   link-option    = "-Lreleases/linux-x64 -lcjqt6_bridge"
 
-# macOS x86_64
-[target.x86_64-apple-darwin]
-  compile-option = ""
-  link-option    = "-Lreleases/macos-x64 -lcjqt6_bridge"
+# macOS x86_64（仓颉官方未发布 macOS x86_64 SDK，本库不提供该平台桥接库；
+# 如需在 Intel Mac 上使用，请从源码自行构建并自行部署仓颉运行时）
+# [target.x86_64-apple-darwin]
+#   compile-option = ""
+#   link-option    = "-Lreleases/macos-x64 -lcjqt6_bridge"
 
 # macOS Apple Silicon
 [target.aarch64-apple-darwin]

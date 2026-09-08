@@ -1,4 +1,4 @@
-﻿# 编译输出
+# 编译输出
 build/
 target/
 *.o
@@ -12,6 +12,7 @@ lib/
 .idea/
 .arts/
 .agents/
+.trae/
 
 # AI工具配置（不上传）
 .codeartsdoer/
@@ -162,3 +163,7 @@ examples/**/stderr_*.txt
 # 示例运行时接收目录（文件传输产物）
 examples/**/recv/
 .codegraph
+
+# AI 辅助缺陷分析/修复方案文档（本地参考，不入库）
+DEFECTS_REVIEW.md
+HIGH_PRIORITY_FIX_PLAN.md
