@@ -48,5 +48,5 @@ QTDIR=/usr/lib/aarch64-linux-gnu bash scripts/build-linux-arm64.sh
 - Qt6 >= 6.2（Core, Gui, Widgets, Qml, Quick, Sql, Multimedia, Charts）
 - 运行时需 `libstdc++.so.6` 及 Qt6 各组件共享库
 
-> **注意**：本目录初始不含 `libcjqt6_bridge.so`，需通过上述方式构建后放入。
-> 若该文件缺失，在 ARM64 Linux 上执行 `cjpm build` 会因链接失败（`cannot find -lcjqt6_bridge`）而报错。
+> **说明**：本目录的 `libcjqt6_bridge.so` 由 CI（ubuntu-24.04-arm runner）编译产出并入库。
+> 若需重新构建，参考上述方式；构建后替换本目录的 `.so` 即可。
