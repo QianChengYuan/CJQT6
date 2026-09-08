@@ -223,7 +223,10 @@ static void fireVoid(ConnKey key) {
         auto i = g_voidCbs.find(key);
         if (i != g_voidCbs.end()) cb = i->second;
     }
-    if (cb) { try { cb(); } catch (...) {} }
+    if (cb) {
+        try { cb(); }
+        catch (...) { qWarning("cjqt6: void 信号槽回调抛出异常，已吞掉（ptr=%lld sig=%d）", static_cast<long long>(key.ptr), key.sig); }
+    }
 }
 
 static void fireInt32(ConnKey key, int32_t v) {
@@ -233,7 +236,10 @@ static void fireInt32(ConnKey key, int32_t v) {
         auto i = g_int32Cbs.find(key);
         if (i != g_int32Cbs.end()) cb = i->second;
     }
-    if (cb) { try { cb(v); } catch (...) {} }
+    if (cb) {
+        try { cb(v); }
+        catch (...) { qWarning("cjqt6: int32 信号槽回调抛出异常，已吞掉（ptr=%lld sig=%d value=%d）", static_cast<long long>(key.ptr), key.sig, v); }
+    }
 }
 
 static void fireFloat64(ConnKey key, double v) {
@@ -243,7 +249,10 @@ static void fireFloat64(ConnKey key, double v) {
         auto i = g_float64Cbs.find(key);
         if (i != g_float64Cbs.end()) cb = i->second;
     }
-    if (cb) { try { cb(v); } catch (...) {} }
+    if (cb) {
+        try { cb(v); }
+        catch (...) { qWarning("cjqt6: float64 信号槽回调抛出异常，已吞掉（ptr=%lld sig=%d value=%f）", static_cast<long long>(key.ptr), key.sig, v); }
+    }
 }
 
 // P2 生命周期修复保留：std::string 持有，确保回调调用期间 const char* 有效
@@ -256,7 +265,8 @@ static void fireText(ConnKey key, const QString& text) {
     }
     if (cb) {
         std::string s = text.toUtf8().constData();
-        try { cb(s.c_str()); } catch (...) {}
+        try { cb(s.c_str()); }
+        catch (...) { qWarning("cjqt6: text 信号槽回调抛出异常，已吞掉（ptr=%lld sig=%d text=%s）", static_cast<long long>(key.ptr), key.sig, s.c_str()); }
     }
 }
 
@@ -267,7 +277,10 @@ static void fireInt64(ConnKey key, int64_t v) {
         auto i = g_int64Cbs.find(key);
         if (i != g_int64Cbs.end()) cb = i->second;
     }
-    if (cb) { try { cb(v); } catch (...) {} }
+    if (cb) {
+        try { cb(v); }
+        catch (...) { qWarning("cjqt6: int64 信号槽回调抛出异常，已吞掉（ptr=%lld sig=%d value=%lld）", static_cast<long long>(key.ptr), key.sig, static_cast<long long>(v)); }
+    }
 }
 
 // void 信号连接（槽零参，Qt 自动丢弃信号多余实参）

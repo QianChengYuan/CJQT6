@@ -62,7 +62,10 @@ protected:
         if (cb) {
             try {
                 cb(event->button(), event->pos().x(), event->pos().y());
-            } catch (...) {}
+            } catch (...) {
+                // 仓颉回调抛异常不可穿过 Qt 事件循环（否则 std::terminate），吞掉但记日志
+                qWarning("cjqt6: mousePress 事件回调抛出异常，已吞掉（widget id=%lld）", static_cast<long long>(m_id));
+            }
         }
         QWidget::mousePressEvent(event);
     }
@@ -77,7 +80,9 @@ protected:
         if (cb) {
             try {
                 cb(event->buttons(), event->pos().x(), event->pos().y());
-            } catch (...) {}
+            } catch (...) {
+                qWarning("cjqt6: mouseMove 事件回调抛出异常，已吞掉（widget id=%lld）", static_cast<long long>(m_id));
+            }
         }
         QWidget::mouseMoveEvent(event);
     }
@@ -92,7 +97,9 @@ protected:
         if (cb) {
             try {
                 cb(event->button(), event->pos().x(), event->pos().y());
-            } catch (...) {}
+            } catch (...) {
+                qWarning("cjqt6: mouseRelease 事件回调抛出异常，已吞掉（widget id=%lld）", static_cast<long long>(m_id));
+            }
         }
         QWidget::mouseReleaseEvent(event);
     }
@@ -107,7 +114,9 @@ protected:
         if (cb) {
             try {
                 cb(event->key(), event->modifiers(), event->text().isEmpty() ? 0 : event->text()[0].unicode());
-            } catch (...) {}
+            } catch (...) {
+                qWarning("cjqt6: keyPress 事件回调抛出异常，已吞掉（widget id=%lld）", static_cast<long long>(m_id));
+            }
         }
         QWidget::keyPressEvent(event);
     }
@@ -122,7 +131,9 @@ protected:
         if (cb) {
             try {
                 cb(event->key(), event->modifiers(), event->text().isEmpty() ? 0 : event->text()[0].unicode());
-            } catch (...) {}
+            } catch (...) {
+                qWarning("cjqt6: keyRelease 事件回调抛出异常，已吞掉（widget id=%lld）", static_cast<long long>(m_id));
+            }
         }
         QWidget::keyReleaseEvent(event);
     }
@@ -138,7 +149,9 @@ protected:
             try {
                 QPainter painter(this);
                 cb(reinterpret_cast<int64_t>(&painter));
-            } catch (...) {}
+            } catch (...) {
+                qWarning("cjqt6: paint 事件回调抛出异常，已吞掉（widget id=%lld）", static_cast<long long>(m_id));
+            }
         }
         QWidget::paintEvent(event);
     }
