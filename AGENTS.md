@@ -24,6 +24,28 @@ cjpm build
 
 **运行示例/程序**：Qt 运行时 DLL 必须可找到，先 `.\scripts\setup-qt-env.ps1`（或把 `C:\Qt\6.10.3\msvc2022_64\bin` 加入 PATH），然后 `cd examples/<name> && cjpm run`。发布部署用 `windeployqt.exe` 或示例目录内的 `deploy_qt.ps1`。
 
+## 发布流程（推 GitCode 前必做）
+
+GitHub 镜像 CI 四平台（Windows x64 / Linux x64 / Linux ARM64 / macOS arm64）**全部全绿后**，推送 GitCode 主仓前，必须先把 CI 当次编译的各平台桥接库同步回 `releases/`，保证入库预编译库与最新代码一致：
+
+```powershell
+# 1) GitHub CI 全绿后，下载四平台 bridge 产物并归位 releases/<platform>/
+.\scripts\sync-release-artifacts.ps1                 # 自动取最近一次成功的 main run
+#   或指定 run：.\scripts\sync-release-artifacts.ps1 -RunId <runId>
+
+# 2) 核对后提交入库的预编译库
+git add releases/
+git commit -m "chore(releases): 同步 CI 四平台预编译桥接库 (run <runId>)"
+
+# 3) 先推 GitHub（触发 CI 复验），全绿后再推 GitCode
+git push github main
+git push origin main
+```
+
+- 脚本通过 `gh run download` 拉取 CI artifact（`cjqt6-bridge-<platform>`），分别归位到 `releases/windows-x64/cjqt6_bridge.dll`、`releases/linux-x64/libcjqt6_bridge.so`、`releases/linux-arm64/libcjqt6_bridge.so`、`releases/macos-arm64/libcjqt6_bridge.dylib`。
+- **Windows CI 只产出 `cjqt6_bridge.dll`**（`cjpm.toml` 链接的就是 dll，mingw 可直接链接 dll；入库的 `cjqt6_bridge.lib` 不随 CI 更新，导出符号稳定即可继续用）。
+- `releases/macos-x64/` 无产物（仓颉无 macOS x64 SDK，不支持），不要同步。
+
 ## 已知坑（踩过才会知道）
 
 - **增量构建陷阱**：`native\build_windows_x64` 有 CMake 缓存时，`cmake --build` 可能判定"已最新"跳过链接，导致改了 C++ 代码但行为不变。强制重编：`cmake --build . --config Release --clean-first`，或删掉 `native\build_windows_x64` 重来。
