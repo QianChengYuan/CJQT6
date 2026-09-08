@@ -44,6 +44,9 @@ public class QPieSeries {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QPieSeries already deleted")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QPieSeries 底层 Qt 对象已失效")
+        }
     }
 
     /// 创建饼图序列
@@ -135,6 +138,13 @@ public class QPieSeries {
     /// 释放资源；已 addSeries 后由 chart 级联释放，勿主动调用
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            // 级联销毁守卫：对象已被父对象（chart/view）接管并销毁时，只注销不 delete，避免 use-after-free
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
             untrackObject(ptr)
             unsafe { qPieSeriesDelete(ptr) }
             ptr = 0

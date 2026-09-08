@@ -132,12 +132,14 @@ public class QTableWidget <: QtResource {
         unsafe {
             ptr = qTableWidgetCreate()
         }
+        trackObject(ptr)
     }
     
     public init(rows: Int32, cols: Int32) {
         unsafe {
             ptr = qTableWidgetCreateWithSize(rows, cols)
         }
+        trackObject(ptr)
     }
     
     public func show(): Unit {
@@ -596,6 +598,9 @@ public class QTableWidget <: QtResource {
         if (ptr == 0) {
             throw NullPointerException("QTableWidget 指针为空")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QTableWidget 底层 Qt 对象已失效")
+        }
     }
 
     /// 关闭资源（幂等）
@@ -605,6 +610,14 @@ public class QTableWidget <: QtResource {
 
     public func delete(): Unit {
         if (!closed && ptr != 0) {
+            // 级联销毁守卫：控件被父窗口/布局接管并销毁时，只注销不 delete，避免 use-after-free
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qTableWidgetDelete(ptr)
             }

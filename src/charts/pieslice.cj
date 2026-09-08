@@ -63,6 +63,9 @@ public class QPieSlice {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QPieSlice already deleted")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QPieSlice 底层 Qt 对象已失效")
+        }
     }
 
     /// 创建空切片
@@ -243,6 +246,13 @@ public class QPieSlice {
     /// 释放资源；已 append 后由 series 级联释放，勿主动调用
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            // 级联销毁守卫：对象已被父对象（chart/series）接管并销毁时，只注销不 delete，避免 use-after-free
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
             untrackObject(ptr)
             unsafe { qPieSliceDelete(ptr) }
             ptr = 0

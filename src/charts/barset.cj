@@ -40,6 +40,9 @@ public class QBarSet {
         if (ptr == 0 || closed) {
             throw ResourceDisposedException("QBarSet already deleted")
         }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QBarSet 底层 Qt 对象已失效")
+        }
     }
 
     /// 创建数据集，指定标签
@@ -115,6 +118,13 @@ public class QBarSet {
     /// 释放资源；已 append 到 QBarSeries 后由 series 级联释放，勿主动调用
     public func close(): Unit {
         if (!closed && ptr != 0) {
+            // 级联销毁守卫：对象已被父对象（chart/series）接管并销毁时，只注销不 delete，避免 use-after-free
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
             untrackObject(ptr)
             unsafe { qBarSetDelete(ptr) }
             ptr = 0
