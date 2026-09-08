@@ -44,6 +44,7 @@ CJQT6 通过 FFI 桥接技术，把 Qt6 的 C++ API 封装成仓颉原生 API �
 | 打印 | `cjqt6.print` | `QPrinter`、`QPrintDialog`/`QPrintPreviewDialog` |
 | 资源 | `cjqt6.resource` | 资源容器、作用域管理器（RAII 辅助）、`ResourceUtils` |
 | 图表 | `cjqt6.charts` | `QChart`/`QChartView`、折线/柱状/饼图/散点/面积/样条/百分比/堆叠/箱线/蜡烛图等系列、坐标轴（`QValueAxis`/`QBarCategoryAxis`/`QCategoryAxis`/`QDateTimeAxis`/`QLogValueAxis`）、`QLegend` |
+| 富控件 | `cjqt6.richwidgets` | 现代化复合控件（20 个文件）：`Avatar`/`Badge`/`Cascader`/`Countdown`/`DateRangePicker`/`Descriptions`/`Empty`/`Form`/`GroupCard`/`Pagination`/`Rate`/`SearchBox`/`Skeleton`/`Statistic`/`Steps`/`Switch`/`Tag`/`Timeline`/`Toast`/`Transfer` |
 
 > 最小示例里通常 import：`cjqt6.core.*`、`cjqt6.widgets.*`、`cjqt6.gui.*`。
 

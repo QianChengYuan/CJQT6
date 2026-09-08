@@ -1,15 +1,15 @@
-﻿﻿# CJQT6 — 仓颉语言的 Qt6 封装库
+﻿# CJQT6 — 仓颉语言的 Qt6 封装库
 
 > 让仓颉语言像 Python 使用 PyQt 一样便捷地开发 Qt6 跨平台 GUI 应用
 
 [![Qt](https://img.shields.io/badge/Qt-6.10.3-blue)](https://www.qt.io/)
 [![Cangjie](https://img.shields.io/badge/Cangjie-1.1.0-orange)](https://cangjie-lang.cn/)
-[![Version](https://img.shields.io/badge/version-1.7.0-green)](cjpm.toml)
+[![Version](https://img.shields.io/badge/version-1.9.0-green)](cjpm.toml)
 [![License](https://img.shields.io/badge/license-MIT-green)](docs/LICENSE)
 
-CJQT6（版本 1.7.0）是为 [仓颉编程语言](https://cangjie-lang.cn/) 提供的 **Qt6 封装库**：仓颉源码（`src/`）通过 FFI 调用 C++ 桥接动态库（`cjqt6_bridge`，`native/`）包装 Qt6 API。项目采用三层架构（仓颉封装层 → C ABI 桥接层 → Qt6 原生层），在主流桌面平台上提供接近原生的性能与开发体验。
+CJQT6（版本 1.9.0）是为 [仓颉编程语言](https://cangjie-lang.cn/) 提供的 **Qt6 封装库**：仓颉源码（`src/`）通过 FFI 调用 C++ 桥接动态库（`cjqt6_bridge`，`native/`）包装 Qt6 API。项目采用三层架构（仓颉封装层 → C ABI 桥接层 → Qt6 原生层），在主流桌面平台上提供接近原生的性能与开发体验。
 
-远端仓库在 **GitCode**（`https://gitcode.com/Cangjie-TPC/CJQT6.git`）；GitHub 镜像仓（`QianChengYuan/CJQT6`）挂载 `.github/workflows/ci.yml` 跑三端无人值守 CI（Linux 主仓、Windows 镜像仓）。
+远端仓库在 **GitCode**（`https://gitcode.com/Cangjie-TPC/CJQT6.git`）；GitHub 镜像仓（`QianChengYuan/CJQT6`）挂载 `.github/workflows/ci.yml` 跑四平台无人值守 CI（Windows x64 / Linux x64 / Linux ARM64 / macOS arm64）。
 
 > 💡 CJQT6 与 Cangjie-TPC 组织下的 CJQT（Qt5.15 绑定）是**并行关系**——CJQT6 面向 Qt6 新特性，覆盖 QML / Network / SQL / Print 等更完整的模块体系。
 >
@@ -22,9 +22,9 @@ CJQT6（版本 1.7.0）是为 [仓颉编程语言](https://cangjie-lang.cn/) 提
 - **🚀 接近原生的性能**：C ABI 桥接层零拷贝传递，避免 C++ name mangling，性能损耗低于 5%
 - **🛡️ 安全的对象生命周期**：桥接层实现反向失效存活表（`qTrackObject` / `qUntrackObject` / `qIsObjectAlive`），通过 `QObject::destroyed` 信号自动标记级联析构的子对象为失效，彻底解决 double-free / 悬空指针问题
 - **🔗 完整的信号槽机制**：复合键 `(ptr, signalId)` + 真 `QObject::disconnect` + 跨线程 `QueuedConnection`，支持自定义信号发射
-- **🧩 广泛的模块覆盖**：13 个仓颉子包（core/widgets/gui/dialogs/menu/paint/qml/multimedia/network/sql/views/print/resource），53 个 C++ 桥接源文件
-- **✅ 工程化闭环**：34 个测试文件、千余测试用例全通过，代码覆盖率约 79%，`cjcov` 覆盖率门禁已集成
-- **🌐 跨平台预编译**：Linux x64 / Windows x64 提供预编译 bridge 库，开箱即用
+- **🧩 广泛的模块覆盖**：15 个仓颉子包（core/widgets/gui/dialogs/menu/paint/qml/multimedia/network/sql/views/print/resource/charts/richwidgets），56 个 C++ 桥接源文件
+- **✅ 工程化闭环**：49 个测试文件、约 2950 个断言全通过，代码覆盖率约 77%，`cjcov` 覆盖率门禁已集成
+- **🌐 跨平台预编译**：Windows x64 / Linux x64 / Linux ARM64 / macOS arm64 提供预编译 bridge 库，开箱即用
 - **📦 一键门禁**：`scripts/verify_all.ps1` 集成构建 → 测试 → 覆盖率 → 冒烟全流程
 
 ---
@@ -37,7 +37,7 @@ CJQT6（版本 1.7.0）是为 [仓颉编程语言](https://cangjie-lang.cn/) 提
 | **Qt6** | 6.4.2（Linux）<br/>6.10.3（Windows） | 桌面版，需包含 `qtbase` + `qttools`；见 [版本兼容矩阵](docs/qt-version-matrix.md) |
 | **C++ 编译器** | MSVC 2022（Win）<br/>GCC 13.3+（Linux） | 仅修改 `native/` 桥接层时需要重编 |
 | **CMake** | 3.16+ | 编译 `native/` 桥接库 |
-| **操作系统** | Windows 10/11 x64<br/>Linux x64（Ubuntu 20.04+ / WSL2） | macOS 目录已建，bridge 待补 |
+| **操作系统** | Windows 10/11 x64<br/>Linux x64（Ubuntu 20.04+ / WSL2）<br/>Linux ARM64 / macOS arm64 | macOS x64 不支持（仓颉无该平台 SDK） |
 
 > ⚠️ **Qt 版本与编译器 ABI 强绑定**：Windows 必须用 MSVC 版 Qt6.10.3，混用 MinGW 会导致链接失败。CJQT6 桥接库对 Qt **小版本**敏感（存在 ABI 差异），换 Qt 版本必须重编 `cjqt6_bridge` 并跑全量测试。
 
@@ -176,7 +176,7 @@ main() {
 
 ```
 CJQT6/
-├── src/                        # 仓颉封装层（13 子包）
+├── src/                        # 仓颉封装层（15 子包）
 │   ├── core/                   # QObject/QTimer/QVariant/事件系统/存活表
 │   ├── widgets/                # QPushButton/QMainWindow/布局等
 │   ├── gui/                    # QPainter/QFont/QColor/QIcon
@@ -190,17 +190,20 @@ CJQT6/
 │   ├── views/                  # 列表/树/表格视图
 │   ├── print/                  # 打印支持
 │   ├── resource/               # 资源管理
-│   └── test/                   # 测试源码（package cjqt6.test，34 个 *_test.cj）
-├── native/                     # C++ FFI 桥接层（53 个 .cpp）
+│   ├── charts/                 # Qt Charts 图表（系列/坐标轴/QChart）
+│   ├── richwidgets/            # 现代化富控件（Avatar/Badge/Cascader/Form/Toast/Transfer…）
+│   └── test/                   # 测试源码（package cjqt6.test，49 个 *_test.cj）
+├── native/                     # C++ FFI 桥接层（56 个 .cpp）
 │   ├── src/<module>/bridge_*.cpp   # extern "C" 导出 qXxx* 函数
 │   ├── includes/               # 桥接头文件（含 MOC 类）
 │   └── tests/                  # 桥接层 C++ 单元测试
 ├── releases/                   # 预编译桥接库（入库，cjpm 链接目标）
 │   ├── windows-x64/            # MSVC + Qt 6.10.3
 │   ├── linux-x64/              # GCC 13.3 + Qt 6.4.2
-│   ├── macos-x64/              # 占位（待补 dylib）
-│   └── macos-arm64/            # 占位（待补 dylib）
-├── examples/                   # 21 个独立示例工程
+│   ├── linux-arm64/            # Linux ARM64（系统 Qt6）
+│   ├── macos-arm64/            # Apple Silicon（dylib）
+│   └── macos-x64/              # 仅占位 README（仓颉无 macOS x64 SDK，不支持）
+├── examples/                   # 20 个独立示例工程
 ├── scripts/                    # 构建/测试/辅助脚本
 ├── docs/                       # 文档（api/tutorial/resource/testing/…）
 ├── tests/                      # 测试部署脚本（deploy_qt_test.ps1）
@@ -213,7 +216,7 @@ CJQT6/
 
 ## 🧪 测试与覆盖率
 
-- 测试源码在根包 `src/test/`（`package cjqt6.test`，34 个 `*_test.cj`，千余 `@Expect` 断言），**根目录 `cjpm test` 直接发现并运行**，随仓库版本化。
+- 测试源码在根包 `src/test/`（`package cjqt6.test`，49 个 `*_test.cj`，约 2950 个 `@Expect`/`@Assert` 断言），**根目录 `cjpm test` 直接发现并运行**，随仓库版本化。
 - 桥接层 C++ 单元测试在 `native/tests/`，由 `scripts/build-native-tests.ps1` 构建、`ctest` 运行。
 - GUI 测试类用 `GUITestEnvironment`（`src/core/gui_test_env.cj`）在 `@BeforeAll` 里建 `QApplication`。
 
@@ -235,7 +238,7 @@ xvfb-run cjpm test
 powershell -ExecutionPolicy Bypass -File scripts\verify_all.ps1
 ```
 
-该脚本自动完成：编译 bridge → `cjpm build` → offscreen 全量测试 → 生成覆盖率报告 → 冒烟示例验证。当前覆盖率约 **79%**。
+该脚本自动完成：编译 bridge → `cjpm build` → offscreen 全量测试 → 生成覆盖率报告 → 冒烟示例验证。当前覆盖率约 **77%**。
 
 > 崩溃退出码 `3221227010` 通常是缺 `QApplication` 实例。
 
@@ -245,11 +248,12 @@ powershell -ExecutionPolicy Bypass -File scripts\verify_all.ps1
 
 | 平台 | 预编译 bridge | 运行时验证 | 生产可用度 |
 |---|---|---|---|
-| Linux x64（Ubuntu 20.04+ / WSL2） | ✅ GCC 13.3 + Qt 6.4.2 | ✅ 全量测试通过 | **可用** |
-| Windows x64（Win10/11） | ✅ MSVC 2022 + Qt 6.10.3 | ✅ 全量测试通过 | **可用** |
-| macOS x64 | ⚠️ 目录已建，dylib 待补 | ⚠️ 需自编译 | 自担风险 |
-| macOS arm64 | ⚠️ 目录已建，dylib 待补 | ⚠️ 需自编译 | 自担风险 |
-| Linux ARM64 / Windows ARM64 | ❌ | ❌ | 不支持 |
+| Windows x64（Win10/11） | ✅ MSVC 2022 + Qt 6.10.3 | ✅ CI 全量测试通过 | **可用** |
+| Linux x64（Ubuntu 20.04+ / WSL2） | ✅ GCC 13.3 + Qt 6.4.2 | ✅ CI 全量测试通过 | **可用** |
+| Linux ARM64（aarch64） | ✅ 系统 Qt6 | ✅ CI 全量测试通过 | **可用** |
+| macOS arm64（Apple Silicon） | ✅ dylib（Qt 6.4.2） | ✅ CI 全量测试通过 | **可用** |
+| macOS x64（Intel） | ❌ 仓颉官方无 macOS x64 SDK | ❌ | 不支持 |
+| Windows ARM64 | ❌ | ❌ | 暂不支持 |
 
 ---
 
@@ -265,12 +269,14 @@ powershell -ExecutionPolicy Bypass -File scripts\verify_all.ps1
 | **multimedia** | QMediaPlayer, QAudioOutput |
 | **network** | HTTP / TCP / UDP |
 | **sql** | 数据库连接 + 表模型 |
-| **views** | QListView, QTreeWidget, QTableView |
+| **views** | QListView, QTreeWidget, QTableView, 各类 Model |
+| **charts** | QChart/QChartView, 折线/柱状/饼图等系列, QValueAxis |
+| **richwidgets** | Avatar, Badge, Cascader, Form, Toast, Transfer 等现代化富控件 |
 | **paint / print / menu / resource** | 绘图 / 打印 / 菜单 / 资源 |
 
 ---
 
-## 📂 示例程序（21 个）
+## 📂 示例程序（20 个）
 
 | 示例 | 说明 |
 |---|---|
@@ -327,8 +333,8 @@ powershell -ExecutionPolicy Bypass -File scripts\verify_all.ps1
 
 - [x] **v1.0** — Widgets 基础链路 + 信号槽 P0/P1
 - [x] **v1.5** — 反向失效存活表、跨线程 QueuedConnection
-- [x] **v1.7** — QML / Network / SQL / Print 模块落地，千余用例 + 约 79% 覆盖率
-- [ ] **v1.8** — macOS 官方 bridge 预编译、GraphicsView 封装
+- [x] **v1.7** — QML / Network / SQL / Print 模块落地，千余用例 + 约 77% 覆盖率
+- [x] **v1.9** — 四平台 CI（Win x64/Linux x64/Linux ARM64/macOS arm64）+ charts/richwidgets 模块、全量封装类接入存活表级联销毁守卫；macOS x64 因官方无 SDK 不支持
 - [ ] **v2.0** — QML 深度集成、QAbstractItemModel 子类化、鸿蒙（OHOS）适配预研
 
 

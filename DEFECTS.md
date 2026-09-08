@@ -8,6 +8,29 @@
 
 ---
 
+## 修复状态总览（2026-09-08 / 09 更新）
+
+本报告记录的缺陷已完成高/中优先级修复闭环，均经四平台 CI（Windows x64 / Linux x64 / Linux ARM64 / macOS arm64）全量验证并入库。各缺陷正文保留原始分析，状态如下：
+
+| 缺陷 | 严重度 | 状态 | 说明 / commit |
+|------|--------|------|----------------|
+| **B1** | 高 | ✅ 已修复 | `bridge_events.cpp` 全局回调表加 `std::recursive_mutex`，锁内查找拷贝、锁外执行回调防死锁 |
+| **D1** | 高 | ✅ 已修复 | `releases/linux-arm64/` 已建并入库实际桥接库，CI 加 `aarch64` job（仓颉官方有 linux-aarch64 SDK） |
+| **D2** | 高 | ✅ 已取消 | 仓颉官方**无 macOS x64 SDK**，非可修复项；`cjpm.toml` 的 `x86_64-apple-darwin` target 已注释，平台表标记不支持 |
+| **A1** | 中 | ✅ 已修复（结论修正） | grep 计数差为文本假象；真实问题是 **33 个 QObject 封装类缺级联销毁守卫**——charts 24 类补 `isObjectAlive` 守卫、views 9 类接入存活表，修 double-free/UAF；附级联生命周期回归测试 |
+| **A2** | 中 | ✅ 判定误报 | `QSqlDatabase` 是隐式共享**值类（非 QObject）**，`trackObject` 强转 QObject 会 UB，不 track 正确；`close()` 不调 `removeDatabase` 为可选增强项 |
+| **A3** | 中 | ✅ 已修复 | `QProcessEnvironment` 已实现 `QtResource` 接口与 `checkValid` 守卫 |
+| **C1** | 中 | ✅ 已修复 | 桥接层 11 处空 `catch(...){}` 补 `qWarning` 日志（保留吞异常防穿透 FFI 的防御语义，不再静默） |
+| **E1** | 中 | ✅ 已修复 | `scripts/run-test.ps1` 移除硬编码本机绝对路径 |
+| **F1** | 中 | ✅ 已修复 | SKILL.md 模块地图补 `richwidgets`（20 个富控件）行 |
+| **F2** | 低 | ✅ 已修复 | AGENTS.md / README.md 测试数（49）、断言数（约 2950）、示例数（20）、模块数（15）已同步 |
+| **F3** | 低 | ✅ 已修复 | macOS / Linux ARM64 产物状态、平台支持表已按实际更新 |
+| C2 / D3 / E2 / G1 / H1–H4 / I1–I2 | 低-中 | ⏸ 未处理 | 属设计取舍、性能优化、示例卫生或 FFI 固有限制，有规避手段，不阻塞使用；详见各正文 |
+
+> 回归测试：新增 `src/test/cascade_lifetime_test.cj`（6 个 `@TestCase`，charts/views 级联销毁后业务方法抛 `ResourceDisposedException`、`close()` 安全幂等），锁定 A1 修复行为。全量 `cjpm test` 1401 PASSED / 75 SKIPPED / 12 FAILED（12 个为 QEventWidgetTests 在 Windows offscreen 下预先存在的偶发超时，与本次改动无关）。
+
+---
+
 ## 严重程度定义
 
 | 等级 | 含义 |
