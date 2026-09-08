@@ -15,7 +15,7 @@ import std.collection.{HashMap, ArrayList}
 /// - 这是一个全局静态类，所有数据在进程级别共享
 /// - 线程不安全，多线程环境需要外部同步
 /// - 在作用域关闭时必须调用unregisterScope清理
-class ScopeManagerRegistry {
+public class ScopeManagerRegistry {
     /// 控件指针 -> 作用域ID的映射
     /// 用于快速查找控件被哪个作用域管理
     private static var managedWidgets: HashMap<Int64, String> = HashMap<Int64, String>()
