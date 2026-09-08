@@ -121,7 +121,7 @@
 
 ## D. 平台兼容性缺陷
 
-### D1. `linux-arm64` 链接目录不存在
+### D1. `linux-arm64` 链接目录不存在 ✅ 已修复
 - **严重程度**：高
 - **影响范围**：Linux ARM64 平台构建直接失败。
 - **缺陷描述**：[cjpm.toml#L106-L108](file:///c:/CodeTools/cangjie_git/CJQT6/cjpm.toml#L106-L108) 声明 `[target.aarch64-unknown-linux-gnu] link-option = "-Lreleases/linux-arm64 -lcjqt6_bridge"`，但 `releases/` 目录下**没有 `linux-arm64` 子目录**（仅有 `windows-x64`、`linux-x64`、`macos-x64`、`macos-arm64`）。链接器找不到库直接报错。
@@ -131,6 +131,12 @@
   1. 在 aarch64 Linux 上设置 `CJQT6_ROOT`
   2. `cjpm build`
   3. 链接阶段报 `cannot find -lcjqt6_bridge`
+- **修复方案**：
+  1. 仓颉官方已发布 `cangjie-sdk-linux-aarch64-1.1.0.tar.gz`，解除了前置阻塞。
+  2. 新增 `scripts/build-linux-arm64.sh` 原生 ARM64 构建脚本，产物部署到 `releases/linux-arm64/`。
+  3. CI 新增 `linux-arm64` job（`ubuntu-24.04-arm` runner + Qt 6.5.3 gcc_arm64），编译 `libcjqt6_bridge.so` 并上传 artifact。
+  4. `releases/linux-arm64/` 目录已创建（含 README.md 说明构建方式），CI 产物下载后 commit 入库即可。
+- **修复状态**：基础设施已就绪（构建脚本 + CI job + 目录），`libcjqt6_bridge.so` 需由 CI 构建后下载入库。
 
 ### D2. `macos-x64` 仅有占位 README，无桥接库产物
 - **严重程度**：高
@@ -283,14 +289,14 @@
 
 ---
 
-## 附录：缺陷优先级建议（仅建议，未实施修复）
+## 附录：缺陷优先级建议
 
-| 优先级 | 缺陷编号 | 理由 |
-|--------|----------|------|
-| P0（阻塞性） | D1, D2, B1 | 链接失败/崩溃，阻塞使用 |
-| P1（重要） | A1, A2, C1, E1 | 资源泄漏/调试困难/可移植性 |
-| P2（改进） | A3, D3, E2, F1, G1, H1, H2, H3, H4, I1 | 一致性/文档/易用性 |
-| P3（次要） | C2, F2, F3, I2 | 文档/边缘安全 |
+| 优先级 | 缺陷编号 | 理由 | 状态 |
+|--------|----------|------|------|
+| P0（阻塞性） | D1, D2, B1 | 链接失败/崩溃，阻塞使用 | D1 ✅已修复 / D2 ⏸️已取消（无 macOS x86_64 SDK，target 已注释）/ B1 ✅已修复 |
+| P1（重要） | A1, A2, C1, E1 | 资源泄漏/调试困难/可移植性 | 待处理 |
+| P2（改进） | A3, D3, E2, F1, G1, H1, H2, H3, H4, I1 | 一致性/文档/易用性 | 待处理 |
+| P3（次要） | C2, F2, F3, I2 | 文档/边缘安全 | 待处理 |
 
 ---
 

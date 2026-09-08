@@ -49,7 +49,7 @@ case "$PLATFORM" in
         bash scripts/build-linux-x64.sh
         ;;
     linux-arm64)
-        echo "ARM64构建尚未实现"
+        bash scripts/build-linux-arm64.sh
         ;;
     macos-x64)
         bash scripts/build-macos-x64.sh

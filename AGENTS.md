@@ -40,7 +40,7 @@ cjpm build
 | `src/test/` | 测试源码（`package cjqt6.test`，41 个 `*_test.cj`，根目录 `cjpm test` 发现） |
 | `native/src/<module>/bridge_*.cpp` | C++ FFI 桥接实现（56 个 .cpp，模块含 core/gui/widgets/views/multimedia/network/paint/print/process/qml/sql/tools/charts），`extern "C"` 导出 `qXxx*` 函数；改它必须重编 bridge |
 | `native/includes/*.h` | 桥接头文件（含 MOC 类 gui.h/widgets.h/signalemitter.h） |
-| `releases/<platform>/` | 预编译桥接库（入库），cjpm 链接目标；现有 `windows-x64/`、`linux-x64/` 含实际产物，`macos-arm64/`、`macos-x64/` 仅占位 README |
+| `releases/<platform>/` | 预编译桥接库（入库），cjpm 链接目标；现有 `windows-x64/`、`linux-x64/`、`macos-arm64/` 含实际产物，`linux-arm64/`（CI 构建后入库）、`macos-x64/` 仅占位 README |
 | `examples/` | 25 个示例/工具工程目录（notepad/calculator/dormitory_manager/qq_chat_lan/all_controls_demo/music_player/snake_game/tank_battle/todo_list/charts_demo…） |
 | `tests/` | 只保留部署脚本 `deploy_qt_test.ps1` / `deploy_qt.ps1`（构建产物不入库） |
 | `scripts/` | `update-bridge.ps1`、`rebuild_all.ps1`、`setup-qt-env.ps1/.sh`、`build-linux-x64.sh` 等 |

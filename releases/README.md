@@ -1,4 +1,4 @@
-﻿# CJQT6 发行版
+# CJQT6 发行版
 
 本目录包含预编译的二进制文件，供不想自行编译的用户下载使用。
 
@@ -126,6 +126,7 @@ make -j$(nproc)
 |------|------|------|
 | Windows x64 (MSVC) | `scripts/update-bridge.ps1` | `releases/windows-x64/cjqt6_bridge.dll` |
 | Linux x86_64 | `scripts/build-linux-x64.sh` | `releases/linux-x64/libcjqt6_bridge.so` |
+| Linux ARM64 (aarch64) | `scripts/build-linux-arm64.sh` | `releases/linux-arm64/libcjqt6_bridge.so` |
 | macOS Intel | `scripts/build-macos-x64.sh` | `releases/macos-x64/libcjqt6_bridge.dylib` |
 | macOS Apple Silicon | `scripts/build-macos-arm64.sh` | `releases/macos-arm64/libcjqt6_bridge.dylib` |
 
