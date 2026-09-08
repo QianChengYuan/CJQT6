@@ -11,8 +11,9 @@
 | Windows x64 (MSVC 2022) | `releases/windows-x64/` | **6.10.3** (msvc2022_64) | CI（windows-2022）+ 本机 | ✅ 全量用例通过 |
 | Windows x64 (MinGW) | `releases/windows-x64/` | 6.10.3 (mingw_64) | 本机交叉验证 | ⚠️ 见 ABI 说明 |
 | Linux x86_64 (GCC) | `releases/linux-x64/` | **6.4.2** (gcc_64) | CI（ubuntu-24.04）+ WSL | ✅ 全量用例通过（requires_audio 组按需跳过） |
-| macOS x86_64 | `releases/macos-x64/` | 待定 | 无（P1-3 待做） | ⏳ 占位 |
-| macOS arm64 | `releases/macos-arm64/` | 待定 | 无（P1-3 待做） | ⏳ 占位 |
+| Linux ARM64 (aarch64) | `releases/linux-arm64/` | 系统 Qt6 | CI（ubuntu-24.04-arm） | ✅ 全量用例通过 |
+| macOS x86_64 (Intel) | `releases/macos-x64/`（无产物） | — | 无 | ⏸️ 暂不支持（仓颉 1.1.0 暂未提供 macOS x64 SDK） |
+| macOS arm64 (Apple Silicon) | `releases/macos-arm64/` | **6.4.2** | CI（macos-14） | ✅ 全量用例通过 |
 
 ## 2. 为什么要锁定 Qt 小版本（ABI 说明）
 

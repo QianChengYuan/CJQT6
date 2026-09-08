@@ -16,7 +16,7 @@
 |------|--------|------|----------------|
 | **B1** | 高 | ✅ 已修复 | `bridge_events.cpp` 全局回调表加 `std::recursive_mutex`，锁内查找拷贝、锁外执行回调防死锁 |
 | **D1** | 高 | ✅ 已修复 | `releases/linux-arm64/` 已建并入库实际桥接库，CI 加 `aarch64` job（仓颉官方有 linux-aarch64 SDK） |
-| **D2** | 高 | ✅ 已取消 | 仓颉官方**无 macOS x64 SDK**，非可修复项；`cjpm.toml` 的 `x86_64-apple-darwin` target 已注释，平台表标记不支持 |
+| **D2** | 高 | ✅ 已取消 | 仓颉 **1.1.0 版本暂未提供 macOS x64（x86_64）SDK**，当前版本非可修复项；`cjpm.toml` 的 `x86_64-apple-darwin` target 已注释，平台表标记暂不支持 |
 | **A1** | 中 | ✅ 已修复（结论修正） | grep 计数差为文本假象；真实问题是 **33 个 QObject 封装类缺级联销毁守卫**——charts 24 类补 `isObjectAlive` 守卫、views 9 类接入存活表，修 double-free/UAF；附级联生命周期回归测试 |
 | **A2** | 中 | ✅ 判定误报 | `QSqlDatabase` 是隐式共享**值类（非 QObject）**，`trackObject` 强转 QObject 会 UB，不 track 正确；`close()` 不调 `removeDatabase` 为可选增强项 |
 | **A3** | 中 | ✅ 已修复 | `QProcessEnvironment` 已实现 `QtResource` 接口与 `checkValid` 守卫 |
@@ -316,7 +316,7 @@
 
 | 优先级 | 缺陷编号 | 理由 | 状态 |
 |--------|----------|------|------|
-| P0（阻塞性） | D1, D2, B1 | 链接失败/崩溃，阻塞使用 | D1 ✅已修复 / D2 ⏸️已取消（无 macOS x86_64 SDK，target 已注释）/ B1 ✅已修复 |
+| P0（阻塞性） | D1, D2, B1 | 链接失败/崩溃，阻塞使用 | D1 ✅已修复 / D2 ⏸️已取消（仓颉 1.1.0 暂未提供 macOS x86_64 SDK，target 已注释）/ B1 ✅已修复 |
 | P1（重要） | A1, A2, C1, E1 | 资源泄漏/调试困难/可移植性 | 待处理 |
 | P2（改进） | A3, D3, E2, F1, G1, H1, H2, H3, H4, I1 | 一致性/文档/易用性 | 待处理 |
 | P3（次要） | C2, F2, F3, I2 | 文档/边缘安全 | 待处理 |

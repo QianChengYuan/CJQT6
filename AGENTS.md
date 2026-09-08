@@ -44,7 +44,7 @@ git push origin main
 
 - 脚本通过 `gh run download` 拉取 CI artifact（`cjqt6-bridge-<platform>`），分别归位到 `releases/windows-x64/cjqt6_bridge.dll`、`releases/linux-x64/libcjqt6_bridge.so`、`releases/linux-arm64/libcjqt6_bridge.so`、`releases/macos-arm64/libcjqt6_bridge.dylib`。
 - **Windows CI 只产出 `cjqt6_bridge.dll`**（`cjpm.toml` 链接的就是 dll，mingw 可直接链接 dll；入库的 `cjqt6_bridge.lib` 不随 CI 更新，导出符号稳定即可继续用）。
-- `releases/macos-x64/` 无产物（仓颉无 macOS x64 SDK，不支持），不要同步。
+- `releases/macos-x64/` 无产物（仓颉 1.1.0 版本暂未提供 macOS x64 SDK，暂不支持），不要同步。
 
 ## 已知坑（踩过才会知道）
 
@@ -62,7 +62,7 @@ git push origin main
 | `src/test/` | 测试源码（`package cjqt6.test`，49 个 `*_test.cj`，根目录 `cjpm test` 发现） |
 | `native/src/<module>/bridge_*.cpp` | C++ FFI 桥接实现（56 个 .cpp，模块含 core/gui/widgets/views/multimedia/network/paint/print/process/qml/sql/tools/charts），`extern "C"` 导出 `qXxx*` 函数；改它必须重编 bridge |
 | `native/includes/*.h` | 桥接头文件（含 MOC 类 gui.h/widgets.h/signalemitter.h） |
-| `releases/<platform>/` | 预编译桥接库（入库），cjpm 链接目标；`windows-x64/`、`linux-x64/`、`linux-arm64/`、`macos-arm64/`(dylib) 含实际产物；`macos-x64/` 仅占位 README——仓颉官方无 macOS x64 SDK，`cjpm.toml` 对应 target 已注释，不支持 |
+| `releases/<platform>/` | 预编译桥接库（入库），cjpm 链接目标；`windows-x64/`、`linux-x64/`、`linux-arm64/`、`macos-arm64/`(dylib) 含实际产物；`macos-x64/` 仅占位 README——仓颉 1.1.0 版本暂未提供 macOS x64 SDK，`cjpm.toml` 对应 target 已注释，暂不支持 |
 | `examples/` | 20 个示例/工具工程目录（notepad/calculator/dormitory_manager/qq_chat_lan/all_controls_demo/music_player/snake_game/tank_battle/todo_list/charts_demo…） |
 | `tests/` | 只保留部署脚本 `deploy_qt_test.ps1` / `deploy_qt.ps1`（构建产物不入库） |
 | `scripts/` | `update-bridge.ps1`、`rebuild_all.ps1`、`setup-qt-env.ps1/.sh`、`build-linux-x64.sh` 等 |

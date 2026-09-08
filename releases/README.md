@@ -127,7 +127,7 @@ make -j$(nproc)
 | Windows x64 (MSVC) | `scripts/update-bridge.ps1` | `releases/windows-x64/cjqt6_bridge.dll` |
 | Linux x86_64 | `scripts/build-linux-x64.sh` | `releases/linux-x64/libcjqt6_bridge.so` |
 | Linux ARM64 (aarch64) | `scripts/build-linux-arm64.sh` | `releases/linux-arm64/libcjqt6_bridge.so` |
-| macOS Intel | `scripts/build-macos-x64.sh` | `releases/macos-x64/libcjqt6_bridge.dylib` |
+| macOS Intel | `scripts/build-macos-x64.sh` | `releases/macos-x64/libcjqt6_bridge.dylib`（⚠️ 仓颉 1.1.0 暂未提供 macOS x64 SDK，当前暂不可用） |
 | macOS Apple Silicon | `scripts/build-macos-arm64.sh` | `releases/macos-arm64/libcjqt6_bridge.dylib` |
 
 在目标 macOS 机器上可直接运行 `bash scripts/build-all-platforms.sh` 自动检测平台并调用对应脚本。

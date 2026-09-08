@@ -37,7 +37,7 @@ CJQT6（版本 1.9.0）是为 [仓颉编程语言](https://cangjie-lang.cn/) 提
 | **Qt6** | 6.4.2（Linux）<br/>6.10.3（Windows） | 桌面版，需包含 `qtbase` + `qttools`；见 [版本兼容矩阵](docs/qt-version-matrix.md) |
 | **C++ 编译器** | MSVC 2022（Win）<br/>GCC 13.3+（Linux） | 仅修改 `native/` 桥接层时需要重编 |
 | **CMake** | 3.16+ | 编译 `native/` 桥接库 |
-| **操作系统** | Windows 10/11 x64<br/>Linux x64（Ubuntu 20.04+ / WSL2）<br/>Linux ARM64 / macOS arm64 | macOS x64 不支持（仓颉无该平台 SDK） |
+| **操作系统** | Windows 10/11 x64<br/>Linux x64（Ubuntu 20.04+ / WSL2）<br/>Linux ARM64 / macOS arm64 | macOS x64 暂不支持（仓颉 1.1.0 版本暂未提供该平台 x64 SDK） |
 
 > ⚠️ **Qt 版本与编译器 ABI 强绑定**：Windows 必须用 MSVC 版 Qt6.10.3，混用 MinGW 会导致链接失败。CJQT6 桥接库对 Qt **小版本**敏感（存在 ABI 差异），换 Qt 版本必须重编 `cjqt6_bridge` 并跑全量测试。
 
@@ -202,7 +202,7 @@ CJQT6/
 │   ├── linux-x64/              # GCC 13.3 + Qt 6.4.2
 │   ├── linux-arm64/            # Linux ARM64（系统 Qt6）
 │   ├── macos-arm64/            # Apple Silicon（dylib）
-│   └── macos-x64/              # 仅占位 README（仓颉无 macOS x64 SDK，不支持）
+│   └── macos-x64/              # 仅占位 README（仓颉 1.1.0 版本暂未提供 macOS x64 SDK，暂不支持）
 ├── examples/                   # 20 个独立示例工程
 ├── scripts/                    # 构建/测试/辅助脚本
 ├── docs/                       # 文档（api/tutorial/resource/testing/…）
@@ -252,7 +252,7 @@ powershell -ExecutionPolicy Bypass -File scripts\verify_all.ps1
 | Linux x64（Ubuntu 20.04+ / WSL2） | ✅ GCC 13.3 + Qt 6.4.2 | ✅ CI 全量测试通过 | **可用** |
 | Linux ARM64（aarch64） | ✅ 系统 Qt6 | ✅ CI 全量测试通过 | **可用** |
 | macOS arm64（Apple Silicon） | ✅ dylib（Qt 6.4.2） | ✅ CI 全量测试通过 | **可用** |
-| macOS x64（Intel） | ❌ 仓颉官方无 macOS x64 SDK | ❌ | 不支持 |
+| macOS x64（Intel） | ❌ 仓颉 1.1.0 暂未提供 x64 SDK | ❌ | 暂不支持 |
 | Windows ARM64 | ❌ | ❌ | 暂不支持 |
 
 ---
@@ -334,7 +334,7 @@ powershell -ExecutionPolicy Bypass -File scripts\verify_all.ps1
 - [x] **v1.0** — Widgets 基础链路 + 信号槽 P0/P1
 - [x] **v1.5** — 反向失效存活表、跨线程 QueuedConnection
 - [x] **v1.7** — QML / Network / SQL / Print 模块落地，千余用例 + 约 77% 覆盖率
-- [x] **v1.9** — 四平台 CI（Win x64/Linux x64/Linux ARM64/macOS arm64）+ charts/richwidgets 模块、全量封装类接入存活表级联销毁守卫；macOS x64 因官方无 SDK 不支持
+- [x] **v1.9** — 四平台 CI（Win x64/Linux x64/Linux ARM64/macOS arm64）+ charts/richwidgets 模块、全量封装类接入存活表级联销毁守卫；macOS x64 因仓颉 1.1.0 暂未提供 x64 SDK 暂不支持
 - [ ] **v2.0** — QML 深度集成、QAbstractItemModel 子类化、鸿蒙（OHOS）适配预研
 
 
