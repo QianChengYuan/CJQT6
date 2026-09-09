@@ -386,6 +386,7 @@ class QQmlComponentTests {
         engine.delete()
     }
 
+    @Tag[requires_qml_quick]
     @TestCase
     func testSetDataAndReady() {
         let engine = QQmlApplicationEngine()

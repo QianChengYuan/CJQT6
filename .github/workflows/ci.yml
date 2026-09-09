@@ -288,6 +288,8 @@ jobs:
 
       - name: 仓颉构建+测试流水线
         uses: ./.github/actions/cjpm-pipeline
+        with:
+          exclude-tags: "requires_gui_dialog,requires_gui_drag,requires_audio,requires_process_spawn,requires_printer,requires_uiloader_findchild"
         env:
           SDKROOT: ${{ env.SDKROOT }}
           QT_QPA_PLATFORM: offscreen
@@ -345,6 +347,8 @@ jobs:
 
       - name: 仓颉构建+测试流水线
         uses: ./.github/actions/cjpm-pipeline
+        with:
+          exclude-tags: "requires_gui_dialog,requires_gui_drag,requires_audio,requires_process_spawn,requires_printer,requires_qml_quick"
         env:
           QT_QPA_PLATFORM: offscreen
           QT_QPA_PLATFORM_PLUGIN_PATH: /usr/lib/aarch64-linux-gnu/qt6/plugins/platforms

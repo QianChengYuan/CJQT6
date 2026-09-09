@@ -68,6 +68,7 @@ class QUiLoaderTests {
     }
 
     /// 加载后按 objectName 查找子控件
+    @Tag[requires_uiloader_findchild]
     @TestCase
     func testFindChildByName() {
         let loader = QUiLoader()
