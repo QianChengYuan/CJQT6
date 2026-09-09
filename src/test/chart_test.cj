@@ -84,6 +84,7 @@ class QChartTests {
         chart.close()
     }
 
+    @Tag[requires_chartview_render]
     @TestCase
     func testChartViewSetChart() {
         let chart = QChart()

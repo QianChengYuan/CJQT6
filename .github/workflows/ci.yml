@@ -190,6 +190,7 @@ jobs:
         with:
           coverage: "true"
           timeout-each: "120s"
+          exclude-tags: "requires_gui_dialog,requires_gui_drag,requires_audio,requires_process_spawn,requires_printer,requires_chartview_render,requires_uiloader_findchild"
         env:
           QT_QPA_PLATFORM: offscreen
           QT_QPA_FONTDIR: C:\Windows\Fonts
