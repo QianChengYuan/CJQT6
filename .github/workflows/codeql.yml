@@ -49,7 +49,7 @@ jobs:
 
     steps:
       - name: 检出代码
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # CodeQL 初始化(下载 CLI + 数据库创建)
       - name: 初始化 CodeQL

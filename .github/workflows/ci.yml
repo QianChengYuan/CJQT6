@@ -65,11 +65,11 @@ jobs:
     env:
       CJQT6_ROOT: ${{ github.workspace }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # cache:cjpm target + CMake build + Qt 安装包(~节省 5 分钟/次)
       - name: 缓存仓颉 cjpm + CMake build + Qt
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             target/release
@@ -133,7 +133,7 @@ jobs:
 
       - name: 上传桥接库产物
         if: success()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: cjqt6-bridge-v${{ env.CANGJIE_VERSION }}-linux-x64
           path: releases/linux-x64/libcjqt6_bridge.so
@@ -149,10 +149,10 @@ jobs:
     env:
       CJQT6_ROOT: ${{ github.workspace }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: 缓存仓颉 cjpm + CMake build + Qt
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             target\release
@@ -211,14 +211,14 @@ jobs:
 
       - name: 评论覆盖率到 PR(sticky comment,自动覆盖上一次)
         if: github.event_name == 'pull_request' && success()
-        uses: marocchino/sticky-pull-request-comment@v2
+        uses: marocchino/sticky-pull-request-comment@v3
         with:
           header: coverage
           path: cov_output/report/pr_summary.md
 
       - name: 上传覆盖率报告
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-windows
           path: cov_output/report/
@@ -226,7 +226,7 @@ jobs:
 
       - name: 上传桥接库产物
         if: success()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: cjqt6-bridge-v${{ env.CANGJIE_VERSION }}-windows-x64
           path: releases/windows-x64/cjqt6_bridge.dll
@@ -242,10 +242,10 @@ jobs:
     env:
       CJQT6_ROOT: ${{ github.workspace }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: 缓存仓颉 cjpm + CMake build + Qt
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             target/release
@@ -293,7 +293,7 @@ jobs:
 
       - name: 上传桥接库产物
         if: success()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: cjqt6-bridge-v${{ env.CANGJIE_VERSION }}-macos-arm64
           path: releases/macos-arm64/libcjqt6_bridge.dylib
@@ -310,10 +310,10 @@ jobs:
       CJQT6_ROOT: ${{ github.workspace }}
       QTDIR: /usr/lib/aarch64-linux-gnu
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: 缓存仓颉 cjpm + CMake build
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             target/release
@@ -349,7 +349,7 @@ jobs:
 
       - name: 上传桥接库产物
         if: success()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: cjqt6-bridge-v${{ env.CANGJIE_VERSION }}-linux-arm64
           path: releases/linux-arm64/libcjqt6_bridge.so
