@@ -1,4 +1,4 @@
-﻿# CJQT6 — 仓颉语言的 Qt6 封装库
+﻿﻿# CJQT6 — 仓颉语言的 Qt6 封装库
 
 > 让仓颉语言像 Python 使用 PyQt 一样便捷地开发 Qt6 跨平台 GUI 应用
 
@@ -206,7 +206,6 @@ CJQT6/
 ├── examples/                   # 20 个独立示例工程
 ├── scripts/                    # 构建/测试/辅助脚本
 ├── docs/                       # 文档（api/tutorial/resource/testing/…）
-├── tests/                      # 测试部署脚本（deploy_qt_test.ps1）
 ├── cjpm.toml                   # cjpm 包配置（output-type = "dynamic"）
 ├── CMakeLists.txt              # CMake 构建配置
 └── .agents/skills/cjqt6/SKILL.md  # 项目自带 skill，权威速查（必读）
@@ -224,7 +223,7 @@ CJQT6/
 # Windows 一键跑测试（部署 Qt 运行时 + offscreen 平台 + 全量 + 覆盖率）
 powershell -File scripts\run-test.ps1
 # 或
-powershell -File tests\deploy_qt_test.ps1 -RunTest
+powershell -File scripts\deploy-qt-test.ps1 -RunTest
 ```
 
 ```bash

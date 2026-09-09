@@ -258,7 +258,7 @@ class QMyControlTests {
 }
 ```
 
-跑测试：根目录 `cjpm build` 后 `cjpm test`（Windows 无显示环境用 `.\tests\deploy_qt_test.ps1 -RunTest`，Linux 用 `xvfb-run cjpm test`）。
+跑测试：根目录 `cjpm build` 后 `cjpm test`（Windows 无显示环境用 `.\scripts\deploy-qt-test.ps1 -RunTest`，Linux 用 `xvfb-run cjpm test`）。
 
 ## ⑤ docs/api 章节
 

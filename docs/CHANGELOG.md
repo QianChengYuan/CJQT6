@@ -7,6 +7,25 @@
 > - 每个版本对应一组逻辑相关的 git 提交，按功能里程碑划分而非按日期随意递增
 > - 版本号与 git tag 一一对应（`v1.9.0` → tag `v1.9.0`），cjpm.toml `version` 字段同步
 
+## [1.9.3] - 2026-09-09
+
+### 变更
+
+- **scripts/ 整理优化**:抽取 `scripts/lib/common.{sh,ps1}` 共享函数库(7 bash + 10 PowerShell 函数,统一 Qt/cjpm/cjcov 探测、平台识别、项目根定位、打印步骤等),13 个脚本迁移使用 lib 函数(Qt 探测、cjpm 探测、路径解析等重复实现去重)。所有 25 个脚本头部"用法:"区块改行尾注释格式(`命令 # 中文说明`)。
+- **tests/ 目录合并并删除**:`tests/deploy_qt.ps1` → `scripts/deploy-qt-example.ps1`(支持 `-ExampleRoot` 参数化、通用化),`tests/deploy_qt_test.ps1` → `scripts/deploy-qt-test.ps1`(用 lib 函数)。整个 `tests/` 目录移出仓库(mv 到系统临时目录,绕过 safe-delete 守卫)。`run-test.ps1` / `verify_all.ps1` 内部子脚本引用同步更新。
+- **DEPRECATED 标记**:`build-win64.sh`(mingw 交叉编译停用,改用 `update-bridge.ps1` MSVC)、`build-macos-x64.sh`(仓颉 1.1.0 无 macOS x64 SDK,保留脚本结构待 SDK 启用)、`rebuild_all.ps1`(已被 `verify_all.ps1` 替代)统一加 DEPRECATED 头注释。
+- **声明 PS 7+ 基线**:`scripts/lib/common.ps1` 顶部明示不兼容 Windows PowerShell 5.1,所有 PowerShell 脚本移除 PS 7+ 才支持的语法(单行 if-return、`param` 默认值函数调用、`$()\path` subexpression 后跟反斜杠、字符串内 `%` 后跟 `$`)。
+
+### 文档
+
+- **scripts/README.md 重写**:全 25 脚本分类、用途、状态(active/deprecated/internal)、共享函数 API 索引、PS 7+ 基线声明、lib 函数调用样例。
+- **入口文档同步**:AGENTS.md 目录地图 + 测试命令、README.md 目录树 + Windows 测试命令、`docs/CONTRIBUTING.md` 目录树 + 测试命令、`docs/guides/wrapper-template.md` 测试命令、`docs/guides/build-guide.md` 一键重建章节(替换 rebuild_all → verify_all)、`docs/guides/cross-compile.md` macOS x64 命令标注 DEPRECATED、`docs/internal/assessment.md` 测试命令——全部同步新脚本路径。
+- **tools/cjqt6-diagnose 提示**:诊断工具第 3 项"完整构建"提示改指向 `verify_all.ps1`(替代 `rebuild_all.ps1 -Example notepad`)。
+
+### 修复
+
+- 移除 `scripts/sync-release-artifacts.ps1` 文件头 4 个连续 UTF-8 BOM。
+
 ## [1.9.2] - 2026-09-05
 
 ### 变更

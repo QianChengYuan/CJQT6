@@ -578,14 +578,12 @@ cjpm build
 
 对于 Windows + MSVC 2022 环境，项目提供了一键重建脚本，避免手动配置 `vcvars`/Qt 路径以及遗漏运行时部署步骤。
 
-**`scripts/rebuild_all.ps1` — 完整重建并自包含部署：**
+**`scripts/verify_all.ps1` — 一键门禁(桥接 + build + test + coverage + 冒烟示例):**
 ```powershell
 cd C:\CodeTools\cangjie_git\CJQT6
-powershell -ExecutionPolicy Bypass -File scripts\rebuild_all.ps1
-cd examples\all_controls_demo
-cjpm run
+powershell -ExecutionPolicy Bypass -File scripts\verify_all.ps1
 ```
-脚本依次执行：清理旧构建 → 重编原生 bridge（调用 `update-bridge.ps1`）→ `cjpm build`（cjqt6 子包）→ `cjpm build`（示例）→ `deploy_qt.ps1`（部署 Qt 运行时 + 平台插件 + MSVC CRT + 各依赖 DLL 到 `target/release/bin`）。
+脚本依次执行:重编原生 bridge(调用 `update-bridge.ps1`)→ `cjpm build`(链接新桥接库)→ 部署 Qt 运行时 + offscreen 平台 + 跑全量 cjpm test(`deploy-qt-test.ps1 -RunTest`)→ cjcov 覆盖率门禁 → 冒烟示例构建。`scripts/rebuild_all.ps1` 已被本脚本替代,保留仅为兼容。
 
 **`scripts/update-bridge.ps1` — 仅重编原生 FFI 桥接库并同步到 releases（修改 `native/src/**` 后使用）：**
 ```powershell
@@ -1029,7 +1027,7 @@ git clone https://gitcode.com/Cangjie-TPC/CJQT6.git
 cd CJQT6
 
 # 方式1: 一键脚本（自动探测Qt路径并部署到 releases/）
-#   Intel Mac (x86_64)        → bash scripts/build-macos-x64.sh
+#   Intel Mac (x86_64)        → bash scripts/build-macos-x64.sh   # ⚠️ DEPRECATED — 仓颉 1.1.0 无 macOS x64 SDK
 #   Apple Silicon (arm64)     → bash scripts/build-macos-arm64.sh
 #   自动检测当前平台          → bash scripts/build-all-platforms.sh
 

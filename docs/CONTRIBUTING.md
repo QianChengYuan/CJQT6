@@ -106,7 +106,7 @@ CJQT6/
 │   └── includes/
 ├── examples/          # 示例程序
 ├── docs/             # 文档
-└── tests/            # 测试部署脚本
+└── scripts/          # 构建/部署/同步工具（tests/ 已合并进来，见 scripts/README.md）
 ```
 
 ## 开发流程
@@ -144,7 +144,7 @@ cjpm test --filter "QPushButton*"  # 指定测试类
 Windows 无显示环境（headless 基线）一键跑：
 
 ```bash
-powershell -File tests\deploy_qt_test.ps1 -RunTest
+powershell -File scripts\deploy-qt-test.ps1 -RunTest
 ```
 
 Linux 无显示环境：`xvfb-run cjpm test`

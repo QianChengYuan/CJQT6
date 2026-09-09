@@ -312,7 +312,7 @@ Get-Item "$ReleaseDir\cjqt6_bridge.dll" | Format-List Length, LastWriteTime
 仓库自带按 CPU 架构拆分的脚本，会自动探测 Qt 路径（Homebrew 或常见目录）并部署到 `releases/`：
 
 ```bash
-# Intel Mac (x86_64)
+# Intel Mac (x86_64) — ⚠️ DEPRECATED,仓颉 1.1.0 无 macOS x64 SDK
 bash scripts/build-macos-x64.sh     # 产物部署到 releases/macos-x64/
 
 # Apple Silicon (arm64)
