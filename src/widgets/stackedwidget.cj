@@ -4,17 +4,29 @@ import cjqt6.core.*
 
 // QStackedWidget - 堆叠窗口
 foreign func qStackedWidgetCreate(): Int64
+
 foreign func qStackedWidgetAddWidget(ptr: Int64, widgetPtr: Int64): Int32
+
 foreign func qStackedWidgetInsertWidget(ptr: Int64, index: Int32, widgetPtr: Int64): Int32
+
 foreign func qStackedWidgetRemoveWidget(ptr: Int64, widgetPtr: Int64): Unit
+
 foreign func qStackedWidgetSetCurrentIndex(ptr: Int64, index: Int32): Unit
+
 foreign func qStackedWidgetCurrentIndex(ptr: Int64): Int32
+
 foreign func qStackedWidgetCurrentWidget(ptr: Int64): Int64
+
 foreign func qStackedWidgetCount(ptr: Int64): Int32
+
 foreign func qStackedWidgetSetCurrentWidget(ptr: Int64, widgetPtr: Int64): Unit
+
 foreign func qStackedWidgetWidget(ptr: Int64, index: Int32): Int64
+
 foreign func qStackedWidgetConnectCurrentChanged(ptr: Int64, callback: Int32Callback): Unit
+
 foreign func qStackedWidgetConnectWidgetRemoved(ptr: Int64, callback: Int32Callback): Unit
+
 foreign func qStackedWidgetDelete(ptr: Int64): Unit
 
 /// 堆叠窗口部件

@@ -11,25 +11,23 @@ import std.unittest.*
 // 全局状态（回调测试使用：CFunc 不捕获局部变量，只能用全局变量）
 // =====================================================================
 var gLwCurrentRow: Int32 = -1
-let gLwCurrentRowCb: Int32Callback = { v: Int32 =>
-    gLwCurrentRow = v
+let gLwCurrentRowCb: Int32Callback = {
+    v: Int32 => gLwCurrentRow = v
 }
-
 var gTbCellRow: Int32 = -1
 var gTbCellCol: Int32 = -1
-let gTbCellCb: Int32Int32Callback = { r: Int32, c: Int32 =>
-    gTbCellRow = r
-    gTbCellCol = c
+let gTbCellCb: Int32Int32Callback = {
+    r: Int32, c: Int32 =>
+        gTbCellRow = r
+        gTbCellCol = c
 }
-
 var gTwCurrentItem: Int64 = 0
-let gTwCurrentItemCb: Int64Callback = { v: Int64 =>
-    gTwCurrentItem = v
+let gTwCurrentItemCb: Int64Callback = {
+    v: Int64 => gTwCurrentItem = v
 }
-
 var gFsmRootPath: String = ""
-let gFsmRootPathCb: CStringCallback = { v: CString =>
-    gFsmRootPath = v.toString()
+let gFsmRootPathCb: CStringCallback = {
+    v: CString => gFsmRootPath = v.toString()
 }
 
 // =====================================================================
@@ -37,7 +35,6 @@ let gFsmRootPathCb: CStringCallback = { v: CString =>
 // =====================================================================
 @Test
 class QSqlDatabaseTests {
-
     @TestCase
     func testAddDatabase() {
         let db = QSqlDatabase.addDatabase(SqlDriver.sqlite(), "t_db_conn")
@@ -325,7 +322,6 @@ class QSqlQueryTests {
 // =====================================================================
 @Test
 class QSqlRecordTests {
-
     @TestCase
     func testRecordFromSelect() {
         let db = QSqlDatabase.addDatabase(SqlDriver.sqlite(), "t_rec_conn")
@@ -426,7 +422,6 @@ class QSqlRecordTests {
 // =====================================================================
 @Test
 class QSqlTableModelTests {
-
     @TestCase
     func testCreateAndSetTable() {
         let db = QSqlDatabase.addDatabase(SqlDriver.sqlite(), "t_tm_conn")
@@ -538,7 +533,6 @@ class QSqlTableModelTests {
 // =====================================================================
 @Test
 class QStandardItemModelTests {
-
     @TestCase
     func testCreateWithSize() {
         let model = QStandardItemModel(3, 3)
@@ -895,7 +889,6 @@ class QSortFilterProxyModelTests {
 // =====================================================================
 @Test
 class QFileSystemModelTests {
-
     @TestCase
     func testCreateAndClose() {
         let model = QFileSystemModel()
@@ -1111,8 +1104,8 @@ class QListWidgetTests {
     func testDoubleClickAndClickCallbacks() {
         let list = QListWidget()
         list.addItem("A")
-        list.setOnItemClicked({ v: Int32 => gLwCurrentRow = v })
-        list.setOnItemDoubleClicked({ v: Int32 => gLwCurrentRow = v })
+        list.setOnItemClicked({v: Int32 => gLwCurrentRow = v})
+        list.setOnItemDoubleClicked({v: Int32 => gLwCurrentRow = v})
         @Assert(true)
         list.delete()
     }
@@ -1121,10 +1114,10 @@ class QListWidgetTests {
     func testItemPointerCallbacks() {
         let list = QListWidget()
         list.addItem("A")
-        list.setOnItemClickedItem({ v: Int64 => gTwCurrentItem = v })
-        list.setOnItemDoubleClickedItem({ v: Int64 => gTwCurrentItem = v })
-        list.setOnCurrentItemChanged({ v: Int64 => gTwCurrentItem = v })
-        list.setOnItemSelectionChanged({ => gDlgAccepted = true })
+        list.setOnItemClickedItem({v: Int64 => gTwCurrentItem = v})
+        list.setOnItemDoubleClickedItem({v: Int64 => gTwCurrentItem = v})
+        list.setOnCurrentItemChanged({v: Int64 => gTwCurrentItem = v})
+        list.setOnItemSelectionChanged({=> gDlgAccepted = true})
         @Assert(true)
         list.delete()
     }
@@ -1341,8 +1334,8 @@ class QTableWidgetTests {
         let table = QTableWidget(3, 3)
         table.setOnCellClicked(gTbCellCb)
         table.setOnCellDoubleClicked(gTbCellCb)
-        table.setOnItemClicked({ v: Int64 => gTwCurrentItem = v })
-        table.setOnItemSelectionChanged({ => gDlgAccepted = true })
+        table.setOnItemClicked({v: Int64 => gTwCurrentItem = v})
+        table.setOnItemSelectionChanged({=> gDlgAccepted = true})
         @Assert(true)
         table.delete()
     }
@@ -1538,12 +1531,12 @@ class QTreeWidgetTests {
     func testOtherCallbacks() {
         let tree = QTreeWidget()
         let item = tree.addTopLevelItem("X")
-        tree.setOnItemClicked({ v: Int64 => gTwCurrentItem = v })
-        tree.setOnItemDoubleClicked({ v: Int64 => gTwCurrentItem = v })
-        tree.setOnItemExpanded({ v: Int64 => gTwCurrentItem = v })
-        tree.setOnItemCollapsed({ v: Int64 => gTwCurrentItem = v })
-        tree.setOnItemClickedWithColumn({ v: Int64, c: Int32 => gTwCurrentItem = v })
-        tree.setOnItemChanged({ v: Int64, c: Int32 => gTwCurrentItem = v })
+        tree.setOnItemClicked({v: Int64 => gTwCurrentItem = v})
+        tree.setOnItemDoubleClicked({v: Int64 => gTwCurrentItem = v})
+        tree.setOnItemExpanded({v: Int64 => gTwCurrentItem = v})
+        tree.setOnItemCollapsed({v: Int64 => gTwCurrentItem = v})
+        tree.setOnItemClickedWithColumn({v: Int64, c: Int32 => gTwCurrentItem = v})
+        tree.setOnItemChanged({v: Int64, c: Int32 => gTwCurrentItem = v})
         tree.setSelectionMode(SingleSelection)
         tree.setHeaderLabel(0, "Name")
         tree.setHeaderHidden(false)
@@ -1711,10 +1704,10 @@ class QListViewTests {
         let model = QStandardItemModel(3, 1)
         model.setItem(0, 0, "A")
         view.setModel(model)
-        view.setOnClicked({ v: Int64 => gTwCurrentItem = v })
-        view.setOnDoubleClicked({ v: Int64 => gTwCurrentItem = v })
-        view.setOnActivated({ v: Int64 => gTwCurrentItem = v })
-        view.setOnPressed({ v: Int64 => gTwCurrentItem = v })
+        view.setOnClicked({v: Int64 => gTwCurrentItem = v})
+        view.setOnDoubleClicked({v: Int64 => gTwCurrentItem = v})
+        view.setOnActivated({v: Int64 => gTwCurrentItem = v})
+        view.setOnPressed({v: Int64 => gTwCurrentItem = v})
         @Assert(true)
         view.delete()
         model.delete()
@@ -1848,10 +1841,10 @@ class QTableViewTests {
         let view = QTableView()
         let model = QStandardItemModel(3, 3)
         view.setModel(model)
-        view.setOnClicked({ v: Int64 => gTwCurrentItem = v })
-        view.setOnDoubleClicked({ v: Int64 => gTwCurrentItem = v })
-        view.setOnActivated({ v: Int64 => gTwCurrentItem = v })
-        view.setOnPressed({ v: Int64 => gTwCurrentItem = v })
+        view.setOnClicked({v: Int64 => gTwCurrentItem = v})
+        view.setOnDoubleClicked({v: Int64 => gTwCurrentItem = v})
+        view.setOnActivated({v: Int64 => gTwCurrentItem = v})
+        view.setOnPressed({v: Int64 => gTwCurrentItem = v})
         @Assert(true)
         view.delete()
         model.delete()
@@ -2004,11 +1997,11 @@ class QTreeViewTests {
         let view = QTreeView()
         let model = QStandardItemModel(2, 1)
         view.setModel(model)
-        view.setOnClicked({ v: Int64 => gTwCurrentItem = v })
-        view.setOnDoubleClicked({ v: Int64 => gTwCurrentItem = v })
-        view.setOnExpanded({ v: Int64 => gTwCurrentItem = v })
-        view.setOnCollapsed({ v: Int64 => gTwCurrentItem = v })
-        view.setOnActivated({ v: Int64 => gTwCurrentItem = v })
+        view.setOnClicked({v: Int64 => gTwCurrentItem = v})
+        view.setOnDoubleClicked({v: Int64 => gTwCurrentItem = v})
+        view.setOnExpanded({v: Int64 => gTwCurrentItem = v})
+        view.setOnCollapsed({v: Int64 => gTwCurrentItem = v})
+        view.setOnActivated({v: Int64 => gTwCurrentItem = v})
         @Assert(true)
         view.delete()
         model.delete()
@@ -2110,12 +2103,12 @@ class QHeaderViewTests {
     @TestCase
     func testSignals() {
         let header = QHeaderView(Orientation.Horizontal)
-        header.setOnSectionClicked({ v: Int32 => gLwCurrentRow = v })
-        header.setOnSectionDoubleClicked({ v: Int32 => gLwCurrentRow = v })
-        header.setOnSectionResized({ a: Int32, b: Int32, c: Int32 => gTbCellRow = a })
-        header.setOnSectionMoved({ a: Int32, b: Int32, c: Int32 => gTbCellRow = a })
-        header.setOnSortIndicatorChanged({ a: Int32, b: Int32 => gTbCellRow = a })
-        header.setOnSectionHandleDoubleClicked({ v: Int32 => gLwCurrentRow = v })
+        header.setOnSectionClicked({v: Int32 => gLwCurrentRow = v})
+        header.setOnSectionDoubleClicked({v: Int32 => gLwCurrentRow = v})
+        header.setOnSectionResized({a: Int32, b: Int32, c: Int32 => gTbCellRow = a})
+        header.setOnSectionMoved({a: Int32, b: Int32, c: Int32 => gTbCellRow = a})
+        header.setOnSortIndicatorChanged({a: Int32, b: Int32 => gTbCellRow = a})
+        header.setOnSectionHandleDoubleClicked({v: Int32 => gLwCurrentRow = v})
         @Assert(true)
         header.delete()
     }

@@ -149,28 +149,28 @@ foreign func qFrameDelete(ptr: Int64): Unit
 public class QGroupBox <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
-    
+
     public init() {
         unsafe {
             ptr = qGroupBoxCreate()
         }
         trackObject(ptr)
     }
-    
+
     public func show(): Unit {
         checkValid()
         unsafe {
             qWidgetShow(ptr)
         }
     }
-    
+
     public func hide(): Unit {
         checkValid()
         unsafe {
             qWidgetHide(ptr)
         }
     }
-    
+
     public func setTitle(title: String): Unit {
         checkValid()
         unsafe {
@@ -179,7 +179,7 @@ public class QGroupBox <: QtResource {
             LibC.free(cstr)
         }
     }
-    
+
     public func title(): String {
         checkValid()
         unsafe {
@@ -189,35 +189,35 @@ public class QGroupBox <: QtResource {
             return result
         }
     }
-    
+
     public func setCheckable(checkable: Bool): Unit {
         checkValid()
         unsafe {
             qGroupBoxSetCheckable(ptr, checkable)
         }
     }
-    
+
     public func isCheckable(): Bool {
         checkValid()
         unsafe {
             qGroupBoxIsCheckable(ptr)
         }
     }
-    
+
     public func setChecked(checked: Bool): Unit {
         checkValid()
         unsafe {
             qGroupBoxSetChecked(ptr, checked)
         }
     }
-    
+
     public func isChecked(): Bool {
         checkValid()
         unsafe {
             qGroupBoxIsChecked(ptr)
         }
     }
-    
+
     /// 设置对齐方式（Qt::Alignment 位或值）
     public func setAlignment(alignment: Int32): Unit {
         checkValid()
@@ -225,7 +225,7 @@ public class QGroupBox <: QtResource {
             qGroupBoxSetAlignment(ptr, alignment)
         }
     }
-    
+
     /// 获取对齐方式
     public func alignment(): Int32 {
         checkValid()
@@ -233,7 +233,7 @@ public class QGroupBox <: QtResource {
             qGroupBoxAlignment(ptr)
         }
     }
-    
+
     /// 点击（带选中态）回调
     public func setOnClicked(callback: BoolCallback): Unit {
         checkValid()
@@ -241,7 +241,7 @@ public class QGroupBox <: QtResource {
             qGroupBoxConnectClicked(ptr, callback)
         }
     }
-    
+
     /// 勾选状态变化回调
     public func setOnToggled(callback: BoolCallback): Unit {
         checkValid()
@@ -254,7 +254,11 @@ public class QGroupBox <: QtResource {
     public func setFlat(flat: Bool): Unit {
         checkValid()
         unsafe {
-            qGroupBoxSetFlat(ptr, if (flat) { 1 } else { 0 })
+            qGroupBoxSetFlat(ptr, if (flat) {
+                1
+            } else {
+                0
+            })
         }
     }
 
@@ -265,29 +269,33 @@ public class QGroupBox <: QtResource {
             return qGroupBoxIsFlat(ptr) != 0
         }
     }
-    
+
     public func setLayout(layoutPtr: Int64): Unit {
         checkValid()
         unsafe {
             qWidgetSetLayout(ptr, layoutPtr)
         }
     }
-    
+
     public func resize(width: Int32, height: Int32): Unit {
         checkValid()
         unsafe {
             qWidgetResize(ptr, width, height)
         }
     }
-    
+
     /// 设置启用/禁用
     public func setEnabled(enabled: Bool): Unit {
         checkValid()
         unsafe {
-            qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
+            qWidgetSetEnabled(ptr, if (enabled) {
+                1
+            } else {
+                0
+            })
         }
     }
-    
+
     /// 检查是否启用
     public func isEnabled(): Bool {
         checkValid()
@@ -295,15 +303,15 @@ public class QGroupBox <: QtResource {
             qWidgetIsEnabled(ptr) == 1
         }
     }
-    
+
     /// 设置样式表
     public func setStyleSheet(style: String): Unit {
         checkValid()
         unsafe {
-            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
+            withCString(style) {c => qWidgetSetStyleSheet(ptr, c)}
         }
     }
-    
+
     /// 设置最小尺寸
     public func setMinimumSize(minw: Int32, minh: Int32): Unit {
         checkValid()
@@ -311,7 +319,7 @@ public class QGroupBox <: QtResource {
             qWidgetSetMinimumSize(ptr, minw, minh)
         }
     }
-    
+
     /// 设置最大尺寸
     public func setMaximumSize(maxw: Int32, maxh: Int32): Unit {
         checkValid()
@@ -319,22 +327,22 @@ public class QGroupBox <: QtResource {
             qWidgetSetMaximumSize(ptr, maxw, maxh)
         }
     }
-    
+
     /// 获取原生指针
     public func getPtr(): Int64 {
         return ptr
     }
-    
+
     /// 是否已关闭
     public func isClosed(): Bool {
         return closed
     }
-    
+
     /// 检查对象有效性
     public func isValid(): Bool {
         return !closed && ptr != 0 && isObjectAlive(ptr)
     }
-    
+
     /// 检查有效性，无效时抛出异常
     /// throws: NullPointerException 空指针访问时抛出
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
@@ -349,7 +357,7 @@ public class QGroupBox <: QtResource {
             throw ResourceDisposedException("QGroupBox 底层 Qt 对象已失效")
         }
     }
-    
+
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
@@ -368,7 +376,7 @@ public class QGroupBox <: QtResource {
             ptr = 0
         }
     }
-    
+
     /// 删除分组框（兼容旧API）
     public func delete(): Unit {
         close()
@@ -383,28 +391,28 @@ public class QGroupBox <: QtResource {
 public class QTabWidget <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
-    
+
     public init() {
         unsafe {
             ptr = qTabWidgetCreate()
         }
         trackObject(ptr)
     }
-    
+
     public func show(): Unit {
         checkValid()
         unsafe {
             qWidgetShow(ptr)
         }
     }
-    
+
     public func hide(): Unit {
         checkValid()
         unsafe {
             qWidgetHide(ptr)
         }
     }
-    
+
     public func addTab(widgetPtr: Int64, title: String): Unit {
         checkValid()
         unsafe {
@@ -413,43 +421,43 @@ public class QTabWidget <: QtResource {
             LibC.free(cstr)
         }
     }
-    
+
     public func removeTab(index: Int32): Unit {
         checkValid()
         unsafe {
             qTabWidgetRemoveTab(ptr, index)
         }
     }
-    
+
     public func currentIndex(): Int32 {
         checkValid()
         unsafe {
             qTabWidgetCurrentIndex(ptr)
         }
     }
-    
+
     public func setCurrentIndex(index: Int32): Unit {
         checkValid()
         unsafe {
             qTabWidgetSetCurrentIndex(ptr, index)
         }
     }
-    
+
     public func count(): Int32 {
         checkValid()
         unsafe {
             qTabWidgetCount(ptr)
         }
     }
-    
+
     /// 设置指定标签页的文本
     public func setTabText(index: Int32, text: String): Unit {
         checkValid()
         unsafe {
-            withCString(text) { c => qTabWidgetSetTabText(ptr, index, c) }
+            withCString(text) {c => qTabWidgetSetTabText(ptr, index, c)}
         }
     }
-    
+
     /// 获取指定标签页的文本
     public func tabText(index: Int32): String {
         checkValid()
@@ -460,15 +468,15 @@ public class QTabWidget <: QtResource {
             return result
         }
     }
-    
+
     /// 设置指定标签页的工具提示
     public func setTabToolTip(index: Int32, toolTip: String): Unit {
         checkValid()
         unsafe {
-            withCString(toolTip) { c => qTabWidgetSetTabToolTip(ptr, index, c) }
+            withCString(toolTip) {c => qTabWidgetSetTabToolTip(ptr, index, c)}
         }
     }
-    
+
     /// 在指定位置插入标签页
     public func insertTab(index: Int32, widgetPtr: Int64, title: String): Int32 {
         checkValid()
@@ -479,7 +487,7 @@ public class QTabWidget <: QtResource {
             return result
         }
     }
-    
+
     /// 设置标签页是否可关闭
     public func setTabsClosable(closable: Bool): Unit {
         checkValid()
@@ -487,7 +495,7 @@ public class QTabWidget <: QtResource {
             qTabWidgetSetTabsClosable(ptr, closable)
         }
     }
-    
+
     /// 设置标签页是否可移动
     public func setMovable(movable: Bool): Unit {
         checkValid()
@@ -495,7 +503,7 @@ public class QTabWidget <: QtResource {
             qTabWidgetSetMovable(ptr, movable)
         }
     }
-    
+
     /// 设置指定标签页的图标（iconPtr 为 QIcon.getPtr() 返回的指针）
     public func setTabIcon(index: Int32, iconPtr: Int64): Unit {
         checkValid()
@@ -503,7 +511,7 @@ public class QTabWidget <: QtResource {
             qTabWidgetSetTabIcon(ptr, index, iconPtr)
         }
     }
-    
+
     /// 设置标签页图标尺寸
     public func setIconSize(width: Int32, height: Int32): Unit {
         checkValid()
@@ -511,7 +519,7 @@ public class QTabWidget <: QtResource {
             qTabWidgetSetIconSize(ptr, width, height)
         }
     }
-    
+
     /// 设置标签位置（0=北 1=南 2=西 3=东）
     public func setTabPosition(pos: Int32): Unit {
         checkValid()
@@ -519,7 +527,7 @@ public class QTabWidget <: QtResource {
             qTabWidgetSetTabPosition(ptr, pos)
         }
     }
-    
+
     /// 设置文档模式
     public func setDocumentMode(enabled: Bool): Unit {
         checkValid()
@@ -527,7 +535,7 @@ public class QTabWidget <: QtResource {
             qTabWidgetSetDocumentMode(ptr, enabled)
         }
     }
-    
+
     /// 设置标签文本省略模式（0=左 1=右 2=中 3=无）
     public func setElideMode(mode: Int32): Unit {
         checkValid()
@@ -535,7 +543,7 @@ public class QTabWidget <: QtResource {
             qTabWidgetSetElideMode(ptr, mode)
         }
     }
-    
+
     /// 设置标签形状（0=圆角 1=三角）
     public func setTabShape(shape: Int32): Unit {
         checkValid()
@@ -543,7 +551,7 @@ public class QTabWidget <: QtResource {
             qTabWidgetSetTabShape(ptr, shape)
         }
     }
-    
+
     /// 设置是否使用滚动按钮（标签过多时）
     public func setUsesScrollButtons(enabled: Bool): Unit {
         checkValid()
@@ -551,7 +559,7 @@ public class QTabWidget <: QtResource {
             qTabWidgetSetUsesScrollButtons(ptr, enabled)
         }
     }
-    
+
     /// 清除所有标签页
     public func clear(): Unit {
         checkValid()
@@ -559,7 +567,7 @@ public class QTabWidget <: QtResource {
             qTabWidgetClear(ptr)
         }
     }
-    
+
     /// 设置当前标签页变化回调
     public func setOnCurrentChanged(callback: Int32Callback): Unit {
         checkValid()
@@ -567,7 +575,7 @@ public class QTabWidget <: QtResource {
             qTabWidgetConnectCurrentChanged(ptr, callback)
         }
     }
-    
+
     /// 断开当前标签页变化信号
     public func disconnectCurrentChanged(): Unit {
         if (ptr != 0) {
@@ -576,20 +584,24 @@ public class QTabWidget <: QtResource {
             }
         }
     }
-    
+
     /// 断开该标签控件的全部信号（currentChanged）
     public func disconnect(): Unit {
         disconnectCurrentChanged()
     }
-    
+
     /// 设置启用/禁用
     public func setEnabled(enabled: Bool): Unit {
         checkValid()
         unsafe {
-            qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
+            qWidgetSetEnabled(ptr, if (enabled) {
+                1
+            } else {
+                0
+            })
         }
     }
-    
+
     /// 检查是否启用
     public func isEnabled(): Bool {
         checkValid()
@@ -597,15 +609,15 @@ public class QTabWidget <: QtResource {
             qWidgetIsEnabled(ptr) == 1
         }
     }
-    
+
     /// 设置样式表
     public func setStyleSheet(style: String): Unit {
         checkValid()
         unsafe {
-            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
+            withCString(style) {c => qWidgetSetStyleSheet(ptr, c)}
         }
     }
-    
+
     /// 设置最大尺寸
     public func setMaximumSize(maxw: Int32, maxh: Int32): Unit {
         checkValid()
@@ -613,7 +625,7 @@ public class QTabWidget <: QtResource {
             qWidgetSetMaximumSize(ptr, maxw, maxh)
         }
     }
-    
+
     public func resize(width: Int32, height: Int32): Unit {
         checkValid()
         unsafe {
@@ -627,22 +639,22 @@ public class QTabWidget <: QtResource {
             qWidgetSetMinimumSize(ptr, minw, minh)
         }
     }
-    
+
     /// 获取原生指针
     public func getPtr(): Int64 {
         return ptr
     }
-    
+
     /// 是否已关闭
     public func isClosed(): Bool {
         return closed
     }
-    
+
     /// 检查对象有效性
     public func isValid(): Bool {
         return !closed && ptr != 0 && isObjectAlive(ptr)
     }
-    
+
     /// 检查有效性，无效时抛出异常
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     /// throws: NullPointerException 空指针访问时抛出
@@ -657,7 +669,7 @@ public class QTabWidget <: QtResource {
             throw ResourceDisposedException("QTabWidget 底层 Qt 对象已失效")
         }
     }
-    
+
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
@@ -676,7 +688,7 @@ public class QTabWidget <: QtResource {
             ptr = 0
         }
     }
-    
+
     /// 删除标签页（兼容旧API）
     public func delete(): Unit {
         close()
@@ -691,49 +703,49 @@ public class QTabWidget <: QtResource {
 public class QScrollArea <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
-    
+
     public init() {
         unsafe {
             ptr = qScrollAreaCreate()
         }
         trackObject(ptr)
     }
-    
+
     public func show(): Unit {
         checkValid()
         unsafe {
             qWidgetShow(ptr)
         }
     }
-    
+
     public func hide(): Unit {
         checkValid()
         unsafe {
             qWidgetHide(ptr)
         }
     }
-    
+
     public func setWidget(widgetPtr: Int64): Unit {
         checkValid()
         unsafe {
             qScrollAreaSetWidget(ptr, widgetPtr)
         }
     }
-    
+
     public func setWidgetResizable(resizable: Bool): Unit {
         checkValid()
         unsafe {
             qScrollAreaSetWidgetResizable(ptr, resizable)
         }
     }
-    
+
     public func widget(): Int64 {
         checkValid()
         unsafe {
             qScrollAreaWidget(ptr)
         }
     }
-    
+
     /// 取出内部部件并返回其指针（之后不再由 QScrollArea 管理）
     public func takeWidget(): Int64 {
         checkValid()
@@ -741,7 +753,7 @@ public class QScrollArea <: QtResource {
             qScrollAreaTakeWidget(ptr)
         }
     }
-    
+
     /// 是否自动调整内部部件尺寸
     public func widgetResizable(): Bool {
         checkValid()
@@ -749,7 +761,7 @@ public class QScrollArea <: QtResource {
             qScrollAreaWidgetResizable(ptr) != 0
         }
     }
-    
+
     /// 设置水平滚动条策略
     public func setHorizontalScrollBarPolicy(policy: Int32): Unit {
         checkValid()
@@ -757,7 +769,7 @@ public class QScrollArea <: QtResource {
             qScrollAreaSetHorizontalScrollBarPolicy(ptr, policy)
         }
     }
-    
+
     /// 设置垂直滚动条策略
     public func setVerticalScrollBarPolicy(policy: Int32): Unit {
         checkValid()
@@ -765,7 +777,7 @@ public class QScrollArea <: QtResource {
             qScrollAreaSetVerticalScrollBarPolicy(ptr, policy)
         }
     }
-    
+
     /// 滚动以确保 (x,y) 处可见（w,h 为边距）
     public func ensureVisible(x: Int32, y: Int32, w: Int32, h: Int32): Unit {
         checkValid()
@@ -773,7 +785,7 @@ public class QScrollArea <: QtResource {
             qScrollAreaEnsureVisible(ptr, x, y, w, h)
         }
     }
-    
+
     /// 设置内容对齐方式
     public func setAlignment(alignment: Int32): Unit {
         checkValid()
@@ -781,7 +793,7 @@ public class QScrollArea <: QtResource {
             qScrollAreaSetAlignment(ptr, alignment)
         }
     }
-    
+
     /// 获取内容对齐方式
     public func alignment(): Int32 {
         checkValid()
@@ -789,22 +801,26 @@ public class QScrollArea <: QtResource {
             qScrollAreaAlignment(ptr)
         }
     }
-    
+
     public func resize(width: Int32, height: Int32): Unit {
         checkValid()
         unsafe {
             qWidgetResize(ptr, width, height)
         }
     }
-    
+
     /// 设置启用/禁用
     public func setEnabled(enabled: Bool): Unit {
         checkValid()
         unsafe {
-            qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
+            qWidgetSetEnabled(ptr, if (enabled) {
+                1
+            } else {
+                0
+            })
         }
     }
-    
+
     /// 检查是否启用
     public func isEnabled(): Bool {
         checkValid()
@@ -812,15 +828,15 @@ public class QScrollArea <: QtResource {
             qWidgetIsEnabled(ptr) == 1
         }
     }
-    
+
     /// 设置样式表
     public func setStyleSheet(style: String): Unit {
         checkValid()
         unsafe {
-            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
+            withCString(style) {c => qWidgetSetStyleSheet(ptr, c)}
         }
     }
-    
+
     /// 设置最小尺寸
     public func setMinimumSize(minw: Int32, minh: Int32): Unit {
         checkValid()
@@ -828,7 +844,7 @@ public class QScrollArea <: QtResource {
             qWidgetSetMinimumSize(ptr, minw, minh)
         }
     }
-    
+
     /// 设置最大尺寸
     public func setMaximumSize(maxw: Int32, maxh: Int32): Unit {
         checkValid()
@@ -836,22 +852,22 @@ public class QScrollArea <: QtResource {
             qWidgetSetMaximumSize(ptr, maxw, maxh)
         }
     }
-    
+
     /// 获取原生指针
     public func getPtr(): Int64 {
         return ptr
     }
-    
+
     /// 是否已关闭
     public func isClosed(): Bool {
         return closed
     }
-    
+
     /// 检查对象有效性
     public func isValid(): Bool {
         return !closed && ptr != 0 && isObjectAlive(ptr)
     }
-    
+
     /// 检查有效性，无效时抛出异常
     /// throws: NullPointerException 空指针访问时抛出
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
@@ -866,7 +882,7 @@ public class QScrollArea <: QtResource {
             throw ResourceDisposedException("QScrollArea 底层 Qt 对象已失效")
         }
     }
-    
+
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
@@ -885,7 +901,7 @@ public class QScrollArea <: QtResource {
             ptr = 0
         }
     }
-    
+
     /// 删除滚动区域（兼容旧API）
     public func delete(): Unit {
         close()
@@ -911,42 +927,42 @@ public class ScrollBarPolicy {
 public class QFrame <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
-    
+
     public init() {
         unsafe {
             ptr = qFrameCreate()
         }
         trackObject(ptr)
     }
-    
+
     public func show(): Unit {
         checkValid()
         unsafe {
             qWidgetShow(ptr)
         }
     }
-    
+
     public func hide(): Unit {
         checkValid()
         unsafe {
             qWidgetHide(ptr)
         }
     }
-    
+
     public func setFrameShape(shape: Int32): Unit {
         checkValid()
         unsafe {
             qFrameSetFrameShape(ptr, shape)
         }
     }
-    
+
     public func setFrameShadow(shadow: Int32): Unit {
         checkValid()
         unsafe {
             qFrameSetFrameShadow(ptr, shadow)
         }
     }
-    
+
     public func setLineWidth(width: Int32): Unit {
         checkValid()
         unsafe {
@@ -969,7 +985,7 @@ public class QFrame <: QtResource {
             return qFrameFrameWidth(ptr)
         }
     }
-    
+
     /// 设置整体边框样式（形状 | 阴影 的组合值）
     public func setFrameStyle(style: Int32): Unit {
         checkValid()
@@ -977,7 +993,7 @@ public class QFrame <: QtResource {
             qFrameSetFrameStyle(ptr, style)
         }
     }
-    
+
     /// 获取整体边框样式
     public func frameStyle(): Int32 {
         checkValid()
@@ -985,7 +1001,7 @@ public class QFrame <: QtResource {
             qFrameFrameStyle(ptr)
         }
     }
-    
+
     /// 获取边框形状
     public func frameShape(): Int32 {
         checkValid()
@@ -993,7 +1009,7 @@ public class QFrame <: QtResource {
             qFrameFrameShape(ptr)
         }
     }
-    
+
     /// 获取边框阴影
     public func frameShadow(): Int32 {
         checkValid()
@@ -1001,7 +1017,7 @@ public class QFrame <: QtResource {
             qFrameFrameShadow(ptr)
         }
     }
-    
+
     /// 设置中线宽度
     public func setMidLineWidth(width: Int32): Unit {
         checkValid()
@@ -1009,7 +1025,7 @@ public class QFrame <: QtResource {
             qFrameSetMidLineWidth(ptr, width)
         }
     }
-    
+
     /// 获取中线宽度
     public func midLineWidth(): Int32 {
         checkValid()
@@ -1017,7 +1033,7 @@ public class QFrame <: QtResource {
             qFrameMidLineWidth(ptr)
         }
     }
-    
+
     /// 设置边框矩形
     public func setFrameRect(x: Int32, y: Int32, w: Int32, h: Int32): Unit {
         checkValid()
@@ -1025,29 +1041,33 @@ public class QFrame <: QtResource {
             qFrameSetFrameRect(ptr, x, y, w, h)
         }
     }
-    
+
     public func setLayout(layoutPtr: Int64): Unit {
         checkValid()
         unsafe {
             qWidgetSetLayout(ptr, layoutPtr)
         }
     }
-    
+
     public func resize(width: Int32, height: Int32): Unit {
         checkValid()
         unsafe {
             qWidgetResize(ptr, width, height)
         }
     }
-    
+
     /// 设置启用/禁用
     public func setEnabled(enabled: Bool): Unit {
         checkValid()
         unsafe {
-            qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
+            qWidgetSetEnabled(ptr, if (enabled) {
+                1
+            } else {
+                0
+            })
         }
     }
-    
+
     /// 检查是否启用
     public func isEnabled(): Bool {
         checkValid()
@@ -1055,15 +1075,15 @@ public class QFrame <: QtResource {
             qWidgetIsEnabled(ptr) == 1
         }
     }
-    
+
     /// 设置样式表
     public func setStyleSheet(style: String): Unit {
         checkValid()
         unsafe {
-            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
+            withCString(style) {c => qWidgetSetStyleSheet(ptr, c)}
         }
     }
-    
+
     /// 设置最小尺寸
     public func setMinimumSize(minw: Int32, minh: Int32): Unit {
         checkValid()
@@ -1071,7 +1091,7 @@ public class QFrame <: QtResource {
             qWidgetSetMinimumSize(ptr, minw, minh)
         }
     }
-    
+
     /// 设置最大尺寸
     public func setMaximumSize(maxw: Int32, maxh: Int32): Unit {
         checkValid()
@@ -1079,30 +1099,30 @@ public class QFrame <: QtResource {
             qWidgetSetMaximumSize(ptr, maxw, maxh)
         }
     }
-    
+
     /// 设置工具提示
     public func setToolTip(toolTip: String): Unit {
         checkValid()
         unsafe {
-            withCString(toolTip) { c => qWidgetSetToolTip(ptr, c) }
+            withCString(toolTip) {c => qWidgetSetToolTip(ptr, c)}
         }
     }
-    
+
     /// 获取原生指针
     public func getPtr(): Int64 {
         return ptr
     }
-    
+
     /// 是否已关闭
     public func isClosed(): Bool {
         return closed
     }
-    
+
     /// 检查对象有效性
     public func isValid(): Bool {
         return !closed && ptr != 0 && isObjectAlive(ptr)
     }
-    
+
     /// 检查有效性，无效时抛出异常
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     /// throws: NullPointerException 空指针访问时抛出
@@ -1117,7 +1137,7 @@ public class QFrame <: QtResource {
             throw ResourceDisposedException("QFrame 底层 Qt 对象已失效")
         }
     }
-    
+
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
@@ -1136,7 +1156,7 @@ public class QFrame <: QtResource {
             ptr = 0
         }
     }
-    
+
     /// 删除边框容器（兼容旧API）
     public func delete(): Unit {
         close()
@@ -1193,96 +1213,100 @@ foreign func qSplitterRestoreState(ptr: Int64, buffer: CPointer<UInt8>, size: In
 public class QSplitter <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
-    
+
     // 创建水平分割器
     public static func createHorizontal(parent: Int64): QSplitter {
         unsafe {
             QSplitter(qSplitterCreateHorizontal(parent), true)
         }
     }
-    
+
     // 创建垂直分割器
     public static func createVertical(parent: Int64): QSplitter {
         unsafe {
             QSplitter(qSplitterCreateVertical(parent), true)
         }
     }
-    
+
     public init(parent: Int64) {
         unsafe {
             ptr = qSplitterCreate(parent)
         }
         trackObject(ptr)
     }
-    
+
     // 内部构造函数，用于静态工厂方法
     private init(ptr: Int64, _: Bool) {
         this.ptr = ptr
     }
-    
+
     public func addWidget(widgetPtr: Int64): Unit {
         checkValid()
         unsafe {
             qSplitterAddWidget(ptr, widgetPtr)
         }
     }
-    
+
     public func count(): Int32 {
         checkValid()
         unsafe {
             qSplitterCount(ptr)
         }
     }
-    
+
     public func setStretchFactor(index: Int32, stretch: Int32): Unit {
         checkValid()
         unsafe {
             qSplitterSetStretchFactor(ptr, index, stretch)
         }
     }
-    
+
     public func setHandleWidth(width: Int32): Unit {
         checkValid()
         unsafe {
             qSplitterSetHandleWidth(ptr, width)
         }
     }
-    
+
     public func handleWidth(): Int32 {
         checkValid()
         unsafe {
             qSplitterHandleWidth(ptr)
         }
     }
-    
+
     public func setChildrenCollapsible(collapsible: Bool): Unit {
         checkValid()
         unsafe {
-            qSplitterSetChildrenCollapsible(ptr, if (collapsible) { 1 } else { 0 })
+            qSplitterSetChildrenCollapsible(ptr, if (collapsible) {
+                1
+            } else {
+                0
+            })
         }
     }
-    
+
     public func childrenCollapsible(): Bool {
         checkValid()
         unsafe {
             qSplitterChildrenCollapsible(ptr) == 1
         }
     }
-    
+
     public func setOrientation(orientation: Int32): Unit {
         checkValid()
         unsafe {
             qSplitterSetOrientation(ptr, orientation)
         }
     }
-    
+
     public func orientation(): Int32 {
         checkValid()
         unsafe {
             qSplitterOrientation(ptr)
         }
     }
-    
+
     /// 在指定位置插入控件
     public func insertWidget(index: Int32, widgetPtr: Int64): Unit {
         checkValid()
@@ -1290,7 +1314,7 @@ public class QSplitter <: QtResource {
             qSplitterInsertWidget(ptr, index, widgetPtr)
         }
     }
-    
+
     /// 替换指定位置控件，返回被替换控件指针
     public func replaceWidget(index: Int32, widgetPtr: Int64): Int64 {
         checkValid()
@@ -1298,7 +1322,7 @@ public class QSplitter <: QtResource {
             qSplitterReplaceWidget(ptr, index, widgetPtr)
         }
     }
-    
+
     /// 设置是否在拖动时实时调整尺寸
     public func setOpaqueResize(opaque: Bool): Unit {
         checkValid()
@@ -1306,7 +1330,7 @@ public class QSplitter <: QtResource {
             qSplitterSetOpaqueResize(ptr, opaque)
         }
     }
-    
+
     /// 设置各子控件尺寸
     public func setSizes(sizes: Array<Int32>): Unit {
         checkValid()
@@ -1319,7 +1343,7 @@ public class QSplitter <: QtResource {
             releaseArrayRawData(handle)
         }
     }
-    
+
     /// 获取各子控件尺寸
     public func sizes(): Array<Int32> {
         checkValid()
@@ -1330,12 +1354,12 @@ public class QSplitter <: QtResource {
         unsafe {
             let buf = LibC.malloc<Int32>(count: Int64(n))
             let actual = qSplitterSizes(ptr, buf, n)
-            var result = Array<Int32>(Int64(actual), { i => buf.read(i) })
+            var result = Array<Int32>(Int64(actual), {i => buf.read(i)})
             LibC.free(buf)
             return result
         }
     }
-    
+
     /// 保存状态为字节数组（可用于持久化分割比例）
     public func saveState(): Array<UInt8> {
         checkValid()
@@ -1344,12 +1368,12 @@ public class QSplitter <: QtResource {
             let buf = LibC.malloc<UInt8>(count: Int64(capacity))
             var actualLen: Int32 = capacity
             qSplitterSaveState(ptr, buf, inout actualLen)
-            var result = Array<UInt8>(Int64(actualLen), { i => buf.read(i) })
+            var result = Array<UInt8>(Int64(actualLen), {i => buf.read(i)})
             LibC.free(buf)
             return result
         }
     }
-    
+
     /// 从字节数组恢复状态
     public func restoreState(data: Array<UInt8>): Bool {
         checkValid()
@@ -1363,36 +1387,40 @@ public class QSplitter <: QtResource {
             return r != 0
         }
     }
-    
+
     public func show(): Unit {
         checkValid()
         unsafe {
             qWidgetShow(ptr)
         }
     }
-    
+
     public func hide(): Unit {
         checkValid()
         unsafe {
             qWidgetHide(ptr)
         }
     }
-    
+
     public func resize(width: Int32, height: Int32): Unit {
         checkValid()
         unsafe {
             qWidgetResize(ptr, width, height)
         }
     }
-    
+
     /// 设置启用/禁用
     public func setEnabled(enabled: Bool): Unit {
         checkValid()
         unsafe {
-            qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
+            qWidgetSetEnabled(ptr, if (enabled) {
+                1
+            } else {
+                0
+            })
         }
     }
-    
+
     /// 检查是否启用
     public func isEnabled(): Bool {
         checkValid()
@@ -1400,15 +1428,15 @@ public class QSplitter <: QtResource {
             qWidgetIsEnabled(ptr) == 1
         }
     }
-    
+
     /// 设置样式表
     public func setStyleSheet(style: String): Unit {
         checkValid()
         unsafe {
-            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
+            withCString(style) {c => qWidgetSetStyleSheet(ptr, c)}
         }
     }
-    
+
     /// 设置最小尺寸
     public func setMinimumSize(minw: Int32, minh: Int32): Unit {
         checkValid()
@@ -1416,7 +1444,7 @@ public class QSplitter <: QtResource {
             qWidgetSetMinimumSize(ptr, minw, minh)
         }
     }
-    
+
     /// 设置最大尺寸
     public func setMaximumSize(maxw: Int32, maxh: Int32): Unit {
         checkValid()
@@ -1424,22 +1452,22 @@ public class QSplitter <: QtResource {
             qWidgetSetMaximumSize(ptr, maxw, maxh)
         }
     }
-    
+
     /// 获取原生指针
     public func getPtr(): Int64 {
         return ptr
     }
-    
+
     /// 是否已关闭
     public func isClosed(): Bool {
         return closed
     }
-    
+
     /// 检查对象有效性
     public func isValid(): Bool {
         return !closed && ptr != 0 && isObjectAlive(ptr)
     }
-    
+
     /// 检查有效性，无效时抛出异常
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     /// throws: NullPointerException 空指针访问时抛出
@@ -1454,7 +1482,7 @@ public class QSplitter <: QtResource {
             throw ResourceDisposedException("QSplitter 底层 Qt 对象已失效")
         }
     }
-    
+
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
@@ -1473,7 +1501,7 @@ public class QSplitter <: QtResource {
             ptr = 0
         }
     }
-    
+
     /// 删除分割器（兼容旧API）
     public func delete(): Unit {
         close()
@@ -1482,6 +1510,6 @@ public class QSplitter <: QtResource {
 
 // 分割器方向常量
 public class SplitterOrientation {
-    public static let Horizontal: Int32 = 1  // Qt::Horizontal
-    public static let Vertical: Int32 = 2    // Qt::Vertical
+    public static let Horizontal: Int32 = 1 // Qt::Horizontal
+    public static let Vertical: Int32 = 2 // Qt::Vertical
 }

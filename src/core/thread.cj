@@ -5,53 +5,94 @@ package cjqt6.core
 // ============================================================
 
 foreign func qThreadCreate(): Int64
+
 foreign func qThreadDelete(ptr: Int64): Unit
+
 foreign func qThreadStart(ptr: Int64): Unit
+
 foreign func qThreadQuit(ptr: Int64): Unit
+
 foreign func qThreadWait(ptr: Int64, timeoutMs: Int32): Bool
+
 foreign func qThreadIsRunning(ptr: Int64): Bool
+
 foreign func qThreadIsFinished(ptr: Int64): Bool
+
 foreign func qThreadPriority(ptr: Int64): Int32
+
 foreign func qThreadSetPriority(ptr: Int64, priority: Int32): Unit
+
 foreign func qThreadSetStackSize(ptr: Int64, stackSize: Int64): Unit
+
 foreign func qThreadStackSize(ptr: Int64): Int64
+
 foreign func qThreadExit(ptr: Int64): Unit
+
 foreign func qThreadIsInterruptionRequested(ptr: Int64): Bool
+
 foreign func qThreadRequestInterruption(ptr: Int64): Unit
+
 foreign func qThreadCurrentThread(): Int64
+
 foreign func qThreadIdealThreadCount(): Int64
+
 foreign func qThreadMsleep(ms: Int32): Unit
+
 foreign func qThreadConnectStarted(ptr: Int64, callback: VoidCallback): Unit
+
 foreign func qThreadConnectFinished(ptr: Int64, callback: VoidCallback): Unit
+
 foreign func qThreadDisconnectCallbacks(ptr: Int64): Unit
 
 foreign func qRunnableCreate(callback: VoidCallback): Int64
+
 foreign func qRunnableDelete(ptr: Int64): Unit
 
 foreign func qThreadPoolGlobalInstance(): Int64
-foreign func qThreadPoolStart(ptr: Int64, runnablePtr: Int64): Unit
-foreign func qThreadPoolWaitForDone(ptr: Int64, timeoutMs: Int32): Bool
-foreign func qThreadPoolActiveThreadCount(ptr: Int64): Int32
-foreign func qThreadPoolMaxThreadCount(ptr: Int64): Int32
-foreign func qThreadPoolSetMaxThreadCount(ptr: Int64, count: Int32): Unit
-foreign func qThreadPoolExpiryTimeout(ptr: Int64): Int32
-foreign func qThreadPoolSetExpiryTimeout(ptr: Int64, timeout: Int32): Unit
 
+foreign func qThreadPoolStart(ptr: Int64, runnablePtr: Int64): Unit
+
+foreign func qThreadPoolWaitForDone(ptr: Int64, timeoutMs: Int32): Bool
+
+foreign func qThreadPoolActiveThreadCount(ptr: Int64): Int32
+
+foreign func qThreadPoolMaxThreadCount(ptr: Int64): Int32
+
+foreign func qThreadPoolSetMaxThreadCount(ptr: Int64, count: Int32): Unit
+
+foreign func qThreadPoolExpiryTimeout(ptr: Int64): Int32
+
+foreign func qThreadPoolSetExpiryTimeout(ptr: Int64, timeout: Int32): Unit
 
 // ============================================================
 // 线程优先级常量
 // ============================================================
 public class ThreadPriority {
-    public static func idle(): Int32 { 0 }
-    public static func lowest(): Int32 { 1 }
-    public static func low(): Int32 { 2 }
-    public static func normal(): Int32 { 3 }
-    public static func high(): Int32 { 4 }
-    public static func highest(): Int32 { 5 }
-    public static func timeCritical(): Int32 { 6 }
-    public static func inherit(): Int32 { 7 }
+    public static func idle(): Int32 {
+        0
+    }
+    public static func lowest(): Int32 {
+        1
+    }
+    public static func low(): Int32 {
+        2
+    }
+    public static func normal(): Int32 {
+        3
+    }
+    public static func high(): Int32 {
+        4
+    }
+    public static func highest(): Int32 {
+        5
+    }
+    public static func timeCritical(): Int32 {
+        6
+    }
+    public static func inherit(): Int32 {
+        7
+    }
 }
-
 
 // ============================================================
 // QRunnable - 可运行任务
@@ -78,7 +119,9 @@ public class QRunnable {
         }
     }
 
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     public func close(): Unit {
         if (!closed && ptr != 0) {
@@ -88,7 +131,6 @@ public class QRunnable {
         }
     }
 }
-
 
 // ============================================================
 // QThread - 线程
@@ -108,7 +150,9 @@ public class QThread <: QtResource {
     }
 
     /// 是否已关闭（资源已释放）
-    public func isClosed(): Bool { closed }
+    public func isClosed(): Bool {
+        closed
+    }
 
     /// 检查对象有效性（未关闭且指针有效）
     public func isValid(): Bool {
@@ -241,7 +285,9 @@ public class QThread <: QtResource {
         unsafe { qThreadMsleep(ms) }
     }
 
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     public func close(): Unit {
         if (!closed && ptr != 0) {
@@ -258,7 +304,6 @@ public class QThread <: QtResource {
         }
     }
 }
-
 
 // ============================================================
 // QThreadPool - 线程池
@@ -318,10 +363,14 @@ public class QThreadPool <: QtResource {
         unsafe { qThreadPoolSetExpiryTimeout(ptr, timeout) }
     }
 
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     /// 是否已关闭
-    public func isClosed(): Bool { closed }
+    public func isClosed(): Bool {
+        closed
+    }
 
     /// 检查对象有效性（全局单例借用语义：只查 closed/ptr）
     public func isValid(): Bool {

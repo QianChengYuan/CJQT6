@@ -7,53 +7,95 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qStandardItemModelCreate(): Int64
+
 foreign func qStandardItemModelCreateWithSize(rows: Int32, cols: Int32): Int64
+
 foreign func qStandardItemModelSetRowCount(ptr: Int64, rows: Int32): Unit
+
 foreign func qStandardItemModelRowCount(ptr: Int64): Int32
+
 foreign func qStandardItemModelSetColumnCount(ptr: Int64, cols: Int32): Unit
+
 foreign func qStandardItemModelColumnCount(ptr: Int64): Int32
+
 foreign func qStandardItemModelSetItem(ptr: Int64, row: Int32, col: Int32, text: CString): Unit
+
 foreign func qStandardItemModelItemText(ptr: Int64, row: Int32, col: Int32): CString
+
 foreign func qStandardItemModelClear(ptr: Int64): Unit
+
 foreign func qStandardItemModelSetHorizontalHeaderLabel(ptr: Int64, col: Int32, label: CString): Unit
+
 foreign func qStandardItemModelSetVerticalHeaderLabel(ptr: Int64, row: Int32, label: CString): Unit
+
 foreign func qStandardItemModelInsertRow(ptr: Int64, row: Int32): Unit
+
 foreign func qStandardItemModelRemoveRow(ptr: Int64, row: Int32): Unit
+
 foreign func qStandardItemModelInsertColumn(ptr: Int64, col: Int32): Unit
+
 foreign func qStandardItemModelRemoveColumn(ptr: Int64, col: Int32): Unit
+
 foreign func qStandardItemModelSetItemEnabled(ptr: Int64, row: Int32, col: Int32, enabled: Bool): Unit
+
 foreign func qStandardItemModelSetItemCheckable(ptr: Int64, row: Int32, col: Int32, checkable: Bool): Unit
+
 foreign func qStandardItemModelSetItemChecked(ptr: Int64, row: Int32, col: Int32, checked: Bool): Unit
+
 foreign func qStandardItemModelIsItemChecked(ptr: Int64, row: Int32, col: Int32): Int32
+
 foreign func qStandardItemModelDelete(ptr: Int64): Unit
 
 // 补充 API FFI
 foreign func qStandardItemModelSetHeaderData(ptr: Int64, section: Int32, orientation: Int32, value: Int64, role: Int32): Int32
+
 foreign func qStandardItemModelSetItemPtr(ptr: Int64, row: Int32, col: Int32, itemPtr: Int64): Unit
+
 foreign func qStandardItemModelItem(ptr: Int64, row: Int32, col: Int32): Int64
+
 foreign func qStandardItemModelSetHorizontalHeaderItem(ptr: Int64, col: Int32, itemPtr: Int64): Unit
+
 foreign func qStandardItemModelSetVerticalHeaderItem(ptr: Int64, row: Int32, itemPtr: Int64): Unit
+
 foreign func qStandardItemModelAppendRow(ptr: Int64, itemPtr: Int64): Unit
+
 foreign func qStandardItemModelInsertRowItem(ptr: Int64, row: Int32, itemPtr: Int64): Unit
+
 foreign func qStandardItemModelFindItems(ptr: Int64, text: CString, flags: Int32): Int32
+
 foreign func qStandardItemModelItemFromIndex(ptr: Int64, indexPtr: Int64): Int64
+
 foreign func qStandardItemModelIndexFromItem(ptr: Int64, itemPtr: Int64): Int64
 
 // QStandardItem 封装 FFI
 foreign func qStandardItemCreate(): Int64
+
 foreign func qStandardItemCreateWithText(text: CString): Int64
+
 foreign func qStandardItemDelete(itemPtr: Int64): Unit
+
 foreign func qStandardItemSetText(itemPtr: Int64, text: CString): Unit
+
 foreign func qStandardItemGetText(itemPtr: Int64): CString
+
 foreign func qStandardItemSetFlags(itemPtr: Int64, flags: Int32): Unit
+
 foreign func qStandardItemFlags(itemPtr: Int64): Int32
+
 foreign func qStandardItemSetCheckState(itemPtr: Int64, state: Int32): Unit
+
 foreign func qStandardItemCheckState(itemPtr: Int64): Int32
+
 foreign func qStandardItemSetData(itemPtr: Int64, role: Int32, value: Int64): Unit
+
 foreign func qStandardItemData(itemPtr: Int64, role: Int32): Int64
+
 foreign func qStandardItemSetEditable(itemPtr: Int64, v: Int32): Unit
+
 foreign func qStandardItemIsEditable(itemPtr: Int64): Int32
+
 foreign func qStandardItemAppendRow(itemPtr: Int64, childPtr: Int64): Unit
+
 foreign func qStandardItemSetForeground(itemPtr: Int64, r: Int32, g: Int32, b: Int32): Unit
 
 // ============================================================
@@ -136,7 +178,7 @@ public class QStandardItemModel <: QtResource {
     public func setItem(row: Int32, col: Int32, text: String): Unit {
         checkValid()
         unsafe {
-            withCString(text) { c => qStandardItemModelSetItem(ptr, row, col, c) }
+            withCString(text) {c => qStandardItemModelSetItem(ptr, row, col, c)}
         }
     }
 
@@ -160,14 +202,14 @@ public class QStandardItemModel <: QtResource {
     public func setHorizontalHeaderLabel(col: Int32, label: String): Unit {
         checkValid()
         unsafe {
-            withCString(label) { c => qStandardItemModelSetHorizontalHeaderLabel(ptr, col, c) }
+            withCString(label) {c => qStandardItemModelSetHorizontalHeaderLabel(ptr, col, c)}
         }
     }
 
     public func setVerticalHeaderLabel(row: Int32, label: String): Unit {
         checkValid()
         unsafe {
-            withCString(label) { c => qStandardItemModelSetVerticalHeaderLabel(ptr, row, c) }
+            withCString(label) {c => qStandardItemModelSetVerticalHeaderLabel(ptr, row, c)}
         }
     }
 
@@ -307,7 +349,9 @@ public class QStandardItemModel <: QtResource {
     }
 
     /// 是否已关闭（资源已释放）
-    public func isClosed(): Bool { closed }
+    public func isClosed(): Bool {
+        closed
+    }
 
     /// 检查对象有效性（未关闭且指针有效）
     public func isValid(): Bool {
@@ -357,7 +401,7 @@ public class QStandardItem <: QtResource {
 
     public init(text: String) {
         unsafe {
-            withCString(text) { c => ptr = qStandardItemCreateWithText(c) }
+            withCString(text) {c => ptr = qStandardItemCreateWithText(c)}
         }
         owned = true
     }
@@ -387,7 +431,7 @@ public class QStandardItem <: QtResource {
 
     public func setText(text: String): Unit {
         unsafe {
-            withCString(text) { c => qStandardItemSetText(ptr, c) }
+            withCString(text) {c => qStandardItemSetText(ptr, c)}
         }
     }
 
@@ -429,7 +473,11 @@ public class QStandardItem <: QtResource {
 
     public func setEditable(editable: Bool): Unit {
         unsafe {
-            qStandardItemSetEditable(ptr, if (editable) { 1 } else { 0 })
+            qStandardItemSetEditable(ptr, if (editable) {
+                1
+            } else {
+                0
+            })
         }
     }
 
@@ -452,7 +500,9 @@ public class QStandardItem <: QtResource {
     }
 
     /// 是否已关闭
-    public func isClosed(): Bool { closed }
+    public func isClosed(): Bool {
+        closed
+    }
 
     /// 检查对象有效性（借用 item 由模型管理，close 只置位不删除）
     public func isValid(): Bool {

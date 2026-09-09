@@ -7,10 +7,16 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qSyntaxHighlighterCreate(selfId: Int64, docPtr: Int64): Int64
+
 foreign func qSyntaxHighlighterDelete(ptr: Int64): Unit
+
 foreign func qSyntaxHighlighterSetCallback(ptr: Int64, callback: CFunc<(Int64, CString) -> Unit>): Unit
-foreign func qSyntaxHighlighterSetFormat(ptr: Int64, start: Int32, count: Int32, color: Int64, bold: Bool, italic: Bool, underline: Bool): Unit
+
+foreign func qSyntaxHighlighterSetFormat(ptr: Int64, start: Int32, count: Int32, color: Int64, bold: Bool, italic: Bool,
+    underline: Bool): Unit
+
 foreign func qSyntaxHighlighterRehighlight(ptr: Int64): Unit
+
 foreign func qSyntaxHighlighterDocument(ptr: Int64): Int64
 
 /// 语法高亮器，为 QTextDocument 提供基于回调的语法高亮（用于代码编辑器）
@@ -22,8 +28,12 @@ public class QSyntaxHighlighter {
 
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     private func checkValid(): Unit {
-        if (ptr == 0 || closed) { throw ResourceDisposedException("QSyntaxHighlighter already deleted") }
-        if (!isObjectAlive(ptr)) { throw ResourceDisposedException("QSyntaxHighlighter 底层 Qt 对象已失效") }
+        if (ptr == 0 || closed) {
+            throw ResourceDisposedException("QSyntaxHighlighter already deleted")
+        }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QSyntaxHighlighter 底层 Qt 对象已失效")
+        }
     }
 
     /// 创建语法高亮器，docPtr 为关联的 QTextDocument 指针
@@ -33,7 +43,9 @@ public class QSyntaxHighlighter {
         QSyntaxHighlighter.nextId += 1
         unsafe {
             ptr = qSyntaxHighlighterCreate(selfId, docPtr)
-            if (ptr == 0) { throw CreateFailedException("QSyntaxHighlighter create failed") }
+            if (ptr == 0) {
+                throw CreateFailedException("QSyntaxHighlighter create failed")
+            }
         }
         trackObject(ptr)
     }
@@ -68,7 +80,9 @@ public class QSyntaxHighlighter {
     }
 
     /// 获取底层指针
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     /// 释放资源
     public func close(): Unit {
@@ -81,7 +95,8 @@ public class QSyntaxHighlighter {
             }
             untrackObject(ptr)
             unsafe { qSyntaxHighlighterDelete(ptr) }
-            ptr = 0; closed = true
+            ptr = 0
+            closed = true
         }
     }
 }

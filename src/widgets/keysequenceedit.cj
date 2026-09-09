@@ -4,10 +4,15 @@ import cjqt6.core.*
 
 // QKeySequenceEdit - 快捷键输入控件
 foreign func qKeySequenceEditCreate(parentPtr: Int64): Int64
+
 foreign func qKeySequenceEditKeySequence(ptr: Int64): CString
+
 foreign func qKeySequenceEditSetKeySequence(ptr: Int64, text: CString): Unit
+
 foreign func qKeySequenceEditClear(ptr: Int64): Unit
+
 foreign func qKeySequenceEditConnectKeySequenceChanged(ptr: Int64, callback: CStringCallback): Unit
+
 foreign func qKeySequenceEditDelete(ptr: Int64): Unit
 
 /// 快捷键输入控件
@@ -22,10 +27,14 @@ public class QKeySequenceEdit {
     }
 
     /// 显示
-    public func show(): Unit { unsafe { qWidgetShow(ptr) } }
+    public func show(): Unit {
+        unsafe { qWidgetShow(ptr) }
+    }
 
     /// 隐藏
-    public func hide(): Unit { unsafe { qWidgetHide(ptr) } }
+    public func hide(): Unit {
+        unsafe { qWidgetHide(ptr) }
+    }
 
     /// 调整大小
     public func resize(width: Int32, height: Int32): Unit {
@@ -35,7 +44,7 @@ public class QKeySequenceEdit {
     /// 设置样式表
     public func setStyleSheet(style: String): Unit {
         unsafe {
-            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
+            withCString(style) {c => qWidgetSetStyleSheet(ptr, c)}
         }
     }
 
@@ -52,12 +61,14 @@ public class QKeySequenceEdit {
     /// 设置快捷键序列（如 "Ctrl+C", "Alt+Shift+X"）
     public func setKeySequence(text: String): Unit {
         unsafe {
-            withCString(text) { c => qKeySequenceEditSetKeySequence(ptr, c) }
+            withCString(text) {c => qKeySequenceEditSetKeySequence(ptr, c)}
         }
     }
 
     /// 清空快捷键
-    public func clear(): Unit { unsafe { qKeySequenceEditClear(ptr) } }
+    public func clear(): Unit {
+        unsafe { qKeySequenceEditClear(ptr) }
+    }
 
     /// 快捷键序列变化回调（参数为快捷键文本，如 "Ctrl+C"）
     public func setOnKeySequenceChanged(callback: CStringCallback): Unit {

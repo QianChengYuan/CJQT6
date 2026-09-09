@@ -7,29 +7,43 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qGraphicsViewCreate(parentPtr: Int64): Int64
+
 foreign func qGraphicsViewDelete(ptr: Int64): Unit
 
 foreign func qGraphicsViewSetScene(ptr: Int64, scenePtr: Int64): Unit
+
 foreign func qGraphicsViewScene(ptr: Int64): Int64
 
 foreign func qGraphicsViewSetRenderHint(ptr: Int64, hint: Int32, enabled: Bool): Unit
+
 foreign func qGraphicsViewSetRenderHints(ptr: Int64, hints: Int32): Unit
+
 foreign func qGraphicsViewSetDragMode(ptr: Int64, mode: Int32): Unit
+
 foreign func qGraphicsViewDragMode(ptr: Int64): Int32
+
 foreign func qGraphicsViewSetViewportUpdateMode(ptr: Int64, mode: Int32): Unit
 
 foreign func qGraphicsViewCenterOn(ptr: Int64, x: Float64, y: Float64): Unit
+
 foreign func qGraphicsViewFitInView(ptr: Int64, x: Float64, y: Float64, w: Float64, h: Float64): Unit
+
 foreign func qGraphicsViewScale(ptr: Int64, fx: Float64, fy: Float64): Unit
+
 foreign func qGraphicsViewRotate(ptr: Int64, angle: Float64): Unit
+
 foreign func qGraphicsViewTranslate(ptr: Int64, dx: Float64, dy: Float64): Unit
+
 foreign func qGraphicsViewResetTransform(ptr: Int64): Unit
 
 foreign func qGraphicsViewSetInteractive(ptr: Int64, interactive: Bool): Unit
+
 foreign func qGraphicsViewIsInteractive(ptr: Int64): Bool
 
 foreign func qGraphicsViewSetSceneRect(ptr: Int64, x: Float64, y: Float64, w: Float64, h: Float64): Unit
+
 foreign func qGraphicsViewSetBackgroundBrush(ptr: Int64, r: Int32, g: Int32, b: Int32): Unit
+
 foreign func qGraphicsViewSetForegroundBrush(ptr: Int64, r: Int32, g: Int32, b: Int32): Unit
 
 foreign func qGraphicsViewMapToScene(ptr: Int64, x: Float64, y: Float64): CString
@@ -39,28 +53,38 @@ foreign func qGraphicsViewMapToScene(ptr: Int64, x: Float64, y: Float64): CStrin
 // ============================================================
 
 foreign func qGraphicsSceneCreate(): Int64
+
 foreign func qGraphicsSceneDelete(ptr: Int64): Unit
 
 foreign func qGraphicsSceneAddItem(ptr: Int64, itemPtr: Int64): Unit
+
 foreign func qGraphicsSceneRemoveItem(ptr: Int64, itemPtr: Int64): Unit
+
 foreign func qGraphicsSceneClear(ptr: Int64): Unit
+
 foreign func qGraphicsSceneItems(ptr: Int64): CString
+
 foreign func qGraphicsSceneItemAt(ptr: Int64, x: Float64, y: Float64): Int64
 
-foreign func qGraphicsSceneAddRect(ptr: Int64, x: Float64, y: Float64, w: Float64, h: Float64,
-                                   penR: Int32, penG: Int32, penB: Int32, penW: Float64,
-                                   brushR: Int32, brushG: Int32, brushB: Int32): Int64
-foreign func qGraphicsSceneAddEllipse(ptr: Int64, x: Float64, y: Float64, w: Float64, h: Float64,
-                                      penR: Int32, penG: Int32, penB: Int32, penW: Float64,
-                                      brushR: Int32, brushG: Int32, brushB: Int32): Int64
-foreign func qGraphicsSceneAddLine(ptr: Int64, x1: Float64, y1: Float64, x2: Float64, y2: Float64,
-                                   penR: Int32, penG: Int32, penB: Int32, penW: Float64): Int64
+foreign func qGraphicsSceneAddRect(ptr: Int64, x: Float64, y: Float64, w: Float64, h: Float64, penR: Int32, penG: Int32,
+    penB: Int32, penW: Float64, brushR: Int32, brushG: Int32, brushB: Int32): Int64
+
+foreign func qGraphicsSceneAddEllipse(ptr: Int64, x: Float64, y: Float64, w: Float64, h: Float64, penR: Int32,
+    penG: Int32, penB: Int32, penW: Float64, brushR: Int32, brushG: Int32, brushB: Int32): Int64
+
+foreign func qGraphicsSceneAddLine(ptr: Int64, x1: Float64, y1: Float64, x2: Float64, y2: Float64, penR: Int32,
+    penG: Int32, penB: Int32, penW: Float64): Int64
+
 foreign func qGraphicsSceneAddText(ptr: Int64, text: CString): Int64
 
 foreign func qGraphicsSceneSetSceneRect(ptr: Int64, x: Float64, y: Float64, w: Float64, h: Float64): Unit
+
 foreign func qGraphicsSceneSceneRect(ptr: Int64): CString
+
 foreign func qGraphicsSceneUpdate(ptr: Int64): Unit
+
 foreign func qGraphicsSceneSetBackgroundBrush(ptr: Int64, r: Int32, g: Int32, b: Int32): Unit
+
 foreign func qGraphicsSceneAddWidget(ptr: Int64, widgetPtr: Int64): Int64
 
 // ============================================================
@@ -68,13 +92,21 @@ foreign func qGraphicsSceneAddWidget(ptr: Int64, widgetPtr: Int64): Int64
 // ============================================================
 
 foreign func qGraphicsItemSetPos(ptr: Int64, x: Float64, y: Float64): Unit
+
 foreign func qGraphicsItemPos(ptr: Int64): CString
+
 foreign func qGraphicsItemSetZValue(ptr: Int64, z: Float64): Unit
+
 foreign func qGraphicsItemSetRotation(ptr: Int64, angle: Float64): Unit
+
 foreign func qGraphicsItemSetVisible(ptr: Int64, visible: Bool): Unit
+
 foreign func qGraphicsItemIsVisible(ptr: Int64): Bool
+
 foreign func qGraphicsItemSetSelected(ptr: Int64, selected: Bool): Unit
+
 foreign func qGraphicsItemIsSelected(ptr: Int64): Bool
+
 foreign func qGraphicsItemUpdate(ptr: Int64): Unit
 
 // ============================================================
@@ -356,26 +388,24 @@ public class QGraphicsScene <: QtResource {
         trackObject(ptr)
     }
 
-    public func addRect(x: Float64, y: Float64, w: Float64, h: Float64,
-                        penR: Int32, penG: Int32, penB: Int32, penW: Float64,
-                        brushR: Int32, brushG: Int32, brushB: Int32): Int64 {
+    public func addRect(x: Float64, y: Float64, w: Float64, h: Float64, penR: Int32, penG: Int32, penB: Int32,
+        penW: Float64, brushR: Int32, brushG: Int32, brushB: Int32): Int64 {
         checkValid()
         unsafe {
             return qGraphicsSceneAddRect(ptr, x, y, w, h, penR, penG, penB, penW, brushR, brushG, brushB)
         }
     }
 
-    public func addEllipse(x: Float64, y: Float64, w: Float64, h: Float64,
-                           penR: Int32, penG: Int32, penB: Int32, penW: Float64,
-                           brushR: Int32, brushG: Int32, brushB: Int32): Int64 {
+    public func addEllipse(x: Float64, y: Float64, w: Float64, h: Float64, penR: Int32, penG: Int32, penB: Int32,
+        penW: Float64, brushR: Int32, brushG: Int32, brushB: Int32): Int64 {
         checkValid()
         unsafe {
             return qGraphicsSceneAddEllipse(ptr, x, y, w, h, penR, penG, penB, penW, brushR, brushG, brushB)
         }
     }
 
-    public func addLine(x1: Float64, y1: Float64, x2: Float64, y2: Float64,
-                        penR: Int32, penG: Int32, penB: Int32, penW: Float64): Int64 {
+    public func addLine(x1: Float64, y1: Float64, x2: Float64, y2: Float64, penR: Int32, penG: Int32, penB: Int32,
+        penW: Float64): Int64 {
         checkValid()
         unsafe {
             return qGraphicsSceneAddLine(ptr, x1, y1, x2, y2, penR, penG, penB, penW)

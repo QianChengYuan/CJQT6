@@ -7,40 +7,66 @@ import cjqt6.core.*
 
 // QWidget公共函数
 foreign func qWidgetShow(ptr: Int64): Unit
+
 foreign func qWidgetHide(ptr: Int64): Unit
+
 foreign func qWidgetResize(ptr: Int64, width: Int32, height: Int32): Unit
+
 foreign func qWidgetDelete(ptr: Int64): Unit
 
 // QMenuBar
 foreign func qMenuBarCreate(): Int64
+
 foreign func qMenuBarAddMenu(ptr: Int64, title: CString): Int64
+
 foreign func qMenuBarDelete(ptr: Int64): Unit
 
 // QMenu
 foreign func qMenuCreate(title: CString): Int64
+
 foreign func qMenuAddAction(ptr: Int64, text: CString): Int64
+
 foreign func qMenuAddActionByPtr(menuPtr: Int64, actionPtr: Int64): Unit
+
 foreign func qMenuAddSeparator(ptr: Int64): Int64
+
 foreign func qMenuAddMenu(ptr: Int64, title: CString): Int64
+
 foreign func qMenuSetTitle(ptr: Int64, title: CString): Unit
+
 foreign func qMenuPopup(ptr: Int64, x: Int32, y: Int32): Unit
+
 foreign func qMenuDelete(ptr: Int64): Unit
 
 // QAction
 foreign func qActionCreate(text: CString): Int64
+
 foreign func qActionSetText(ptr: Int64, text: CString): Unit
+
 foreign func qActionText(ptr: Int64): CString
+
 foreign func qActionSetShortcut(ptr: Int64, shortcut: CString): Unit
+
 foreign func qActionSetCheckable(ptr: Int64, checkable: Bool): Unit
+
 foreign func qActionIsCheckable(ptr: Int64): Bool
+
 foreign func qActionSetChecked(ptr: Int64, checked: Bool): Unit
+
 foreign func qActionIsChecked(ptr: Int64): Bool
+
 foreign func qActionSetEnabled(ptr: Int64, enabled: Bool): Unit
+
 foreign func qActionIsEnabled(ptr: Int64): Bool
+
 foreign func qActionSetVisible(ptr: Int64, visible: Bool): Unit
+
 foreign func qActionIsVisible(ptr: Int64): Bool
+
 foreign func qActionConnectTriggered(ptr: Int64, callback: VoidCallback): Unit
+
 foreign func qActionDisconnectTriggered(ptr: Int64): Unit
+
 foreign func qActionDelete(ptr: Int64): Unit
 
 // P1c：闭包捕获 id 版连接（native 仅保存 id，信号触发时回调顶层调度器）
@@ -51,26 +77,41 @@ foreign func qSignalCleanup(ptr: Int64): Unit
 
 // QToolBar
 foreign func qToolBarCreate(title: CString): Int64
+
 foreign func qToolBarAddAction(ptr: Int64, actionPtr: Int64): Unit
+
 foreign func qToolBarAddSeparator(ptr: Int64): Unit
+
 foreign func qToolBarAddWidget(ptr: Int64, widgetPtr: Int64): Unit
+
 foreign func qToolBarSetMovable(ptr: Int64, movable: Bool): Unit
+
 foreign func qToolBarDelete(ptr: Int64): Unit
 
 // QStatusBar
 foreign func qStatusBarCreate(): Int64
+
 foreign func qStatusBarShowMessage(ptr: Int64, message: CString, timeout: Int32): Unit
+
 foreign func qStatusBarClearMessage(ptr: Int64): Unit
+
 foreign func qStatusBarAddWidget(ptr: Int64, widgetPtr: Int64, stretch: Int32): Unit
+
 foreign func qStatusBarDelete(ptr: Int64): Unit
 
 // QMainWindow
 foreign func qMainWindowCreate(): Int64
+
 foreign func qMainWindowSetMenuBar(ptr: Int64, menuBarPtr: Int64): Unit
+
 foreign func qMainWindowAddToolBar(ptr: Int64, toolBarPtr: Int64): Unit
+
 foreign func qMainWindowSetStatusBar(ptr: Int64, statusBarPtr: Int64): Unit
+
 foreign func qMainWindowSetCentralWidget(ptr: Int64, widgetPtr: Int64): Unit
+
 foreign func qMainWindowSetWindowTitle(ptr: Int64, title: CString): Unit
+
 foreign func qMainWindowDelete(ptr: Int64): Unit
 
 // ============================================================
@@ -83,7 +124,7 @@ public class QAction <: QtResource {
     /// 是否拥有原生对象所有权：init(text) 创建的对象为 true；init(ptr) 包装（menu.addAction 等返回）为 false，
     /// close() 只标记关闭、不删除底层对象（避免删除仍被菜单/工具栏引用的动作导致悬垂或二次释放）
     private var owned: Bool = true
-    
+
     /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(text: String) {
         unsafe {
@@ -97,7 +138,7 @@ public class QAction <: QtResource {
         owned = true
         trackObject(ptr)
     }
-    
+
     // 内部构造函数（从指针创建，不获取所有权）
     /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(ptr: Int64) {
@@ -108,7 +149,7 @@ public class QAction <: QtResource {
         this.owned = false
         closed = false
     }
-    
+
     public func setText(text: String): Unit {
         checkValid()
         unsafe {
@@ -117,7 +158,7 @@ public class QAction <: QtResource {
             LibC.free(cstr)
         }
     }
-    
+
     public func text(): String {
         checkValid()
         unsafe {
@@ -127,7 +168,7 @@ public class QAction <: QtResource {
             return result
         }
     }
-    
+
     public func setShortcut(shortcut: String): Unit {
         checkValid()
         unsafe {
@@ -136,63 +177,63 @@ public class QAction <: QtResource {
             LibC.free(cstr)
         }
     }
-    
+
     public func setCheckable(checkable: Bool): Unit {
         checkValid()
         unsafe {
             qActionSetCheckable(ptr, checkable)
         }
     }
-    
+
     public func isCheckable(): Bool {
         checkValid()
         unsafe {
             qActionIsCheckable(ptr)
         }
     }
-    
+
     public func setChecked(checked: Bool): Unit {
         checkValid()
         unsafe {
             qActionSetChecked(ptr, checked)
         }
     }
-    
+
     public func isChecked(): Bool {
         checkValid()
         unsafe {
             qActionIsChecked(ptr)
         }
     }
-    
+
     public func setEnabled(enabled: Bool): Unit {
         checkValid()
         unsafe {
             qActionSetEnabled(ptr, enabled)
         }
     }
-    
+
     public func isEnabled(): Bool {
         checkValid()
         unsafe {
             qActionIsEnabled(ptr)
         }
     }
-    
+
     public func setVisible(visible: Bool): Unit {
         checkValid()
         unsafe {
             qActionSetVisible(ptr, visible)
         }
     }
-    
+
     public func isVisible(): Bool {
         checkValid()
         unsafe {
             qActionIsVisible(ptr)
         }
     }
-    
+
     public func setOnTriggered(callback: VoidCallback): Unit {
         checkValid()
         unsafe {
@@ -210,26 +251,26 @@ public class QAction <: QtResource {
         }
         return SignalConnection.createCapturing(ptr, SIGNAL_TRIGGERED, WIDGET_TYPE_ACTION, id)
     }
-    
+
     public func disconnect(): Unit {
         checkValid()
         unsafe {
             qActionDisconnectTriggered(ptr)
         }
     }
-    
+
     public func getPtr(): Int64 {
         return ptr
     }
-    
+
     public func isClosed(): Bool {
         return closed
     }
-    
+
     public func isValid(): Bool {
         return !closed && ptr != 0 && isObjectAlive(ptr)
     }
-    
+
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     /// throws: NullPointerException 空指针访问时抛出
     public func checkValid(): Unit {
@@ -243,7 +284,7 @@ public class QAction <: QtResource {
             throw ResourceDisposedException("QAction 底层 Qt 对象已失效")
         }
     }
-    
+
     /// 关闭资源，释放Qt对象（仅 owned 动作删除底层对象；借用包装只标记关闭）
     public func close(): Unit {
         if (!closed && ptr != 0) {
@@ -266,7 +307,7 @@ public class QAction <: QtResource {
             ptr = 0
         }
     }
-    
+
     /// 删除动作（兼容旧API）
     public func delete(): Unit {
         close()
@@ -283,7 +324,7 @@ public class QMenu <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
     private let ownsPtr: Bool
-    
+
     /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(title: String) {
         unsafe {
@@ -297,7 +338,7 @@ public class QMenu <: QtResource {
         ownsPtr = true
         trackObject(ptr)
     }
-    
+
     // 内部构造函数（从指针创建，不获取所有权）
     /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(ptr: Int64) {
@@ -308,7 +349,7 @@ public class QMenu <: QtResource {
         this.ownsPtr = false
         this.closed = false
     }
-    
+
     public func addAction(text: String): QAction {
         checkValid()
         unsafe {
@@ -318,7 +359,7 @@ public class QMenu <: QtResource {
             return QAction(actionPtr)
         }
     }
-    
+
     // 通过指针添加已存在的QAction
     public func addActionPtr(actionPtr: Int64): Unit {
         checkValid()
@@ -326,14 +367,14 @@ public class QMenu <: QtResource {
             qMenuAddActionByPtr(ptr, actionPtr)
         }
     }
-    
+
     public func addSeparator(): Unit {
         checkValid()
         unsafe {
             qMenuAddSeparator(ptr)
         }
     }
-    
+
     public func addMenu(title: String): QMenu {
         checkValid()
         unsafe {
@@ -343,7 +384,7 @@ public class QMenu <: QtResource {
             return QMenu(menuPtr)
         }
     }
-    
+
     public func setTitle(title: String): Unit {
         checkValid()
         unsafe {
@@ -352,26 +393,26 @@ public class QMenu <: QtResource {
             LibC.free(cstr)
         }
     }
-    
+
     public func popup(globalX: Int32, globalY: Int32): Unit {
         checkValid()
         unsafe {
             qMenuPopup(ptr, globalX, globalY)
         }
     }
-    
+
     public func getPtr(): Int64 {
         return ptr
     }
-    
+
     public func isClosed(): Bool {
         return closed
     }
-    
+
     public func isValid(): Bool {
         return !closed && ptr != 0 && isObjectAlive(ptr)
     }
-    
+
     /// throws: NullPointerException 空指针访问时抛出
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     public func checkValid(): Unit {
@@ -385,7 +426,7 @@ public class QMenu <: QtResource {
             throw ResourceDisposedException("QMenu 底层 Qt 对象已失效")
         }
     }
-    
+
     /// 关闭资源，释放Qt对象（仅 ownsPtr=true 时删除C++对象）
     public func close(): Unit {
         if (!closed && ptr != 0 && ownsPtr) {
@@ -403,7 +444,7 @@ public class QMenu <: QtResource {
         closed = true
         ptr = 0
     }
-    
+
     /// 删除菜单（兼容旧API）
     public func delete(): Unit {
         close()
@@ -417,7 +458,7 @@ public class QMenu <: QtResource {
 public class QMenuBar <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
-    
+
     /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
         unsafe {
@@ -428,7 +469,7 @@ public class QMenuBar <: QtResource {
         }
         trackObject(ptr)
     }
-    
+
     public func addMenu(title: String): QMenu {
         checkValid()
         unsafe {
@@ -438,19 +479,19 @@ public class QMenuBar <: QtResource {
             return QMenu(menuPtr)
         }
     }
-    
+
     public func getPtr(): Int64 {
         ptr
     }
-    
+
     public func isClosed(): Bool {
         return closed
     }
-    
+
     public func isValid(): Bool {
         return !closed && ptr != 0 && isObjectAlive(ptr)
     }
-    
+
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     /// throws: NullPointerException 空指针访问时抛出
     public func checkValid(): Unit {
@@ -464,7 +505,7 @@ public class QMenuBar <: QtResource {
             throw ResourceDisposedException("QMenuBar 底层 Qt 对象已失效")
         }
     }
-    
+
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
@@ -482,7 +523,7 @@ public class QMenuBar <: QtResource {
         closed = true
         ptr = 0
     }
-    
+
     /// 删除菜单栏（兼容旧API）
     public func delete(): Unit {
         close()
@@ -496,7 +537,7 @@ public class QMenuBar <: QtResource {
 public class QToolBar <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
-    
+
     /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(title: String) {
         unsafe {
@@ -509,7 +550,7 @@ public class QToolBar <: QtResource {
         }
         trackObject(ptr)
     }
-    
+
     /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
         unsafe {
@@ -522,47 +563,47 @@ public class QToolBar <: QtResource {
         }
         trackObject(ptr)
     }
-    
+
     public func addAction(actionPtr: Int64): Unit {
         checkValid()
         unsafe {
             qToolBarAddAction(ptr, actionPtr)
         }
     }
-    
+
     public func addSeparator(): Unit {
         checkValid()
         unsafe {
             qToolBarAddSeparator(ptr)
         }
     }
-    
+
     public func addWidget(widgetPtr: Int64): Unit {
         checkValid()
         unsafe {
             qToolBarAddWidget(ptr, widgetPtr)
         }
     }
-    
+
     public func setMovable(movable: Bool): Unit {
         checkValid()
         unsafe {
             qToolBarSetMovable(ptr, movable)
         }
     }
-    
+
     public func getPtr(): Int64 {
         ptr
     }
-    
+
     public func isClosed(): Bool {
         return closed
     }
-    
+
     public func isValid(): Bool {
         return !closed && ptr != 0 && isObjectAlive(ptr)
     }
-    
+
     /// throws: NullPointerException 空指针访问时抛出
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     public func checkValid(): Unit {
@@ -576,7 +617,7 @@ public class QToolBar <: QtResource {
             throw ResourceDisposedException("QToolBar 底层 Qt 对象已失效")
         }
     }
-    
+
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
@@ -594,7 +635,7 @@ public class QToolBar <: QtResource {
         closed = true
         ptr = 0
     }
-    
+
     /// 删除工具栏（兼容旧API）
     public func delete(): Unit {
         close()
@@ -608,7 +649,7 @@ public class QToolBar <: QtResource {
 public class QStatusBar <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
-    
+
     /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
         unsafe {
@@ -619,7 +660,7 @@ public class QStatusBar <: QtResource {
         }
         trackObject(ptr)
     }
-    
+
     public func showMessage(message: String): Unit {
         checkValid()
         unsafe {
@@ -628,7 +669,7 @@ public class QStatusBar <: QtResource {
             LibC.free(cstr)
         }
     }
-    
+
     public func showMessageWithTimeout(message: String, timeout: Int32): Unit {
         checkValid()
         unsafe {
@@ -637,40 +678,40 @@ public class QStatusBar <: QtResource {
             LibC.free(cstr)
         }
     }
-    
+
     public func clearMessage(): Unit {
         checkValid()
         unsafe {
             qStatusBarClearMessage(ptr)
         }
     }
-    
+
     public func addWidget(widgetPtr: Int64): Unit {
         checkValid()
         unsafe {
             qStatusBarAddWidget(ptr, widgetPtr, 0)
         }
     }
-    
+
     public func addWidgetWithStretch(widgetPtr: Int64, stretch: Int32): Unit {
         checkValid()
         unsafe {
             qStatusBarAddWidget(ptr, widgetPtr, stretch)
         }
     }
-    
+
     public func getPtr(): Int64 {
         ptr
     }
-    
+
     public func isClosed(): Bool {
         return closed
     }
-    
+
     public func isValid(): Bool {
         return !closed && ptr != 0 && isObjectAlive(ptr)
     }
-    
+
     /// throws: NullPointerException 空指针访问时抛出
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     public func checkValid(): Unit {
@@ -684,7 +725,7 @@ public class QStatusBar <: QtResource {
             throw ResourceDisposedException("QStatusBar 底层 Qt 对象已失效")
         }
     }
-    
+
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
@@ -702,7 +743,7 @@ public class QStatusBar <: QtResource {
         closed = true
         ptr = 0
     }
-    
+
     /// 删除状态栏（兼容旧API）
     public func delete(): Unit {
         close()
@@ -716,7 +757,7 @@ public class QStatusBar <: QtResource {
 public class QMainWindow <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
-    
+
     /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
         unsafe {
@@ -727,21 +768,21 @@ public class QMainWindow <: QtResource {
         }
         trackObject(ptr)
     }
-    
+
     public func show(): Unit {
         checkValid()
         unsafe {
             qWidgetShow(ptr)
         }
     }
-    
+
     public func hide(): Unit {
         checkValid()
         unsafe {
             qWidgetHide(ptr)
         }
     }
-    
+
     public func setTitle(title: String): Unit {
         checkValid()
         unsafe {
@@ -750,54 +791,54 @@ public class QMainWindow <: QtResource {
             LibC.free(cstr)
         }
     }
-    
+
     public func resize(width: Int32, height: Int32): Unit {
         checkValid()
         unsafe {
             qWidgetResize(ptr, width, height)
         }
     }
-    
+
     public func setMenuBar(menuBarPtr: Int64): Unit {
         checkValid()
         unsafe {
             qMainWindowSetMenuBar(ptr, menuBarPtr)
         }
     }
-    
+
     public func addToolBar(toolBarPtr: Int64): Unit {
         checkValid()
         unsafe {
             qMainWindowAddToolBar(ptr, toolBarPtr)
         }
     }
-    
+
     public func setStatusBar(statusBarPtr: Int64): Unit {
         checkValid()
         unsafe {
             qMainWindowSetStatusBar(ptr, statusBarPtr)
         }
     }
-    
+
     public func setCentralWidget(widgetPtr: Int64): Unit {
         checkValid()
         unsafe {
             qMainWindowSetCentralWidget(ptr, widgetPtr)
         }
     }
-    
+
     public func getPtr(): Int64 {
         ptr
     }
-    
+
     public func isClosed(): Bool {
         return closed
     }
-    
+
     public func isValid(): Bool {
         return !closed && ptr != 0 && isObjectAlive(ptr)
     }
-    
+
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     /// throws: NullPointerException 空指针访问时抛出
     public func checkValid(): Unit {
@@ -811,7 +852,7 @@ public class QMainWindow <: QtResource {
             throw ResourceDisposedException("QMainWindow 底层 Qt 对象已失效")
         }
     }
-    
+
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
@@ -829,7 +870,7 @@ public class QMainWindow <: QtResource {
         closed = true
         ptr = 0
     }
-    
+
     /// 删除主窗口（兼容旧API）
     public func delete(): Unit {
         close()

@@ -5,15 +5,25 @@ package cjqt6.core
 // ============================================================
 
 foreign func qPropertyAnimationCreate(targetPtr: Int64, propertyName: CString): Int64
+
 foreign func qPropertyAnimationSetDuration(ptr: Int64, duration: Int32): Unit
+
 foreign func qPropertyAnimationDuration(ptr: Int64): Int32
+
 foreign func qPropertyAnimationSetStartValue(ptr: Int64, value: Float64): Unit
+
 foreign func qPropertyAnimationSetEndValue(ptr: Int64, value: Float64): Unit
+
 foreign func qPropertyAnimationStart(ptr: Int64): Unit
+
 foreign func qPropertyAnimationStop(ptr: Int64): Unit
+
 foreign func qPropertyAnimationSetLoopCount(ptr: Int64, count: Int32): Unit
+
 foreign func qPropertyAnimationLoopCount(ptr: Int64): Int32
+
 foreign func qPropertyAnimationSetEasingCurve(ptr: Int64, curveType: Int32): Unit
+
 foreign func qPropertyAnimationDelete(ptr: Int64): Unit
 
 /// 缓动曲线类型常量（值对齐 Qt 官方 QEasingCurve::Type 枚举，native 侧 static_cast 直传）

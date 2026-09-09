@@ -3,13 +3,21 @@ package cjqt6.widgets
 import cjqt6.core.*
 
 foreign func qFontComboBoxCreate(): Int64
+
 foreign func qFontComboBoxCreateWithParent(parentPtr: Int64): Int64
+
 foreign func qFontComboBoxSetCurrentFont(ptr: Int64, family: CString): Unit
+
 foreign func qFontComboBoxCurrentFont(ptr: Int64): CString
+
 foreign func qFontComboBoxSetWritingSystem(ptr: Int64, ws: Int32): Unit
+
 foreign func qFontComboBoxSetFontFilters(ptr: Int64, filters: Int32): Unit
+
 foreign func qFontComboBoxWritingSystem(ptr: Int64): Int32
+
 foreign func qFontComboBoxFontFilters(ptr: Int64): Int32
+
 foreign func qFontComboBoxDelete(ptr: Int64): Unit
 
 /// 字体筛选器标志位（对应 QFontComboBox::FontFilters，可按位或组合）
@@ -58,13 +66,13 @@ public class QFontComboBox {
 
     public func setStyleSheet(styleSheet: String): Unit {
         unsafe {
-            withCString(styleSheet) { c => qWidgetSetStyleSheet(ptr, c) }
+            withCString(styleSheet) {c => qWidgetSetStyleSheet(ptr, c)}
         }
     }
 
     public func setCurrentFont(family: String): Unit {
         unsafe {
-            withCString(family) { c => qFontComboBoxSetCurrentFont(ptr, c) }
+            withCString(family) {c => qFontComboBoxSetCurrentFont(ptr, c)}
         }
     }
 

@@ -9,7 +9,7 @@ class LifecycleTests {
     func testExplicitDelete() {
         let color = QColor(255, 128, 64)
         @Expect(color.isValid(), true)
-        
+
         color.delete()
         @Expect(color.isValid(), false)
         @Expect(color.getPtr(), 0)
@@ -38,15 +38,15 @@ class LifecycleTests {
         let pen = QPen(color)
         pen.setWidth(5)
         let brush = QBrush(color)
-        
+
         @Expect(color.isValid(), true)
         @Expect(pen.isValid(), true)
         @Expect(brush.isValid(), true)
-        
+
         pen.delete()
         brush.delete()
         color.delete()
-        
+
         @Expect(color.isValid(), false)
         @Expect(pen.isValid(), false)
         @Expect(brush.isValid(), false)

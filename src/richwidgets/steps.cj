@@ -76,9 +76,11 @@ public class Steps <: QtResource {
         for (i in 0..circles.size) {
             let circle = circles[i]
             if (i <= current) {
-                circle.setStyleSheet("background-color:#1890ff; color:#ffffff; border-radius:10px; min-width:20px; min-height:20px; max-width:20px; max-height:20px;")
+                circle.setStyleSheet(
+                    "background-color:#1890ff; color:#ffffff; border-radius:10px; min-width:20px; min-height:20px; max-width:20px; max-height:20px;")
             } else {
-                circle.setStyleSheet("background-color:#ffffff; color:#999999; border:1px solid #d9d9d9; border-radius:10px; min-width:20px; min-height:20px; max-width:20px; max-height:20px;")
+                circle.setStyleSheet(
+                    "background-color:#ffffff; color:#999999; border:1px solid #d9d9d9; border-radius:10px; min-width:20px; min-height:20px; max-width:20px; max-height:20px;")
             }
         }
     }

@@ -148,7 +148,7 @@ class QMimeDataTests {
     func testDoubleDelete() {
         let m = QMimeData()
         m.delete()
-        m.delete()  // 安全
+        m.delete() // 安全
         @Assert(true)
     }
 

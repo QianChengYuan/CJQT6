@@ -7,30 +7,51 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qSoundEffectCreate(): Int64
+
 foreign func qSoundEffectSetSource(ptr: Int64, url: CString): Unit
+
 foreign func qSoundEffectSetSourceFile(ptr: Int64, filePath: CString): Unit
+
 foreign func qSoundEffectSetVolume(ptr: Int64, volume: Float64): Unit
+
 foreign func qSoundEffectVolume(ptr: Int64): Float64
+
 foreign func qSoundEffectSetLoopCount(ptr: Int64, count: Int32): Unit
+
 foreign func qSoundEffectLoopCount(ptr: Int64): Int32
+
 foreign func qSoundEffectSetMuted(ptr: Int64, muted: Bool): Unit
+
 foreign func qSoundEffectIsMuted(ptr: Int64): Bool
+
 foreign func qSoundEffectIsPlaying(ptr: Int64): Bool
+
 foreign func qSoundEffectPlay(ptr: Int64): Unit
+
 foreign func qSoundEffectStop(ptr: Int64): Unit
+
 foreign func qSoundEffectStatus(ptr: Int64): Int32
+
 foreign func qSoundEffectDelete(ptr: Int64): Unit
 
 /// 音效状态常量：无效/初始状态
 public class SoundEffectStatus {
     /// 无效状态
-    public static func Null(): Int32 { 0 }
+    public static func Null(): Int32 {
+        0
+    }
     /// 正在加载音源
-    public static func Loading(): Int32 { 1 }
+    public static func Loading(): Int32 {
+        1
+    }
     /// 加载完成，可播放
-    public static func Ready(): Int32 { 2 }
+    public static func Ready(): Int32 {
+        2
+    }
     /// 加载出错
-    public static func Error(): Int32 { 3 }
+    public static func Error(): Int32 {
+        3
+    }
 }
 
 /// 音效播放器，适合播放短促的音效文件（低延迟，支持音量/循环/静音控制）
@@ -131,10 +152,14 @@ public class QSoundEffect <: QtResource {
     }
 
     /// 获取原生指针
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     /// 是否已关闭（资源已释放）
-    public func isClosed(): Bool { closed }
+    public func isClosed(): Bool {
+        closed
+    }
 
     /// 检查对象有效性（未关闭且指针有效）
     public func isValid(): Bool {

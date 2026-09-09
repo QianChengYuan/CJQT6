@@ -7,10 +7,15 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qPercentBarSeriesCreate(): Int64
+
 foreign func qPercentBarSeriesDelete(ptr: Int64): Unit
+
 foreign func qPercentBarSeriesAppend(ptr: Int64, setPtr: Int64): Unit
+
 foreign func qPercentBarSeriesCount(ptr: Int64): Int32
+
 foreign func qPercentBarSeriesClear(ptr: Int64): Unit
+
 foreign func qPercentBarSeriesSetLabelsVisible(ptr: Int64, visible: Int32): Unit
 
 // ============================================================
@@ -72,10 +77,16 @@ public class QPercentBarSeries {
     /// 设置标签是否可见
     public func setLabelsVisible(visible: Bool): Unit {
         checkValid()
-        unsafe { qPercentBarSeriesSetLabelsVisible(ptr, if (visible) { 1 } else { 0 }) }
+        unsafe { qPercentBarSeriesSetLabelsVisible(ptr, if (visible) {
+            1
+        } else {
+            0
+        }) }
     }
 
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     /// 释放资源；已 addSeries 后由 chart 级联释放，勿主动调用
     public func close(): Unit {

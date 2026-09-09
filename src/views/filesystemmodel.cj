@@ -7,23 +7,38 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qFileSystemModelCreate(): Int64
+
 foreign func qFileSystemModelSetRootPath(ptr: Int64, path: CString): Unit
+
 foreign func qFileSystemModelRootPath(ptr: Int64): CString
+
 foreign func qFileSystemModelIndex(ptr: Int64, path: CString): Int64
+
 foreign func qFileSystemModelSetNameFilters(ptr: Int64, filters: CString): Unit
+
 foreign func qFileSystemModelSetFilter(ptr: Int64, filter: Int32): Unit
+
 foreign func qFileSystemModelDelete(ptr: Int64): Unit
 
 // 补充 API FFI
 foreign func qFileSystemModelSetReadOnly(ptr: Int64, v: Int32): Unit
+
 foreign func qFileSystemModelIsReadOnly(ptr: Int64): Int32
+
 foreign func qFileSystemModelSetNameFilterDisables(ptr: Int64, v: Int32): Unit
+
 foreign func qFileSystemModelSetResolveSymlinks(ptr: Int64, v: Int32): Unit
+
 foreign func qFileSystemModelIsResolveSymlinks(ptr: Int64): Int32
+
 foreign func qFileSystemModelFilePath(ptr: Int64, indexPtr: Int64): CString
+
 foreign func qFileSystemModelFileName(ptr: Int64, indexPtr: Int64): CString
+
 foreign func qFileSystemModelIsDir(ptr: Int64, indexPtr: Int64): Int32
+
 foreign func qFileSystemModelConnectDirectoryLoaded(ptr: Int64, callback: CStringCallback): Unit
+
 foreign func qFileSystemModelConnectRootPathChanged(ptr: Int64, callback: CStringCallback): Unit
 
 // ============================================================
@@ -57,7 +72,7 @@ public class QFileSystemModel <: QtResource {
     public func setRootPath(path: String): Unit {
         checkValid()
         unsafe {
-            withCString(path) { c => qFileSystemModelSetRootPath(ptr, c) }
+            withCString(path) {c => qFileSystemModelSetRootPath(ptr, c)}
         }
     }
 
@@ -92,7 +107,7 @@ public class QFileSystemModel <: QtResource {
                 }
                 joined += filters[i]
             }
-            withCString(joined) { c => qFileSystemModelSetNameFilters(ptr, c) }
+            withCString(joined) {c => qFileSystemModelSetNameFilters(ptr, c)}
         }
     }
 
@@ -106,7 +121,11 @@ public class QFileSystemModel <: QtResource {
     public func setReadOnly(readOnly: Bool): Unit {
         checkValid()
         unsafe {
-            qFileSystemModelSetReadOnly(ptr, if (readOnly) { 1 } else { 0 })
+            qFileSystemModelSetReadOnly(ptr, if (readOnly) {
+                1
+            } else {
+                0
+            })
         }
     }
 
@@ -120,14 +139,22 @@ public class QFileSystemModel <: QtResource {
     public func setNameFilterDisables(disables: Bool): Unit {
         checkValid()
         unsafe {
-            qFileSystemModelSetNameFilterDisables(ptr, if (disables) { 1 } else { 0 })
+            qFileSystemModelSetNameFilterDisables(ptr, if (disables) {
+                1
+            } else {
+                0
+            })
         }
     }
 
     public func setResolveSymlinks(resolve: Bool): Unit {
         checkValid()
         unsafe {
-            qFileSystemModelSetResolveSymlinks(ptr, if (resolve) { 1 } else { 0 })
+            qFileSystemModelSetResolveSymlinks(ptr, if (resolve) {
+                1
+            } else {
+                0
+            })
         }
     }
 
@@ -184,7 +211,9 @@ public class QFileSystemModel <: QtResource {
     }
 
     /// 是否已关闭（资源已释放）
-    public func isClosed(): Bool { closed }
+    public func isClosed(): Bool {
+        closed
+    }
 
     /// 检查对象有效性（未关闭且指针有效）
     public func isValid(): Bool {

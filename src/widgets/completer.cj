@@ -4,22 +4,39 @@ import cjqt6.core.*
 
 // QCompleter - 自动补全
 foreign func qCompleterCreate(): Int64
+
 foreign func qCompleterCreateWithStrings(items: CString): Int64
+
 foreign func qCompleterSetModel(ptr: Int64, items: CString): Unit
+
 foreign func qCompleterSetCaseSensitivity(ptr: Int64, caseSensitive: Bool): Unit
+
 foreign func qCompleterSetFilterMode(ptr: Int64, mode: Int32): Unit
+
 foreign func qCompleterSetCompletionMode(ptr: Int64, mode: Int32): Unit
+
 foreign func qCompleterSetMaxVisibleItems(ptr: Int64, maxItems: Int32): Unit
+
 foreign func qCompleterMaxVisibleItems(ptr: Int64): Int32
+
 foreign func qCompleterSetCompletionPrefix(ptr: Int64, prefix: CString): Unit
+
 foreign func qCompleterCompletionPrefix(ptr: Int64): CString
+
 foreign func qCompleterCompletionCount(ptr: Int64): Int32
+
 foreign func qCompleterComplete(ptr: Int64): Unit
+
 foreign func qCompleterDelete(ptr: Int64): Unit
+
 foreign func qCompleterCaseSensitivity(ptr: Int64): Int32
+
 foreign func qCompleterCompletionMode(ptr: Int64): Int32
+
 foreign func qCompleterSetModelSorting(ptr: Int64, sorting: Int32): Unit
+
 foreign func qCompleterSetCompletionColumn(ptr: Int64, column: Int32): Unit
+
 foreign func qCompleterSetCompletionRole(ptr: Int64, role: Int32): Unit
 
 /// 补全模式常量
@@ -71,7 +88,7 @@ public class QCompleter {
     /// items: 用换行符分隔的候选词列表
     public init(items: String) {
         unsafe {
-            withCString(items) { c => ptr = qCompleterCreateWithStrings(c) }
+            withCString(items) {c => ptr = qCompleterCreateWithStrings(c)}
         }
     }
 
@@ -79,7 +96,9 @@ public class QCompleter {
     public static func fromArray(items: Array<String>): QCompleter {
         let combined = StringBuilder()
         for (i in 0..items.size) {
-            if (i > 0) { combined.append("\n") }
+            if (i > 0) {
+                combined.append("\n")
+            }
             combined.append(items[i])
         }
         return QCompleter(combined.toString())
@@ -88,7 +107,7 @@ public class QCompleter {
     /// 更新候选词列表
     public func setModel(items: String): Unit {
         unsafe {
-            withCString(items) { c => qCompleterSetModel(ptr, c) }
+            withCString(items) {c => qCompleterSetModel(ptr, c)}
         }
     }
 
@@ -130,7 +149,7 @@ public class QCompleter {
     /// 设置补全前缀
     public func setCompletionPrefix(prefix: String): Unit {
         unsafe {
-            withCString(prefix) { c => qCompleterSetCompletionPrefix(ptr, c) }
+            withCString(prefix) {c => qCompleterSetCompletionPrefix(ptr, c)}
         }
     }
 

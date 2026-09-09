@@ -152,7 +152,7 @@ public class QLineEdit <: QtResource {
     public func setText(text: String): Unit {
         checkValid()
         unsafe {
-            withCString(text) { c => qLineEditSetText(ptr, c) }
+            withCString(text) {c => qLineEditSetText(ptr, c)}
         }
     }
 
@@ -171,7 +171,7 @@ public class QLineEdit <: QtResource {
     public func setStyleSheet(styleSheet: String): Unit {
         checkValid()
         unsafe {
-            withCString(styleSheet) { c => qWidgetSetStyleSheet(ptr, c) }
+            withCString(styleSheet) {c => qWidgetSetStyleSheet(ptr, c)}
         }
     }
 
@@ -179,7 +179,7 @@ public class QLineEdit <: QtResource {
     public func setPlaceholder(text: String): Unit {
         checkValid()
         unsafe {
-            withCString(text) { c => qLineEditSetPlaceholder(ptr, c) }
+            withCString(text) {c => qLineEditSetPlaceholder(ptr, c)}
         }
     }
 
@@ -337,7 +337,7 @@ public class QLineEdit <: QtResource {
     public func setInputMask(mask: String): Unit {
         checkValid()
         unsafe {
-            withCString(mask) { c => qLineEditSetInputMask(ptr, c) }
+            withCString(mask) {c => qLineEditSetInputMask(ptr, c)}
         }
     }
 

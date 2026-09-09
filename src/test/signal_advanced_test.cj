@@ -13,7 +13,6 @@ var gAlarmConn: ?SignalConnection = None
 
 @Test
 class SignalAdvancedTests {
-
     @BeforeEach
     static func setUp(): Unit {
         gAlarmCount = 0
@@ -24,9 +23,15 @@ class SignalAdvancedTests {
 
     @AfterEach
     static func tearDown(): Unit {
-        if (let Some(t) <- gAlarmTimer) { t.close() }
-        if (let Some(w) <- gAlarmWatchdog) { w.close() }
-        if (let Some(a) <- gAlarmApp) { a.delete() }
+        if (let Some(t) <- gAlarmTimer) {
+            t.close()
+        }
+        if (let Some(w) <- gAlarmWatchdog) {
+            w.close()
+        }
+        if (let Some(a) <- gAlarmApp) {
+            a.delete()
+        }
         gAlarmTimer = None
         gAlarmWatchdog = None
         gAlarmApp = None
@@ -38,7 +43,7 @@ class SignalAdvancedTests {
         let w = QTimer()
         gAlarmWatchdog = Some(w)
         w.setInterval(ms)
-        w.setOnTimeout({ => QApp.quit() })
+        w.setOnTimeout({=> QApp.quit()})
         w.start()
     }
 
@@ -56,20 +61,25 @@ class SignalAdvancedTests {
         timer.setInterval(10)
 
         // 设置 -> 替换 -> 替换：只有最后一个应该触发
-        timer.setOnTimeout({ => gAlarmCount += 1 })
-        timer.setOnTimeout({ => gAlarmCount += 10 })
-        timer.setOnTimeout({ =>
-            gAlarmCount += 1
-            if (gAlarmCount >= 3) {
-                if (let Some(t) <- gAlarmTimer) { t.stop() }
-                QApp.quit()
+        timer.setOnTimeout({=> gAlarmCount += 1})
+        timer.setOnTimeout({=> gAlarmCount += 10})
+        timer.setOnTimeout(
+            {
+                =>
+                    gAlarmCount += 1
+                    if (gAlarmCount >= 3) {
+                        if (let Some(t) <- gAlarmTimer) {
+                            t.stop()
+                        }
+                        QApp.quit()
+                    }
             }
-        })
+        )
 
         timer.start()
         app.exec()
 
-        @Expect(gAlarmCount, 3)  // 只有最后一个绑定触发了 3 次
+        @Expect(gAlarmCount, 3) // 只有最后一个绑定触发了 3 次
         timer.close()
     }
 
@@ -86,13 +96,18 @@ class SignalAdvancedTests {
         gAlarmTimer = Some(timer)
         timer.setInterval(10)
 
-        let conn = timer.setOnTimeout({ =>
-            gAlarmCount += 1
-            if (gAlarmCount >= 2) {
-                if (let Some(t) <- gAlarmTimer) { t.stop() }
-                QApp.quit()
+        let conn = timer.setOnTimeout(
+            {
+                =>
+                    gAlarmCount += 1
+                    if (gAlarmCount >= 2) {
+                        if (let Some(t) <- gAlarmTimer) {
+                            t.stop()
+                        }
+                        QApp.quit()
+                    }
             }
-        })
+        )
 
         @Expect(conn.isConnected(), true)
         timer.start()
@@ -108,7 +123,7 @@ class SignalAdvancedTests {
     @TestCase
     func testCallbackConnectionApi() {
         let btn = QPushButton()
-        let conn = btn.setOnPressed({ => /* noop */ })
+        let conn = btn.setOnPressed({=> /* noop */ })
         @Expect(conn.isConnected(), true)
         conn.disconnect()
         @Expect(conn.isConnected(), false)
@@ -129,27 +144,32 @@ class SignalAdvancedTests {
         timer.setInterval(10)
 
         // 第一次连接
-        let conn1 = timer.setOnTimeout({ =>
-            gAlarmCount += 1
+        let conn1 = timer.setOnTimeout({
+            => gAlarmCount += 1
         })
 
         // 断开并重新连接
         conn1.disconnect()
         @Expect(conn1.isConnected(), false)
 
-        let conn2 = timer.setOnTimeout({ =>
-            gAlarmCount += 100
-            if (gAlarmCount >= 300) {
-                if (let Some(t) <- gAlarmTimer) { t.stop() }
-                QApp.quit()
+        let conn2 = timer.setOnTimeout(
+            {
+                =>
+                    gAlarmCount += 100
+                    if (gAlarmCount >= 300) {
+                        if (let Some(t) <- gAlarmTimer) {
+                            t.stop()
+                        }
+                        QApp.quit()
+                    }
             }
-        })
+        )
         @Expect(conn2.isConnected(), true)
 
         timer.start()
         app.exec()
 
-        @Expect(gAlarmCount, 300)  // 只有 conn2 触发（conn1 已断开）
+        @Expect(gAlarmCount, 300) // 只有 conn2 触发（conn1 已断开）
         timer.close()
     }
 }
@@ -159,11 +179,10 @@ class SignalAdvancedTests {
 // =====================================================================
 @Test
 class QSignalLifecycleTests {
-
     @TestCase
     func testDisconnectAfterResourceClosed() {
         let timer = QTimer()
-        let conn = timer.setOnTimeout({ => /* noop */ })
+        let conn = timer.setOnTimeout({=> /* noop */ })
         timer.close()
 
         // 控件关闭后 SignalConnection 应该仍可安全调用 disconnect
@@ -176,15 +195,15 @@ class QSignalLifecycleTests {
         let btn = QPushButton()
         let btn2 = QPushButton()
 
-        let conn1 = btn.setOnPressed({ => /* noop */ })
-        let conn2 = btn2.setOnPressed({ => /* noop */ })
+        let conn1 = btn.setOnPressed({=> /* noop */ })
+        let conn2 = btn2.setOnPressed({=> /* noop */ })
 
         @Expect(conn1.isConnected(), true)
         @Expect(conn2.isConnected(), true)
 
         conn1.disconnect()
         @Expect(conn1.isConnected(), false)
-        @Expect(conn2.isConnected(), true)  // 另一个不受影响
+        @Expect(conn2.isConnected(), true) // 另一个不受影响
 
         conn2.disconnect()
         @Expect(conn2.isConnected(), false)
@@ -198,8 +217,8 @@ class QSignalLifecycleTests {
         let btn1 = QPushButton()
         let btn2 = QPushButton()
 
-        let conn1 = btn1.setOnPressed({ => /* noop */ })
-        let conn2 = btn2.setOnPressed({ => /* noop */ })
+        let conn1 = btn1.setOnPressed({=> /* noop */ })
+        let conn2 = btn2.setOnPressed({=> /* noop */ })
 
         @Expect(conn1.isConnected(), true)
         @Expect(conn2.isConnected(), true)
@@ -219,7 +238,7 @@ class QSignalLifecycleTests {
     @TestCase
     func testCheckboxStateChangedApi() {
         let cb = QCheckBox()
-        cb.setOnStateChanged({ x: Int32 => /* noop */ })
+        cb.setOnStateChanged({x: Int32 => /* noop */ })
         @Assert(cb.isValid())
         cb.disconnectStateChanged()
         @Assert(cb.isValid())
@@ -229,7 +248,7 @@ class QSignalLifecycleTests {
     @TestCase
     func testButtonToggledApi() {
         let btn = QPushButton()
-        let conn = btn.setOnToggled({ x: Int32 => /* noop */ })
+        let conn = btn.setOnToggled({x: Int32 => /* noop */ })
         @Expect(conn.isConnected(), true)
         conn.disconnect()
         @Expect(conn.isConnected(), false)

@@ -7,23 +7,30 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qCategoryAxisCreate(): Int64
-foreign func qCategoryAxisDelete(ptr: Int64): Unit
-foreign func qCategoryAxisAppend(ptr: Int64, label: CString, endValue: Float64): Unit
-foreign func qCategoryAxisRemove(ptr: Int64, label: CString): Unit
-foreign func qCategoryAxisReplaceLabel(ptr: Int64, oldLabel: CString, newLabel: CString): Unit
-foreign func qCategoryAxisSetStartValue(ptr: Int64, min: Float64): Unit
-foreign func qCategoryAxisCount(ptr: Int64): Int32
-foreign func qCategoryAxisSetLabelsPosition(ptr: Int64, position: Int32): Unit
-foreign func qCategoryAxisLabelsPosition(ptr: Int64): Int32
 
+foreign func qCategoryAxisDelete(ptr: Int64): Unit
+
+foreign func qCategoryAxisAppend(ptr: Int64, label: CString, endValue: Float64): Unit
+
+foreign func qCategoryAxisRemove(ptr: Int64, label: CString): Unit
+
+foreign func qCategoryAxisReplaceLabel(ptr: Int64, oldLabel: CString, newLabel: CString): Unit
+
+foreign func qCategoryAxisSetStartValue(ptr: Int64, min: Float64): Unit
+
+foreign func qCategoryAxisCount(ptr: Int64): Int32
+
+foreign func qCategoryAxisSetLabelsPosition(ptr: Int64, position: Int32): Unit
+
+foreign func qCategoryAxisLabelsPosition(ptr: Int64): Int32
 
 // ============================================================
 // 分类轴标签位置常量（对应 QCategoryAxis::AxisLabelsPosition）
 // ============================================================
 
 public class CategoryAxisLabelsPosition {
-    public static let center: Int32 = 0   // AxisLabelsPositionCenter
-    public static let onValue: Int32 = 1  // AxisLabelsPositionOnValue
+    public static let center: Int32 = 0 // AxisLabelsPositionCenter
+    public static let onValue: Int32 = 1 // AxisLabelsPositionOnValue
 }
 
 // ============================================================
@@ -69,7 +76,7 @@ public class QCategoryAxis {
     public func append(label: String, endValue: Float64): Unit {
         checkValid()
         unsafe {
-            withCString(label) { c => qCategoryAxisAppend(ptr, c, endValue) }
+            withCString(label) {c => qCategoryAxisAppend(ptr, c, endValue)}
         }
     }
 
@@ -77,7 +84,7 @@ public class QCategoryAxis {
     public func remove(label: String): Unit {
         checkValid()
         unsafe {
-            withCString(label) { c => qCategoryAxisRemove(ptr, c) }
+            withCString(label) {c => qCategoryAxisRemove(ptr, c)}
         }
     }
 
@@ -135,7 +142,7 @@ public class QCategoryAxis {
     public func setLabelFormat(format: String): Unit {
         checkValid()
         unsafe {
-            withCString(format) { c => qValueAxisSetLabelFormat(ptr, c) }
+            withCString(format) {c => qValueAxisSetLabelFormat(ptr, c)}
         }
     }
 
@@ -151,7 +158,9 @@ public class QCategoryAxis {
         unsafe { qValueAxisSetMax(ptr, max) }
     }
 
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     /// 释放资源；已 addAxis 后由 chart 级联释放，勿主动调用
     public func close(): Unit {

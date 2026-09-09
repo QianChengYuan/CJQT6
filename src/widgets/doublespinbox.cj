@@ -4,34 +4,63 @@ import cjqt6.core.*
 
 // QDoubleSpinBox - 双精度旋转框
 foreign func qDoubleSpinBoxCreate(): Int64
+
 foreign func qDoubleSpinBoxSetValue(ptr: Int64, value: Float64): Unit
+
 foreign func qDoubleSpinBoxValue(ptr: Int64): Float64
+
 foreign func qDoubleSpinBoxSetRange(ptr: Int64, min: Float64, max: Float64): Unit
+
 foreign func qDoubleSpinBoxSetSingleStep(ptr: Int64, step: Float64): Unit
+
 foreign func qDoubleSpinBoxSetDecimals(ptr: Int64, decimals: Int32): Unit
+
 foreign func qDoubleSpinBoxDecimals(ptr: Int64): Int32
+
 foreign func qDoubleSpinBoxDelete(ptr: Int64): Unit
+
 foreign func qDoubleSpinBoxConnectValueChanged(ptr: Int64, callback: Float64Callback): Unit
+
 foreign func qDoubleSpinBoxDisconnectValueChanged(ptr: Int64): Unit
+
 foreign func qDoubleSpinBoxSetPrefix(ptr: Int64, prefix: CString): Unit
+
 foreign func qDoubleSpinBoxPrefix(ptr: Int64): CString
+
 foreign func qDoubleSpinBoxSetSuffix(ptr: Int64, suffix: CString): Unit
+
 foreign func qDoubleSpinBoxSuffix(ptr: Int64): CString
+
 foreign func qDoubleSpinBoxSetSpecialValueText(ptr: Int64, text: CString): Unit
+
 foreign func qDoubleSpinBoxSetStepType(ptr: Int64, stepType: Int32): Unit
+
 foreign func qDoubleSpinBoxSetMinimum(ptr: Int64, value: Float64): Unit
+
 foreign func qDoubleSpinBoxMinimum(ptr: Int64): Float64
+
 foreign func qDoubleSpinBoxSetMaximum(ptr: Int64, value: Float64): Unit
+
 foreign func qDoubleSpinBoxMaximum(ptr: Int64): Float64
+
 foreign func qDoubleSpinBoxSetGroupSeparatorShown(ptr: Int64, shown: Int32): Unit
+
 foreign func qDoubleSpinBoxSetWrapping(ptr: Int64, wrap: Int32): Unit
+
 foreign func qDoubleSpinBoxWrapping(ptr: Int64): Int32
+
 foreign func qDoubleSpinBoxSetButtonSymbols(ptr: Int64, symbols: Int32): Unit
+
 foreign func qDoubleSpinBoxCleanText(ptr: Int64): CString
+
 foreign func qDoubleSpinBoxText(ptr: Int64): CString
+
 foreign func qDoubleSpinBoxConnectTextChanged(ptr: Int64, callback: CStringCallback): Unit
+
 foreign func qDoubleSpinBoxConnectEditingFinished(ptr: Int64, callback: VoidCallback): Unit
+
 foreign func qDoubleSpinBoxSelectAll(ptr: Int64): Unit
+
 foreign func qDoubleSpinBoxSetFocus(ptr: Int64): Unit
 
 /// 双精度旋转框部件
@@ -39,7 +68,7 @@ foreign func qDoubleSpinBoxSetFocus(ptr: Int64): Unit
 public class QDoubleSpinBox <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
-    
+
     /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
         unsafe {
@@ -50,75 +79,79 @@ public class QDoubleSpinBox <: QtResource {
         }
         trackObject(ptr)
     }
-    
+
     public func show(): Unit {
         checkValid()
         unsafe {
             qWidgetShow(ptr)
         }
     }
-    
+
     public func hide(): Unit {
         checkValid()
         unsafe {
             qWidgetHide(ptr)
         }
     }
-    
+
     public func resize(width: Int32, height: Int32): Unit {
         checkValid()
         unsafe {
             qWidgetResize(ptr, width, height)
         }
     }
-    
+
     public func setValue(value: Float64): Unit {
         checkValid()
         unsafe {
             qDoubleSpinBoxSetValue(ptr, value)
         }
     }
-    
+
     public func value(): Float64 {
         checkValid()
         unsafe {
             return qDoubleSpinBoxValue(ptr)
         }
     }
-    
+
     public func setRange(min: Float64, max: Float64): Unit {
         checkValid()
         unsafe {
             qDoubleSpinBoxSetRange(ptr, min, max)
         }
     }
-    
+
     public func setSingleStep(step: Float64): Unit {
         checkValid()
         unsafe {
             qDoubleSpinBoxSetSingleStep(ptr, step)
         }
     }
-    
+
     public func setDecimals(decimals: Int32): Unit {
         checkValid()
         unsafe {
             qDoubleSpinBoxSetDecimals(ptr, decimals)
         }
     }
-    
+
     public func decimals(): Int32 {
         checkValid()
         unsafe {
             return qDoubleSpinBoxDecimals(ptr)
         }
     }
-    
+
     /// 设置启用/禁用
     public func setEnabled(enabled: Bool): Unit {
         checkValid()
         unsafe {
-            qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
+            qWidgetSetEnabled(ptr, if (enabled) {
+                1
+            } else {
+                0
+            })
         }
     }
 
@@ -126,7 +159,7 @@ public class QDoubleSpinBox <: QtResource {
     public func setPrefix(prefix: String): Unit {
         checkValid()
         unsafe {
-            withCString(prefix) { c => qDoubleSpinBoxSetPrefix(ptr, c) }
+            withCString(prefix) {c => qDoubleSpinBoxSetPrefix(ptr, c)}
         }
     }
 
@@ -145,7 +178,7 @@ public class QDoubleSpinBox <: QtResource {
     public func setSuffix(suffix: String): Unit {
         checkValid()
         unsafe {
-            withCString(suffix) { c => qDoubleSpinBoxSetSuffix(ptr, c) }
+            withCString(suffix) {c => qDoubleSpinBoxSetSuffix(ptr, c)}
         }
     }
 
@@ -164,7 +197,7 @@ public class QDoubleSpinBox <: QtResource {
     public func setSpecialValueText(text: String): Unit {
         checkValid()
         unsafe {
-            withCString(text) { c => qDoubleSpinBoxSetSpecialValueText(ptr, c) }
+            withCString(text) {c => qDoubleSpinBoxSetSpecialValueText(ptr, c)}
         }
     }
 
@@ -212,7 +245,11 @@ public class QDoubleSpinBox <: QtResource {
     public func setGroupSeparatorShown(shown: Bool): Unit {
         checkValid()
         unsafe {
-            qDoubleSpinBoxSetGroupSeparatorShown(ptr, if (shown) { 1 } else { 0 })
+            qDoubleSpinBoxSetGroupSeparatorShown(ptr, if (shown) {
+                1
+            } else {
+                0
+            })
         }
     }
 
@@ -220,7 +257,11 @@ public class QDoubleSpinBox <: QtResource {
     public func setWrapping(wrap: Bool): Unit {
         checkValid()
         unsafe {
-            qDoubleSpinBoxSetWrapping(ptr, if (wrap) { 1 } else { 0 })
+            qDoubleSpinBoxSetWrapping(ptr, if (wrap) {
+                1
+            } else {
+                0
+            })
         }
     }
 
@@ -293,7 +334,7 @@ public class QDoubleSpinBox <: QtResource {
             qDoubleSpinBoxSetFocus(ptr)
         }
     }
-    
+
     /// 检查是否启用
     public func isEnabled(): Bool {
         checkValid()
@@ -301,15 +342,15 @@ public class QDoubleSpinBox <: QtResource {
             qWidgetIsEnabled(ptr) == 1
         }
     }
-    
+
     /// 设置样式表
     public func setStyleSheet(style: String): Unit {
         checkValid()
         unsafe {
-            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
+            withCString(style) {c => qWidgetSetStyleSheet(ptr, c)}
         }
     }
-    
+
     /// 设置最小尺寸
     public func setMinimumSize(minw: Int32, minh: Int32): Unit {
         checkValid()
@@ -317,7 +358,7 @@ public class QDoubleSpinBox <: QtResource {
             qWidgetSetMinimumSize(ptr, minw, minh)
         }
     }
-    
+
     /// 设置最大尺寸
     public func setMaximumSize(maxw: Int32, maxh: Int32): Unit {
         checkValid()
@@ -325,7 +366,7 @@ public class QDoubleSpinBox <: QtResource {
             qWidgetSetMaximumSize(ptr, maxw, maxh)
         }
     }
-    
+
     /// 设置值变化回调
     public func setOnValueChanged(callback: Float64Callback): Unit {
         checkValid()
@@ -333,7 +374,7 @@ public class QDoubleSpinBox <: QtResource {
             qDoubleSpinBoxConnectValueChanged(ptr, callback)
         }
     }
-    
+
     /// 断开值变化信号
     public func disconnectValueChanged(): Unit {
         if (ptr != 0) {
@@ -342,12 +383,12 @@ public class QDoubleSpinBox <: QtResource {
             }
         }
     }
-    
+
     /// 断开该双精度数值框的全部信号（valueChanged）
     public func disconnect(): Unit {
         disconnectValueChanged()
     }
-    
+
     /// 获取对象指针
     public func getPtr(): Int64 {
         return ptr
@@ -396,7 +437,7 @@ public class QDoubleSpinBox <: QtResource {
             ptr = 0
         }
     }
-    
+
     /// 删除旋转框（兼容旧API）
     public func delete(): Unit {
         close()

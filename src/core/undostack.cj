@@ -7,30 +7,50 @@ package cjqt6.core
 /// 撤销/重做回调类型
 public type UndoRedoCallback = CFunc<(Int64) -> Unit>
 
-foreign func qUndoCommandCreate(undoCallback: UndoRedoCallback, redoCallback: UndoRedoCallback, userData: Int64, text: CString): Int64
+foreign func qUndoCommandCreate(undoCallback: UndoRedoCallback, redoCallback: UndoRedoCallback, userData: Int64,
+    text: CString): Int64
+
 foreign func qUndoCommandSetText(ptr: Int64, text: CString): Unit
+
 foreign func qUndoCommandText(ptr: Int64): CString
+
 foreign func qUndoCommandDelete(ptr: Int64): Unit
 
 foreign func qUndoStackCreate(): Int64
-foreign func qUndoStackPush(ptr: Int64, cmdPtr: Int64): Unit
-foreign func qUndoStackUndo(ptr: Int64): Unit
-foreign func qUndoStackRedo(ptr: Int64): Unit
-foreign func qUndoStackCanUndo(ptr: Int64): Int32
-foreign func qUndoStackCanRedo(ptr: Int64): Int32
-foreign func qUndoStackUndoText(ptr: Int64): CString
-foreign func qUndoStackRedoText(ptr: Int64): CString
-foreign func qUndoStackCount(ptr: Int64): Int32
-foreign func qUndoStackIndex(ptr: Int64): Int32
-foreign func qUndoStackClear(ptr: Int64): Unit
-foreign func qUndoStackSetUndoLimit(ptr: Int64, limit: Int32): Unit
-foreign func qUndoStackUndoLimit(ptr: Int64): Int32
-foreign func qUndoStackSetClean(ptr: Int64): Unit
-foreign func qUndoStackIsClean(ptr: Int64): Int32
-foreign func qUndoStackBeginMacro(ptr: Int64, text: CString): Unit
-foreign func qUndoStackEndMacro(ptr: Int64): Unit
-foreign func qUndoStackDelete(ptr: Int64): Unit
 
+foreign func qUndoStackPush(ptr: Int64, cmdPtr: Int64): Unit
+
+foreign func qUndoStackUndo(ptr: Int64): Unit
+
+foreign func qUndoStackRedo(ptr: Int64): Unit
+
+foreign func qUndoStackCanUndo(ptr: Int64): Int32
+
+foreign func qUndoStackCanRedo(ptr: Int64): Int32
+
+foreign func qUndoStackUndoText(ptr: Int64): CString
+
+foreign func qUndoStackRedoText(ptr: Int64): CString
+
+foreign func qUndoStackCount(ptr: Int64): Int32
+
+foreign func qUndoStackIndex(ptr: Int64): Int32
+
+foreign func qUndoStackClear(ptr: Int64): Unit
+
+foreign func qUndoStackSetUndoLimit(ptr: Int64, limit: Int32): Unit
+
+foreign func qUndoStackUndoLimit(ptr: Int64): Int32
+
+foreign func qUndoStackSetClean(ptr: Int64): Unit
+
+foreign func qUndoStackIsClean(ptr: Int64): Int32
+
+foreign func qUndoStackBeginMacro(ptr: Int64, text: CString): Unit
+
+foreign func qUndoStackEndMacro(ptr: Int64): Unit
+
+foreign func qUndoStackDelete(ptr: Int64): Unit
 
 // ============================================================
 // QUndoCommand - 撤销命令
@@ -86,7 +106,9 @@ public class QUndoCommand <: QtResource {
     }
 
     /// 获取原生指针
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     /// 标记为已入栈（不再手动删除，由栈管理生命周期）
     public func markPushed(): Unit {
@@ -94,10 +116,14 @@ public class QUndoCommand <: QtResource {
     }
 
     /// 是否已入栈
-    public func isPushed(): Bool { pushed }
+    public func isPushed(): Bool {
+        pushed
+    }
 
     /// 是否已关闭（入栈后的命令归栈管理，视为不可由包装释放）
-    public func isClosed(): Bool { closed || pushed }
+    public func isClosed(): Bool {
+        closed || pushed
+    }
 
     /// 检查对象有效性（未释放且未入栈时才可由包装管理）
     public func isValid(): Bool {
@@ -118,7 +144,6 @@ public class QUndoCommand <: QtResource {
         delete()
     }
 }
-
 
 // ============================================================
 // QUndoStack - 撤销栈
@@ -258,10 +283,14 @@ public class QUndoStack <: QtResource {
     }
 
     /// 获取原生指针
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     /// 是否已关闭（资源已释放）
-    public func isClosed(): Bool { closed }
+    public func isClosed(): Bool {
+        closed
+    }
 
     /// 检查对象有效性（未关闭且指针有效）
     public func isValid(): Bool {

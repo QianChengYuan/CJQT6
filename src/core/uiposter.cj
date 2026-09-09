@@ -33,10 +33,13 @@ public class UiPoster {
     /// threadPtr 为 0 时使用当前线程（调用方线程）。
     internal static func runOnUiThreadOn(threadPtr: Int64, callback: () -> Unit): Unit {
         let holder = UiPosterTask()
-        let id = registerVoidCallback({ =>
-            callback()
-            unregisterVoidCallback(holder.id)
-        })
+        let id = registerVoidCallback(
+            {
+                =>
+                    callback()
+                    unregisterVoidCallback(holder.id)
+            }
+        )
         holder.id = id
         unsafe { qUiPosterPost(threadPtr, id) }
     }
@@ -69,8 +72,9 @@ public func runOnUiThread(callback: () -> Unit): Unit {
 public func runAsync(work: () -> Unit, onDone: () -> Unit): Unit {
     // 记录发起线程（GUI/测试线程），工作线程完成后回投到该线程
     let targetThread = QThread.currentThreadPtr()
-    spawn { =>
-        work()
-        UiPoster.runOnUiThreadOn(targetThread, onDone)
+    spawn {
+        =>
+            work()
+            UiPoster.runOnUiThreadOn(targetThread, onDone)
     }
 }

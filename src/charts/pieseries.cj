@@ -7,18 +7,31 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qPieSeriesCreate(): Int64
+
 foreign func qPieSeriesDelete(ptr: Int64): Unit
+
 foreign func qPieSeriesAppend(ptr: Int64, label: CString, value: Float64): Unit
+
 foreign func qPieSeriesClear(ptr: Int64): Unit
+
 foreign func qPieSeriesCount(ptr: Int64): Int32
+
 foreign func qPieSeriesSum(ptr: Int64): Float64
+
 foreign func qPieSeriesSetHoleSize(ptr: Int64, size: Float64): Unit
+
 foreign func qPieSeriesSetPieSize(ptr: Int64, size: Float64): Unit
+
 foreign func qPieSeriesSetHorizontalPosition(ptr: Int64, pos: Float64): Unit
+
 foreign func qPieSeriesSetVerticalPosition(ptr: Int64, pos: Float64): Unit
+
 foreign func qPieSeriesSetPieStartAngle(ptr: Int64, angle: Float64): Unit
+
 foreign func qPieSeriesSetPieEndAngle(ptr: Int64, angle: Float64): Unit
+
 foreign func qPieSeriesSetLabelsVisible(ptr: Int64, visible: Int32): Unit
+
 foreign func qPieSeriesAppendSlice(ptr: Int64, slicePtr: Int64): Unit
 
 // ============================================================
@@ -63,7 +76,7 @@ public class QPieSeries {
     public func append(label: String, value: Float64): Unit {
         checkValid()
         unsafe {
-            withCString(label) { c => qPieSeriesAppend(ptr, c, value) }
+            withCString(label) {c => qPieSeriesAppend(ptr, c, value)}
         }
     }
 
@@ -130,10 +143,16 @@ public class QPieSeries {
     /// 设置切片标签是否可见
     public func setLabelsVisible(visible: Bool): Unit {
         checkValid()
-        unsafe { qPieSeriesSetLabelsVisible(ptr, if (visible) { 1 } else { 0 }) }
+        unsafe { qPieSeriesSetLabelsVisible(ptr, if (visible) {
+            1
+        } else {
+            0
+        }) }
     }
 
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     /// 释放资源；已 addSeries 后由 chart 级联释放，勿主动调用
     public func close(): Unit {

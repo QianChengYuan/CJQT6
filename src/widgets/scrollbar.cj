@@ -4,39 +4,67 @@ import cjqt6.core.*
 
 // QScrollBar FFI 声明
 foreign func qScrollBarCreate(orientation: Int32): Int64
+
 foreign func qScrollBarSetRange(ptr: Int64, min: Int32, max: Int32): Unit
+
 foreign func qScrollBarSetValue(ptr: Int64, value: Int32): Unit
+
 foreign func qScrollBarValue(ptr: Int64): Int32
+
 foreign func qScrollBarSetSingleStep(ptr: Int64, step: Int32): Unit
+
 foreign func qScrollBarSetPageStep(ptr: Int64, step: Int32): Unit
+
 foreign func qScrollBarSetOrientation(ptr: Int64, orientation: Int32): Unit
+
 foreign func qScrollBarConnectValueChanged(ptr: Int64, callback: Int32Callback): Unit
+
 foreign func qScrollBarDelete(ptr: Int64): Unit
+
 foreign func qScrollBarSetMinimum(ptr: Int64, value: Int32): Unit
+
 foreign func qScrollBarMinimum(ptr: Int64): Int32
+
 foreign func qScrollBarSetMaximum(ptr: Int64, value: Int32): Unit
+
 foreign func qScrollBarMaximum(ptr: Int64): Int32
+
 foreign func qScrollBarSetSliderPosition(ptr: Int64, value: Int32): Unit
+
 foreign func qScrollBarSliderPosition(ptr: Int64): Int32
+
 foreign func qScrollBarSetTracking(ptr: Int64, tracking: Int32): Unit
+
 foreign func qScrollBarIsTracking(ptr: Int64): Int32
+
 foreign func qScrollBarSetInvertedAppearance(ptr: Int64, value: Int32): Unit
+
 foreign func qScrollBarInvertedAppearance(ptr: Int64): Int32
+
 foreign func qScrollBarSetInvertedControls(ptr: Int64, value: Int32): Unit
+
 foreign func qScrollBarInvertedControls(ptr: Int64): Int32
+
 foreign func qScrollBarSetRepeatAction(ptr: Int64, action: Int32): Unit
+
 foreign func qScrollBarRepeatAction(ptr: Int64): Int32
+
 foreign func qScrollBarTriggerAction(ptr: Int64, action: Int32): Unit
+
 foreign func qScrollBarConnectSliderPressed(ptr: Int64, callback: VoidCallback): Unit
+
 foreign func qScrollBarConnectSliderMoved(ptr: Int64, callback: Int32Callback): Unit
+
 foreign func qScrollBarConnectSliderReleased(ptr: Int64, callback: VoidCallback): Unit
+
 foreign func qScrollBarConnectRangeChanged(ptr: Int64, callback: Int32Int32Callback): Unit
+
 foreign func qScrollBarConnectActionTriggered(ptr: Int64, callback: Int32Callback): Unit
 
 /// 独立滚动条部件
 public class QScrollBar {
     private var ptr: Int64 = 0
-    
+
     /// 创建滚动条
     /// orientation: ScrollBarOrientation.Horizontal 或 ScrollBarOrientation.Vertical
     public init(orientation: Int32) {
@@ -44,49 +72,49 @@ public class QScrollBar {
             ptr = qScrollBarCreate(orientation)
         }
     }
-    
+
     public func show(): Unit {
         unsafe { qWidgetShow(ptr) }
     }
-    
+
     public func hide(): Unit {
         unsafe { qWidgetHide(ptr) }
     }
-    
+
     public func resize(width: Int32, height: Int32): Unit {
         unsafe { qWidgetResize(ptr, width, height) }
     }
-    
+
     /// 设置范围 [min, max]
     public func setRange(min: Int32, max: Int32): Unit {
         unsafe { qScrollBarSetRange(ptr, min, max) }
     }
-    
+
     /// 设置当前值
     public func setValue(value: Int32): Unit {
         unsafe { qScrollBarSetValue(ptr, value) }
     }
-    
+
     /// 获取当前值
     public func value(): Int32 {
         unsafe { return qScrollBarValue(ptr) }
     }
-    
+
     /// 设置单步步长（箭头点击）
     public func setSingleStep(step: Int32): Unit {
         unsafe { qScrollBarSetSingleStep(ptr, step) }
     }
-    
+
     /// 设置翻页步长（点击滑块空白区域）
     public func setPageStep(step: Int32): Unit {
         unsafe { qScrollBarSetPageStep(ptr, step) }
     }
-    
+
     /// 设置方向
     public func setOrientation(orientation: Int32): Unit {
         unsafe { qScrollBarSetOrientation(ptr, orientation) }
     }
-    
+
     /// 设置值变化回调
     public func setOnValueChanged(callback: Int32Callback): Unit {
         unsafe { qScrollBarConnectValueChanged(ptr, callback) }
@@ -124,7 +152,11 @@ public class QScrollBar {
 
     /// 设置是否跟踪（拖动时实时触发 valueChanged）
     public func setTracking(tracking: Bool): Unit {
-        unsafe { qScrollBarSetTracking(ptr, if (tracking) { 1 } else { 0 }) }
+        unsafe { qScrollBarSetTracking(ptr, if (tracking) {
+            1
+        } else {
+            0
+        }) }
     }
 
     /// 是否跟踪
@@ -134,7 +166,11 @@ public class QScrollBar {
 
     /// 设置反向外观
     public func setInvertedAppearance(value: Bool): Unit {
-        unsafe { qScrollBarSetInvertedAppearance(ptr, if (value) { 1 } else { 0 }) }
+        unsafe { qScrollBarSetInvertedAppearance(ptr, if (value) {
+            1
+        } else {
+            0
+        }) }
     }
 
     /// 是否反向外观
@@ -144,7 +180,11 @@ public class QScrollBar {
 
     /// 设置反向控制
     public func setInvertedControls(value: Bool): Unit {
-        unsafe { qScrollBarSetInvertedControls(ptr, if (value) { 1 } else { 0 }) }
+        unsafe { qScrollBarSetInvertedControls(ptr, if (value) {
+            1
+        } else {
+            0
+        }) }
     }
 
     /// 是否反向控制
@@ -191,24 +231,28 @@ public class QScrollBar {
     public func setOnActionTriggered(callback: Int32Callback): Unit {
         unsafe { qScrollBarConnectActionTriggered(ptr, callback) }
     }
-    
+
     /// 设置启用/禁用
     public func setEnabled(enabled: Bool): Unit {
-        unsafe { qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 }) }
+        unsafe { qWidgetSetEnabled(ptr, if (enabled) {
+            1
+        } else {
+            0
+        }) }
     }
-    
+
     /// 设置样式表
     public func setStyleSheet(style: String): Unit {
         unsafe {
-            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
+            withCString(style) {c => qWidgetSetStyleSheet(ptr, c)}
         }
     }
-    
+
     /// 获取对象指针
     public func getPtr(): Int64 {
         return ptr
     }
-    
+
     /// 删除部件
     public func delete(): Unit {
         if (ptr != 0) {

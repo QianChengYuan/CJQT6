@@ -40,7 +40,7 @@ class ColorTests {
         @Expect(red.green(), 0)
         @Expect(red.blue(), 0)
         red.delete()
-        
+
         let blue = QColor.fromName("blue")
         @Expect(blue.red(), 0)
         @Expect(blue.blue(), 255)
@@ -52,13 +52,13 @@ class ColorTests {
         let color = QColor()
         color.setRed(100)
         @Expect(color.red(), 100)
-        
+
         color.setGreen(150)
         @Expect(color.green(), 150)
-        
+
         color.setBlue(200)
         @Expect(color.blue(), 200)
-        
+
         color.setAlpha(128)
         @Expect(color.alpha(), 128)
         color.delete()
@@ -69,11 +69,11 @@ class ColorTests {
         let c1 = QColor(255, 0, 0)
         let c2 = QColor(0, 255, 0)
         let c3 = QColor(0, 0, 255)
-        
+
         @Expect(c1.red(), 255)
         @Expect(c2.green(), 255)
         @Expect(c3.blue(), 255)
-        
+
         c1.delete()
         c2.delete()
         c3.delete()

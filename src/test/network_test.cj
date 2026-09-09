@@ -7,9 +7,9 @@ import std.unittest.*
 // =====================================================================
 // 回调用全局 CFunc（不捕获局部变量，仅验证注册不崩溃）
 // =====================================================================
-private let gNetVoidCb: VoidCallback = { => () }
-private let gNetInt64Cb: Int64Callback = { v: Int64 => () }
-private let gNetStrCb: CStringCallback = { s: CString => () }
+private let gNetVoidCb: VoidCallback = {=> ()}
+private let gNetInt64Cb: Int64Callback = {v: Int64 => ()}
+private let gNetStrCb: CStringCallback = {s: CString => ()}
 
 // =====================================================================
 // QHostAddress 测试
@@ -181,7 +181,7 @@ class QNetworkProxyTests {
     func testClose() {
         let proxy = QNetworkProxy()
         proxy.close()
-        proxy.close()  // 重复 close 安全
+        proxy.close() // 重复 close 安全
         @Assert(true)
     }
 
@@ -323,7 +323,7 @@ class QTcpSocketTests {
     func testDelete() {
         let sock = QTcpSocket()
         sock.delete()
-        sock.delete()  // 重复删除安全
+        sock.delete() // 重复删除安全
         @Assert(true)
     }
 }
@@ -511,7 +511,7 @@ class QLocalServerTests {
     func testClose() {
         let server = QLocalServer()
         server.close()
-        server.close()  // 重复 close 安全
+        server.close() // 重复 close 安全
         @Assert(true)
     }
 
@@ -574,7 +574,7 @@ class QSslSocketTests {
     func testClose() {
         let sock = QSslSocket()
         sock.close()
-        sock.close()  // 重复 close 安全
+        sock.close() // 重复 close 安全
         @Assert(true)
     }
 
@@ -650,7 +650,7 @@ class QNetworkRequestTests {
     func testClose() {
         let req = QNetworkRequest("https://example.com") // cjlint-ignore !G.OTH.03 测试用示例URL
         req.close()
-        req.close()  // 重复 close 安全
+        req.close() // 重复 close 安全
         @Assert(true)
     }
 
@@ -684,7 +684,7 @@ class QNetworkAccessManagerTests {
     func testClose() {
         let mgr = QNetworkAccessManager()
         mgr.close()
-        mgr.close()  // 重复 close 安全
+        mgr.close() // 重复 close 安全
         @Assert(true)
     }
 

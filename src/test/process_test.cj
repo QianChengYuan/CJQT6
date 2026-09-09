@@ -139,7 +139,7 @@ class QProcessEnvironmentTests {
     func testDoubleDelete() {
         let env = QProcessEnvironment()
         env.delete()
-        env.delete()  // 安全
+        env.delete() // 安全
         @Assert(true)
     }
 }
@@ -162,7 +162,7 @@ class QProcessTests {
     func testDoubleDelete() {
         let p = QProcess()
         p.delete()
-        p.delete()  // 安全
+        p.delete() // 安全
         @Assert(true)
     }
 
@@ -300,12 +300,12 @@ class QProcessTests {
     @TestCase
     func testRegisterCallbacks() {
         let p = QProcess()
-        let onFinish: CFunc<(Int32, Int32) -> Unit> = { a: Int32, b: Int32 => () }
-        let onStarted: CFunc<() -> Unit> = { => () }
-        let onReadyOut: CFunc<() -> Unit> = { => () }
-        let onReadyErr: CFunc<() -> Unit> = { => () }
-        let onError: CFunc<(Int32) -> Unit> = { e: Int32 => () }
-        let onState: CFunc<(Int32) -> Unit> = { s: Int32 => () }
+        let onFinish: CFunc<(Int32, Int32) -> Unit> = {a: Int32, b: Int32 => ()}
+        let onStarted: CFunc<() -> Unit> = {=> ()}
+        let onReadyOut: CFunc<() -> Unit> = {=> ()}
+        let onReadyErr: CFunc<() -> Unit> = {=> ()}
+        let onError: CFunc<(Int32) -> Unit> = {e: Int32 => ()}
+        let onState: CFunc<(Int32) -> Unit> = {s: Int32 => ()}
         p.setOnFinished(onFinish)
         p.setOnStarted(onStarted)
         p.setOnReadyReadStandardOutput(onReadyOut)

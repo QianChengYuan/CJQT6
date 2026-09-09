@@ -5,12 +5,19 @@ package cjqt6.core
 // ============================================================
 
 foreign func qScreenPrimaryDpiX(): Float64
+
 foreign func qScreenPrimaryDpiY(): Float64
+
 foreign func qScreenPrimaryPhysicalDpiX(): Float64
+
 foreign func qScreenPrimaryPhysicalDpiY(): Float64
+
 foreign func qScreenPrimaryDevicePixelRatio(): Float64
+
 foreign func qScreenPrimaryWidth(): Int32
+
 foreign func qScreenPrimaryHeight(): Int32
+
 foreign func qScreenPrimaryRefreshRate(): Float64
 
 /// 主屏幕信息查询，提供主屏分辨率、DPI、刷新率等静态查询（静态方法，无需实例化）

@@ -13,19 +13,18 @@ var gUndoCount: Int32 = 0
 var gRedoCount: Int32 = 0
 var gLastUndoData: Int64 = 0
 var gLastRedoData: Int64 = 0
-
-let gUndoCb: CFunc<(Int64) -> Unit> = { userData: Int64 =>
-    gUndoCount += 1
-    gLastUndoData = userData
+let gUndoCb: CFunc<(Int64) -> Unit> = {
+    userData: Int64 =>
+        gUndoCount += 1
+        gLastUndoData = userData
 }
-
-let gRedoCb: CFunc<(Int64) -> Unit> = { userData: Int64 =>
-    gRedoCount += 1
-    gLastRedoData = userData
+let gRedoCb: CFunc<(Int64) -> Unit> = {
+    userData: Int64 =>
+        gRedoCount += 1
+        gLastRedoData = userData
 }
-
-let gUndoCb2: CFunc<(Int64) -> Unit> = { userData: Int64 => () }
-let gRedoCb2: CFunc<(Int64) -> Unit> = { userData: Int64 => () }
+let gUndoCb2: CFunc<(Int64) -> Unit> = {userData: Int64 => ()}
+let gRedoCb2: CFunc<(Int64) -> Unit> = {userData: Int64 => ()}
 
 // ---------------------------------------------------------------------
 // QUndoCommand 测试
@@ -65,7 +64,7 @@ class QUndoCommandTests {
     func testDoubleDelete() {
         let cmd = QUndoCommand(gUndoCb, gRedoCb, 0, "x")
         cmd.delete()
-        cmd.delete()  // 安全
+        cmd.delete() // 安全
         @Assert(true)
     }
 
@@ -211,7 +210,7 @@ class QUndoStackTests {
     func testDoubleClose() {
         let stack = QUndoStack()
         stack.close()
-        stack.close()  // 安全
+        stack.close() // 安全
         @Assert(true)
     }
 }

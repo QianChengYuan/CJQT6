@@ -28,22 +28,22 @@ import std.collection.{ArrayList, HashMap}
 public class ScopeManager <: QtResource {
     /// 管理的控件列表
     private let widgets: ArrayList<QtResource>
-    
+
     /// 控件详细信息映射（指针 -> 信息）
     private let widgetInfos: HashMap<Int64, WidgetInfo>
-    
+
     /// 作用域唯一标识
     private let scopeId: String
-    
+
     /// 是否已关闭
     private var closed: Bool
-    
+
     /// 配置选项
     private let config: ScopeConfig
-    
+
     /// 创建时间（毫秒时间戳）
     private let createdTime: Int64
-    
+
     /// 默认构造函数
     /// 
     /// 使用默认配置创建作用域管理器
@@ -55,11 +55,11 @@ public class ScopeManager <: QtResource {
         this.closed = false
         this.config = ScopeConfig()
         this.createdTime = currentTimeMillis()
-        
+
         // 注册到全局注册表
         ScopeManagerRegistry.registerScope(this.scopeId)
     }
-    
+
     /// 带配置的构造函数
     /// 
     /// 参数:
@@ -71,10 +71,10 @@ public class ScopeManager <: QtResource {
         this.closed = false
         this.config = config
         this.createdTime = currentTimeMillis()
-        
+
         ScopeManagerRegistry.registerScope(this.scopeId)
     }
-    
+
     /// 注册控件到作用域
     /// 
     /// 将控件添加到管理列表，并记录详细信息
@@ -91,12 +91,12 @@ public class ScopeManager <: QtResource {
         if (this.closed) {
             throw ResourceDisposedException("ScopeManager already closed")
         }
-        
+
         // 检查控件是否已关闭
         if (widget.isClosed()) {
             return this
         }
-        
+
         // 检查控件是否已被其他作用域管理
         let ptr = widget.getPtr()
         if (ScopeManagerRegistry.isManaged(ptr)) {
@@ -111,10 +111,10 @@ public class ScopeManager <: QtResource {
             // 控件已在当前作用域，重复注册，忽略
             return this
         }
-        
+
         // 添加到控件列表
         this.widgets.add(widget)
-        
+
         // 记录控件详细信息
         let info = WidgetInfo(
             ptr,
@@ -123,13 +123,13 @@ public class ScopeManager <: QtResource {
             ReleaseStatus.Pending
         )
         this.widgetInfos[ptr] = info
-        
+
         // 在全局注册表标记
         ScopeManagerRegistry.markManaged(ptr, this.scopeId)
-        
+
         return this
     }
-    
+
     /// 从作用域移除控件（不释放）
     /// 
     /// 将控件从管理列表移除，但不调用close()
@@ -143,10 +143,10 @@ public class ScopeManager <: QtResource {
         if (this.closed) {
             return false
         }
-        
+
         let ptr = widget.getPtr()
         let index = findWidgetIndex(widget)
-        
+
         if (index >= 0) {
             this.widgets.remove(at: index)
             this.widgetInfos.remove(ptr)
@@ -155,7 +155,7 @@ public class ScopeManager <: QtResource {
         }
         return false
     }
-    
+
     /// 手动释放所有控件
     /// 
     /// 提前触发释放，不等作用域关闭
@@ -166,7 +166,7 @@ public class ScopeManager <: QtResource {
     public func releaseAll(): ReleaseResult {
         return doRelease()
     }
-    
+
     /// 内部释放实现
     /// 
     /// 遍历所有控件并释放，更新状态信息
@@ -176,11 +176,11 @@ public class ScopeManager <: QtResource {
         var success: Int32 = 0
         var failed: Int32 = 0
         var skipped: Int32 = 0
-        
+
         for (widget in this.widgets) {
             total += 1
             let ptr = widget.getPtr()
-            
+
             // 获取控件详细信息
             let infoOpt = this.widgetInfos.get(ptr)
             if (let Some(info) <- infoOpt) {
@@ -197,7 +197,7 @@ public class ScopeManager <: QtResource {
                     } catch (ex: Exception) {
                         failed += 1
                         info.status = ReleaseStatus.Failed
-                        
+
                         if (this.config.logEnabled) {
                             println("Failed to release widget: ${info.typeName}, reason: ${ex}")
                         }
@@ -205,22 +205,26 @@ public class ScopeManager <: QtResource {
                 }
             }
         }
-        
+
         // 清理所有数据结构
         this.widgets.clear()
         this.widgetInfos.clear()
         ScopeManagerRegistry.unregisterScope(this.scopeId)
-        
+
         return ReleaseResult(total, success, failed, skipped, 0)
     }
-    
+
     /// 获取作用域统计信息
     /// 
     /// 返回:
     ///   ScopeStats 包含作用域ID、状态、控件数量等信息
     public func getStats(): ScopeStats {
-        let closedTime = if (this.closed) { currentTimeMillis() } else { 0 }
-        
+        let closedTime = if (this.closed) {
+            currentTimeMillis()
+        } else {
+            0
+        }
+
         return ScopeStats(
             this.scopeId,
             !this.closed,
@@ -229,12 +233,12 @@ public class ScopeManager <: QtResource {
             closedTime
         )
     }
-    
+
     /// 检查作用域是否已关闭
     public func isClosed(): Bool {
         return this.closed
     }
-    
+
     /// 关闭作用域
     /// 
     /// 根据配置决定是否自动释放所有控件
@@ -244,29 +248,29 @@ public class ScopeManager <: QtResource {
         if (this.closed) {
             return
         }
-        
+
         // 根据配置决定是否自动释放
         if (this.config.autoRelease) {
             doRelease()
         }
-        
+
         this.closed = true
     }
-    
+
     /// 获取底层指针
     /// 
     /// 注意：ScopeManager不是Qt对象，返回0
     public func getPtr(): Int64 {
         return 0
     }
-    
+
     /// 检查作用域是否有效
     /// 
     /// 返回: true表示未关闭，false表示已关闭
     public func isValid(): Bool {
         return !this.closed
     }
-    
+
     /// 检查有效性，无效时抛出异常
     /// 
     /// 异常:
@@ -276,7 +280,7 @@ public class ScopeManager <: QtResource {
             throw ResourceDisposedException("ScopeManager already closed")
         }
     }
-    
+
     /// 获取控件的类型名称
     /// 
     /// 注意：当前返回固定值"QtResource"
@@ -284,7 +288,7 @@ public class ScopeManager <: QtResource {
     private func getTypeName(_: QtResource): String {
         return "QtResource"
     }
-    
+
     /// 查找控件在列表中的索引
     /// 
     /// 参数:
@@ -299,7 +303,7 @@ public class ScopeManager <: QtResource {
         }
         return -1
     }
-    
+
     /// 生成唯一作用域ID
     ///
     /// 格式：scope_${自增序号}

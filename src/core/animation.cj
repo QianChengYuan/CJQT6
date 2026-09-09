@@ -7,44 +7,67 @@ package cjqt6.core
 foreign func qParallelAnimationGroupCreate(): Int64
 
 foreign func qAnimationGroupAddAnimation(groupPtr: Int64, animPtr: Int64): Unit
+
 foreign func qAnimationGroupRemoveAnimation(groupPtr: Int64, animPtr: Int64): Unit
+
 foreign func qAnimationGroupAnimationCount(groupPtr: Int64): Int32
 
 foreign func qAbstractAnimationStart(ptr: Int64): Unit
+
 foreign func qAbstractAnimationStop(ptr: Int64): Unit
+
 foreign func qAbstractAnimationPause(ptr: Int64): Unit
+
 foreign func qAbstractAnimationResume(ptr: Int64): Unit
+
 foreign func qAbstractAnimationState(ptr: Int64): Int32
+
 foreign func qAbstractAnimationDuration(ptr: Int64): Int64
+
 foreign func qAbstractAnimationSetLoopCount(ptr: Int64, count: Int32): Unit
+
 foreign func qAbstractAnimationLoopCount(ptr: Int64): Int32
+
 foreign func qAbstractAnimationCurrentTime(ptr: Int64): Int32
+
 foreign func qAbstractAnimationSetCurrentTime(ptr: Int64, ms: Int32): Unit
+
 foreign func qAbstractAnimationCurrentLoop(ptr: Int64): Int32
+
 foreign func qAbstractAnimationSetDirection(ptr: Int64, direction: Int32): Unit
+
 foreign func qAbstractAnimationDirection(ptr: Int64): Int32
 
 foreign func qParallelAnimationGroupDelete(ptr: Int64): Unit
-foreign func qAbstractAnimationDelete(ptr: Int64): Unit
 
+foreign func qAbstractAnimationDelete(ptr: Int64): Unit
 
 // ============================================================
 // 动画状态常量
 // ============================================================
 public class AnimationState {
-    public static func stopped(): Int32 { 0 }
-    public static func paused(): Int32 { 1 }
-    public static func running(): Int32 { 2 }
+    public static func stopped(): Int32 {
+        0
+    }
+    public static func paused(): Int32 {
+        1
+    }
+    public static func running(): Int32 {
+        2
+    }
 }
 
 // ============================================================
 // 动画方向常量
 // ============================================================
 public class AnimationDirection {
-    public static func forward(): Int32 { 0 }
-    public static func backward(): Int32 { 1 }
+    public static func forward(): Int32 {
+        0
+    }
+    public static func backward(): Int32 {
+        1
+    }
 }
-
 
 // ============================================================
 // QAbstractAnimation - 动画基类
@@ -147,10 +170,14 @@ public class QAbstractAnimation <: QtResource {
     }
 
     /// 获取原生指针
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     /// 是否已关闭（资源已释放）
-    public func isClosed(): Bool { closed }
+    public func isClosed(): Bool {
+        closed
+    }
 
     /// 检查对象有效性（未关闭且指针有效）
     public func isValid(): Bool {
@@ -178,7 +205,6 @@ public class QAbstractAnimation <: QtResource {
         delete()
     }
 }
-
 
 // ============================================================
 // QParallelAnimationGroup - 并行动画组
@@ -287,10 +313,14 @@ public class QParallelAnimationGroup <: QtResource {
     }
 
     /// 获取原生指针
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     /// 是否已关闭（资源已释放）
-    public func isClosed(): Bool { closed }
+    public func isClosed(): Bool {
+        closed
+    }
 
     /// 检查对象有效性（未关闭且指针有效）
     public func isValid(): Bool {

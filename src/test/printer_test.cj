@@ -96,7 +96,7 @@ class QPrinterTests {
     func testDoubleDelete() {
         let p = QPrinter()
         p.delete()
-        p.delete()  // 安全
+        p.delete() // 安全
         @Assert(true)
     }
 
@@ -285,7 +285,7 @@ class QPrintDialogTests {
         let printer = QPrinter()
         let dlg = QPrintDialog(printer)
         dlg.delete()
-        dlg.delete()  // 安全
+        dlg.delete() // 安全
         printer.delete()
         @Assert(true)
     }

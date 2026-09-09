@@ -11,19 +11,19 @@ import cjqt6.core.QtResource
 public class ReleaseResult {
     /// 总控件数量
     public let totalCount: Int32
-    
+
     /// 成功释放的数量
     public let successCount: Int32
-    
+
     /// 释放失败的数量
     public let failedCount: Int32
-    
+
     /// 跳过的数量（已关闭的控件）
     public let skippedCount: Int32
-    
+
     /// 释放耗时（毫秒）
     public let elapsedTime: Int64
-    
+
     /// 构造函数
     public init(totalCount: Int32, successCount: Int32, failedCount: Int32, skippedCount: Int32, elapsedTime: Int64) {
         this.totalCount = totalCount
@@ -32,19 +32,19 @@ public class ReleaseResult {
         this.skippedCount = skippedCount
         this.elapsedTime = elapsedTime
     }
-    
+
     /// 检查是否全部释放成功
     /// 返回: true表示没有失败，false表示有失败
     public func isAllSuccess(): Bool {
         return failedCount == 0
     }
-    
+
     /// 检查是否有失败
     /// 返回: true表示有失败，false表示全部成功
     public func hasFailure(): Bool {
         return failedCount > 0
     }
-    
+
     /// 计算成功率（百分比）
     /// 返回: 成功释放的比例（0-100）
     public func successRate(): Int32 {
@@ -53,7 +53,7 @@ public class ReleaseResult {
         }
         return (successCount * 100) / totalCount
     }
-    
+
     /// 转换为字符串表示
     public func toString(): String {
         return "ReleaseResult(total=${totalCount}, success=${successCount}, failed=${failedCount}, skipped=${skippedCount}, rate=${successRate()}%)"
@@ -72,7 +72,7 @@ public class ReleaseResult {
 /// - 处理可能为null的Option类型控件
 /// - 快速释放固定数量的控件
 public class ResourceUtils {
-    
+
     /// 批量释放控件（数组版本）
     /// 
     /// 遍历数组中的所有控件并尝试释放
@@ -88,11 +88,11 @@ public class ResourceUtils {
         var success: Int32 = 0
         var failed: Int32 = 0
         var skipped: Int32 = 0
-        
+
         for (i in 0..widgets.size) {
             let widget = widgets[i]
             total += 1
-            
+
             // 检查控件是否已关闭
             if (widget.isClosed()) {
                 skipped += 1
@@ -107,10 +107,10 @@ public class ResourceUtils {
                 }
             }
         }
-        
+
         return ReleaseResult(total, success, failed, skipped, 0)
     }
-    
+
     /// 安全释放控件（处理Option类型）
     /// 
     /// 处理可能为None的控件数组
@@ -125,11 +125,11 @@ public class ResourceUtils {
         var success: Int32 = 0
         var failed: Int32 = 0
         var skipped: Int32 = 0
-        
+
         for (i in 0..widgets.size) {
             let widgetOpt = widgets[i]
             total += 1
-            
+
             // 解构Option类型
             if (let Some(widget) <- widgetOpt) {
                 if (widget.isClosed()) {
@@ -147,22 +147,22 @@ public class ResourceUtils {
                 skipped += 1
             }
         }
-        
+
         return ReleaseResult(total, success, failed, skipped, 0)
     }
-    
+
     /// 释放两个控件
     /// 快捷方法，避免创建数组的开销
     public static func releaseTwo(w1: QtResource, w2: QtResource): ReleaseResult {
         return releaseAll([w1, w2])
     }
-    
+
     /// 释放三个控件
     /// 快捷方法，避免创建数组的开销
     public static func releaseThree(w1: QtResource, w2: QtResource, w3: QtResource): ReleaseResult {
         return releaseAll([w1, w2, w3])
     }
-    
+
     /// 释放四个控件
     /// 快捷方法，避免创建数组的开销
     public static func releaseFour(w1: QtResource, w2: QtResource, w3: QtResource, w4: QtResource): ReleaseResult {

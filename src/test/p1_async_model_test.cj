@@ -23,18 +23,22 @@ var gMdlIndexCalls: Int32 = 0
 var gMdlRowQueries: Int32 = 0
 
 // 自定义模型回调：行数/列数/索引（索引返回非零内部 ID，供 dataChanged 建索引）
-let mdlRowCountCb: CFunc<(Int64, Int64) -> Int32> = { modelPtr: Int64, parentPtr: Int64 =>
-    gMdlRowQueries += 1
-    gMdlRows
+let mdlRowCountCb: CFunc<(Int64, Int64) -> Int32> = {
+    modelPtr: Int64, parentPtr: Int64 =>
+        gMdlRowQueries += 1
+        gMdlRows
 }
-let mdlColCountCb: CFunc<(Int64, Int64) -> Int32> = { modelPtr: Int64, parentPtr: Int64 => gMdlCols }
-let mdlIndexCb: CFunc<(Int64, Int32, Int32, Int64) -> Int64> = { modelPtr: Int64, row: Int32, col: Int32, parentPtr: Int64 =>
-    gMdlIndexCalls += 1
-    Int64(row * 100 + col + 1)
+let mdlColCountCb: CFunc<(Int64, Int64) -> Int32> = {modelPtr: Int64, parentPtr: Int64 => gMdlCols}
+let mdlIndexCb: CFunc<(Int64, Int32, Int32, Int64) -> Int64> = {
+    modelPtr: Int64, row: Int32, col: Int32, parentPtr: Int64 =>
+        gMdlIndexCalls += 1
+        Int64(row * 100 + col + 1)
 }
-let mdlDataCb: CFunc<(Int64, Int64, Int32) -> Int64> = { modelPtr: Int64, indexPtr: Int64, role: Int32 => 0 }
-let mdlHeaderCb: CFunc<(Int64, Int32, Int32, Int32) -> Int64> = { modelPtr: Int64, section: Int32, orientation: Int32, role: Int32 => 0 }
-let mdlFlagsCb: CFunc<(Int64, Int64) -> Int32> = { modelPtr: Int64, indexPtr: Int64 => 0 }
+let mdlDataCb: CFunc<(Int64, Int64, Int32) -> Int64> = {modelPtr: Int64, indexPtr: Int64, role: Int32 => 0}
+let mdlHeaderCb: CFunc<(Int64, Int32, Int32, Int32) -> Int64> = {
+    modelPtr: Int64, section: Int32, orientation: Int32, role: Int32 => 0
+}
+let mdlFlagsCb: CFunc<(Int64, Int64) -> Int32> = {modelPtr: Int64, indexPtr: Int64 => 0}
 
 // UiPoster 测试全局状态
 var gP1App: ?QApplication = None
@@ -152,7 +156,6 @@ class P1ModelNotifyTests {
 // =====================================================================
 @Test
 class P1UiPosterTests {
-
     @BeforeEach
     static func setUp(): Unit {
         gP1App = Some(QApplication())
@@ -177,7 +180,7 @@ class P1UiPosterTests {
         let w = QTimer()
         gP1Watchdog = Some(w)
         w.setInterval(ms)
-        w.setOnTimeout({ => QApp.quit() })
+        w.setOnTimeout({=> QApp.quit()})
         w.start()
     }
 
@@ -186,11 +189,16 @@ class P1UiPosterTests {
     func testRunOnUiThreadExecutes() {
         gP1UiCount = 0
         armWatchdog(3000)
-        runOnUiThread({ =>
-            gP1UiCount += 1
-            QApp.quit()
-        })
-        if (let Some(a) <- gP1App) { a.exec() }
+        runOnUiThread(
+            {
+                =>
+                    gP1UiCount += 1
+                    QApp.quit()
+            }
+        )
+        if (let Some(a) <- gP1App) {
+            a.exec()
+        }
         @Expect(gP1UiCount, 1)
     }
 
@@ -199,11 +207,16 @@ class P1UiPosterTests {
     func testPostAlias() {
         gP1UiCount = 0
         armWatchdog(3000)
-        UiPoster.post({ =>
-            gP1UiCount += 1
-            QApp.quit()
-        })
-        if (let Some(a) <- gP1App) { a.exec() }
+        UiPoster.post(
+            {
+                =>
+                    gP1UiCount += 1
+                    QApp.quit()
+            }
+        )
+        if (let Some(a) <- gP1App) {
+            a.exec()
+        }
         @Expect(gP1UiCount, 1)
     }
 
@@ -212,13 +225,18 @@ class P1UiPosterTests {
     func testFifoOrder() {
         gP1Order = ""
         armWatchdog(3000)
-        runOnUiThread({ => gP1Order = gP1Order + "a" })
-        runOnUiThread({ => gP1Order = gP1Order + "b" })
-        runOnUiThread({ =>
-            gP1Order = gP1Order + "c"
-            QApp.quit()
-        })
-        if (let Some(a) <- gP1App) { a.exec() }
+        runOnUiThread({=> gP1Order = gP1Order + "a"})
+        runOnUiThread({=> gP1Order = gP1Order + "b"})
+        runOnUiThread(
+            {
+                =>
+                    gP1Order = gP1Order + "c"
+                    QApp.quit()
+            }
+        )
+        if (let Some(a) <- gP1App) {
+            a.exec()
+        }
         @Expect(gP1Order, "abc")
     }
 
@@ -229,15 +247,22 @@ class P1UiPosterTests {
         gP1MainThreadPtr = QThread.currentThreadPtr()
         gP1CbThreadPtr = 0
         armWatchdog(5000)
-        runAsync({ =>
-            // 工作线程：模拟耗时任务
-            gP1WorkCount += 1
-        }, { =>
-            gP1CbThreadPtr = QThread.currentThreadPtr()
-            gP1UiCount += 1
-            QApp.quit()
-        })
-        if (let Some(a) <- gP1App) { a.exec() }
+        runAsync(
+            {
+                =>
+                // 工作线程：模拟耗时任务
+                gP1WorkCount += 1
+            },
+            {
+                =>
+                    gP1CbThreadPtr = QThread.currentThreadPtr()
+                    gP1UiCount += 1
+                    QApp.quit()
+            }
+        )
+        if (let Some(a) <- gP1App) {
+            a.exec()
+        }
         @Expect(gP1UiCount, 1)
         @Expect(gP1WorkCount, 1)
         // onDone 必须在 GUI 线程（与测试主线程同一 QThread）执行
@@ -251,7 +276,6 @@ class P1UiPosterTests {
 // =====================================================================
 @Test
 class P1SpinBoxTextTests {
-
     @BeforeEach
     static func setUp(): Unit {
         gP1App = Some(QApplication())
@@ -277,7 +301,7 @@ class P1SpinBoxTextTests {
         gP1SpinText = ""
         let sp = QSpinBox()
         sp.setRange(0, 100)
-        sp.setOnTextChanged({ t: CString => gP1SpinText = t.toString() })
+        sp.setOnTextChanged({t: CString => gP1SpinText = t.toString()})
         sp.setValue(42)
         @Expect(gP1SpinText, "42")
         sp.close()
@@ -289,7 +313,7 @@ class P1SpinBoxTextTests {
         gP1DspinText = ""
         let sp = QDoubleSpinBox()
         sp.setRange(0.0, 100.0)
-        sp.setOnTextChanged({ t: CString => gP1DspinText = t.toString() })
+        sp.setOnTextChanged({t: CString => gP1DspinText = t.toString()})
         sp.setValue(3.14)
         @Expect(gP1DspinText, "3.14")
         sp.close()
@@ -302,8 +326,8 @@ class P1SpinBoxTextTests {
         gP1SpinValue = -1
         let sp = QSpinBox()
         sp.setRange(0, 100)
-        sp.setOnValueChanged({ v: Int32 => gP1SpinValue = v })
-        sp.setOnTextChanged({ t: CString => gP1SpinText = t.toString() })
+        sp.setOnValueChanged({v: Int32 => gP1SpinValue = v})
+        sp.setOnTextChanged({t: CString => gP1SpinText = t.toString()})
         sp.setValue(7)
         @Expect(gP1SpinValue, 7)
         @Expect(gP1SpinText, "7")
@@ -319,7 +343,7 @@ class P1SpinBoxTextTests {
             gP1SpinText = ""
             let sp = QSpinBox()
             sp.setRange(0, 100)
-            sp.setOnTextChanged({ t: CString => gP1SpinText = t.toString() })
+            sp.setOnTextChanged({t: CString => gP1SpinText = t.toString()})
             sp.setValue(Int32(i))
             if (gP1SpinText != i.toString()) {
                 @Expect(gP1SpinText, i.toString())
@@ -336,7 +360,7 @@ class P1SpinBoxTextTests {
             let sp = QDoubleSpinBox()
             sp.setRange(0.0, 100.0)
             sp.setDecimals(0)
-            sp.setOnTextChanged({ t: CString => gP1DspinText = t.toString() })
+            sp.setOnTextChanged({t: CString => gP1DspinText = t.toString()})
             sp.setValue(Float64(i))
             if (gP1DspinText != i.toString()) {
                 @Expect(gP1DspinText, i.toString())

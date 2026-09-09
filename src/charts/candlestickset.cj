@@ -7,17 +7,29 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qCandlestickSetCreate(timestamp: Float64): Int64
+
 foreign func qCandlestickSetCreateOHLC(open: Float64, high: Float64, low: Float64, close: Float64, timestamp: Float64): Int64
+
 foreign func qCandlestickSetDelete(ptr: Int64): Unit
+
 foreign func qCandlestickSetSetTimestamp(ptr: Int64, timestamp: Float64): Unit
+
 foreign func qCandlestickSetTimestamp(ptr: Int64): Float64
+
 foreign func qCandlestickSetSetOpen(ptr: Int64, value: Float64): Unit
+
 foreign func qCandlestickSetOpen(ptr: Int64): Float64
+
 foreign func qCandlestickSetSetHigh(ptr: Int64, value: Float64): Unit
+
 foreign func qCandlestickSetHigh(ptr: Int64): Float64
+
 foreign func qCandlestickSetSetLow(ptr: Int64, value: Float64): Unit
+
 foreign func qCandlestickSetLow(ptr: Int64): Float64
+
 foreign func qCandlestickSetSetClose(ptr: Int64, value: Float64): Unit
+
 foreign func qCandlestickSetClose(ptr: Int64): Float64
 
 // ============================================================
@@ -131,7 +143,9 @@ public class QCandlestickSet {
         unsafe { return qCandlestickSetClose(ptr) }
     }
 
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     /// 释放资源；已 append 后由 series 级联释放，勿主动调用
     public func close(): Unit {

@@ -5,8 +5,11 @@ package cjqt6.core
 // ============================================================
 
 foreign func qStandardPathWritableLocation(`type`: Int32): CString
+
 foreign func qStandardPathLocate(`type`: Int32, fileName: CString): CString
+
 foreign func qStandardPathDisplayName(`type`: Int32): CString
+
 foreign func qStandardPathTempDir(): CString
 
 /// 标准路径位置类型：桌面

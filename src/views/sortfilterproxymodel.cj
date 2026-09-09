@@ -7,46 +7,74 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qSortFilterProxyModelCreate(): Int64
-foreign func qSortFilterProxyModelSetSourceModel(ptr: Int64, modelPtr: Int64): Unit
-foreign func qSortFilterProxyModelSetFilterRegularExpression(ptr: Int64, pattern: CString): Unit
-foreign func qSortFilterProxyModelSetFilterFixedString(ptr: Int64, pattern: CString): Unit
-foreign func qSortFilterProxyModelSetFilterKeyColumn(ptr: Int64, col: Int32): Unit
-foreign func qSortFilterProxyModelFilterKeyColumn(ptr: Int64): Int32
-foreign func qSortFilterProxyModelSetFilterRole(ptr: Int64, role: Int32): Unit
-foreign func qSortFilterProxyModelFilterRole(ptr: Int64): Int32
-foreign func qSortFilterProxyModelSetSortRole(ptr: Int64, role: Int32): Unit
-foreign func qSortFilterProxyModelSortRole(ptr: Int64): Int32
-foreign func qSortFilterProxyModelSetDynamicSortFilter(ptr: Int64, enable: Int32): Unit
-foreign func qSortFilterProxyModelDynamicSortFilter(ptr: Int64): Int32
-foreign func qSortFilterProxyModelSort(ptr: Int64, column: Int32, order: Int32): Unit
-foreign func qSortFilterProxyModelSortOrder(ptr: Int64): Int32
-foreign func qSortFilterProxyModelMapToSource(ptr: Int64, proxyRow: Int32, proxyCol: Int32): Int64
-foreign func qSortFilterProxyModelMapFromSource(ptr: Int64, sourceRow: Int32, sourceCol: Int32, sourceModelPtr: Int64): Int64
-foreign func qSortFilterProxyModelSetFilterCaseSensitivity(ptr: Int64, cs: Int32): Unit
-foreign func qSortFilterProxyModelFilterCaseSensitivity(ptr: Int64): Int32
-foreign func qSortFilterProxyModelInvalidate(ptr: Int64): Unit
-foreign func qSortFilterProxyModelSetFilterWildcard(ptr: Int64, pattern: CString): Unit
-foreign func qSortFilterProxyModelRowCount(ptr: Int64): Int32
-foreign func qSortFilterProxyModelColumnCount(ptr: Int64): Int32
-foreign func qSortFilterProxyModelDelete(ptr: Int64): Unit
 
+foreign func qSortFilterProxyModelSetSourceModel(ptr: Int64, modelPtr: Int64): Unit
+
+foreign func qSortFilterProxyModelSetFilterRegularExpression(ptr: Int64, pattern: CString): Unit
+
+foreign func qSortFilterProxyModelSetFilterFixedString(ptr: Int64, pattern: CString): Unit
+
+foreign func qSortFilterProxyModelSetFilterKeyColumn(ptr: Int64, col: Int32): Unit
+
+foreign func qSortFilterProxyModelFilterKeyColumn(ptr: Int64): Int32
+
+foreign func qSortFilterProxyModelSetFilterRole(ptr: Int64, role: Int32): Unit
+
+foreign func qSortFilterProxyModelFilterRole(ptr: Int64): Int32
+
+foreign func qSortFilterProxyModelSetSortRole(ptr: Int64, role: Int32): Unit
+
+foreign func qSortFilterProxyModelSortRole(ptr: Int64): Int32
+
+foreign func qSortFilterProxyModelSetDynamicSortFilter(ptr: Int64, enable: Int32): Unit
+
+foreign func qSortFilterProxyModelDynamicSortFilter(ptr: Int64): Int32
+
+foreign func qSortFilterProxyModelSort(ptr: Int64, column: Int32, order: Int32): Unit
+
+foreign func qSortFilterProxyModelSortOrder(ptr: Int64): Int32
+
+foreign func qSortFilterProxyModelMapToSource(ptr: Int64, proxyRow: Int32, proxyCol: Int32): Int64
+
+foreign func qSortFilterProxyModelMapFromSource(ptr: Int64, sourceRow: Int32, sourceCol: Int32, sourceModelPtr: Int64): Int64
+
+foreign func qSortFilterProxyModelSetFilterCaseSensitivity(ptr: Int64, cs: Int32): Unit
+
+foreign func qSortFilterProxyModelFilterCaseSensitivity(ptr: Int64): Int32
+
+foreign func qSortFilterProxyModelInvalidate(ptr: Int64): Unit
+
+foreign func qSortFilterProxyModelSetFilterWildcard(ptr: Int64, pattern: CString): Unit
+
+foreign func qSortFilterProxyModelRowCount(ptr: Int64): Int32
+
+foreign func qSortFilterProxyModelColumnCount(ptr: Int64): Int32
+
+foreign func qSortFilterProxyModelDelete(ptr: Int64): Unit
 
 // ============================================================
 // 排序常量
 // ============================================================
 public class SortOrder {
-    public static func ascending(): Int32 { 0 }
-    public static func descending(): Int32 { 1 }
+    public static func ascending(): Int32 {
+        0
+    }
+    public static func descending(): Int32 {
+        1
+    }
 }
 
 // ============================================================
 // 大小写敏感性
 // ============================================================
 public class CaseSensitivity {
-    public static func insensitive(): Int32 { 0 }
-    public static func sensitive(): Int32 { 1 }
+    public static func insensitive(): Int32 {
+        0
+    }
+    public static func sensitive(): Int32 {
+        1
+    }
 }
-
 
 // ============================================================
 // QSortFilterProxyModel - 排序过滤代理模型
@@ -88,7 +116,7 @@ public class QSortFilterProxyModel <: QtResource {
     public func setFilterRegularExpression(pattern: String): Unit {
         checkValid()
         unsafe {
-            withCString(pattern) { c => qSortFilterProxyModelSetFilterRegularExpression(ptr, c) }
+            withCString(pattern) {c => qSortFilterProxyModelSetFilterRegularExpression(ptr, c)}
         }
     }
 
@@ -96,7 +124,7 @@ public class QSortFilterProxyModel <: QtResource {
     public func setFilterFixedString(pattern: String): Unit {
         checkValid()
         unsafe {
-            withCString(pattern) { c => qSortFilterProxyModelSetFilterFixedString(ptr, c) }
+            withCString(pattern) {c => qSortFilterProxyModelSetFilterFixedString(ptr, c)}
         }
     }
 
@@ -104,7 +132,7 @@ public class QSortFilterProxyModel <: QtResource {
     public func setFilterWildcard(pattern: String): Unit {
         checkValid()
         unsafe {
-            withCString(pattern) { c => qSortFilterProxyModelSetFilterWildcard(ptr, c) }
+            withCString(pattern) {c => qSortFilterProxyModelSetFilterWildcard(ptr, c)}
         }
     }
 
@@ -160,7 +188,11 @@ public class QSortFilterProxyModel <: QtResource {
     public func setDynamicSortFilter(enable: Bool): Unit {
         checkValid()
         unsafe {
-            qSortFilterProxyModelSetDynamicSortFilter(ptr, if (enable) { 1 } else { 0 })
+            qSortFilterProxyModelSetDynamicSortFilter(ptr, if (enable) {
+                1
+            } else {
+                0
+            })
         }
     }
 
@@ -250,7 +282,9 @@ public class QSortFilterProxyModel <: QtResource {
     }
 
     /// 是否已关闭（资源已释放）
-    public func isClosed(): Bool { closed }
+    public func isClosed(): Bool {
+        closed
+    }
 
     /// 检查对象有效性（未关闭且指针有效）
     public func isValid(): Bool {

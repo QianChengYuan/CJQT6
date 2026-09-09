@@ -283,4 +283,3 @@ class GroupCardTests {
         card.close()
     }
 }
-

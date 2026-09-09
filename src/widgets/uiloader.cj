@@ -4,9 +4,13 @@ import cjqt6.core.*
 
 // QUiLoader - Qt Designer .ui 文件加载器
 foreign func qUiLoaderCreate(): Int64
+
 foreign func qUiLoaderDelete(ptr: Int64): Unit
+
 foreign func qUiLoaderLoadFile(ptr: Int64, filePath: CString, parentPtr: Int64): Int64
+
 foreign func qUiLoaderSetWorkingDirectory(ptr: Int64, dir: CString): Unit
+
 foreign func qUiLoaderErrorString(ptr: Int64): CString
 
 /// Qt Designer .ui 文件加载器（QtUiTools）
@@ -53,7 +57,7 @@ public class QUiLoader <: QtResource {
     public func setWorkingDirectory(dir: String): Unit {
         checkValid()
         unsafe {
-            withCString(dir) { c => qUiLoaderSetWorkingDirectory(ptr, c) }
+            withCString(dir) {c => qUiLoaderSetWorkingDirectory(ptr, c)}
         }
     }
 

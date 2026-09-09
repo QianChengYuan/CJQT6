@@ -7,53 +7,95 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qNetworkRequestCreate(url: CString): Int64
+
 foreign func qNetworkRequestDelete(ptr: Int64): Unit
+
 foreign func qNetworkRequestSetUrl(ptr: Int64, url: CString): Unit
+
 foreign func qNetworkRequestUrl(ptr: Int64): CString
+
 foreign func qNetworkRequestSetHeader(ptr: Int64, header: Int32, value: CString): Unit
+
 foreign func qNetworkRequestHeader(ptr: Int64, header: Int32): CString
+
 foreign func qNetworkRequestSetRawHeader(ptr: Int64, name: CString, value: CString): Unit
+
 foreign func qNetworkRequestSetTransferTimeout(ptr: Int64, timeoutMs: Int32): Unit
 
 foreign func qNetworkAccessManagerCreate(): Int64
+
 foreign func qNetworkAccessManagerDelete(ptr: Int64): Unit
+
 foreign func qNetworkAccessManagerGet(ptr: Int64, requestPtr: Int64): Int64
+
 foreign func qNetworkAccessManagerPost(ptr: Int64, requestPtr: Int64, data: CString): Int64
+
 foreign func qNetworkAccessManagerPut(ptr: Int64, requestPtr: Int64, data: CString): Int64
+
 foreign func qNetworkAccessManagerDeleteResource(ptr: Int64, requestPtr: Int64): Int64
+
 foreign func qNetworkAccessManagerSetTransferTimeout(ptr: Int64, timeoutMs: Int32): Unit
 
 foreign func qNetworkReplyReadAll(ptr: Int64): CString
-foreign func qNetworkReplyBytesAvailable(ptr: Int64): Int64
-foreign func qNetworkReplyError(ptr: Int64): Int32
-foreign func qNetworkReplyErrorString(ptr: Int64): CString
-foreign func qNetworkReplyStatusCode(ptr: Int64): Int32
-foreign func qNetworkReplyHeader(ptr: Int64, header: Int32): CString
-foreign func qNetworkReplyIsFinished(ptr: Int64): Bool
-foreign func qNetworkReplyIsRunning(ptr: Int64): Bool
-foreign func qNetworkReplyAbort(ptr: Int64): Unit
-foreign func qNetworkReplyClose(ptr: Int64): Unit
-foreign func qNetworkReplyDelete(ptr: Int64): Unit
-foreign func qNetworkReplyUrl(ptr: Int64): CString
-foreign func qNetworkReplyConnectFinished(ptr: Int64, callback: Int64Callback): Unit
-foreign func qNetworkReplyDisconnectCallbacks(ptr: Int64): Unit
 
+foreign func qNetworkReplyBytesAvailable(ptr: Int64): Int64
+
+foreign func qNetworkReplyError(ptr: Int64): Int32
+
+foreign func qNetworkReplyErrorString(ptr: Int64): CString
+
+foreign func qNetworkReplyStatusCode(ptr: Int64): Int32
+
+foreign func qNetworkReplyHeader(ptr: Int64, header: Int32): CString
+
+foreign func qNetworkReplyIsFinished(ptr: Int64): Bool
+
+foreign func qNetworkReplyIsRunning(ptr: Int64): Bool
+
+foreign func qNetworkReplyAbort(ptr: Int64): Unit
+
+foreign func qNetworkReplyClose(ptr: Int64): Unit
+
+foreign func qNetworkReplyDelete(ptr: Int64): Unit
+
+foreign func qNetworkReplyUrl(ptr: Int64): CString
+
+foreign func qNetworkReplyConnectFinished(ptr: Int64, callback: Int64Callback): Unit
+
+foreign func qNetworkReplyDisconnectCallbacks(ptr: Int64): Unit
 
 // ============================================================
 // 已知HTTP头常量
 // ============================================================
 public class KnownHeaders {
-    public static func contentType(): Int32 { 0 }
-    public static func contentLength(): Int32 { 1 }
-    public static func location(): Int32 { 2 }
-    public static func lastModified(): Int32 { 3 }
-    public static func cookie(): Int32 { 4 }
-    public static func setCookie(): Int32 { 5 }
-    public static func userAgent(): Int32 { 6 }
-    public static func referer(): Int32 { 7 }
-    public static func server(): Int32 { 8 }
+    public static func contentType(): Int32 {
+        0
+    }
+    public static func contentLength(): Int32 {
+        1
+    }
+    public static func location(): Int32 {
+        2
+    }
+    public static func lastModified(): Int32 {
+        3
+    }
+    public static func cookie(): Int32 {
+        4
+    }
+    public static func setCookie(): Int32 {
+        5
+    }
+    public static func userAgent(): Int32 {
+        6
+    }
+    public static func referer(): Int32 {
+        7
+    }
+    public static func server(): Int32 {
+        8
+    }
 }
-
 
 // ============================================================
 // QNetworkRequest - 网络请求
@@ -73,7 +115,7 @@ public class QNetworkRequest <: QtResource {
     /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(url: String) {
         unsafe {
-            withCString(url) { c => ptr = qNetworkRequestCreate(c) }
+            withCString(url) {c => ptr = qNetworkRequestCreate(c)}
             if (ptr == 0) {
                 throw CreateFailedException("QNetworkRequest create failed")
             }
@@ -84,7 +126,7 @@ public class QNetworkRequest <: QtResource {
     public func setUrl(url: String): Unit {
         checkValid()
         unsafe {
-            withCString(url) { c => qNetworkRequestSetUrl(ptr, c) }
+            withCString(url) {c => qNetworkRequestSetUrl(ptr, c)}
         }
     }
 
@@ -103,7 +145,7 @@ public class QNetworkRequest <: QtResource {
     public func setHeader(header: Int32, value: String): Unit {
         checkValid()
         unsafe {
-            withCString(value) { c => qNetworkRequestSetHeader(ptr, header, c) }
+            withCString(value) {c => qNetworkRequestSetHeader(ptr, header, c)}
         }
     }
 
@@ -136,10 +178,14 @@ public class QNetworkRequest <: QtResource {
         unsafe { qNetworkRequestSetTransferTimeout(ptr, timeoutMs) }
     }
 
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     /// 是否已关闭（资源已释放）
-    public func isClosed(): Bool { closed }
+    public func isClosed(): Bool {
+        closed
+    }
 
     /// 检查对象有效性（QNetworkRequest 非 QObject 值对象）
     public func isValid(): Bool {
@@ -154,7 +200,6 @@ public class QNetworkRequest <: QtResource {
         }
     }
 }
-
 
 // ============================================================
 // QNetworkReply - 网络响应
@@ -266,10 +311,14 @@ public class QNetworkReply <: QtResource {
         unsafe { qNetworkReplyConnectFinished(ptr, callback) }
     }
 
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     /// 是否已关闭（资源已释放）
-    public func isClosed(): Bool { closed }
+    public func isClosed(): Bool {
+        closed
+    }
 
     /// 检查对象有效性（未关闭且指针有效）
     public func isValid(): Bool {
@@ -295,7 +344,6 @@ public class QNetworkReply <: QtResource {
         }
     }
 }
-
 
 // ============================================================
 // QNetworkAccessManager - 网络访问管理器
@@ -387,10 +435,14 @@ public class QNetworkAccessManager <: QtResource {
         unsafe { qNetworkAccessManagerSetTransferTimeout(ptr, timeoutMs) }
     }
 
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     /// 是否已关闭（资源已释放）
-    public func isClosed(): Bool { closed }
+    public func isClosed(): Bool {
+        closed
+    }
 
     /// 检查对象有效性（未关闭且指针有效）
     public func isValid(): Bool {

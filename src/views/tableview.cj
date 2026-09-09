@@ -7,40 +7,72 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qTableViewCreate(): Int64
+
 foreign func qTableViewSetModel(ptr: Int64, modelPtr: Int64): Unit
+
 foreign func qTableViewSetItemDelegate(ptr: Int64, delegatePtr: Int64): Unit
+
 foreign func qTableViewSetColumnWidth(ptr: Int64, col: Int32, width: Int32): Unit
+
 foreign func qTableViewSetRowHeight(ptr: Int64, row: Int32, height: Int32): Unit
+
 foreign func qTableViewSetShowGrid(ptr: Int64, show: Int32): Unit
+
 foreign func qTableViewSetSelectionMode(ptr: Int64, mode: Int32): Unit
+
 foreign func qTableViewSetSelectionBehavior(ptr: Int64, behavior: Int32): Unit
+
 foreign func qTableViewSetSortingEnabled(ptr: Int64, enabled: Int32): Unit
+
 foreign func qTableViewResizeColumnsToContents(ptr: Int64): Unit
+
 foreign func qTableViewResizeRowsToContents(ptr: Int64): Unit
+
 foreign func qTableViewHorizontalHeaderSetStretchLastSection(ptr: Int64, stretch: Int32): Unit
+
 foreign func qTableViewDelete(ptr: Int64): Unit
 
 // 补充 API FFI（编辑/网格/布局/索引/信号）
 foreign func qTableViewSetEditTriggers(ptr: Int64, v: Int32): Unit
+
 foreign func qTableViewEditTriggers(ptr: Int64): Int32
+
 foreign func qTableViewIsShowGrid(ptr: Int64): Int32
+
 foreign func qTableViewSetGridStyle(ptr: Int64, v: Int32): Unit
+
 foreign func qTableViewGridStyle(ptr: Int64): Int32
+
 foreign func qTableViewSetCornerButtonEnabled(ptr: Int64, v: Int32): Unit
+
 foreign func qTableViewIsCornerButtonEnabled(ptr: Int64): Int32
+
 foreign func qTableViewIsSortingEnabled(ptr: Int64): Int32
+
 foreign func qTableViewResizeColumnToContents(ptr: Int64, col: Int32): Unit
+
 foreign func qTableViewSetHorizontalHeader(ptr: Int64, headerPtr: Int64): Unit
+
 foreign func qTableViewSetVerticalHeader(ptr: Int64, headerPtr: Int64): Unit
+
 foreign func qTableViewSetWordWrap(ptr: Int64, v: Int32): Unit
+
 foreign func qTableViewIsWordWrap(ptr: Int64): Int32
+
 foreign func qTableViewRowAt(ptr: Int64, y: Int32): Int32
+
 foreign func qTableViewColumnAt(ptr: Int64, x: Int32): Int32
+
 foreign func qTableViewSetCurrentIndex(ptr: Int64, indexPtr: Int64): Unit
+
 foreign func qTableViewCurrentIndex(ptr: Int64): Int64
+
 foreign func qTableViewConnectClicked(ptr: Int64, callback: Int64Callback): Unit
+
 foreign func qTableViewConnectDoubleClicked(ptr: Int64, callback: Int64Callback): Unit
+
 foreign func qTableViewConnectActivated(ptr: Int64, callback: Int64Callback): Unit
+
 foreign func qTableViewConnectPressed(ptr: Int64, callback: Int64Callback): Unit
 
 // ============================================================
@@ -104,14 +136,18 @@ public class QTableView <: QtResource {
     public func setEnabled(enabled: Bool): Unit {
         checkValid()
         unsafe {
-            qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
+            qWidgetSetEnabled(ptr, if (enabled) {
+                1
+            } else {
+                0
+            })
         }
     }
 
     public func setStyleSheet(style: String): Unit {
         checkValid()
         unsafe {
-            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
+            withCString(style) {c => qWidgetSetStyleSheet(ptr, c)}
         }
     }
 
@@ -156,7 +192,11 @@ public class QTableView <: QtResource {
     public func setShowGrid(show: Bool): Unit {
         checkValid()
         unsafe {
-            qTableViewSetShowGrid(ptr, if (show) { 1 } else { 0 })
+            qTableViewSetShowGrid(ptr, if (show) {
+                1
+            } else {
+                0
+            })
         }
     }
 
@@ -177,7 +217,11 @@ public class QTableView <: QtResource {
     public func setSortingEnabled(enabled: Bool): Unit {
         checkValid()
         unsafe {
-            qTableViewSetSortingEnabled(ptr, if (enabled) { 1 } else { 0 })
+            qTableViewSetSortingEnabled(ptr, if (enabled) {
+                1
+            } else {
+                0
+            })
         }
     }
 
@@ -198,7 +242,11 @@ public class QTableView <: QtResource {
     public func horizontalHeaderSetStretchLastSection(stretch: Bool): Unit {
         checkValid()
         unsafe {
-            qTableViewHorizontalHeaderSetStretchLastSection(ptr, if (stretch) { 1 } else { 0 })
+            qTableViewHorizontalHeaderSetStretchLastSection(ptr, if (stretch) {
+                1
+            } else {
+                0
+            })
         }
     }
 
@@ -240,7 +288,11 @@ public class QTableView <: QtResource {
     public func setCornerButtonEnabled(enabled: Bool): Unit {
         checkValid()
         unsafe {
-            qTableViewSetCornerButtonEnabled(ptr, if (enabled) { 1 } else { 0 })
+            qTableViewSetCornerButtonEnabled(ptr, if (enabled) {
+                1
+            } else {
+                0
+            })
         }
     }
 
@@ -282,7 +334,11 @@ public class QTableView <: QtResource {
     public func setWordWrap(wordWrap: Bool): Unit {
         checkValid()
         unsafe {
-            qTableViewSetWordWrap(ptr, if (wordWrap) { 1 } else { 0 })
+            qTableViewSetWordWrap(ptr, if (wordWrap) {
+                1
+            } else {
+                0
+            })
         }
     }
 
@@ -354,7 +410,9 @@ public class QTableView <: QtResource {
     }
 
     /// 是否已关闭（资源已释放）
-    public func isClosed(): Bool { closed }
+    public func isClosed(): Bool {
+        closed
+    }
 
     /// 检查对象有效性（未关闭且指针有效）
     public func isValid(): Bool {

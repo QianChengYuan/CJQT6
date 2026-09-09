@@ -7,11 +7,14 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qVideoWidgetCreate(): Int64
-foreign func qVideoWidgetSetAspectRatioMode(ptr: Int64, mode: Int32): Unit
-foreign func qVideoWidgetAspectRatioMode(ptr: Int64): Int32
-foreign func qVideoWidgetShow(ptr: Int64): Unit
-foreign func qVideoWidgetDelete(ptr: Int64): Unit
 
+foreign func qVideoWidgetSetAspectRatioMode(ptr: Int64, mode: Int32): Unit
+
+foreign func qVideoWidgetAspectRatioMode(ptr: Int64): Int32
+
+foreign func qVideoWidgetShow(ptr: Int64): Unit
+
+foreign func qVideoWidgetDelete(ptr: Int64): Unit
 
 // ============================================================
 // QVideoWidget - 视频显示控件

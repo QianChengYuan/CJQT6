@@ -7,19 +7,33 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qTcpServerCreate(): Int64
+
 foreign func qTcpServerDelete(ptr: Int64): Unit
+
 foreign func qTcpServerListen(ptr: Int64, address: CString, port: UInt16): Bool
+
 foreign func qTcpServerClose(ptr: Int64): Unit
+
 foreign func qTcpServerIsListening(ptr: Int64): Bool
+
 foreign func qTcpServerServerPort(ptr: Int64): UInt16
+
 foreign func qTcpServerServerAddress(ptr: Int64): CString
+
 foreign func qTcpServerErrorString(ptr: Int64): CString
+
 foreign func qTcpServerMaxPendingConnections(ptr: Int64): Int32
+
 foreign func qTcpServerSetMaxPendingConnections(ptr: Int64, count: Int32): Unit
+
 foreign func qTcpServerHasPendingConnections(ptr: Int64): Bool
+
 foreign func qTcpServerNextPendingConnection(ptr: Int64): Int64
+
 foreign func qTcpServerConnectNewConnection(ptr: Int64, callback: VoidCallback): Unit
+
 foreign func qTcpServerConnectNewConnectionId(ptr: Int64, id: Int64): Unit
+
 foreign func qTcpServerDisconnectCallbacks(ptr: Int64): Unit
 
 /// TCP服务器

@@ -5,21 +5,35 @@ package cjqt6.widgets
 // ============================================================
 
 foreign func qGraphicsOpacityEffectCreate(): Int64
+
 foreign func qGraphicsOpacityEffectSetOpacity(ptr: Int64, opacity: Float64): Unit
+
 foreign func qGraphicsOpacityEffectOpacity(ptr: Int64): Float64
+
 foreign func qGraphicsOpacityEffectSetEnabled(ptr: Int64, enabled: Bool): Unit
+
 foreign func qGraphicsOpacityEffectDelete(ptr: Int64): Unit
 
 foreign func qGraphicsDropShadowEffectCreate(): Int64
+
 foreign func qGraphicsDropShadowEffectSetOffset(ptr: Int64, dx: Float64, dy: Float64): Unit
+
 foreign func qGraphicsDropShadowEffectSetBlurRadius(ptr: Int64, radius: Float64): Unit
+
 foreign func qGraphicsDropShadowEffectBlurRadius(ptr: Int64): Float64
+
 foreign func qGraphicsDropShadowEffectSetColor(ptr: Int64, r: Int32, g: Int32, b: Int32, a: Int32): Unit
+
 foreign func qGraphicsDropShadowEffectSetEnabled(ptr: Int64, enabled: Bool): Unit
+
 foreign func qGraphicsDropShadowEffectDelete(ptr: Int64): Unit
+
 foreign func qGraphicsDropShadowEffectXOffset(ptr: Int64): Float64
+
 foreign func qGraphicsDropShadowEffectSetXOffset(ptr: Int64, v: Float64): Unit
+
 foreign func qGraphicsDropShadowEffectYOffset(ptr: Int64): Float64
+
 foreign func qGraphicsDropShadowEffectSetYOffset(ptr: Int64, v: Float64): Unit
 
 /// 透明度特效，可调整控件的整体不透明度（0.0 全透明 - 1.0 不透明）

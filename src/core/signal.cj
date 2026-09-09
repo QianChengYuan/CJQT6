@@ -67,6 +67,7 @@ public const SIGNAL_CURRENT_INDEX_CHANGED: String = "currentIndexChanged"
 // ============================================================
 
 foreign func qWidgetConnectDestroyed(ptr: Int64, callback: VoidCallback): Unit
+
 foreign func qWidgetDisconnectDestroyed(ptr: Int64): Unit
 
 // ============================================================
@@ -74,11 +75,15 @@ foreign func qWidgetDisconnectDestroyed(ptr: Int64): Unit
 // ============================================================
 
 foreign func qButtonConnectClicked(ptr: Int64, callback: VoidCallback): Unit
+
 foreign func qButtonDisconnectClicked(ptr: Int64): Unit
 // P1：按钮扩展信号断开（native 侧已实现真正的 QObject::disconnect）
 foreign func qButtonDisconnectPressed(ptr: Int64): Unit
+
 foreign func qButtonDisconnectReleased(ptr: Int64): Unit
+
 foreign func qButtonDisconnectToggled(ptr: Int64): Unit
+
 foreign func qButtonDisconnectClickedChecked(ptr: Int64): Unit
 
 // ============================================================
@@ -86,10 +91,13 @@ foreign func qButtonDisconnectClickedChecked(ptr: Int64): Unit
 // ============================================================
 
 foreign func qToolButtonConnectClicked(ptr: Int64, callback: VoidCallback): Unit
+
 foreign func qToolButtonDisconnectClicked(ptr: Int64): Unit
 // P1：工具按钮扩展信号断开
 foreign func qToolButtonDisconnectPressed(ptr: Int64): Unit
+
 foreign func qToolButtonDisconnectReleased(ptr: Int64): Unit
+
 foreign func qToolButtonDisconnectClickedChecked(ptr: Int64): Unit
 
 // ============================================================
@@ -97,6 +105,7 @@ foreign func qToolButtonDisconnectClickedChecked(ptr: Int64): Unit
 // ============================================================
 
 foreign func qSliderConnectValueChanged(ptr: Int64, callback: Int32Callback): Unit
+
 foreign func qSliderDisconnectValueChanged(ptr: Int64): Unit
 
 // ============================================================
@@ -104,6 +113,7 @@ foreign func qSliderDisconnectValueChanged(ptr: Int64): Unit
 // ============================================================
 
 foreign func qSliderConnectSliderMoved(ptr: Int64, callback: Int32Callback): Unit
+
 foreign func qSliderDisconnectSliderMoved(ptr: Int64): Unit
 
 // ============================================================
@@ -111,6 +121,7 @@ foreign func qSliderDisconnectSliderMoved(ptr: Int64): Unit
 // ============================================================
 
 foreign func qSpinBoxConnectValueChanged(ptr: Int64, callback: Int32Callback): Unit
+
 foreign func qSpinBoxDisconnectValueChanged(ptr: Int64): Unit
 
 // ============================================================
@@ -118,6 +129,7 @@ foreign func qSpinBoxDisconnectValueChanged(ptr: Int64): Unit
 // ============================================================
 
 foreign func qDoubleSpinBoxConnectValueChanged(ptr: Int64, callback: Float64Callback): Unit
+
 foreign func qDoubleSpinBoxDisconnectValueChanged(ptr: Int64): Unit
 
 // ============================================================
@@ -125,6 +137,7 @@ foreign func qDoubleSpinBoxDisconnectValueChanged(ptr: Int64): Unit
 // ============================================================
 
 foreign func qDialConnectValueChanged(ptr: Int64, callback: Int32Callback): Unit
+
 foreign func qDialDisconnectValueChanged(ptr: Int64): Unit
 
 // ============================================================
@@ -132,6 +145,7 @@ foreign func qDialDisconnectValueChanged(ptr: Int64): Unit
 // ============================================================
 
 foreign func qCheckBoxConnectStateChanged(ptr: Int64, callback: Int32Callback): Unit
+
 foreign func qCheckBoxDisconnectStateChanged(ptr: Int64): Unit
 
 // ============================================================
@@ -139,6 +153,7 @@ foreign func qCheckBoxDisconnectStateChanged(ptr: Int64): Unit
 // ============================================================
 
 foreign func qRadioButtonConnectToggled(ptr: Int64, callback: Int32Callback): Unit
+
 foreign func qRadioButtonDisconnectToggled(ptr: Int64): Unit
 
 // ============================================================
@@ -146,6 +161,7 @@ foreign func qRadioButtonDisconnectToggled(ptr: Int64): Unit
 // ============================================================
 
 foreign func qComboBoxConnectCurrentIndexChanged(ptr: Int64, callback: Int32Callback): Unit
+
 foreign func qComboBoxDisconnectCurrentIndexChanged(ptr: Int64): Unit
 
 // ============================================================
@@ -153,6 +169,7 @@ foreign func qComboBoxDisconnectCurrentIndexChanged(ptr: Int64): Unit
 // ============================================================
 
 foreign func qComboBoxConnectCurrentTextChanged(ptr: Int64, callback: CStringCallback): Unit
+
 foreign func qComboBoxDisconnectCurrentTextChanged(ptr: Int64): Unit
 
 // ============================================================
@@ -160,6 +177,7 @@ foreign func qComboBoxDisconnectCurrentTextChanged(ptr: Int64): Unit
 // ============================================================
 
 foreign func qLineEditConnectTextChanged(ptr: Int64, callback: CStringCallback): Unit
+
 foreign func qLineEditDisconnectTextChanged(ptr: Int64): Unit
 
 // ============================================================
@@ -167,6 +185,7 @@ foreign func qLineEditDisconnectTextChanged(ptr: Int64): Unit
 // ============================================================
 
 foreign func qLineEditConnectReturnPressed(ptr: Int64, callback: VoidCallback): Unit
+
 foreign func qLineEditDisconnectReturnPressed(ptr: Int64): Unit
 
 // ============================================================
@@ -174,6 +193,7 @@ foreign func qLineEditDisconnectReturnPressed(ptr: Int64): Unit
 // ============================================================
 
 foreign func qLineEditConnectEditingFinished(ptr: Int64, callback: VoidCallback): Unit
+
 foreign func qLineEditDisconnectEditingFinished(ptr: Int64): Unit
 
 // ============================================================
@@ -181,6 +201,7 @@ foreign func qLineEditDisconnectEditingFinished(ptr: Int64): Unit
 // ============================================================
 
 foreign func qTimerConnectTimeout(ptr: Int64, callback: VoidCallback): Unit
+
 foreign func qTimerDisconnectTimeout(ptr: Int64): Unit
 
 // ============================================================
@@ -188,6 +209,7 @@ foreign func qTimerDisconnectTimeout(ptr: Int64): Unit
 // ============================================================
 
 foreign func qActionConnectTriggered(ptr: Int64, callback: VoidCallback): Unit
+
 foreign func qActionDisconnectTriggered(ptr: Int64): Unit
 
 // ============================================================
@@ -201,10 +223,12 @@ foreign func qSetCallbackDispatcher(disp: CFunc<(Int64) -> Unit>): Unit
 
 // 以下两个供同包 cjqt6.core 内的 timer.cj / widget.cj 使用
 foreign func qTimerConnectTimeoutId(ptr: Int64, id: Int64): Unit
+
 foreign func qWidgetConnectDestroyedId(ptr: Int64, id: Int64): Unit
 
 // QWidget close 事件（事件过滤器实现）
 foreign func qWidgetConnectCloseId(ptr: Int64, id: Int64): Unit
+
 foreign func qWidgetDisconnectClose(ptr: Int64): Unit
 
 // ============================================================
@@ -235,12 +259,12 @@ public const WIDGET_TYPE_ACTION: String = "action"
 public class SignalConnection {
     private var ptr: Int64 = 0
     private var signalType: String = ""
-    private var widgetType: String = ""  // 新增：控件类型，用于正确断开信号
+    private var widgetType: String = "" // 新增：控件类型，用于正确断开信号
     private var connected: Bool = false
-    private var callbackId: Int64 = 0     // P1c：捕获路径的注册表 id（0 表示非捕获路径）
-    
+    private var callbackId: Int64 = 0 // P1c：捕获路径的注册表 id（0 表示非捕获路径）
+
     private init() {}
-    
+
     /// 创建连接句柄
     public static func create(ptr: Int64, signalType: String): SignalConnection {
         let conn = SignalConnection()
@@ -249,7 +273,7 @@ public class SignalConnection {
         conn.connected = true
         return conn
     }
-    
+
     /// 创建连接句柄（带控件类型）
     public static func createWithWidgetType(ptr: Int64, signalType: String, widgetType: String): SignalConnection {
         let conn = SignalConnection()
@@ -270,7 +294,7 @@ public class SignalConnection {
         conn.connected = true
         return conn
     }
-    
+
     /// 断开连接
     public func disconnect(): Unit {
         if (connected && ptr != 0) {
@@ -364,17 +388,17 @@ public class SignalConnection {
             }
         }
     }
-    
+
     /// 是否已连接
     public func isConnected(): Bool {
         return connected
     }
-    
+
     /// 获取对象指针
     public func getPtr(): Int64 {
         return ptr
     }
-    
+
     /// 获取信号类型
     public func getSignalType(): String {
         return signalType

@@ -7,42 +7,76 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qTreeViewCreate(): Int64
+
 foreign func qTreeViewSetModel(ptr: Int64, modelPtr: Int64): Unit
+
 foreign func qTreeViewSetItemDelegate(ptr: Int64, delegatePtr: Int64): Unit
+
 foreign func qTreeViewExpandAll(ptr: Int64): Unit
+
 foreign func qTreeViewCollapseAll(ptr: Int64): Unit
+
 foreign func qTreeViewSetSelectionMode(ptr: Int64, mode: Int32): Unit
+
 foreign func qTreeViewSetHeaderHidden(ptr: Int64, hidden: Int32): Unit
+
 foreign func qTreeViewDelete(ptr: Int64): Unit
 
 // 补充 API FFI（编辑/动画/展开/索引/信号）
 foreign func qTreeViewSetEditTriggers(ptr: Int64, v: Int32): Unit
+
 foreign func qTreeViewEditTriggers(ptr: Int64): Int32
+
 foreign func qTreeViewIsSortingEnabled(ptr: Int64): Int32
+
 foreign func qTreeViewSetAnimated(ptr: Int64, v: Int32): Unit
+
 foreign func qTreeViewIsAnimated(ptr: Int64): Int32
+
 foreign func qTreeViewIsHeaderHidden(ptr: Int64): Int32
+
 foreign func qTreeViewSetUniformRowHeights(ptr: Int64, v: Int32): Unit
+
 foreign func qTreeViewUniformRowHeights(ptr: Int64): Int32
+
 foreign func qTreeViewSetItemsExpandable(ptr: Int64, v: Int32): Unit
+
 foreign func qTreeViewItemsExpandable(ptr: Int64): Int32
+
 foreign func qTreeViewSetRootIsDecorated(ptr: Int64, v: Int32): Unit
+
 foreign func qTreeViewRootIsDecorated(ptr: Int64): Int32
+
 foreign func qTreeViewSetExpandsOnDoubleClick(ptr: Int64, v: Int32): Unit
+
 foreign func qTreeViewExpandsOnDoubleClick(ptr: Int64): Int32
+
 foreign func qTreeViewExpand(ptr: Int64, indexPtr: Int64): Unit
+
 foreign func qTreeViewCollapse(ptr: Int64, indexPtr: Int64): Unit
+
 foreign func qTreeViewIsExpanded(ptr: Int64, indexPtr: Int64): Int32
+
 foreign func qTreeViewSetColumnWidth(ptr: Int64, col: Int32, width: Int32): Unit
+
 foreign func qTreeViewSetHeader(ptr: Int64, headerPtr: Int64): Unit
+
 foreign func qTreeViewSetCurrentIndex(ptr: Int64, indexPtr: Int64): Unit
+
 foreign func qTreeViewCurrentIndex(ptr: Int64): Int64
+
 foreign func qTreeViewSetRootIndex(ptr: Int64, indexPtr: Int64): Unit
+
 foreign func qTreeViewRootIndex(ptr: Int64): Int64
+
 foreign func qTreeViewConnectClicked(ptr: Int64, callback: Int64Callback): Unit
+
 foreign func qTreeViewConnectDoubleClicked(ptr: Int64, callback: Int64Callback): Unit
+
 foreign func qTreeViewConnectExpanded(ptr: Int64, callback: Int64Callback): Unit
+
 foreign func qTreeViewConnectCollapsed(ptr: Int64, callback: Int64Callback): Unit
+
 foreign func qTreeViewConnectActivated(ptr: Int64, callback: Int64Callback): Unit
 
 // ============================================================
@@ -97,14 +131,18 @@ public class QTreeView <: QtResource {
     public func setEnabled(enabled: Bool): Unit {
         checkValid()
         unsafe {
-            qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
+            qWidgetSetEnabled(ptr, if (enabled) {
+                1
+            } else {
+                0
+            })
         }
     }
 
     public func setStyleSheet(style: String): Unit {
         checkValid()
         unsafe {
-            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
+            withCString(style) {c => qWidgetSetStyleSheet(ptr, c)}
         }
     }
 
@@ -147,7 +185,11 @@ public class QTreeView <: QtResource {
     public func setHeaderHidden(hidden: Bool): Unit {
         checkValid()
         unsafe {
-            qTreeViewSetHeaderHidden(ptr, if (hidden) { 1 } else { 0 })
+            qTreeViewSetHeaderHidden(ptr, if (hidden) {
+                1
+            } else {
+                0
+            })
         }
     }
 
@@ -175,7 +217,11 @@ public class QTreeView <: QtResource {
     public func setAnimated(animated: Bool): Unit {
         checkValid()
         unsafe {
-            qTreeViewSetAnimated(ptr, if (animated) { 1 } else { 0 })
+            qTreeViewSetAnimated(ptr, if (animated) {
+                1
+            } else {
+                0
+            })
         }
     }
 
@@ -196,7 +242,11 @@ public class QTreeView <: QtResource {
     public func setUniformRowHeights(uniform: Bool): Unit {
         checkValid()
         unsafe {
-            qTreeViewSetUniformRowHeights(ptr, if (uniform) { 1 } else { 0 })
+            qTreeViewSetUniformRowHeights(ptr, if (uniform) {
+                1
+            } else {
+                0
+            })
         }
     }
 
@@ -210,7 +260,11 @@ public class QTreeView <: QtResource {
     public func setItemsExpandable(expandable: Bool): Unit {
         checkValid()
         unsafe {
-            qTreeViewSetItemsExpandable(ptr, if (expandable) { 1 } else { 0 })
+            qTreeViewSetItemsExpandable(ptr, if (expandable) {
+                1
+            } else {
+                0
+            })
         }
     }
 
@@ -224,7 +278,11 @@ public class QTreeView <: QtResource {
     public func setRootIsDecorated(decorated: Bool): Unit {
         checkValid()
         unsafe {
-            qTreeViewSetRootIsDecorated(ptr, if (decorated) { 1 } else { 0 })
+            qTreeViewSetRootIsDecorated(ptr, if (decorated) {
+                1
+            } else {
+                0
+            })
         }
     }
 
@@ -238,7 +296,11 @@ public class QTreeView <: QtResource {
     public func setExpandsOnDoubleClick(expands: Bool): Unit {
         checkValid()
         unsafe {
-            qTreeViewSetExpandsOnDoubleClick(ptr, if (expands) { 1 } else { 0 })
+            qTreeViewSetExpandsOnDoubleClick(ptr, if (expands) {
+                1
+            } else {
+                0
+            })
         }
     }
 
@@ -352,7 +414,9 @@ public class QTreeView <: QtResource {
     }
 
     /// 是否已关闭（资源已释放）
-    public func isClosed(): Bool { closed }
+    public func isClosed(): Bool {
+        closed
+    }
 
     /// 检查对象有效性（未关闭且指针有效）
     public func isValid(): Bool {

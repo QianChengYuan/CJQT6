@@ -7,15 +7,25 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qBarCategoryAxisCreate(): Int64
+
 foreign func qBarCategoryAxisDelete(ptr: Int64): Unit
+
 foreign func qBarCategoryAxisAppend(ptr: Int64, category: CString): Unit
+
 foreign func qBarCategoryAxisRemove(ptr: Int64, category: CString): Unit
+
 foreign func qBarCategoryAxisInsert(ptr: Int64, index: Int32, category: CString): Unit
+
 foreign func qBarCategoryAxisReplace(ptr: Int64, oldCat: CString, newCat: CString): Unit
+
 foreign func qBarCategoryAxisClear(ptr: Int64): Unit
+
 foreign func qBarCategoryAxisCount(ptr: Int64): Int32
+
 foreign func qBarCategoryAxisSetMin(ptr: Int64, minCat: CString): Unit
+
 foreign func qBarCategoryAxisSetMax(ptr: Int64, maxCat: CString): Unit
+
 foreign func qBarCategoryAxisSetRange(ptr: Int64, minCat: CString, maxCat: CString): Unit
 
 // ============================================================
@@ -59,7 +69,7 @@ public class QBarCategoryAxis {
     public func append(category: String): Unit {
         checkValid()
         unsafe {
-            withCString(category) { c => qBarCategoryAxisAppend(ptr, c) }
+            withCString(category) {c => qBarCategoryAxisAppend(ptr, c)}
         }
     }
 
@@ -67,7 +77,7 @@ public class QBarCategoryAxis {
     public func remove(category: String): Unit {
         checkValid()
         unsafe {
-            withCString(category) { c => qBarCategoryAxisRemove(ptr, c) }
+            withCString(category) {c => qBarCategoryAxisRemove(ptr, c)}
         }
     }
 
@@ -75,7 +85,7 @@ public class QBarCategoryAxis {
     public func insert(index: Int32, category: String): Unit {
         checkValid()
         unsafe {
-            withCString(category) { c => qBarCategoryAxisInsert(ptr, index, c) }
+            withCString(category) {c => qBarCategoryAxisInsert(ptr, index, c)}
         }
     }
 
@@ -107,7 +117,7 @@ public class QBarCategoryAxis {
     public func setMin(minCategory: String): Unit {
         checkValid()
         unsafe {
-            withCString(minCategory) { c => qBarCategoryAxisSetMin(ptr, c) }
+            withCString(minCategory) {c => qBarCategoryAxisSetMin(ptr, c)}
         }
     }
 
@@ -115,7 +125,7 @@ public class QBarCategoryAxis {
     public func setMax(maxCategory: String): Unit {
         checkValid()
         unsafe {
-            withCString(maxCategory) { c => qBarCategoryAxisSetMax(ptr, c) }
+            withCString(maxCategory) {c => qBarCategoryAxisSetMax(ptr, c)}
         }
     }
 
@@ -131,7 +141,9 @@ public class QBarCategoryAxis {
         }
     }
 
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     /// 释放资源；已 addAxis 后由 chart 级联释放，勿主动调用
     public func close(): Unit {

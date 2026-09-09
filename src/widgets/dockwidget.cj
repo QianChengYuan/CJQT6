@@ -4,20 +4,35 @@ import cjqt6.core.*
 
 // QDockWidget - 停靠窗口
 foreign func qDockWidgetCreate(title: CString): Int64
+
 foreign func qDockWidgetDelete(ptr: Int64): Unit
+
 foreign func qDockWidgetSetWidget(ptr: Int64, widgetPtr: Int64): Unit
+
 foreign func qDockWidgetWidget(ptr: Int64): Int64
+
 foreign func qDockWidgetSetWindowTitle(ptr: Int64, title: CString): Unit
+
 foreign func qDockWidgetSetAllowedAreas(ptr: Int64, areas: Int32): Unit
+
 foreign func qDockWidgetSetFeatures(ptr: Int64, features: Int32): Unit
+
 foreign func qDockWidgetSetFloating(ptr: Int64, floating: Int32): Unit
+
 foreign func qDockWidgetIsFloating(ptr: Int64): Int32
+
 foreign func qDockWidgetFeatures(ptr: Int64): Int32
+
 foreign func qDockWidgetAllowedAreas(ptr: Int64): Int32
+
 foreign func qDockWidgetSetVisible(ptr: Int64, visible: Int32): Unit
+
 foreign func qDockWidgetToggleViewAction(ptr: Int64): Int64
+
 foreign func qDockWidgetConnectTopLevelChanged(ptr: Int64, callback: BoolCallback): Unit
+
 foreign func qDockWidgetConnectVisibilityChanged(ptr: Int64, callback: BoolCallback): Unit
+
 foreign func qDockWidgetConnectDockLocationChanged(ptr: Int64, callback: Int32Callback): Unit
 
 // DockWidgetArea
@@ -105,7 +120,11 @@ public class QDockWidget {
 
     public func setFloating(floating: Bool): Unit {
         unsafe {
-            qDockWidgetSetFloating(ptr, if (floating) { 1 } else { 0 })
+            qDockWidgetSetFloating(ptr, if (floating) {
+                1
+            } else {
+                0
+            })
         }
     }
 
@@ -132,7 +151,11 @@ public class QDockWidget {
     /// 设置可见性
     public func setVisible(visible: Bool): Unit {
         unsafe {
-            qDockWidgetSetVisible(ptr, if (visible) { 1 } else { 0 })
+            qDockWidgetSetVisible(ptr, if (visible) {
+                1
+            } else {
+                0
+            })
         }
     }
 
@@ -163,7 +186,7 @@ public class QDockWidget {
             qDockWidgetConnectDockLocationChanged(ptr, callback)
         }
     }
-    
+
     public func setLayout(layoutPtr: Int64): Unit {
         unsafe {
             qWidgetSetLayout(ptr, layoutPtr)

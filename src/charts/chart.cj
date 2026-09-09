@@ -7,14 +7,23 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qChartCreate(): Int64
+
 foreign func qChartDelete(ptr: Int64): Unit
+
 foreign func qChartAddSeries(ptr: Int64, seriesPtr: Int64): Unit
+
 foreign func qChartRemoveAllSeries(ptr: Int64): Unit
+
 foreign func qChartSetTitle(ptr: Int64, title: CString): Unit
+
 foreign func qChartSetTheme(ptr: Int64, theme: Int32): Unit
+
 foreign func qChartCreateDefaultAxes(ptr: Int64): Unit
+
 foreign func qChartSetAnimationOptions(ptr: Int64, options: Int32): Unit
+
 foreign func qChartAddAxis(ptr: Int64, axisPtr: Int64, alignment: Int32): Unit
+
 foreign func qChartLegend(ptr: Int64): Int64
 
 // ============================================================
@@ -22,14 +31,14 @@ foreign func qChartLegend(ptr: Int64): Int64
 // ============================================================
 
 public class ChartTheme {
-    public static let light: Int32 = 0          // ChartThemeLight
-    public static let blueCerulean: Int32 = 1   // ChartThemeBlueCerulean
-    public static let dark: Int32 = 2           // ChartThemeDark
-    public static let brownSand: Int32 = 3      // ChartThemeBrownSand
-    public static let blueNcs: Int32 = 4        // ChartThemeBlueNcs
-    public static let highContrast: Int32 = 5   // ChartThemeHighContrast
-    public static let blueIcy: Int32 = 6        // ChartThemeBlueIcy
-    public static let qt: Int32 = 7             // ChartThemeQt
+    public static let light: Int32 = 0 // ChartThemeLight
+    public static let blueCerulean: Int32 = 1 // ChartThemeBlueCerulean
+    public static let dark: Int32 = 2 // ChartThemeDark
+    public static let brownSand: Int32 = 3 // ChartThemeBrownSand
+    public static let blueNcs: Int32 = 4 // ChartThemeBlueNcs
+    public static let highContrast: Int32 = 5 // ChartThemeHighContrast
+    public static let blueIcy: Int32 = 6 // ChartThemeBlueIcy
+    public static let qt: Int32 = 7 // ChartThemeQt
 }
 
 // ============================================================
@@ -37,10 +46,10 @@ public class ChartTheme {
 // ============================================================
 
 public class ChartAnimation {
-    public static let none: Int32 = 0               // NoAnimation
-    public static let gridAxis: Int32 = 1           // GridAxisAnimations
-    public static let series: Int32 = 2             // SeriesAnimations
-    public static let all: Int32 = 3                // AllAnimations
+    public static let none: Int32 = 0 // NoAnimation
+    public static let gridAxis: Int32 = 1 // GridAxisAnimations
+    public static let series: Int32 = 2 // SeriesAnimations
+    public static let all: Int32 = 3 // AllAnimations
 }
 
 // ============================================================
@@ -48,12 +57,12 @@ public class ChartAnimation {
 // ============================================================
 
 public class AxisAlignment {
-    public static let left: Int32 = 0x0001      // AlignLeft
-    public static let right: Int32 = 0x0002     // AlignRight
-    public static let hCenter: Int32 = 0x0004   // AlignHCenter
-    public static let top: Int32 = 0x0020       // AlignTop
-    public static let bottom: Int32 = 0x0040    // AlignBottom
-    public static let vCenter: Int32 = 0x0080   // AlignVCenter
+    public static let left: Int32 = 0x0001 // AlignLeft
+    public static let right: Int32 = 0x0002 // AlignRight
+    public static let hCenter: Int32 = 0x0004 // AlignHCenter
+    public static let top: Int32 = 0x0020 // AlignTop
+    public static let bottom: Int32 = 0x0040 // AlignBottom
+    public static let vCenter: Int32 = 0x0080 // AlignVCenter
 }
 
 // ============================================================
@@ -184,7 +193,7 @@ public class QChart {
     public func setTitle(title: String): Unit {
         checkValid()
         unsafe {
-            withCString(title) { c => qChartSetTitle(ptr, c) }
+            withCString(title) {c => qChartSetTitle(ptr, c)}
         }
     }
 
@@ -249,7 +258,9 @@ public class QChart {
         }
     }
 
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     /// 释放资源；已挂载到 QChartView 时由视图级联释放，勿主动调用
     public func close(): Unit {

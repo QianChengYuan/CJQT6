@@ -8,23 +8,23 @@ import std.collection.{ArrayList, HashMap}
 public class ContainerConfig {
     /// 是否启用日志输出
     public let logEnabled: Bool
-    
+
     /// 关闭容器时是否自动释放所有管理的控件
     public let autoReleaseOnClose: Bool
-    
+
     /// 默认构造函数
     /// logEnabled=false, autoReleaseOnClose=true
     public init() {
         this.logEnabled = false
         this.autoReleaseOnClose = true
     }
-    
+
     /// 自定义配置构造函数
     public init(logEnabled: Bool, autoReleaseOnClose: Bool) {
         this.logEnabled = logEnabled
         this.autoReleaseOnClose = autoReleaseOnClose
     }
-    
+
     /// 获取默认配置
     public static func defaultConfig(): ContainerConfig {
         return ContainerConfig()
@@ -36,23 +36,23 @@ public class ContainerConfig {
 public class ContainerStats {
     /// 总控件数量
     public let totalCount: Int32
-    
+
     /// 活跃控件数量（未释放）
     public let activeCount: Int32
-    
+
     /// 已释放控件数量
     public let releasedCount: Int32
-    
+
     /// 按类型统计的控件数量
     public let typeCounts: HashMap<String, Int32>
-    
+
     public init(totalCount: Int32, activeCount: Int32, releasedCount: Int32, typeCounts: HashMap<String, Int32>) {
         this.totalCount = totalCount
         this.activeCount = activeCount
         this.releasedCount = releasedCount
         this.typeCounts = typeCounts
     }
-    
+
     /// 转换为字符串表示
     public func toString(): String {
         return "ContainerStats(total=${totalCount}, active=${activeCount}, released=${releasedCount})"
@@ -80,16 +80,16 @@ public class ContainerStats {
 public class ResourceContainer <: QtResource {
     /// 控件列表
     private let widgets: ArrayList<QtResource>
-    
+
     /// 按类型分组的控件映射
     private let typeGroups: HashMap<String, ArrayList<QtResource>>
-    
+
     /// 容器是否已关闭
     private var closed: Bool
-    
+
     /// 容器配置
     private let config: ContainerConfig
-    
+
     /// 默认构造函数
     public init() {
         this.widgets = ArrayList<QtResource>()
@@ -97,7 +97,7 @@ public class ResourceContainer <: QtResource {
         this.closed = false
         this.config = ContainerConfig()
     }
-    
+
     /// 带配置的构造函数
     /// 
     /// 参数:
@@ -108,7 +108,7 @@ public class ResourceContainer <: QtResource {
         this.closed = false
         this.config = config
     }
-    
+
     /// 添加控件到容器
     /// 
     /// 将控件添加到管理列表，并按类型分组
@@ -124,7 +124,7 @@ public class ResourceContainer <: QtResource {
         if (this.closed) {
             throw ResourceDisposedException("Container already closed")
         }
-        
+
         // 检查控件是否已关闭
         if (widget.isClosed()) {
             if (this.config.logEnabled) {
@@ -132,20 +132,20 @@ public class ResourceContainer <: QtResource {
             }
             return this
         }
-        
+
         // 添加到控件列表
         this.widgets.add(widget)
-        
+
         // 按类型分组
         let typeName = getTypeName(widget)
         if (!this.typeGroups.contains(typeName)) {
             this.typeGroups[typeName] = ArrayList<QtResource>()
         }
         this.typeGroups[typeName].add(widget)
-        
+
         return this
     }
-    
+
     /// 批量添加控件
     /// 
     /// 遍历数组并逐个添加控件
@@ -161,7 +161,7 @@ public class ResourceContainer <: QtResource {
         }
         return this
     }
-    
+
     /// 从容器移除控件（不释放）
     /// 
     /// 将控件从管理列表移除，但不调用close()
@@ -175,15 +175,15 @@ public class ResourceContainer <: QtResource {
         if (this.closed) {
             return false
         }
-        
+
         let index = findWidgetIndex(widget)
         if (index < 0) {
             return false
         }
-        
+
         // 从主列表移除
         this.widgets.remove(at: index)
-        
+
         // 从类型分组移除
         let typeName = getTypeName(widget)
         if (this.typeGroups.contains(typeName)) {
@@ -193,10 +193,10 @@ public class ResourceContainer <: QtResource {
                 group.remove(at: groupIndex)
             }
         }
-        
+
         return true
     }
-    
+
     /// 释放所有控件
     /// 
     /// 遍历所有控件并调用close()
@@ -210,10 +210,10 @@ public class ResourceContainer <: QtResource {
         var success: Int32 = 0
         var failed: Int32 = 0
         var skipped: Int32 = 0
-        
+
         for (widget in this.widgets) {
             total += 1
-            
+
             if (widget.isClosed()) {
                 skipped += 1
             } else {
@@ -228,14 +228,14 @@ public class ResourceContainer <: QtResource {
                 }
             }
         }
-        
+
         // 清空所有数据结构
         this.widgets.clear()
         this.typeGroups.clear()
-        
+
         return ReleaseResult(total, success, failed, skipped, 0)
     }
-    
+
     /// 按类型释放控件
     /// 
     /// 只释放指定类型的控件
@@ -250,17 +250,17 @@ public class ResourceContainer <: QtResource {
         if (!this.typeGroups.contains(typeName)) {
             return ReleaseResult(0, 0, 0, 0, 0)
         }
-        
+
         let group = this.typeGroups[typeName]
         var total: Int32 = 0
         var success: Int32 = 0
         var failed: Int32 = 0
         var skipped: Int32 = 0
-        
+
         // 释放该类型的所有控件
         for (widget in group) {
             total += 1
-            
+
             if (widget.isClosed()) {
                 skipped += 1
             } else {
@@ -275,26 +275,26 @@ public class ResourceContainer <: QtResource {
                 }
             }
         }
-        
+
         // 从主列表中移除已释放的控件
         let widgetsToRemove = ArrayList<QtResource>()
         for (widget in group) {
             widgetsToRemove.add(widget)
         }
-        
+
         for (widget in widgetsToRemove) {
             let index = findWidgetIndex(widget)
             if (index >= 0) {
                 this.widgets.remove(at: index)
             }
         }
-        
+
         // 移除类型分组
         this.typeGroups.remove(typeName)
-        
+
         return ReleaseResult(total, success, failed, skipped, 0)
     }
-    
+
     /// 获取容器统计信息
     /// 
     /// 统计总控件数、活跃控件数、已释放控件数
@@ -305,7 +305,7 @@ public class ResourceContainer <: QtResource {
     public func getStats(): ContainerStats {
         let typeCounts = HashMap<String, Int32>()
         var activeCount: Int32 = 0
-        
+
         // 统计各类型的活跃控件数
         for ((typeName, group) in this.typeGroups) {
             var count: Int32 = 0
@@ -319,17 +319,17 @@ public class ResourceContainer <: QtResource {
                 typeCounts[typeName] = count
             }
         }
-        
+
         let releasedCount = Int32(this.widgets.size) - activeCount
-        
+
         return ContainerStats(Int32(this.widgets.size), activeCount, releasedCount, typeCounts)
     }
-    
+
     /// 检查容器是否已关闭
     public func isClosed(): Bool {
         return this.closed
     }
-    
+
     /// 关闭容器
     /// 
     /// 根据配置决定是否自动释放所有控件
@@ -339,28 +339,28 @@ public class ResourceContainer <: QtResource {
         if (this.closed) {
             return
         }
-        
+
         if (this.config.autoReleaseOnClose) {
             this.releaseAll()
         }
-        
+
         this.closed = true
     }
-    
+
     /// 获取底层指针
     /// 
     /// 注意：ResourceContainer不是Qt对象，返回0
     public func getPtr(): Int64 {
         return 0
     }
-    
+
     /// 检查容器是否有效
     /// 
     /// 返回: true表示未关闭，false表示已关闭
     public func isValid(): Bool {
         return !this.closed
     }
-    
+
     /// 检查有效性，无效时抛出异常
     /// 
     /// 异常:
@@ -370,7 +370,7 @@ public class ResourceContainer <: QtResource {
             throw ResourceDisposedException("Container already closed")
         }
     }
-    
+
     /// 获取控件的类型名称
     /// 
     /// 注意：当前返回固定值"QtResource"
@@ -378,7 +378,7 @@ public class ResourceContainer <: QtResource {
     private func getTypeName(_: QtResource): String {
         return "QtResource"
     }
-    
+
     /// 查找控件在列表中的索引
     /// 
     /// 参数:
@@ -393,7 +393,7 @@ public class ResourceContainer <: QtResource {
         }
         return -1
     }
-    
+
     /// 查找控件在类型分组中的索引
     /// 
     /// 参数:

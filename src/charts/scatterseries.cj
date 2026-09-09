@@ -7,13 +7,21 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qScatterSeriesCreate(): Int64
+
 foreign func qScatterSeriesDelete(ptr: Int64): Unit
+
 foreign func qScatterSeriesAppend(ptr: Int64, x: Float64, y: Float64): Unit
+
 foreign func qScatterSeriesSetName(ptr: Int64, name: CString): Unit
+
 foreign func qScatterSeriesCount(ptr: Int64): Int32
+
 foreign func qScatterSeriesSetMarkerShape(ptr: Int64, shape: Int32): Unit
+
 foreign func qScatterSeriesSetMarkerSize(ptr: Int64, size: Float64): Unit
+
 foreign func qScatterSeriesSetColor(ptr: Int64, r: Int32, g: Int32, b: Int32): Unit
+
 foreign func qScatterSeriesSetBorderColor(ptr: Int64, r: Int32, g: Int32, b: Int32): Unit
 
 // ============================================================
@@ -21,12 +29,12 @@ foreign func qScatterSeriesSetBorderColor(ptr: Int64, r: Int32, g: Int32, b: Int
 // ============================================================
 
 public class ScatterMarkerShape {
-    public static let circle: Int32 = 0           // MarkerShapeCircle
-    public static let rectangle: Int32 = 1        // MarkerShapeRectangle
+    public static let circle: Int32 = 0 // MarkerShapeCircle
+    public static let rectangle: Int32 = 1 // MarkerShapeRectangle
     public static let rotatedRectangle: Int32 = 2 // MarkerShapeRotatedRectangle
-    public static let triangle: Int32 = 3         // MarkerShapeTriangle
-    public static let star: Int32 = 4             // MarkerShapeStar
-    public static let pentagon: Int32 = 5         // MarkerShapePentagon
+    public static let triangle: Int32 = 3 // MarkerShapeTriangle
+    public static let star: Int32 = 4 // MarkerShapeStar
+    public static let pentagon: Int32 = 5 // MarkerShapePentagon
 }
 
 // ============================================================
@@ -79,7 +87,7 @@ public class QScatterSeries {
     public func setName(name: String): Unit {
         checkValid()
         unsafe {
-            withCString(name) { c => qScatterSeriesSetName(ptr, c) }
+            withCString(name) {c => qScatterSeriesSetName(ptr, c)}
         }
     }
 
@@ -113,7 +121,9 @@ public class QScatterSeries {
         unsafe { qScatterSeriesSetBorderColor(ptr, r, g, b) }
     }
 
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     /// 释放资源；已 addSeries 后由 chart 级联释放，勿主动调用
     public func close(): Unit {

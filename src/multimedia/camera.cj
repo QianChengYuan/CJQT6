@@ -7,24 +7,36 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qMediaDevicesDefaultVideoInput(): Int64
+
 foreign func qMediaDevicesVideoInputCount(): Int32
+
 foreign func qCameraDeviceDescription(ptr: Int64): CString
+
 foreign func qCameraDeviceId(ptr: Int64): CString
+
 foreign func qCameraDeviceDelete(ptr: Int64): Unit
 
 foreign func qCameraCreate(devicePtr: Int64): Int64
+
 foreign func qCameraStart(ptr: Int64): Unit
+
 foreign func qCameraStop(ptr: Int64): Unit
+
 foreign func qCameraIsActive(ptr: Int64): Int32
+
 foreign func qCameraErrorCode(ptr: Int64): Int32
+
 foreign func qCameraErrorString(ptr: Int64): CString
+
 foreign func qCameraDelete(ptr: Int64): Unit
 
 foreign func qMediaCaptureSessionCreate(): Int64
-foreign func qMediaCaptureSessionSetCamera(ptr: Int64, cameraPtr: Int64): Unit
-foreign func qMediaCaptureSessionSetVideoOutput(ptr: Int64, outputPtr: Int64): Unit
-foreign func qMediaCaptureSessionDelete(ptr: Int64): Unit
 
+foreign func qMediaCaptureSessionSetCamera(ptr: Int64, cameraPtr: Int64): Unit
+
+foreign func qMediaCaptureSessionSetVideoOutput(ptr: Int64, outputPtr: Int64): Unit
+
+foreign func qMediaCaptureSessionDelete(ptr: Int64): Unit
 
 // ============================================================
 // QCameraDevice - 摄像头设备描述
@@ -38,7 +50,9 @@ public class QCameraDevice {
 
     /// 获取设备描述
     public func description(): String {
-        if (ptr == 0) { return "" }
+        if (ptr == 0) {
+            return ""
+        }
         unsafe {
             let cstr = qCameraDeviceDescription(ptr)
             let result = cstr.toString()
@@ -49,7 +63,9 @@ public class QCameraDevice {
 
     /// 获取设备ID
     public func id(): String {
-        if (ptr == 0) { return "" }
+        if (ptr == 0) {
+            return ""
+        }
         unsafe {
             let cstr = qCameraDeviceId(ptr)
             let result = cstr.toString()
@@ -59,7 +75,9 @@ public class QCameraDevice {
     }
 
     /// 释放设备描述
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     public func delete(): Unit {
         if (ptr != 0) {
@@ -68,7 +86,6 @@ public class QCameraDevice {
         }
     }
 }
-
 
 // ============================================================
 // QMediaDevices - 媒体设备信息（静态类）
@@ -85,7 +102,6 @@ public class QMediaDevices {
         unsafe { qMediaDevicesVideoInputCount() }
     }
 }
-
 
 // ============================================================
 // QCamera - 摄像头控制
@@ -160,7 +176,9 @@ public class QCamera {
     }
 
     /// 获取原生指针
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     /// 释放资源
     public func close(): Unit {
@@ -178,7 +196,6 @@ public class QCamera {
         }
     }
 }
-
 
 // ============================================================
 // QMediaCaptureSession - 媒体捕获会话
@@ -219,7 +236,9 @@ public class QMediaCaptureSession {
     }
 
     /// 获取原生指针
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     /// 释放资源
     public func close(): Unit {

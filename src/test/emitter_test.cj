@@ -15,21 +15,17 @@ var gIntValue: Int32 = 0
 var gDoubleValue: Float64 = 0.0
 var gStringValue: String = ""
 var gVoidCaptureCount: Int32 = 0
-
-private let gVoidCb: VoidCallback = { =>
-    gVoidCount += 1
+private let gVoidCb: VoidCallback = {
+    => gVoidCount += 1
 }
-
-private let gIntCb: Int32Callback = { v: Int32 =>
-    gIntValue = v
+private let gIntCb: Int32Callback = {
+    v: Int32 => gIntValue = v
 }
-
-private let gDoubleCb: Float64Callback = { v: Float64 =>
-    gDoubleValue = v
+private let gDoubleCb: Float64Callback = {
+    v: Float64 => gDoubleValue = v
 }
-
-private let gStringCb: CStringCallback = { s: CString =>
-    gStringValue = s.toString()
+private let gStringCb: CStringCallback = {
+    s: CString => gStringValue = s.toString()
 }
 
 // ---------------------------------------------------------------------
@@ -38,7 +34,6 @@ private let gStringCb: CStringCallback = { s: CString =>
 @Test
 class ConnectionTypeTests {
     @TestCase
-
     func testConstants() {
         @Expect(ConnectionType.Auto, 0)
         @Expect(ConnectionType.Direct, 1)
@@ -106,8 +101,8 @@ class SignalEmitterTests {
     func testVoidSignalCapture() {
         gVoidCaptureCount = 0
         let e = SignalEmitter()
-        let conn = e.setOnVoidCapture({ =>
-            gVoidCaptureCount += 1
+        let conn = e.setOnVoidCapture({
+            => gVoidCaptureCount += 1
         })
         @Expect(conn.isConnected(), true)
         e.emitVoid()

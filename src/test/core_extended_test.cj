@@ -8,7 +8,6 @@ import std.unittest.*
 // =====================================================================
 @Test
 class QApplicationBasicTests {
-
     @TestCase
     func testCreateAndDelete() {
         let app = QApplication()
@@ -20,7 +19,7 @@ class QApplicationBasicTests {
     func testDoubleDelete() {
         let app = QApplication()
         app.delete()
-        app.delete()  // 安全
+        app.delete() // 安全
         @Assert(true)
     }
 
@@ -112,7 +111,6 @@ class QApplicationBasicTests {
 // =====================================================================
 @Test
 class QLocaleTests {
-
     @TestCase
     func testCreateWithName() {
         let locale = QLocale("zh_CN")
@@ -154,7 +152,7 @@ class QLocaleTests {
     func testDoubleClose() {
         let locale = QLocale("en_US")
         locale.close()
-        locale.close()  // 安全
+        locale.close() // 安全
         @Assert(true)
     }
 }
@@ -383,7 +381,7 @@ class QFileWatcherTests {
     func testDoubleClose() {
         let watcher = QFileSystemWatcher()
         watcher.close()
-        watcher.close()  // 安全
+        watcher.close() // 安全
         @Expect(watcher.isClosed(), true)
     }
 }

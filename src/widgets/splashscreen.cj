@@ -5,14 +5,23 @@ import cjqt6.paint.*
 
 // QSplashScreen FFI
 foreign func qSplashScreenCreate(): Int64
+
 foreign func qSplashScreenCreateWithPixmap(pixmapPtr: Int64): Int64
+
 foreign func qSplashScreenShow(ptr: Int64): Unit
+
 foreign func qSplashScreenFinish(ptr: Int64, windowPtr: Int64): Unit
+
 foreign func qSplashScreenShowMessage(ptr: Int64, message: CString): Unit
+
 foreign func qSplashScreenSetPixmap(ptr: Int64, pixmapPtr: Int64): Unit
+
 foreign func qSplashScreenClearMessage(ptr: Int64): Unit
+
 foreign func qSplashScreenMessage(ptr: Int64): CString
+
 foreign func qSplashScreenShowMessageAlign(ptr: Int64, message: CString, alignment: Int32): Unit
+
 foreign func qSplashScreenDelete(ptr: Int64): Unit
 
 /// 启动画面
@@ -56,7 +65,7 @@ public class QSplashScreen <: QtResource {
     public func showMessage(message: String): Unit {
         checkValid()
         unsafe {
-            withCString(message) { c => qSplashScreenShowMessage(ptr, c) }
+            withCString(message) {c => qSplashScreenShowMessage(ptr, c)}
         }
     }
 
@@ -64,7 +73,7 @@ public class QSplashScreen <: QtResource {
     public func showMessage(message: String, alignment: Int32): Unit {
         checkValid()
         unsafe {
-            withCString(message) { c => qSplashScreenShowMessageAlign(ptr, c, alignment) }
+            withCString(message) {c => qSplashScreenShowMessageAlign(ptr, c, alignment)}
         }
     }
 
@@ -92,13 +101,17 @@ public class QSplashScreen <: QtResource {
 
     public func setEnabled(enabled: Bool): Unit {
         checkValid()
-        unsafe { qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 }) }
+        unsafe { qWidgetSetEnabled(ptr, if (enabled) {
+            1
+        } else {
+            0
+        }) }
     }
 
     public func setStyleSheet(style: String): Unit {
         checkValid()
         unsafe {
-            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
+            withCString(style) {c => qWidgetSetStyleSheet(ptr, c)}
         }
     }
 

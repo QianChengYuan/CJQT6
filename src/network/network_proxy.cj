@@ -7,34 +7,59 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qNetworkProxyCreate(): Int64
+
 foreign func qNetworkProxyCreateWithType(proxyType: Int32): Int64
+
 foreign func qNetworkProxyDelete(ptr: Int64): Unit
+
 foreign func qNetworkProxySetType(ptr: Int64, proxyType: Int32): Unit
+
 foreign func qNetworkProxyType(ptr: Int64): Int32
+
 foreign func qNetworkProxySetHostName(ptr: Int64, host: CString): Unit
+
 foreign func qNetworkProxyHostName(ptr: Int64): CString
+
 foreign func qNetworkProxySetPort(ptr: Int64, port: UInt16): Unit
+
 foreign func qNetworkProxyPort(ptr: Int64): UInt16
+
 foreign func qNetworkProxySetUser(ptr: Int64, user: CString): Unit
+
 foreign func qNetworkProxyUser(ptr: Int64): CString
+
 foreign func qNetworkProxySetPassword(ptr: Int64, pass: CString): Unit
+
 foreign func qNetworkProxyPassword(ptr: Int64): CString
+
 foreign func qNetworkProxySetApplicationProxy(host: CString, port: UInt16): Unit
 
 /// 代理类型（与 QNetworkProxy::ProxyType 枚举对应）
 public class ProxyType {
     /// 不使用代理
-    public static func noProxy(): Int32 { 0 }
+    public static func noProxy(): Int32 {
+        0
+    }
     /// 使用系统默认代理
-    public static func defaultProxy(): Int32 { 1 }
+    public static func defaultProxy(): Int32 {
+        1
+    }
     /// SOCKS5 代理
-    public static func socks5(): Int32 { 2 }
+    public static func socks5(): Int32 {
+        2
+    }
     /// HTTP 代理
-    public static func http(): Int32 { 3 }
+    public static func http(): Int32 {
+        3
+    }
     /// HTTP 缓存代理
-    public static func httpCaching(): Int32 { 4 }
+    public static func httpCaching(): Int32 {
+        4
+    }
     /// FTP 缓存代理
-    public static func ftpCaching(): Int32 { 5 }
+    public static func ftpCaching(): Int32 {
+        5
+    }
 }
 
 /// 网络代理配置，描述代理服务器的类型、主机、端口及认证信息
@@ -87,7 +112,7 @@ public class QNetworkProxy {
     public func setHostName(host: String): Unit {
         checkValid()
         unsafe {
-            withCString(host) { c => qNetworkProxySetHostName(ptr, c) }
+            withCString(host) {c => qNetworkProxySetHostName(ptr, c)}
         }
     }
 
@@ -118,7 +143,7 @@ public class QNetworkProxy {
     public func setUser(user: String): Unit {
         checkValid()
         unsafe {
-            withCString(user) { c => qNetworkProxySetUser(ptr, c) }
+            withCString(user) {c => qNetworkProxySetUser(ptr, c)}
         }
     }
 
@@ -137,7 +162,7 @@ public class QNetworkProxy {
     public func setPassword(pass: String): Unit {
         checkValid()
         unsafe {
-            withCString(pass) { c => qNetworkProxySetPassword(ptr, c) }
+            withCString(pass) {c => qNetworkProxySetPassword(ptr, c)}
         }
     }
 
@@ -155,12 +180,14 @@ public class QNetworkProxy {
     /// 设置为应用级代理（静态方法，影响所有网络请求）
     public static func setApplicationProxy(host: String, port: UInt16): Unit {
         unsafe {
-            withCString(host) { c => qNetworkProxySetApplicationProxy(c, port) }
+            withCString(host) {c => qNetworkProxySetApplicationProxy(c, port)}
         }
     }
 
     /// 获取底层指针
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     /// 释放资源
     public func close(): Unit {

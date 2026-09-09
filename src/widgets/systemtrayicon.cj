@@ -4,15 +4,25 @@ import cjqt6.core.*
 
 // QSystemTrayIcon - 系统托盘图标
 foreign func qSystemTrayIconCreate(parentPtr: Int64): Int64
+
 foreign func qSystemTrayIconDelete(ptr: Int64): Unit
+
 foreign func qSystemTrayIconSetIcon(ptr: Int64, iconPath: CString): Unit
+
 foreign func qSystemTrayIconSetToolTip(ptr: Int64, tip: CString): Unit
+
 foreign func qSystemTrayIconShow(ptr: Int64): Unit
+
 foreign func qSystemTrayIconHide(ptr: Int64): Unit
+
 foreign func qSystemTrayIconIsVisible(ptr: Int64): Bool
+
 foreign func qSystemTrayIconShowMessage(ptr: Int64, title: CString, message: CString, iconType: Int32, duration: Int32): Unit
+
 foreign func qSystemTrayIconSetContextMenu(ptr: Int64, menuPtr: Int64): Unit
+
 foreign func qSystemTrayIconConnectActivated(ptr: Int64, callback: Int32Callback): Unit
+
 foreign func qSystemTrayIconConnectMessageClicked(ptr: Int64, callback: VoidCallback): Unit
 
 /// 托盘消息图标类型
@@ -37,25 +47,31 @@ public class QSystemTrayIcon {
     /// 设置图标（从文件路径）
     public func setIcon(iconPath: String): Unit {
         unsafe {
-            withCString(iconPath) { c => qSystemTrayIconSetIcon(ptr, c) }
+            withCString(iconPath) {c => qSystemTrayIconSetIcon(ptr, c)}
         }
     }
 
     /// 设置工具提示
     public func setToolTip(tip: String): Unit {
         unsafe {
-            withCString(tip) { c => qSystemTrayIconSetToolTip(ptr, c) }
+            withCString(tip) {c => qSystemTrayIconSetToolTip(ptr, c)}
         }
     }
 
     /// 显示托盘图标
-    public func show(): Unit { unsafe { qSystemTrayIconShow(ptr) } }
+    public func show(): Unit {
+        unsafe { qSystemTrayIconShow(ptr) }
+    }
 
     /// 隐藏托盘图标
-    public func hide(): Unit { unsafe { qSystemTrayIconHide(ptr) } }
+    public func hide(): Unit {
+        unsafe { qSystemTrayIconHide(ptr) }
+    }
 
     /// 托盘图标是否可见
-    public func isVisible(): Bool { unsafe { return qSystemTrayIconIsVisible(ptr) } }
+    public func isVisible(): Bool {
+        unsafe { return qSystemTrayIconIsVisible(ptr) }
+    }
 
     /// 显示消息气泡
     /// title: 标题

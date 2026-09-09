@@ -66,63 +66,63 @@ foreign func qSliderDelete(ptr: Int64): Unit
 public class QSlider <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
-    
+
     public init() {
         unsafe {
             ptr = qSliderCreate()
         }
         trackObject(ptr)
     }
-    
+
     public func show(): Unit {
         checkValid()
         unsafe {
             qWidgetShow(ptr)
         }
     }
-    
+
     public func hide(): Unit {
         checkValid()
         unsafe {
             qWidgetHide(ptr)
         }
     }
-    
+
     public func resize(width: Int32, height: Int32): Unit {
         checkValid()
         unsafe {
             qWidgetResize(ptr, width, height)
         }
     }
-    
+
     public func setValue(value: Int32): Unit {
         checkValid()
         unsafe {
             qSliderSetValue(ptr, value)
         }
     }
-    
+
     public func value(): Int32 {
         checkValid()
         unsafe {
             return qSliderValue(ptr)
         }
     }
-    
+
     public func setRange(min: Int32, max: Int32): Unit {
         checkValid()
         unsafe {
             qSliderSetRange(ptr, min, max)
         }
     }
-    
+
     public func setOrientation(orientation: Int32): Unit {
         checkValid()
         unsafe {
             qSliderSetOrientation(ptr, orientation)
         }
     }
-    
+
     /// 设置单步步长
     public func setSingleStep(step: Int32): Unit {
         checkValid()
@@ -130,7 +130,7 @@ public class QSlider <: QtResource {
             qSliderSetSingleStep(ptr, step)
         }
     }
-    
+
     /// 获取单步步长
     public func singleStep(): Int32 {
         checkValid()
@@ -138,7 +138,7 @@ public class QSlider <: QtResource {
             return qSliderSingleStep(ptr)
         }
     }
-    
+
     /// 设置页步步长
     public func setPageStep(step: Int32): Unit {
         checkValid()
@@ -146,7 +146,7 @@ public class QSlider <: QtResource {
             qSliderSetPageStep(ptr, step)
         }
     }
-    
+
     /// 获取页步步长
     public func pageStep(): Int32 {
         checkValid()
@@ -154,7 +154,7 @@ public class QSlider <: QtResource {
             return qSliderPageStep(ptr)
         }
     }
-    
+
     /// 设置刻度位置
     public func setTickPosition(position: Int32): Unit {
         checkValid()
@@ -162,7 +162,7 @@ public class QSlider <: QtResource {
             qSliderSetTickPosition(ptr, position)
         }
     }
-    
+
     /// 获取刻度位置
     public func tickPosition(): Int32 {
         checkValid()
@@ -170,7 +170,7 @@ public class QSlider <: QtResource {
             return qSliderTickPosition(ptr)
         }
     }
-    
+
     /// 设置刻度间隔
     public func setTickInterval(interval: Int32): Unit {
         checkValid()
@@ -178,7 +178,7 @@ public class QSlider <: QtResource {
             qSliderSetTickInterval(ptr, interval)
         }
     }
-    
+
     /// 获取刻度间隔
     public func tickInterval(): Int32 {
         checkValid()
@@ -186,7 +186,7 @@ public class QSlider <: QtResource {
             return qSliderTickInterval(ptr)
         }
     }
-    
+
     /// 设置反向控制
     public func setInvertedControls(inverted: Bool): Unit {
         checkValid()
@@ -194,7 +194,7 @@ public class QSlider <: QtResource {
             qSliderSetInvertedControls(ptr, inverted)
         }
     }
-    
+
     /// 获取反向控制
     public func invertedControls(): Bool {
         checkValid()
@@ -202,7 +202,7 @@ public class QSlider <: QtResource {
             return qSliderInvertedControls(ptr)
         }
     }
-    
+
     /// 设置追踪模式（为true时拖动过程中实时触发valueChanged）
     public func setTracking(enable: Bool): Unit {
         checkValid()
@@ -210,7 +210,7 @@ public class QSlider <: QtResource {
             qSliderSetTracking(ptr, enable)
         }
     }
-    
+
     /// 是否启用追踪模式
     public func hasTracking(): Bool {
         checkValid()
@@ -218,15 +218,19 @@ public class QSlider <: QtResource {
             return qSliderHasTracking(ptr)
         }
     }
-    
+
     /// 设置反向外观（true: 最大值在底部/左侧，最小值在顶部/右侧）
     public func setInvertedAppearance(inverted: Bool): Unit {
         checkValid()
         unsafe {
-            qSliderSetInvertedAppearance(ptr, if (inverted) { 1 } else { 0 })
+            qSliderSetInvertedAppearance(ptr, if (inverted) {
+                1
+            } else {
+                0
+            })
         }
     }
-    
+
     /// 是否反向外观
     public func invertedAppearance(): Bool {
         checkValid()
@@ -234,15 +238,19 @@ public class QSlider <: QtResource {
             return qSliderInvertedAppearance(ptr) != 0
         }
     }
-    
+
     /// 设置启用/禁用
     public func setEnabled(enabled: Bool): Unit {
         checkValid()
         unsafe {
-            qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
+            qWidgetSetEnabled(ptr, if (enabled) {
+                1
+            } else {
+                0
+            })
         }
     }
-    
+
     /// 检查是否启用
     public func isEnabled(): Bool {
         checkValid()
@@ -250,15 +258,15 @@ public class QSlider <: QtResource {
             qWidgetIsEnabled(ptr) == 1
         }
     }
-    
+
     /// 设置样式表
     public func setStyleSheet(style: String): Unit {
         checkValid()
         unsafe {
-            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
+            withCString(style) {c => qWidgetSetStyleSheet(ptr, c)}
         }
     }
-    
+
     /// 设置最小尺寸
     public func setMinimumSize(minw: Int32, minh: Int32): Unit {
         checkValid()
@@ -266,7 +274,7 @@ public class QSlider <: QtResource {
             qWidgetSetMinimumSize(ptr, minw, minh)
         }
     }
-    
+
     /// 设置最大尺寸
     public func setMaximumSize(maxw: Int32, maxh: Int32): Unit {
         checkValid()
@@ -274,7 +282,7 @@ public class QSlider <: QtResource {
             qWidgetSetMaximumSize(ptr, maxw, maxh)
         }
     }
-    
+
     /// 设置值变化回调
     public func setOnValueChanged(callback: Int32Callback): Unit {
         checkValid()
@@ -282,7 +290,7 @@ public class QSlider <: QtResource {
             qSliderConnectValueChanged(ptr, callback)
         }
     }
-    
+
     /// 断开值变化信号
     public func disconnectValueChanged(): Unit {
         if (ptr != 0) {
@@ -291,7 +299,7 @@ public class QSlider <: QtResource {
             }
         }
     }
-    
+
     /// 设置滑块拖动回调（拖动过程中实时触发）
     public func setOnSliderMoved(callback: Int32Callback): Unit {
         checkValid()
@@ -299,7 +307,7 @@ public class QSlider <: QtResource {
             qSliderConnectSliderMoved(ptr, callback)
         }
     }
-    
+
     /// 断开滑块拖动信号
     public func disconnectSliderMoved(): Unit {
         if (ptr != 0) {
@@ -308,13 +316,13 @@ public class QSlider <: QtResource {
             }
         }
     }
-    
+
     /// 断开该滑块的全部信号（valueChanged/sliderMoved）
     public func disconnect(): Unit {
         disconnectValueChanged()
         disconnectSliderMoved()
     }
-    
+
     /// 设置滑块按下回调
     public func setOnSliderPressed(callback: Int64Callback): Unit {
         checkValid()
@@ -322,7 +330,7 @@ public class QSlider <: QtResource {
             qSliderSetOnSliderPressed(ptr, callback)
         }
     }
-    
+
     /// 设置滑块释放回调
     public func setOnSliderReleased(callback: Int64Callback): Unit {
         checkValid()
@@ -330,22 +338,22 @@ public class QSlider <: QtResource {
             qSliderSetOnSliderReleased(ptr, callback)
         }
     }
-    
+
     /// 获取原生指针
     public func getPtr(): Int64 {
         return ptr
     }
-    
+
     /// 是否已关闭
     public func isClosed(): Bool {
         return closed
     }
-    
+
     /// 检查对象有效性
     public func isValid(): Bool {
         return !closed && ptr != 0 && isObjectAlive(ptr)
     }
-    
+
     /// 检查有效性，无效时抛出异常
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     /// throws: NullPointerException 空指针访问时抛出
@@ -360,7 +368,7 @@ public class QSlider <: QtResource {
             throw ResourceDisposedException("QSlider 底层 Qt 对象已失效")
         }
     }
-    
+
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
@@ -379,7 +387,7 @@ public class QSlider <: QtResource {
             ptr = 0
         }
     }
-    
+
     /// 删除滑动条（兼容旧API）
     public func delete(): Unit {
         close()

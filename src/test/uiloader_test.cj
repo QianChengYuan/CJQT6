@@ -15,23 +15,11 @@ class QUiLoaderTests {
 
     /// 生成一个简单的 .ui 表单文件（含一个 QPushButton，objectName = btnOk）
     static func createUiFile(): Unit {
-        let uiXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-            "<ui version=\"4.0\">\n" +
-            " <class>Form</class>\n" +
-            " <widget class=\"QWidget\" name=\"Form\">\n" +
-            "  <layout class=\"QVBoxLayout\" name=\"verticalLayout\">\n" +
-            "   <item>\n" +
-            "    <widget class=\"QPushButton\" name=\"btnOk\">\n" +
-            "     <property name=\"text\">\n" +
-            "      <string>OK</string>\n" +
-            "     </property>\n" +
-            "    </widget>\n" +
-            "   </item>\n" +
-            "  </layout>\n" +
-            " </widget>\n" +
-            " <resources/>\n" +
-            " <connections/>\n" +
-            "</ui>\n"
+        let uiXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + "<ui version=\"4.0\">\n" + " <class>Form</class>\n" +
+            " <widget class=\"QWidget\" name=\"Form\">\n" + "  <layout class=\"QVBoxLayout\" name=\"verticalLayout\">\n" +
+            "   <item>\n" + "    <widget class=\"QPushButton\" name=\"btnOk\">\n" + "     <property name=\"text\">\n" +
+            "      <string>OK</string>\n" + "     </property>\n" + "    </widget>\n" + "   </item>\n" + "  </layout>\n" +
+            " </widget>\n" + " <resources/>\n" + " <connections/>\n" + "</ui>\n"
         removeIfExists(Path(uiFilePath), recursive: true)
         let file = File(uiFilePath, OpenMode.ReadWrite)
         file.write(uiXml.toArray())
@@ -62,7 +50,7 @@ class QUiLoaderTests {
         let form = loader.load(uiFilePath, 0)
         @Expect(form.getPtr() != 0, true)
         @Expect(form.isValid(), true)
-        form.close()  // 无父顶层控件，close() 真正释放底层对象
+        form.close() // 无父顶层控件，close() 真正释放底层对象
         loader.close()
         @Expect(loader.isClosed(), true)
     }
@@ -89,7 +77,8 @@ class QUiLoaderTests {
     func testLoadMissingFile() {
         let loader = QUiLoader()
         @ExpectThrows[CreateFailedException](loader.load("./no_such_file.ui", 0))
-        loader.close()    }
+        loader.close()
+    }
 
     /// 设置工作目录后加载相对资源路径
     @TestCase

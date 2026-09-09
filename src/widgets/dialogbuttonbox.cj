@@ -4,14 +4,23 @@ import cjqt6.core.*
 
 // QDialogButtonBox 桥接函数
 foreign func qDialogButtonBoxCreate(): Int64
+
 foreign func qDialogButtonBoxAddButton(ptr: Int64, text: CString, role: Int32): Unit
+
 foreign func qDialogButtonBoxSetStandardButtons(ptr: Int64, buttons: Int32): Unit
+
 foreign func qDialogButtonBoxConnectAccepted(ptr: Int64, callback: VoidCallback): Unit
+
 foreign func qDialogButtonBoxConnectRejected(ptr: Int64, callback: VoidCallback): Unit
+
 foreign func qDialogButtonBoxStandardButtons(ptr: Int64): Int32
+
 foreign func qDialogButtonBoxButton(ptr: Int64, which: Int32): Int64
+
 foreign func qDialogButtonBoxButtonRole(ptr: Int64, buttonPtr: Int64): Int32
+
 foreign func qDialogButtonBoxConnectClicked(ptr: Int64, callback: Int64Callback): Unit
+
 foreign func qDialogButtonBoxDelete(ptr: Int64): Unit
 
 /// 标准按钮组合辅助函数
@@ -26,32 +35,32 @@ public func makeStandardButtons(buttons: Array<Int32>): Int32 {
 /// 对话框标准按钮组部件
 public class QDialogButtonBox {
     private var ptr: Int64 = 0
-    
+
     public init() {
         unsafe {
             ptr = qDialogButtonBoxCreate()
         }
     }
-    
+
     public func show(): Unit {
         unsafe { qWidgetShow(ptr) }
     }
-    
+
     public func hide(): Unit {
         unsafe { qWidgetHide(ptr) }
     }
-    
+
     public func resize(width: Int32, height: Int32): Unit {
         unsafe { qWidgetResize(ptr, width, height) }
     }
-    
+
     /// 添加自定义按钮：text=按钮文字, role=按钮角色(ButtonRole枚举值)
     public func addButton(text: String, role: Int32): Unit {
         unsafe {
-            withCString(text) { c => qDialogButtonBoxAddButton(ptr, c, role) }
+            withCString(text) {c => qDialogButtonBoxAddButton(ptr, c, role)}
         }
     }
-    
+
     /// 设置标准按钮组合（使用 makeStandardButtons 组合 StandardButtons 值）
     public func setStandardButtons(buttons: Int32): Unit {
         unsafe { qDialogButtonBoxSetStandardButtons(ptr, buttons) }
@@ -76,34 +85,38 @@ public class QDialogButtonBox {
     public func setOnClicked(callback: Int64Callback): Unit {
         unsafe { qDialogButtonBoxConnectClicked(ptr, callback) }
     }
-    
+
     /// 设置接受信号回调
     public func setOnAccepted(callback: VoidCallback): Unit {
         unsafe { qDialogButtonBoxConnectAccepted(ptr, callback) }
     }
-    
+
     /// 设置拒绝信号回调
     public func setOnRejected(callback: VoidCallback): Unit {
         unsafe { qDialogButtonBoxConnectRejected(ptr, callback) }
     }
-    
+
     /// 设置启用/禁用
     public func setEnabled(enabled: Bool): Unit {
-        unsafe { qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 }) }
+        unsafe { qWidgetSetEnabled(ptr, if (enabled) {
+            1
+        } else {
+            0
+        }) }
     }
-    
+
     /// 设置样式表
     public func setStyleSheet(style: String): Unit {
         unsafe {
-            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
+            withCString(style) {c => qWidgetSetStyleSheet(ptr, c)}
         }
     }
-    
+
     /// 获取对象指针
     public func getPtr(): Int64 {
         return ptr
     }
-    
+
     /// 删除部件
     public func delete(): Unit {
         if (ptr != 0) {

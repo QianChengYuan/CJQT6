@@ -7,48 +7,79 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qListViewCreate(): Int64
+
 foreign func qListViewSetModel(ptr: Int64, modelPtr: Int64): Unit
+
 foreign func qListViewSetItemDelegate(ptr: Int64, delegatePtr: Int64): Unit
+
 foreign func qListViewSetSelectionMode(ptr: Int64, mode: Int32): Unit
+
 foreign func qListViewDelete(ptr: Int64): Unit
 
 // 选择 / 编辑 / 外观
 foreign func qListViewSelectionMode(ptr: Int64): Int32
+
 foreign func qListViewSetEditTriggers(ptr: Int64, v: Int32): Unit
+
 foreign func qListViewEditTriggers(ptr: Int64): Int32
+
 foreign func qListViewSetViewMode(ptr: Int64, v: Int32): Unit
+
 foreign func qListViewViewMode(ptr: Int64): Int32
+
 foreign func qListViewSetMovement(ptr: Int64, v: Int32): Unit
+
 foreign func qListViewMovement(ptr: Int64): Int32
+
 foreign func qListViewSetFlow(ptr: Int64, v: Int32): Unit
+
 foreign func qListViewFlow(ptr: Int64): Int32
+
 foreign func qListViewSetWrapping(ptr: Int64, v: Int32): Unit
+
 foreign func qListViewIsWrapping(ptr: Int64): Int32
+
 foreign func qListViewSetSpacing(ptr: Int64, v: Int32): Unit
+
 foreign func qListViewSpacing(ptr: Int64): Int32
+
 foreign func qListViewSetResizeMode(ptr: Int64, v: Int32): Unit
+
 foreign func qListViewResizeMode(ptr: Int64): Int32
+
 foreign func qListViewSetWordWrap(ptr: Int64, v: Int32): Unit
+
 foreign func qListViewIsWordWrap(ptr: Int64): Int32
+
 foreign func qListViewSetUniformItemSizes(ptr: Int64, v: Int32): Unit
+
 foreign func qListViewUniformItemSizes(ptr: Int64): Int32
+
 foreign func qListViewSetCurrentIndex(ptr: Int64, indexPtr: Int64): Unit
+
 foreign func qListViewCurrentIndex(ptr: Int64): Int64
+
 foreign func qListViewSetRootIndex(ptr: Int64, indexPtr: Int64): Unit
+
 foreign func qListViewRootIndex(ptr: Int64): Int64
 
 // 信号
 foreign func qListViewConnectClicked(ptr: Int64, callback: Int64Callback): Unit
+
 foreign func qListViewConnectDoubleClicked(ptr: Int64, callback: Int64Callback): Unit
+
 foreign func qListViewConnectActivated(ptr: Int64, callback: Int64Callback): Unit
+
 foreign func qListViewConnectPressed(ptr: Int64, callback: Int64Callback): Unit
 
 // QModelIndex 句柄辅助
 foreign func qModelIndexRow(ptr: Int64): Int32
-foreign func qModelIndexColumn(ptr: Int64): Int32
-foreign func qModelIndexIsValid(ptr: Int64): Int32
-foreign func qModelIndexDelete(ptr: Int64): Unit
 
+foreign func qModelIndexColumn(ptr: Int64): Int32
+
+foreign func qModelIndexIsValid(ptr: Int64): Int32
+
+foreign func qModelIndexDelete(ptr: Int64): Unit
 
 // ============================================================
 // QListView
@@ -102,14 +133,18 @@ public class QListView <: QtResource {
     public func setEnabled(enabled: Bool): Unit {
         checkValid()
         unsafe {
-            qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
+            qWidgetSetEnabled(ptr, if (enabled) {
+                1
+            } else {
+                0
+            })
         }
     }
 
     public func setStyleSheet(style: String): Unit {
         checkValid()
         unsafe {
-            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
+            withCString(style) {c => qWidgetSetStyleSheet(ptr, c)}
         }
     }
 
@@ -201,7 +236,11 @@ public class QListView <: QtResource {
     public func setWrapping(wrapping: Bool): Unit {
         checkValid()
         unsafe {
-            qListViewSetWrapping(ptr, if (wrapping) { 1 } else { 0 })
+            qListViewSetWrapping(ptr, if (wrapping) {
+                1
+            } else {
+                0
+            })
         }
     }
 
@@ -243,7 +282,11 @@ public class QListView <: QtResource {
     public func setWordWrap(wordWrap: Bool): Unit {
         checkValid()
         unsafe {
-            qListViewSetWordWrap(ptr, if (wordWrap) { 1 } else { 0 })
+            qListViewSetWordWrap(ptr, if (wordWrap) {
+                1
+            } else {
+                0
+            })
         }
     }
 
@@ -257,7 +300,11 @@ public class QListView <: QtResource {
     public func setUniformItemSizes(uniform: Bool): Unit {
         checkValid()
         unsafe {
-            qListViewSetUniformItemSizes(ptr, if (uniform) { 1 } else { 0 })
+            qListViewSetUniformItemSizes(ptr, if (uniform) {
+                1
+            } else {
+                0
+            })
         }
     }
 
@@ -343,7 +390,9 @@ public class QListView <: QtResource {
     }
 
     /// 是否已关闭（资源已释放）
-    public func isClosed(): Bool { closed }
+    public func isClosed(): Bool {
+        closed
+    }
 
     /// 检查对象有效性（未关闭且指针有效）
     public func isValid(): Bool {

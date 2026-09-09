@@ -146,7 +146,7 @@ class QParallelAnimationGroupTests {
     func testDoubleClose() {
         let g = QParallelAnimationGroup()
         g.close()
-        g.close()  // 安全
+        g.close() // 安全
         @Assert(true)
     }
 }

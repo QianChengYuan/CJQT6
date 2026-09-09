@@ -148,7 +148,7 @@ class QPieSliceDateTimeLogHorizontalTests {
     @TestCase
     func testDateTimeAxisSetRange() {
         let axis = QDateTimeAxis()
-        let baseTime = 1787616000.0  // 2026-08-25
+        let baseTime = 1787616000.0 // 2026-08-25
         let day = 86400.0
         axis.setRange(baseTime, baseTime + day * 4.0)
         @Expect(axis.min(), baseTime)

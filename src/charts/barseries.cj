@@ -7,14 +7,23 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qBarSeriesCreate(): Int64
+
 foreign func qBarSeriesDelete(ptr: Int64): Unit
+
 foreign func qBarSeriesAppend(ptr: Int64, setPtr: Int64): Unit
+
 foreign func qBarSeriesRemove(ptr: Int64, setPtr: Int64): Unit
+
 foreign func qBarSeriesInsert(ptr: Int64, index: Int32, setPtr: Int64): Unit
+
 foreign func qBarSeriesCount(ptr: Int64): Int32
+
 foreign func qBarSeriesClear(ptr: Int64): Unit
+
 foreign func qBarSeriesSetBarWidth(ptr: Int64, width: Float64): Unit
+
 foreign func qBarSeriesSetLabelsVisible(ptr: Int64, visible: Int32): Unit
+
 foreign func qBarSeriesSetLabelsPosition(ptr: Int64, position: Int32): Unit
 
 // ============================================================
@@ -22,10 +31,10 @@ foreign func qBarSeriesSetLabelsPosition(ptr: Int64, position: Int32): Unit
 // ============================================================
 
 public class BarLabelsPosition {
-    public static let center: Int32 = 0       // LabelsCenter
-    public static let insideEnd: Int32 = 1    // LabelsInsideEnd
-    public static let insideBase: Int32 = 2   // LabelsInsideBase
-    public static let outsideEnd: Int32 = 3   // LabelsOutsideEnd
+    public static let center: Int32 = 0 // LabelsCenter
+    public static let insideEnd: Int32 = 1 // LabelsInsideEnd
+    public static let insideBase: Int32 = 2 // LabelsInsideBase
+    public static let outsideEnd: Int32 = 3 // LabelsOutsideEnd
 }
 
 // ============================================================
@@ -108,7 +117,11 @@ public class QBarSeries {
     /// 设置标签是否可见
     public func setLabelsVisible(visible: Bool): Unit {
         checkValid()
-        unsafe { qBarSeriesSetLabelsVisible(ptr, if (visible) { 1 } else { 0 }) }
+        unsafe { qBarSeriesSetLabelsVisible(ptr, if (visible) {
+            1
+        } else {
+            0
+        }) }
     }
 
     /// 设置标签位置（见 BarLabelsPosition 常量）
@@ -117,7 +130,9 @@ public class QBarSeries {
         unsafe { qBarSeriesSetLabelsPosition(ptr, position) }
     }
 
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     /// 释放资源；已 addSeries 后由 chart 级联释放，勿主动调用
     public func close(): Unit {

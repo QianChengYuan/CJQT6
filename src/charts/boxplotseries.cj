@@ -7,11 +7,17 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qBoxPlotSeriesCreate(): Int64
+
 foreign func qBoxPlotSeriesDelete(ptr: Int64): Unit
+
 foreign func qBoxPlotSeriesAppend(ptr: Int64, boxPtr: Int64): Unit
+
 foreign func qBoxPlotSeriesCount(ptr: Int64): Int32
+
 foreign func qBoxPlotSeriesClear(ptr: Int64): Unit
+
 foreign func qBoxPlotSeriesSetBoxOutlineVisible(ptr: Int64, visible: Int32): Unit
+
 foreign func qBoxPlotSeriesSetBoxWidth(ptr: Int64, width: Float64): Unit
 
 // ============================================================
@@ -74,7 +80,11 @@ public class QBoxPlotSeries {
     /// 设置箱体边框可见性
     public func setBoxOutlineVisible(visible: Bool): Unit {
         checkValid()
-        unsafe { qBoxPlotSeriesSetBoxOutlineVisible(ptr, if (visible) { 1 } else { 0 }) }
+        unsafe { qBoxPlotSeriesSetBoxOutlineVisible(ptr, if (visible) {
+            1
+        } else {
+            0
+        }) }
     }
 
     /// 设置箱体宽度
@@ -83,7 +93,9 @@ public class QBoxPlotSeries {
         unsafe { qBoxPlotSeriesSetBoxWidth(ptr, width) }
     }
 
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     /// 释放资源；已 addSeries 后由 chart 级联释放，勿主动调用
     public func close(): Unit {

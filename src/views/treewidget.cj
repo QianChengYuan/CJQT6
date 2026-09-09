@@ -8,71 +8,108 @@ import cjqt6.core.*
 
 // QTreeWidget
 foreign func qTreeWidgetCreate(): Int64
+
 foreign func qTreeWidgetDelete(ptr: Int64): Unit
+
 foreign func qTreeWidgetSetColumnCount(ptr: Int64, columns: Int32): Unit
+
 foreign func qTreeWidgetSetHeaderLabel(ptr: Int64, column: Int32, label: CString): Unit
+
 foreign func qTreeWidgetSetHeaderHidden(ptr: Int64, hidden: Bool): Unit
 
 foreign func qTreeWidgetAddTopLevelItem(ptr: Int64, text: CString): Int64
+
 foreign func qTreeWidgetInsertTopLevelItem(ptr: Int64, index: Int32, itemPtr: Int64): Unit
+
 foreign func qTreeWidgetTakeTopLevelItem(ptr: Int64, index: Int32): Unit
+
 foreign func qTreeWidgetTopLevelItemCount(ptr: Int64): Int32
+
 foreign func qTreeWidgetTopLevelItem(ptr: Int64, index: Int32): Int64
+
 foreign func qTreeWidgetClear(ptr: Int64): Unit
 
 foreign func qTreeWidgetCurrentItem(ptr: Int64): Int64
+
 foreign func qTreeWidgetSetCurrentItem(ptr: Int64, itemPtr: Int64): Unit
 
 foreign func qTreeWidgetExpandItem(ptr: Int64, itemPtr: Int64): Unit
+
 foreign func qTreeWidgetCollapseItem(ptr: Int64, itemPtr: Int64): Unit
+
 foreign func qTreeWidgetExpandAll(ptr: Int64): Unit
+
 foreign func qTreeWidgetCollapseAll(ptr: Int64): Unit
 
 // QTreeWidgetItem
 foreign func qTreeWidgetItemCreate(): Int64
+
 foreign func qTreeWidgetItemCreateWithText(text: CString): Int64
+
 foreign func qTreeWidgetItemDelete(itemPtr: Int64): Unit
 
 foreign func qTreeWidgetItemSetText(itemPtr: Int64, column: Int32, text: CString): Unit
+
 foreign func qTreeWidgetItemText(itemPtr: Int64, column: Int32): CString
 
 foreign func qTreeWidgetItemAddChild(itemPtr: Int64, text: CString): Int64
+
 foreign func qTreeWidgetItemAddChildItem(itemPtr: Int64, childPtr: Int64): Unit
+
 foreign func qTreeWidgetItemChildCount(itemPtr: Int64): Int32
+
 foreign func qTreeWidgetItemChild(itemPtr: Int64, index: Int32): Int64
+
 foreign func qTreeWidgetItemTakeChild(itemPtr: Int64, index: Int32): Unit
+
 foreign func qTreeWidgetItemParent(itemPtr: Int64): Int64
 
 foreign func qTreeWidgetItemSetData(itemPtr: Int64, column: Int32, data: Int64): Unit
+
 foreign func qTreeWidgetItemGetData(itemPtr: Int64, column: Int32): Int64
 
 foreign func qTreeWidgetItemSetExpanded(itemPtr: Int64, expanded: Bool): Unit
+
 foreign func qTreeWidgetItemIsExpanded(itemPtr: Int64): Bool
 
 foreign func qTreeWidgetItemSetCheckState(itemPtr: Int64, column: Int32, state: Int32): Unit
+
 foreign func qTreeWidgetItemCheckState(itemPtr: Int64, column: Int32): Int32
 
 foreign func qTreeWidgetItemSetSelected(itemPtr: Int64, selected: Bool): Unit
+
 foreign func qTreeWidgetItemIsSelected(itemPtr: Int64): Bool
 
 foreign func qTreeWidgetItemSetHidden(itemPtr: Int64, hidden: Bool): Unit
+
 foreign func qTreeWidgetItemIsHidden(itemPtr: Int64): Bool
 
 // QTreeWidget 事件回调
 foreign func qTreeWidgetSetOnItemClicked(ptr: Int64, callback: CFunc<(Int64) -> Unit>): Unit
+
 foreign func qTreeWidgetSetOnItemDoubleClicked(ptr: Int64, callback: CFunc<(Int64) -> Unit>): Unit
+
 foreign func qTreeWidgetSetOnItemExpanded(ptr: Int64, callback: CFunc<(Int64) -> Unit>): Unit
+
 foreign func qTreeWidgetSetOnItemCollapsed(ptr: Int64, callback: CFunc<(Int64) -> Unit>): Unit
+
 foreign func qTreeWidgetSetOnCurrentItemChanged(ptr: Int64, callback: CFunc<(Int64) -> Unit>): Unit
 
 // 补充 API FFI
 foreign func qTreeWidgetColumnCount(ptr: Int64): Int32
+
 foreign func qTreeWidgetSetHeaderItem(ptr: Int64, itemPtr: Int64): Unit
+
 foreign func qTreeWidgetIndexOfTopLevelItem(ptr: Int64, itemPtr: Int64): Int32
+
 foreign func qTreeWidgetSelectedItems(ptr: Int64): Int32
+
 foreign func qTreeWidgetSetSelectionMode(ptr: Int64, mode: Int32): Unit
+
 foreign func qTreeWidgetConnectItemClicked(ptr: Int64, callback: CFunc<(Int64, Int32) -> Unit>): Unit
+
 foreign func qTreeWidgetConnectItemDoubleClicked(ptr: Int64, callback: CFunc<(Int64, Int32) -> Unit>): Unit
+
 foreign func qTreeWidgetConnectItemChanged(ptr: Int64, callback: CFunc<(Int64, Int32) -> Unit>): Unit
 
 // 勾选状态常量
@@ -90,14 +127,14 @@ public class QTreeWidgetItem <: QtResource {
     private var closed: Bool = false
     /// 是否拥有原生对象：自建 init 为 true；fromPtr 借用（归树控件管理）为 false
     private var owned: Bool = true
-    
+
     public init() {
         unsafe {
             ptr = qTreeWidgetItemCreate()
         }
         owned = true
     }
-    
+
     public init(text: String) {
         unsafe {
             var cstr = LibC.mallocCString(text)
@@ -106,28 +143,28 @@ public class QTreeWidgetItem <: QtResource {
         }
         owned = true
     }
-    
+
     // 从指针创建（不拥有所有权）
     public static func fromPtr(ptr: Int64): QTreeWidgetItem {
-        QTreeWidgetItem(ptr, ())  // 直接使用私有构造函数，无泄漏
+        QTreeWidgetItem(ptr, ()) // 直接使用私有构造函数，无泄漏
     }
-    
+
     // 内部构造函数
     private init(ptr: Int64, _: Unit) {
         this.ptr = ptr
         this.owned = false
     }
-    
+
     public static func __fromPtr(ptr: Int64): QTreeWidgetItem {
         QTreeWidgetItem(ptr, ())
     }
-    
+
     public func getPtr(): Int64 {
         ptr
     }
-    
+
     // ========== 文本 ==========
-    
+
     public func setText(column: Int32, text: String): Unit {
         unsafe {
             var cstr = LibC.mallocCString(text)
@@ -135,7 +172,7 @@ public class QTreeWidgetItem <: QtResource {
             LibC.free(cstr)
         }
     }
-    
+
     public func text(column: Int32): String {
         unsafe {
             let cstr = qTreeWidgetItemText(ptr, column)
@@ -144,9 +181,9 @@ public class QTreeWidgetItem <: QtResource {
             return result
         }
     }
-    
+
     // ========== 子项 ==========
-    
+
     public func addChild(text: String): QTreeWidgetItem {
         unsafe {
             var cstr = LibC.mallocCString(text)
@@ -155,34 +192,34 @@ public class QTreeWidgetItem <: QtResource {
             return QTreeWidgetItem.__fromPtr(childPtr)
         }
     }
-    
+
     public func addChildItem(child: QTreeWidgetItem): Unit {
         unsafe {
             qTreeWidgetItemAddChildItem(ptr, child.getPtr())
         }
     }
-    
+
     public func childCount(): Int32 {
         unsafe {
             qTreeWidgetItemChildCount(ptr)
         }
     }
-    
+
     public func child(index: Int32): QTreeWidgetItem {
         unsafe {
             let childPtr = qTreeWidgetItemChild(ptr, index)
             return QTreeWidgetItem.__fromPtr(childPtr)
         }
     }
-    
+
     public func takeChild(index: Int32): Unit {
         unsafe {
             qTreeWidgetItemTakeChild(ptr, index)
         }
     }
-    
+
     // ========== 父项 ==========
-    
+
     public func parent(): ?QTreeWidgetItem {
         unsafe {
             let parentPtr = qTreeWidgetItemParent(ptr)
@@ -192,71 +229,71 @@ public class QTreeWidgetItem <: QtResource {
             return Some(QTreeWidgetItem.__fromPtr(parentPtr))
         }
     }
-    
+
     // ========== 用户数据 ==========
-    
+
     public func setData(column: Int32, data: Int64): Unit {
         unsafe {
             qTreeWidgetItemSetData(ptr, column, data)
         }
     }
-    
+
     public func getData(column: Int32): Int64 {
         unsafe {
             qTreeWidgetItemGetData(ptr, column)
         }
     }
-    
+
     // ========== 展开/折叠 ==========
-    
+
     public func setExpanded(expanded: Bool): Unit {
         unsafe {
             qTreeWidgetItemSetExpanded(ptr, expanded)
         }
     }
-    
+
     public func isExpanded(): Bool {
         unsafe {
             qTreeWidgetItemIsExpanded(ptr)
         }
     }
-    
+
     // ========== 勾选 ==========
-    
+
     public func setCheckState(column: Int32, state: Int32): Unit {
         unsafe {
             qTreeWidgetItemSetCheckState(ptr, column, state)
         }
     }
-    
+
     public func checkState(column: Int32): Int32 {
         unsafe {
             qTreeWidgetItemCheckState(ptr, column)
         }
     }
-    
+
     // ========== 选中 ==========
-    
+
     public func setSelected(selected: Bool): Unit {
         unsafe {
             qTreeWidgetItemSetSelected(ptr, selected)
         }
     }
-    
+
     public func isSelected(): Bool {
         unsafe {
             qTreeWidgetItemIsSelected(ptr)
         }
     }
-    
+
     // ========== 隐藏 ==========
-    
+
     public func setHidden(hidden: Bool): Unit {
         unsafe {
             qTreeWidgetItemSetHidden(ptr, hidden)
         }
     }
-    
+
     public func isHidden(): Bool {
         unsafe {
             qTreeWidgetItemIsHidden(ptr)
@@ -264,7 +301,9 @@ public class QTreeWidgetItem <: QtResource {
     }
 
     /// 是否已关闭
-    public func isClosed(): Bool { closed }
+    public func isClosed(): Bool {
+        closed
+    }
 
     /// 检查对象有效性（借用 item 由树控件管理，close 只置位不删除）
     public func isValid(): Bool {
@@ -305,26 +344,28 @@ public class QTreeWidgetItem <: QtResource {
 public class QTreeWidget <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
-    
+
     public init() {
         unsafe {
             ptr = qTreeWidgetCreate()
         }
         trackObject(ptr)
     }
-    
+
     public func getPtr(): Int64 {
         ptr
     }
-    
+
     /// 是否已关闭（资源已释放）
-    public func isClosed(): Bool { closed }
-    
+    public func isClosed(): Bool {
+        closed
+    }
+
     /// 检查对象有效性（未关闭且指针有效）
     public func isValid(): Bool {
         return !closed && ptr != 0
     }
-    
+
     /// 检查有效性，无效时抛出异常
     public func checkValid(): Unit {
         if (closed) {
@@ -337,12 +378,12 @@ public class QTreeWidget <: QtResource {
             throw ResourceDisposedException("QTreeWidget 底层 Qt 对象已失效")
         }
     }
-    
+
     /// 关闭资源（幂等）
     public func close(): Unit {
         delete()
     }
-    
+
     public func delete(): Unit {
         if (!closed && ptr != 0) {
             // 级联销毁守卫：控件被父窗口/布局接管并销毁时，只注销不 delete，避免 use-after-free
@@ -360,15 +401,15 @@ public class QTreeWidget <: QtResource {
             closed = true
         }
     }
-    
+
     // ========== 列设置 ==========
-    
+
     public func setColumnCount(columns: Int32): Unit {
         unsafe {
             qTreeWidgetSetColumnCount(ptr, columns)
         }
     }
-    
+
     public func setHeaderLabel(column: Int32, label: String): Unit {
         unsafe {
             var cstr = LibC.mallocCString(label)
@@ -376,15 +417,15 @@ public class QTreeWidget <: QtResource {
             LibC.free(cstr)
         }
     }
-    
+
     public func setHeaderHidden(hidden: Bool): Unit {
         unsafe {
             qTreeWidgetSetHeaderHidden(ptr, hidden)
         }
     }
-    
+
     // ========== 顶级项 ==========
-    
+
     public func addTopLevelItem(text: String): QTreeWidgetItem {
         unsafe {
             var cstr = LibC.mallocCString(text)
@@ -393,40 +434,40 @@ public class QTreeWidget <: QtResource {
             return QTreeWidgetItem.__fromPtr(itemPtr)
         }
     }
-    
+
     public func insertTopLevelItem(index: Int32, item: QTreeWidgetItem): Unit {
         unsafe {
             qTreeWidgetInsertTopLevelItem(ptr, index, item.getPtr())
         }
     }
-    
+
     public func takeTopLevelItem(index: Int32): Unit {
         unsafe {
             qTreeWidgetTakeTopLevelItem(ptr, index)
         }
     }
-    
+
     public func topLevelItemCount(): Int32 {
         unsafe {
             qTreeWidgetTopLevelItemCount(ptr)
         }
     }
-    
+
     public func topLevelItem(index: Int32): QTreeWidgetItem {
         unsafe {
             let itemPtr = qTreeWidgetTopLevelItem(ptr, index)
             return QTreeWidgetItem.__fromPtr(itemPtr)
         }
     }
-    
+
     public func clear(): Unit {
         unsafe {
             qTreeWidgetClear(ptr)
         }
     }
-    
+
     // ========== 当前选中 ==========
-    
+
     public func currentItem(): ?QTreeWidgetItem {
         unsafe {
             let itemPtr = qTreeWidgetCurrentItem(ptr)
@@ -436,76 +477,76 @@ public class QTreeWidget <: QtResource {
             return Some(QTreeWidgetItem.__fromPtr(itemPtr))
         }
     }
-    
+
     public func setCurrentItem(item: QTreeWidgetItem): Unit {
         unsafe {
             qTreeWidgetSetCurrentItem(ptr, item.getPtr())
         }
     }
-    
+
     // ========== 展开/折叠 ==========
-    
+
     public func expandItem(item: QTreeWidgetItem): Unit {
         unsafe {
             qTreeWidgetExpandItem(ptr, item.getPtr())
         }
     }
-    
+
     public func collapseItem(item: QTreeWidgetItem): Unit {
         unsafe {
             qTreeWidgetCollapseItem(ptr, item.getPtr())
         }
     }
-    
+
     public func expandAll(): Unit {
         unsafe {
             qTreeWidgetExpandAll(ptr)
         }
     }
-    
+
     public func collapseAll(): Unit {
         unsafe {
             qTreeWidgetCollapseAll(ptr)
         }
     }
-    
+
     // ========== 事件回调 ==========
-    
+
     // 设置项点击回调
     public func setOnItemClicked(callback: CFunc<(Int64) -> Unit>): Unit {
         unsafe {
             qTreeWidgetSetOnItemClicked(ptr, callback)
         }
     }
-    
+
     // 设置项双击回调
     public func setOnItemDoubleClicked(callback: CFunc<(Int64) -> Unit>): Unit {
         unsafe {
             qTreeWidgetSetOnItemDoubleClicked(ptr, callback)
         }
     }
-    
+
     // 设置项展开回调
     public func setOnItemExpanded(callback: CFunc<(Int64) -> Unit>): Unit {
         unsafe {
             qTreeWidgetSetOnItemExpanded(ptr, callback)
         }
     }
-    
+
     // 设置项折叠回调
     public func setOnItemCollapsed(callback: CFunc<(Int64) -> Unit>): Unit {
         unsafe {
             qTreeWidgetSetOnItemCollapsed(ptr, callback)
         }
     }
-    
+
     // 设置当前项变化回调
     public func setOnCurrentItemChanged(callback: CFunc<(Int64) -> Unit>): Unit {
         unsafe {
             qTreeWidgetSetOnCurrentItemChanged(ptr, callback)
         }
     }
-    
+
     // ========== 补充 API ==========
 
     public func columnCount(): Int32 {
@@ -558,19 +599,19 @@ public class QTreeWidget <: QtResource {
     }
 
     // ========== 继承自QWidget的方法 ==========
-    
+
     public func show(): Unit {
         unsafe {
             qWidgetShow(ptr)
         }
     }
-    
+
     public func hide(): Unit {
         unsafe {
             qWidgetHide(ptr)
         }
     }
-    
+
     public func resize(width: Int32, height: Int32): Unit {
         unsafe {
             qWidgetResize(ptr, width, height)

@@ -7,7 +7,9 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qPolarChartCreate(): Int64
+
 foreign func qPolarChartDelete(ptr: Int64): Unit
+
 foreign func qPolarChartAddAxis(ptr: Int64, axisPtr: Int64, polarOrientation: Int32): Unit
 
 // ============================================================
@@ -15,8 +17,8 @@ foreign func qPolarChartAddAxis(ptr: Int64, axisPtr: Int64, polarOrientation: In
 // ============================================================
 
 public class PolarOrientation {
-    public static let radial: Int32 = 0x1   // 径向（从圆心向外）
-    public static let angular: Int32 = 0x2  // 角向（沿圆周）
+    public static let radial: Int32 = 0x1 // 径向（从圆心向外）
+    public static let angular: Int32 = 0x2 // 角向（沿圆周）
 }
 
 // ============================================================
@@ -136,7 +138,7 @@ public class QPolarChart {
     public func setTitle(title: String): Unit {
         checkValid()
         unsafe {
-            withCString(title) { c => qChartSetTitle(ptr, c) }
+            withCString(title) {c => qChartSetTitle(ptr, c)}
         }
     }
 
@@ -203,7 +205,9 @@ public class QPolarChart {
         }
     }
 
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     /// 释放资源；已挂载到 QChartView 时由视图级联释放，勿主动调用
     public func close(): Unit {

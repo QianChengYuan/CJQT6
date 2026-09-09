@@ -10,23 +10,23 @@ import std.unittest.*
 
 /// 记录 paint 回调收到的委托指针（用于验证回调被正确路由）
 var gDelegatePaintPtr: Int64 = 0
-let gDelegatePaintCb: CFunc<(Int64) -> Unit> = { dptr: Int64 =>
-    gDelegatePaintPtr = dptr
+let gDelegatePaintCb: CFunc<(Int64) -> Unit> = {
+    dptr: Int64 => gDelegatePaintPtr = dptr
 }
 
 /// sizeHint 回调：固定返回 120x40 的打包值
-let gDelegateSizeHintCb: CFunc<(Int64) -> Int64> = { dptr: Int64 =>
-    makeSizeHintValue(120, 40)
+let gDelegateSizeHintCb: CFunc<(Int64) -> Int64> = {
+    dptr: Int64 => makeSizeHintValue(120, 40)
 }
 
 /// 空操作回调（仅验证注册不崩溃）
-let gDelegateNoopPaintCb: CFunc<(Int64) -> Unit> = { _: Int64 => () }
+let gDelegateNoopPaintCb: CFunc<(Int64) -> Unit> = {_: Int64 => ()}
 
 /// 编辑回调：createEditor 返回 0（不编辑），仅验证注册不崩溃
-let gDelegateNoopCreateEditorCb: CFunc<(Int64) -> Int64> = { _: Int64 => 0 }
+let gDelegateNoopCreateEditorCb: CFunc<(Int64) -> Int64> = {_: Int64 => 0}
 /// 编辑回调：空操作
-let gDelegateNoopSetEditorDataCb: CFunc<(Int64) -> Unit> = { _: Int64 => () }
-let gDelegateNoopSetModelDataCb: CFunc<(Int64) -> Unit> = { _: Int64 => () }
+let gDelegateNoopSetEditorDataCb: CFunc<(Int64) -> Unit> = {_: Int64 => ()}
+let gDelegateNoopSetModelDataCb: CFunc<(Int64) -> Unit> = {_: Int64 => ()}
 
 // =====================================================================
 // QStyledItemDelegate 测试（GUI 环境）

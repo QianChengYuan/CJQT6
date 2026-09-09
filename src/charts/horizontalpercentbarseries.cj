@@ -7,14 +7,23 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qHorizontalPercentBarSeriesCreate(): Int64
+
 foreign func qHorizontalPercentBarSeriesDelete(ptr: Int64): Unit
+
 foreign func qHorizontalPercentBarSeriesAppend(ptr: Int64, setPtr: Int64): Unit
+
 foreign func qHorizontalPercentBarSeriesRemove(ptr: Int64, setPtr: Int64): Unit
+
 foreign func qHorizontalPercentBarSeriesInsert(ptr: Int64, index: Int32, setPtr: Int64): Unit
+
 foreign func qHorizontalPercentBarSeriesCount(ptr: Int64): Int32
+
 foreign func qHorizontalPercentBarSeriesClear(ptr: Int64): Unit
+
 foreign func qHorizontalPercentBarSeriesSetBarWidth(ptr: Int64, width: Float64): Unit
+
 foreign func qHorizontalPercentBarSeriesSetLabelsVisible(ptr: Int64, visible: Int32): Unit
+
 foreign func qHorizontalPercentBarSeriesSetLabelsPosition(ptr: Int64, position: Int32): Unit
 
 // ============================================================
@@ -94,7 +103,11 @@ public class QHorizontalPercentBarSeries {
     /// 设置标签是否可见
     public func setLabelsVisible(visible: Bool): Unit {
         checkValid()
-        unsafe { qHorizontalPercentBarSeriesSetLabelsVisible(ptr, if (visible) { 1 } else { 0 }) }
+        unsafe { qHorizontalPercentBarSeriesSetLabelsVisible(ptr, if (visible) {
+            1
+        } else {
+            0
+        }) }
     }
 
     /// 设置标签位置（见 BarLabelsPosition 常量）
@@ -103,7 +116,9 @@ public class QHorizontalPercentBarSeries {
         unsafe { qHorizontalPercentBarSeriesSetLabelsPosition(ptr, position) }
     }
 
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     /// 释放资源；已 addSeries 后由 chart 级联释放，勿主动调用
     public func close(): Unit {

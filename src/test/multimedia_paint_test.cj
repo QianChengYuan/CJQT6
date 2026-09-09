@@ -10,23 +10,20 @@ import std.unittest.*
 // 全局回调状态（CFunc 回调不捕获局部变量，只能用全局变量）
 // =====================================================================
 var gPosChanged: Int64 = -1
-let gPosChangedCb: Int64Callback = { v: Int64 =>
-    gPosChanged = v
+let gPosChangedCb: Int64Callback = {
+    v: Int64 => gPosChanged = v
 }
-
 var gDurChanged: Int64 = -1
-let gDurChangedCb: Int64Callback = { v: Int64 =>
-    gDurChanged = v
+let gDurChangedCb: Int64Callback = {
+    v: Int64 => gDurChanged = v
 }
-
 var gPlayState: Int32 = -1
-let gPlayStateCb: Int32Callback = { v: Int32 =>
-    gPlayState = v
+let gPlayStateCb: Int32Callback = {
+    v: Int32 => gPlayState = v
 }
-
 var gMediaStatusVal: Int32 = -1
-let gMediaStatusCb: Int32Callback = { v: Int32 =>
-    gMediaStatusVal = v
+let gMediaStatusCb: Int32Callback = {
+    v: Int32 => gMediaStatusVal = v
 }
 
 // =====================================================================

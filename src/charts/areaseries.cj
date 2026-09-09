@@ -7,9 +7,13 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qAreaSeriesCreate(upperPtr: Int64, lowerPtr: Int64): Int64
+
 foreign func qAreaSeriesDelete(ptr: Int64): Unit
+
 foreign func qAreaSeriesSetColor(ptr: Int64, r: Int32, g: Int32, b: Int32): Unit
+
 foreign func qAreaSeriesSetBorderColor(ptr: Int64, r: Int32, g: Int32, b: Int32): Unit
+
 foreign func qAreaSeriesSetPointsVisible(ptr: Int64, visible: Int32): Unit
 
 // ============================================================
@@ -73,10 +77,16 @@ public class QAreaSeries {
     /// 设置数据点是否可见
     public func setPointsVisible(visible: Bool): Unit {
         checkValid()
-        unsafe { qAreaSeriesSetPointsVisible(ptr, if (visible) { 1 } else { 0 }) }
+        unsafe { qAreaSeriesSetPointsVisible(ptr, if (visible) {
+            1
+        } else {
+            0
+        }) }
     }
 
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     /// 释放资源；已 addSeries 后由 chart 级联释放，勿主动调用
     public func close(): Unit {

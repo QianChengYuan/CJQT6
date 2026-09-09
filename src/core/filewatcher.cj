@@ -5,8 +5,11 @@ package cjqt6.core
 // ============================================================
 
 foreign func qFileSystemWatcherCreate(): Int64
+
 foreign func qFileSystemWatcherAddPath(ptr: Int64, path: CString): Unit
+
 foreign func qFileSystemWatcherRemovePath(ptr: Int64, path: CString): Unit
+
 foreign func qFileSystemWatcherDelete(ptr: Int64): Unit
 
 /// 文件系统监视器，监听指定文件/目录的变化（本封装提供路径的添加与移除管理）

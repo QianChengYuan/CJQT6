@@ -7,13 +7,21 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qBoxSetCreate(label: CString): Int64
+
 foreign func qBoxSetCreate5(le: Float64, lq: Float64, m: Float64, uq: Float64, ue: Float64, label: CString): Int64
+
 foreign func qBoxSetDelete(ptr: Int64): Unit
+
 foreign func qBoxSetAppend(ptr: Int64, value: Float64): Unit
+
 foreign func qBoxSetClear(ptr: Int64): Unit
+
 foreign func qBoxSetSetLabel(ptr: Int64, label: CString): Unit
+
 foreign func qBoxSetSetValue(ptr: Int64, index: Int32, value: Float64): Unit
+
 foreign func qBoxSetAt(ptr: Int64, index: Int32): Float64
+
 foreign func qBoxSetCount(ptr: Int64): Int32
 
 // ============================================================
@@ -53,7 +61,7 @@ public class QBoxSet {
     /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(label: String) {
         unsafe {
-            withCString(label) { c => ptr = qBoxSetCreate(c) }
+            withCString(label) {c => ptr = qBoxSetCreate(c)}
         }
         if (ptr == 0) {
             throw CreateFailedException("QBoxSet create failed")
@@ -65,7 +73,7 @@ public class QBoxSet {
     /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(le: Float64, lq: Float64, m: Float64, uq: Float64, ue: Float64) {
         unsafe {
-            withCString("") { c => ptr = qBoxSetCreate5(le, lq, m, uq, ue, c) }
+            withCString("") {c => ptr = qBoxSetCreate5(le, lq, m, uq, ue, c)}
         }
         if (ptr == 0) {
             throw CreateFailedException("QBoxSet create failed")
@@ -89,7 +97,7 @@ public class QBoxSet {
     public func setLabel(label: String): Unit {
         checkValid()
         unsafe {
-            withCString(label) { c => qBoxSetSetLabel(ptr, c) }
+            withCString(label) {c => qBoxSetSetLabel(ptr, c)}
         }
     }
 
@@ -111,7 +119,9 @@ public class QBoxSet {
         unsafe { return qBoxSetCount(ptr) }
     }
 
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     /// 释放资源；已 append 后由 series 级联释放，勿主动调用
     public func close(): Unit {

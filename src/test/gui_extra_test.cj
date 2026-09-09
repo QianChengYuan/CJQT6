@@ -16,8 +16,8 @@ func highlightCallback(_: Int64, _: CString): Unit {
 }
 
 // CFunc 必须用 lambda 显式标注参数类型（参考 src/core/callback.cj 的 gVoidDispatcher 模式）
-let gHighlightCb: CFunc<(Int64, CString) -> Unit> = { selfId: Int64, text: CString =>
-    gHighlightCalled = true
+let gHighlightCb: CFunc<(Int64, CString) -> Unit> = {
+    selfId: Int64, text: CString => gHighlightCalled = true
 }
 
 // =====================================================================
@@ -98,7 +98,7 @@ class QCursorTests {
     func testDoubleClose() {
         let cur = QCursor()
         cur.close()
-        cur.close()  // 安全
+        cur.close() // 安全
         @Expect(cur.getPtr(), 0)
     }
 
@@ -832,7 +832,6 @@ class QTextCursorTests {
 // =====================================================================
 @Test
 class GuiTypesTests {
-
     @TestCase
     func testAlignment() {
         @Expect(Alignment.Center.isCenter(), true)

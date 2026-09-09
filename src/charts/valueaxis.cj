@@ -7,11 +7,17 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qValueAxisCreate(): Int64
+
 foreign func qValueAxisDelete(ptr: Int64): Unit
+
 foreign func qValueAxisSetRange(ptr: Int64, min: Float64, max: Float64): Unit
+
 foreign func qValueAxisSetTickCount(ptr: Int64, count: Int32): Unit
+
 foreign func qValueAxisSetLabelFormat(ptr: Int64, format: CString): Unit
+
 foreign func qValueAxisSetMin(ptr: Int64, min: Float64): Unit
+
 foreign func qValueAxisSetMax(ptr: Int64, max: Float64): Unit
 
 // ============================================================
@@ -67,7 +73,7 @@ public class QValueAxis {
     public func setLabelFormat(format: String): Unit {
         checkValid()
         unsafe {
-            withCString(format) { c => qValueAxisSetLabelFormat(ptr, c) }
+            withCString(format) {c => qValueAxisSetLabelFormat(ptr, c)}
         }
     }
 
@@ -83,7 +89,9 @@ public class QValueAxis {
         unsafe { qValueAxisSetMax(ptr, max) }
     }
 
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     /// 释放资源；已 addAxis 后由 chart 级联释放，勿主动调用
     public func close(): Unit {

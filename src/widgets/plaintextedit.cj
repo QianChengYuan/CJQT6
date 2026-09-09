@@ -4,41 +4,71 @@ import cjqt6.core.*
 
 // QPlainTextEdit - 纯文本编辑器
 foreign func qPlainTextEditCreate(): Int64
+
 foreign func qPlainTextEditSetPlainText(ptr: Int64, text: CString): Unit
+
 foreign func qPlainTextEditToPlainText(ptr: Int64): CString
+
 foreign func qPlainTextEditSetReadOnly(ptr: Int64, readonly: Bool): Unit
+
 foreign func qPlainTextEditIsReadOnly(ptr: Int64): Bool
+
 foreign func qPlainTextEditClear(ptr: Int64): Unit
+
 foreign func qPlainTextEditCut(ptr: Int64): Unit
+
 foreign func qPlainTextEditCopy(ptr: Int64): Unit
+
 foreign func qPlainTextEditPaste(ptr: Int64): Unit
+
 foreign func qPlainTextEditSelectAll(ptr: Int64): Unit
+
 foreign func qPlainTextEditUndo(ptr: Int64): Unit
+
 foreign func qPlainTextEditRedo(ptr: Int64): Unit
+
 foreign func qPlainTextEditCanUndo(ptr: Int64): Bool
+
 foreign func qPlainTextEditCanRedo(ptr: Int64): Bool
+
 foreign func qPlainTextEditIsModified(ptr: Int64): Bool
+
 foreign func qPlainTextEditSetModified(ptr: Int64, modified: Bool): Unit
+
 foreign func qPlainTextEditSetLineWrapMode(ptr: Int64, mode: Int32): Unit
+
 foreign func qPlainTextEditLineWrapMode(ptr: Int64): Int32
+
 foreign func qPlainTextEditSetTabStopDistance(ptr: Int64, distance: Float64): Unit
+
 foreign func qPlainTextEditLineCount(ptr: Int64): Int64
+
 foreign func qPlainTextEditAppendPlainText(ptr: Int64, text: CString): Unit
+
 foreign func qPlainTextEditSetMaximumBlockCount(ptr: Int64, maxBlocks: Int32): Unit
+
 foreign func qPlainTextEditAppendHtml(ptr: Int64, html: CString): Unit
+
 foreign func qPlainTextEditZoomIn(ptr: Int64, range: Int32): Unit
+
 foreign func qPlainTextEditZoomOut(ptr: Int64, range: Int32): Unit
+
 foreign func qPlainTextEditBlockCount(ptr: Int64): Int32
+
 foreign func qPlainTextEditConnectTextChanged(ptr: Int64, callback: VoidCallback): Unit
+
 foreign func qPlainTextEditConnectBlockCountChanged(ptr: Int64, callback: Int32Callback): Unit
+
 foreign func qPlainTextEditConnectModificationChanged(ptr: Int64, callback: BoolCallback): Unit
+
 foreign func qPlainTextEditConnectCopyAvailable(ptr: Int64, callback: BoolCallback): Unit
+
 foreign func qPlainTextEditDelete(ptr: Int64): Unit
 
 /// 换行模式常量
 public class PlainTextLineWrap {
-    public static let NoWrap: Int32 = 0        // 不换行
-    public static let WidgetWidth: Int32 = 1   // 按控件宽度换行
+    public static let NoWrap: Int32 = 0 // 不换行
+    public static let WidgetWidth: Int32 = 1 // 按控件宽度换行
 }
 
 /// 纯文本编辑器
@@ -79,14 +109,14 @@ public class QPlainTextEdit {
     /// 设置样式表
     public func setStyleSheet(style: String): Unit {
         unsafe {
-            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
+            withCString(style) {c => qWidgetSetStyleSheet(ptr, c)}
         }
     }
 
     /// 设置纯文本内容
     public func setPlainText(text: String): Unit {
         unsafe {
-            withCString(text) { c => qPlainTextEditSetPlainText(ptr, c) }
+            withCString(text) {c => qPlainTextEditSetPlainText(ptr, c)}
         }
     }
 
@@ -103,7 +133,7 @@ public class QPlainTextEdit {
     /// 追加文本
     public func appendPlainText(text: String): Unit {
         unsafe {
-            withCString(text) { c => qPlainTextEditAppendPlainText(ptr, c) }
+            withCString(text) {c => qPlainTextEditAppendPlainText(ptr, c)}
         }
     }
 
@@ -129,31 +159,49 @@ public class QPlainTextEdit {
     }
 
     /// 剪切
-    public func cut(): Unit { unsafe { qPlainTextEditCut(ptr) } }
+    public func cut(): Unit {
+        unsafe { qPlainTextEditCut(ptr) }
+    }
 
     /// 复制
-    public func copy(): Unit { unsafe { qPlainTextEditCopy(ptr) } }
+    public func copy(): Unit {
+        unsafe { qPlainTextEditCopy(ptr) }
+    }
 
     /// 粘贴
-    public func paste(): Unit { unsafe { qPlainTextEditPaste(ptr) } }
+    public func paste(): Unit {
+        unsafe { qPlainTextEditPaste(ptr) }
+    }
 
     /// 全选
-    public func selectAll(): Unit { unsafe { qPlainTextEditSelectAll(ptr) } }
+    public func selectAll(): Unit {
+        unsafe { qPlainTextEditSelectAll(ptr) }
+    }
 
     /// 撤销
-    public func undo(): Unit { unsafe { qPlainTextEditUndo(ptr) } }
+    public func undo(): Unit {
+        unsafe { qPlainTextEditUndo(ptr) }
+    }
 
     /// 重做
-    public func redo(): Unit { unsafe { qPlainTextEditRedo(ptr) } }
+    public func redo(): Unit {
+        unsafe { qPlainTextEditRedo(ptr) }
+    }
 
     /// 是否可以撤销
-    public func canUndo(): Bool { unsafe { return qPlainTextEditCanUndo(ptr) } }
+    public func canUndo(): Bool {
+        unsafe { return qPlainTextEditCanUndo(ptr) }
+    }
 
     /// 是否可以重做
-    public func canRedo(): Bool { unsafe { return qPlainTextEditCanRedo(ptr) } }
+    public func canRedo(): Bool {
+        unsafe { return qPlainTextEditCanRedo(ptr) }
+    }
 
     /// 内容是否被修改
-    public func isModified(): Bool { unsafe { return qPlainTextEditIsModified(ptr) } }
+    public func isModified(): Bool {
+        unsafe { return qPlainTextEditIsModified(ptr) }
+    }
 
     /// 设置修改状态
     public func setModified(modified: Bool): Unit {
@@ -189,7 +237,7 @@ public class QPlainTextEdit {
     /// 追加 HTML 片段
     public func appendHtml(html: String): Unit {
         unsafe {
-            withCString(html) { c => qPlainTextEditAppendHtml(ptr, c) }
+            withCString(html) {c => qPlainTextEditAppendHtml(ptr, c)}
         }
     }
 

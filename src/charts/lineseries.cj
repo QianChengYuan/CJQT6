@@ -7,9 +7,13 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qLineSeriesCreate(): Int64
+
 foreign func qLineSeriesDelete(ptr: Int64): Unit
+
 foreign func qLineSeriesAppend(ptr: Int64, x: Float64, y: Float64): Unit
+
 foreign func qLineSeriesSetName(ptr: Int64, name: CString): Unit
+
 foreign func qLineSeriesCount(ptr: Int64): Int32
 
 // ============================================================
@@ -60,7 +64,7 @@ public class QLineSeries {
     public func setName(name: String): Unit {
         checkValid()
         unsafe {
-            withCString(name) { c => qLineSeriesSetName(ptr, c) }
+            withCString(name) {c => qLineSeriesSetName(ptr, c)}
         }
     }
 
@@ -70,7 +74,9 @@ public class QLineSeries {
         unsafe { qLineSeriesCount(ptr) }
     }
 
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     /// 释放资源；已 addSeries 后由 chart 级联释放，勿主动调用
     public func close(): Unit {

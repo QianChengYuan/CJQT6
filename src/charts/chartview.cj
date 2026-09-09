@@ -7,11 +7,14 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qChartViewCreate(): Int64
+
 foreign func qChartViewDelete(ptr: Int64): Unit
+
 foreign func qChartViewSetChart(ptr: Int64, chartPtr: Int64): Unit
 
 // widget 基类方法（foreign func 默认包私有，跨包需重新声明，链接同一符号）
 foreign func qWidgetShow(ptr: Int64): Unit
+
 foreign func qWidgetResize(ptr: Int64, width: Int32, height: Int32): Unit
 
 // ============================================================
@@ -71,7 +74,9 @@ public class QChartView {
         unsafe { qWidgetResize(ptr, width, height) }
     }
 
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     /// 释放资源；会级联释放已 setChart 的 QChart 及其 series/axis
     public func close(): Unit {

@@ -11,10 +11,10 @@ package cjqt6.core
 
 // 连接类型（映射 Qt::ConnectionType）
 public class ConnectionType {
-    public static let Auto: Int32 = 0            // Qt::AutoConnection
-    public static let Direct: Int32 = 1          // Qt::DirectConnection
-    public static let Queued: Int32 = 2          // Qt::QueuedConnection
-    public static let BlockingQueued: Int32 = 3  // Qt::BlockingQueuedConnection
+    public static let Auto: Int32 = 0 // Qt::AutoConnection
+    public static let Direct: Int32 = 1 // Qt::DirectConnection
+    public static let Queued: Int32 = 2 // Qt::QueuedConnection
+    public static let BlockingQueued: Int32 = 3 // Qt::BlockingQueuedConnection
 }
 
 // 控件类型 / 信号常量（供 SignalConnection 路由断开）
@@ -26,19 +26,33 @@ public const SIGNAL_EMIT_STRING: String = "emitString"
 
 // ---- native 声明（同包 cjqt6.core 内调用，非 public 即可） ----
 foreign func qEmitterCreate(): Int64
+
 foreign func qEmitterDelete(ptr: Int64): Unit
+
 foreign func qEmitterConnectVoid(ptr: Int64, callback: VoidCallback, connType: Int32): Unit
+
 foreign func qEmitterConnectVoidId(ptr: Int64, id: Int64, connType: Int32): Unit
+
 foreign func qEmitterConnectInt(ptr: Int64, callback: Int32Callback, connType: Int32): Unit
+
 foreign func qEmitterConnectDouble(ptr: Int64, callback: Float64Callback, connType: Int32): Unit
+
 foreign func qEmitterConnectString(ptr: Int64, callback: CStringCallback, connType: Int32): Unit
+
 foreign func qEmitterDisconnectVoid(ptr: Int64): Unit
+
 foreign func qEmitterDisconnectInt(ptr: Int64): Unit
+
 foreign func qEmitterDisconnectDouble(ptr: Int64): Unit
+
 foreign func qEmitterDisconnectString(ptr: Int64): Unit
+
 foreign func qEmitterEmitVoid(ptr: Int64): Unit
+
 foreign func qEmitterEmitInt(ptr: Int64, v: Int32): Unit
+
 foreign func qEmitterEmitDouble(ptr: Int64, v: Float64): Unit
+
 foreign func qEmitterEmitString(ptr: Int64, s: CString): Unit
 
 /// 通用自定义信号发射器：支持 void/int/double/string 四种参数信号，
@@ -92,7 +106,9 @@ public class SignalEmitter <: QtResource {
     }
 
     public func disconnectVoid(): Unit {
-        if (ptr != 0) { unsafe { qEmitterDisconnectVoid(ptr) } }
+        if (ptr != 0) {
+            unsafe { qEmitterDisconnectVoid(ptr) }
+        }
     }
 
     // ---- int 信号 ----
@@ -112,7 +128,9 @@ public class SignalEmitter <: QtResource {
     }
 
     public func disconnectInt(): Unit {
-        if (ptr != 0) { unsafe { qEmitterDisconnectInt(ptr) } }
+        if (ptr != 0) {
+            unsafe { qEmitterDisconnectInt(ptr) }
+        }
     }
 
     // ---- double 信号 ----
@@ -132,7 +150,9 @@ public class SignalEmitter <: QtResource {
     }
 
     public func disconnectDouble(): Unit {
-        if (ptr != 0) { unsafe { qEmitterDisconnectDouble(ptr) } }
+        if (ptr != 0) {
+            unsafe { qEmitterDisconnectDouble(ptr) }
+        }
     }
 
     // ---- string 信号 ----
@@ -156,7 +176,9 @@ public class SignalEmitter <: QtResource {
     }
 
     public func disconnectString(): Unit {
-        if (ptr != 0) { unsafe { qEmitterDisconnectString(ptr) } }
+        if (ptr != 0) {
+            unsafe { qEmitterDisconnectString(ptr) }
+        }
     }
 
     /// 断开该发射器的全部信号
@@ -168,16 +190,28 @@ public class SignalEmitter <: QtResource {
     }
 
     /// 获取原生指针
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
-    public func isClosed(): Bool { closed }
-    public func isValid(): Bool { !closed && ptr != 0 && isObjectAlive(ptr) }
+    public func isClosed(): Bool {
+        closed
+    }
+    public func isValid(): Bool {
+        !closed && ptr != 0 && isObjectAlive(ptr)
+    }
     /// throws: NullPointerException 空指针访问时抛出
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     public func checkValid(): Unit {
-        if (closed) { throw ResourceDisposedException("SignalEmitter 已经被释放") }
-        if (ptr == 0) { throw NullPointerException("SignalEmitter 指针为空") }
-        if (!isObjectAlive(ptr)) { throw ResourceDisposedException("SignalEmitter 底层 Qt 对象已失效") }
+        if (closed) {
+            throw ResourceDisposedException("SignalEmitter 已经被释放")
+        }
+        if (ptr == 0) {
+            throw NullPointerException("SignalEmitter 指针为空")
+        }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("SignalEmitter 底层 Qt 对象已失效")
+        }
     }
 
     public func close(): Unit {
@@ -198,5 +232,7 @@ public class SignalEmitter <: QtResource {
         }
     }
 
-    public func delete(): Unit { close() }
+    public func delete(): Unit {
+        close()
+    }
 }

@@ -50,7 +50,9 @@ public func withCString(s: String, f: (CString) -> Unit): Unit {
 // ============================================================
 
 foreign func qTrackObject(ptr: Int64): Unit
+
 foreign func qUntrackObject(ptr: Int64): Unit
+
 foreign func qIsObjectAlive(ptr: Int64): Bool
 
 /// 注册对象到 native 存活表（对象创建后调用）

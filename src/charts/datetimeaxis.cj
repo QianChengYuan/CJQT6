@@ -7,15 +7,25 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qDateTimeAxisCreate(): Int64
+
 foreign func qDateTimeAxisDelete(ptr: Int64): Unit
+
 foreign func qDateTimeAxisSetMin(ptr: Int64, secsSinceEpoch: Float64): Unit
+
 foreign func qDateTimeAxisMin(ptr: Int64): Float64
+
 foreign func qDateTimeAxisSetMax(ptr: Int64, secsSinceEpoch: Float64): Unit
+
 foreign func qDateTimeAxisMax(ptr: Int64): Float64
+
 foreign func qDateTimeAxisSetRange(ptr: Int64, minSecs: Float64, maxSecs: Float64): Unit
+
 foreign func qDateTimeAxisSetFormat(ptr: Int64, format: CString): Unit
+
 foreign func qDateTimeAxisFormat(ptr: Int64): CString
+
 foreign func qDateTimeAxisSetTickCount(ptr: Int64, count: Int32): Unit
+
 foreign func qDateTimeAxisTickCount(ptr: Int64): Int32
 
 // ============================================================
@@ -91,7 +101,7 @@ public class QDateTimeAxis {
     public func setFormat(format: String): Unit {
         checkValid()
         unsafe {
-            withCString(format) { c => qDateTimeAxisSetFormat(ptr, c) }
+            withCString(format) {c => qDateTimeAxisSetFormat(ptr, c)}
         }
     }
 
@@ -118,7 +128,9 @@ public class QDateTimeAxis {
         unsafe { return qDateTimeAxisTickCount(ptr) }
     }
 
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     /// 释放资源；已 addAxis 后由 chart 级联释放，勿主动调用
     public func close(): Unit {

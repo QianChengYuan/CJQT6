@@ -8,21 +8,21 @@ import std.unittest.*
 @Test
 class QPushButtonTests {
     private static var guiEnv: ?GUITestEnvironment = None
-    
+
     @BeforeAll
     static func setupGUI(): Unit {
         let env = GUITestEnvironment.getInstance()
         env.setupEnvironment()
         guiEnv = Some(env)
     }
-    
+
     @AfterAll
     static func teardownGUI(): Unit {
         if (let Some(env) <- guiEnv) {
             env.teardownEnvironment()
         }
     }
-    
+
     @TestCase
     func testCreate() {
         let btn = QPushButton()
@@ -31,7 +31,7 @@ class QPushButtonTests {
         @Expect(btn.getPtr() != 0, true)
         btn.close()
     }
-    
+
     @TestCase
     func testClose() {
         let btn = QPushButton()
@@ -40,7 +40,7 @@ class QPushButtonTests {
         @Expect(btn.isClosed(), true)
         @Expect(btn.isValid(), false)
     }
-    
+
     @TestCase
     func testSetText() {
         let btn = QPushButton()
@@ -48,18 +48,18 @@ class QPushButtonTests {
         @Assert(btn.isValid())
         btn.close()
     }
-    
+
     @TestCase
     func testOperationsAfterClose() {
         let btn = QPushButton()
         btn.close()
-        
+
         @ExpectThrows[ResourceDisposedException](btn.show())
         @ExpectThrows[ResourceDisposedException](btn.hide())
         @ExpectThrows[ResourceDisposedException](btn.setText("test"))
         @ExpectThrows[ResourceDisposedException](btn.resize(100, 50))
     }
-    
+
     @TestCase
     func testSetMinimumSize() {
         let btn = QPushButton()
@@ -67,7 +67,7 @@ class QPushButtonTests {
         @Assert(btn.isValid())
         btn.close()
     }
-    
+
     @TestCase
     func testSetMaximumSize() {
         let btn = QPushButton()
@@ -75,7 +75,7 @@ class QPushButtonTests {
         @Assert(btn.isValid())
         btn.close()
     }
-    
+
     @TestCase
     func testSetMenu() {
         let btn = QPushButton()
@@ -90,21 +90,21 @@ class QPushButtonTests {
 @Test
 class QLabelTests {
     private static var guiEnv: ?GUITestEnvironment = None
-    
+
     @BeforeAll
     static func setupGUI(): Unit {
         let env = GUITestEnvironment.getInstance()
         env.setupEnvironment()
         guiEnv = Some(env)
     }
-    
+
     @AfterAll
     static func teardownGUI(): Unit {
         if (let Some(env) <- guiEnv) {
             env.teardownEnvironment()
         }
     }
-    
+
     @TestCase
     func testCreate() {
         let label = QLabel()
@@ -112,7 +112,7 @@ class QLabelTests {
         @Expect(label.isClosed(), false)
         label.close()
     }
-    
+
     @TestCase
     func testSetText() {
         let label = QLabel()
@@ -120,7 +120,7 @@ class QLabelTests {
         @Assert(label.isValid())
         label.close()
     }
-    
+
     @TestCase
     func testSetAlignment() {
         let label = QLabel()
@@ -128,12 +128,12 @@ class QLabelTests {
         @Assert(label.isValid())
         label.close()
     }
-    
+
     @TestCase
     func testOperationsAfterClose() {
         let label = QLabel()
         label.close()
-        
+
         @ExpectThrows[ResourceDisposedException](label.show())
         @ExpectThrows[ResourceDisposedException](label.setText("test"))
     }
@@ -141,7 +141,6 @@ class QLabelTests {
 
 @Test
 class QLineEditTests {
-    
     @TestCase
     func testCreate() {
         let edit = QLineEdit()
@@ -149,7 +148,7 @@ class QLineEditTests {
         @Expect(edit.isClosed(), false)
         edit.close()
     }
-    
+
     @TestCase
     func testSetText() {
         let edit = QLineEdit()
@@ -157,7 +156,7 @@ class QLineEditTests {
         @Assert(edit.isValid())
         edit.close()
     }
-    
+
     @TestCase
     func testText() {
         let edit = QLineEdit()
@@ -166,7 +165,7 @@ class QLineEditTests {
         @Expect(text, "Test Content")
         edit.close()
     }
-    
+
     @TestCase
     func testClear() {
         let edit = QLineEdit()
@@ -176,7 +175,7 @@ class QLineEditTests {
         @Expect(text, "")
         edit.close()
     }
-    
+
     @TestCase
     func testSetPlaceholder() {
         let edit = QLineEdit()
@@ -184,12 +183,12 @@ class QLineEditTests {
         @Assert(edit.isValid())
         edit.close()
     }
-    
+
     @TestCase
     func testOperationsAfterClose() {
         let edit = QLineEdit()
         edit.close()
-        
+
         @ExpectThrows[ResourceDisposedException](edit.setText("test"))
         @ExpectThrows[ResourceDisposedException](edit.text())
         @ExpectThrows[ResourceDisposedException](edit.clear())
@@ -198,7 +197,6 @@ class QLineEditTests {
 
 @Test
 class QSpinBoxTests {
-    
     @TestCase
     func testCreate() {
         let spin = QSpinBox()
@@ -206,7 +204,7 @@ class QSpinBoxTests {
         @Expect(spin.isClosed(), false)
         spin.close()
     }
-    
+
     @TestCase
     func testSetValue() {
         let spin = QSpinBox()
@@ -214,7 +212,7 @@ class QSpinBoxTests {
         @Assert(spin.isValid())
         spin.close()
     }
-    
+
     @TestCase
     func testValue() {
         let spin = QSpinBox()
@@ -223,7 +221,7 @@ class QSpinBoxTests {
         @Expect(v, 42)
         spin.close()
     }
-    
+
     @TestCase
     func testSetRange() {
         let spin = QSpinBox()
@@ -232,12 +230,12 @@ class QSpinBoxTests {
         @Expect(spin.value(), 50)
         spin.close()
     }
-    
+
     @TestCase
     func testOperationsAfterClose() {
         let spin = QSpinBox()
         spin.close()
-        
+
         @ExpectThrows[ResourceDisposedException](spin.setValue(10))
         @ExpectThrows[ResourceDisposedException](spin.value())
     }

@@ -9,17 +9,29 @@ package cjqt6.core
 // ============================================================
 
 foreign func qMimeDataCreate(): Int64
+
 foreign func qMimeDataSetText(ptr: Int64, text: CString): Unit
+
 foreign func qMimeDataText(ptr: Int64): CString
+
 foreign func qMimeDataSetHtml(ptr: Int64, html: CString): Unit
+
 foreign func qMimeDataHtml(ptr: Int64): CString
+
 foreign func qMimeDataUrlsCount(ptr: Int64): Int32
+
 foreign func qMimeDataUrlAt(ptr: Int64, index: Int32): CString
+
 foreign func qMimeDataHasText(ptr: Int64): Bool
+
 foreign func qMimeDataHasHtml(ptr: Int64): Bool
+
 foreign func qMimeDataHasUrls(ptr: Int64): Bool
+
 foreign func qMimeDataHasImage(ptr: Int64): Bool
+
 foreign func qMimeDataClear(ptr: Int64): Unit
+
 foreign func qMimeDataDelete(ptr: Int64): Unit
 
 // ============================================================
@@ -27,13 +39,21 @@ foreign func qMimeDataDelete(ptr: Int64): Unit
 // ============================================================
 
 foreign func qDragCreate(sourcePtr: Int64): Int64
+
 foreign func qDragSetMimeData(ptr: Int64, mimeDataPtr: Int64): Unit
+
 foreign func qDragSetPixmap(ptr: Int64, pixmapPtr: Int64): Unit
+
 foreign func qDragSetHotSpot(ptr: Int64, x: Int32, y: Int32): Unit
+
 foreign func qDragExec(ptr: Int64, supportedActions: Int32): Int32
+
 foreign func qDragExecWithDefault(ptr: Int64, supportedActions: Int32, defaultAction: Int32): Int32
+
 foreign func qDragSource(ptr: Int64): Int64
+
 foreign func qDragTarget(ptr: Int64): Int64
+
 foreign func qDragCancel(): Unit
 
 // ============================================================
@@ -41,8 +61,11 @@ foreign func qDragCancel(): Unit
 // ============================================================
 
 foreign func qDropActionCopy(): Int32
+
 foreign func qDropActionMove(): Int32
+
 foreign func qDropActionLink(): Int32
+
 foreign func qDropActionIgnore(): Int32
 
 // ============================================================
@@ -78,19 +101,19 @@ public class QMimeData <: QtResource {
     private var ptr: Int64 = 0
     private var owned: Bool = true
     private var closed: Bool = false
-    
+
     public init() {
         unsafe {
             ptr = qMimeDataCreate()
         }
     }
-    
+
     /// 从指针创建（不拥有所有权）
     public init(ptr: Int64, owned: Bool) {
         this.ptr = ptr
         this.owned = owned
     }
-    
+
     /// 设置文本数据
     public func setText(text: String): Unit {
         unsafe {
@@ -99,7 +122,7 @@ public class QMimeData <: QtResource {
             LibC.free(cstr)
         }
     }
-    
+
     /// 获取文本数据
     public func text(): String {
         unsafe {
@@ -109,7 +132,7 @@ public class QMimeData <: QtResource {
             return result
         }
     }
-    
+
     /// 设置HTML数据
     public func setHtml(html: String): Unit {
         unsafe {
@@ -118,7 +141,7 @@ public class QMimeData <: QtResource {
             LibC.free(cstr)
         }
     }
-    
+
     /// 获取HTML数据
     public func html(): String {
         unsafe {
@@ -128,14 +151,14 @@ public class QMimeData <: QtResource {
             return result
         }
     }
-    
+
     /// 获取URL数量
     public func urlsCount(): Int32 {
         unsafe {
             return qMimeDataUrlsCount(ptr)
         }
     }
-    
+
     /// 获取指定索引的URL
     public func urlAt(index: Int32): String {
         unsafe {
@@ -145,57 +168,57 @@ public class QMimeData <: QtResource {
             return result
         }
     }
-    
+
     /// 是否包含文本
     public func hasText(): Bool {
         unsafe {
             return qMimeDataHasText(ptr)
         }
     }
-    
+
     /// 是否包含HTML
     public func hasHtml(): Bool {
         unsafe {
             return qMimeDataHasHtml(ptr)
         }
     }
-    
+
     /// 是否包含URL
     public func hasUrls(): Bool {
         unsafe {
             return qMimeDataHasUrls(ptr)
         }
     }
-    
+
     /// 是否包含图像
     public func hasImage(): Bool {
         unsafe {
             return qMimeDataHasImage(ptr)
         }
     }
-    
+
     /// 清空所有数据
     public func clear(): Unit {
         unsafe {
             qMimeDataClear(ptr)
         }
     }
-    
+
     /// 获取指针
     public func getPtr(): Int64 {
         return ptr
     }
-    
+
     /// 是否已关闭（资源已释放）
     public func isClosed(): Bool {
         return closed
     }
-    
+
     /// 检查对象有效性（QMimeData 未接入存活表，只查 closed/ptr；QDrag 移交所有权场景请遵循 Qt 语义）
     public func isValid(): Bool {
         return !closed && ptr != 0
     }
-    
+
     /// 检查有效性，无效时抛出异常
     /// throws: ResourceDisposedException 对象已释放时抛出
     /// throws: NullPointerException 空指针访问时抛出
@@ -207,12 +230,12 @@ public class QMimeData <: QtResource {
             throw NullPointerException("QMimeData 指针为空")
         }
     }
-    
+
     /// 关闭资源（幂等；仅 owned 时删除底层对象，借用包装只置位）
     public func close(): Unit {
         delete()
     }
-    
+
     /// 删除
     public func delete(): Unit {
         if (!closed && ptr != 0) {
@@ -235,34 +258,34 @@ public class QMimeData <: QtResource {
 public class QDrag <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
-    
+
     public init(sourcePtr: Int64) {
         unsafe {
             ptr = qDragCreate(sourcePtr)
         }
     }
-    
+
     /// 设置MIME数据
     public func setMimeData(mimeData: QMimeData): Unit {
         unsafe {
             qDragSetMimeData(ptr, mimeData.getPtr())
         }
     }
-    
+
     /// 设置拖动图像
     public func setPixmap(pixmapPtr: Int64): Unit {
         unsafe {
             qDragSetPixmap(ptr, pixmapPtr)
         }
     }
-    
+
     /// 设置热点位置
     public func setHotSpot(x: Int32, y: Int32): Unit {
         unsafe {
             qDragSetHotSpot(ptr, x, y)
         }
     }
-    
+
     /// 执行拖放操作
     /// 返回实际执行的动作
     public func exec(supportedActions: Int32): Int32 {
@@ -270,50 +293,50 @@ public class QDrag <: QtResource {
             return qDragExec(ptr, supportedActions)
         }
     }
-    
+
     /// 执行拖放操作（带默认动作）
     public func exec(supportedActions: Int32, defaultAction: Int32): Int32 {
         unsafe {
             return qDragExecWithDefault(ptr, supportedActions, defaultAction)
         }
     }
-    
+
     /// 获取源控件
     public func source(): Int64 {
         unsafe {
             return qDragSource(ptr)
         }
     }
-    
+
     /// 获取目标控件
     public func target(): Int64 {
         unsafe {
             return qDragTarget(ptr)
         }
     }
-    
+
     /// 取消拖放操作
     public static func cancel(): Unit {
         unsafe {
             qDragCancel()
         }
     }
-    
+
     /// 获取指针
     public func getPtr(): Int64 {
         return ptr
     }
-    
+
     /// 是否已关闭（已结束/释放）
     public func isClosed(): Bool {
         return closed
     }
-    
+
     /// 检查对象有效性（QDrag 由 Qt 在 exec 结束后自行回收，不删除也不 track）
     public func isValid(): Bool {
         return !closed && ptr != 0
     }
-    
+
     /// 检查有效性，无效时抛出异常
     /// throws: ResourceDisposedException 对象已释放时抛出
     /// throws: NullPointerException 空指针访问时抛出
@@ -325,7 +348,7 @@ public class QDrag <: QtResource {
             throw NullPointerException("QDrag 指针为空")
         }
     }
-    
+
     /// 结束拖放句柄（幂等；底层 QDrag 由 Qt 生命周期管理，此处只置位不删除）
     public func close(): Unit {
         if (!closed) {
@@ -333,7 +356,7 @@ public class QDrag <: QtResource {
             closed = true
         }
     }
-    
+
     /// 删除（兼容旧 API，等同 close()；不做 native 删除）
     public func delete(): Unit {
         close()
@@ -357,7 +380,7 @@ public func startTextDrag(sourcePtr: Int64, text: String, supportedActions: Int3
 public func startFileDrag(sourcePtr: Int64, filePath: String, supportedActions: Int32): Int32 {
     let drag = QDrag(sourcePtr)
     let mimeData = QMimeData()
-    mimeData.setText(filePath)  // 简化实现
+    mimeData.setText(filePath) // 简化实现
     drag.setMimeData(mimeData)
     return drag.exec(supportedActions)
 }

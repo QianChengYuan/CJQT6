@@ -7,15 +7,25 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qBarSetCreate(label: CString): Int64
+
 foreign func qBarSetDelete(ptr: Int64): Unit
+
 foreign func qBarSetAppend(ptr: Int64, value: Float64): Unit
+
 foreign func qBarSetInsert(ptr: Int64, index: Int32, value: Float64): Unit
+
 foreign func qBarSetRemove(ptr: Int64, index: Int32, count: Int32): Unit
+
 foreign func qBarSetReplace(ptr: Int64, index: Int32, value: Float64): Unit
+
 foreign func qBarSetCount(ptr: Int64): Int32
+
 foreign func qBarSetSum(ptr: Int64): Float64
+
 foreign func qBarSetSetLabel(ptr: Int64, label: CString): Unit
+
 foreign func qBarSetColor(ptr: Int64, r: Int32, g: Int32, b: Int32): Unit
+
 foreign func qBarSetSetBorderColor(ptr: Int64, r: Int32, g: Int32, b: Int32): Unit
 
 // ============================================================
@@ -49,7 +59,7 @@ public class QBarSet {
     /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(label: String) {
         unsafe {
-            withCString(label) { c => ptr = qBarSetCreate(c) }
+            withCString(label) {c => ptr = qBarSetCreate(c)}
         }
         if (ptr == 0) {
             throw CreateFailedException("QBarSet create failed")
@@ -97,7 +107,7 @@ public class QBarSet {
     public func setLabel(label: String): Unit {
         checkValid()
         unsafe {
-            withCString(label) { c => qBarSetSetLabel(ptr, c) }
+            withCString(label) {c => qBarSetSetLabel(ptr, c)}
         }
     }
 
@@ -113,7 +123,9 @@ public class QBarSet {
         unsafe { qBarSetSetBorderColor(ptr, r, g, b) }
     }
 
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     /// 释放资源；已 append 到 QBarSeries 后由 series 级联释放，勿主动调用
     public func close(): Unit {

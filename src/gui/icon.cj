@@ -4,9 +4,13 @@ import cjqt6.core.*
 
 // QIcon FFI
 foreign func qIconCreate(): Int64
+
 foreign func qIconCreateFromFile(filename: CString): Int64
+
 foreign func qIconIsNull(ptr: Int64): Bool
+
 foreign func qIconAddFile(ptr: Int64, filename: CString): Unit
+
 foreign func qIconDelete(ptr: Int64): Unit
 
 /// QIcon - 图标类
@@ -31,7 +35,7 @@ public class QIcon {
     /// 从文件路径创建图标
     public init(filename: String) {
         unsafe {
-            withCString(filename) { c => ptr = qIconCreateFromFile(c) }
+            withCString(filename) {c => ptr = qIconCreateFromFile(c)}
         }
     }
 
@@ -45,11 +49,13 @@ public class QIcon {
     public func addFile(filename: String): Unit {
         checkValid()
         unsafe {
-            withCString(filename) { c => qIconAddFile(ptr, c) }
+            withCString(filename) {c => qIconAddFile(ptr, c)}
         }
     }
 
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     /// 释放资源
     public func close(): Unit {
@@ -60,5 +66,7 @@ public class QIcon {
         }
     }
 
-    public func delete(): Unit { close() }
+    public func delete(): Unit {
+        close()
+    }
 }

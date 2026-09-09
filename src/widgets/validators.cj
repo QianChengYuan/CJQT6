@@ -4,40 +4,59 @@ import cjqt6.core.*
 
 // 验证器 FFI 声明
 foreign func qIntValidatorCreate(min: Int32, max: Int32): Int64
+
 foreign func qIntValidatorSetRange(ptr: Int64, min: Int32, max: Int32): Unit
+
 foreign func qDoubleValidatorCreate(min: Float64, max: Float64, decimals: Int32): Int64
+
 foreign func qDoubleValidatorSetRange(ptr: Int64, min: Float64, max: Float64, decimals: Int32): Unit
+
 foreign func qIntValidatorBottom(ptr: Int64): Int32
+
 foreign func qIntValidatorSetBottom(ptr: Int64, value: Int32): Unit
+
 foreign func qIntValidatorTop(ptr: Int64): Int32
+
 foreign func qIntValidatorSetTop(ptr: Int64, value: Int32): Unit
+
 foreign func qDoubleValidatorBottom(ptr: Int64): Float64
+
 foreign func qDoubleValidatorSetBottom(ptr: Int64, value: Float64): Unit
+
 foreign func qDoubleValidatorTop(ptr: Int64): Float64
+
 foreign func qDoubleValidatorSetTop(ptr: Int64, value: Float64): Unit
+
 foreign func qDoubleValidatorDecimals(ptr: Int64): Int32
+
 foreign func qDoubleValidatorSetDecimals(ptr: Int64, value: Int32): Unit
+
 foreign func qDoubleValidatorNotation(ptr: Int64): Int32
+
 foreign func qDoubleValidatorSetNotation(ptr: Int64, value: Int32): Unit
+
 foreign func qRegExpValidatorCreate(pattern: CString): Int64
+
 foreign func qRegExpValidatorSetPattern(ptr: Int64, pattern: CString): Unit
+
 foreign func qLineEditSetValidator(lineEditPtr: Int64, validatorPtr: Int64): Unit
+
 foreign func qValidatorDelete(ptr: Int64): Unit
 
 /// 整数输入验证器
 public class QIntValidator {
     private var ptr: Int64 = 0
-    
+
     public init(min: Int32, max: Int32) {
         unsafe {
             ptr = qIntValidatorCreate(min, max)
         }
     }
-    
+
     public init() {
         this(Int32(-2147483648), Int32(2147483647))
     }
-    
+
     /// 设置验证范围
     public func setRange(min: Int32, max: Int32): Unit {
         unsafe { qIntValidatorSetRange(ptr, min, max) }
@@ -80,13 +99,13 @@ public class QIntValidator {
 /// 浮点数输入验证器
 public class QDoubleValidator {
     private var ptr: Int64 = 0
-    
+
     public init(min: Float64, max: Float64, decimals: Int32) {
         unsafe {
             ptr = qDoubleValidatorCreate(min, max, decimals)
         }
     }
-    
+
     /// 设置验证范围
     public func setRange(min: Float64, max: Float64, decimals: Int32): Unit {
         unsafe { qDoubleValidatorSetRange(ptr, min, max, decimals) }
@@ -152,14 +171,14 @@ public class QRegExpValidator {
 
     public init(pattern: String) {
         unsafe {
-            withCString(pattern) { c => ptr = qRegExpValidatorCreate(c) }
+            withCString(pattern) {c => ptr = qRegExpValidatorCreate(c)}
         }
     }
 
     /// 重新设置正则表达式
     public func setPattern(pattern: String): Unit {
         unsafe {
-            withCString(pattern) { c => qRegExpValidatorSetPattern(ptr, c) }
+            withCString(pattern) {c => qRegExpValidatorSetPattern(ptr, c)}
         }
     }
 

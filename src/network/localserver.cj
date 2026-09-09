@@ -7,33 +7,57 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qLocalServerCreate(): Int64
+
 foreign func qLocalServerDelete(ptr: Int64): Unit
+
 foreign func qLocalServerListen(ptr: Int64, name: CString): Bool
+
 foreign func qLocalServerClose(ptr: Int64): Unit
+
 foreign func qLocalServerIsListening(ptr: Int64): Bool
+
 foreign func qLocalServerFullServerName(ptr: Int64): CString
+
 foreign func qLocalServerServerName(ptr: Int64): CString
+
 foreign func qLocalServerMaxPendingConnections(ptr: Int64): Int32
+
 foreign func qLocalServerSetMaxPendingConnections(ptr: Int64, count: Int32): Unit
+
 foreign func qLocalServerWaitForNewConnection(ptr: Int64, msec: Int32): Int64
+
 foreign func qLocalServerHasPendingConnections(ptr: Int64): Bool
+
 foreign func qLocalServerNextPendingConnection(ptr: Int64): Int64
+
 foreign func qLocalServerSetSocketOptions(ptr: Int64, options: Int32): Unit
+
 foreign func qLocalServerSocketOptions(ptr: Int64): Int32
+
 foreign func qLocalServerRemoveServer(name: CString): Bool
 
 /// 本地套接字访问权限选项（与 QLocalServer::SocketOption 枚举对应，可按位组合）
 public class SocketOption {
     /// 无特殊权限
-    public static func noOptions(): Int32 { 0 }
+    public static func noOptions(): Int32 {
+        0
+    }
     /// 仅用户可访问
-    public static func userAccessOption(): Int32 { 1 }
+    public static func userAccessOption(): Int32 {
+        1
+    }
     /// 同组用户可访问
-    public static func groupAccessOption(): Int32 { 2 }
+    public static func groupAccessOption(): Int32 {
+        2
+    }
     /// 其他用户可访问
-    public static func otherAccessOption(): Int32 { 4 }
+    public static func otherAccessOption(): Int32 {
+        4
+    }
     /// 所有用户可访问（user|group|other）
-    public static func worldAccessOption(): Int32 { 7 }
+    public static func worldAccessOption(): Int32 {
+        7
+    }
 }
 
 /// 本地服务器，通过 Unix 域套接字或 Windows 命名管道提供进程间通信
@@ -161,7 +185,9 @@ public class QLocalServer {
     }
 
     /// 获取底层指针
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     /// 释放资源
     public func close(): Unit {

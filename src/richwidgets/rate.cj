@@ -25,12 +25,16 @@ public class Rate <: QtResource {
         group.setFlat(true)
         layout = QHBoxLayout()
         stars = ArrayList<QPushButton>()
-        maxStars = if (count < 1) { 1 } else { count }
+        maxStars = if (count < 1) {
+            1
+        } else {
+            count
+        }
         for (i in 0..maxStars) {
             let star = QPushButton()
             star.setText("☆")
             // 闭包捕获 this 与循环变量 i（均为 let），调成员方法 setRating
-            star.setOnClickCapture({ => setRating(i + 1) })
+            star.setOnClickCapture({=> setRating(i + 1)})
             layout.addWidget(star.getPtr())
             stars.add(star)
         }
@@ -49,7 +53,7 @@ public class Rate <: QtResource {
         for (i in 0..maxStars) {
             let star = QPushButton()
             star.setText("☆")
-            star.setOnClickCapture({ => setRating(i + 1) })
+            star.setOnClickCapture({=> setRating(i + 1)})
             layout.addWidget(star.getPtr())
             stars.add(star)
         }

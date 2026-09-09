@@ -169,7 +169,7 @@ class QRadioButtonTests {
         let rb = QRadioButton()
         rb.delete()
         @Assert(true)
-        rb.delete()  // 安全
+        rb.delete() // 安全
         @Assert(true)
     }
 
@@ -180,9 +180,9 @@ class QRadioButtonTests {
         @Expect(rb.isEnabled(), false)
         rb.delete()
     }
-    
+
     // ===== QtResource 测试 =====
-    
+
     @TestCase
     func testClose() {
         let rb = QRadioButton()
@@ -192,15 +192,15 @@ class QRadioButtonTests {
         @Expect(rb.isClosed(), true)
         @Expect(rb.isValid(), false)
     }
-    
+
     @TestCase
     func testDoubleClose() {
         let rb = QRadioButton()
         rb.close()
-        rb.close()  // 安全
+        rb.close() // 安全
         @Assert(true)
     }
-    
+
     @TestCase
     func testOperationsAfterClose() {
         let rb = QRadioButton()
@@ -210,12 +210,12 @@ class QRadioButtonTests {
         @ExpectThrows[ResourceDisposedException](rb.setText("test"))
         @ExpectThrows[ResourceDisposedException](rb.setChecked(true))
     }
-    
+
     @TestCase
     func testDeleteAfterClose() {
         let rb = QRadioButton()
         rb.close()
-        rb.delete()  // delete 应安全处理已关闭状态
+        rb.delete() // delete 应安全处理已关闭状态
         @Assert(true)
     }
 }
@@ -737,12 +737,12 @@ class QDialTests {
     func testDoubleDelete() {
         let dial = QDial()
         dial.delete()
-        dial.delete()  // 安全
+        dial.delete() // 安全
         @Assert(true)
     }
-    
+
     // ===== QtResource 测试 =====
-    
+
     @TestCase
     func testClose() {
         let dial = QDial()
@@ -752,15 +752,15 @@ class QDialTests {
         @Expect(dial.isClosed(), true)
         @Expect(dial.isValid(), false)
     }
-    
+
     @TestCase
     func testDoubleClose() {
         let dial = QDial()
         dial.close()
-        dial.close()  // 安全
+        dial.close() // 安全
         @Assert(true)
     }
-    
+
     @TestCase
     func testOperationsAfterClose() {
         let dial = QDial()
@@ -770,12 +770,12 @@ class QDialTests {
         @ExpectThrows[ResourceDisposedException](dial.setValue(50))
         @ExpectThrows[ResourceDisposedException](dial.value())
     }
-    
+
     @TestCase
     func testDeleteAfterClose() {
         let dial = QDial()
         dial.close()
-        dial.delete()  // 安全
+        dial.delete() // 安全
         @Assert(true)
     }
 }
@@ -1082,7 +1082,7 @@ class QLCDNumberTests {
     func testDoubleClose() {
         let lcd = QLCDNumber()
         lcd.close()
-        lcd.close()  // 安全
+        lcd.close() // 安全
         @Assert(true)
     }
 
@@ -1100,7 +1100,7 @@ class QLCDNumberTests {
     func testDeleteAfterClose() {
         let lcd = QLCDNumber()
         lcd.close()
-        lcd.delete()  // 安全
+        lcd.delete() // 安全
         @Assert(true)
     }
 }
@@ -1183,7 +1183,7 @@ class QToolButtonTests {
     func testDoubleClose() {
         let btn = QToolButton()
         btn.close()
-        btn.close()  // 安全
+        btn.close() // 安全
         @Assert(true)
     }
 
@@ -1201,7 +1201,7 @@ class QToolButtonTests {
     func testDeleteAfterClose() {
         let btn = QToolButton()
         btn.close()
-        btn.delete()  // 安全
+        btn.delete() // 安全
         @Assert(true)
     }
 }
@@ -1314,7 +1314,7 @@ class QSplitterTests {
     func testDoubleClose() {
         let splitter = QSplitter(0)
         splitter.close()
-        splitter.close()  // 安全
+        splitter.close() // 安全
         @Assert(true)
     }
 
@@ -1339,7 +1339,7 @@ class QSplitterTests {
         let p1 = QLabel()
         let p2 = QLabel()
         splitter.addWidget(p1.getPtr())
-        splitter.insertWidget(0, p2.getPtr())  // 在头部插入
+        splitter.insertWidget(0, p2.getPtr()) // 在头部插入
         @Expect(splitter.count(), 2)
         p1.close()
         p2.close()
@@ -1353,7 +1353,7 @@ class QSplitterTests {
         let p2 = QLabel()
         splitter.addWidget(p1.getPtr())
         let oldPtr = splitter.replaceWidget(0, p2.getPtr())
-        @Expect(oldPtr != 0, true)  // 返回被替换的 p1 指针
+        @Expect(oldPtr != 0, true) // 返回被替换的 p1 指针
         @Expect(splitter.count(), 1)
         p1.close()
         p2.close()
@@ -1408,7 +1408,7 @@ class QSplitterTests {
         splitter.addWidget(p1.getPtr())
         splitter.addWidget(p2.getPtr())
         let state = splitter.saveState()
-        @Expect(state.size > 0, true)  // 非空状态字节
+        @Expect(state.size > 0, true) // 非空状态字节
         p1.close()
         p2.close()
         splitter.close()

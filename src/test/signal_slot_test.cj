@@ -17,7 +17,6 @@ var gApp: ?QApplication = None
 
 @Test
 class SignalSlotTests {
-
     @BeforeEach
     static func setUp(): Unit {
         gApp = Some(QApplication())
@@ -43,7 +42,7 @@ class SignalSlotTests {
         let w = QTimer()
         gWatchdog = Some(w)
         w.setInterval(ms)
-        w.setOnTimeout({ => QApp.quit() })
+        w.setOnTimeout({=> QApp.quit()})
         w.start()
     }
 
@@ -63,18 +62,25 @@ class SignalSlotTests {
         gTimer = Some(timer)
         timer.setInterval(10)
 
-        timer.setOnTimeout({ => gReplaceA += 1 })
-        timer.setOnTimeout({ =>
-            gReplaceB += 1
-            if (gReplaceB >= 3) {
-                if (let Some(t) <- gTimer) { t.stop() }
-                QApp.quit()
+        timer.setOnTimeout({=> gReplaceA += 1})
+        timer.setOnTimeout(
+            {
+                =>
+                    gReplaceB += 1
+                    if (gReplaceB >= 3) {
+                        if (let Some(t) <- gTimer) {
+                            t.stop()
+                        }
+                        QApp.quit()
+                    }
             }
-        })
+        )
 
         armWatchdog(3000)
         timer.start()
-        if (let Some(a) <- gApp) { a.exec() }
+        if (let Some(a) <- gApp) {
+            a.exec()
+        }
         disarmWatchdog()
 
         @Expect(gReplaceA, 0)
@@ -93,19 +99,26 @@ class SignalSlotTests {
         gTimer = Some(timer)
         timer.setInterval(10)
 
-        let conn = timer.setOnTimeout({ =>
-            if (gPhase == 0) {
+        let conn = timer.setOnTimeout({
+            => if (gPhase == 0) {
                 gHandleOld += 1
                 if (gHandleOld >= 2) {
-                    if (let Some(c) <- gConnOld) { c.disconnect() }
+                    if (let Some(c) <- gConnOld) {
+                        c.disconnect()
+                    }
                     if (let Some(t) <- gTimer) {
-                        gConn2 = t.setOnTimeout({ =>
-                            gHandleNew += 1
-                            if (gHandleNew >= 3) {
-                                if (let Some(gt) <- gTimer) { gt.stop() }
-                                QApp.quit()
+                        gConn2 = t.setOnTimeout(
+                            {
+                                =>
+                                    gHandleNew += 1
+                                    if (gHandleNew >= 3) {
+                                        if (let Some(gt) <- gTimer) {
+                                            gt.stop()
+                                        }
+                                        QApp.quit()
+                                    }
                             }
-                        })
+                        )
                     }
                     gPhase = 1
                 }
@@ -116,7 +129,9 @@ class SignalSlotTests {
 
         armWatchdog(3000)
         timer.start()
-        if (let Some(a) <- gApp) { a.exec() }
+        if (let Some(a) <- gApp) {
+            a.exec()
+        }
         disarmWatchdog()
 
         @Expect(gHandleOld, 2)
@@ -133,13 +148,13 @@ class SignalSlotTests {
     @TestCase
     func testButtonPressedHandle() {
         let btn = QPushButton()
-        let conn = btn.setOnPressed({ => /* offscreen */ })
+        let conn = btn.setOnPressed({=> /* offscreen */ })
         @Expect(conn.isConnected(), true)
 
         conn.disconnect()
         @Expect(conn.isConnected(), false)
 
-        let conn2 = btn.setOnPressed({ => /* offscreen */ })
+        let conn2 = btn.setOnPressed({=> /* offscreen */ })
         @Expect(conn2.isConnected(), true)
         conn2.disconnect()
         btn.close()

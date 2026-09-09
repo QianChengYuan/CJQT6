@@ -5,9 +5,13 @@ package cjqt6.core
 // ============================================================
 
 foreign func qShortcutCreate(parentPtr: Int64): Int64
+
 foreign func qShortcutSetKey(ptr: Int64, keySequence: CString): Unit
+
 foreign func qShortcutSetEnabled(ptr: Int64, enabled: Bool): Unit
+
 foreign func qShortcutSetAutoRepeat(ptr: Int64, repeat: Bool): Unit
+
 foreign func qShortcutDelete(ptr: Int64): Unit
 
 /// 快捷键，将按键序列绑定到父控件，触发对应操作（结合信号系统使用）

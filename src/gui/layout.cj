@@ -50,7 +50,8 @@ foreign func qGridLayoutCreate(): Int64
 // QGridLayout::addWidget() - 在指定位置添加子部件
 foreign func qGridLayoutAddWidget(layoutPtr: Int64, widgetPtr: Int64, row: Int32, col: Int32): Unit
 // QGridLayout::addWidget() - 在指定位置添加跨行跨列的子部件
-foreign func qGridLayoutAddWidgetSpan(layoutPtr: Int64, widgetPtr: Int64, row: Int32, col: Int32, rowSpan: Int32, colSpan: Int32): Unit
+foreign func qGridLayoutAddWidgetSpan(layoutPtr: Int64, widgetPtr: Int64, row: Int32, col: Int32, rowSpan: Int32,
+    colSpan: Int32): Unit
 // QGridLayout::setSpacing() - 设置间距
 foreign func qGridLayoutSetSpacing(ptr: Int64, spacing: Int32): Unit
 // QGridLayout::setMargin() - 设置边距
@@ -69,56 +70,56 @@ foreign func qWidgetSetLayout(widgetPtr: Int64, layoutPtr: Int64): Unit
 public class QVBoxLayout <: QLayout {
     private var ptr: Int64 = 0
     private var closed: Bool = false
-    
+
     public init() {
         unsafe {
             ptr = qVBoxLayoutCreate()
         }
         trackObject(ptr)
     }
-    
+
     public func addWidget(widgetPtr: Int64): Unit {
         checkValid()
         unsafe {
             qVBoxLayoutAddWidget(ptr, widgetPtr)
         }
     }
-    
+
     public func addWidget(widgetPtr: Int64, stretch: Int32): Unit {
         checkValid()
         unsafe {
             qVBoxLayoutAddWidgetStretch(ptr, widgetPtr, stretch)
         }
     }
-    
+
     public func addLayout(layoutPtr: Int64): Unit {
         checkValid()
         unsafe {
             qVBoxLayoutAddLayout(ptr, layoutPtr)
         }
     }
-    
+
     public func addStretch(): Unit {
         checkValid()
         unsafe {
             qVBoxLayoutAddStretch(ptr)
         }
     }
-    
+
     public func setSpacing(spacing: Int32): Unit {
         checkValid()
         unsafe {
             qVBoxLayoutSetSpacing(ptr, spacing)
         }
     }
-    
+
     public func setMargin(margin: Int32): Unit {
         checkValid()
         unsafe {
             qVBoxLayoutSetMargin(ptr, margin)
         }
     }
-    
+
     /// 设置四方向边距（当四方向边距不同时使用Margins的all字段）
     public func setMargins(margins: Margins): Unit {
         checkValid()
@@ -126,19 +127,19 @@ public class QVBoxLayout <: QLayout {
             qVBoxLayoutSetMargin(ptr, margins.left)
         }
     }
-    
+
     public func getPtr(): Int64 {
         ptr
     }
-    
+
     public func isClosed(): Bool {
         closed
     }
-    
+
     public func isValid(): Bool {
         !closed && ptr != 0 && isObjectAlive(ptr)
     }
-    
+
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     public func checkValid(): Unit {
         if (closed) {
@@ -151,7 +152,7 @@ public class QVBoxLayout <: QLayout {
             throw ResourceDisposedException("QVBoxLayout 底层 Qt 对象已失效")
         }
     }
-    
+
     public func close(): Unit {
         if (!closed && ptr != 0) {
             if (!isObjectAlive(ptr)) {
@@ -168,7 +169,7 @@ public class QVBoxLayout <: QLayout {
             ptr = 0
         }
     }
-    
+
     public func delete(): Unit {
         close()
     }
@@ -180,56 +181,56 @@ public class QVBoxLayout <: QLayout {
 public class QHBoxLayout <: QLayout {
     private var ptr: Int64 = 0
     private var closed: Bool = false
-    
+
     public init() {
         unsafe {
             ptr = qHBoxLayoutCreate()
         }
         trackObject(ptr)
     }
-    
+
     public func addWidget(widgetPtr: Int64): Unit {
         checkValid()
         unsafe {
             qHBoxLayoutAddWidget(ptr, widgetPtr)
         }
     }
-    
+
     public func addWidget(widgetPtr: Int64, stretch: Int32): Unit {
         checkValid()
         unsafe {
             qHBoxLayoutAddWidgetStretch(ptr, widgetPtr, stretch)
         }
     }
-    
+
     public func addLayout(layoutPtr: Int64): Unit {
         checkValid()
         unsafe {
             qHBoxLayoutAddLayout(ptr, layoutPtr)
         }
     }
-    
+
     public func addStretch(): Unit {
         checkValid()
         unsafe {
             qHBoxLayoutAddStretch(ptr)
         }
     }
-    
+
     public func setSpacing(spacing: Int32): Unit {
         checkValid()
         unsafe {
             qHBoxLayoutSetSpacing(ptr, spacing)
         }
     }
-    
+
     public func setMargin(margin: Int32): Unit {
         checkValid()
         unsafe {
             qHBoxLayoutSetMargin(ptr, margin)
         }
     }
-    
+
     /// 设置四方向边距（当四方向边距不同时使用Margins的all字段）
     public func setMargins(margins: Margins): Unit {
         checkValid()
@@ -237,19 +238,19 @@ public class QHBoxLayout <: QLayout {
             qHBoxLayoutSetMargin(ptr, margins.left)
         }
     }
-    
+
     public func getPtr(): Int64 {
         ptr
     }
-    
+
     public func isClosed(): Bool {
         closed
     }
-    
+
     public func isValid(): Bool {
         !closed && ptr != 0 && isObjectAlive(ptr)
     }
-    
+
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     public func checkValid(): Unit {
         if (closed) {
@@ -262,7 +263,7 @@ public class QHBoxLayout <: QLayout {
             throw ResourceDisposedException("QHBoxLayout 底层 Qt 对象已失效")
         }
     }
-    
+
     public func close(): Unit {
         if (!closed && ptr != 0) {
             if (!isObjectAlive(ptr)) {
@@ -279,7 +280,7 @@ public class QHBoxLayout <: QLayout {
             ptr = 0
         }
     }
-    
+
     public func delete(): Unit {
         close()
     }
@@ -291,42 +292,42 @@ public class QHBoxLayout <: QLayout {
 public class QGridLayout <: QLayout {
     private var ptr: Int64 = 0
     private var closed: Bool = false
-    
+
     public init() {
         unsafe {
             ptr = qGridLayoutCreate()
         }
         trackObject(ptr)
     }
-    
+
     public func addWidget(widgetPtr: Int64, row: Int32, col: Int32): Unit {
         checkValid()
         unsafe {
             qGridLayoutAddWidget(ptr, widgetPtr, row, col)
         }
     }
-    
+
     public func addWidgetSpan(widgetPtr: Int64, row: Int32, col: Int32, rowSpan: Int32, colSpan: Int32): Unit {
         checkValid()
         unsafe {
             qGridLayoutAddWidgetSpan(ptr, widgetPtr, row, col, rowSpan, colSpan)
         }
     }
-    
+
     public func setSpacing(spacing: Int32): Unit {
         checkValid()
         unsafe {
             qGridLayoutSetSpacing(ptr, spacing)
         }
     }
-    
+
     public func setMargin(margin: Int32): Unit {
         checkValid()
         unsafe {
             qGridLayoutSetMargin(ptr, margin)
         }
     }
-    
+
     /// 设置四方向边距（当四方向边距不同时使用Margins的all字段）
     public func setMargins(margins: Margins): Unit {
         checkValid()
@@ -334,19 +335,19 @@ public class QGridLayout <: QLayout {
             qGridLayoutSetMargin(ptr, margins.left)
         }
     }
-    
+
     public func getPtr(): Int64 {
         ptr
     }
-    
+
     public func isClosed(): Bool {
         closed
     }
-    
+
     public func isValid(): Bool {
         !closed && ptr != 0 && isObjectAlive(ptr)
     }
-    
+
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     public func checkValid(): Unit {
         if (closed) {
@@ -359,7 +360,7 @@ public class QGridLayout <: QLayout {
             throw ResourceDisposedException("QGridLayout 底层 Qt 对象已失效")
         }
     }
-    
+
     public func close(): Unit {
         if (!closed && ptr != 0) {
             if (!isObjectAlive(ptr)) {
@@ -376,7 +377,7 @@ public class QGridLayout <: QLayout {
             ptr = 0
         }
     }
-    
+
     public func delete(): Unit {
         close()
     }
@@ -418,16 +419,16 @@ foreign func qFormLayoutDelete(ptr: Int64): Unit
 
 /// 字段增长策略
 public class FieldGrowthPolicy {
-    public static let FieldsStayAtSizeHint: Int32 = 0  // 字段保持大小提示
-    public static let ExpandingFieldsGrow: Int32 = 1   // 可扩展字段增长
+    public static let FieldsStayAtSizeHint: Int32 = 0 // 字段保持大小提示
+    public static let ExpandingFieldsGrow: Int32 = 1 // 可扩展字段增长
     public static let AllNonFixedFieldsGrow: Int32 = 2 // 所有非固定字段增长
 }
 
 /// 行换行策略
 public class RowWrapPolicy {
-    public static let DontWrapRows: Int32 = 0       // 不换行
-    public static let WrapLongRows: Int32 = 1       // 长行换行
-    public static let WrapAllRows: Int32 = 2        // 所有行换行
+    public static let DontWrapRows: Int32 = 0 // 不换行
+    public static let WrapLongRows: Int32 = 1 // 长行换行
+    public static let WrapAllRows: Int32 = 2 // 所有行换行
 }
 
 /// 表单布局
@@ -447,7 +448,7 @@ public class QFormLayout <: QLayout {
     public func addRow(label: String, widgetPtr: Int64): Unit {
         checkValid()
         unsafe {
-            withCString(label) { c => qFormLayoutAddRow(ptr, c, widgetPtr) }
+            withCString(label) {c => qFormLayoutAddRow(ptr, c, widgetPtr)}
         }
     }
 
@@ -463,7 +464,7 @@ public class QFormLayout <: QLayout {
     public func addRowLayout(label: String, layoutPtr: Int64): Unit {
         checkValid()
         unsafe {
-            withCString(label) { c => qFormLayoutAddRowLayout(ptr, c, layoutPtr) }
+            withCString(label) {c => qFormLayoutAddRowLayout(ptr, c, layoutPtr)}
         }
     }
 
@@ -471,7 +472,7 @@ public class QFormLayout <: QLayout {
     public func insertRow(row: Int32, label: String, widgetPtr: Int64): Unit {
         checkValid()
         unsafe {
-            withCString(label) { c => qFormLayoutInsertRow(ptr, row, c, widgetPtr) }
+            withCString(label) {c => qFormLayoutInsertRow(ptr, row, c, widgetPtr)}
         }
     }
 
@@ -555,11 +556,11 @@ public class QFormLayout <: QLayout {
     public func isClosed(): Bool {
         closed
     }
-    
+
     public func isValid(): Bool {
         !closed && ptr != 0 && isObjectAlive(ptr)
     }
-    
+
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     public func checkValid(): Unit {
         if (closed) {
@@ -572,7 +573,7 @@ public class QFormLayout <: QLayout {
             throw ResourceDisposedException("QFormLayout 底层 Qt 对象已失效")
         }
     }
-    
+
     public func close(): Unit {
         if (!closed && ptr != 0) {
             if (!isObjectAlive(ptr)) {

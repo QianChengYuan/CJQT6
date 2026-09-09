@@ -53,71 +53,71 @@ foreign func qProgressBarDelete(ptr: Int64): Unit
 public class QProgressBar <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
-    
+
     public init() {
         unsafe {
             ptr = qProgressBarCreate()
         }
         trackObject(ptr)
     }
-    
+
     public func show(): Unit {
         checkValid()
         unsafe {
             qWidgetShow(ptr)
         }
     }
-    
+
     public func hide(): Unit {
         checkValid()
         unsafe {
             qWidgetHide(ptr)
         }
     }
-    
+
     public func resize(width: Int32, height: Int32): Unit {
         checkValid()
         unsafe {
             qWidgetResize(ptr, width, height)
         }
     }
-    
+
     public func setValue(value: Int32): Unit {
         checkValid()
         unsafe {
             qProgressBarSetValue(ptr, value)
         }
     }
-    
+
     public func value(): Int32 {
         checkValid()
         unsafe {
             qProgressBarValue(ptr)
         }
     }
-    
+
     public func setRange(min: Int32, max: Int32): Unit {
         checkValid()
         unsafe {
             qProgressBarSetRange(ptr, min, max)
         }
     }
-    
+
     public func setTextVisible(visible: Bool): Unit {
         checkValid()
         unsafe {
             qProgressBarSetTextVisible(ptr, visible)
         }
     }
-    
+
     /// 设置显示格式（如 "%p%" 显示百分比）
     public func setFormat(format: String): Unit {
         checkValid()
         unsafe {
-            withCString(format) { c => qProgressBarSetFormat(ptr, c) }
+            withCString(format) {c => qProgressBarSetFormat(ptr, c)}
         }
     }
-    
+
     /// 获取显示格式
     public func format(): String {
         checkValid()
@@ -139,7 +139,7 @@ public class QProgressBar <: QtResource {
             return result
         }
     }
-    
+
     /// 设置方向
     public func setOrientation(orientation: Int32): Unit {
         checkValid()
@@ -147,7 +147,7 @@ public class QProgressBar <: QtResource {
             qProgressBarSetOrientation(ptr, orientation)
         }
     }
-    
+
     /// 设置反向外观
     public func setInvertedAppearance(invert: Bool): Unit {
         checkValid()
@@ -155,7 +155,7 @@ public class QProgressBar <: QtResource {
             qProgressBarSetInvertedAppearance(ptr, invert)
         }
     }
-    
+
     /// 重置进度条
     public func reset(): Unit {
         checkValid()
@@ -248,10 +248,14 @@ public class QProgressBar <: QtResource {
     public func setEnabled(enabled: Bool): Unit {
         checkValid()
         unsafe {
-            qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
+            qWidgetSetEnabled(ptr, if (enabled) {
+                1
+            } else {
+                0
+            })
         }
     }
-    
+
     /// 检查是否启用
     public func isEnabled(): Bool {
         checkValid()
@@ -259,15 +263,15 @@ public class QProgressBar <: QtResource {
             qWidgetIsEnabled(ptr) == 1
         }
     }
-    
+
     /// 设置样式表
     public func setStyleSheet(style: String): Unit {
         checkValid()
         unsafe {
-            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
+            withCString(style) {c => qWidgetSetStyleSheet(ptr, c)}
         }
     }
-    
+
     /// 设置最小尺寸
     public func setMinimumSize(minw: Int32, minh: Int32): Unit {
         checkValid()
@@ -275,7 +279,7 @@ public class QProgressBar <: QtResource {
             qWidgetSetMinimumSize(ptr, minw, minh)
         }
     }
-    
+
     /// 设置最大尺寸
     public func setMaximumSize(maxw: Int32, maxh: Int32): Unit {
         checkValid()
@@ -283,22 +287,22 @@ public class QProgressBar <: QtResource {
             qWidgetSetMaximumSize(ptr, maxw, maxh)
         }
     }
-    
+
     /// 获取原生指针
     public func getPtr(): Int64 {
         return ptr
     }
-    
+
     /// 是否已关闭
     public func isClosed(): Bool {
         return closed
     }
-    
+
     /// 检查对象有效性
     public func isValid(): Bool {
         return !closed && ptr != 0 && isObjectAlive(ptr)
     }
-    
+
     /// 检查有效性，无效时抛出异常
     /// throws: NullPointerException 空指针访问时抛出
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
@@ -313,7 +317,7 @@ public class QProgressBar <: QtResource {
             throw ResourceDisposedException("QProgressBar 底层 Qt 对象已失效")
         }
     }
-    
+
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
@@ -332,7 +336,7 @@ public class QProgressBar <: QtResource {
             ptr = 0
         }
     }
-    
+
     /// 删除进度条（兼容旧API）
     public func delete(): Unit {
         close()

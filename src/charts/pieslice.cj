@@ -7,28 +7,51 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qPieSliceCreate(): Int64
+
 foreign func qPieSliceCreateLabelValue(label: CString, value: Float64): Int64
+
 foreign func qPieSliceDelete(ptr: Int64): Unit
+
 foreign func qPieSliceSetLabel(ptr: Int64, label: CString): Unit
+
 foreign func qPieSliceLabel(ptr: Int64): CString
+
 foreign func qPieSliceSetValue(ptr: Int64, value: Float64): Unit
+
 foreign func qPieSliceValue(ptr: Int64): Float64
+
 foreign func qPieSliceSetLabelVisible(ptr: Int64, visible: Int32): Unit
+
 foreign func qPieSliceIsLabelVisible(ptr: Int64): Int32
+
 foreign func qPieSliceSetLabelPosition(ptr: Int64, position: Int32): Unit
+
 foreign func qPieSliceLabelPosition(ptr: Int64): Int32
+
 foreign func qPieSliceSetExploded(ptr: Int64, exploded: Int32): Unit
+
 foreign func qPieSliceIsExploded(ptr: Int64): Int32
+
 foreign func qPieSliceSetColor(ptr: Int64, r: Int32, g: Int32, b: Int32, a: Int32): Unit
+
 foreign func qPieSliceSetBorderColor(ptr: Int64, r: Int32, g: Int32, b: Int32, a: Int32): Unit
+
 foreign func qPieSliceSetBorderWidth(ptr: Int64, width: Int32): Unit
+
 foreign func qPieSliceSetLabelColor(ptr: Int64, r: Int32, g: Int32, b: Int32, a: Int32): Unit
+
 foreign func qPieSliceSetLabelArmLengthFactor(ptr: Int64, factor: Float64): Unit
+
 foreign func qPieSliceLabelArmLengthFactor(ptr: Int64): Float64
+
 foreign func qPieSliceSetExplodeDistanceFactor(ptr: Int64, factor: Float64): Unit
+
 foreign func qPieSliceExplodeDistanceFactor(ptr: Int64): Float64
+
 foreign func qPieSlicePercentage(ptr: Int64): Float64
+
 foreign func qPieSliceStartAngle(ptr: Int64): Float64
+
 foreign func qPieSliceAngleSpan(ptr: Int64): Float64
 
 // ============================================================
@@ -36,10 +59,10 @@ foreign func qPieSliceAngleSpan(ptr: Int64): Float64
 // ============================================================
 
 public class PieSliceLabelPosition {
-    public static let outside: Int32 = 0              // LabelOutside
-    public static let insideHorizontal: Int32 = 1     // LabelInsideHorizontal
-    public static let insideTangential: Int32 = 2     // LabelInsideTangential
-    public static let insideNormal: Int32 = 3         // LabelInsideNormal
+    public static let outside: Int32 = 0 // LabelOutside
+    public static let insideHorizontal: Int32 = 1 // LabelInsideHorizontal
+    public static let insideTangential: Int32 = 2 // LabelInsideTangential
+    public static let insideNormal: Int32 = 3 // LabelInsideNormal
 }
 
 // ============================================================
@@ -82,7 +105,7 @@ public class QPieSlice {
     /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init(label: String, value: Float64) {
         unsafe {
-            withCString(label) { c => ptr = qPieSliceCreateLabelValue(c, value) }
+            withCString(label) {c => ptr = qPieSliceCreateLabelValue(c, value)}
         }
         if (ptr == 0) {
             throw CreateFailedException("QPieSlice create failed")
@@ -94,7 +117,7 @@ public class QPieSlice {
     public func setLabel(label: String): Unit {
         checkValid()
         unsafe {
-            withCString(label) { c => qPieSliceSetLabel(ptr, c) }
+            withCString(label) {c => qPieSliceSetLabel(ptr, c)}
         }
     }
 
@@ -124,7 +147,11 @@ public class QPieSlice {
     /// 设置标签是否可见
     public func setLabelVisible(visible: Bool): Unit {
         checkValid()
-        unsafe { qPieSliceSetLabelVisible(ptr, if (visible) { 1 } else { 0 }) }
+        unsafe { qPieSliceSetLabelVisible(ptr, if (visible) {
+            1
+        } else {
+            0
+        }) }
     }
 
     /// 查询标签是否可见
@@ -148,7 +175,11 @@ public class QPieSlice {
     /// 设置是否爆炸（分离显示）
     public func setExploded(exploded: Bool): Unit {
         checkValid()
-        unsafe { qPieSliceSetExploded(ptr, if (exploded) { 1 } else { 0 }) }
+        unsafe { qPieSliceSetExploded(ptr, if (exploded) {
+            1
+        } else {
+            0
+        }) }
     }
 
     /// 查询是否爆炸
@@ -241,7 +272,9 @@ public class QPieSlice {
         unsafe { return qPieSliceAngleSpan(ptr) }
     }
 
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     /// 释放资源；已 append 后由 series 级联释放，勿主动调用
     public func close(): Unit {

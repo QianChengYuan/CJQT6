@@ -40,8 +40,8 @@ public class Transfer <: QtResource {
         layout.addWidget(rightList.getPtr())
         group.setLayout(layout.getPtr())
         // 所有成员已初始化，注册按钮回调
-        toRightBtn.setOnClickCapture({ => moveSelectedToRight() })
-        toLeftBtn.setOnClickCapture({ => moveSelectedToLeft() })
+        toRightBtn.setOnClickCapture({=> moveSelectedToRight()})
+        toLeftBtn.setOnClickCapture({=> moveSelectedToLeft()})
     }
 
     /// 添加候选项到左侧

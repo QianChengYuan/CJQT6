@@ -9,9 +9,9 @@ import cjqt6.core.*
 import std.unittest.*
 
 // CFunc 回调（顶层 let）
-private let gMouseCb: CFunc<(Int32, Int32, Int32) -> Unit> = { b: Int32, x: Int32, y: Int32 => () }
-private let gKeyCb: CFunc<(Int32, Int32, Int32) -> Unit> = { k: Int32, m: Int32, u: Int32 => () }
-private let gPaintCb: CFunc<(Int64) -> Unit> = { p: Int64 => () }
+private let gMouseCb: CFunc<(Int32, Int32, Int32) -> Unit> = {b: Int32, x: Int32, y: Int32 => ()}
+private let gKeyCb: CFunc<(Int32, Int32, Int32) -> Unit> = {k: Int32, m: Int32, u: Int32 => ()}
+private let gPaintCb: CFunc<(Int64) -> Unit> = {p: Int64 => ()}
 
 // ---------------------------------------------------------------------
 // MouseButton 常量测试（无需 GUI，但底层调用 Qt，需 QApplication）
@@ -335,7 +335,7 @@ class QEventWidgetTests {
     func testDoubleDelete() {
         let w = QEventWidget()
         w.delete()
-        w.delete()  // 安全
+        w.delete() // 安全
         @Assert(true)
     }
 }

@@ -7,34 +7,63 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qTcpSocketCreate(): Int64
+
 foreign func qTcpSocketDelete(ptr: Int64): Unit
+
 foreign func qTcpSocketConnectToHost(ptr: Int64, host: CString, port: UInt16): Unit
+
 foreign func qTcpSocketDisconnectFromHost(ptr: Int64): Unit
+
 foreign func qTcpSocketWrite(ptr: Int64, data: CPointer<Int8>, size: Int64): Int64
+
 foreign func qTcpSocketRead(ptr: Int64, buffer: CPointer<Int8>, maxSize: Int64): Int64
+
 foreign func qTcpSocketReadAll(ptr: Int64, buffer: CPointer<Int8>, bufferSize: Int64): Int64
+
 foreign func qTcpSocketBytesAvailable(ptr: Int64): Int64
+
 foreign func qTcpSocketBytesToWrite(ptr: Int64): Int64
+
 foreign func qTcpSocketFlush(ptr: Int64): Bool
+
 foreign func qTcpSocketAtEnd(ptr: Int64): Bool
+
 foreign func qTcpSocketState(ptr: Int64): Int32
+
 foreign func qTcpSocketError(ptr: Int64): Int32
+
 foreign func qTcpSocketErrorString(ptr: Int64): CString
+
 foreign func qTcpSocketIsValid(ptr: Int64): Bool
+
 foreign func qTcpSocketClose(ptr: Int64): Unit
+
 foreign func qTcpSocketPeerAddress(ptr: Int64): CString
+
 foreign func qTcpSocketPeerPort(ptr: Int64): UInt16
+
 foreign func qTcpSocketLocalAddress(ptr: Int64): CString
+
 foreign func qTcpSocketLocalPort(ptr: Int64): UInt16
+
 foreign func qTcpSocketConnectConnected(ptr: Int64, callback: VoidCallback): Unit
+
 foreign func qTcpSocketConnectDisconnected(ptr: Int64, callback: VoidCallback): Unit
+
 foreign func qTcpSocketConnectReadyRead(ptr: Int64, callback: VoidCallback): Unit
+
 foreign func qTcpSocketConnectError(ptr: Int64, callback: VoidCallback): Unit
+
 foreign func qTcpSocketDisconnectCallbacks(ptr: Int64): Unit
+
 foreign func qNetSetVoidDispatcher(disp: CFunc<(Int64) -> Unit>): Unit
+
 foreign func qTcpSocketConnectConnectedId(ptr: Int64, id: Int64): Unit
+
 foreign func qTcpSocketConnectDisconnectedId(ptr: Int64, id: Int64): Unit
+
 foreign func qTcpSocketConnectReadyReadId(ptr: Int64, id: Int64): Unit
+
 foreign func qTcpSocketConnectErrorId(ptr: Int64, id: Int64): Unit
 
 // 网络模块闭包调度器注册标记（Capture 回调首次使用时初始化）
@@ -96,7 +125,7 @@ public class SocketError {
 public class QTcpSocket <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
-    
+
     /// 创建TCP套接字
     /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
@@ -108,7 +137,7 @@ public class QTcpSocket <: QtResource {
         }
         trackObject(ptr)
     }
-    
+
     /// 包装已存在的原生套接字指针
     /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     /// 用于 QTcpServer.nextPendingConnection() 返回的连接，
@@ -119,17 +148,17 @@ public class QTcpSocket <: QtResource {
         }
         ptr = nativePtr
     }
-    
+
     /// 连接到主机
     /// host: 主机地址（IP或域名）
     /// port: 端口号
     public func connectToHost(host: String, port: UInt16): Unit {
         checkValid()
         unsafe {
-            withCString(host) { c => qTcpSocketConnectToHost(ptr, c, port) }
+            withCString(host) {c => qTcpSocketConnectToHost(ptr, c, port)}
         }
     }
-    
+
     /// 断开连接
     public func disconnectFromHost(): Unit {
         checkValid()
@@ -137,7 +166,7 @@ public class QTcpSocket <: QtResource {
             qTcpSocketDisconnectFromHost(ptr)
         }
     }
-    
+
     /// 立即关闭套接字连接（不等待数据传输完成）
     public func abort(): Unit {
         checkValid()
@@ -145,7 +174,7 @@ public class QTcpSocket <: QtResource {
             qTcpSocketClose(ptr)
         }
     }
-    
+
     /// 写入数据
     /// 返回实际写入的字节数，-1表示错误
     public func write(data: Array<Byte>): Int64 {
@@ -157,14 +186,14 @@ public class QTcpSocket <: QtResource {
             return result
         }
     }
-    
+
     /// 写入字符串数据
     public func writeString(text: String): Int64 {
         checkValid()
         let bytes = text.toArray()
         return write(bytes)
     }
-    
+
     /// 读取数据
     /// maxSize: 最大读取字节数
     /// 返回读取到的字节数组
@@ -177,7 +206,7 @@ public class QTcpSocket <: QtResource {
                 LibC.free(buffer)
                 return []
             }
-            
+
             var result: Array<Byte> = []
             for (i in 0..size) {
                 result = result.concat([buffer.read(i)])
@@ -186,7 +215,7 @@ public class QTcpSocket <: QtResource {
             return result
         }
     }
-    
+
     /// 读取所有可用数据
     public func readAll(): Array<Byte> {
         checkValid()
@@ -196,14 +225,14 @@ public class QTcpSocket <: QtResource {
         }
         return read(available)
     }
-    
+
     /// 读取为字符串
     public func readString(maxSize: Int64): String {
         checkValid()
         let bytes = read(maxSize)
         return String.fromUtf8(bytes)
     }
-    
+
     /// 可读取字节数
     public func bytesAvailable(): Int64 {
         checkValid()
@@ -211,7 +240,7 @@ public class QTcpSocket <: QtResource {
             return qTcpSocketBytesAvailable(ptr)
         }
     }
-    
+
     /// 待写入字节数
     public func bytesToWrite(): Int64 {
         checkValid()
@@ -219,7 +248,7 @@ public class QTcpSocket <: QtResource {
             return qTcpSocketBytesToWrite(ptr)
         }
     }
-    
+
     /// 刷新缓冲区
     public func flush(): Bool {
         checkValid()
@@ -227,7 +256,7 @@ public class QTcpSocket <: QtResource {
             return qTcpSocketFlush(ptr)
         }
     }
-    
+
     /// 是否到达末尾
     public func atEnd(): Bool {
         checkValid()
@@ -235,7 +264,7 @@ public class QTcpSocket <: QtResource {
             return qTcpSocketAtEnd(ptr)
         }
     }
-    
+
     /// 获取套接字状态
     public func state(): Int32 {
         checkValid()
@@ -243,7 +272,7 @@ public class QTcpSocket <: QtResource {
             return qTcpSocketState(ptr)
         }
     }
-    
+
     /// 获取错误码
     public func error(): Int32 {
         checkValid()
@@ -251,7 +280,7 @@ public class QTcpSocket <: QtResource {
             return qTcpSocketError(ptr)
         }
     }
-    
+
     /// 获取错误描述
     public func errorString(): String {
         checkValid()
@@ -262,7 +291,7 @@ public class QTcpSocket <: QtResource {
             return result
         }
     }
-    
+
     /// 获取对端IP地址（连接建立后有效）
     public func peerAddress(): String {
         checkValid()
@@ -273,7 +302,7 @@ public class QTcpSocket <: QtResource {
             return result
         }
     }
-    
+
     /// 获取对端端口（连接建立后有效）
     public func peerPort(): UInt16 {
         checkValid()
@@ -281,7 +310,7 @@ public class QTcpSocket <: QtResource {
             return qTcpSocketPeerPort(ptr)
         }
     }
-    
+
     /// 获取本端IP地址
     public func localAddress(): String {
         checkValid()
@@ -292,7 +321,7 @@ public class QTcpSocket <: QtResource {
             return result
         }
     }
-    
+
     /// 获取本端端口
     public func localPort(): UInt16 {
         checkValid()
@@ -300,7 +329,7 @@ public class QTcpSocket <: QtResource {
             return qTcpSocketLocalPort(ptr)
         }
     }
-    
+
     /// Qt资源管理：检查底层套接字是否有效
     public func isSocketValid(): Bool {
         checkValid()
@@ -308,7 +337,7 @@ public class QTcpSocket <: QtResource {
             return qTcpSocketIsValid(ptr)
         }
     }
-    
+
     /// 设置连接成功回调
     public func setOnConnected(callback: VoidCallback): Unit {
         checkValid()
@@ -316,7 +345,7 @@ public class QTcpSocket <: QtResource {
             qTcpSocketConnectConnected(ptr, callback)
         }
     }
-    
+
     /// 设置断开连接回调
     public func setOnDisconnected(callback: VoidCallback): Unit {
         checkValid()
@@ -324,7 +353,7 @@ public class QTcpSocket <: QtResource {
             qTcpSocketConnectDisconnected(ptr, callback)
         }
     }
-    
+
     /// 设置数据就绪回调
     public func setOnReadyRead(callback: VoidCallback): Unit {
         checkValid()
@@ -332,7 +361,7 @@ public class QTcpSocket <: QtResource {
             qTcpSocketConnectReadyRead(ptr, callback)
         }
     }
-    
+
     /// 设置错误回调
     public func setOnError(callback: VoidCallback): Unit {
         checkValid()
@@ -340,7 +369,7 @@ public class QTcpSocket <: QtResource {
             qTcpSocketConnectError(ptr, callback)
         }
     }
-    
+
     /// 断开所有信号连接
     /// 同时注销 Cangjie 侧捕获闭包注册表条目（避免闭包滞留；close 内也会执行，幂等）
     public func disconnectCallbacks(): Unit {
@@ -350,7 +379,7 @@ public class QTcpSocket <: QtResource {
         }
         unregisterObjectVoidCallbacks(ptr)
     }
-    
+
     /// 设置连接成功回调（闭包捕获版，可捕获局部变量）
     /// 返回闭包注册表 id，可调用 unregisterVoidCallback(id) 注销
     public func setOnConnectedCapture(callback: () -> Unit): Int64 {
@@ -362,7 +391,7 @@ public class QTcpSocket <: QtResource {
         }
         return id
     }
-    
+
     /// 设置断开连接回调（闭包捕获版）
     public func setOnDisconnectedCapture(callback: () -> Unit): Int64 {
         checkValid()
@@ -373,7 +402,7 @@ public class QTcpSocket <: QtResource {
         }
         return id
     }
-    
+
     /// 设置数据就绪回调（闭包捕获版）
     /// 服务器多连接场景：每个连接套接字注册各自闭包即可区分来源
     public func setOnReadyReadCapture(callback: () -> Unit): Int64 {
@@ -385,7 +414,7 @@ public class QTcpSocket <: QtResource {
         }
         return id
     }
-    
+
     /// 设置错误回调（闭包捕获版）
     public func setOnErrorCapture(callback: () -> Unit): Int64 {
         checkValid()
@@ -396,22 +425,22 @@ public class QTcpSocket <: QtResource {
         }
         return id
     }
-    
+
     /// 获取原生指针
     public func getPtr(): Int64 {
         return ptr
     }
-    
+
     /// 是否已关闭（资源已释放）
     public func isClosed(): Bool {
         return closed
     }
-    
+
     /// 检查对象有效性（未关闭且指针有效）
     public func isValid(): Bool {
         return !closed && ptr != 0 && isObjectAlive(ptr)
     }
-    
+
     /// 检查有效性，无效时抛出异常
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     /// throws: NullPointerException 空指针访问时抛出
@@ -426,7 +455,7 @@ public class QTcpSocket <: QtResource {
             throw ResourceDisposedException("QTcpSocket 底层 Qt 对象已失效")
         }
     }
-    
+
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
@@ -448,7 +477,7 @@ public class QTcpSocket <: QtResource {
             ptr = 0
         }
     }
-    
+
     /// 删除套接字（兼容旧API）
     public func delete(): Unit {
         close()

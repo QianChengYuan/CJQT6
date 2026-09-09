@@ -11,38 +11,32 @@ import std.unittest.*
 // 全局状态（CFunc 回调不捕获局部变量，只能用全局变量）
 // =====================================================================
 var gSbValue: Int32 = -1
-let gSbValueCb: Int32Callback = { v: Int32 =>
-    gSbValue = v
+let gSbValueCb: Int32Callback = {
+    v: Int32 => gSbValue = v
 }
-
 var gStackIndex: Int32 = -1
-let gStackIndexCb: Int32Callback = { v: Int32 =>
-    gStackIndex = v
+let gStackIndexCb: Int32Callback = {
+    v: Int32 => gStackIndex = v
 }
-
 var gToolBoxIndex: Int32 = -1
-let gToolBoxIndexCb: Int32Callback = { v: Int32 =>
-    gToolBoxIndex = v
+let gToolBoxIndexCb: Int32Callback = {
+    v: Int32 => gToolBoxIndex = v
 }
-
 var gTabIndex: Int32 = -1
-let gTabIndexCb: Int32Callback = { v: Int32 =>
-    gTabIndex = v
+let gTabIndexCb: Int32Callback = {
+    v: Int32 => gTabIndex = v
 }
-
 var gBgClickedId: Int64 = 0
-let gBgClickedCb: Int64Callback = { v: Int64 =>
-    gBgClickedId = v
+let gBgClickedCb: Int64Callback = {
+    v: Int64 => gBgClickedId = v
 }
-
 var gDlgAccepted: Bool = false
-let gDlgAcceptedCb: VoidCallback = { =>
-    gDlgAccepted = true
+let gDlgAcceptedCb: VoidCallback = {
+    => gDlgAccepted = true
 }
-
 var gKeySeq: String = ""
-let gKeySeqCb: CStringCallback = { v: CString =>
-    gKeySeq = v.toString()
+let gKeySeqCb: CStringCallback = {
+    v: CString => gKeySeq = v.toString()
 }
 
 // =====================================================================
@@ -95,7 +89,7 @@ class QButtonGroupTests {
         let rb2 = QRadioButton()
         bg.addButton(rb1.getPtr(), 1)
         bg.addButton(rb2.getPtr(), 2)
-        @Expect(bg.checkedId(), -1)  // 默认无选中
+        @Expect(bg.checkedId(), -1) // 默认无选中
         rb1.setChecked(true)
         @Expect(bg.checkedId(), 1)
         @Expect(bg.checkedButton(), rb1.getPtr())
@@ -120,7 +114,7 @@ class QButtonGroupTests {
     @TestCase
     func testExclusive() {
         let bg = QButtonGroup()
-        @Expect(bg.isExclusive(), true)  // 默认互斥
+        @Expect(bg.isExclusive(), true) // 默认互斥
         bg.setExclusive(false)
         @Expect(bg.isExclusive(), false)
         bg.delete()
@@ -348,7 +342,7 @@ class QDockWidgetTests {
         let inner = QLabel()
         dock.setWidget(inner.getPtr())
         @Expect(dock.widget(), inner.getPtr())
-        inner.close()  // 先从 dock 移除，避免双重释放
+        inner.close() // 先从 dock 移除，避免双重释放
         dock.delete()
     }
 
@@ -1096,7 +1090,7 @@ class QScrollBarTests {
     @TestCase
     func testTracking() {
         let sb = QScrollBar(ScrollBarOrientation.Horizontal)
-        @Expect(sb.isTracking(), true)  // 默认跟踪
+        @Expect(sb.isTracking(), true) // 默认跟踪
         sb.setTracking(false)
         @Expect(sb.isTracking(), false)
         sb.delete()
@@ -1380,7 +1374,7 @@ class QTextBrowserTests {
     @TestCase
     func testOpenLinks() {
         let tb = QTextBrowser()
-        @Expect(tb.isOpenLinks(), true)  // 默认打开链接
+        @Expect(tb.isOpenLinks(), true) // 默认打开链接
         tb.setOpenLinks(false)
         @Expect(tb.isOpenLinks(), false)
         tb.setOpenExternalLinks(true)
@@ -1687,7 +1681,7 @@ class QTabWidgetTests {
         let tab = QTabWidget()
         let p = QLabel()
         tab.addTab(p.getPtr(), "一")
-        let icon = QIcon()  // 空图标，验证不崩溃
+        let icon = QIcon() // 空图标，验证不崩溃
         tab.setTabIcon(0, icon.getPtr())
         @Assert(tab.getPtr() != 0)
         icon.close()
@@ -1706,9 +1700,9 @@ class QTabWidgetTests {
     @TestCase
     func testSetTabPosition() {
         let tab = QTabWidget()
-        tab.setTabPosition(1)  // South
+        tab.setTabPosition(1) // South
         @Assert(tab.getPtr() != 0)
-        tab.setTabPosition(2)  // West
+        tab.setTabPosition(2) // West
         tab.close()
     }
 
@@ -1723,7 +1717,7 @@ class QTabWidgetTests {
     @TestCase
     func testSetElideMode() {
         let tab = QTabWidget()
-        tab.setElideMode(2)  // ElideMiddle
+        tab.setElideMode(2) // ElideMiddle
         @Assert(tab.getPtr() != 0)
         tab.close()
     }
@@ -1731,7 +1725,7 @@ class QTabWidgetTests {
     @TestCase
     func testSetTabShape() {
         let tab = QTabWidget()
-        tab.setTabShape(1)  // Triangular
+        tab.setTabShape(1) // Triangular
         @Assert(tab.getPtr() != 0)
         tab.close()
     }
@@ -1838,7 +1832,7 @@ class QDateTimeTests {
         dt.delete()
     }
 
-@TestCase
+    @TestCase
     func testDateTimeToString() {
         let d = QDate(2024, 1, 2)
         let t = QTime(3, 4, 5)
@@ -1854,18 +1848,16 @@ class QDateTimeTests {
 
 // 信号回调全局状态（CFunc 无法捕获局部变量）
 var gCalClicked: String = ""
-let gCalClickedCb: CStringCallback = { v: CString =>
-    gCalClicked = v.toString()
+let gCalClickedCb: CStringCallback = {
+    v: CString => gCalClicked = v.toString()
 }
-
 var gCalActivated: String = ""
-let gCalActivatedCb: CStringCallback = { v: CString =>
-    gCalActivated = v.toString()
+let gCalActivatedCb: CStringCallback = {
+    v: CString => gCalActivated = v.toString()
 }
-
 var gCalSelectionChanged: Bool = false
-let gCalSelectionChangedCb: VoidCallback = { =>
-    gCalSelectionChanged = true
+let gCalSelectionChangedCb: VoidCallback = {
+    => gCalSelectionChanged = true
 }
 
 @Test
@@ -1917,13 +1909,12 @@ class QCalendarWidgetTests {
 // =====================================================================
 // QTextEdit 信号回调全局状态（CFunc 无法捕获局部变量）
 var gTeCursorPosChanged: Bool = false
-let gTeCursorPosCb: VoidCallback = { =>
-    gTeCursorPosChanged = true
+let gTeCursorPosCb: VoidCallback = {
+    => gTeCursorPosChanged = true
 }
-
 var gTeSelectionChanged: Bool = false
-let gTeSelectionCb: VoidCallback = { =>
-    gTeSelectionChanged = true
+let gTeSelectionCb: VoidCallback = {
+    => gTeSelectionChanged = true
 }
 
 // QTextEdit 测试
@@ -2142,9 +2133,9 @@ class QFrameTests {
     @TestCase
     func testFrameShape() {
         let frame = QFrame()
-        frame.setFrameShape(1)  // FrameShape.Box
+        frame.setFrameShape(1) // FrameShape.Box
         @Expect(frame.frameShape(), 1)
-        frame.setFrameShadow(48)  // FrameShadow.Sunken
+        frame.setFrameShadow(48) // FrameShadow.Sunken
         @Expect(frame.frameShadow(), 48)
         @Expect(frame.frameStyle() != 0, true)
         frame.close()
@@ -2153,7 +2144,7 @@ class QFrameTests {
     @TestCase
     func testLineWidth() {
         let frame = QFrame()
-        frame.setFrameShape(1)  // FrameShape.Box：frameWidth = lineWidth + midLineWidth
+        frame.setFrameShape(1) // FrameShape.Box：frameWidth = lineWidth + midLineWidth
         frame.setLineWidth(3)
         @Expect(frame.lineWidth(), 3)
         frame.setMidLineWidth(2)

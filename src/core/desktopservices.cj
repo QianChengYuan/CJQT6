@@ -5,6 +5,7 @@ package cjqt6.core
 // ============================================================
 
 foreign func qDesktopServicesOpenUrl(url: CString): Bool
+
 foreign func qDesktopServicesOpenFile(filePath: CString): Bool
 
 /// 桌面级服务，提供使用系统默认程序打开 URL 或文件的能力（静态方法，无需实例化）

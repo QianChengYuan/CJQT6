@@ -27,14 +27,22 @@ public class Badge <: QtResource {
     /// 创建徽标（带初始数字）
     public init(initialCount: Int32) {
         label = QLabel()
-        count = if (initialCount < 0) { 0 } else { initialCount }
+        count = if (initialCount < 0) {
+            0
+        } else {
+            initialCount
+        }
         label.setAlignment(HAlign.toAlignment(0))
         applyStyle()
     }
 
     /// 设置数字（负数归零）
     public func setCount(n: Int32): Unit {
-        count = if (n < 0) { 0 } else { n }
+        count = if (n < 0) {
+            0
+        } else {
+            n
+        }
         applyStyle()
     }
 
@@ -45,7 +53,11 @@ public class Badge <: QtResource {
 
     /// 设置显示上限（超过则显示 "N+"）
     public func setMaxCount(max: Int32): Unit {
-        maxCount = if (max < 1) { 1 } else { max }
+        maxCount = if (max < 1) {
+            1
+        } else {
+            max
+        }
         applyStyle()
     }
 
@@ -73,7 +85,8 @@ public class Badge <: QtResource {
         if (count == 0) {
             label.setStyleSheet("background-color:transparent; color:transparent; border:none;")
         } else {
-            label.setStyleSheet("background-color:${bgColor}; color:${fgColor}; border-radius:8px; padding:0 6px; font-size:12px; min-width:16px;")
+            label.setStyleSheet(
+                "background-color:${bgColor}; color:${fgColor}; border-radius:8px; padding:0 6px; font-size:12px; min-width:16px;")
         }
     }
 

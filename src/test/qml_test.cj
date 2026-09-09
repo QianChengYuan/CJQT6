@@ -15,15 +15,14 @@ var gItemFocusValue: Int32 = -1
 var gItemParentPtr: Int64 = 0
 var gWindowWidth: Int32 = -1
 var gCompStatus: Int32 = -1
-
-let gItemXChangedCb: VoidCallback = { => gItemXChanged += 1 }
-let gItemWidthChangedCb: VoidCallback = { => gItemWidthChanged += 1 }
-let gItemOpacityChangedCb: VoidCallback = { => gItemOpacityChanged += 1 }
-let gItemVisibleChangedCb: VoidCallback = { => gItemVisibleChanged += 1 }
-let gItemFocusChangedCb: Int32Callback = { v: Int32 => gItemFocusValue = v }
-let gItemParentChangedCb: Int64Callback = { p: Int64 => gItemParentPtr = p }
-let gWindowWidthCb: Int32Callback = { w: Int32 => gWindowWidth = w }
-let gCompStatusCb: Int32Callback = { s: Int32 => gCompStatus = s }
+let gItemXChangedCb: VoidCallback = {=> gItemXChanged += 1}
+let gItemWidthChangedCb: VoidCallback = {=> gItemWidthChanged += 1}
+let gItemOpacityChangedCb: VoidCallback = {=> gItemOpacityChanged += 1}
+let gItemVisibleChangedCb: VoidCallback = {=> gItemVisibleChanged += 1}
+let gItemFocusChangedCb: Int32Callback = {v: Int32 => gItemFocusValue = v}
+let gItemParentChangedCb: Int64Callback = {p: Int64 => gItemParentPtr = p}
+let gWindowWidthCb: Int32Callback = {w: Int32 => gWindowWidth = w}
+let gCompStatusCb: Int32Callback = {s: Int32 => gCompStatus = s}
 
 // =====================================================================
 // QQuickItem 测试
@@ -61,9 +60,9 @@ class QQuickItemTests {
         let item = QQuickItem.create()
         let borrowed = QQuickItem.fromPtr(item.getPtr())
         @Expect(borrowed.isValid(), true)
-        borrowed.close()  // 借用项 close 只标记，不删除
+        borrowed.close() // 借用项 close 只标记，不删除
         @Expect(borrowed.isClosed(), true)
-        @Expect(item.isValid(), true)  // 原对象仍有效
+        @Expect(item.isValid(), true) // 原对象仍有效
         item.close()
     }
 
@@ -155,8 +154,8 @@ class QQuickItemTests {
         item.setX(50.0f32)
         item.setWidth(200.0f32)
         item.setOpacity(0.9f32)
-        item.setVisible(false)  // 默认可见 → 变为不可见，触发 visibleChanged
-        item.setVisible(true)   // 再次触发
+        item.setVisible(false) // 默认可见 → 变为不可见，触发 visibleChanged
+        item.setVisible(true) // 再次触发
         @Expect(gItemXChanged > 0, true)
         @Expect(gItemWidthChanged > 0, true)
         @Expect(gItemOpacityChanged > 0, true)
@@ -191,7 +190,7 @@ class QQuickItemTests {
     func testDoubleClose() {
         let item = QQuickItem.create()
         item.close()
-        item.close()  // 安全
+        item.close() // 安全
         @Expect(item.getPtr(), 0)
     }
 
@@ -316,7 +315,7 @@ class QQmlEngineTests {
         let engine = QQmlApplicationEngine()
         let ctx = engine.rootContext()
         @Expect(ctx.isValid(), true)
-        ctx.close()  // 借用项，仅标记
+        ctx.close() // 借用项，仅标记
         engine.delete()
     }
 
@@ -472,7 +471,7 @@ class QQuickWindowTests {
         let win = QQuickWindow()
         let item = win.contentItem()
         @Expect(item.isValid(), true)
-        item.close()  // 借用项
+        item.close() // 借用项
         win.close()
     }
 

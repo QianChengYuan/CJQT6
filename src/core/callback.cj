@@ -25,22 +25,23 @@ private var gDispatcherSet: Bool = false
 // 信号在发射线程直接派发），必须持 gRegistryLock 读取注册表，避免与
 // registerVoidCallback / unregisterVoidCallback 的写操作并发导致 HashMap 数据竞争。
 // 锁内只取出闭包、锁外调用：回调体内再 register/unregister 时不重入死锁。
-private let gVoidDispatcher: CFunc<(Int64) -> Unit> = { id: Int64 =>
-    var cb: ?(() -> Unit) = None
-    synchronized (gRegistryLock) {
-        cb = gVoidRegistry.get(id)
-    }
-    match (cb) {
-        case Some(f) => f()
-        case None => ()
-    }
+private let gVoidDispatcher: CFunc<(Int64) -> Unit> = {
+    id: Int64 =>
+        var cb: ?(() -> Unit) = None
+        synchronized(gRegistryLock) {
+            cb = gVoidRegistry.get(id)
+        }
+        match (cb) {
+            case Some(f) => f()
+            case None => ()
+        }
 }
 
 // native 侧注册表调度器入口与 id 版连接（foreign 声明见 signal.cj，与既有信号声明同处）
 
 /// 注册一个可捕获的 void 闭包，返回注册表 id（供 native 按 id 派发）
 public func registerVoidCallback(callback: () -> Unit): Int64 {
-    synchronized (gRegistryLock) {
+    synchronized(gRegistryLock) {
         if (!gDispatcherSet) {
             unsafe {
                 qSetCallbackDispatcher(gVoidDispatcher)
@@ -56,7 +57,7 @@ public func registerVoidCallback(callback: () -> Unit): Int64 {
 
 /// 注销指定 id 的闭包（连接断开时调用，避免注册表泄漏）
 public func unregisterVoidCallback(id: Int64): Unit {
-    synchronized (gRegistryLock) {
+    synchronized(gRegistryLock) {
         gVoidRegistry.remove(id)
     }
 }
@@ -88,7 +89,7 @@ private let gObjVoidIdsLock = Mutex()
 public func registerObjectVoidCallback(ptr: Int64, callback: () -> Unit): Int64 {
     let id = registerVoidCallback(callback)
     // 先持 gRegistryLock（在上方已释放）再持 gObjVoidIdsLock，顺序恒定
-    synchronized (gObjVoidIdsLock) {
+    synchronized(gObjVoidIdsLock) {
         if (let Some(list) <- gObjVoidIds.get(ptr)) {
             list.add(id)
         } else {
@@ -103,7 +104,7 @@ public func registerObjectVoidCallback(ptr: Int64, callback: () -> Unit): Int64 
 /// 注销对象名下全部捕获闭包（对象 close/delete 时调用，幂等）
 public func unregisterObjectVoidCallbacks(ptr: Int64): Unit {
     var ids = ArrayList<Int64>()
-    synchronized (gObjVoidIdsLock) {
+    synchronized(gObjVoidIdsLock) {
         if (let Some(list) <- gObjVoidIds.get(ptr)) {
             ids = list
             gObjVoidIds.remove(ptr)
@@ -117,7 +118,7 @@ public func unregisterObjectVoidCallbacks(ptr: Int64): Unit {
 
 /// 注销对象名下单个捕获闭包（信号断开路径调用，幂等；已断开的 id 注销为空操作）
 public func unregisterObjectVoidCallback(ptr: Int64, id: Int64): Unit {
-    synchronized (gObjVoidIdsLock) {
+    synchronized(gObjVoidIdsLock) {
         if (let Some(list) <- gObjVoidIds.get(ptr)) {
             var i = 0
             while (i < list.size) {

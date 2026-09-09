@@ -7,9 +7,13 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qSplineSeriesCreate(): Int64
+
 foreign func qSplineSeriesDelete(ptr: Int64): Unit
+
 foreign func qSplineSeriesAppend(ptr: Int64, x: Float64, y: Float64): Unit
+
 foreign func qSplineSeriesSetName(ptr: Int64, name: CString): Unit
+
 foreign func qSplineSeriesCount(ptr: Int64): Int32
 
 // ============================================================
@@ -59,7 +63,7 @@ public class QSplineSeries {
     public func setName(name: String): Unit {
         checkValid()
         unsafe {
-            withCString(name) { c => qSplineSeriesSetName(ptr, c) }
+            withCString(name) {c => qSplineSeriesSetName(ptr, c)}
         }
     }
 
@@ -69,7 +73,9 @@ public class QSplineSeries {
         unsafe { return qSplineSeriesCount(ptr) }
     }
 
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     /// 释放资源；已 addSeries 后由 chart 级联释放，勿主动调用
     public func close(): Unit {

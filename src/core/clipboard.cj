@@ -5,8 +5,11 @@ package cjqt6.core
 // ============================================================
 
 foreign func qClipboardText(): CString
+
 foreign func qClipboardSetText(text: CString): Unit
+
 foreign func qClipboardHasText(): Bool
+
 foreign func qClipboardClear(): Unit
 
 /// 系统剪贴板，提供文本的读取、写入、清空与存在性判断（静态方法，无需实例化）

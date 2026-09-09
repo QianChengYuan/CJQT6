@@ -7,45 +7,90 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qAbstractItemModelCreate(): Int64
-foreign func qAbstractItemModelDelete(ptr: Int64): Unit
-foreign func qAbstractItemModelSetRowCountCallback(ptr: Int64, callback: CFunc<(Int64, Int64) -> Int32>): Unit
-foreign func qAbstractItemModelSetColumnCountCallback(ptr: Int64, callback: CFunc<(Int64, Int64) -> Int32>): Unit
-foreign func qAbstractItemModelSetIndexCallback(ptr: Int64, callback: CFunc<(Int64, Int32, Int32, Int64) -> Int64>): Unit
-foreign func qAbstractItemModelSetParentCallback(ptr: Int64, callback: CFunc<(Int64, Int64) -> Int64>): Unit
-foreign func qAbstractItemModelSetDataCallback(ptr: Int64, callback: CFunc<(Int64, Int64, Int32) -> Int64>): Unit
-foreign func qAbstractItemModelSetHeaderDataCallback(ptr: Int64, callback: CFunc<(Int64, Int32, Int32, Int32) -> Int64>): Unit
-foreign func qAbstractItemModelSetFlagsCallback(ptr: Int64, callback: CFunc<(Int64, Int64) -> Int32>): Unit
-foreign func qAbstractItemModelBeginResetModel(ptr: Int64): Unit
-foreign func qAbstractItemModelEndResetModel(ptr: Int64): Unit
-foreign func qAbstractItemModelBeginInsertRows(ptr: Int64, first: Int32, last: Int32): Unit
-foreign func qAbstractItemModelEndInsertRows(ptr: Int64): Unit
-foreign func qAbstractItemModelBeginRemoveRows(ptr: Int64, first: Int32, last: Int32): Unit
-foreign func qAbstractItemModelEndRemoveRows(ptr: Int64): Unit
-foreign func qAbstractItemModelDataChanged(ptr: Int64, topLeftRow: Int32, topLeftCol: Int32, bottomRightRow: Int32, bottomRightCol: Int32): Unit
-foreign func qAbstractItemModelLayoutChanged(ptr: Int64): Unit
 
+foreign func qAbstractItemModelDelete(ptr: Int64): Unit
+
+foreign func qAbstractItemModelSetRowCountCallback(ptr: Int64, callback: CFunc<(Int64, Int64) -> Int32>): Unit
+
+foreign func qAbstractItemModelSetColumnCountCallback(ptr: Int64, callback: CFunc<(Int64, Int64) -> Int32>): Unit
+
+foreign func qAbstractItemModelSetIndexCallback(ptr: Int64, callback: CFunc<(Int64, Int32, Int32, Int64) -> Int64>): Unit
+
+foreign func qAbstractItemModelSetParentCallback(ptr: Int64, callback: CFunc<(Int64, Int64) -> Int64>): Unit
+
+foreign func qAbstractItemModelSetDataCallback(ptr: Int64, callback: CFunc<(Int64, Int64, Int32) -> Int64>): Unit
+
+foreign func qAbstractItemModelSetHeaderDataCallback(ptr: Int64, callback: CFunc<(Int64, Int32, Int32, Int32) -> Int64>): Unit
+
+foreign func qAbstractItemModelSetFlagsCallback(ptr: Int64, callback: CFunc<(Int64, Int64) -> Int32>): Unit
+
+foreign func qAbstractItemModelBeginResetModel(ptr: Int64): Unit
+
+foreign func qAbstractItemModelEndResetModel(ptr: Int64): Unit
+
+foreign func qAbstractItemModelBeginInsertRows(ptr: Int64, first: Int32, last: Int32): Unit
+
+foreign func qAbstractItemModelEndInsertRows(ptr: Int64): Unit
+
+foreign func qAbstractItemModelBeginRemoveRows(ptr: Int64, first: Int32, last: Int32): Unit
+
+foreign func qAbstractItemModelEndRemoveRows(ptr: Int64): Unit
+
+foreign func qAbstractItemModelDataChanged(ptr: Int64, topLeftRow: Int32, topLeftCol: Int32, bottomRightRow: Int32,
+    bottomRightCol: Int32): Unit
+
+foreign func qAbstractItemModelLayoutChanged(ptr: Int64): Unit
 
 // ============================================================
 // 数据角色常量
 // ============================================================
 public class ItemDataRole {
-    public static func displayRole(): Int32 { 0 }
-    public static func decorationRole(): Int32 { 1 }
-    public static func editRole(): Int32 { 2 }
-    public static func toolTipRole(): Int32 { 3 }
-    public static func statusTipRole(): Int32 { 4 }
-    public static func whatsThisRole(): Int32 { 5 }
-    public static func fontRole(): Int32 { 6 }
-    public static func textAlignmentRole(): Int32 { 7 }
-    public static func backgroundRole(): Int32 { 8 }
-    public static func foregroundRole(): Int32 { 9 }
-    public static func checkStateRole(): Int32 { 10 }
-    public static func accessibleTextRole(): Int32 { 11 }
-    public static func accessibleDescriptionRole(): Int32 { 12 }
-    public static func sizeHintRole(): Int32 { 13 }
-    public static func initialSortOrderRole(): Int32 { 14 }
+    public static func displayRole(): Int32 {
+        0
+    }
+    public static func decorationRole(): Int32 {
+        1
+    }
+    public static func editRole(): Int32 {
+        2
+    }
+    public static func toolTipRole(): Int32 {
+        3
+    }
+    public static func statusTipRole(): Int32 {
+        4
+    }
+    public static func whatsThisRole(): Int32 {
+        5
+    }
+    public static func fontRole(): Int32 {
+        6
+    }
+    public static func textAlignmentRole(): Int32 {
+        7
+    }
+    public static func backgroundRole(): Int32 {
+        8
+    }
+    public static func foregroundRole(): Int32 {
+        9
+    }
+    public static func checkStateRole(): Int32 {
+        10
+    }
+    public static func accessibleTextRole(): Int32 {
+        11
+    }
+    public static func accessibleDescriptionRole(): Int32 {
+        12
+    }
+    public static func sizeHintRole(): Int32 {
+        13
+    }
+    public static func initialSortOrderRole(): Int32 {
+        14
+    }
 }
-
 
 // ============================================================
 // QAbstractItemModel - 自定义模型基类（基于回调）
@@ -184,7 +229,9 @@ public class QAbstractItemModel {
         unsafe { qAbstractItemModelLayoutChanged(ptr) }
     }
 
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     /// 释放资源
     public func close(): Unit {

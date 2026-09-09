@@ -7,10 +7,15 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qVideoSinkCreate(): Int64
+
 foreign func qVideoSinkDelete(ptr: Int64): Unit
+
 foreign func qVideoSinkVideoWidth(ptr: Int64): Int32
+
 foreign func qVideoSinkVideoHeight(ptr: Int64): Int32
+
 foreign func qVideoSinkSetSubtitleText(ptr: Int64, text: CString): Unit
+
 foreign func qVideoSinkSubtitleText(ptr: Int64): CString
 
 // ============================================================

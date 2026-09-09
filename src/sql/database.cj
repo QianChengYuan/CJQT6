@@ -4,74 +4,135 @@ import cjqt6.core.*
 
 // QSqlDatabase - 数据库连接
 foreign func qSqlDatabaseAddDatabase(`type`: CString, name: CString): Int64
+
 foreign func qSqlDatabaseDatabase(name: CString): Int64
+
 foreign func qSqlDatabaseSetHostName(ptr: Int64, host: CString): Unit
+
 foreign func qSqlDatabaseSetPort(ptr: Int64, port: Int32): Unit
+
 foreign func qSqlDatabaseSetDatabaseName(ptr: Int64, name: CString): Unit
+
 foreign func qSqlDatabaseSetUserName(ptr: Int64, user: CString): Unit
+
 foreign func qSqlDatabaseSetPassword(ptr: Int64, password: CString): Unit
+
 foreign func qSqlDatabaseOpen(ptr: Int64): Bool
+
 foreign func qSqlDatabaseClose(ptr: Int64): Unit
+
 foreign func qSqlDatabaseIsOpen(ptr: Int64): Bool
+
 foreign func qSqlDatabaseLastError(ptr: Int64): CString
+
 foreign func qSqlDatabaseDriverName(ptr: Int64): CString
+
 foreign func qSqlDatabaseRemoveDatabase(name: CString): Unit
+
 foreign func qSqlDatabaseDelete(ptr: Int64): Unit
 
 // QSqlQuery - SQL查询
 foreign func qSqlQueryCreate(): Int64
+
 foreign func qSqlQueryCreateWithDb(dbPtr: Int64): Int64
+
 foreign func qSqlQueryExec(ptr: Int64, sql: CString): Bool
+
 foreign func qSqlQueryExecBatch(ptr: Int64): Bool
+
 foreign func qSqlQueryPrepare(ptr: Int64, sql: CString): Bool
+
 foreign func qSqlQueryBindValue(ptr: Int64, placeholder: CString, value: CString): Unit
+
 foreign func qSqlQueryBindValueInt(ptr: Int64, placeholder: CString, value: Int32): Unit
+
 foreign func qSqlQueryBindValueDouble(ptr: Int64, placeholder: CString, value: Float64): Unit
+
 foreign func qSqlQueryNext(ptr: Int64): Bool
+
 foreign func qSqlQueryPrevious(ptr: Int64): Bool
+
 foreign func qSqlQueryFirst(ptr: Int64): Bool
+
 foreign func qSqlQueryLast(ptr: Int64): Bool
+
 foreign func qSqlQueryValueString(ptr: Int64, index: Int32): CString
+
 foreign func qSqlQueryValueInt(ptr: Int64, index: Int32): Int32
+
 foreign func qSqlQueryValueDouble(ptr: Int64, index: Int32): Float64
+
 foreign func qSqlQuerySize(ptr: Int64): Int32
+
 foreign func qSqlQueryNumRowsAffected(ptr: Int64): Int32
+
 foreign func qSqlQueryAt(ptr: Int64): Int32
+
 foreign func qSqlQueryIsValid(ptr: Int64): Bool
+
 foreign func qSqlQueryIsActive(ptr: Int64): Bool
+
 foreign func qSqlQueryIsSelect(ptr: Int64): Bool
+
 foreign func qSqlQueryFinish(ptr: Int64): Unit
+
 foreign func qSqlQueryClear(ptr: Int64): Unit
+
 foreign func qSqlQueryLastError(ptr: Int64): CString
+
 foreign func qSqlQueryDelete(ptr: Int64): Unit
 
 // QSqlRecord FFI
 foreign func qSqlQueryRecord(ptr: Int64): Int64
+
 foreign func qSqlRecordCount(ptr: Int64): Int32
+
 foreign func qSqlRecordFieldName(ptr: Int64, index: Int32): CString
+
 foreign func qSqlRecordIndexOf(ptr: Int64, name: CString): Int32
+
 foreign func qSqlRecordIsNull(ptr: Int64, index: Int32): Bool
+
 foreign func qSqlRecordValueString(ptr: Int64, index: Int32): CString
+
 foreign func qSqlRecordValueInt(ptr: Int64, index: Int32): Int32
+
 foreign func qSqlRecordValueDouble(ptr: Int64, index: Int32): Float64
+
 foreign func qSqlRecordField(ptr: Int64, index: Int32): Int64
+
 foreign func qSqlRecordDelete(ptr: Int64): Unit
 
 // QSqlField FFI
 foreign func qSqlFieldName(ptr: Int64): CString
+
 foreign func qSqlFieldIsNull(ptr: Int64): Bool
+
 foreign func qSqlFieldIsReadOnly(ptr: Int64): Bool
+
 foreign func qSqlFieldIsAutoValue(ptr: Int64): Bool
+
 foreign func qSqlFieldValueString(ptr: Int64): CString
+
 foreign func qSqlFieldDelete(ptr: Int64): Unit
 
 /// 数据库驱动类型
 public class SqlDriver {
-    public static func sqlite(): String { "QSQLITE" }
-    public static func mysql(): String { "QMYSQL" }
-    public static func postgresql(): String { "QPSQL" }
-    public static func odbc(): String { "QODBC" }
-    public static func oracle(): String { "QOCI" }
+    public static func sqlite(): String {
+        "QSQLITE"
+    }
+    public static func mysql(): String {
+        "QMYSQL"
+    }
+    public static func postgresql(): String {
+        "QPSQL"
+    }
+    public static func odbc(): String {
+        "QODBC"
+    }
+    public static func oracle(): String {
+        "QOCI"
+    }
 }
 
 /// SQL数据库连接
@@ -79,9 +140,9 @@ public class SqlDriver {
 public class QSqlDatabase <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
-    
+
     private init() {}
-    
+
     /// 添加数据库连接
     public static func addDatabase(driverType: String, connectionName: String): QSqlDatabase {
         let db = QSqlDatabase()
@@ -94,7 +155,7 @@ public class QSqlDatabase <: QtResource {
         }
         return db
     }
-    
+
     /// 获取已存在的数据库连接
     public static func database(connectionName: String): QSqlDatabase {
         let db = QSqlDatabase()
@@ -105,7 +166,7 @@ public class QSqlDatabase <: QtResource {
         }
         return db
     }
-    
+
     /// 移除数据库连接
     public static func removeDatabase(connectionName: String): Unit {
         unsafe {
@@ -114,7 +175,7 @@ public class QSqlDatabase <: QtResource {
             LibC.free(nameStr)
         }
     }
-    
+
     public func setHostName(host: String): Unit {
         checkValid()
         unsafe {
@@ -123,12 +184,12 @@ public class QSqlDatabase <: QtResource {
             LibC.free(cstr)
         }
     }
-    
+
     public func setPort(port: Int32): Unit {
         checkValid()
         unsafe { qSqlDatabaseSetPort(ptr, port) }
     }
-    
+
     public func setDatabaseName(name: String): Unit {
         checkValid()
         unsafe {
@@ -137,7 +198,7 @@ public class QSqlDatabase <: QtResource {
             LibC.free(cstr)
         }
     }
-    
+
     public func setUserName(user: String): Unit {
         checkValid()
         unsafe {
@@ -146,7 +207,7 @@ public class QSqlDatabase <: QtResource {
             LibC.free(cstr)
         }
     }
-    
+
     public func setPassword(password: String): Unit {
         checkValid()
         unsafe {
@@ -155,25 +216,25 @@ public class QSqlDatabase <: QtResource {
             LibC.free(cstr)
         }
     }
-    
+
     /// 打开数据库连接
     public func open(): Bool {
         checkValid()
         unsafe { qSqlDatabaseOpen(ptr) }
     }
-    
+
     /// 关闭数据库连接（如仍需使用数据库对象，调用 closeDatabase 仅关闭连接）
     public func closeDatabase(): Unit {
         checkValid()
         unsafe { qSqlDatabaseClose(ptr) }
     }
-    
+
     /// 检查数据库连接是否已打开
     public func isOpen(): Bool {
         checkValid()
         unsafe { qSqlDatabaseIsOpen(ptr) }
     }
-    
+
     public func lastError(): String {
         checkValid()
         unsafe {
@@ -183,7 +244,7 @@ public class QSqlDatabase <: QtResource {
             return result
         }
     }
-    
+
     public func driverName(): String {
         checkValid()
         unsafe {
@@ -193,19 +254,21 @@ public class QSqlDatabase <: QtResource {
             return result
         }
     }
-    
-    public func getPtr(): Int64 { ptr }
-    
+
+    public func getPtr(): Int64 {
+        ptr
+    }
+
     /// 是否已关闭（资源已释放）
     public func isClosed(): Bool {
         return closed
     }
-    
+
     /// 检查对象有效性（未关闭且指针有效）
     public func isValid(): Bool {
         return !closed && ptr != 0
     }
-    
+
     /// 检查有效性，无效时抛出异常
     /// throws: NullPointerException 空指针访问时抛出
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
@@ -217,7 +280,7 @@ public class QSqlDatabase <: QtResource {
             throw NullPointerException("QSqlDatabase 指针为空")
         }
     }
-    
+
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
@@ -229,7 +292,7 @@ public class QSqlDatabase <: QtResource {
             ptr = 0
         }
     }
-    
+
     /// 删除数据库连接（兼容旧API）
     public func delete(): Unit {
         close()
@@ -240,15 +303,15 @@ public class QSqlDatabase <: QtResource {
 public class QSqlQuery <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
-    
+
     public init() {
         unsafe { ptr = qSqlQueryCreate() }
     }
-    
+
     public init(db: QSqlDatabase) {
         unsafe { ptr = qSqlQueryCreateWithDb(db.getPtr()) }
     }
-    
+
     public func exec(sql: String): Bool {
         unsafe {
             var cstr = LibC.mallocCString(sql)
@@ -257,11 +320,11 @@ public class QSqlQuery <: QtResource {
             return result
         }
     }
-    
+
     public func execBatch(): Bool {
         unsafe { qSqlQueryExecBatch(ptr) }
     }
-    
+
     public func prepare(sql: String): Bool {
         unsafe {
             var cstr = LibC.mallocCString(sql)
@@ -270,7 +333,7 @@ public class QSqlQuery <: QtResource {
             return result
         }
     }
-    
+
     public func bindValue(placeholder: String, value: String): Unit {
         unsafe {
             var pstr = LibC.mallocCString(placeholder)
@@ -280,7 +343,7 @@ public class QSqlQuery <: QtResource {
             LibC.free(vstr)
         }
     }
-    
+
     public func bindValueInt(placeholder: String, value: Int32): Unit {
         unsafe {
             var pstr = LibC.mallocCString(placeholder)
@@ -288,7 +351,7 @@ public class QSqlQuery <: QtResource {
             LibC.free(pstr)
         }
     }
-    
+
     public func bindValueDouble(placeholder: String, value: Float64): Unit {
         unsafe {
             var pstr = LibC.mallocCString(placeholder)
@@ -296,23 +359,23 @@ public class QSqlQuery <: QtResource {
             LibC.free(pstr)
         }
     }
-    
+
     public func next(): Bool {
         unsafe { qSqlQueryNext(ptr) }
     }
-    
+
     public func previous(): Bool {
         unsafe { qSqlQueryPrevious(ptr) }
     }
-    
+
     public func first(): Bool {
         unsafe { qSqlQueryFirst(ptr) }
     }
-    
+
     public func last(): Bool {
         unsafe { qSqlQueryLast(ptr) }
     }
-    
+
     public func valueString(index: Int32): String {
         unsafe {
             let cstr = qSqlQueryValueString(ptr, index)
@@ -321,27 +384,27 @@ public class QSqlQuery <: QtResource {
             return result
         }
     }
-    
+
     public func valueInt(index: Int32): Int32 {
         unsafe { qSqlQueryValueInt(ptr, index) }
     }
-    
+
     public func valueDouble(index: Int32): Float64 {
         unsafe { qSqlQueryValueDouble(ptr, index) }
     }
-    
+
     public func size(): Int32 {
         unsafe { qSqlQuerySize(ptr) }
     }
-    
+
     public func numRowsAffected(): Int32 {
         unsafe { qSqlQueryNumRowsAffected(ptr) }
     }
-    
+
     public func at(): Int32 {
         unsafe { qSqlQueryAt(ptr) }
     }
-    
+
     public func isValid(): Bool {
         // QtResource 语义融合：对象已释放/指针为空即无效；否则按 Qt 查询有效性返回
         if (closed || ptr == 0) {
@@ -349,23 +412,23 @@ public class QSqlQuery <: QtResource {
         }
         unsafe { qSqlQueryIsValid(ptr) }
     }
-    
+
     public func isActive(): Bool {
         unsafe { qSqlQueryIsActive(ptr) }
     }
-    
+
     public func isSelect(): Bool {
         unsafe { qSqlQueryIsSelect(ptr) }
     }
-    
+
     public func finish(): Unit {
         unsafe { qSqlQueryFinish(ptr) }
     }
-    
+
     public func clear(): Unit {
         unsafe { qSqlQueryClear(ptr) }
     }
-    
+
     public func lastError(): String {
         unsafe {
             let cstr = qSqlQueryLastError(ptr)
@@ -374,7 +437,7 @@ public class QSqlQuery <: QtResource {
             return result
         }
     }
-    
+
     /// 获取当前查询的记录元数据
     /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public func record(): QSqlRecord {
@@ -386,11 +449,15 @@ public class QSqlQuery <: QtResource {
             return QSqlRecord(recordPtr)
         }
     }
-    
-    public func getPtr(): Int64 { ptr }
+
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     /// 是否已关闭（资源已释放）
-    public func isClosed(): Bool { closed }
+    public func isClosed(): Bool {
+        closed
+    }
 
     /// 检查有效性，无效时抛出异常
     /// throws: ResourceDisposedException 对象已释放时抛出
@@ -412,7 +479,7 @@ public class QSqlQuery <: QtResource {
             closed = true
         }
     }
-    
+
     public func delete(): Unit {
         close()
     }
@@ -437,7 +504,9 @@ public class QSqlRecord <: QtResource {
     }
 
     /// 是否已关闭
-    public func isClosed(): Bool { closed }
+    public func isClosed(): Bool {
+        closed
+    }
 
     /// 检查对象有效性（非 QObject 值包装）
     public func isValid(): Bool {
@@ -514,7 +583,9 @@ public class QSqlRecord <: QtResource {
         }
     }
 
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     public func close(): Unit {
         if (!closed && ptr != 0) {
@@ -544,7 +615,9 @@ public class QSqlField <: QtResource {
     }
 
     /// 是否已关闭
-    public func isClosed(): Bool { closed }
+    public func isClosed(): Bool {
+        closed
+    }
 
     /// 检查对象有效性（非 QObject 值包装）
     public func isValid(): Bool {
@@ -591,7 +664,9 @@ public class QSqlField <: QtResource {
         }
     }
 
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     public func close(): Unit {
         if (!closed && ptr != 0) {

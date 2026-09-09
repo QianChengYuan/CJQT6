@@ -11,7 +11,7 @@ import cjqt6.network.*
 import std.unittest.*
 
 // CFunc 回调（顶层 let，不捕获局部变量）
-private let gNewConnCb: VoidCallback = { => () }
+private let gNewConnCb: VoidCallback = {=> ()}
 var gNewConnCaptureCount: Int32 = 0
 
 // ---------------------------------------------------------------------
@@ -147,8 +147,8 @@ class QTcpServerTests {
     func testSetOnNewConnectionCapture() {
         gNewConnCaptureCount = 0
         let s = QTcpServer()
-        let id = s.setOnNewConnectionCapture({ =>
-            gNewConnCaptureCount += 1
+        let id = s.setOnNewConnectionCapture({
+            => gNewConnCaptureCount += 1
         })
         @Expect(id > 0, true)
         s.close()

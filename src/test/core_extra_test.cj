@@ -16,7 +16,6 @@ var gRunnableRan: Bool = false
 // =====================================================================
 @Test
 class QItemSelectionModelTests {
-
     @TestCase
     func testCreateAndClose() {
         let model = QStandardItemModel(3, 3)
@@ -139,7 +138,6 @@ class QItemSelectionModelTests {
 // =====================================================================
 @Test
 class QJsonDocumentTests {
-
     @TestCase
     func testParseObject() {
         let doc = QJsonDocument("{\"name\":\"cjqt6\"}")
@@ -212,7 +210,6 @@ class QJsonDocumentTests {
 // =====================================================================
 @Test
 class QJsonObjectTests {
-
     @TestCase
     func testCreateEmpty() {
         let obj = QJsonObject()
@@ -280,7 +277,6 @@ class QJsonObjectTests {
 // =====================================================================
 @Test
 class QJsonArrayTests {
-
     @TestCase
     func testCreateEmpty() {
         let arr = QJsonArray()
@@ -324,7 +320,6 @@ class QJsonArrayTests {
 // =====================================================================
 @Test
 class QJsonValueTests {
-
     @TestCase
     func testCreateNull() {
         let v = QJsonValue.createNull()
@@ -392,7 +387,6 @@ class QJsonValueTests {
 // =====================================================================
 @Test
 class QThreadTests {
-
     @TestCase
     func testCreateAndClose() {
         let thread = QThread()
@@ -406,7 +400,7 @@ class QThreadTests {
     func testDoubleClose() {
         let thread = QThread()
         thread.close()
-        thread.close()  // 安全
+        thread.close() // 安全
         @Assert(true)
     }
 
@@ -460,7 +454,7 @@ class QThreadTests {
     func testFinishedCallback() {
         gThreadFinished = false
         let thread = QThread()
-        thread.setOnFinished({ => gThreadFinished = true })
+        thread.setOnFinished({=> gThreadFinished = true})
         thread.start()
         QThread.msleep(20)
         thread.quit()
@@ -485,7 +479,6 @@ class QThreadTests {
 // =====================================================================
 @Test
 class QThreadPoolTests {
-
     @TestCase
     func testGlobalInstance() {
         let pool = QThreadPool.globalInstance()
@@ -514,7 +507,7 @@ class QThreadPoolTests {
     @TestCase
     func testRunRunnable() {
         gRunnableRan = false
-        let runnable = QRunnable({ => gRunnableRan = true })
+        let runnable = QRunnable({=> gRunnableRan = true})
         let pool = QThreadPool.globalInstance()
         pool.start(runnable)
         let done = pool.waitForDone()

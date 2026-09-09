@@ -4,21 +4,37 @@ import cjqt6.core.*
 
 // QButtonGroup - 按钮分组
 foreign func qButtonGroupCreate(): Int64
+
 foreign func qButtonGroupAddButton(ptr: Int64, btnPtr: Int64, id: Int32): Unit
+
 foreign func qButtonGroupRemoveButton(ptr: Int64, btnPtr: Int64): Unit
+
 foreign func qButtonGroupSetExclusive(ptr: Int64, exclusive: Bool): Unit
+
 foreign func qButtonGroupIsExclusive(ptr: Int64): Bool
+
 foreign func qButtonGroupCheckedId(ptr: Int64): Int32
+
 foreign func qButtonGroupCheckedButton(ptr: Int64): Int64
+
 foreign func qButtonGroupSetId(ptr: Int64, btnPtr: Int64, id: Int32): Unit
+
 foreign func qButtonGroupId(ptr: Int64, btnPtr: Int64): Int32
+
 foreign func qButtonGroupButtonsCount(ptr: Int64): Int32
+
 foreign func qButtonGroupDelete(ptr: Int64): Unit
+
 foreign func qButtonGroupButton(ptr: Int64, id: Int32): Int64
+
 foreign func qButtonGroupConnectButtonClicked(ptr: Int64, callback: Int64Callback): Unit
+
 foreign func qButtonGroupConnectButtonPressed(ptr: Int64, callback: Int64Callback): Unit
+
 foreign func qButtonGroupConnectButtonReleased(ptr: Int64, callback: Int64Callback): Unit
+
 foreign func qButtonGroupConnectButtonToggled(ptr: Int64, callback: Int64Int32Callback): Unit
+
 foreign func qButtonGroupConnectIdClicked(ptr: Int64, callback: Int32Callback): Unit
 
 /// 按钮分组

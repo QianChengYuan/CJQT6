@@ -2,9 +2,13 @@ package cjqt6.core
 
 // QTimer - 定时器
 foreign func qTimerCreate(): Int64
+
 foreign func qTimerSetInterval(ptr: Int64, interval: Int32): Unit
+
 foreign func qTimerStart(ptr: Int64): Unit
+
 foreign func qTimerStop(ptr: Int64): Unit
+
 foreign func qTimerDelete(ptr: Int64): Unit
 
 /// 定时器
@@ -12,7 +16,7 @@ foreign func qTimerDelete(ptr: Int64): Unit
 public class QTimer <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
-    
+
     /// 创建定时器
     /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
@@ -24,7 +28,7 @@ public class QTimer <: QtResource {
         }
         trackObject(ptr)
     }
-    
+
     /// 设置间隔时间（毫秒）
     public func setInterval(interval: Int32): Unit {
         checkValid()
@@ -32,7 +36,7 @@ public class QTimer <: QtResource {
             qTimerSetInterval(ptr, interval)
         }
     }
-    
+
     /// 启动定时器
     public func start(): Unit {
         checkValid()
@@ -40,7 +44,7 @@ public class QTimer <: QtResource {
             qTimerStart(ptr)
         }
     }
-    
+
     /// 停止定时器
     public func stop(): Unit {
         checkValid()
@@ -48,7 +52,7 @@ public class QTimer <: QtResource {
             qTimerStop(ptr)
         }
     }
-    
+
     /// 设置超时回调，返回 SignalConnection 句柄（可 disconnect）
     public func setOnTimeout(callback: VoidCallback): SignalConnection {
         checkValid()
@@ -68,7 +72,7 @@ public class QTimer <: QtResource {
         }
         return SignalConnection.createCapturing(ptr, SIGNAL_TIMEOUT, WIDGET_TYPE_TIMER, id)
     }
-    
+
     /// 断开超时信号
     public func disconnectTimeout(): Unit {
         if (ptr != 0) {
@@ -77,27 +81,27 @@ public class QTimer <: QtResource {
             }
         }
     }
-    
+
     /// 断开该定时器的全部信号（timeout）
     public func disconnect(): Unit {
         disconnectTimeout()
     }
-    
+
     /// 获取原生指针
     public func getPtr(): Int64 {
         return ptr
     }
-    
+
     /// 是否已关闭
     public func isClosed(): Bool {
         return closed
     }
-    
+
     /// 检查对象有效性
     public func isValid(): Bool {
         return !closed && ptr != 0 && isObjectAlive(ptr)
     }
-    
+
     /// 检查有效性，无效时抛出异常
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     /// throws: NullPointerException 空指针访问时抛出
@@ -112,7 +116,7 @@ public class QTimer <: QtResource {
             throw ResourceDisposedException("QTimer 底层 Qt 对象已失效")
         }
     }
-    
+
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
@@ -133,12 +137,12 @@ public class QTimer <: QtResource {
             ptr = 0
         }
     }
-    
+
     /// 删除定时器（兼容旧API）
     public func delete(): Unit {
         close()
     }
-    
+
     /// 终结器 - 已禁用
     /// 注意：仓颉运行时可能会在不正确的时机调用终结器（例如对象仍被全局变量引用时）。
     /// 这会导致 Qt 对象被提前删除，引发崩溃。

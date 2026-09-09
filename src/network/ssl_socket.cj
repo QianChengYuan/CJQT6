@@ -7,18 +7,28 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qSslSocketCreate(): Int64
-foreign func qSslSocketDelete(ptr: Int64): Unit
-foreign func qSslSocketConnectToHostEncrypted(ptr: Int64, host: CString, port: UInt16): Unit
-foreign func qSslSocketStartClientEncryption(ptr: Int64): Unit
-foreign func qSslSocketStartServerEncryption(ptr: Int64): Unit
-foreign func qSslSocketIsEncrypted(ptr: Int64): Bool
-foreign func qSslSocketSslMode(ptr: Int64): Int32
-foreign func qSslSocketSetPeerVerifyMode(ptr: Int64, mode: Int32): Unit
-foreign func qSslSocketPeerVerifyMode(ptr: Int64): Int32
-foreign func qSslSocketPeerCertificateInfo(ptr: Int64): CString
-foreign func qSslSocketConnectEncrypted(ptr: Int64, callback: VoidCallback): Unit
-foreign func qSslSocketConnectPeerVerifyError(ptr: Int64, callback: CStringCallback): Unit
 
+foreign func qSslSocketDelete(ptr: Int64): Unit
+
+foreign func qSslSocketConnectToHostEncrypted(ptr: Int64, host: CString, port: UInt16): Unit
+
+foreign func qSslSocketStartClientEncryption(ptr: Int64): Unit
+
+foreign func qSslSocketStartServerEncryption(ptr: Int64): Unit
+
+foreign func qSslSocketIsEncrypted(ptr: Int64): Bool
+
+foreign func qSslSocketSslMode(ptr: Int64): Int32
+
+foreign func qSslSocketSetPeerVerifyMode(ptr: Int64, mode: Int32): Unit
+
+foreign func qSslSocketPeerVerifyMode(ptr: Int64): Int32
+
+foreign func qSslSocketPeerCertificateInfo(ptr: Int64): CString
+
+foreign func qSslSocketConnectEncrypted(ptr: Int64, callback: VoidCallback): Unit
+
+foreign func qSslSocketConnectPeerVerifyError(ptr: Int64, callback: CStringCallback): Unit
 
 // ============================================================
 // SSL模式常量（与 QSsl::SslMode 枚举对应）
@@ -26,11 +36,17 @@ foreign func qSslSocketConnectPeerVerifyError(ptr: Int64, callback: CStringCallb
 /// SSL 模式常量：无加密 / 客户端 / 服务端
 public class SslMode {
     /// 未加密模式
-    public static func unsecured(): Int32 { 0 }
+    public static func unsecured(): Int32 {
+        0
+    }
     /// SSL 客户端模式
-    public static func sslClient(): Int32 { 1 }
+    public static func sslClient(): Int32 {
+        1
+    }
     /// SSL 服务端模式
-    public static func sslServer(): Int32 { 2 }
+    public static func sslServer(): Int32 {
+        2
+    }
 }
 
 // ============================================================
@@ -39,15 +55,22 @@ public class SslMode {
 /// 对端证书验证模式常量
 public class PeerVerifyMode {
     /// 不验证对端证书
-    public static func verifyNone(): Int32 { 0 }
+    public static func verifyNone(): Int32 {
+        0
+    }
     /// 请求对端证书但不验证
-    public static func queryPeer(): Int32 { 1 }
+    public static func queryPeer(): Int32 {
+        1
+    }
     /// 请求并验证对端证书
-    public static func verifyPeer(): Int32 { 2 }
+    public static func verifyPeer(): Int32 {
+        2
+    }
     /// 自动验证（客户端模式自动开启验证）
-    public static func autoVerify(): Int32 { 3 }
+    public static func autoVerify(): Int32 {
+        3
+    }
 }
-
 
 // ============================================================
 // QSslSocket - SSL/TLS加密套接字
@@ -83,7 +106,7 @@ public class QSslSocket {
     public func connectToHostEncrypted(host: String, port: UInt16): Unit {
         checkValid()
         unsafe {
-            withCString(host) { c => qSslSocketConnectToHostEncrypted(ptr, c, port) }
+            withCString(host) {c => qSslSocketConnectToHostEncrypted(ptr, c, port)}
         }
     }
 
@@ -149,7 +172,9 @@ public class QSslSocket {
     }
 
     /// 获取底层指针
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     /// 释放资源
     public func close(): Unit {

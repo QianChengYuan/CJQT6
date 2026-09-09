@@ -19,11 +19,11 @@ public class ScopeManagerRegistry {
     /// 控件指针 -> 作用域ID的映射
     /// 用于快速查找控件被哪个作用域管理
     private static var managedWidgets: HashMap<Int64, String> = HashMap<Int64, String>()
-    
+
     /// 所有活跃作用域ID列表
     /// 用于追踪当前活跃的作用域
     private static var scopeIds: ArrayList<String> = ArrayList<String>()
-    
+
     /// 注册作用域
     /// 
     /// 在创建ScopeManager时调用
@@ -34,7 +34,7 @@ public class ScopeManagerRegistry {
     public static func registerScope(scopeId: String): Unit {
         scopeIds.add(scopeId)
     }
-    
+
     /// 注销作用域
     /// 
     /// 在ScopeManager关闭时调用
@@ -51,12 +51,12 @@ public class ScopeManagerRegistry {
                 keysToRemove.add(ptr)
             }
         }
-        
+
         // 批量移除控件标记
         for (ptr in keysToRemove) {
             managedWidgets.remove(ptr)
         }
-        
+
         // 从作用域列表中移除
         for (i in 0..scopeIds.size) {
             if (scopeIds[i] == scopeId) {
@@ -65,7 +65,7 @@ public class ScopeManagerRegistry {
             }
         }
     }
-    
+
     /// 标记控件为已管理
     /// 
     /// 将控件指针映射到作用域ID
@@ -76,7 +76,7 @@ public class ScopeManagerRegistry {
     public static func markManaged(ptr: Int64, scopeId: String): Unit {
         managedWidgets[ptr] = scopeId
     }
-    
+
     /// 取消控件的管理标记
     /// 
     /// 从注册表中移除控件
@@ -86,7 +86,7 @@ public class ScopeManagerRegistry {
     public static func unmarkManaged(ptr: Int64): Unit {
         managedWidgets.remove(ptr)
     }
-    
+
     /// 检查控件是否已被管理
     /// 
     /// 参数:
@@ -96,7 +96,7 @@ public class ScopeManagerRegistry {
     public static func isManaged(ptr: Int64): Bool {
         return managedWidgets.contains(ptr)
     }
-    
+
     /// 获取管理该控件的作用域ID
     /// 
     /// 参数:
@@ -109,7 +109,7 @@ public class ScopeManagerRegistry {
         }
         return ""
     }
-    
+
     /// 清空所有注册信息
     /// 
     /// 用于测试环境的清理
@@ -118,7 +118,7 @@ public class ScopeManagerRegistry {
         managedWidgets.clear()
         scopeIds.clear()
     }
-    
+
     /// 获取活跃作用域数量
     /// 
     /// 返回:
@@ -126,7 +126,7 @@ public class ScopeManagerRegistry {
     public static func activeScopeCount(): Int64 {
         return scopeIds.size
     }
-    
+
     /// 获取已管理控件数量
     /// 
     /// 返回:

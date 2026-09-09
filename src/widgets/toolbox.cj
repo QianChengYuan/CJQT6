@@ -4,21 +4,37 @@ import cjqt6.core.*
 
 // QToolBox - 工具箱
 foreign func qToolBoxCreate(): Int64
+
 foreign func qToolBoxDelete(ptr: Int64): Unit
+
 foreign func qToolBoxAddItem(ptr: Int64, widgetPtr: Int64, title: CString): Int32
+
 foreign func qToolBoxInsertItem(ptr: Int64, index: Int32, widgetPtr: Int64, title: CString): Int32
+
 foreign func qToolBoxRemoveItem(ptr: Int64, index: Int32): Unit
+
 foreign func qToolBoxCount(ptr: Int64): Int32
+
 foreign func qToolBoxCurrentIndex(ptr: Int64): Int32
+
 foreign func qToolBoxSetCurrentIndex(ptr: Int64, index: Int32): Unit
+
 foreign func qToolBoxSetItemText(ptr: Int64, index: Int32, text: CString): Unit
+
 foreign func qToolBoxItemText(ptr: Int64, index: Int32): CString
+
 foreign func qToolBoxSetItemToolTip(ptr: Int64, index: Int32, toolTip: CString): Unit
+
 foreign func qToolBoxSetItemEnabled(ptr: Int64, index: Int32, enabled: Int32): Unit
+
 foreign func qToolBoxIsItemEnabled(ptr: Int64, index: Int32): Int32
+
 foreign func qToolBoxSetItemIcon(ptr: Int64, index: Int32, path: CString): Unit
+
 foreign func qToolBoxSetCurrentWidget(ptr: Int64, widgetPtr: Int64): Unit
+
 foreign func qToolBoxIndexOf(ptr: Int64, widgetPtr: Int64): Int32
+
 foreign func qToolBoxConnectCurrentChanged(ptr: Int64, callback: Int32Callback): Unit
 
 /// 工具箱控件，以选项卡方式组织多个页面（类似分页容器）
@@ -127,7 +143,11 @@ public class QToolBox {
 
     public func setItemEnabled(index: Int32, enabled: Bool): Unit {
         unsafe {
-            qToolBoxSetItemEnabled(ptr, index, if (enabled) { 1 } else { 0 })
+            qToolBoxSetItemEnabled(ptr, index, if (enabled) {
+                1
+            } else {
+                0
+            })
         }
     }
 
@@ -140,7 +160,7 @@ public class QToolBox {
     /// 设置指定项图标（按文件路径）
     public func setItemIcon(index: Int32, path: String): Unit {
         unsafe {
-            withCString(path) { c => qToolBoxSetItemIcon(ptr, index, c) }
+            withCString(path) {c => qToolBoxSetItemIcon(ptr, index, c)}
         }
     }
 
@@ -164,7 +184,7 @@ public class QToolBox {
             qToolBoxConnectCurrentChanged(ptr, callback)
         }
     }
-    
+
     public func setLayout(layoutPtr: Int64): Unit {
         unsafe {
             qWidgetSetLayout(ptr, layoutPtr)

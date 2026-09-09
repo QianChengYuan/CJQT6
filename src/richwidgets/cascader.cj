@@ -48,7 +48,7 @@ public class Cascader <: QtResource {
             updateLevel2(0)
         }
         // 注册联动回调（一级变化时自动更新二级）
-        level1.setOnCurrentIndexChangedCapture({ => onLevel1Changed() })
+        level1.setOnCurrentIndexChangedCapture({=> onLevel1Changed()})
     }
 
     /// 一级变化回调（联动更新二级后触发，可捕获局部变量）

@@ -7,10 +7,15 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qStackedBarSeriesCreate(): Int64
+
 foreign func qStackedBarSeriesDelete(ptr: Int64): Unit
+
 foreign func qStackedBarSeriesAppend(ptr: Int64, setPtr: Int64): Unit
+
 foreign func qStackedBarSeriesCount(ptr: Int64): Int32
+
 foreign func qStackedBarSeriesClear(ptr: Int64): Unit
+
 foreign func qStackedBarSeriesSetLabelsVisible(ptr: Int64, visible: Int32): Unit
 
 // ============================================================
@@ -75,10 +80,16 @@ public class QStackedBarSeries {
     /// 设置标签是否可见
     public func setLabelsVisible(visible: Bool): Unit {
         checkValid()
-        unsafe { qStackedBarSeriesSetLabelsVisible(ptr, if (visible) { 1 } else { 0 }) }
+        unsafe { qStackedBarSeriesSetLabelsVisible(ptr, if (visible) {
+            1
+        } else {
+            0
+        }) }
     }
 
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     /// 释放资源；已 addSeries 后由 chart 级联释放，勿主动调用
     public func close(): Unit {

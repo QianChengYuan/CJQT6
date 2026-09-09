@@ -7,25 +7,42 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qStyledItemDelegateCreate(): Int64
+
 foreign func qStyledItemDelegateDelete(ptr: Int64): Unit
+
 foreign func qStyledItemDelegateSetPaintCallback(ptr: Int64, callback: CFunc<(Int64) -> Unit>): Unit
+
 foreign func qStyledItemDelegateSetSizeHintCallback(ptr: Int64, callback: CFunc<(Int64) -> Int64>): Unit
+
 foreign func qStyledItemDelegateIsMounted(ptr: Int64): Int32
+
 foreign func qStyledItemDelegateGetPainterPtr(ptr: Int64): Int64
+
 foreign func qStyledItemDelegateGetRectX(ptr: Int64): Int32
+
 foreign func qStyledItemDelegateGetRectY(ptr: Int64): Int32
+
 foreign func qStyledItemDelegateGetRectW(ptr: Int64): Int32
+
 foreign func qStyledItemDelegateGetRectH(ptr: Int64): Int32
+
 foreign func qStyledItemDelegateGetState(ptr: Int64): Int32
+
 foreign func qStyledItemDelegateGetRow(ptr: Int64): Int32
+
 foreign func qStyledItemDelegateGetCol(ptr: Int64): Int32
 
 // 编辑委托
 foreign func qStyledItemDelegateSetCreateEditorCallback(ptr: Int64, callback: CFunc<(Int64) -> Int64>): Unit
+
 foreign func qStyledItemDelegateSetSetEditorDataCallback(ptr: Int64, callback: CFunc<(Int64) -> Unit>): Unit
+
 foreign func qStyledItemDelegateSetSetModelDataCallback(ptr: Int64, callback: CFunc<(Int64) -> Unit>): Unit
+
 foreign func qStyledItemDelegateGetParentPtr(ptr: Int64): Int64
+
 foreign func qStyledItemDelegateGetEditorPtr(ptr: Int64): Int64
+
 foreign func qStyledItemDelegateGetModelPtr(ptr: Int64): Int64
 
 // ============================================================
@@ -50,15 +67,25 @@ public type DelegateSetModelDataCallback = CFunc<(Int64) -> Unit>
 /// 绘制状态位标志，用于判断当前单元格是否被选中/悬浮/聚焦等
 public class PaintState {
     /// 被选中（对应 QStyle::State_Selected）
-    public static func selected(): Int32 { 0x00008000 }
+    public static func selected(): Int32 {
+        0x00008000
+    }
     /// 鼠标悬浮（对应 QStyle::State_MouseOver）
-    public static func mouseOver(): Int32 { 0x00002000 }
+    public static func mouseOver(): Int32 {
+        0x00002000
+    }
     /// 拥有焦点（对应 QStyle::State_HasFocus）
-    public static func hasFocus(): Int32 { 0x00000100 }
+    public static func hasFocus(): Int32 {
+        0x00000100
+    }
     /// 处于激活状态（对应 QStyle::State_Active）
-    public static func active(): Int32 { 0x00010000 }
+    public static func active(): Int32 {
+        0x00010000
+    }
     /// 判断是否包含某状态位
-    public static func has(state: Int32, flag: Int32): Bool { (state & flag) != 0 }
+    public static func has(state: Int32, flag: Int32): Bool {
+        (state & flag) != 0
+    }
 }
 
 // ============================================================
@@ -226,10 +253,14 @@ public class QStyledItemDelegate <: QtResource {
         unsafe { qStyledItemDelegateGetModelPtr(ptr) }
     }
 
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     /// 是否已关闭（资源已释放）
-    public func isClosed(): Bool { closed }
+    public func isClosed(): Bool {
+        closed
+    }
 
     /// 检查对象有效性（未关闭且指针有效）
     public func isValid(): Bool {

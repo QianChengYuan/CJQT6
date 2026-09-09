@@ -4,20 +4,35 @@ import cjqt6.core.*
 
 // QDial - 旋钮控件
 foreign func qDialCreate(): Int64
+
 foreign func qDialSetValue(ptr: Int64, value: Int32): Unit
+
 foreign func qDialValue(ptr: Int64): Int32
+
 foreign func qDialSetRange(ptr: Int64, min: Int32, max: Int32): Unit
+
 foreign func qDialSetSingleStep(ptr: Int64, step: Int32): Unit
+
 foreign func qDialSetWrapping(ptr: Int64, wrapping: Bool): Unit
+
 foreign func qDialWrapping(ptr: Int64): Bool
+
 foreign func qDialSetNotchesVisible(ptr: Int64, visible: Bool): Unit
+
 foreign func qDialNotchesVisible(ptr: Int64): Bool
+
 foreign func qDialDelete(ptr: Int64): Unit
+
 foreign func qDialConnectValueChanged(ptr: Int64, callback: Int32Callback): Unit
+
 foreign func qDialDisconnectValueChanged(ptr: Int64): Unit
+
 foreign func qDialSetNotchTarget(ptr: Int64, target: Float64): Unit
+
 foreign func qDialNotchTarget(ptr: Int64): Float64
+
 foreign func qDialSetPageStep(ptr: Int64, step: Int32): Unit
+
 foreign func qDialPageStep(ptr: Int64): Int32
 
 /// 旋钮控件部件
@@ -25,63 +40,63 @@ foreign func qDialPageStep(ptr: Int64): Int32
 public class QDial <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
-    
+
     public init() {
         unsafe {
             ptr = qDialCreate()
         }
         trackObject(ptr)
     }
-    
+
     public func show(): Unit {
         checkValid()
         unsafe {
             qWidgetShow(ptr)
         }
     }
-    
+
     public func hide(): Unit {
         checkValid()
         unsafe {
             qWidgetHide(ptr)
         }
     }
-    
+
     public func resize(width: Int32, height: Int32): Unit {
         checkValid()
         unsafe {
             qWidgetResize(ptr, width, height)
         }
     }
-    
+
     public func setValue(value: Int32): Unit {
         checkValid()
         unsafe {
             qDialSetValue(ptr, value)
         }
     }
-    
+
     public func value(): Int32 {
         checkValid()
         unsafe {
             return qDialValue(ptr)
         }
     }
-    
+
     public func setRange(min: Int32, max: Int32): Unit {
         checkValid()
         unsafe {
             qDialSetRange(ptr, min, max)
         }
     }
-    
+
     public func setSingleStep(step: Int32): Unit {
         checkValid()
         unsafe {
             qDialSetSingleStep(ptr, step)
         }
     }
-    
+
     /// 设置是否循环
     public func setWrapping(wrapping: Bool): Unit {
         checkValid()
@@ -89,7 +104,7 @@ public class QDial <: QtResource {
             qDialSetWrapping(ptr, wrapping)
         }
     }
-    
+
     /// 获取是否循环
     public func wrapping(): Bool {
         checkValid()
@@ -97,7 +112,7 @@ public class QDial <: QtResource {
             return qDialWrapping(ptr)
         }
     }
-    
+
     /// 设置刻度是否可见
     public func setNotchesVisible(visible: Bool): Unit {
         checkValid()
@@ -105,7 +120,7 @@ public class QDial <: QtResource {
             qDialSetNotchesVisible(ptr, visible)
         }
     }
-    
+
     /// 获取刻度是否可见
     public func notchesVisible(): Bool {
         checkValid()
@@ -113,12 +128,16 @@ public class QDial <: QtResource {
             return qDialNotchesVisible(ptr)
         }
     }
-    
+
     /// 设置启用/禁用
     public func setEnabled(enabled: Bool): Unit {
         checkValid()
         unsafe {
-            qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
+            qWidgetSetEnabled(ptr, if (enabled) {
+                1
+            } else {
+                0
+            })
         }
     }
 
@@ -153,7 +172,7 @@ public class QDial <: QtResource {
             return qDialPageStep(ptr)
         }
     }
-    
+
     /// 检查是否启用
     public func isEnabled(): Bool {
         checkValid()
@@ -161,15 +180,15 @@ public class QDial <: QtResource {
             qWidgetIsEnabled(ptr) == 1
         }
     }
-    
+
     /// 设置样式表
     public func setStyleSheet(style: String): Unit {
         checkValid()
         unsafe {
-            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
+            withCString(style) {c => qWidgetSetStyleSheet(ptr, c)}
         }
     }
-    
+
     /// 设置最小尺寸
     public func setMinimumSize(minw: Int32, minh: Int32): Unit {
         checkValid()
@@ -177,7 +196,7 @@ public class QDial <: QtResource {
             qWidgetSetMinimumSize(ptr, minw, minh)
         }
     }
-    
+
     /// 设置最大尺寸
     public func setMaximumSize(maxw: Int32, maxh: Int32): Unit {
         checkValid()
@@ -185,7 +204,7 @@ public class QDial <: QtResource {
             qWidgetSetMaximumSize(ptr, maxw, maxh)
         }
     }
-    
+
     /// 设置值变化回调
     public func setOnValueChanged(callback: Int32Callback): Unit {
         checkValid()
@@ -193,7 +212,7 @@ public class QDial <: QtResource {
             qDialConnectValueChanged(ptr, callback)
         }
     }
-    
+
     /// 断开值变化信号
     public func disconnectValueChanged(): Unit {
         checkValid()
@@ -201,27 +220,27 @@ public class QDial <: QtResource {
             qDialDisconnectValueChanged(ptr)
         }
     }
-    
+
     /// 断开该拨盘的全部信号（valueChanged）
     public func disconnect(): Unit {
         disconnectValueChanged()
     }
-    
+
     /// 获取对象指针
     public func getPtr(): Int64 {
         return ptr
     }
-    
+
     /// 是否已关闭
     public func isClosed(): Bool {
         return closed
     }
-    
+
     /// 检查对象有效性
     public func isValid(): Bool {
         return !closed && ptr != 0 && isObjectAlive(ptr)
     }
-    
+
     /// 检查有效性，无效时抛出异常
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
     /// throws: NullPointerException 空指针访问时抛出
@@ -236,7 +255,7 @@ public class QDial <: QtResource {
             throw ResourceDisposedException("QDial 底层 Qt 对象已失效")
         }
     }
-    
+
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
@@ -255,7 +274,7 @@ public class QDial <: QtResource {
             ptr = 0
         }
     }
-    
+
     /// 删除旋钮（兼容旧API）
     public func delete(): Unit {
         close()

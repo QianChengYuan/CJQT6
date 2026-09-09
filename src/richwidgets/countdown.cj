@@ -41,7 +41,7 @@ public class Countdown <: QtResource {
     /// 开始倒计时（首次调用时注册回调，规避 init 成员未完成约束）
     public func start(): Unit {
         if (!registered) {
-            timer.setOnTimeoutCapture({ => onTick() })
+            timer.setOnTimeoutCapture({=> onTick()})
             registered = true
         }
         timer.start()

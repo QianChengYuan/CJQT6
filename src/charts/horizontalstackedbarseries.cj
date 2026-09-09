@@ -7,14 +7,23 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qHorizontalStackedBarSeriesCreate(): Int64
+
 foreign func qHorizontalStackedBarSeriesDelete(ptr: Int64): Unit
+
 foreign func qHorizontalStackedBarSeriesAppend(ptr: Int64, setPtr: Int64): Unit
+
 foreign func qHorizontalStackedBarSeriesRemove(ptr: Int64, setPtr: Int64): Unit
+
 foreign func qHorizontalStackedBarSeriesInsert(ptr: Int64, index: Int32, setPtr: Int64): Unit
+
 foreign func qHorizontalStackedBarSeriesCount(ptr: Int64): Int32
+
 foreign func qHorizontalStackedBarSeriesClear(ptr: Int64): Unit
+
 foreign func qHorizontalStackedBarSeriesSetBarWidth(ptr: Int64, width: Float64): Unit
+
 foreign func qHorizontalStackedBarSeriesSetLabelsVisible(ptr: Int64, visible: Int32): Unit
+
 foreign func qHorizontalStackedBarSeriesSetLabelsPosition(ptr: Int64, position: Int32): Unit
 
 // ============================================================
@@ -94,7 +103,11 @@ public class QHorizontalStackedBarSeries {
     /// 设置标签是否可见
     public func setLabelsVisible(visible: Bool): Unit {
         checkValid()
-        unsafe { qHorizontalStackedBarSeriesSetLabelsVisible(ptr, if (visible) { 1 } else { 0 }) }
+        unsafe { qHorizontalStackedBarSeriesSetLabelsVisible(ptr, if (visible) {
+            1
+        } else {
+            0
+        }) }
     }
 
     /// 设置标签位置（见 BarLabelsPosition 常量）
@@ -103,7 +116,9 @@ public class QHorizontalStackedBarSeries {
         unsafe { qHorizontalStackedBarSeriesSetLabelsPosition(ptr, position) }
     }
 
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     /// 释放资源；已 addSeries 后由 chart 级联释放，勿主动调用
     public func close(): Unit {

@@ -115,28 +115,28 @@ foreign func qTextEditConnectSelectionChanged(ptr: Int64, callback: VoidCallback
 public class QTextEdit <: QtResource {
     private var ptr: Int64 = 0
     private var closed: Bool = false
-    
+
     public init() {
         unsafe {
             ptr = qTextEditCreate()
         }
         trackObject(ptr)
     }
-    
+
     public func show(): Unit {
         checkValid()
         unsafe {
             qWidgetShow(ptr)
         }
     }
-    
+
     public func hide(): Unit {
         checkValid()
         unsafe {
             qWidgetHide(ptr)
         }
     }
-    
+
     public func setText(text: String): Unit {
         checkValid()
         unsafe {
@@ -145,7 +145,7 @@ public class QTextEdit <: QtResource {
             LibC.free(cstr)
         }
     }
-    
+
     public func text(): String {
         checkValid()
         unsafe {
@@ -155,14 +155,14 @@ public class QTextEdit <: QtResource {
             return result
         }
     }
-    
+
     public func setReadOnly(readonly: Bool): Unit {
         checkValid()
         unsafe {
             qTextEditSetReadOnly(ptr, readonly)
         }
     }
-    
+
     /// 设置制表位距离（像素，Qt6 用 setTabStopDistance 替代 Qt5 的 setTabStopWidth）
     public func setTabStopDistance(distance: Float64): Unit {
         checkValid()
@@ -170,7 +170,7 @@ public class QTextEdit <: QtResource {
             qTextEditSetTabStopDistance(ptr, distance)
         }
     }
-    
+
     /// 设置是否接受富文本
     public func setAcceptRichText(accept: Bool): Unit {
         checkValid()
@@ -178,113 +178,113 @@ public class QTextEdit <: QtResource {
             qTextEditSetAcceptRichText(ptr, accept)
         }
     }
-    
+
     /// 设置占位文本
     public func setPlaceholderText(text: String): Unit {
         checkValid()
         unsafe {
-            withCString(text) { c => qTextEditSetPlaceholderText(ptr, c) }
+            withCString(text) {c => qTextEditSetPlaceholderText(ptr, c)}
         }
     }
-    
+
     public func clear(): Unit {
         checkValid()
         unsafe {
             qTextEditClear(ptr)
         }
     }
-    
+
     public func cut(): Unit {
         checkValid()
         unsafe {
             qTextEditCut(ptr)
         }
     }
-    
+
     public func copy(): Unit {
         checkValid()
         unsafe {
             qTextEditCopy(ptr)
         }
     }
-    
+
     public func paste(): Unit {
         checkValid()
         unsafe {
             qTextEditPaste(ptr)
         }
     }
-    
+
     public func selectAll(): Unit {
         checkValid()
         unsafe {
             qTextEditSelectAll(ptr)
         }
     }
-    
+
     public func canPaste(): Bool {
         checkValid()
         unsafe {
             qTextEditCanPaste(ptr)
         }
     }
-    
+
     public func undo(): Unit {
         checkValid()
         unsafe {
             qTextEditUndo(ptr)
         }
     }
-    
+
     public func redo(): Unit {
         checkValid()
         unsafe {
             qTextEditRedo(ptr)
         }
     }
-    
+
     public func canUndo(): Bool {
         checkValid()
         unsafe {
             qTextEditCanUndo(ptr)
         }
     }
-    
+
     public func canRedo(): Bool {
         checkValid()
         unsafe {
             qTextEditCanRedo(ptr)
         }
     }
-    
+
     public func isModified(): Bool {
         checkValid()
         unsafe {
             qTextEditIsModified(ptr)
         }
     }
-    
+
     public func setModified(modified: Bool): Unit {
         checkValid()
         unsafe {
             qTextEditSetModified(ptr, modified)
         }
     }
-    
+
     public func setLineWrapMode(mode: Int32): Unit {
         checkValid()
         unsafe {
             qTextEditSetLineWrapMode(ptr, mode)
         }
     }
-    
+
     public func lineWrapMode(): Int32 {
         checkValid()
         unsafe {
             qTextEditLineWrapMode(ptr)
         }
     }
-    
+
     public func setFontFamily(family: String): Unit {
         checkValid()
         unsafe {
@@ -293,28 +293,28 @@ public class QTextEdit <: QtResource {
             LibC.free(cstr)
         }
     }
-    
+
     public func setFontSize(size: Int32): Unit {
         checkValid()
         unsafe {
             qTextEditSetFontSize(ptr, size)
         }
     }
-    
+
     public func setFontBold(bold: Bool): Unit {
         checkValid()
         unsafe {
             qTextEditSetFontBold(ptr, bold)
         }
     }
-    
+
     public func setFontItalic(italic: Bool): Unit {
         checkValid()
         unsafe {
             qTextEditSetFontItalic(ptr, italic)
         }
     }
-    
+
     /// 设置 HTML 内容
     public func setHtml(html: String): Unit {
         checkValid()
@@ -324,7 +324,7 @@ public class QTextEdit <: QtResource {
             LibC.free(cstr)
         }
     }
-    
+
     /// 获取 HTML 内容
     public func toHtml(): String {
         checkValid()
@@ -335,7 +335,7 @@ public class QTextEdit <: QtResource {
             return result
         }
     }
-    
+
     /// 设置纯文本内容
     public func setPlainText(text: String): Unit {
         checkValid()
@@ -345,7 +345,7 @@ public class QTextEdit <: QtResource {
             LibC.free(cstr)
         }
     }
-    
+
     /// 获取纯文本内容
     public func toPlainText(): String {
         checkValid()
@@ -356,7 +356,7 @@ public class QTextEdit <: QtResource {
             return result
         }
     }
-    
+
     /// 追加文本（自动添加换行）
     public func append(text: String): Unit {
         checkValid()
@@ -366,7 +366,7 @@ public class QTextEdit <: QtResource {
             LibC.free(cstr)
         }
     }
-    
+
     /// 在光标处插入 HTML 片段
     public func insertHtml(html: String): Unit {
         checkValid()
@@ -376,7 +376,7 @@ public class QTextEdit <: QtResource {
             LibC.free(cstr)
         }
     }
-    
+
     /// 设置当前文本颜色（RGB，0-255）
     public func setTextColor(r: Int32, g: Int32, b: Int32): Unit {
         checkValid()
@@ -384,7 +384,7 @@ public class QTextEdit <: QtResource {
             qTextEditSetTextColor(ptr, r, g, b)
         }
     }
-    
+
     /// 放大字体
     public func zoomIn(range: Int32): Unit {
         checkValid()
@@ -392,7 +392,7 @@ public class QTextEdit <: QtResource {
             qTextEditZoomIn(ptr, range)
         }
     }
-    
+
     /// 缩小字体
     public func zoomOut(range: Int32): Unit {
         checkValid()
@@ -400,7 +400,7 @@ public class QTextEdit <: QtResource {
             qTextEditZoomOut(ptr, range)
         }
     }
-    
+
     /// 文本内容变化回调
     public func setOnTextChanged(callback: VoidCallback): Unit {
         checkValid()
@@ -408,7 +408,7 @@ public class QTextEdit <: QtResource {
             qTextEditConnectTextChanged(ptr, callback)
         }
     }
-    
+
     /// 撤销可用性变化回调（参数: 是否可撤销）
     public func setOnUndoAvailable(callback: BoolCallback): Unit {
         checkValid()
@@ -416,7 +416,7 @@ public class QTextEdit <: QtResource {
             qTextEditConnectUndoAvailable(ptr, callback)
         }
     }
-    
+
     /// 重做可用性变化回调（参数: 是否可重做）
     public func setOnRedoAvailable(callback: BoolCallback): Unit {
         checkValid()
@@ -424,7 +424,7 @@ public class QTextEdit <: QtResource {
             qTextEditConnectRedoAvailable(ptr, callback)
         }
     }
-    
+
     /// 复制可用性变化回调（参数: 是否有选中内容可复制）
     public func setOnCopyAvailable(callback: BoolCallback): Unit {
         checkValid()
@@ -432,7 +432,7 @@ public class QTextEdit <: QtResource {
             qTextEditConnectCopyAvailable(ptr, callback)
         }
     }
-    
+
     /// 光标位置变化回调
     public func setOnCursorPositionChanged(callback: VoidCallback): Unit {
         checkValid()
@@ -440,7 +440,7 @@ public class QTextEdit <: QtResource {
             qTextEditConnectCursorPositionChanged(ptr, callback)
         }
     }
-    
+
     /// 选区变化回调
     public func setOnSelectionChanged(callback: VoidCallback): Unit {
         checkValid()
@@ -448,7 +448,7 @@ public class QTextEdit <: QtResource {
             qTextEditConnectSelectionChanged(ptr, callback)
         }
     }
-    
+
     /// 查找文本，返回是否找到
     public func find(text: String, caseSensitive: Bool): Bool {
         checkValid()
@@ -459,7 +459,7 @@ public class QTextEdit <: QtResource {
             return result
         }
     }
-    
+
     /// 查找下一个
     public func findNext(text: String, caseSensitive: Bool): Unit {
         checkValid()
@@ -469,7 +469,7 @@ public class QTextEdit <: QtResource {
             LibC.free(cstr)
         }
     }
-    
+
     /// 查找上一个
     public func findPrev(text: String, caseSensitive: Bool): Unit {
         checkValid()
@@ -479,7 +479,7 @@ public class QTextEdit <: QtResource {
             LibC.free(cstr)
         }
     }
-    
+
     /// 替换当前选中内容
     public func replace(newText: String): Unit {
         checkValid()
@@ -489,7 +489,7 @@ public class QTextEdit <: QtResource {
             LibC.free(cstr)
         }
     }
-    
+
     /// 替换所有匹配项，返回替换数量
     public func replaceAll(oldText: String, newText: String, caseSensitive: Bool): Int32 {
         checkValid()
@@ -502,7 +502,7 @@ public class QTextEdit <: QtResource {
             return count
         }
     }
-    
+
     /// 获取总行数
     public func lineCount(): Int32 {
         checkValid()
@@ -510,7 +510,7 @@ public class QTextEdit <: QtResource {
             qTextEditLineCount(ptr)
         }
     }
-    
+
     /// 获取当前行号 (1-based)
     public func currentLine(): Int32 {
         checkValid()
@@ -518,7 +518,7 @@ public class QTextEdit <: QtResource {
             qTextEditCurrentLine(ptr)
         }
     }
-    
+
     /// 获取当前列号 (1-based)
     public func currentColumn(): Int32 {
         checkValid()
@@ -526,7 +526,7 @@ public class QTextEdit <: QtResource {
             qTextEditCurrentColumn(ptr)
         }
     }
-    
+
     /// 获取字符总数
     public func characterCount(): Int32 {
         checkValid()
@@ -534,7 +534,7 @@ public class QTextEdit <: QtResource {
             qTextEditCharacterCount(ptr)
         }
     }
-    
+
     /// 跳转到指定行
     public func goToLine(line: Int32): Unit {
         checkValid()
@@ -550,7 +550,7 @@ public class QTextEdit <: QtResource {
             qTextEditSetFocus(ptr)
         }
     }
-    
+
     /// 打印文档
     public func print(printerPtr: Int64): Unit {
         checkValid()
@@ -558,7 +558,7 @@ public class QTextEdit <: QtResource {
             qTextEditPrint(ptr, printerPtr)
         }
     }
-    
+
     public func resize(width: Int32, height: Int32): Unit {
         checkValid()
         unsafe {
@@ -572,22 +572,22 @@ public class QTextEdit <: QtResource {
             qWidgetSetMinimumSize(ptr, minw, minh)
         }
     }
-    
+
     /// 获取原生指针
     public func getPtr(): Int64 {
         return ptr
     }
-    
+
     /// 是否已关闭
     public func isClosed(): Bool {
         return closed
     }
-    
+
     /// 检查对象有效性
     public func isValid(): Bool {
         return !closed && ptr != 0 && isObjectAlive(ptr)
     }
-    
+
     /// 检查有效性，无效时抛出异常
     /// throws: NullPointerException 空指针访问时抛出
     /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
@@ -602,7 +602,7 @@ public class QTextEdit <: QtResource {
             throw ResourceDisposedException("QTextEdit 底层 Qt 对象已失效")
         }
     }
-    
+
     /// 关闭资源，释放Qt对象
     public func close(): Unit {
         if (!closed && ptr != 0) {
@@ -621,12 +621,12 @@ public class QTextEdit <: QtResource {
             ptr = 0
         }
     }
-    
+
     /// 删除文本编辑框（兼容旧API）
     public func delete(): Unit {
         close()
     }
-    
+
     /// 设置样式表
     public func setStyleSheet(style: String): Unit {
         checkValid()
@@ -636,7 +636,7 @@ public class QTextEdit <: QtResource {
             LibC.free(cstr)
         }
     }
-    
+
     /// 兼容旧API
     @Deprecated[message: "请使用 setStyleSheet 代替"]
     public func setWidgetStyleSheet(style: String): Unit {
@@ -647,7 +647,7 @@ public class QTextEdit <: QtResource {
             LibC.free(cstr)
         }
     }
-    
+
     public func widgetStyleSheet(): String {
         checkValid()
         unsafe {
@@ -657,15 +657,19 @@ public class QTextEdit <: QtResource {
             result
         }
     }
-    
+
     /// 设置启用状态
     public func setEnabled(enabled: Bool): Unit {
         checkValid()
         unsafe {
-            qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
+            qWidgetSetEnabled(ptr, if (enabled) {
+                1
+            } else {
+                0
+            })
         }
     }
-    
+
     /// 是否启用
     public func isEnabled(): Bool {
         checkValid()
@@ -673,23 +677,27 @@ public class QTextEdit <: QtResource {
             return qWidgetIsEnabled(ptr) == 1
         }
     }
-    
+
     /// 设置工具提示
     public func setToolTip(toolTip: String): Unit {
         checkValid()
         unsafe {
-            withCString(toolTip) { c => qWidgetSetToolTip(ptr, c) }
+            withCString(toolTip) {c => qWidgetSetToolTip(ptr, c)}
         }
     }
-    
+
     /// 设置可见性
     public func setVisible(visible: Bool): Unit {
         checkValid()
         unsafe {
-            qWidgetSetVisible(ptr, if (visible) { 1 } else { 0 })
+            qWidgetSetVisible(ptr, if (visible) {
+                1
+            } else {
+                0
+            })
         }
     }
-    
+
     /// 是否可见
     public func isVisible(): Bool {
         checkValid()
@@ -697,7 +705,7 @@ public class QTextEdit <: QtResource {
             return qWidgetIsVisible(ptr) == 1
         }
     }
-    
+
     /// 获取宽度
     public func width(): Int32 {
         checkValid()
@@ -705,7 +713,7 @@ public class QTextEdit <: QtResource {
             return qWidgetWidth(ptr)
         }
     }
-    
+
     /// 获取高度
     public func height(): Int32 {
         checkValid()
@@ -713,7 +721,7 @@ public class QTextEdit <: QtResource {
             return qWidgetHeight(ptr)
         }
     }
-    
+
     /// 设置最大尺寸
     public func setMaximumSize(maxw: Int32, maxh: Int32): Unit {
         checkValid()

@@ -11,7 +11,7 @@ import cjqt6.menu.*
 import std.unittest.*
 
 // CFunc 回调（顶层 let，不捕获局部变量）
-private let gActionTriggered: VoidCallback = { => () }
+private let gActionTriggered: VoidCallback = {=> ()}
 var gActionTriggeredCount: Int32 = 0
 
 // ---------------------------------------------------------------------
@@ -120,8 +120,8 @@ class QActionTests {
     func testSetOnTriggeredCapture() {
         gActionTriggeredCount = 0
         let act = QAction("Run")
-        let conn = act.setOnTriggeredCapture({ =>
-            gActionTriggeredCount += 1
+        let conn = act.setOnTriggeredCapture({
+            => gActionTriggeredCount += 1
         })
         @Expect(conn.isConnected(), true)
         conn.disconnect()

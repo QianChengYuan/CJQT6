@@ -44,16 +44,16 @@ public open class CreateFailedException <: QtException {
 public interface QtResource {
     /// 资源是否已关闭
     func isClosed(): Bool
-    
+
     /// 关闭资源，释放底层Qt对象
     func close(): Unit
-    
+
     /// 获取原生指针
     func getPtr(): Int64
-    
+
     /// 检查对象有效性
     func isValid(): Bool
-    
+
     /// 检查有效性，无效时抛出异常
     func checkValid(): Unit // cjlint-ignore !G.SEC.01 接口方法默认open
 }

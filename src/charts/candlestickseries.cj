@@ -7,15 +7,25 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qCandlestickSeriesCreate(): Int64
+
 foreign func qCandlestickSeriesDelete(ptr: Int64): Unit
+
 foreign func qCandlestickSeriesAppend(ptr: Int64, setPtr: Int64): Unit
+
 foreign func qCandlestickSeriesCount(ptr: Int64): Int32
+
 foreign func qCandlestickSeriesClear(ptr: Int64): Unit
+
 foreign func qCandlestickSeriesSetBodyWidth(ptr: Int64, width: Float64): Unit
+
 foreign func qCandlestickSeriesSetBodyOutlineVisible(ptr: Int64, visible: Int32): Unit
+
 foreign func qCandlestickSeriesSetCapsWidth(ptr: Int64, width: Float64): Unit
+
 foreign func qCandlestickSeriesSetCapsVisible(ptr: Int64, visible: Int32): Unit
+
 foreign func qCandlestickSeriesSetIncreasingColor(ptr: Int64, r: Int32, g: Int32, b: Int32): Unit
+
 foreign func qCandlestickSeriesSetDecreasingColor(ptr: Int64, r: Int32, g: Int32, b: Int32): Unit
 
 // ============================================================
@@ -86,7 +96,11 @@ public class QCandlestickSeries {
     /// 设置实体边框可见性
     public func setBodyOutlineVisible(visible: Bool): Unit {
         checkValid()
-        unsafe { qCandlestickSeriesSetBodyOutlineVisible(ptr, if (visible) { 1 } else { 0 }) }
+        unsafe { qCandlestickSeriesSetBodyOutlineVisible(ptr, if (visible) {
+            1
+        } else {
+            0
+        }) }
     }
 
     /// 设置上下影线宽度
@@ -98,7 +112,11 @@ public class QCandlestickSeries {
     /// 设置上下影线可见性
     public func setCapsVisible(visible: Bool): Unit {
         checkValid()
-        unsafe { qCandlestickSeriesSetCapsVisible(ptr, if (visible) { 1 } else { 0 }) }
+        unsafe { qCandlestickSeriesSetCapsVisible(ptr, if (visible) {
+            1
+        } else {
+            0
+        }) }
     }
 
     /// 设置上涨颜色（RGB）
@@ -113,7 +131,9 @@ public class QCandlestickSeries {
         unsafe { qCandlestickSeriesSetDecreasingColor(ptr, r, g, b) }
     }
 
-    public func getPtr(): Int64 { ptr }
+    public func getPtr(): Int64 {
+        ptr
+    }
 
     /// 释放资源；已 addSeries 后由 chart 级联释放，勿主动调用
     public func close(): Unit {

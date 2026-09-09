@@ -5,16 +5,27 @@ package cjqt6.core
 // ============================================================
 
 foreign func qSettingsCreate(appName: CString): Int64
+
 foreign func qSettingsCreateWithFile(fileName: CString): Int64
+
 foreign func qSettingsSetValue(ptr: Int64, key: CString, value: CString): Unit
+
 foreign func qSettingsValue(ptr: Int64, key: CString, defaultValue: CString): CString
+
 foreign func qSettingsValueInt(ptr: Int64, key: CString, defaultValue: Int32): Int32
+
 foreign func qSettingsValueBool(ptr: Int64, key: CString, defaultValue: Bool): Bool
+
 foreign func qSettingsBeginGroup(ptr: Int64, prefix: CString): Unit
+
 foreign func qSettingsEndGroup(ptr: Int64): Unit
+
 foreign func qSettingsSync(ptr: Int64): Unit
+
 foreign func qSettingsContains(ptr: Int64, key: CString): Bool
+
 foreign func qSettingsRemove(ptr: Int64, key: CString): Unit
+
 foreign func qSettingsDelete(ptr: Int64): Unit
 
 /// 应用配置持久化，以键值对方式读写应用设置（支持分组与多类型取值）

@@ -7,46 +7,84 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qHeaderViewCreate(orientation: Int32): Int64
+
 foreign func qHeaderViewSetStretchLastSection(ptr: Int64, stretch: Int32): Unit
+
 foreign func qHeaderViewSetSectionResizeMode(ptr: Int64, mode: Int32): Unit
+
 foreign func qHeaderViewDelete(ptr: Int64): Unit
 
 // 补充 API FFI（可见性/布局/尺寸/索引/信号）
 foreign func qHeaderViewSetVisible(ptr: Int64, v: Int32): Unit
+
 foreign func qHeaderViewShow(ptr: Int64): Unit
+
 foreign func qHeaderViewHide(ptr: Int64): Unit
+
 foreign func qHeaderViewIsStretchLastSection(ptr: Int64): Int32
+
 foreign func qHeaderViewSetDefaultSectionSize(ptr: Int64, v: Int32): Unit
+
 foreign func qHeaderViewDefaultSectionSize(ptr: Int64): Int32
+
 foreign func qHeaderViewSetMinimumSectionSize(ptr: Int64, v: Int32): Unit
+
 foreign func qHeaderViewMinimumSectionSize(ptr: Int64): Int32
+
 foreign func qHeaderViewSetSectionResizeModeIndex(ptr: Int64, index: Int32, mode: Int32): Unit
+
 foreign func qHeaderViewSetSortIndicatorShown(ptr: Int64, v: Int32): Unit
+
 foreign func qHeaderViewIsSortIndicatorShown(ptr: Int64): Int32
+
 foreign func qHeaderViewSetSectionsClickable(ptr: Int64, v: Int32): Unit
+
 foreign func qHeaderViewIsSectionsClickable(ptr: Int64): Int32
+
 foreign func qHeaderViewSetHighlightSections(ptr: Int64, v: Int32): Unit
+
 foreign func qHeaderViewIsHighlightSections(ptr: Int64): Int32
+
 foreign func qHeaderViewSetCascadingSectionResizes(ptr: Int64, v: Int32): Unit
+
 foreign func qHeaderViewIsCascadingSectionResizes(ptr: Int64): Int32
+
 foreign func qHeaderViewResizeSection(ptr: Int64, index: Int32, size: Int32): Unit
+
 foreign func qHeaderViewSectionSize(ptr: Int64, index: Int32): Int32
+
 foreign func qHeaderViewSetSectionHidden(ptr: Int64, index: Int32, v: Int32): Unit
+
 foreign func qHeaderViewIsSectionHidden(ptr: Int64, index: Int32): Int32
+
 foreign func qHeaderViewCount(ptr: Int64): Int32
+
 foreign func qHeaderViewLength(ptr: Int64): Int32
+
 foreign func qHeaderViewLogicalIndex(ptr: Int64, visual: Int32): Int32
+
 foreign func qHeaderViewVisualIndex(ptr: Int64, logical: Int32): Int32
+
 foreign func qHeaderViewSetOffset(ptr: Int64, offset: Int32): Unit
+
 foreign func qHeaderViewOffset(ptr: Int64): Int32
+
 foreign func qHeaderViewMoveSection(ptr: Int64, from: Int32, to: Int32): Unit
+
 foreign func qHeaderViewSwapSections(ptr: Int64, one: Int32, two: Int32): Unit
+
 foreign func qHeaderViewSetDefaultAlignment(ptr: Int64, alignment: Int32): Unit
+
 foreign func qHeaderViewConnectSectionClicked(ptr: Int64, callback: Int32Callback): Unit
+
 foreign func qHeaderViewConnectSectionDoubleClicked(ptr: Int64, callback: Int32Callback): Unit
+
 foreign func qHeaderViewConnectSectionResized(ptr: Int64, callback: CFunc<(Int32, Int32, Int32) -> Unit>): Unit
+
 foreign func qHeaderViewConnectSectionMoved(ptr: Int64, callback: CFunc<(Int32, Int32, Int32) -> Unit>): Unit
+
 foreign func qHeaderViewConnectSortIndicatorChanged(ptr: Int64, callback: Int32Int32Callback): Unit
+
 foreign func qHeaderViewConnectSectionHandleDoubleClicked(ptr: Int64, callback: Int32Callback): Unit
 
 // ============================================================
@@ -119,21 +157,29 @@ public class QHeaderView <: QtResource {
     public func setEnabled(enabled: Bool): Unit {
         checkValid()
         unsafe {
-            qWidgetSetEnabled(ptr, if (enabled) { 1 } else { 0 })
+            qWidgetSetEnabled(ptr, if (enabled) {
+                1
+            } else {
+                0
+            })
         }
     }
 
     public func setStyleSheet(style: String): Unit {
         checkValid()
         unsafe {
-            withCString(style) { c => qWidgetSetStyleSheet(ptr, c) }
+            withCString(style) {c => qWidgetSetStyleSheet(ptr, c)}
         }
     }
 
     public func setStretchLastSection(stretch: Bool): Unit {
         checkValid()
         unsafe {
-            qHeaderViewSetStretchLastSection(ptr, if (stretch) { 1 } else { 0 })
+            qHeaderViewSetStretchLastSection(ptr, if (stretch) {
+                1
+            } else {
+                0
+            })
         }
     }
 
@@ -147,7 +193,11 @@ public class QHeaderView <: QtResource {
     public func setVisible(visible: Bool): Unit {
         checkValid()
         unsafe {
-            qHeaderViewSetVisible(ptr, if (visible) { 1 } else { 0 })
+            qHeaderViewSetVisible(ptr, if (visible) {
+                1
+            } else {
+                0
+            })
         }
     }
 
@@ -196,7 +246,11 @@ public class QHeaderView <: QtResource {
     public func setSortIndicatorShown(shown: Bool): Unit {
         checkValid()
         unsafe {
-            qHeaderViewSetSortIndicatorShown(ptr, if (shown) { 1 } else { 0 })
+            qHeaderViewSetSortIndicatorShown(ptr, if (shown) {
+                1
+            } else {
+                0
+            })
         }
     }
 
@@ -210,7 +264,11 @@ public class QHeaderView <: QtResource {
     public func setSectionsClickable(clickable: Bool): Unit {
         checkValid()
         unsafe {
-            qHeaderViewSetSectionsClickable(ptr, if (clickable) { 1 } else { 0 })
+            qHeaderViewSetSectionsClickable(ptr, if (clickable) {
+                1
+            } else {
+                0
+            })
         }
     }
 
@@ -224,7 +282,11 @@ public class QHeaderView <: QtResource {
     public func setHighlightSections(highlight: Bool): Unit {
         checkValid()
         unsafe {
-            qHeaderViewSetHighlightSections(ptr, if (highlight) { 1 } else { 0 })
+            qHeaderViewSetHighlightSections(ptr, if (highlight) {
+                1
+            } else {
+                0
+            })
         }
     }
 
@@ -238,7 +300,11 @@ public class QHeaderView <: QtResource {
     public func setCascadingSectionResizes(cascading: Bool): Unit {
         checkValid()
         unsafe {
-            qHeaderViewSetCascadingSectionResizes(ptr, if (cascading) { 1 } else { 0 })
+            qHeaderViewSetCascadingSectionResizes(ptr, if (cascading) {
+                1
+            } else {
+                0
+            })
         }
     }
 
@@ -266,7 +332,11 @@ public class QHeaderView <: QtResource {
     public func setSectionHidden(index: Int32, hidden: Bool): Unit {
         checkValid()
         unsafe {
-            qHeaderViewSetSectionHidden(ptr, index, if (hidden) { 1 } else { 0 })
+            qHeaderViewSetSectionHidden(ptr, index, if (hidden) {
+                1
+            } else {
+                0
+            })
         }
     }
 
@@ -388,7 +458,9 @@ public class QHeaderView <: QtResource {
     }
 
     /// 是否已关闭（资源已释放）
-    public func isClosed(): Bool { closed }
+    public func isClosed(): Bool {
+        closed
+    }
 
     /// 检查对象有效性（未关闭且指针有效）
     public func isValid(): Bool {

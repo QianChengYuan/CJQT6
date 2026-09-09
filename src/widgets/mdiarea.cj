@@ -4,27 +4,46 @@ import cjqt6.core.*
 
 // QMdiArea - 多文档区域
 foreign func qMdiAreaCreate(): Int64
+
 foreign func qMdiAreaDelete(ptr: Int64): Unit
+
 foreign func qMdiAreaAddSubWindow(ptr: Int64, widgetPtr: Int64): Int64
+
 foreign func qMdiAreaRemoveSubWindow(ptr: Int64, subWinPtr: Int64): Unit
+
 foreign func qMdiAreaCurrentSubWindow(ptr: Int64): Int64
+
 foreign func qMdiAreaCascadeSubWindows(ptr: Int64): Unit
+
 foreign func qMdiAreaTileSubWindows(ptr: Int64): Unit
+
 foreign func qMdiAreaCloseAllSubWindows(ptr: Int64): Unit
+
 foreign func qMdiAreaSetViewMode(ptr: Int64, mode: Int32): Unit
+
 foreign func qMdiAreaSubWindowCount(ptr: Int64): Int32
+
 foreign func qMdiAreaSetActiveSubWindow(ptr: Int64, subWinPtr: Int64): Unit
+
 foreign func qMdiAreaViewMode(ptr: Int64): Int32
+
 foreign func qMdiAreaSetActivationOrder(ptr: Int64, order: Int32): Unit
+
 foreign func qMdiAreaActivationOrder(ptr: Int64): Int32
+
 foreign func qMdiAreaSetBackground(ptr: Int64, path: CString): Unit
+
 foreign func qMdiAreaConnectSubWindowActivated(ptr: Int64, callback: Int64Callback): Unit
 
 // QMdiSubWindow
 foreign func qMdiSubWindowSetWidget(ptr: Int64, widgetPtr: Int64): Unit
+
 foreign func qMdiSubWindowWidget(ptr: Int64): Int64
+
 foreign func qMdiSubWindowDelete(ptr: Int64): Unit
+
 foreign func qMdiSubWindowShowShaded(ptr: Int64): Unit
+
 foreign func qMdiSubWindowIsShaded(ptr: Int64): Int32
 
 // QMdiArea ViewMode
@@ -151,7 +170,7 @@ public class QMdiArea {
     /// 设置背景（按图片文件路径作为纹理笔刷）
     public func setBackground(path: String): Unit {
         unsafe {
-            withCString(path) { c => qMdiAreaSetBackground(ptr, c) }
+            withCString(path) {c => qMdiAreaSetBackground(ptr, c)}
         }
     }
 
@@ -161,7 +180,7 @@ public class QMdiArea {
             qMdiAreaConnectSubWindowActivated(ptr, callback)
         }
     }
-    
+
     public func setLayout(layoutPtr: Int64): Unit {
         unsafe {
             qWidgetSetLayout(ptr, layoutPtr)
@@ -233,7 +252,7 @@ public class QMdiSubWindow {
             qMdiSubWindowIsShaded(ptr) != 0
         }
     }
-    
+
     public func getPtr(): Int64 {
         ptr
     }

@@ -7,10 +7,15 @@ import cjqt6.core.*
 // ============================================================
 
 foreign func qFontDatabaseFamilies(): CString
+
 foreign func qFontDatabaseStandardSizes(): Int32
+
 foreign func qFontDatabaseIsFixedPitch(family: CString, style: CString): Bool
+
 foreign func qFontDatabaseIsScalable(family: CString): Bool
+
 foreign func qFontDatabaseStyles(family: CString): CString
+
 foreign func qFontDatabasePointSizes(family: CString, style: CString): Int32
 
 /// 系统字体数据库，查询可用字体族、样式与字号信息（静态方法，无需实例化）

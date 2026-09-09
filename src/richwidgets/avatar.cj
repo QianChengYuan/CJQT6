@@ -19,7 +19,11 @@ public class Avatar <: QtResource {
     /// 创建头像（文字 + 直径，默认蓝底白字）
     public init(text: String, size: Int32) {
         label = QLabel()
-        diameter = if (size < 16) { 16 } else { size }
+        diameter = if (size < 16) {
+            16
+        } else {
+            size
+        }
         label.setText(text)
         label.setAlignment(HAlign.toAlignment(0)) // 居中
         applyStyle()
@@ -40,7 +44,11 @@ public class Avatar <: QtResource {
 
     /// 设置直径
     public func setSize(size: Int32): Unit {
-        diameter = if (size < 16) { 16 } else { size }
+        diameter = if (size < 16) {
+            16
+        } else {
+            size
+        }
         applyStyle()
     }
 
@@ -60,7 +68,8 @@ public class Avatar <: QtResource {
     private func applyStyle(): Unit {
         label.setMinimumSize(diameter, diameter)
         label.setMaximumSize(diameter, diameter)
-        label.setStyleSheet("background-color:${bgColor}; color:${fgColor}; border-radius:${diameter / 2}px; font-weight:bold;")
+        label.setStyleSheet(
+            "background-color:${bgColor}; color:${fgColor}; border-radius:${diameter / 2}px; font-weight:bold;")
     }
 
     // ---- QtResource 接口委托 ----
