@@ -29,25 +29,28 @@ exit_code=$?
 
 cat "$out"
 
+# 去掉 ANSI 转义序列后再 grep(避免颜色代码干扰匹配)
+clean=$(sed 's/\x1b\[[0-9;]*m//g' "$out")
+
 # 退出码 0 → 成功
 if [ $exit_code -eq 0 ]; then
   exit 0
 fi
 
 # FAILED: N(N>0) → 真失败
-if grep -qE "FAILED: [1-9]" "$out"; then
+if echo "$clean" | grep -qE "FAILED: [1-9]"; then
   echo "::error::测试有断言失败"
   exit "$exit_code"
 fi
 
 # FAILED: 0 但 GC 跨线程析构 Qt 对象触发 SIGSEGV/SIGBUS → 已知非真失败
-if grep -qE "schd-worker|SIGSEGV|SIGBUS|killTimer" "$out"; then
+if echo "$clean" | grep -qE "schd-worker|SIGSEGV|SIGBUS|killTimer"; then
   echo "::warning::测试无断言失败(FAILED: 0),ERROR 是 GC 跨线程析构 Qt 对象导致的信号。不影响测试结果正确性。"
   exit 0
 fi
 
 # FAILED: 0 但有 ERROR(非断言失败,可能是 offscreen 平台间歇性资源问题) → 非真失败
-if grep -qE "FAILED: 0" "$out" && grep -qE "ERROR: [1-9]" "$out"; then
+if echo "$clean" | grep -qE "FAILED: 0" && echo "$clean" | grep -qE "ERROR: [1-9]"; then
   echo "::warning::测试无断言失败(FAILED: 0),ERROR 为 offscreen 平台间歇性非断言错误。不影响测试结果正确性。"
   exit 0
 fi
