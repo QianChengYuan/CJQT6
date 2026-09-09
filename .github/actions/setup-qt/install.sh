@@ -50,8 +50,13 @@ case "$INPUT_OS" in
 
     # aqtinstall -m 不接受逗号分隔,转为空格分隔
     MODULES_LIST="${INPUT_MODULES//,/ }"
+    # aqtinstall host 参数:macos → mac
+    case "$INPUT_OS" in
+      macos) AQT_HOST="mac" ;;
+      *)     AQT_HOST="${INPUT_OS%arm64}" ;;
+    esac
     echo "==> aqtinstall 安装 Qt ${QT_VERSION} ${QT_ARCH} (modules: ${MODULES_LIST})"
-    "$AQT_PY" -m aqt install-qt "${INPUT_OS%arm64}" desktop "$QT_VERSION" "$QT_ARCH" \
+    "$AQT_PY" -m aqt install-qt "$AQT_HOST" desktop "$QT_VERSION" "$QT_ARCH" \
       -O "$RUNNER_TEMP/Qt" -m $MODULES_LIST
 
     case "$INPUT_OS" in

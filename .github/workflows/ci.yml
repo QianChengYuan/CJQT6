@@ -181,6 +181,10 @@ jobs:
         shell: pwsh
         run: .\scripts\update-bridge.ps1 -QtDir "${{ env.QTDIR }}" -RunTests
 
+      - name: 将桥接库目录加入 PATH(测试运行时需找到 cjqt6_bridge.dll)
+        shell: bash
+        run: echo "${{ env.CJQT6_ROOT }}/releases/windows-x64" >> "$GITHUB_PATH"
+
       - name: 仓颉构建+测试流水线(带覆盖率)
         uses: ./.github/actions/cjpm-pipeline
         with:
