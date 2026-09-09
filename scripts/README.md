@@ -112,6 +112,14 @@ scripts/
 | `deploy-qt-example.ps1` | 示例运行时 DLL 部署(Qt + MSVC CRT + bridge + cjqt6 deps) | examples/ 下手动 |
 | `deploy-qt-test.ps1` | 测试运行时 DLL 部署(Qt + bridge + MSVC CRT + 平台/驱动/媒体插件 + 跑 cjpm test) | `run-test.ps1` / `verify_all.ps1` |
 
+> **防卡死设计**(`deploy-qt-test.ps1 -RunTest`):
+> - 默认 `-j 1` 串行编译 —— `cjpm test --coverage` 并行编译时 `cjc.exe` 会挂死成孤儿(CPU 0/内存 ~0MB),
+>   其继承的 stdout 句柄让调用方永远等不到 EOF,表现为"卡住且零输出"。
+> - 开跑前 / 结束后清理孤儿 `cjc.exe`;用 .NET `Process` 启动 cjpm 以支持整体硬超时
+>   (`-TestTimeoutSec`,默认 1800s),超时打印挂起进程画像(含命令行)并按 PID 杀整棵进程树。
+> - 每 30s 输出一次心跳,结束时日志落盘 `target\cjpm-test.log`。
+> - 参数:`-SkipCoverage` / `-Filter '<类名>'` / `-ExcludeTags` / `-TimeoutEach` / `-Jobs` / `-TestTimeoutSec`。
+
 > 历史:`tests/deploy_qt.ps1` 与 `tests/deploy_qt_test.ps1` 已合并到 `scripts/deploy-qt-example.ps1` 与 `scripts/deploy-qt-test.ps1`,
 > `tests/` 目录整体移出仓库(2026-09-09)。
 

@@ -15,6 +15,7 @@
 #   powershell -ExecutionPolicy Bypass -File scripts\verify_all.ps1 -QtDir "C:\Qt\6.10.3\msvc2022_64"     # 指定 Qt6 路径,跳过探测
 #   powershell -ExecutionPolicy Bypass -File scripts\verify_all.ps1 -SkipCoverage                         # 跳过覆盖率门禁(仅验证构建+测试)
 #   powershell -ExecutionPolicy Bypass -File scripts\verify_all.ps1 -CoverageThreshold 75                  # 自定义含测试覆盖率阈值(默认 70)
+#   powershell -ExecutionPolicy Bypass -File scripts\verify_all.ps1 -TestTimeoutSec 600                     # 测试整体硬超时 600s(默认 900s),超时强杀并报错
 # ============================================================
 
 [CmdletBinding()]
@@ -26,7 +27,8 @@ param(
     [string]$Example = "all_controls_demo",
     [string]$QtDir = "",
     [double]$CoverageThreshold = 70.0,
-    [double]$LibraryCoverageThreshold = 52.0
+    [double]$LibraryCoverageThreshold = 52.0,
+    [int]$TestTimeoutSec = 1800       # 测试整体硬超时(秒),兜底并行 cjc 挂死;机器慢可加大
 )
 
 $ErrorActionPreference = "Stop"
@@ -73,8 +75,8 @@ if ($LASTEXITCODE -ne 0) {
 if ($SkipTest) {
     Write-Step 3 5 "跳过测试(-SkipTest)" Skip
 } else {
-    Write-Step 3 5 "部署 Qt 运行时 + 全量测试(offscreen,--coverage)..."
-    & powershell -ExecutionPolicy Bypass -File "$RootDir\scripts\deploy-qt-test.ps1" -RunTest -SkipBuild
+    Write-Step 3 5 "部署 Qt 运行时 + 全量测试(offscreen,--coverage,上限 ${TestTimeoutSec}s)..."
+    & pwsh -ExecutionPolicy Bypass -File "$RootDir\scripts\deploy-qt-test.ps1" -RunTest -SkipBuild -TestTimeoutSec $TestTimeoutSec
     if ($LASTEXITCODE -ne 0) {
         Write-Host "错误: 测试失败" -ForegroundColor Red
         exit 1

@@ -51,6 +51,7 @@ git push origin main
 - **增量构建陷阱**：`native\build_windows_x64` 有 CMake 缓存时，`cmake --build` 可能判定"已最新"跳过链接，导致改了 C++ 代码但行为不变。强制重编：`cmake --build . --config Release --clean-first`，或删掉 `native\build_windows_x64` 重来。
 - **`cjpm.toml` 用 `${CJQT6_ROOT}` 环境变量替换链接路径**（Windows 目标段 `[target.x86_64-w64-mingw32]`：`link-option = "${CJQT6_ROOT}/releases/windows-x64/cjqt6_bridge.dll"`）。构建前必须设置 `CJQT6_ROOT` 指向仓库根目录（`scripts/update-bridge.ps1`、`scripts/verify_all.ps1`、`scripts/setup-qt-env.ps1/.sh` 已自动注入，CI 用 `github.workspace`）；**不设置会拼成 `/releases/...` 直接链接失败**。cjc 实际目标三元组是 `x86_64-w64-mingw32`（`cjc -v` 实测），顶层 `link-option` 已置空。
 - **测试源码已迁入根包 `src/test/`**（`package cjqt6.test`，49 个 `*_test.cj`），根目录 `cjpm test` 直接发现并运行；`docs/internal/`、`PUBLISHING.md`、`.agents/skills/`（除 `cjqt6/SKILL.md`）不入库；`tests/` 已删除（脚本迁入 `scripts/deploy-qt-example.ps1` 与 `scripts/deploy-qt-test.ps1`，2026-09-09）。
+- **`cjpm test --coverage` 不要用默认并行编译**：并行时 `cjc.exe` 可能挂死成孤儿进程（CPU 0.00s / 内存 ~0MB，父进程 cjpm 已退出），而这些孤儿继承了 stdout 句柄，导致调用方**永远等不到 EOF —— 表现为"卡住且一行输出都没有"**（实测 5m40s 无任何输出，手动杀掉孤儿 cjc 才结束）。挂死的 cjc 命令行形如 `cjc -p <仓库>\src\charts ... --coverage ...`。因此 `scripts/deploy-qt-test.ps1` 默认 `-j 1` 串行，并在开跑前/结束后清理孤儿 `cjc.exe`。
 - 示例（`examples/`）是独立 cjpm 工程，通过 `cjqt6 = { path = "../../" }` 依赖根包；其 `link-option` 也含本机绝对路径。
 - `src/main.cj` 只是打印占位，不是入口；库本身是 `output-type = "dynamic"`，真正的运行入口在各示例。
 
@@ -84,6 +85,8 @@ git push origin main
 
 - 测试源码已迁入根包 `src/test/`（`package cjqt6.test`，49 个 `*_test.cj`，约 2950 个 `@Expect`/`@Assert`/`@ExpectThrows` 断言），**根目录 `cjpm test` 直接发现并运行**，随仓库版本化。
 - Windows 一键跑测试：`powershell -File scripts\deploy-qt-test.ps1 -RunTest`（部署 Qt 运行时 + offscreen 平台 + 跑全量），或一步到位的 `powershell -File scripts\verify_all.ps1`（bridge + build + test + coverage + 冒烟示例）；Linux 无显示环境用 `xvfb-run cjpm test`。
+- `deploy-qt-test.ps1` 自带两道保险：**默认 `-j 1` 串行编译**（避开上面并行 cjc 挂死坑）+ **整体硬超时**（`-TestTimeoutSec`，默认 1800s，超时打印挂起进程画像并按 PID 杀整棵进程树）。其它常用参数：`-SkipCoverage`（不加 `--coverage`，更快）、`-Filter '<类名>'`（缩小范围定位挂起用例）、`-TimeoutEach`（单用例超时，默认 30s）。
+- 若仍卡住：脚本超时时会打印 `HUNG <进程> PID=... ` 及其命令行，按里面的 `-p src/xxx` 定位到具体包，再用 `-Filter` 缩到具体测试类。
 - GUI 测试类用 `GUITestEnvironment`（`src/core/gui_test_env.cj`）在 `@BeforeAll` 里建 `QApplication`。规范见 `docs/testing/test-guide.md` 与 `test-specification.md`（`@TestCase`/`@Expect`/`@ExpectThrows`）。
 - 崩溃退出码 3221227010 通常是缺 QApplication 实例。
 

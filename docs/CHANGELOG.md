@@ -25,6 +25,8 @@
 ### 修复
 
 - 移除 `scripts/sync-release-artifacts.ps1` 文件头 4 个连续 UTF-8 BOM。
+- **修复 `scripts/rebuild_all.ps1` / `lib/common.ps1` 报 `The term 'if' is not recognized`**：根因是 `common.ps1` 里写了 `return if (...) {...} else {...}`——PowerShell 的 `if` 是语句不是表达式，被当成命令名解析；同时该文件缺 UTF-8 BOM，PS 5.1 按 ANSI(GBK) 解码中文导致字节错位、换行被吞，把后续代码并进注释。改为多行 if/return，并给 12 个无 BOM 的 .ps1 补上 BOM。
+- **修复 `cjpm test --coverage` 卡死（Windows）**：并行编译时 `cjc.exe` 会挂死成孤儿进程（CPU 0.00s/内存 ~0MB），其继承的 stdout 句柄让调用方永远等不到 EOF，表现为"卡住且零输出"（实测 5m40s 无输出，需手动杀孤儿 cjc）。`scripts/deploy-qt-test.ps1` 改为：默认 `-j 1` 串行、开跑前与结束后清理孤儿 `cjc.exe`、用 .NET `Process` 启动 cjpm 以支持整体硬超时（`-TestTimeoutSec`，默认 1800s，超时打印挂起进程画像并按 PID 杀进程树）、每 30s 输出心跳、日志落盘 `target\cjpm-test.log`。新增 `-SkipCoverage` / `-Filter` / `-ExcludeTags` / `-TimeoutEach` / `-Jobs` 参数；`scripts/verify_all.ps1` 新增 `-TestTimeoutSec` 并透传。
 
 ## [1.9.2] - 2026-09-05
 
