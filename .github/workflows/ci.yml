@@ -189,9 +189,9 @@ jobs:
         uses: ./.github/actions/cjpm-pipeline
         with:
           coverage: "true"
+          timeout-each: "120s"
         env:
           QT_QPA_PLATFORM: offscreen
-
           QT_QPA_FONTDIR: C:\Windows\Fonts
 
       - name: 覆盖率门禁(P0-1,双口径阈值)
