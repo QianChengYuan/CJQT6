@@ -321,20 +321,58 @@ static POINT g_dragStartWindow;
 
 // sendEvent 方式下的鼠标捕获：sendEvent 不走 QPA 通道，Qt 不会建立隐式鼠标捕获，
 
+// 异步窗口缩放：与拖拽同理，原生 sizing modal loop 在仓颉 M:N 线程下不工作。
+// 拦截 WM_NCLBUTTONDOWN（缩放边/角 HitTest）不进入 modal loop，
+// 在 WM_NCMOUSEMOVE / WM_MOUSEMOVE 中手动 SetWindowPos 缩放窗口。
+static bool g_windowResizing = false;
+static HWND g_resizeHwnd = NULL;
+static LONG g_resizeHitTest = 0;   // HTLEFT/HTRIGHT/HTTOP/HTBOTTOM + 四角
+static POINT g_resizeStartMouse;
+static RECT g_resizeStartRect;
+static int g_resizeMinW = 0;       // 缩放开始时缓存的最小跟踪宽（物理像素）
+static int g_resizeMinH = 0;       // 缩放开始时缓存的最小跟踪高（物理像素）
+
+// 取窗口最小跟踪尺寸（物理像素）。WM_GETMINMAXINFO 会带回 Qt 侧 minimumSize 的钳制；
+// 原生 sizing modal loop 在仓颉 M:N 下不工作，这里复用其钳制值手动限定缩放下限。
+static void cjqt6GetMinTrackSize(HWND hwnd, int& minW, int& minH) {
+    MINMAXINFO mmi;
+    ZeroMemory(&mmi, sizeof(mmi));
+    SendMessage(hwnd, WM_GETMINMAXINFO, 0, reinterpret_cast<LPARAM>(&mmi));
+    minW = mmi.ptMinTrackSize.x;
+    minH = mmi.ptMinTrackSize.y;
+    if (minW <= 0) minW = 100;
+    if (minH <= 0) minH = 40;
+}
+
 static LRESULT CALLBACK cjqt6MouseHookProc(int code, WPARAM wParam, LPARAM lParam) {
     if (code == HC_ACTION) {
             // 异步窗口拖拽：拦截 WM_NCLBUTTONDOWN(HTCAPTION) 不进入 DefWindowProc modal loop
             if (wParam == WM_NCLBUTTONDOWN) {
                 MOUSEHOOKSTRUCT* mhs = (MOUSEHOOKSTRUCT*)lParam;
-                if (mhs && mhs->wHitTestCode == HTCAPTION && mhs->hwnd) {
-                    g_windowDragging = true;
-                    g_dragHwnd = mhs->hwnd;
-                    g_dragStartMouse = mhs->pt;
-                    RECT rect;
-                    GetWindowRect(mhs->hwnd, &rect);
-                    g_dragStartWindow.x = rect.left;
-                    g_dragStartWindow.y = rect.top;
-                    return 1;
+                if (mhs && mhs->hwnd) {
+                    if (mhs->wHitTestCode == HTCAPTION) {
+                        g_windowDragging = true;
+                        g_dragHwnd = mhs->hwnd;
+                        g_dragStartMouse = mhs->pt;
+                        RECT rect;
+                        GetWindowRect(mhs->hwnd, &rect);
+                        g_dragStartWindow.x = rect.left;
+                        g_dragStartWindow.y = rect.top;
+                        return 1;
+                    }
+                    // 异步窗口缩放：拦截缩放边/角 HitTest，同上不进入原生 sizing modal loop
+                    LONG ht = mhs->wHitTestCode;
+                    if (ht == HTLEFT || ht == HTRIGHT || ht == HTTOP || ht == HTBOTTOM ||
+                        ht == HTTOPLEFT || ht == HTTOPRIGHT || ht == HTBOTTOMLEFT ||
+                        ht == HTBOTTOMRIGHT) {
+                        g_windowResizing = true;
+                        g_resizeHwnd = mhs->hwnd;
+                        g_resizeHitTest = ht;
+                        g_resizeStartMouse = mhs->pt;
+                        GetWindowRect(mhs->hwnd, &g_resizeStartRect);
+                        cjqt6GetMinTrackSize(mhs->hwnd, g_resizeMinW, g_resizeMinH);
+                        return 1;
+                    }
                 }
             }
             // 拖拽中：WM_NCMOUSEMOVE 手动移动窗口
@@ -351,6 +389,38 @@ static LRESULT CALLBACK cjqt6MouseHookProc(int code, WPARAM wParam, LPARAM lPara
             if (g_windowDragging && (wParam == WM_NCLBUTTONUP || wParam == WM_LBUTTONUP)) {
                 g_windowDragging = false;
                 g_dragHwnd = NULL;
+                return 1;
+            }
+            // 缩放中：WM_NCMOUSEMOVE / WM_MOUSEMOVE 手动缩放窗口
+            if (g_windowResizing && (wParam == WM_NCMOUSEMOVE || wParam == WM_MOUSEMOVE)) {
+                MOUSEHOOKSTRUCT* mhs = (MOUSEHOOKSTRUCT*)lParam;
+                if (mhs && g_resizeHwnd) {
+                    int dx = mhs->pt.x - g_resizeStartMouse.x;
+                    int dy = mhs->pt.y - g_resizeStartMouse.y;
+                    RECT r = g_resizeStartRect;
+                    LONG ht = g_resizeHitTest;
+                    if (ht == HTLEFT || ht == HTTOPLEFT || ht == HTBOTTOMLEFT) r.left += dx;
+                    if (ht == HTRIGHT || ht == HTTOPRIGHT || ht == HTBOTTOMRIGHT) r.right += dx;
+                    if (ht == HTTOP || ht == HTTOPLEFT || ht == HTTOPRIGHT) r.top += dy;
+                    if (ht == HTBOTTOM || ht == HTBOTTOMLEFT || ht == HTBOTTOMRIGHT) r.bottom += dy;
+                    // 最小尺寸钳制（锚定不动的那条边，只收缩移动中的边）
+                    if (r.right - r.left < g_resizeMinW) {
+                        if (ht == HTLEFT || ht == HTTOPLEFT || ht == HTBOTTOMLEFT) r.left = r.right - g_resizeMinW;
+                        else r.right = r.left + g_resizeMinW;
+                    }
+                    if (r.bottom - r.top < g_resizeMinH) {
+                        if (ht == HTTOP || ht == HTTOPLEFT || ht == HTTOPRIGHT) r.top = r.bottom - g_resizeMinH;
+                        else r.bottom = r.top + g_resizeMinH;
+                    }
+                    SetWindowPos(g_resizeHwnd, NULL, r.left, r.top, r.right - r.left, r.bottom - r.top,
+                                 SWP_NOZORDER | SWP_NOACTIVATE);
+                    return 1;
+                }
+            }
+            // 缩放结束：WM_NCLBUTTONUP 或 WM_LBUTTONUP
+            if (g_windowResizing && (wParam == WM_NCLBUTTONUP || wParam == WM_LBUTTONUP)) {
+                g_windowResizing = false;
+                g_resizeHwnd = NULL;
                 return 1;
             }
             if (wParam == WM_LBUTTONDOWN || wParam == WM_LBUTTONUP || wParam == WM_LBUTTONDBLCLK ||
