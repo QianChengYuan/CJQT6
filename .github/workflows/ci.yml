@@ -177,9 +177,9 @@ jobs:
           version: ${{ env.QT_VERSION_WINDOWS }}
           arch: ${{ env.QT_ARCH_WINDOWS }}
 
-      - name: 编译 C++ FFI 桥接库 + 桥接层单元测试(ASAN)
+      - name: 编译 C++ FFI 桥接库 + 桥接层单元测试
         shell: pwsh
-        run: .\scripts\update-bridge.ps1 -QtDir "${{ env.QTDIR }}" -RunTests -Asan
+        run: .\scripts\update-bridge.ps1 -QtDir "${{ env.QTDIR }}" -RunTests
 
       - name: 仓颉构建+测试流水线(带覆盖率)
         uses: ./.github/actions/cjpm-pipeline

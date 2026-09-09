@@ -48,7 +48,9 @@ if [ -n "$sha" ]; then
   echo "==> 校验 SHA-256: $sha"
   echo "$sha  $RUNNER_TEMP/cangjie-sdk.tar.gz" | sha256sum -c -
 else
-  echo "::warning::平台 ${INPUT_OS} 未配置 SHA-256,跳过校验(建议配 vars.CANGJIE_SDK_SHA_${INPUT_OS^^})"
+  # bash 3.2(macOS)不支持 ${var^^},用 tr 转大写
+  OS_UPPER=$(echo "$INPUT_OS" | tr '[:lower:]' '[:upper:]')
+  echo "::warning::平台 ${INPUT_OS} 未配置 SHA-256,跳过校验(建议配 vars.CANGJIE_SDK_SHA_${OS_UPPER})"
 fi
 
 echo "==> 解压到: $RUNNER_TEMP/cangjie-sdk"
