@@ -36,7 +36,9 @@ jobs:
           url-override: ${{ vars.CANGJIE_SDK_URL_LINUX }}
 
       - name: cjfmt 格式检查
-        run: cjfmt --check src/
+        run: |
+          cjfmt -d src/
+          git diff --exit-code src/
 
       - name: cjlint 静态检查
         run: cjlint -f src/ -c .
