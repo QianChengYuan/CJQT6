@@ -1,4 +1,4 @@
-# ============================================================
+﻿# ============================================================
 # check-release.ps1 - CJQT6 语义化版本门禁（P3-2）
 # ------------------------------------------------------------
 # 发版打 tag 前的校验：
@@ -7,13 +7,10 @@
 #   3. 紧邻其上的 `## [Unreleased]` 节不含未转移的 feat/fix/break 内容
 #   4. CHANGELOG 分类小节（新增/修复/文档/Break）格式常规（语义化版本最佳实践）
 #
-# 用法（在 CJQT6 根目录，按顺序先升版本再校验）：
-#   pwsh -File scripts\check-release.ps1 -Version 1.8.0
-#   pwsh -File scripts\check-release.ps1          # 自动读 cjpm.toml 当前版本
-#
-# 选项：
-#   -Version <x.y.z>  待打 tag 的版本号（默认取 cjpm.toml 的 version）
-#   -Changelog <路径>  CHANGELOG 路径（默认 docs\CHANGELOG.md）
+# 用法(在 CJQT6 根目录,按顺序先升版本再校验):
+#   pwsh -File scripts\check-release.ps1 -Version 1.8.0                          # 校验指定版本号与 CHANGELOG 一致性
+#   pwsh -File scripts\check-release.ps1                                         # 自动读 cjpm.toml 当前版本号
+# 选项:
 # ============================================================
 
 param(

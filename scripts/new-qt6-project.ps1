@@ -1,8 +1,7 @@
 ﻿#!/usr/bin/env pwsh
-# CJQT6 项目脚手架 —— 快速创建 CJQT6 应用骨架
-# 用法: .\scripts\new-qt6-project.ps1 -Name myapp
-#       .\scripts\new-qt6-project.ps1 -Name myapp -Path ./projects
-# 对应 roadmap 9.5：cjqt6-cli 脚手架（cjpm init --template qt6 等价物）
+# 用法: .\scripts\new-qt6-project.ps1 -Name myapp                       # 在当前目录下创建 myapp/ 目录,生成 cjpm.toml + src/main.cj + .gitignore 骨架
+#       .\scripts\new-qt6-project.ps1 -Name myapp -Path ./projects      # 指定输出路径(相对/绝对均可),myapp/ 会作为子目录创建
+# 对应 roadmap 9.5:cjqt6-cli 脚手架(cjpm init --template qt6 等价物)
 
 param(
     [Parameter(Mandatory = $true)]

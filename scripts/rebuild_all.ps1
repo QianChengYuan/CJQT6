@@ -1,18 +1,25 @@
-# rebuild_all.ps1 - 完整构建：FFI 桥接库 + CJQT6 子包 + 示例
+﻿# ============================================================
+# DEPRECATED — 本脚本功能已被 verify_all.ps1 完全覆盖(含覆盖率门禁 + 冒烟示例),
+# 且 verify_all.ps1 加了覆盖率 / -SkipTest 等更细粒度的开关。
+# 保留仅用于历史兼容,新流程请统一用 verify_all.ps1。
+# ============================================================
+#
+# rebuild_all.ps1 - 完整构建:FFI 桥接库 + CJQT6 子包 + 示例
 # 在 CJQT6 根目录运行: powershell -ExecutionPolicy Bypass -File scripts\rebuild_all.ps1
 #
 # 用法:
-#   .\scripts\rebuild_all.ps1                          # 构建 all_controls_demo（默认）
+#   .\scripts\rebuild_all.ps1                          # 构建 all_controls_demo(默认)
 #   .\scripts\rebuild_all.ps1 -Example dormitory_manager  # 构建指定示例
 #   .\scripts\rebuild_all.ps1 -SkipExample              # 跳过示例构建
-#   .\scripts\rebuild_all.ps1 -SkipBridge              # 跳过桥接库编译（仅 cjpm build + 示例）
+#   .\scripts\rebuild_all.ps1 -SkipBridge              # 跳过桥接库编译(仅 cjpm build + 示例)
 #
-# 重要顺序: 必须先构建桥接库，再执行 `cjpm build`。
-# 子包的 DLL 链接到 releases/windows-x64/cjqt6_bridge.dll，
-# 新增的任何 `foreign func qXxx` 绑定都需要先编译新桥接库，
+# 重要顺序: 必须先构建桥接库,再执行 `cjpm build`。
+# 子包的 DLL 链接到 releases/windows-x64/cjqt6_bridge.dll,
+# 新增的任何 `foreign func qXxx` 绑定都需要先编译新桥接库,
 # 否则链接阶段会报 "undefined symbol: qXxx"。
-# 仅当桥接库已是最新且未改动 native/ 下 C++ 代码时，可用 -SkipBridge 加速重建。
+# 仅当桥接库已是最新且未改动 native/ 下 C++ 代码时,可用 -SkipBridge 加速重建。
 
+[CmdletBinding()]
 param(
     [string]$Example = "all_controls_demo",
     [switch]$SkipExample,
@@ -22,23 +29,15 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$RootDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$RootDir = Split-Path -Parent $RootDir
+. "$PSScriptRoot\lib\common.ps1"
+
+$RootDir = Get-RootDir -ScriptPath $PSCommandPath
 Set-Location $RootDir
 Write-Host "工作目录: $RootDir"
+Write-Host "⚠️  DEPRECATED:此脚本已被 verify_all.ps1 替代,建议迁移" -ForegroundColor Yellow
 
 # ---- 第1步: 查找 cjpm ----
-$cjpm = Get-Command cjpm -ErrorAction SilentlyContinue
-if (-not $cjpm) {
-    $candidates = @(
-        "$env:CANGJIE_HOME\tools\bin\cjpm.exe",
-        "$env:USERPROFILE\.cangjie\tools\bin\cjpm.exe",
-        "C:\CodeTools\cangjie\cangjie_1.1.0\tools\bin\cjpm.exe"
-    )
-    foreach ($c in $candidates) {
-        if (Test-Path $c) { $cjpm = Get-Command $c; break }
-    }
-}
+$cjpm = Find-Cjpm
 if (-not $cjpm) {
     Write-Host "错误: 未在 PATH 中找到 cjpm" -ForegroundColor Red
     exit 1
@@ -54,21 +53,24 @@ if (Test-Path "target") {
     Remove-Item -Recurse -Force "target"
 }
 
-# ---- 第3步: 先构建原生 FFI 桥接库（子包链接依赖它） ----
+# ---- 第3步: 先构建原生 FFI 桥接库(子包链接依赖它)----
 if ($SkipBridge) {
-    Write-Host "跳过桥接库编译（已指定 -SkipBridge，使用 releases/ 现有产物）"
+    Write-Host "跳过桥接库编译(已指定 -SkipBridge,使用 releases/ 现有产物)"
 } else {
-    Write-Host "构建原生 FFI 桥接库（必须在 cjpm build 之前）..."
+    Write-Host "构建原生 FFI 桥接库(必须在 cjpm build 之前)..."
     $updateArgs = @()
-    if ($QtDir) { $updateArgs += "-QtDir"; $updateArgs += $QtDir }
-    & "$RootDir\scripts\update-bridge.ps1" $updateArgs
+    if ($QtDir) {
+        $updateArgs += "-QtDir"
+        $updateArgs += $QtDir
+    }
+    & "$RootDir\scripts\update-bridge.ps1" @updateArgs
     if ($LASTEXITCODE -ne 0) {
         Write-Host "错误: 桥接库构建失败" -ForegroundColor Red
         exit 1
     }
 }
 
-# ---- 第4步: 构建 cjqt6 子包（链接到新桥接库） ----
+# ---- 第4步: 构建 cjqt6 子包(链接到新桥接库)----
 Write-Host "构建 cjqt6 子包..."
 & $cjpm build
 if ($LASTEXITCODE -ne 0) {
@@ -78,10 +80,11 @@ if ($LASTEXITCODE -ne 0) {
 
 # ---- 第5步: 构建示例 + 部署 Qt ----
 if ($SkipExample) {
-    Write-Host "跳过示例构建（已指定 -SkipExample）"
+    Write-Host "跳过示例构建(已指定 -SkipExample)"
 } else {
     Write-Host "构建示例 $Example..."
-    Set-Location "examples\$Example"
+    $exampleDir = Join-Path $RootDir (Join-Path "examples" $Example)
+    Set-Location $exampleDir
     & $cjpm build
     if ($LASTEXITCODE -ne 0) {
         Write-Host "错误: 示例构建失败" -ForegroundColor Red
@@ -89,7 +92,7 @@ if ($SkipExample) {
     }
 
     # 部署 Qt 运行时
-    $deployScript = "$RootDir\examples\$Example\deploy_qt.ps1"
+    $deployScript = Join-Path $exampleDir "deploy_qt.ps1"
     if (Test-Path $deployScript) {
         & $deployScript
     }

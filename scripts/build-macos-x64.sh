@@ -1,5 +1,15 @@
+# ============================================================
+# DEPRECATED — 仓颉 1.1.0 暂不提供 macOS x86_64 SDK,此平台不在官方支持矩阵。
+# 保留脚本结构以便将来 SDK 发布后启用。
+# 替代:macOS arm64 用户请用 build-macos-arm64.sh。
+# 详见:releases/macos-x64/README.md 与 cjpm.toml [target.x86_64-apple-darwin](已注释)。
+# ------------------------------------------------------------
+# 用法(已废弃):
+#   bash scripts/build-macos-x64.sh    # ⚠️ 仓颉 1.1.0 无 macOS x64 SDK,产物无法使用
+# ============================================================
 #!/bin/bash
-# macOS x86_64 构建脚本
+# macOS x86_64 构建脚本(DEPRECATED)
+# 仓颉 1.1.0 SDK 无 macOS x86_64 版本,此脚本当前无 CI 引用。
 
 set -e
 
@@ -7,17 +17,16 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 echo "======================================"
-echo "构建 FFI Bridge - macOS x86_64"
+echo "构建 FFI Bridge - macOS x86_64 (DEPRECATED)"
 echo "======================================"
+echo "⚠️  仓颉 1.1.0 SDK 无 macOS x86_64,产物无法使用"
+echo ""
 
 # 检测Qt6路径
 if [ -z "$QTDIR" ]; then
-    # 尝试通过brew检测
     if command -v brew &> /dev/null; then
         QTDIR=$(brew --prefix qt@6 2>/dev/null || true)
     fi
-    
-    # 尝试常见路径
     for path in /usr/local/qt6 /opt/qt6; do
         if [ -d "$path" ]; then
             QTDIR="$path"
@@ -28,8 +37,6 @@ fi
 
 if [ -z "$QTDIR" ]; then
     echo "错误: 未找到Qt6安装路径"
-    echo "请通过brew安装: brew install qt@6"
-    echo "或设置环境变量 QTDIR"
     exit 1
 fi
 
@@ -40,7 +47,6 @@ BUILD_DIR="$PROJECT_DIR/native/build-macos-x64"
 mkdir -p "$BUILD_DIR"
 
 # CMake配置
-echo "配置CMake..."
 cd "$BUILD_DIR"
 cmake "$PROJECT_DIR" \
     -DCMAKE_BUILD_TYPE=Release \
@@ -49,27 +55,12 @@ cmake "$PROJECT_DIR" \
     -DCMAKE_INSTALL_RPATH="@rpath" \
     -DCMAKE_BUILD_WITH_INSTALL_RPATH=TRUE
 
-# 构建
-echo "开始构建..."
 cmake --build . --config Release -j$(sysctl -n hw.ncpu)
 
-# 验证构建产物
+# 部署
 if [ -f "lib/libcjqt6_bridge.dylib" ]; then
-    echo "======================================"
-    echo "构建成功!"
-    echo "======================================"
-    echo "产物位置: $(pwd)/lib/libcjqt6_bridge.dylib"
-    file lib/libcjqt6_bridge.dylib
-    echo ""
-    echo "依赖库:"
-    otool -L lib/libcjqt6_bridge.dylib || true
-
-    # 部署到 releases/
     RELEASE_DIR="$PROJECT_DIR/releases/macos-x64"
     mkdir -p "$RELEASE_DIR"
     cp lib/libcjqt6_bridge.dylib "$RELEASE_DIR/"
-    echo "已部署到: $RELEASE_DIR/libcjqt6_bridge.dylib"
-else
-    echo "错误: 构建产物未生成"
-    exit 1
+    echo "已部署: $RELEASE_DIR/libcjqt6_bridge.dylib"
 fi

@@ -1,4 +1,4 @@
-# ============================================================
+﻿# ============================================================
 # gen-api-index.ps1 - CJQT6 API 参考索引生成器（P3-1）
 # ------------------------------------------------------------
 # 背景：cjpm doc（类级参考站）在仓颉 1.1.0 不存在（`cjpm doc` = unknown command），
@@ -7,8 +7,8 @@
 #   2. 覆盖校验 —— src/ 公共类 vs 文档小节，缺文档的类告警（默认仅警告）
 #
 # 用法（在 CJQT6 根目录）：
-#   pwsh -File scripts\gen-api-index.ps1
-#   pwsh -File scripts\gen-api-index.ps1 -FailOnMissing   # 缺文档即退出码 1
+#   pwsh -File scripts\gen-api-index.ps1                                  # 提取 docs/api/*.md 小节,生成 docs/api/INDEX.md,缺文档仅警告
+#   pwsh -File scripts\gen-api-index.ps1 -FailOnMissing                  # 有 src/ 公共类未在 docs/api 中出现时退出码 1(门禁模式)   # 缺文档即退出码 1
 #
 # 选项：
 #   -FailOnMissing  有 src/ 公共类未在 docs/api 中出现时退出码 1（门禁模式）

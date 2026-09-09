@@ -1,9 +1,9 @@
-# ============================================================
+﻿# ============================================================
 # gen-ui.ps1 - Designer (.ui) 一键转仓颉代码
 #
 # 用法:
-#   .\scripts\gen-ui.ps1 examples\ui2cj_demo\login_form.ui
-#   .\scripts\gen-ui.ps1 .\login_form.ui -ProjectDir examples\ui2cj_demo
+#   .\scripts\gen-ui.ps1 examples\ui2cj_demo\login_form.ui                          # 自动探测 ui 所在工程,转 main.cj 并 cjpm build 验证
+#   .\scripts\gen-ui.ps1 .\login_form.ui -ProjectDir examples\ui2cj_demo           # 显式指定工程目录(路径解析异常时手动指定)
 #
 # 行为:
 #   1. 自动探测 ui 所在 cjpm 工程（向上找 cjpm.toml），自动填 package

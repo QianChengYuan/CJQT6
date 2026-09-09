@@ -1,5 +1,17 @@
+# ============================================================
+# DEPRECATED — 此脚本已废弃,Windows 平台桥接库由 update-bridge.ps1(MSVC)构建。
+# 保留仅用于早期 mingw-w64 交叉编译实验链路(已停用,无 CI 引用)。
+# 替代:
+#   - Windows MSVC:PowerShell .\scripts\update-bridge.ps1
+#   - 交叉编译:docs/guides/cross-compile.md(若需 mingw 产物)
+# ------------------------------------------------------------
+# 用法(已废弃):
+#   sudo apt install mingw-w64
+#   QT6_WIN_PATH=/mnt/c/Qt/6.10.3/mingw_64 bash scripts/build-win64.sh
+# ============================================================
 #!/bin/bash
-# Windows x64 交叉编译脚本
+# Windows x64 交叉编译脚本(已废弃)
+# 原设计:在 Linux/WSL 主机上用 mingw-w64 交叉编译 Windows Qt6 应用。
 # 需要先安装: sudo apt install mingw-w64
 # 需要下载 Qt6 for Windows 并设置 QT6_WIN_PATH 环境变量
 
@@ -11,14 +23,14 @@ BUILD_DIR="$PROJECT_DIR/native/build-win64"
 
 # Qt6 Windows 路径 - 默认使用 WSL 挂载的 Windows Qt 路径
 if [ -z "$QT6_WIN_PATH" ]; then
-    # 默认路径: Windows C:\Qt\6.10.3\mingw_64 （MinGW 版本 Qt）
-    # 注意: 交叉编译需要 MinGW 版本的 Qt，不能使用 MSVC 版本的 Qt
+    # 默认路径: Windows C:\Qt\6.10.3\mingw_64 (MinGW 版本 Qt)
+    # 注意: 交叉编译需要 MinGW 版本的 Qt,不能使用 MSVC 版本的 Qt
     export QT6_WIN_PATH="/mnt/c/Qt/6.10.3/mingw_64"
     echo "使用默认 Qt6 路径: $QT6_WIN_PATH"
 fi
 
 echo "=========================================="
-echo "CJQT6 Windows x64 交叉编译"
+echo "CJQT6 Windows x64 交叉编译(DEPRECATED)"
 echo "=========================================="
 echo "Qt6 路径: $QT6_WIN_PATH"
 echo "构建目录: $BUILD_DIR"
@@ -42,3 +54,5 @@ echo "=========================================="
 echo "编译完成!"
 echo "输出文件: $BUILD_DIR/bin/libcjqt6_bridge.dll"
 echo "=========================================="
+echo ""
+echo "⚠️  此脚本已废弃,建议使用 PowerShell update-bridge.ps1(MSVC 版本)"

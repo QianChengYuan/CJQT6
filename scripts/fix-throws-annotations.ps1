@@ -1,12 +1,12 @@
 ﻿<#
 .SYNOPSIS
-    批量补全 throw 所在方法的 /// throws: 异常类型 注释，消除 cjlint G.ERR.01 告警
+    批量补全 throw 所在方法的 /// throws: 异常类型 注释,消除 cjlint G.ERR.01 告警
 .DESCRIPTION
-    一次性修复脚本。跑 cjlint 收集 G.ERR.01 告警，对每处 throw 找所在方法声明，
-    在方法文档注释末尾（或声明前）插入 /// throws: XxxException 说明 行。
-    同方法同异常类型去重，从后往前插入避免行号偏移。
+    一次性修复脚本。跑 cjlint 收集 G.ERR.01 告警,对每处 throw 找所在方法声明,
+    在方法文档注释末尾(或声明前)插入 /// throws: XxxException 说明 行。
+    同方法同异常类型去重,从后往前插入避免行号偏移。
 .EXAMPLE
-    .\scripts\fix-throws-annotations.ps1
+    .\scripts\fix-throws-annotations.ps1                              # 扫描 src/ 下所有 .cj,在 throw 所在方法的 /// 注释末尾追加 /// throws: XxxException 说明 行
 #>
 param(
     [string]$ProjectRoot = (Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path))
