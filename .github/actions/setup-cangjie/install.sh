@@ -12,20 +12,28 @@ INPUT_SHA_OVERRIDE="${INPUT_SHA_OVERRIDE:-}"
 
 # 默认 objectKey(随 1.1.0 版本固定,官方重传可用 url-override 覆盖)
 # SHA-256 默认值硬编码;macOS 暂未固定默认 SHA,需 vars.CANGJIE_SDK_SHA_MACOS 覆盖
-declare -A DEFAULT_URLS=(
-  ["linux"]="https://cangjie-lang.cn/v1/files/auth/downLoad?nsId=142267&fileName=cangjie-sdk-linux-x64-${INPUT_VERSION}.tar.gz&objectKey=69e9d50c21f5a8178d6fd219"
-  ["macos"]="https://cangjie-lang.cn/v1/files/auth/downLoad?nsId=142267&fileName=cangjie-sdk-mac-aarch64-${INPUT_VERSION}.tar.gz&objectKey=69eac73121f5a8178d6fd21b"
-  ["linux-arm64"]="https://cangjie-lang.cn/v1/files/auth/downLoad?nsId=142267&fileName=cangjie-sdk-linux-aarch64-${INPUT_VERSION}.tar.gz&objectKey=69e9d37021f5a8178d6fd216"
-)
+# 注:不用关联数组(macOS bash 3.2 不支持 declare -A)
+case "$INPUT_OS" in
+  linux)
+    DEFAULT_URL="https://cangjie-lang.cn/v1/files/auth/downLoad?nsId=142267&fileName=cangjie-sdk-linux-x64-${INPUT_VERSION}.tar.gz&objectKey=69e9d50c21f5a8178d6fd219"
+    DEFAULT_SHA="5ce7e8c8523aad9cf5965f818249e1a39f10788963aef7c5852697a3ac964060"
+    ;;
+  macos)
+    DEFAULT_URL="https://cangjie-lang.cn/v1/files/auth/downLoad?nsId=142267&fileName=cangjie-sdk-mac-aarch64-${INPUT_VERSION}.tar.gz&objectKey=69eac73121f5a8178d6fd21b"
+    DEFAULT_SHA=""
+    ;;
+  linux-arm64)
+    DEFAULT_URL="https://cangjie-lang.cn/v1/files/auth/downLoad?nsId=142267&fileName=cangjie-sdk-linux-aarch64-${INPUT_VERSION}.tar.gz&objectKey=69e9d37021f5a8178d6fd216"
+    DEFAULT_SHA="fe961bd2972632fb86cbb8bb2d536a9fcaa8308d348c6a4f9148276ee62f495a"
+    ;;
+  *)
+    DEFAULT_URL=""
+    DEFAULT_SHA=""
+    ;;
+esac
 
-declare -A DEFAULT_SHAS=(
-  ["linux"]="5ce7e8c8523aad9cf5965f818249e1a39f10788963aef7c5852697a3ac964060"
-  ["linux-arm64"]="fe961bd2972632fb86cbb8bb2d536a9fcaa8308d348c6a4f9148276ee62f495a"
-  # macOS 默认 SHA 暂缺,必须配 vars.CANGJIE_SDK_SHA_MACOS 或显式传 sha-override
-)
-
-url="${INPUT_URL_OVERRIDE:-${DEFAULT_URLS[$INPUT_OS]:-}}"
-sha="${INPUT_SHA_OVERRIDE:-${DEFAULT_SHAS[$INPUT_OS]:-}}"
+url="${INPUT_URL_OVERRIDE:-$DEFAULT_URL}"
+sha="${INPUT_SHA_OVERRIDE:-$DEFAULT_SHA}"
 
 if [ -z "$url" ]; then
   echo "::error::未找到平台 ${INPUT_OS} 的 SDK URL,请通过 url-override input 覆盖"

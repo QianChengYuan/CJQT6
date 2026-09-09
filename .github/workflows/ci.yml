@@ -119,7 +119,7 @@ jobs:
           QT_QPA_PLATFORM: offscreen
           QT_QPA_PLATFORM_PLUGIN_PATH: ${{ env.QTDIR }}/plugins/platforms
           QT_PLUGIN_PATH: ${{ env.QTDIR }}/plugins
-          LD_LIBRARY_PATH: ${{ env.QTDIR }}/lib:${{ env.CANGJIE_HOME }}/runtime/lib/linux_x86_64_cjnative:${{ env.CJQT6_ROOT }}/releases/linux-x64
+          LD_LIBRARY_PATH: ${{ env.QTDIR }}/lib:${{ env.CANGJIE_HOME }}/runtime/lib/linux_x86_64_cjnative:${{ env.CANGJIE_HOME }}/tools/lib:${{ env.CJQT6_ROOT }}/releases/linux-x64
 
       - name: 诊断 Qt6Multimedia gstreamer 后端依赖
         if: always()
@@ -288,7 +288,7 @@ jobs:
           QT_QPA_PLATFORM: offscreen
           QT_QPA_PLATFORM_PLUGIN_PATH: ${{ env.QTDIR }}/plugins/platforms
           QT_PLUGIN_PATH: ${{ env.QTDIR }}/plugins
-          DYLD_LIBRARY_PATH: ${{ env.QTDIR }}/lib:${{ env.CJ_RUNTIME_LIB }}:${{ env.CJQT6_ROOT }}/releases/macos-arm64
+          DYLD_LIBRARY_PATH: ${{ env.QTDIR }}/lib:${{ env.CJ_RUNTIME_LIB }}:${{ env.CANGJIE_HOME }}/tools/lib:${{ env.CJQT6_ROOT }}/releases/macos-arm64
           DYLD_FRAMEWORK_PATH: ${{ env.QTDIR }}/lib
 
       - name: 上传桥接库产物
@@ -345,7 +345,7 @@ jobs:
           QT_QPA_PLATFORM_PLUGIN_PATH: /usr/lib/aarch64-linux-gnu/qt6/plugins/platforms
           QT_PLUGIN_PATH: /usr/lib/aarch64-linux-gnu/qt6/plugins
           QML2_IMPORT_PATH: /usr/lib/aarch64-linux-gnu/qt6/qml
-          LD_LIBRARY_PATH: /usr/lib/aarch64-linux-gnu:${{ env.CANGJIE_HOME }}/runtime/lib/linux_aarch64_cjnative:${{ env.CJQT6_ROOT }}/releases/linux-arm64
+          LD_LIBRARY_PATH: /usr/lib/aarch64-linux-gnu:${{ env.CANGJIE_HOME }}/runtime/lib/linux_aarch64_cjnative:${{ env.CANGJIE_HOME }}/tools/lib:${{ env.CJQT6_ROOT }}/releases/linux-arm64
 
       - name: 上传桥接库产物
         if: success()
