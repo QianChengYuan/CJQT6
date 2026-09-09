@@ -83,7 +83,12 @@ case "$INPUT_OS" in
     sudo apt-get install -y \
       qt6-base-dev qt6-base-private-dev \
       qt6-declarative-dev qt6-tools-dev \
-      qt6-multimedia-dev qt6-charts-dev qt6-svg-dev
+      qt6-multimedia-dev qt6-charts-dev qt6-svg-dev \
+      qml6-module-qtqml qml6-module-qtqmlmodels \
+      qml6-module-qtquick qml6-module-qtquickcontrols \
+      qml6-module-qtquicklayouts qml6-module-qtquickwindow \
+      qml6-module-qtquickshapes qml6-module-qtmultimedia \
+      qml6-module-qtcharts libqt6quickplugins6
     QTDIR="/usr/lib/aarch64-linux-gnu"
     QT_VERSION=""  # 系统版本由 apt 决定
     ;;
