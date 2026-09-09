@@ -1,0 +1,42 @@
+# ============================================================
+# CJQT6 CI Lint —— 快速静态检查(<30s)
+# ------------------------------------------------------------
+# 触发:任何 push/PR(无 paths 过滤) + workflow_dispatch
+# 职责:
+#   - cjfmt --check(格式)
+#   - cjlint(语义)
+# 与 ci.yml 的关系:
+#   - docs-only / README / 注释改动只触发 ci-lint,跳过 ci.yml(节省 ~9 分钟)
+#   - src/native/cjpm.toml 改动会同时触发 ci-lint 和 ci.yml(职责互补)
+#   - ci.yml 用 paths 过滤仅跑 build+test,不再重复 lint(由本工作流覆盖)
+# ------------------------------------------------------------
+
+name: CI Lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  lint:
+    name: cjfmt + cjlint
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装仓颉 SDK 1.1.0
+        uses: ./.github/actions/setup-cangjie
+        with:
+          os: linux
+          version: "1.1.0"
+          url-override: ${{ vars.CANGJIE_SDK_URL_LINUX }}
+
+      - name: cjfmt 格式检查
+        run: cjfmt --check src/
+
+      - name: cjlint 静态检查
+        run: cjlint -f src/ -c .

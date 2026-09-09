@@ -1,0 +1,86 @@
+# cjpm-pipeline — 仓颉 cjpm check/build/lint/test 一键流水线
+# ------------------------------------------------------------
+# 用法:
+#   - uses: ./.github/actions/cjpm-pipeline
+#     with:
+#       check:   true   # cjpm check
+#       build:   true   # cjpm build
+#       lint:    true   # cjlint -f src/ -c .
+#       test:    true   # cjpm test(offscreen)
+#       coverage: false # 仅 Windows 启用;同时调用 cjcov 生成报告
+#       exclude-tags: "requires_gui_dialog,..."  # 测试排除标签
+#       timeout-each: "30s"
+# 依赖前置(QT_QPA_PLATFORM 等由调用方在 env 注入)。
+# ------------------------------------------------------------
+
+name: cjpm-pipeline
+description: 仓颉 cjpm check/build/lint/test 一键流水线(支持可选覆盖率)
+
+inputs:
+  check:
+    description: 是否运行 cjpm check
+    required: false
+    default: "true"
+  build:
+    description: 是否运行 cjpm build
+    required: false
+    default: "true"
+  lint:
+    description: 是否运行 cjlint
+    required: false
+    default: "true"
+  test:
+    description: 是否运行 cjpm test(offscreen,需配合 QT_QPA_PLATFORM=offscreen)
+    required: false
+    default: "true"
+  coverage:
+    description: 是否启用 --coverage(仅 Windows,需 cjpm 0.50+ 支持)
+    required: false
+    default: "false"
+  exclude-tags:
+    description: 测试排除标签,逗号分隔
+    required: false
+    default: "requires_gui_dialog,requires_gui_drag,requires_audio,requires_process_spawn,requires_printer"
+  timeout-each:
+    description: 单测超时(传给 cjpm test --timeout-each)
+    required: false
+    default: "30s"
+
+runs:
+  using: composite
+  steps:
+    - name: cjpm check(校验依赖可重现构建)
+      if: inputs.check == 'true'
+      shell: bash
+      run: cjpm check
+
+    - name: cjpm build
+      if: inputs.build == 'true'
+      shell: bash
+      run: cjpm build
+
+    - name: cjlint 静态检查
+      if: inputs.lint == 'true'
+      shell: bash
+      run: cjlint -f src/ -c .
+
+    - name: cjpm test(offscreen)
+      if: inputs.test == 'true'
+      shell: bash
+      run: bash "${{ github.action_path }}/run-test.sh"
+      env:
+        INPUT_EXCLUDE_TAGS: ${{ inputs.exclude-tags }}
+        INPUT_TIMEOUT_EACH: ${{ inputs.timeout-each }}
+        INPUT_COVERAGE:     ${{ inputs.coverage }}
+
+    - name: 生成覆盖率报告(cjcov)
+      if: inputs.coverage == 'true'
+      shell: bash
+      run: |
+        if [ ! -d "cov_output" ]; then
+          echo "::warning::cov_output/ 不存在,跳过覆盖率报告"
+          exit 0
+        fi
+        cjcov --root=cov_output --source=src \
+          --output=cov_output/report --html-details --json --xml
+        echo "覆盖率报告已生成: cov_output/report/index.html"

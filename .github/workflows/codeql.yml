@@ -1,0 +1,74 @@
+# ============================================================
+# CodeQL — 安全扫描(native 桥接 C/C++)
+# ------------------------------------------------------------
+# 覆盖:
+#   - C/C++(native/src/** 桥接代码):高优,FFI 边界是攻击面
+#   - Python(.github/actions/**/*.sh + scripts/*):次优,CI 注入风险
+#
+# 不覆盖:
+#   - 仓颉 .cj:CodeQL 不支持,跳过(由 cjlint 替代)
+#
+# 触发:
+#   - push main / PR main:扫描当前代码
+#   - schedule:每周一 02:00 跑一次,捕获新规则
+# 矩阵:linux + windows(CI runner 已有,无额外成本)
+# 严重度:仅 error / warning 阻断 PR,note 不阻断(降低噪声)
+# ============================================================
+
+name: CodeQL
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # 每周一 02:00 UTC(对应北京时间 10:00,避开 dependabot 周一 09:00 批量 PR)
+    - cron: "0 2 * * 1"
+  workflow_dispatch:
+
+jobs:
+  analyze:
+    name: CodeQL (${{ matrix.language }})
+    timeout-minutes: 30
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: cpp
+            os: ubuntu-24.04
+          - language: python
+            os: ubuntu-24.04
+          - language: cpp
+            os: windows-2022
+    permissions:
+      actions: read
+      contents: read
+      security-events: write  # 上传 SARIF 到 Security tab
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      # CodeQL 初始化(下载 CLI + 数据库创建)
+      - name: 初始化 CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          # 缩小扫描范围:native bridge C/C++ + CI 脚本 Python
+          paths: |
+            native/src
+            native/includes
+            .github/actions
+            scripts
+          # 不扫 examples/(示例代码)、docs/、src/test/(仓颉测试源码,CodeQL 不支持 .cj)
+
+      # 执行分析
+      - name: 执行 CodeQL 分析
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"
+          # 仅 error 级别阻断,降低 warning 噪声
+          # (CodeQL 默认全阻断,实际多数项目改为 warning 阻断即可)
+          # 注:此处不强制阻断,留给 PR review 时人工判断

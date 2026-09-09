@@ -1,81 +1,100 @@
 # ============================================================
-# CJQT6 CI —— 三端无人值守门禁（P0-2）
+# CJQT6 CI —— 四平台无人值守门禁(P0-2)
 # ------------------------------------------------------------
-# 触发：push/PR 到 main，以及手动 workflow_dispatch。
-# 平台：
-#   - Linux   (ubuntu-22.04, GCC 13, Qt 6.4.2 gcc_64)   —— 主仓 GitCode
-#   - Windows (windows-2022, MSVC 2022, Qt 6.9.1 msvc2022_64) —— GitHub 镜像
-# 流程：装仓颉 SDK → aqtinstall 装 Qt → 编译 bridge → cjpm build
+# 触发:push/PR 到 main(仅源码/桥接变更),以及手动 workflow_dispatch。
+# 平台:
+#   - Linux x64 (ubuntu-24.04, GCC 13, Qt 6.4.2 gcc_64)
+#   - Windows x64 (windows-2022, MSVC 2022, Qt 6.9.1 msvc2022_64)
+#   - macOS arm64 (macos-14, Qt 6.4.2 clang_64 universal2)
+#   - Linux arm64 (ubuntu-24.04-arm, 系统 Qt6)
+# 流程:cache → 仓颉 SDK → Qt → 系统依赖 → bridge → cjpm pipeline
 #       → offscreen 全量测试 → 上传桥接库产物。
-# 注意：Linux 不带 --coverage（SDK 1.1.0 在 Linux x64 触发 schd-worker 运行时 bug），与 macOS 对齐。
-#       Windows 独保留 --coverage + 覆盖率门禁（唯一不触发 bug 的端）。
-#
-# 前置说明（SDK 下载）：
-#   官网下载页直链（https://cangjie-lang.cn/download/1.1.0/cangjie-sdk-*.tar.gz|zip）会 404，
-#   页面"复制链接"给的是带临时签名的 URL，会过期。
-#   稳定机制：cangjie-lang.cn 的 objectKey API
-#     /v1/files/auth/downLoad?nsId=142267&fileName=<文件名>&objectKey=<objectKey>
-#   无需签名、可长期使用（objectKey 内嵌在版本目录 JS 中，随版本固定）。
-#   1.1.0 的 objectKey 已硬编码为默认值并校验 SHA-256；
-#   若官方重新上传（objectKey 变更），在仓库 Variables 配
-#     CANGJIE_SDK_URL_LINUX / CANGJIE_SDK_URL_WINDOWS 覆盖即可，无需改工作流。
-# ============================================================
+# 覆盖:
+#   - Linux/Windows/macOS bridge 层 C++ 单元测试均带 ASAN(P0-3,统一口径)
+#   - Windows 独享覆盖率门禁(P0-1)
+# 文档变更(.md、docs/、README、PERSONAL_NOTES 等)触发 ci-lint.yml,
+# 本工作流不跑构建(节省 ~9 分钟/次)。
+# ------------------------------------------------------------
 
 name: CI
 
 on:
   push:
     branches: [main]
+    paths:
+      - 'src/**'
+      - 'native/**'
+      - 'cjpm.toml'
+      - 'CMakeLists.txt'
+      - 'cmake/**'
+      - 'scripts/build-*.sh'
+      - 'scripts/build-*.ps1'
+      - '.github/workflows/ci.yml'
+      - '.github/actions/**'
   pull_request:
     branches: [main]
+    paths:
+      - 'src/**'
+      - 'native/**'
+      - 'cjpm.toml'
+      - 'CMakeLists.txt'
+      - 'cmake/**'
+      - 'scripts/build-*.sh'
+      - 'scripts/build-*.ps1'
+      - '.github/workflows/ci.yml'
+      - '.github/actions/**'
   workflow_dispatch:
 
 env:
   CANGJIE_VERSION: "1.1.0"
-  # Linux: Qt 6.4.2（与 releases/linux-x64 锁定一致）；Windows: 6.9.1 msvc2022_64
-  # （6.10.3 的 qtbase 包含 QtNoLinkTargetHelpers.cmake，aqtinstall 3.3.0 的 py7zr 解压报 Bad7zFile）
   QT_VERSION_LINUX: "6.4.2"
   QT_ARCH_LINUX: "gcc_64"
+  QT_VERSION_MACOS: "6.4.2"
+  QT_ARCH_MACOS: "clang_64"
   QT_VERSION_WINDOWS: "6.9.1"
   QT_ARCH_WINDOWS: "win64_msvc2022_64"
 
 jobs:
+  # ============================================================
+  # Linux x86_64(GCC 13 · Qt 6.4.2)
+  # ============================================================
   linux:
-    name: Linux (GCC 13 · Qt 6.4.2)
-    # 用 ubuntu-24.04（gstreamer 1.24）：22.04 的 gstreamer 1.20 下 Qt6Multimedia
-    # 测试跑完后进程挂起（exit 6 / 不退出），且 QSpinBox textChanged 偶发失败；
-    # 本机 WSL 24.04 双 Qt 来源实测 915/915 全过正常退出
-    runs-on: ubuntu-24.04
+    name: Linux x64 (GCC 13 · Qt ${{ env.QT_VERSION_LINUX }})
     timeout-minutes: 60
+    runs-on: ubuntu-24.04
     env:
       CJQT6_ROOT: ${{ github.workspace }}
     steps:
-      - name: 检出代码
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: 下载并解压仓颉 SDK 1.1.0
-        shell: bash
-        run: |
-          set -euo pipefail
-          # 默认用稳定的 objectKey API（无签名、不过期）；若官方重传导致 404，可用仓库变量覆盖
-          url="${{ vars.CANGJIE_SDK_URL_LINUX }}"
-          if [ -z "$url" ]; then
-            url="https://cangjie-lang.cn/v1/files/auth/downLoad?nsId=142267&fileName=cangjie-sdk-linux-x64-1.1.0.tar.gz&objectKey=69e9d50c21f5a8178d6fd219"
-          fi
-          mkdir -p "$RUNNER_TEMP/cangjie-sdk"
-          curl -fL --retry 3 -o "$RUNNER_TEMP/cangjie-sdk.tar.gz" "$url"
-          echo "5ce7e8c8523aad9cf5965f818249e1a39f10788963aef7c5852697a3ac964060  $RUNNER_TEMP/cangjie-sdk.tar.gz" | sha256sum -c -
-          tar -xzf "$RUNNER_TEMP/cangjie-sdk.tar.gz" -C "$RUNNER_TEMP/cangjie-sdk"
-          CANGJIE_HOME="$(find "$RUNNER_TEMP/cangjie-sdk" -maxdepth 2 -name envsetup.sh -printf '%h\n' | head -n1)"
-          echo "CANGJIE_HOME=$CANGJIE_HOME" >> "$GITHUB_ENV"
-          echo "$CANGJIE_HOME/bin"      >> "$GITHUB_PATH"
-          echo "$CANGJIE_HOME/tools/bin" >> "$GITHUB_PATH"
-          # cjpm/cjc 启动依赖 SDK 运行时库（libcangjie-runtime.so 在 runtime/lib/linux_x86_64_cjnative）
-          echo "LD_LIBRARY_PATH=$CANGJIE_HOME/runtime/lib/linux_x86_64_cjnative:$CANGJIE_HOME/tools/lib:${LD_LIBRARY_PATH:-}" >> "$GITHUB_ENV"
-          echo "已安装到: $CANGJIE_HOME"
+      # cache:cjpm target + CMake build + Qt 安装包(~节省 5 分钟/次)
+      - name: 缓存仓颉 cjpm + CMake build + Qt
+        uses: actions/cache@v4
+        with:
+          path: |
+            target/release
+            target/release/cjqt6
+            native/build_linux_x64
+            ${{ runner.temp }}/Qt
+          key: ci-linux-${{ env.CANGJIE_VERSION }}-${{ env.QT_VERSION_LINUX }}-${{ hashFiles('cjpm.toml','CMakeLists.txt','src/**/*.cj','native/src/**','native/includes/**') }}
+          restore-keys: |
+            ci-linux-${{ env.CANGJIE_VERSION }}-${{ env.QT_VERSION_LINUX }}-
 
-      - name: 安装系统依赖（Qt offscreen 运行所需）
-        shell: bash
+      - name: 安装仓颉 SDK ${{ env.CANGJIE_VERSION }}
+        uses: ./.github/actions/setup-cangjie
+        with:
+          os: linux
+          version: ${{ env.CANGJIE_VERSION }}
+          url-override: ${{ vars.CANGJIE_SDK_URL_LINUX }}
+
+      - name: 安装 Qt ${{ env.QT_VERSION_LINUX }} (${{ env.QT_ARCH_LINUX }})
+        uses: ./.github/actions/setup-qt
+        with:
+          os: linux
+          version: ${{ env.QT_VERSION_LINUX }}
+          arch: ${{ env.QT_ARCH_LINUX }}
+
+      - name: 安装 Qt offscreen 运行依赖
         run: |
           sudo apt-get update
           sudo apt-get install -y libfontconfig1 libdbus-1-3 libglib2.0-0 \
@@ -88,213 +107,117 @@ jobs:
             libgstreamer-plugins-good1.0-0 gstreamer1.0-gl \
             gstreamer1.0-plugins-base gstreamer1.0-plugins-good
 
-      - name: aqtinstall 安装 Qt ${{ env.QT_VERSION_LINUX }} (gcc_64)
-        shell: bash
-        run: |
-          python3 -m pip install --user --quiet aqtinstall
-          python3 -m aqt install-qt linux desktop \
-            "${{ env.QT_VERSION_LINUX }}" "${{ env.QT_ARCH_LINUX }}" \
-            -O "$RUNNER_TEMP/Qt" -m qtmultimedia qtcharts
-          QTDIR="$RUNNER_TEMP/Qt/${{ env.QT_VERSION_LINUX }}/${{ env.QT_ARCH_LINUX }}"
-          echo "QTDIR=$QTDIR" >> "$GITHUB_ENV"
-          echo "$QTDIR/bin" >> "$GITHUB_PATH"
-
       - name: 编译 C++ FFI 桥接库
-        shell: bash
-        env:
-          QTDIR: ${{ env.QTDIR }}
-        run: |
-          QTDIR="${{ env.QTDIR }}" bash scripts/build-linux-x64.sh
+        run: bash scripts/build-linux-x64.sh
 
-      - name: 编译并运行桥接层 C++ 单元测试（P0-3，ASAN）
-        shell: bash
-        env:
-          QTDIR: ${{ env.QTDIR }}
-        run: |
-          QTDIR="${{ env.QTDIR }}" bash scripts/build-native-tests.sh -asan
+      - name: 编译并运行桥接层 C++ 单元测试(ASAN)
+        run: bash scripts/build-native-tests.sh -asan
 
-      - name: 校验依赖可重现构建（P0-4）
-        shell: bash
-        run: |
-          cjpm check
-
-      - name: 构建仓颉包
-        shell: bash
-        run: |
-          cjpm build
-
-      - name: 静态检查（cjlint）
-        shell: bash
-        run: |
-          cjlint -f src/ -c .
-
-      - name: 诊断 Qt6Multimedia gstreamer 后端依赖
-        shell: bash
-        run: |
-          set +e
-          echo "== gstreamer 插件缺失依赖 =="
-          ldd "${{ env.QTDIR }}/plugins/multimedia/libgstreamermediaplugin.so" 2>&1 | grep -i "not found" || echo "(无缺失)"
-          echo "== 系统 gstreamer 版本 =="
-          dpkg -l | grep -E "libgstreamer|gstreamer1.0" | awk '{print $2, $3}' | head -15
-          echo "== gst-inspect 探针 =="
-          GST_PLUGIN_SYSTEM_PATH_1_0=/usr/lib/x86_64-linux-gnu/gstreamer-1.0 \
-            gst-inspect-1.0 --version 2>&1 | head -2 || echo "gst-inspect 不可用"
-
-      - name: 全量测试（offscreen）
-        shell: bash
+      - name: 仓颉构建+测试流水线
+        uses: ./.github/actions/cjpm-pipeline
         env:
           QT_QPA_PLATFORM: offscreen
           QT_QPA_PLATFORM_PLUGIN_PATH: ${{ env.QTDIR }}/plugins/platforms
           QT_PLUGIN_PATH: ${{ env.QTDIR }}/plugins
-          # 运行时需能找桥接库 libcjqt6_bridge.so（releases/linux-x64），cjpm 不会拷到测试 PATH
           LD_LIBRARY_PATH: ${{ env.QTDIR }}/lib:${{ env.CANGJIE_HOME }}/runtime/lib/linux_x86_64_cjnative:${{ env.CJQT6_ROOT }}/releases/linux-x64
+
+      - name: 诊断 Qt6Multimedia gstreamer 后端依赖
+        if: always()
         run: |
-          # 排除需交互/真实硬件/平台特定命令的测试：
-          # - requires_gui_dialog: QMessageBox/QFileDialog 等模态静态方法，offscreen 阻塞等交互
-          # - requires_gui_drag:   拖拽测试，offscreen 无鼠标输入
-          # - requires_audio:      QAudioOutput/QMediaPlayer 等依赖音频设备，CI runner 无音频服务
-          # - requires_process_spawn: QProcess 测试用 cmd /c（Windows 专用），Linux 无 cmd
-          # - requires_printer:    QPrinter nativeFormat 依赖打印系统，Linux CI 无 CUPS
-          # Windows CI 不排除后两者（有 cmd 和打印系统），保持覆盖
-          # 注意：不带 --coverage —— 仓颉 SDK 1.1.0 在 Linux x64 上 --coverage 会触发 schd-worker
-          # 线程运行时 bug（HashMap<String,String> 不是 Collection<Tuple<String,String>>），导致 SIGABRT。
-          # macOS 不带 --coverage 正常通过，此处与 macOS 对齐。
           set +e
-          timeout 600s cjpm test \
-            --exclude-tags=requires_gui_dialog,requires_gui_drag,requires_audio,requires_process_spawn,requires_printer \
-            --timeout-each=30s > /tmp/cj_test_output.txt 2>&1
-          exit_code=$?
-          cat /tmp/cj_test_output.txt
-          if [ $exit_code -eq 0 ]; then
-            exit 0
-          fi
-          # 有真正的断言失败（FAILED: N where N > 0）→ 报错退出
-          if grep -qE "FAILED: [1-9]" /tmp/cj_test_output.txt; then
-            echo "::error::测试有断言失败"
-            exit $exit_code
-          fi
-          # FAILED: 0 但进程退出时 GC 跨線程析構 Qt 對象觸發 SIGSEGV/SIGBUS/killTimer
-          if grep -qE "schd-worker|SIGSEGV|SIGBUS|killTimer" /tmp/cj_test_output.txt; then
-            echo "::warning::测试无断言失败（FAILED: 0），ERROR 是 GC 跨線程析構 Qt 對象導致的信號。不影响测试结果正确性。"
-            exit 0
-          fi
-          exit $exit_code
+          echo "== gstreamer 插件缺失依赖 =="
+          ldd "${{ env.QTDIR }}/plugins/multimedia/libgstreamermediaplugin.so" 2>&1 | grep -i "not found" || echo "(无缺失)"
+          echo "== gst-inspect 探针 =="
+          GST_PLUGIN_SYSTEM_PATH_1_0=/usr/lib/x86_64-linux-gnu/gstreamer-1.0 \
+            gst-inspect-1.0 --version 2>&1 | head -2 || echo "gst-inspect 不可用"
 
       - name: 上传桥接库产物
+        if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: cjqt6-bridge-linux-x64
+          name: cjqt6-bridge-v${{ env.CANGJIE_VERSION }}-linux-x64
           path: releases/linux-x64/libcjqt6_bridge.so
           if-no-files-found: error
 
+  # ============================================================
+  # Windows x64(MSVC 2022 · Qt 6.9.1)
+  # ============================================================
   windows:
-    name: Windows (MSVC 2022 · Qt 6.9.1)
-    runs-on: windows-2022
+    name: Windows x64 (MSVC 2022 · Qt ${{ env.QT_VERSION_WINDOWS }})
     timeout-minutes: 60
+    runs-on: windows-2022
     env:
       CJQT6_ROOT: ${{ github.workspace }}
     steps:
-      - name: 检出代码
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: 下载并解压仓颉 SDK 1.1.0
-        shell: pwsh
-        run: |
-          # 默认用稳定的 objectKey API（无签名、不过期）；若官方重传导致 404，可用仓库变量覆盖
-          $url = "${{ vars.CANGJIE_SDK_URL_WINDOWS }}"
-          if ([string]::IsNullOrEmpty($url)) {
-            $url = "https://cangjie-lang.cn/v1/files/auth/downLoad?nsId=142267&fileName=cangjie-sdk-windows-x64-1.1.0.zip&objectKey=69e9d12b21f5a8178d6fd213"
-          }
-          New-Item -ItemType Directory -Force -Path "$env:RUNNER_TEMP\cangjie-sdk" | Out-Null
-          curl.exe -fL --retry 3 -o "$env:RUNNER_TEMP\cangjie-sdk.zip" $url
-          $expected = "3E2746B1C556441F1E0D8128CA23FE80A34583AFE2FA58A32F8ABB3B3C08B7E6"
-          $actual = (Get-FileHash "$env:RUNNER_TEMP\cangjie-sdk.zip" -Algorithm SHA256).Hash
-          if ($actual -ne $expected) { Write-Host "::error::SDK SHA-256 校验失败: $actual"; exit 1 }
-          Expand-Archive -Path "$env:RUNNER_TEMP\cangjie-sdk.zip" -DestinationPath "$env:RUNNER_TEMP\cangjie-sdk"
-          $envFile = Get-ChildItem "$env:RUNNER_TEMP\cangjie-sdk" -Recurse -Filter envsetup.ps1 | Select-Object -First 1
-          if (-not $envFile) { Write-Host "::error::解压后未找到 envsetup.ps1"; exit 1 }
-          $CANGJIE_HOME = $envFile.DirectoryName
-          "CANGJIE_HOME=$CANGJIE_HOME" | Out-File -FilePath $env:GITHUB_ENV -Append
-          "$CANGJIE_HOME\bin"       | Out-File -FilePath $env:GITHUB_PATH -Append
-          "$CANGJIE_HOME\tools\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
-          # cjlint 依赖 libcjlint.dll 在 tools\lib，cjpm/cjc 依赖 libcangjie-runtime.dll 在 runtime\lib
-          "$CANGJIE_HOME\tools\lib" | Out-File -FilePath $env:GITHUB_PATH -Append
-          "$CANGJIE_HOME\runtime\lib\windows_x86_64_cjnative" | Out-File -FilePath $env:GITHUB_PATH -Append
-          Write-Host "已安装到: $CANGJIE_HOME"
+      - name: 缓存仓颉 cjpm + CMake build + Qt
+        uses: actions/cache@v4
+        with:
+          path: |
+            target\release
+            target\release\cjqt6
+            native\build_windows
+            ${{ runner.temp }}\Qt
+          key: ci-windows-${{ env.CANGJIE_VERSION }}-${{ env.QT_VERSION_WINDOWS }}-${{ hashFiles('cjpm.toml','CMakeLists.txt','src/**/*.cj','native/src/**','native/includes/**') }}
+          restore-keys: |
+            ci-windows-${{ env.CANGJIE_VERSION }}-${{ env.QT_VERSION_WINDOWS }}-
 
-      - name: aqtinstall 安装 Qt ${{ env.QT_VERSION_WINDOWS }} (msvc2022_64)
-        shell: pwsh
-        run: |
-          python -m pip install --quiet aqtinstall
-          python -m aqt install-qt windows desktop `
-            "${{ env.QT_VERSION_WINDOWS }}" "${{ env.QT_ARCH_WINDOWS }}" `
-            -O "$env:RUNNER_TEMP\Qt" -m qtmultimedia qtcharts
-          # aqt 实际目录名可能与 arch 参数不一致（如 win64_msvc2022_64 → msvc2022_64），探测真实路径
-          $qtBase = "$env:RUNNER_TEMP\Qt\${{ env.QT_VERSION_WINDOWS }}"
-          $QTDIR = Get-ChildItem $qtBase -Directory | Where-Object { Test-Path "$($_.FullName)\bin\Qt6Core.dll" } | Select-Object -First 1
-          if (-not $QTDIR) { Write-Host "::error::未找到 Qt 安装目录: $qtBase"; exit 1 }
-          $QTDIR = $QTDIR.FullName
-          "QTDIR=$QTDIR" | Out-File -FilePath $env:GITHUB_ENV -Append
-          "$QTDIR\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
-          Write-Host "QTDIR=$QTDIR"
+      - name: 安装仓颉 SDK ${{ env.CANGJIE_VERSION }}
+        uses: ./.github/actions/setup-cangjie
+        with:
+          os: windows
+          version: ${{ env.CANGJIE_VERSION }}
+          url-override: ${{ vars.CANGJIE_SDK_URL_WINDOWS }}
 
-      - name: 编译 C++ FFI 桥接库 + 桥接层单元测试（P0-3）
-        shell: pwsh
-        run: |
-          .\scripts\update-bridge.ps1 -QtDir "${{ env.QTDIR }}" -RunTests
+      - name: 安装 Qt ${{ env.QT_VERSION_WINDOWS }} (${{ env.QT_ARCH_WINDOWS }})
+        uses: ./.github/actions/setup-qt
+        with:
+          os: windows
+          version: ${{ env.QT_VERSION_WINDOWS }}
+          arch: ${{ env.QT_ARCH_WINDOWS }}
 
-      - name: 校验依赖可重现构建（P0-4）
+      - name: 编译 C++ FFI 桥接库 + 桥接层单元测试(ASAN)
         shell: pwsh
-        run: |
-          cjpm check
+        run: .\scripts\update-bridge.ps1 -QtDir "${{ env.QTDIR }}" -RunTests -Asan
 
-      - name: 构建仓颉包
-        shell: pwsh
-        run: |
-          cjpm build
-
-      - name: 静态检查（cjlint）
-        shell: pwsh
-        run: |
-          # pwsh 7 native command 非零退出码被当作 ErrorRecord，用 2>&1 合并 stderr 并显式捕获退出码
-          $output = & cjlint -f src/ -c . 2>&1 | Out-String
-          $code = $LASTEXITCODE
-          Write-Host $output
-          Write-Host "cjlint exit code: $code"
-          if ($code -ne 0) { exit $code }
-
-      - name: 部署 Qt 运行时 + 全量测试（offscreen，--coverage）
-        shell: pwsh
+      - name: 仓颉构建+测试流水线(带覆盖率)
+        uses: ./.github/actions/cjpm-pipeline
+        with:
+          coverage: "true"
         env:
           QT_QPA_PLATFORM: offscreen
           QT_QPA_FONTDIR: C:\Windows\Fonts
-        run: |
-          .\tests\deploy_qt_test.ps1 -RunTest -SkipBuild -QtDir "${{ env.QTDIR }}"
-        # 说明：Windows 排除 requires_gui_dialog/drag/audio（模态对话框需交互、
-        # 拖拽需鼠标输入、多媒体需真实设备，offscreen 环境会挂起；与 Linux 口径对齐）
 
-      - name: 生成覆盖率报告（cjcov）
+      - name: 覆盖率门禁(P0-1,双口径阈值)
+        if: success()
         shell: pwsh
-        run: |
-          if (-not (Test-Path "cov_output")) {
-            Write-Host "::warning::cov_output/ 不存在，跳过覆盖率报告"
-            exit 0
-          }
-          cjcov --root=cov_output --source=src `
-            --output=cov_output/report --html-details --json --xml
-          Write-Host "覆盖率报告已生成: cov_output/report/index.html"
-
-      - name: 覆盖率门禁（P0-1，双口径阈值）
-        shell: pwsh
-        # Windows 排除 requires_gui_dialog/drag/audio，用默认阈值（含测试 70% / 库源码 52%）
         run: |
           if (Test-Path "cov_output\report\coverage.json") {
             .\scripts\check-coverage.ps1
           } else {
-            Write-Host "::warning::coverage.json 不存在，跳过覆盖率门禁"
+            Write-Host "::warning::coverage.json 不存在,跳过覆盖率门禁"
           }
 
+      - name: 生成覆盖率摘要 markdown(PR 评论用)
+        if: github.event_name == 'pull_request' && success()
+        shell: pwsh
+        run: |
+          if (Test-Path "cov_output\report\coverage.json") {
+            .\scripts\gen-coverage-summary.ps1
+          } else {
+            Write-Host "::warning::coverage.json 不存在,跳过 PR 评论 markdown 生成"
+          }
+
+      - name: 评论覆盖率到 PR(sticky comment,自动覆盖上一次)
+        if: github.event_name == 'pull_request' && success()
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: coverage
+          path: cov_output/report/pr_summary.md
+
       - name: 上传覆盖率报告
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: coverage-windows
@@ -302,284 +225,132 @@ jobs:
           if-no-files-found: warn
 
       - name: 上传桥接库产物
+        if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: cjqt6-bridge-windows-x64
+          name: cjqt6-bridge-v${{ env.CANGJIE_VERSION }}-windows-x64
           path: releases/windows-x64/cjqt6_bridge.dll
           if-no-files-found: error
 
   # ============================================================
-  # macOS Apple Silicon (arm64)
-  # ------------------------------------------------------------
-  # 无 Mac 本地环境时，用 GitHub macOS Runner 编译桥接库 cjqt6_bridge.dylib
-  # 并跑 cjpm build/test。dylib 产物上传 artifact，手动下载后 commit 到
-  # releases/macos-arm64/（不需仓库写权限）。
-  #
-  # 前置：仓颉 Mac SDK 下载 URL 需在仓库 Variables 配 CANGJIE_SDK_URL_MACOS。
-  #   获取方式：https://cangjie-lang.cn/download/1.1.0 → macOS arm64 SDK → 复制链接
-  #   （objectKey 内嵌在页面 JS 中，与 Linux/Windows 同机制）。
+  # macOS Apple Silicon(arm64)
   # ============================================================
   macos-arm64:
-    name: macOS (Apple Silicon · Qt 6.4.2)
-    runs-on: macos-14
+    name: macOS arm64 (Apple Silicon · Qt ${{ env.QT_VERSION_MACOS }})
     timeout-minutes: 60
+    runs-on: macos-14
     env:
       CJQT6_ROOT: ${{ github.workspace }}
     steps:
-      - name: 检出代码
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: 下载并解压仓颉 SDK 1.1.0 (macOS arm64)
-        shell: bash
-        run: |
-          set -euo pipefail
-          # 默认用稳定 objectKey API（无签名、不过期）；若官方重传导致 404，可用仓库变量覆盖
-          url="${{ vars.CANGJIE_SDK_URL_MACOS }}"
-          if [ -z "$url" ]; then
-            url="https://cangjie-lang.cn/v1/files/auth/downLoad?nsId=142267&fileName=cangjie-sdk-mac-aarch64-1.1.0.tar.gz&objectKey=69eac73121f5a8178d6fd21b"
-          fi
-          mkdir -p "$RUNNER_TEMP/cangjie-sdk"
-          curl -fL --retry 3 -o "$RUNNER_TEMP/cangjie-sdk.tar.gz" "$url"
-          # SHA-256 校验（可选）：配 CANGJIE_SDK_SHA_MACOS 变量则校验，否则跳过
-          expected_sha="${{ vars.CANGJIE_SDK_SHA_MACOS }}"
-          if [ -n "$expected_sha" ]; then
-            echo "$expected_sha  $RUNNER_TEMP/cangjie-sdk.tar.gz" | shasum -a 256 -c -
-          else
-            echo "::warning::未配 CANGJIE_SDK_SHA_MACOS，跳过 SHA-256 校验"
-          fi
-          tar -xzf "$RUNNER_TEMP/cangjie-sdk.tar.gz" -C "$RUNNER_TEMP/cangjie-sdk"
-          # BSD find（macOS）不支持 -printf，用 dirname + find 兼容 GNU/BSD
-          CANGJIE_HOME="$(dirname "$(find "$RUNNER_TEMP/cangjie-sdk" -maxdepth 2 -name envsetup.sh | head -n1)")"
-          echo "CANGJIE_HOME=$CANGJIE_HOME" >> "$GITHUB_ENV"
-          echo "$CANGJIE_HOME/bin"      >> "$GITHUB_PATH"
-          echo "$CANGJIE_HOME/tools/bin" >> "$GITHUB_PATH"
-          # cjpm/cjc 启动依赖 SDK 运行时库（libcangjie-runtime.dylib 在 runtime/lib/<os>_<arch>_cjnative）
-          # 子目录名因平台而异（实测 macOS arm64 为 darwin_aarch64_cjnative），动态探测避免硬编码猜错
-          CJ_RUNTIME_LIB="$(find "$CANGJIE_HOME/runtime/lib" -maxdepth 1 -type d -name '*cjnative' | head -n1)"
-          if [ -z "$CJ_RUNTIME_LIB" ]; then
-            echo "::error::未找到仓颉 runtime lib cjnative 目录（$CANGJIE_HOME/runtime/lib 下）"
-            ls -la "$CANGJIE_HOME/runtime/lib" || true
-            exit 1
-          fi
-          echo "CJ_RUNTIME_LIB=$CJ_RUNTIME_LIB" >> "$GITHUB_ENV"
-          echo "DYLD_LIBRARY_PATH=$CJ_RUNTIME_LIB:$CANGJIE_HOME/tools/lib:${DYLD_LIBRARY_PATH:-}" >> "$GITHUB_ENV"
-          echo "已安装到: $CANGJIE_HOME (runtime lib: $CJ_RUNTIME_LIB)"
+      - name: 缓存仓颉 cjpm + CMake build + Qt
+        uses: actions/cache@v4
+        with:
+          path: |
+            target/release
+            target/release/cjqt6
+            native/build_macos_arm64
+            ${{ runner.temp }}/Qt
+          key: ci-macos-arm64-${{ env.CANGJIE_VERSION }}-${{ env.QT_VERSION_MACOS }}-${{ hashFiles('cjpm.toml','CMakeLists.txt','src/**/*.cj','native/src/**','native/includes/**') }}
+          restore-keys: |
+            ci-macos-arm64-${{ env.CANGJIE_VERSION }}-${{ env.QT_VERSION_MACOS }}-
 
-      - name: aqtinstall 安装 Qt 6.4.2 (clang_64 universal2)
-        shell: bash
-        run: |
-          # macOS Homebrew Python 受 PEP 668 限制，pip install --user 被禁止，用 venv 规避
-          python3 -m venv "$RUNNER_TEMP/aqt-venv"
-          "$RUNNER_TEMP/aqt-venv/bin/pip" install --quiet aqtinstall
-          # Qt 6.4.2 无 macos_arm64 架构（6.5+ 才有），用 clang_64（universal2，含 arm64）
-          "$RUNNER_TEMP/aqt-venv/bin/python3" -m aqt install-qt mac desktop \
-            "6.4.2" "clang_64" \
-            -O "$RUNNER_TEMP/Qt" -m qtmultimedia qtcharts
-          QTDIR="$RUNNER_TEMP/Qt/6.4.2/macos"
-          echo "QTDIR=$QTDIR" >> "$GITHUB_ENV"
-          echo "$QTDIR/bin" >> "$GITHUB_PATH"
+      - name: 安装仓颉 SDK ${{ env.CANGJIE_VERSION }}
+        uses: ./.github/actions/setup-cangjie
+        with:
+          os: macos
+          version: ${{ env.CANGJIE_VERSION }}
+          url-override: ${{ vars.CANGJIE_SDK_URL_MACOS }}
+          sha-override: ${{ vars.CANGJIE_SDK_SHA_MACOS }}
+
+      - name: 安装 Qt ${{ env.QT_VERSION_MACOS }} (${{ env.QT_ARCH_MACOS }})
+        uses: ./.github/actions/setup-qt
+        with:
+          os: macos
+          version: ${{ env.QT_VERSION_MACOS }}
+          arch: ${{ env.QT_ARCH_MACOS }}
 
       - name: 编译 C++ FFI 桥接库
-        shell: bash
+        run: bash scripts/build-macos-arm64.sh
+
+      - name: 编译并运行桥接层 C++ 单元测试(ASAN)
+        run: bash scripts/build-native-tests.sh -asan
+
+      # 仓颉链接器 ld64.lld 默认 -syslibroot '/',需 SDKROOT 定位 macOS 系统库
+      - name: 探测 macOS SDK 路径并写入 env
+        run: echo "SDKROOT=$(xcrun --sdk macosx --show-sdk-path)" >> "$GITHUB_ENV"
+
+      - name: 仓颉构建+测试流水线
+        uses: ./.github/actions/cjpm-pipeline
         env:
-          QTDIR: ${{ env.QTDIR }}
-        run: |
-          QTDIR="${{ env.QTDIR }}" bash scripts/build-macos-arm64.sh
-
-      - name: 编译并运行桥接层 C++ 单元测试（P0-3）
-        shell: bash
-        env:
-          QTDIR: ${{ env.QTDIR }}
-          DYLD_LIBRARY_PATH: ${{ env.QTDIR }}/lib:${{ env.CJ_RUNTIME_LIB }}
-          DYLD_FRAMEWORK_PATH: ${{ env.QTDIR }}/lib
-        run: |
-          QTDIR="${{ env.QTDIR }}" bash scripts/build-native-tests.sh
-
-      - name: 校验依赖可重现构建
-        shell: bash
-        run: |
-          cjpm check
-
-      - name: 构建仓颉包
-        shell: bash
-        run: |
-          # 仓颉链接器 ld64.lld 默认 -syslibroot '/'，找不到 macOS 系统库（libSystem、libdyld 等）
-          # 显式设置 SDKROOT 指向 CommandLineTools SDK，链接器据此定位系统库
-          export SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
-          echo "SDKROOT=$SDKROOT"
-          cjpm build
-
-      - name: 静态检查（cjlint）
-        shell: bash
-        run: |
-          cjlint -f src/ -c .
-
-      - name: 全量测试（offscreen）
-        shell: bash
-        env:
+          SDKROOT: ${{ env.SDKROOT }}
           QT_QPA_PLATFORM: offscreen
           QT_QPA_PLATFORM_PLUGIN_PATH: ${{ env.QTDIR }}/plugins/platforms
           QT_PLUGIN_PATH: ${{ env.QTDIR }}/plugins
-          # 运行时需能找桥接库 libcjqt6_bridge.dylib（releases/macos-arm64）与仓颉 runtime 库
           DYLD_LIBRARY_PATH: ${{ env.QTDIR }}/lib:${{ env.CJ_RUNTIME_LIB }}:${{ env.CJQT6_ROOT }}/releases/macos-arm64
-          # macOS Qt 以 framework 形式安装（QtCore.framework 等），需 DYLD_FRAMEWORK_PATH 定位
           DYLD_FRAMEWORK_PATH: ${{ env.QTDIR }}/lib
-        run: |
-          # cjpm test 会先链接测试二进制，同样需要 SDKROOT 定位 macOS 系统库
-          export SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
-          # macOS 无 GNU timeout 命令，依赖 --timeout-each=30s 控制单测超时，job timeout-minutes 兜底整体
-          # 排除同 Linux：模态对话框/拖拽/音频/进程(cmd)/打印(CUPS)等环境相关测试
-          set +e
-          cjpm test \
-            --exclude-tags=requires_gui_dialog,requires_gui_drag,requires_audio,requires_process_spawn,requires_printer \
-            --timeout-each=30s > /tmp/cj_test_output.txt 2>&1
-          exit_code=$?
-          cat /tmp/cj_test_output.txt
-          if [ $exit_code -eq 0 ]; then
-            exit 0
-          fi
-          # 有真正的断言失败（FAILED: N where N > 0）→ 报错退出
-          if grep -qE "FAILED: [1-9]" /tmp/cj_test_output.txt; then
-            echo "::error::测试有断言失败"
-            exit $exit_code
-          fi
-          # FAILED: 0 但进程退出时 GC 跨線程析構 Qt 對象觸發 SIGSEGV/SIGBUS
-          if grep -qE "schd-worker|SIGSEGV|SIGBUS|killTimer" /tmp/cj_test_output.txt; then
-            echo "::warning::测试无断言失败（FAILED: 0），ERROR 是 GC 跨線程析構 Qt 對象導致的信號。不影响测试结果正确性。"
-            exit 0
-          fi
-          exit $exit_code
 
       - name: 上传桥接库产物
+        if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: cjqt6-bridge-macos-arm64
+          name: cjqt6-bridge-v${{ env.CANGJIE_VERSION }}-macos-arm64
           path: releases/macos-arm64/libcjqt6_bridge.dylib
           if-no-files-found: error
 
-      - name: 上传测试产物（可选，供调试）
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: macos-arm64-test-output
-          path: |
-            target/release/unittest_bin/
-          if-no-files-found: warn
-
   # ============================================================
-  # Linux ARM64 (aarch64)
-  # ------------------------------------------------------------
-  # 使用 GitHub 原生 ARM64 runner（ubuntu-24.04-arm）编译桥接库
-  # libcjqt6_bridge.so，并跑 cjpm build/test。产物上传 artifact，
-  # 手动下载后 commit 到 releases/linux-arm64/（修复 D1 缺陷）。
-  #
-  # 前置：仓颉 Linux ARM64 SDK 1.1.0（cangjie-sdk-linux-aarch64-1.1.0.tar.gz）
-  #   objectKey 已从官网下载页解析并硬编码；若官方重传，配仓库变量
-  #   CANGJIE_SDK_URL_LINUX_ARM64 覆盖即可。
+  # Linux ARM64(aarch64)
   # ============================================================
   linux-arm64:
-    name: Linux ARM64 (aarch64 · 系统 Qt6)
-    runs-on: ubuntu-24.04-arm
+    name: Linux arm64 (aarch64 · 系统 Qt6)
     timeout-minutes: 60
+    runs-on: ubuntu-24.04-arm
     env:
       CJQT6_ROOT: ${{ github.workspace }}
       QTDIR: /usr/lib/aarch64-linux-gnu
     steps:
-      - name: 检出代码
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: 下载并解压仓颉 SDK 1.1.0 (Linux ARM64)
-        shell: bash
-        run: |
-          set -euo pipefail
-          url="${{ vars.CANGJIE_SDK_URL_LINUX_ARM64 }}"
-          if [ -z "$url" ]; then
-            url="https://cangjie-lang.cn/v1/files/auth/downLoad?nsId=142267&fileName=cangjie-sdk-linux-aarch64-1.1.0.tar.gz&objectKey=69e9d37021f5a8178d6fd216"
-          fi
-          mkdir -p "$RUNNER_TEMP/cangjie-sdk"
-          curl -fL --retry 3 -o "$RUNNER_TEMP/cangjie-sdk.tar.gz" "$url"
-          echo "fe961bd2972632fb86cbb8bb2d536a9fcaa8308d348c6a4f9148276ee62f495a  $RUNNER_TEMP/cangjie-sdk.tar.gz" | sha256sum -c -
-          tar -xzf "$RUNNER_TEMP/cangjie-sdk.tar.gz" -C "$RUNNER_TEMP/cangjie-sdk"
-          CANGJIE_HOME="$(find "$RUNNER_TEMP/cangjie-sdk" -maxdepth 2 -name envsetup.sh -printf '%h\n' | head -n1)"
-          echo "CANGJIE_HOME=$CANGJIE_HOME" >> "$GITHUB_ENV"
-          echo "$CANGJIE_HOME/bin"      >> "$GITHUB_PATH"
-          echo "$CANGJIE_HOME/tools/bin" >> "$GITHUB_PATH"
-          # cjpm/cjc 启动依赖 SDK 运行时库（libcangjie-runtime.so 在 runtime/lib/linux_aarch64_cjnative）
-          echo "LD_LIBRARY_PATH=$CANGJIE_HOME/runtime/lib/linux_aarch64_cjnative:$CANGJIE_HOME/tools/lib:${LD_LIBRARY_PATH:-}" >> "$GITHUB_ENV"
-          echo "已安装到: $CANGJIE_HOME"
+      - name: 缓存仓颉 cjpm + CMake build
+        uses: actions/cache@v4
+        with:
+          path: |
+            target/release
+            target/release/cjqt6
+            native/build_linux_arm64
+          key: ci-linux-arm64-${{ env.CANGJIE_VERSION }}-${{ hashFiles('cjpm.toml','CMakeLists.txt','src/**/*.cj','native/src/**','native/includes/**') }}
+          restore-keys: |
+            ci-linux-arm64-${{ env.CANGJIE_VERSION }}-
 
-      - name: 安装系统依赖 + Qt6 开发包（apt）
-        shell: bash
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            build-essential cmake pkg-config \
-            qt6-base-dev qt6-base-private-dev \
-            qt6-declarative-dev qt6-tools-dev \
-            qt6-multimedia-dev qt6-charts-dev qt6-svg-dev \
-            libfontconfig1 libdbus-1-3 libglib2.0-0 \
-            libxkbcommon0 libxkbcommon-x11-0 libxkbcommon-dev \
-            libegl1 libgl1 libxcb-cursor0 \
-            libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 \
-            libxcb-shape0 libxcb-xinerama0 libxcb-xkb1 \
-            libgl1-mesa-dev libglvnd-dev libegl-dev libopengl-dev \
-            libgstreamer1.0-0 libgstreamer-plugins-base1.0-0 libgstreamer-gl1.0-0 \
-            libgstreamer-plugins-good1.0-0 gstreamer1.0-gl \
-            gstreamer1.0-plugins-base gstreamer1.0-plugins-good
+      - name: 安装仓颉 SDK ${{ env.CANGJIE_VERSION }}
+        uses: ./.github/actions/setup-cangjie
+        with:
+          os: linux-arm64
+          version: ${{ env.CANGJIE_VERSION }}
+          url-override: ${{ vars.CANGJIE_SDK_URL_LINUX_ARM64 }}
+
+      - name: 安装 Qt6 系统开发包
+        uses: ./.github/actions/setup-qt
+        with:
+          os: linux-arm64
 
       - name: 编译 C++ FFI 桥接库
-        shell: bash
-        run: |
-          bash scripts/build-linux-arm64.sh
+        run: bash scripts/build-linux-arm64.sh
 
-      - name: 校验依赖可重现构建
-        shell: bash
-        run: |
-          cjpm check
-
-      - name: 构建仓颉包
-        shell: bash
-        run: |
-          cjpm build
-
-      - name: 静态检查（cjlint）
-        shell: bash
-        run: |
-          cjlint -f src/ -c .
-
-      - name: 全量测试（offscreen）
-        shell: bash
+      - name: 仓颉构建+测试流水线
+        uses: ./.github/actions/cjpm-pipeline
         env:
           QT_QPA_PLATFORM: offscreen
           QT_QPA_PLATFORM_PLUGIN_PATH: /usr/lib/aarch64-linux-gnu/qt6/plugins/platforms
           QT_PLUGIN_PATH: /usr/lib/aarch64-linux-gnu/qt6/plugins
           QML2_IMPORT_PATH: /usr/lib/aarch64-linux-gnu/qt6/qml
           LD_LIBRARY_PATH: /usr/lib/aarch64-linux-gnu:${{ env.CANGJIE_HOME }}/runtime/lib/linux_aarch64_cjnative:${{ env.CJQT6_ROOT }}/releases/linux-arm64
-        run: |
-          # 与 Linux x64 / macOS 对齐：排除模态对话框/拖拽/音频/进程/打印等环境相关测试
-          # 不带 --coverage（SDK 1.1.0 在 ARM64 上同样可能触发 schd-worker 运行时 bug）
-          set +e
-          timeout 600s cjpm test \
-            --exclude-tags=requires_gui_dialog,requires_gui_drag,requires_audio,requires_process_spawn,requires_printer \
-            --timeout-each=30s > /tmp/cj_test_output.txt 2>&1
-          exit_code=$?
-          cat /tmp/cj_test_output.txt
-          if [ $exit_code -eq 0 ]; then
-            exit 0
-          fi
-          if grep -qE "FAILED: [1-9]" /tmp/cj_test_output.txt; then
-            echo "::error::测试有断言失败"
-            exit $exit_code
-          fi
-          if grep -qE "schd-worker|SIGSEGV|SIGBUS|killTimer" /tmp/cj_test_output.txt; then
-            echo "::warning::测试无断言失败（FAILED: 0），ERROR 是 GC 跨線程析構 Qt 對象導致的信號。不影响测试结果正确性。"
-            exit 0
-          fi
-          exit $exit_code
 
       - name: 上传桥接库产物
+        if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: cjqt6-bridge-linux-arm64
+          name: cjqt6-bridge-v${{ env.CANGJIE_VERSION }}-linux-arm64
           path: releases/linux-arm64/libcjqt6_bridge.so
           if-no-files-found: error

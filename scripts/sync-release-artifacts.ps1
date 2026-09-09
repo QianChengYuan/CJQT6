@@ -1,16 +1,12 @@
-﻿# 用法：在 CJQT6 根目录下运行
-# .\scripts\sync-release-artifacts.ps1
-#   从 GitHub CI（QianChengYuan/CJQT6）下载四平台编译的 cjqt6_bridge 桥接库，
-#   归位到 releases/<platform>/ 对应位置，使入库的预编译库与最新代码同步。
-#   默认取最近一次成功的 main CI run；也可用 -RunId 指定。
-#
-# .\scripts\sync-release-artifacts.ps1 -RunId 34261986569
-#
-# 时机：GitHub CI 四平台全绿后、推送 GitCode 主仓之前运行。
-# 下载归位后请人工核对，再：git add releases/ && git commit && git push origin
+﻿# 用法(在 CJQT6 根目录下运行):
+#   .\scripts\sync-release-artifacts.ps1                                            # 从 GitHub CI(QianChengYuan/CJQT6)取最近一次成功的 main run,下载四平台 bridge 同步到 releases/<platform>/
+#   .\scripts\sync-release-artifacts.ps1 -RunId 34261986569                         # 指定 GitHub Actions run id(gh run list --repo QianChengYuan/CJQT6 查看)
+# 时机:GitHub CI 四平台全绿后、推送 GitCode 主仓之前运行。
+# 下载归位后请人工核对,再 git add releases/ && git commit && git push origin
 
 param(
-    [string]$RunId = ""
+    [string]$RunId = "",
+    [string]$CangjieVersion = "1.1.0"  # 与 ci.yml env.CANGJIE_VERSION 同步
 )
 
 $ErrorActionPreference = "Stop"
@@ -19,11 +15,12 @@ $base = Split-Path $PSScriptRoot -Parent
 Set-Location $base
 
 # CI artifact 名 -> releases 目标相对路径（与 .github/workflows/ci.yml 的 upload-artifact 对应）
+# artifact 名带 SDK 版本(v$CangjieVersion),便于跨版本溯源
 $map = [ordered]@{
-    "cjqt6-bridge-windows-x64" = "releases/windows-x64/cjqt6_bridge.dll"
-    "cjqt6-bridge-linux-x64"   = "releases/linux-x64/libcjqt6_bridge.so"
-    "cjqt6-bridge-linux-arm64" = "releases/linux-arm64/libcjqt6_bridge.so"
-    "cjqt6-bridge-macos-arm64" = "releases/macos-arm64/libcjqt6_bridge.dylib"
+    "cjqt6-bridge-v$CangjieVersion-windows-x64" = "releases/windows-x64/cjqt6_bridge.dll"
+    "cjqt6-bridge-v$CangjieVersion-linux-x64"   = "releases/linux-x64/libcjqt6_bridge.so"
+    "cjqt6-bridge-v$CangjieVersion-linux-arm64" = "releases/linux-arm64/libcjqt6_bridge.so"
+    "cjqt6-bridge-v$CangjieVersion-macos-arm64" = "releases/macos-arm64/libcjqt6_bridge.dylib"
 }
 
 if ([string]::IsNullOrEmpty($RunId)) {
@@ -44,7 +41,9 @@ try {
         $dlDir = Join-Path $tmp $name
         gh run download $RunId --repo $repo --name $name --dir $dlDir 2>$null | Out-Null
         $src = Get-ChildItem $dlDir -File -ErrorAction SilentlyContinue | Select-Object -First 1
-        if (-not $src) { throw "artifact $name 下载失败或为空（run $RunId）" }
+        if (-not $src) {
+            throw "artifact $name 下载失败或为空(run $RunId)"
+        }
         $dest = Join-Path $base $destRel
         Copy-Item $src.FullName $dest -Force
         $sizeKB = [math]::Round((Get-Item $dest).Length / 1KB, 1)

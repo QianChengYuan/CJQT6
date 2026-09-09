@@ -1,0 +1,49 @@
+# setup-qt — Qt6 安装 composite action
+# ------------------------------------------------------------
+# 用法:
+#   - uses: ./.github/actions/setup-qt
+#     with:
+#       os: linux | macos | linux-arm64 | windows
+#       # 可选覆盖(version / arch / modules);Linux ARM64 走系统 apt
+# 输出:
+#   qtdir: Qt 安装根目录(Linux ARM64 为 /usr/lib/aarch64-linux-gnu)
+# 副作用:
+#   - QTDIR(写入 $GITHUB_ENV)
+#   - $QTDIR/bin(写入 $GITHUB_PATH)
+# ------------------------------------------------------------
+
+name: setup-qt
+description: 安装 Qt6(Linux/macOS/Windows 走 aqtinstall;Linux ARM64 走 apt)
+
+inputs:
+  os:
+    description: 目标平台 linux | macos | linux-arm64 | windows
+    required: true
+  version:
+    description: Qt 版本(Linux ARM64 忽略,使用系统包)
+    required: false
+    default: ""
+  arch:
+    description: Qt 架构(如 gcc_64 / clang_64 / win64_msvc2022_64)
+    required: false
+    default: ""
+  modules:
+    description: Qt 附加模块,逗号分隔
+    required: false
+    default: "qtmultimedia,qtcharts"
+
+# 输出(QTDIR 已写入 $GITHUB_ENV,调用方用 ${{ env.QTDIR }} 直接引用,无需 step output)
+outputs: {}
+
+runs:
+  using: composite
+  steps:
+    # 所有平台统一用 bash(GitHub Windows runner 也提供 bash for Windows)
+    - id: install
+      shell: bash
+      run: bash "${{ github.action_path }}/install.sh"
+      env:
+        INPUT_OS: ${{ inputs.os }}
+        INPUT_VERSION: ${{ inputs.version }}
+        INPUT_ARCH: ${{ inputs.arch }}
+        INPUT_MODULES: ${{ inputs.modules }}

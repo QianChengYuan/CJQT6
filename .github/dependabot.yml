@@ -1,0 +1,57 @@
+# ============================================================
+# dependabot.yml — CJQT6 自动依赖更新
+# ------------------------------------------------------------
+# 跟踪两类生态:
+#   - github-actions: actions/checkout、cache、upload-artifact、sticky-pull-request-comment 等
+#   - pip: aqtinstall(Qt 安装器)
+#
+# 不跟踪:
+#   - 仓颉 SDK:无常规发版节奏(objectKey 绑死 1.1.0),自动更新会破 CI
+#   - Qt:锁定与各平台 release/ 一致(见 ci.yml env.QT_VERSION_*),自动升级会破坏 ABI 兼容性
+#
+# 策略:
+#   - 每周一 09:00(Asia/Shanghai)批量开 PR,避免噪声
+#   - 限制每类最多 5 个开放 PR,避免堆积
+#   - commit message 前缀区分:deps(actions)/deps(pip)
+# ============================================================
+
+version: 2
+updates:
+  # GitHub Actions 版本(workflow 内的 uses: ...)
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Shanghai"
+    commit-message:
+      prefix: "deps(actions)"
+    labels:
+      - "dependencies"
+      - "ci"
+    groups:
+      # 同类合并为一个 PR(降低 PR 噪声)
+      github-actions:
+        patterns:
+          - "*"
+    open-pull-requests-limit: 5
+
+  # Python 依赖(aqtinstall 用于 Qt 安装)
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Shanghai"
+    commit-message:
+      prefix: "deps(pip)"
+    labels:
+      - "dependencies"
+      - "ci"
+    groups:
+      pip-runtime:
+        patterns:
+          - "aqtinstall"
+    open-pull-requests-limit: 3
