@@ -94,7 +94,7 @@ class QChartTests {
 
         let view = QChartView()
         view.setChart(chart)
-        view.resize(400, 300)
+
         @Assert(true)
         // chart 所有权已转给 view，view.close 级联释放 chart 及 series
         view.close()

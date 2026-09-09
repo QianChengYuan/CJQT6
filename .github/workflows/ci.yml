@@ -191,8 +191,7 @@ jobs:
           coverage: "true"
         env:
           QT_QPA_PLATFORM: offscreen
-          QT_QPA_PLATFORM_PLUGIN_PATH: ${{ env.QTDIR }}/plugins/platforms
-          QT_PLUGIN_PATH: ${{ env.QTDIR }}/plugins
+
           QT_QPA_FONTDIR: C:\Windows\Fonts
 
       - name: 覆盖率门禁(P0-1,双口径阈值)
