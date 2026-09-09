@@ -79,6 +79,7 @@ case "$INPUT_OS" in
 
   linux-arm64)
     echo "==> apt 安装 Qt6 系统开发包"
+    sudo rm -f /etc/apt/sources.list.d/google-chrome.list
     sudo apt-get update
     sudo apt-get install -y \
       qt6-base-dev qt6-base-private-dev \
