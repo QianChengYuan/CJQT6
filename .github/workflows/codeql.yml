@@ -49,11 +49,11 @@ jobs:
 
     steps:
       - name: 检出代码
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # CodeQL 初始化(下载 CLI + 数据库创建)
       - name: 初始化 CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
           # 缩小扫描范围:native bridge C/C++ + CI 脚本 Python
@@ -66,7 +66,7 @@ jobs:
 
       # 执行分析
       - name: 执行 CodeQL 分析
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
         with:
           category: "/language:${{ matrix.language }}"
           # 仅 error 级别阻断,降低 warning 噪声
