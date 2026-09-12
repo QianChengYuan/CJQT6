@@ -45,6 +45,10 @@ on:
       - '.github/actions/**'
   workflow_dispatch:
 
+permissions:
+  contents: read
+  pull-requests: write
+
 env:
   CANGJIE_VERSION: "1.1.0"
   QT_VERSION_LINUX: "6.4.2"
@@ -218,6 +222,7 @@ jobs:
       - name: 评论覆盖率到 PR(sticky comment,自动覆盖上一次)
         if: github.event_name == 'pull_request' && success()
         uses: marocchino/sticky-pull-request-comment@v2
+        continue-on-error: true
         with:
           header: coverage
           path: cov_output/report/pr_summary.md
