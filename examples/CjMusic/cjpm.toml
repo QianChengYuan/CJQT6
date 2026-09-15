@@ -1,0 +1,17 @@
+[package]
+  cjc-version = "1.1.0"
+  name = "CjMusic"
+  organization = ""
+  description = "仓颉生态第一个完整的桌面 GUI 音乐播放器"
+  version = "1.0.0"
+  target-dir = ""
+  script-dir = ""
+  output-type = "executable"
+  compile-option = "-Woff unused"
+  override-compile-option = ""
+  link-option = "-L../../releases/windows-x64 -lcjqt6_bridge"
+  package-configuration = {}
+
+[dependencies]
+  "lrc4cj" = "0.3.0"
+  cjqt6 = { path = "../../" }

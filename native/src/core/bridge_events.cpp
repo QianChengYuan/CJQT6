@@ -12,12 +12,36 @@
 #include <functional>
 #include <unordered_map>
 #include <mutex>
+#include <windows.h>
 
 // 互斥锁：守护下列全部回调 map 与 g_eventWidgets，避免多线程读写未定义行为
 // （工作线程创建/销毁 EventWidget 与 Qt 事件循环线程读 map 的并发竞争）
-// 用 recursive_mutex：qEventWidgetDelete 内持锁 erase 回调表后调 delete widget，
-// 触发 ~EventWidget 再次加锁 erase g_eventWidgets —— 同线程可重入，避免死锁
-static std::recursive_mutex g_eventsMutex;
+// 用 CRITICAL_SECTION（Windows 原生递归锁）代替 std::recursive_mutex：
+// 实测在仓颉 FFI 环境下 std::recursive_mutex::lock() 会死锁（C++ runtime 初始化问题），
+// CRITICAL_SECTION 是 Windows API 不依赖 C++ runtime，正常工作。
+// qEventWidgetDelete 内持锁 erase 回调表后调 delete widget，
+// 触发 ~EventWidget 再次加锁 erase g_eventWidgets —— CRITICAL_SECTION 是递归锁，同线程可重入。
+static CRITICAL_SECTION g_eventsMutex;
+static bool g_eventsMutexInit = false;
+
+// 确保 g_eventsMutex 已初始化（线程安全：InitOnceExecuteOnce）
+static INIT_ONCE g_eventsMutexOnce = INIT_ONCE_STATIC_INIT;
+static BOOL CALLBACK initEventsMutexFn(PINIT_ONCE, PVOID, PVOID*) {
+    InitializeCriticalSection(&g_eventsMutex);
+    g_eventsMutexInit = true;
+    return TRUE;
+}
+static inline void ensureEventsMutexInit() {
+    InitOnceExecuteOnce(&g_eventsMutexOnce, initEventsMutexFn, nullptr, nullptr);
+}
+
+// RAII 包装类，类似 std::lock_guard
+class CSLockGuard {
+    CRITICAL_SECTION& m_cs;
+public:
+    CSLockGuard(CRITICAL_SECTION& cs) : m_cs(cs) { ensureEventsMutexInit(); EnterCriticalSection(&m_cs); }
+    ~CSLockGuard() { LeaveCriticalSection(&m_cs); }
+};
 
 // 事件回调映射
 static std::unordered_map<int64_t, std::function<void(int32_t, int32_t, int32_t)>> g_mousePressCallbacks;
@@ -40,12 +64,14 @@ public:
         m_id = nextId++;
         setMouseTracking(true);  // 启用鼠标追踪
         setFocusPolicy(Qt::StrongFocus);  // 启用键盘焦点
-        std::lock_guard<std::recursive_mutex> lk(g_eventsMutex);
+        ensureEventsMutexInit();
+        CSLockGuard lk(g_eventsMutex);
         g_eventWidgets[m_id] = this;
     }
     
     ~EventWidget() {
-        std::lock_guard<std::recursive_mutex> lk(g_eventsMutex);
+        ensureEventsMutexInit();
+        CSLockGuard lk(g_eventsMutex);
         g_eventWidgets.erase(m_id);
     }
     
@@ -55,7 +81,7 @@ protected:
     void mousePressEvent(QMouseEvent* event) override {
         std::function<void(int32_t, int32_t, int32_t)> cb;
         {
-            std::lock_guard<std::recursive_mutex> lk(g_eventsMutex);
+            CSLockGuard lk(g_eventsMutex);
             auto it = g_mousePressCallbacks.find(m_id);
             if (it != g_mousePressCallbacks.end()) cb = it->second;
         }
@@ -73,7 +99,7 @@ protected:
     void mouseMoveEvent(QMouseEvent* event) override {
         std::function<void(int32_t, int32_t, int32_t)> cb;
         {
-            std::lock_guard<std::recursive_mutex> lk(g_eventsMutex);
+            CSLockGuard lk(g_eventsMutex);
             auto it = g_mouseMoveCallbacks.find(m_id);
             if (it != g_mouseMoveCallbacks.end()) cb = it->second;
         }
@@ -90,7 +116,7 @@ protected:
     void mouseReleaseEvent(QMouseEvent* event) override {
         std::function<void(int32_t, int32_t, int32_t)> cb;
         {
-            std::lock_guard<std::recursive_mutex> lk(g_eventsMutex);
+            CSLockGuard lk(g_eventsMutex);
             auto it = g_mouseReleaseCallbacks.find(m_id);
             if (it != g_mouseReleaseCallbacks.end()) cb = it->second;
         }
@@ -107,7 +133,7 @@ protected:
     void keyPressEvent(QKeyEvent* event) override {
         std::function<void(int32_t, int32_t, int32_t)> cb;
         {
-            std::lock_guard<std::recursive_mutex> lk(g_eventsMutex);
+            CSLockGuard lk(g_eventsMutex);
             auto it = g_keyPressCallbacks.find(m_id);
             if (it != g_keyPressCallbacks.end()) cb = it->second;
         }
@@ -124,7 +150,7 @@ protected:
     void keyReleaseEvent(QKeyEvent* event) override {
         std::function<void(int32_t, int32_t, int32_t)> cb;
         {
-            std::lock_guard<std::recursive_mutex> lk(g_eventsMutex);
+            CSLockGuard lk(g_eventsMutex);
             auto it = g_keyReleaseCallbacks.find(m_id);
             if (it != g_keyReleaseCallbacks.end()) cb = it->second;
         }
@@ -141,7 +167,7 @@ protected:
     void paintEvent(QPaintEvent* event) override {
         std::function<void(int64_t)> cb;
         {
-            std::lock_guard<std::recursive_mutex> lk(g_eventsMutex);
+            CSLockGuard lk(g_eventsMutex);
             auto it = g_paintCallbacks.find(m_id);
             if (it != g_paintCallbacks.end()) cb = it->second;
         }
@@ -157,13 +183,14 @@ protected:
     }
 };
 
+
 // M1 修复：resolveEventWidget 兼容 ptr 与 id 双值域
 // 先按 id 查 g_eventWidgets（兼容误传 id 的情况，id 为小整数 1,2,3...），
 // 命中则返回对应 widget；miss 则按指针 reinterpret（保持原行为）。
 // 正常路径（仓颉侧传 qEventWidgetGetPtr 返回的真实指针）仅多一次 hash find miss。
 // 注意：本函数内部加锁读 g_eventWidgets；调用方若后续写回调 map，需另行加锁。
 static EventWidget* resolveEventWidget(int64_t p) {
-    std::lock_guard<std::recursive_mutex> lk(g_eventsMutex);
+    CSLockGuard lk(g_eventsMutex);
     auto it = g_eventWidgets.find(p);
     if (it != g_eventWidgets.end()) {
         return static_cast<EventWidget*>(it->second);
@@ -183,7 +210,7 @@ int64_t qEventWidgetCreate() {
 }
 
 int64_t qEventWidgetGetPtr(int64_t id) {
-    std::lock_guard<std::recursive_mutex> lk(g_eventsMutex);
+    CSLockGuard lk(g_eventsMutex);
     auto it = g_eventWidgets.find(id);
     if (it != g_eventWidgets.end()) {
         return reinterpret_cast<int64_t>(it->second);
@@ -193,10 +220,10 @@ int64_t qEventWidgetGetPtr(int64_t id) {
 
 void qEventWidgetDelete(int64_t ptr) {
     // resolveEventWidget 内部加锁查 g_eventWidgets；析构时 ~EventWidget 会再次加锁
-    // erase g_eventWidgets —— 用 recursive_mutex 允许同线程重入，避免死锁。
+    // erase g_eventWidgets —— CRITICAL_SECTION 是递归锁，同线程可重入，避免死锁。
     EventWidget* widget = resolveEventWidget(ptr);
     if (widget) {
-        std::lock_guard<std::recursive_mutex> lk(g_eventsMutex);
+        CSLockGuard lk(g_eventsMutex);
         g_mousePressCallbacks.erase(widget->id());
         g_mouseMoveCallbacks.erase(widget->id());
         g_mouseReleaseCallbacks.erase(widget->id());
@@ -215,7 +242,7 @@ void qEventWidgetDelete(int64_t ptr) {
 void qEventWidgetSetOnMousePress(int64_t ptr, void (*callback)(int32_t, int32_t, int32_t)) {
     EventWidget* widget = resolveEventWidget(ptr);
     if (widget) {
-        std::lock_guard<std::recursive_mutex> lk(g_eventsMutex);
+        CSLockGuard lk(g_eventsMutex);
         g_mousePressCallbacks[widget->id()] = callback;
     }
 }
@@ -223,7 +250,7 @@ void qEventWidgetSetOnMousePress(int64_t ptr, void (*callback)(int32_t, int32_t,
 void qEventWidgetSetOnMouseMove(int64_t ptr, void (*callback)(int32_t, int32_t, int32_t)) {
     EventWidget* widget = resolveEventWidget(ptr);
     if (widget) {
-        std::lock_guard<std::recursive_mutex> lk(g_eventsMutex);
+        CSLockGuard lk(g_eventsMutex);
         g_mouseMoveCallbacks[widget->id()] = callback;
     }
 }
@@ -231,7 +258,7 @@ void qEventWidgetSetOnMouseMove(int64_t ptr, void (*callback)(int32_t, int32_t, 
 void qEventWidgetSetOnMouseRelease(int64_t ptr, void (*callback)(int32_t, int32_t, int32_t)) {
     EventWidget* widget = resolveEventWidget(ptr);
     if (widget) {
-        std::lock_guard<std::recursive_mutex> lk(g_eventsMutex);
+        CSLockGuard lk(g_eventsMutex);
         g_mouseReleaseCallbacks[widget->id()] = callback;
     }
 }
@@ -243,7 +270,7 @@ void qEventWidgetSetOnMouseRelease(int64_t ptr, void (*callback)(int32_t, int32_
 void qEventWidgetSetOnKeyPress(int64_t ptr, void (*callback)(int32_t, int32_t, int32_t)) {
     EventWidget* widget = resolveEventWidget(ptr);
     if (widget) {
-        std::lock_guard<std::recursive_mutex> lk(g_eventsMutex);
+        CSLockGuard lk(g_eventsMutex);
         g_keyPressCallbacks[widget->id()] = callback;
     }
 }
@@ -251,7 +278,7 @@ void qEventWidgetSetOnKeyPress(int64_t ptr, void (*callback)(int32_t, int32_t, i
 void qEventWidgetSetOnKeyRelease(int64_t ptr, void (*callback)(int32_t, int32_t, int32_t)) {
     EventWidget* widget = resolveEventWidget(ptr);
     if (widget) {
-        std::lock_guard<std::recursive_mutex> lk(g_eventsMutex);
+        CSLockGuard lk(g_eventsMutex);
         g_keyReleaseCallbacks[widget->id()] = callback;
     }
 }
@@ -263,7 +290,7 @@ void qEventWidgetSetOnKeyRelease(int64_t ptr, void (*callback)(int32_t, int32_t,
 void qEventWidgetSetOnPaint(int64_t ptr, void (*callback)(int64_t)) {
     EventWidget* widget = resolveEventWidget(ptr);
     if (widget) {
-        std::lock_guard<std::recursive_mutex> lk(g_eventsMutex);
+        CSLockGuard lk(g_eventsMutex);
         g_paintCallbacks[widget->id()] = callback;
     }
 }
@@ -271,7 +298,7 @@ void qEventWidgetSetOnPaint(int64_t ptr, void (*callback)(int64_t)) {
 void qEventWidgetClearPaintCallback(int64_t ptr) {
     EventWidget* widget = resolveEventWidget(ptr);
     if (widget) {
-        std::lock_guard<std::recursive_mutex> lk(g_eventsMutex);
+        CSLockGuard lk(g_eventsMutex);
         g_paintCallbacks.erase(widget->id());
     }
 }
@@ -279,7 +306,7 @@ void qEventWidgetClearPaintCallback(int64_t ptr) {
 void qEventWidgetClearMousePressCallback(int64_t ptr) {
     EventWidget* widget = resolveEventWidget(ptr);
     if (widget) {
-        std::lock_guard<std::recursive_mutex> lk(g_eventsMutex);
+        CSLockGuard lk(g_eventsMutex);
         g_mousePressCallbacks.erase(widget->id());
     }
 }
@@ -287,7 +314,7 @@ void qEventWidgetClearMousePressCallback(int64_t ptr) {
 void qEventWidgetClearMouseMoveCallback(int64_t ptr) {
     EventWidget* widget = resolveEventWidget(ptr);
     if (widget) {
-        std::lock_guard<std::recursive_mutex> lk(g_eventsMutex);
+        CSLockGuard lk(g_eventsMutex);
         g_mouseMoveCallbacks.erase(widget->id());
     }
 }
@@ -295,7 +322,7 @@ void qEventWidgetClearMouseMoveCallback(int64_t ptr) {
 void qEventWidgetClearMouseReleaseCallback(int64_t ptr) {
     EventWidget* widget = resolveEventWidget(ptr);
     if (widget) {
-        std::lock_guard<std::recursive_mutex> lk(g_eventsMutex);
+        CSLockGuard lk(g_eventsMutex);
         g_mouseReleaseCallbacks.erase(widget->id());
     }
 }
@@ -303,7 +330,7 @@ void qEventWidgetClearMouseReleaseCallback(int64_t ptr) {
 void qEventWidgetClearKeyPressCallback(int64_t ptr) {
     EventWidget* widget = resolveEventWidget(ptr);
     if (widget) {
-        std::lock_guard<std::recursive_mutex> lk(g_eventsMutex);
+        CSLockGuard lk(g_eventsMutex);
         g_keyPressCallbacks.erase(widget->id());
     }
 }
@@ -311,7 +338,7 @@ void qEventWidgetClearKeyPressCallback(int64_t ptr) {
 void qEventWidgetClearKeyReleaseCallback(int64_t ptr) {
     EventWidget* widget = resolveEventWidget(ptr);
     if (widget) {
-        std::lock_guard<std::recursive_mutex> lk(g_eventsMutex);
+        CSLockGuard lk(g_eventsMutex);
         g_keyReleaseCallbacks.erase(widget->id());
     }
 }
@@ -319,7 +346,7 @@ void qEventWidgetClearKeyReleaseCallback(int64_t ptr) {
 void qEventWidgetClearAllCallbacks(int64_t ptr) {
     EventWidget* widget = resolveEventWidget(ptr);
     if (widget) {
-        std::lock_guard<std::recursive_mutex> lk(g_eventsMutex);
+        CSLockGuard lk(g_eventsMutex);
         g_mousePressCallbacks.erase(widget->id());
         g_mouseMoveCallbacks.erase(widget->id());
         g_mouseReleaseCallbacks.erase(widget->id());

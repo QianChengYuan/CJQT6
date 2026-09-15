@@ -310,27 +310,29 @@ static DWORD g_mouseHookThreadId = 0;
 // Qt 可能销毁该 QMenu）。
 static QPointer<QWidget> g_menubarCloseTarget;
 
-// 异步窗口拖拽：仓颉 M:N 线程下 DefWindowProc 的拖拽 modal loop 不工作
+// 异步窗口拖拽/缩放统一状态机
+// 仓颉 M:N 线程下 DefWindowProc 的拖拽/缩放 modal loop 不工作
 // （modal loop 内部 GetMessage/DispatchMessage 与仓颉调度器冲突）。
-// 改为钩子拦截 WM_NCLBUTTONDOWN(HTCAPTION) 不进入 modal loop，
-// 在 WM_NCMOUSEMOVE 中手动 SetWindowPos 移动窗口。
-static bool g_windowDragging = false;
-static HWND g_dragHwnd = NULL;
-static POINT g_dragStartMouse;
-static POINT g_dragStartWindow;
-
-// sendEvent 方式下的鼠标捕获：sendEvent 不走 QPA 通道，Qt 不会建立隐式鼠标捕获，
-
-// 异步窗口缩放：与拖拽同理，原生 sizing modal loop 在仓颉 M:N 线程下不工作。
-// 拦截 WM_NCLBUTTONDOWN（缩放边/角 HitTest）不进入 modal loop，
-// 在 WM_NCMOUSEMOVE / WM_MOUSEMOVE 中手动 SetWindowPos 缩放窗口。
-static bool g_windowResizing = false;
-static HWND g_resizeHwnd = NULL;
-static LONG g_resizeHitTest = 0;   // HTLEFT/HTRIGHT/HTTOP/HTBOTTOM + 四角
-static POINT g_resizeStartMouse;
-static RECT g_resizeStartRect;
-static int g_resizeMinW = 0;       // 缩放开始时缓存的最小跟踪宽（物理像素）
-static int g_resizeMinH = 0;       // 缩放开始时缓存的最小跟踪高（物理像素）
+// 改为钩子拦截 WM_NCLBUTTONDOWN 不进入 modal loop，在 MOVE 中手动 SetWindowPos。
+// 关键修复（解决"拖放后偶发卡住"）：
+//  - SetCapture 接管鼠标，鼠标移出窗口也能收到 WM_MOUSEMOVE
+//  - 两种 MOVE 都认（WM_NCMOUSEMOVE + WM_MOUSEMOVE），避免鼠标脱离非客户区后断流
+//  - 兜底复位：GetAsyncKeyState 检测左键已松开但状态机仍 active → 立即复位
+//    （WM_NCLBUTTONUP 丢失会导致状态机永久卡住，后续 move 被吞用旧起点算位置）
+//  - 去抖：矩形没变就不发 SetWindowPos，避免每个 move 同步触发 WM_SIZE/WM_PAINT
+//    造成消息积压（仓颉侧 resizeEvent 回调做重活时尤甚）
+struct DragResizeState {
+    bool active = false;
+    bool isResize = false;        // true=缩放, false=拖拽
+    HWND hwnd = NULL;
+    LONG hitTest = 0;             // 缩放 HitTest（拖拽时为 HTCAPTION）
+    POINT startMouse = {0, 0};
+    RECT startRect = {0, 0, 0, 0};
+    int minW = 0;                 // 缩放最小宽（物理像素）
+    int minH = 0;                 // 缩放最小高（物理像素）
+    RECT lastApplied = {0, 0, 0, 0};  // 上次 SetWindowPos 的矩形（去抖）
+};
+static DragResizeState g_dragResize;
 
 // 取窗口最小跟踪尺寸（物理像素）。WM_GETMINMAXINFO 会带回 Qt 侧 minimumSize 的钳制；
 // 原生 sizing modal loop 在仓颉 M:N 下不工作，这里复用其钳制值手动限定缩放下限。
@@ -344,84 +346,142 @@ static void cjqt6GetMinTrackSize(HWND hwnd, int& minW, int& minH) {
     if (minH <= 0) minH = 40;
 }
 
+// 结束拖拽/缩放：复位状态机 + ReleaseCapture
+static void cjqt6EndDragResize() {
+    if (g_dragResize.active && g_dragResize.hwnd) {
+        ReleaseCapture();
+    }
+    g_dragResize.active = false;
+    g_dragResize.hwnd = NULL;
+    g_dragResize.isResize = false;
+}
+
+// 兜底复位：检测左键已松开但状态机仍 active → 立即结束
+// 用于 WM_NCLBUTTONUP / WM_LBUTTONUP 丢失的场景（状态机永久卡住的根因 B）
+static void cjqt6RecoverOrphanState() {
+    if (g_dragResize.active && !(GetAsyncKeyState(VK_LBUTTON) & 0x8000)) {
+        cjqt6EndDragResize();
+    }
+}
+
+// 鼠标 grabber：自己维护 press-grab，不依赖 Qt 隐式捕获。
+// 水平进度条很窄（~20px），拖动时鼠标稍微上下动就离开 slider 矩形，widgetAt 返回父窗口，
+// 后续 move/release 派发目标跑偏 → slider 收不到 release → sliderDown 永久 true →
+// 下次拖动行为异常 / 松手后积压的 move 姗姗姗来迟把滑块拉回旧位置。
+// Qt 原生靠隐式鼠标捕获解决，但桥接层 sendEvent 不走 QPA 不建立捕获，故自己维护。
+// QPointer 防悬垂（grabber 控件可能被销毁）。
+static QPointer<QWidget> s_mouseGrabber;
+static Qt::MouseButton s_grabButton = Qt::NoButton;
+
+// 兜底复位 grabber：所有物理按键都已松开但 grabber 仍存在 → release 丢失，强制清状态
+// （和窗口拖拽 g_dragResize 卡死同类问题，根因 3）
+static void cjqt6RecoverMouseGrabber() {
+    if (s_mouseGrabber &&
+        !(GetAsyncKeyState(VK_LBUTTON) & 0x8000) &&
+        !(GetAsyncKeyState(VK_RBUTTON) & 0x8000) &&
+        !(GetAsyncKeyState(VK_MBUTTON) & 0x8000)) {
+        s_mouseGrabber = nullptr;
+        s_grabButton = Qt::NoButton;
+    }
+}
+
+// 应用拖拽/缩放：计算新矩形，去抖后 SetWindowPos
+static void cjqt6ApplyDragResize(POINT currentMouse) {
+    if (!g_dragResize.active || !g_dragResize.hwnd) return;
+
+    int dx = currentMouse.x - g_dragResize.startMouse.x;
+    int dy = currentMouse.y - g_dragResize.startMouse.y;
+    RECT r = g_dragResize.startRect;
+
+    if (g_dragResize.isResize) {
+        LONG ht = g_dragResize.hitTest;
+        if (ht == HTLEFT || ht == HTTOPLEFT || ht == HTBOTTOMLEFT) r.left += dx;
+        if (ht == HTRIGHT || ht == HTTOPRIGHT || ht == HTBOTTOMRIGHT) r.right += dx;
+        if (ht == HTTOP || ht == HTTOPLEFT || ht == HTTOPRIGHT) r.top += dy;
+        if (ht == HTBOTTOM || ht == HTBOTTOMLEFT || ht == HTBOTTOMRIGHT) r.bottom += dy;
+        // 最小尺寸钳制（锚定不动的那条边，只收缩移动中的边）
+        if (r.right - r.left < g_dragResize.minW) {
+            if (ht == HTLEFT || ht == HTTOPLEFT || ht == HTBOTTOMLEFT) r.left = r.right - g_dragResize.minW;
+            else r.right = r.left + g_dragResize.minW;
+        }
+        if (r.bottom - r.top < g_dragResize.minH) {
+            if (ht == HTTOP || ht == HTTOPLEFT || ht == HTTOPRIGHT) r.top = r.bottom - g_dragResize.minH;
+            else r.bottom = r.top + g_dragResize.minH;
+        }
+    } else {
+        // 拖拽：整体平移
+        r.left += dx;
+        r.top += dy;
+        r.right += dx;
+        r.bottom += dy;
+    }
+
+    // 去抖：矩形没变就不发 SetWindowPos（避免每个 move 同步触发 WM_SIZE/WM_PAINT 积压）
+    if (r.left == g_dragResize.lastApplied.left &&
+        r.top == g_dragResize.lastApplied.top &&
+        r.right == g_dragResize.lastApplied.right &&
+        r.bottom == g_dragResize.lastApplied.bottom) {
+        return;
+    }
+
+    SetWindowPos(g_dragResize.hwnd, NULL, r.left, r.top,
+                 r.right - r.left, r.bottom - r.top,
+                 SWP_NOZORDER | SWP_NOACTIVATE);
+    g_dragResize.lastApplied = r;
+}
+
 static LRESULT CALLBACK cjqt6MouseHookProc(int code, WPARAM wParam, LPARAM lParam) {
     if (code == HC_ACTION) {
-            // 异步窗口拖拽：拦截 WM_NCLBUTTONDOWN(HTCAPTION) 不进入 DefWindowProc modal loop
+            // 异步窗口拖拽/缩放：拦截 WM_NCLBUTTONDOWN 不进入 DefWindowProc modal loop
             if (wParam == WM_NCLBUTTONDOWN) {
                 MOUSEHOOKSTRUCT* mhs = (MOUSEHOOKSTRUCT*)lParam;
                 if (mhs && mhs->hwnd) {
                     if (mhs->wHitTestCode == HTCAPTION) {
-                        g_windowDragging = true;
-                        g_dragHwnd = mhs->hwnd;
-                        g_dragStartMouse = mhs->pt;
-                        RECT rect;
-                        GetWindowRect(mhs->hwnd, &rect);
-                        g_dragStartWindow.x = rect.left;
-                        g_dragStartWindow.y = rect.top;
+                        g_dragResize.active = true;
+                        g_dragResize.isResize = false;
+                        g_dragResize.hwnd = mhs->hwnd;
+                        g_dragResize.hitTest = HTCAPTION;
+                        g_dragResize.startMouse = mhs->pt;
+                        GetWindowRect(mhs->hwnd, &g_dragResize.startRect);
+                        g_dragResize.lastApplied = g_dragResize.startRect;
+                        SetCapture(mhs->hwnd);
                         return 1;
                     }
-                    // 异步窗口缩放：拦截缩放边/角 HitTest，同上不进入原生 sizing modal loop
+                    // 缩放边/角 HitTest
                     LONG ht = mhs->wHitTestCode;
                     if (ht == HTLEFT || ht == HTRIGHT || ht == HTTOP || ht == HTBOTTOM ||
                         ht == HTTOPLEFT || ht == HTTOPRIGHT || ht == HTBOTTOMLEFT ||
                         ht == HTBOTTOMRIGHT) {
-                        g_windowResizing = true;
-                        g_resizeHwnd = mhs->hwnd;
-                        g_resizeHitTest = ht;
-                        g_resizeStartMouse = mhs->pt;
-                        GetWindowRect(mhs->hwnd, &g_resizeStartRect);
-                        cjqt6GetMinTrackSize(mhs->hwnd, g_resizeMinW, g_resizeMinH);
+                        g_dragResize.active = true;
+                        g_dragResize.isResize = true;
+                        g_dragResize.hwnd = mhs->hwnd;
+                        g_dragResize.hitTest = ht;
+                        g_dragResize.startMouse = mhs->pt;
+                        GetWindowRect(mhs->hwnd, &g_dragResize.startRect);
+                        g_dragResize.lastApplied = g_dragResize.startRect;
+                        cjqt6GetMinTrackSize(mhs->hwnd, g_dragResize.minW, g_dragResize.minH);
+                        SetCapture(mhs->hwnd);
                         return 1;
                     }
                 }
             }
-            // 拖拽中：WM_NCMOUSEMOVE 手动移动窗口
-            if (g_windowDragging && wParam == WM_NCMOUSEMOVE) {
+            // 兜底复位：每次进钩子先检查是否有孤儿状态（左键已松开但状态机仍 active）
+            cjqt6RecoverOrphanState();
+            cjqt6RecoverMouseGrabber();
+            // 拖拽/缩放中：两种 MOVE 都认（NC + CLIENT），避免鼠标脱离非客户区后断流
+            if (g_dragResize.active && (wParam == WM_NCMOUSEMOVE || wParam == WM_MOUSEMOVE)) {
                 MOUSEHOOKSTRUCT* mhs = (MOUSEHOOKSTRUCT*)lParam;
-                if (mhs && g_dragHwnd) {
-                    int newX = g_dragStartWindow.x + (mhs->pt.x - g_dragStartMouse.x);
-                    int newY = g_dragStartWindow.y + (mhs->pt.y - g_dragStartMouse.y);
-                    SetWindowPos(g_dragHwnd, NULL, newX, newY, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
+                if (mhs) {
+                    cjqt6ApplyDragResize(mhs->pt);
                     return 1;
                 }
             }
-            // 拖拽结束：WM_NCLBUTTONUP 或 WM_LBUTTONUP
-            if (g_windowDragging && (wParam == WM_NCLBUTTONUP || wParam == WM_LBUTTONUP)) {
-                g_windowDragging = false;
-                g_dragHwnd = NULL;
-                return 1;
-            }
-            // 缩放中：WM_NCMOUSEMOVE / WM_MOUSEMOVE 手动缩放窗口
-            if (g_windowResizing && (wParam == WM_NCMOUSEMOVE || wParam == WM_MOUSEMOVE)) {
-                MOUSEHOOKSTRUCT* mhs = (MOUSEHOOKSTRUCT*)lParam;
-                if (mhs && g_resizeHwnd) {
-                    int dx = mhs->pt.x - g_resizeStartMouse.x;
-                    int dy = mhs->pt.y - g_resizeStartMouse.y;
-                    RECT r = g_resizeStartRect;
-                    LONG ht = g_resizeHitTest;
-                    if (ht == HTLEFT || ht == HTTOPLEFT || ht == HTBOTTOMLEFT) r.left += dx;
-                    if (ht == HTRIGHT || ht == HTTOPRIGHT || ht == HTBOTTOMRIGHT) r.right += dx;
-                    if (ht == HTTOP || ht == HTTOPLEFT || ht == HTTOPRIGHT) r.top += dy;
-                    if (ht == HTBOTTOM || ht == HTBOTTOMLEFT || ht == HTBOTTOMRIGHT) r.bottom += dy;
-                    // 最小尺寸钳制（锚定不动的那条边，只收缩移动中的边）
-                    if (r.right - r.left < g_resizeMinW) {
-                        if (ht == HTLEFT || ht == HTTOPLEFT || ht == HTBOTTOMLEFT) r.left = r.right - g_resizeMinW;
-                        else r.right = r.left + g_resizeMinW;
-                    }
-                    if (r.bottom - r.top < g_resizeMinH) {
-                        if (ht == HTTOP || ht == HTTOPLEFT || ht == HTTOPRIGHT) r.top = r.bottom - g_resizeMinH;
-                        else r.bottom = r.top + g_resizeMinH;
-                    }
-                    SetWindowPos(g_resizeHwnd, NULL, r.left, r.top, r.right - r.left, r.bottom - r.top,
-                                 SWP_NOZORDER | SWP_NOACTIVATE);
-                    return 1;
-                }
-            }
-            // 缩放结束：WM_NCLBUTTONUP 或 WM_LBUTTONUP
-            if (g_windowResizing && (wParam == WM_NCLBUTTONUP || wParam == WM_LBUTTONUP)) {
-                g_windowResizing = false;
-                g_resizeHwnd = NULL;
-                return 1;
+            // 拖拽/缩放结束：WM_NCLBUTTONUP 或 WM_LBUTTONUP
+            // 不吞掉 release，让 Windows 正常清理鼠标状态；
+            // 吞掉会导致 Windows 认为鼠标仍按下，下次缩放 press 被忽略（"无法继续拖放"）
+            if (g_dragResize.active && (wParam == WM_NCLBUTTONUP || wParam == WM_LBUTTONUP)) {
+                cjqt6EndDragResize();
+                return CallNextHookEx(g_mouseHook, code, wParam, lParam);
             }
             if (wParam == WM_LBUTTONDOWN || wParam == WM_LBUTTONUP || wParam == WM_LBUTTONDBLCLK ||
                 wParam == WM_RBUTTONDOWN || wParam == WM_RBUTTONUP || wParam == WM_RBUTTONDBLCLK ||
@@ -453,13 +513,22 @@ static LRESULT CALLBACK cjqt6MouseHookProc(int code, WPARAM wParam, LPARAM lPara
                 else if (wParam == WM_XBUTTONUP) { type = QEvent::MouseButtonRelease; button = (HIWORD(wParam) == 1) ? Qt::BackButton : Qt::ForwardButton; }
                 else if (wParam == WM_XBUTTONDBLCLK) { type = QEvent::MouseButtonDblClick; button = (HIWORD(wParam) == 1) ? Qt::BackButton : Qt::ForwardButton; }
                 else if (wParam == WM_MOUSEMOVE) { type = QEvent::MouseMove; button = Qt::NoButton; }
-                // buttons 状态（WH_MOUSE 钩子没有 wParam 的 MK_ 标志，用 GetKeyState）
+                // buttons 状态：用 GetAsyncKeyState（当前硬件状态）而非 GetKeyState（消息时状态）。
+                // WH_MOUSE 钩子中 GetKeyState 可能有时序问题（press 时尚未更新），导致 buttons=0。
+                // GetAsyncKeyState 返回当前实时状态，对 buttons 更可靠。
                 Qt::MouseButtons buttons;
-                if (GetKeyState(VK_LBUTTON) & 0x8000) buttons |= Qt::LeftButton;
-                if (GetKeyState(VK_RBUTTON) & 0x8000) buttons |= Qt::RightButton;
-                if (GetKeyState(VK_MBUTTON) & 0x8000) buttons |= Qt::MiddleButton;
-                if (GetKeyState(VK_XBUTTON1) & 0x8000) buttons |= Qt::BackButton;
-                if (GetKeyState(VK_XBUTTON2) & 0x8000) buttons |= Qt::ForwardButton;
+                if (GetAsyncKeyState(VK_LBUTTON) & 0x8000) buttons |= Qt::LeftButton;
+                if (GetAsyncKeyState(VK_RBUTTON) & 0x8000) buttons |= Qt::RightButton;
+                if (GetAsyncKeyState(VK_MBUTTON) & 0x8000) buttons |= Qt::MiddleButton;
+                if (GetAsyncKeyState(VK_XBUTTON1) & 0x8000) buttons |= Qt::BackButton;
+                if (GetAsyncKeyState(VK_XBUTTON2) & 0x8000) buttons |= Qt::ForwardButton;
+                // 修复：GetKeyState 在 WH_MOUSE 钩子中可能有时序问题（press 时尚未更新），
+                // 导致 buttons=0，QSlider 等控件不处理 press。对 press/release 强制同步 buttons。
+                if (isPress) {
+                    buttons |= button;
+                } else if (isRelease) {
+                    buttons &= ~button;
+                }
                 Qt::KeyboardModifiers mods;
                 if (GetKeyState(VK_SHIFT) & 0x8000) mods |= Qt::ShiftModifier;
                 if (GetKeyState(VK_CONTROL) & 0x8000) mods |= Qt::ControlModifier;
@@ -473,27 +542,42 @@ static LRESULT CALLBACK cjqt6MouseHookProc(int code, WPARAM wParam, LPARAM lPara
                 // 仓颉 M:N 线程下 Qt 原生（QtWndProc）不派发 QMouseEvent 到控件，
                 // 钩子必须主动 sendEvent 才能触发 clicked 等信号。
                 if (!popup) {
-                    if (widget) {
+                    // 有 grabber 时强制路由给 grabber，不重新 widgetAt
+                    // （避免鼠标移出控件矩形后 widgetAt 返回父窗口，move/release 派发目标跑偏）
+                    QWidget* target = widget;
+                    if (s_mouseGrabber) {
+                        target = s_mouseGrabber;
+                    }
+                    if (target) {
+                        // press 时记录 grabber（仅无 popup 时，popup 自己管捕获）
+                        if (isPress && !s_mouseGrabber) {
+                            s_mouseGrabber = target;
+                            s_grabButton = button;
+                        }
                         // 点击激活：吞掉原生 mouse 消息后 QtWndProc 收不到 WM_MOUSEACTIVATE，
                         // press 时主动请求激活目标顶层窗口。
                         if (isPress) {
-                            QWidget* tlw = widget->window();
+                            QWidget* tlw = target->window();
                             QWindow* tlWin = tlw ? tlw->windowHandle() : nullptr;
                             if (tlWin && !tlWin->isActive()) {
                                 tlWin->requestActivate();
                             }
                         }
-                        // move + 无 mouseGrabber（纯 hover）：不 sendEvent，让 Qt 原生
-                        // 处理 WM_SETCURSOR 更新光标形状。
-                        // move + 有 mouseGrabber（控件拖拽中如 slider）：sendEvent + 吞掉，
-                        // 避免 Qt 原生 move 干扰控件拖拽状态。
-                        // button：sendEvent + 吞掉，避免双重派发致控件状态错乱。
-                        if (!isButtonEvent && !QWidget::mouseGrabber()) {
+                        // move + 无按钮按下（纯 hover）+ 无 grabber：让 Qt 原生处理 WM_SETCURSOR。
+                        // move + 有按钮按下（拖拽中）：sendEvent + 吞掉，避免 Qt 原生不派发。
+                        // 有 grabber 时 move 也必须 sendEvent（grabber 依赖我们派发，Qt 原生不派发）。
+                        // button：sendEvent + 吞掉，避免双重派发。
+                        if (!isButtonEvent && (buttons == Qt::NoButton) && !s_mouseGrabber) {
                             return CallNextHookEx(g_mouseHook, code, wParam, lParam);
                         }
-                        QMouseEvent seEvent(type, widget->mapFromGlobal(globalPos),
+                        QMouseEvent seEvent(type, target->mapFromGlobal(globalPos),
                                              QPointF(globalPos), button, buttons, mods);
-                        QCoreApplication::sendEvent(widget, &seEvent);
+                        QCoreApplication::sendEvent(target, &seEvent);
+                        // release 时清 grabber
+                        if (isRelease && s_mouseGrabber) {
+                            s_mouseGrabber = nullptr;
+                            s_grabButton = Qt::NoButton;
+                        }
                         return 1;
                     }
                     return CallNextHookEx(g_mouseHook, code, wParam, lParam);

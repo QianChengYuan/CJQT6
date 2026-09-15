@@ -9,9 +9,20 @@
 #include <QSlider>
 #include <QDial>
 #include <QProgressBar>
+#include <QMouseEvent>
 #include <functional>
 #include <unordered_map>
 #include "bridge_string_utils.h"
+
+// ============================================================
+// CjqtSlider - QSlider 子类，press 时显式 grabMouse() 建立鼠标捕获
+// 仓颉 M:N 线程下钩子用 sendEvent 派发鼠标事件不走 QPA，不建立隐式捕获，
+// 导致 move 时 mouseGrabber() 返回 nullptr，move 走 CallNextHookEx 后
+// Qt 原生不派发 QMouseEvent，滑块拖不动。显式 grabMouse 解决此问题。
+// ============================================================
+class CjqtSlider : public QSlider {
+
+};
 
 // 由 bridge_ext_wrange.cpp 导出：清理 wrange 批次控件（QSpinBox/QDoubleSpinBox/
 // QProgressBar）在 bridge_ext_wrange.cpp 内注册的信号回调 map，避免对象 delete 后
@@ -144,7 +155,7 @@ void qSpinBoxDelete(int64_t ptr) {
 // ============================================================
 
 int64_t qSliderCreate() {
-    QSlider* slider = new QSlider();
+    QSlider* slider = new CjqtSlider();
     return reinterpret_cast<int64_t>(slider);
 }
 
@@ -253,11 +264,11 @@ void qSliderSetOnSliderMoved(int64_t ptr, void (*callback)(int64_t)) {
     QSlider* slider = reinterpret_cast<QSlider*>(ptr);
     if (slider) {
         int64_t widgetPtr = ptr;
-        g_sliderMovedCallbacks[ptr] = [callback, widgetPtr](int64_t) { callback(widgetPtr); };
-        QObject::connect(slider, &QSlider::sliderMoved, [widgetPtr](int) {
+        g_sliderMovedCallbacks[ptr] = [callback, widgetPtr](int64_t val) { callback(val); };
+        QObject::connect(slider, &QSlider::sliderMoved, [widgetPtr](int value) {
             auto it = g_sliderMovedCallbacks.find(widgetPtr);
             if (it != g_sliderMovedCallbacks.end()) {
-                it->second(widgetPtr);
+                it->second(static_cast<int64_t>(value));
             }
         });
     }
@@ -301,11 +312,11 @@ void qSliderSetOnValueChanged(int64_t ptr, void (*callback)(int64_t)) {
     QSlider* slider = reinterpret_cast<QSlider*>(ptr);
     if (slider) {
         int64_t widgetPtr = ptr;
-        g_sliderCallbacks[ptr] = [callback, widgetPtr](int64_t) { callback(widgetPtr); };
-        QObject::connect(slider, &QSlider::valueChanged, [widgetPtr](int) {
+        g_sliderCallbacks[ptr] = [callback, widgetPtr](int64_t val) { callback(val); };
+        QObject::connect(slider, &QSlider::valueChanged, [widgetPtr](int value) {
             auto it = g_sliderCallbacks.find(widgetPtr);
             if (it != g_sliderCallbacks.end()) {
-                it->second(widgetPtr);
+                it->second(static_cast<int64_t>(value));
             }
         });
     }
