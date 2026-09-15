@@ -504,14 +504,13 @@ main() {
 
 ### 4.1 界面效果图
 
-![CjMusic 播放器界面设计稿](https://one-agent-prod-1343551737.cos.ap-guangzhou.myqcloud.com/artifacts/0712/03e55e98d16c4a5184fe5d3c4e0f1d59/0QJJ9B2TvlY/task-97e6de542d9a552bca8fb76a7b8de591/.rendered/_assets/6luCWgSWHyz)
+![CjMusic 播放器界面](docs/cjmusic-screenshot.png)
 
 > 深色主题，左右分栏布局：
 > - **左栏**：播放列表（当前播放项青蓝色高亮 + 音符图标）
 > - **右上**：歌词显示区（当前行青蓝高亮居中，上下行半透明灰，渐变模糊）
 > - **右下**：状态与控制区（文件名、进度条、播放控制、音量）
 >
-> 注：AI 生成的中文文字可能有字形偏差，此图仅作布局与视觉方向参考，实现以代码为准。
 
 ### 4.2 布局结构
 
