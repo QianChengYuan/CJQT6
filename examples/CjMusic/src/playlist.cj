@@ -326,6 +326,9 @@ public func updateTransportButtons(): Unit {
     if (let Some(btn) <- gPrevButton) { btn.setEnabled(hasItems) }
     if (let Some(btn) <- gPlayButton) { btn.setEnabled(hasItems) }
     if (let Some(btn) <- gNextButton) { btn.setEnabled(hasItems) }
+    if (!hasItems) {
+        if (let Some(slider) <- gProgressSlider) { slider.setEnabled(false) }
+    }
 }
 
 /// 更新 UI 显示（由 UI 层实现）

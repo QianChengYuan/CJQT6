@@ -66,6 +66,7 @@ public func createControlBar(): QWidget {
     progressSlider.setOrientation(1)
     progressSlider.setRange(0, 100)
     progressSlider.setValue(0)
+    progressSlider.setEnabled(false)
     progressSlider.setOnSliderMoved(onProgressSliderMoved)
     progressSlider.setOnSliderPressed(onProgressSliderPressed)
     progressSlider.setOnSliderReleased(onProgressSliderReleased)
@@ -128,7 +129,7 @@ public func createControlBar(): QWidget {
     let rightWidget = QWidget()
     rightWidget.setStyleSheet("QWidget { background: transparent; }")
     let rightLayout = QHBoxLayout()
-    rightLayout.setSpacing(8)
+    rightLayout.setSpacing(12)
     rightLayout.setMargin(0)
     rightLayout.addStretch()
 
@@ -172,7 +173,7 @@ public func createControlBar(): QWidget {
     volumeSlider.setRange(0, 100)
     volumeSlider.setValue(70)
 
-    unsafe { qWidgetSetFixedSize(volumeSlider.getPtr(), 100, 20) }
+    unsafe { qWidgetSetFixedSize(volumeSlider.getPtr(), 120, 20) }
     volumeSlider.setOnValueChanged(onVolumeChanged)
     gVolumeSlider = Some(volumeSlider)
     rightLayout.addWidget(volumeSlider.getPtr())
@@ -180,7 +181,7 @@ public func createControlBar(): QWidget {
     // 音量百分比标签（初始值与滑块初值一致；setValue 在连接回调前执行，初始不触发回调）
     let volumeLabel = QLabel()
     volumeLabel.setText("70")
-    volumeLabel.setStyleSheet("QLabel { font-size: 12px; color: #9097a3; background: transparent; font-family: 'Consolas', 'Courier New', monospace; min-width: 26px; }")
+    volumeLabel.setStyleSheet("QLabel { font-size: 12px; color: #9097a3; background: transparent; font-family: 'Consolas', 'Courier New', monospace; min-width: 32px; padding-left: 4px; }")
     volumeLabel.setAlignment(Alignment.Left.value + Alignment.VCenter.value)
     gVolumeLabel = Some(volumeLabel)
     rightLayout.addWidget(volumeLabel.getPtr())

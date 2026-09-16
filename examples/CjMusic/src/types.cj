@@ -102,7 +102,7 @@ public class MusicItem {
         }
     }
 
-    // 从文件名解析 "歌手 - 歌名"（如 "周杰伦 - 晴天.mp3" → 歌手:周杰伦 歌名:晴天）
+    // 从文件名解析 "歌名 - 歌手"（如 "晴天 - 周杰伦.mp3" → 歌名:晴天 歌手:周杰伦）
     func parseFromFileName(): Unit {
         var base = fileName
         if (let Some(dot) <- base.lastIndexOf(".")) {
@@ -112,11 +112,11 @@ public class MusicItem {
         }
         if (let Some(dash) <- base.indexOf(" - ")) {
             if (dash > 0 && dash + 3 < base.size) {
-                if (artist.isEmpty()) {
-                    artist = base[0..dash].trimAscii()
-                }
                 if (title.isEmpty()) {
-                    title = base[dash + 3..base.size].trimAscii()
+                    title = base[0..dash].trimAscii()
+                }
+                if (artist.isEmpty()) {
+                    artist = base[dash + 3..base.size].trimAscii()
                 }
             }
         }

@@ -8,6 +8,17 @@ import cjqt6.core.*
 import cjqt6.multimedia.*
 import std.env.*
 import std.fs.*
+import std.console.*
+import std.time.*
+import cjqt6.dialogs.*
+
+// 诊断日志
+func dbgLog(msg: String): Unit {
+    try {
+        File.writeTo(Path("C:/CodeTools/cangjie_git/CJQT6/cjmusic_debug.log"), (msg + "\n").toArray())
+    } catch (_) {
+    }
+}
 
 // ============================================================
 // QMediaPlayer 信号回调（@C func，不能捕获局部变量）
@@ -119,6 +130,10 @@ func cbMediaStatusChanged(status: Int32): Unit {
                     updateStatus("正在播放: ${item.title} - ${item.artist}")
                 }
             }
+            if (let Some(slider) <- gProgressSlider) { slider.setEnabled(true) }
+        case 0 | 7 =>
+            // NoMedia/InvalidMedia → 禁用进度条
+            if (let Some(slider) <- gProgressSlider) { slider.setEnabled(false) }
         case _ => ()
     }
 }
@@ -151,7 +166,6 @@ func initPlayer(): Unit {
 main(): Int32 {
     setVariable("QT_MEDIA_BACKEND", "windows")
 
-    // 设置图标目录路径（相对于工作目录的 icons/ 解析为绝对路径）
     let iconPath = canonicalize(Path("icons"))
     gIconDir = "${iconPath}"
 
