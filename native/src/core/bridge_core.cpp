@@ -385,6 +385,10 @@ static void cjqt6RecoverMouseGrabber() {
     }
 }
 
+// flushWindowSystemEvents 重入守卫：钩子回调里 flush 可能触发新一轮消息再入钩子，
+// 不加守卫会无限递归。所有钩子内 flush 调用都应先检查此标志。
+static bool s_inFlush = false;
+
 // 应用拖拽/缩放：计算新矩形，去抖后 SetWindowPos
 static void cjqt6ApplyDragResize(POINT currentMouse) {
     if (!g_dragResize.active || !g_dragResize.hwnd) return;
@@ -524,7 +528,7 @@ static LRESULT CALLBACK cjqt6MouseHookProc(int code, WPARAM wParam, LPARAM lPara
                 if (GetAsyncKeyState(VK_XBUTTON2) & 0x8000) buttons |= Qt::ForwardButton;
                 // 修复：GetKeyState 在 WH_MOUSE 钩子中可能有时序问题（press 时尚未更新），
                 // 导致 buttons=0，QSlider 等控件不处理 press。对 press/release 强制同步 buttons。
-                if (isPress) {
+                if (isPress || isDblClick) {
                     buttons |= button;
                 } else if (isRelease) {
                     buttons &= ~button;
@@ -556,11 +560,25 @@ static LRESULT CALLBACK cjqt6MouseHookProc(int code, WPARAM wParam, LPARAM lPara
                         }
                         // 点击激活：吞掉原生 mouse 消息后 QtWndProc 收不到 WM_MOUSEACTIVATE，
                         // press 时主动请求激活目标顶层窗口。
+                        // 根因 1 修复：requestActivate() 在 Windows 上异步（PostMessage 到事件队列），
+                        // 紧接着 sendEvent 投递 press 时窗口还没 active → Qt 跳过 ClickFocus →
+                        // focusWidget() 保持 nullptr（表现：点两下才聚焦）。
+                        // 修法：requestActivate 后立即 flush 让激活事件落地，再 activateWindow 兜底。
                         if (isPress) {
                             QWidget* tlw = target->window();
                             QWindow* tlWin = tlw ? tlw->windowHandle() : nullptr;
-                            if (tlWin && !tlWin->isActive()) {
-                                tlWin->requestActivate();
+                            if (tlWin) {
+                                if (!tlWin->isActive()) {
+                                    tlWin->requestActivate();
+                                    if (!s_inFlush) {
+                                        s_inFlush = true;
+                                        QWindowSystemInterface::flushWindowSystemEvents();
+                                        s_inFlush = false;
+                                    }
+                                }
+                                if (tlw && !tlw->isActiveWindow()) {
+                                    tlw->activateWindow();
+                                }
                             }
                         }
                         // move + 无按钮按下（纯 hover）+ 无 grabber：让 Qt 原生处理 WM_SETCURSOR。
@@ -573,6 +591,15 @@ static LRESULT CALLBACK cjqt6MouseHookProc(int code, WPARAM wParam, LPARAM lPara
                         QMouseEvent seEvent(type, target->mapFromGlobal(globalPos),
                                              QPointF(globalPos), button, buttons, mods);
                         QCoreApplication::sendEvent(target, &seEvent);
+                        // 根因4兜底：吞掉原生 WM_LBUTTONDOWN 后 Qt 原生 ClickFocus 链路断，
+                        // sendEvent 的 mousePressEvent 理论会 setFocus，但窗口激活时序/
+                        // 事件 spontaneous 等原因可能未落地。press 后主动补 setFocus，
+                        // 确保输入控件（QLineEdit 等）点击即聚焦。
+                        if (isPress && target != QApplication::focusWidget()) {
+                            if (target->focusPolicy() & Qt::ClickFocus) {
+                                target->setFocus(Qt::MouseFocusReason);
+                            }
+                        }
                         // release 时清 grabber
                         if (isRelease && s_mouseGrabber) {
                             s_mouseGrabber = nullptr;
@@ -813,11 +840,11 @@ int32_t qApplicationExec() {
                         QWidget* w = QApplication::widgetAt(globalPos);
 
                         Qt::MouseButtons buttons;
-                        if (GetKeyState(VK_LBUTTON) & 0x8000) buttons |= Qt::LeftButton;
-                        if (GetKeyState(VK_RBUTTON) & 0x8000) buttons |= Qt::RightButton;
-                        if (GetKeyState(VK_MBUTTON) & 0x8000) buttons |= Qt::MiddleButton;
-                        if (GetKeyState(VK_XBUTTON1) & 0x8000) buttons |= Qt::BackButton;
-                        if (GetKeyState(VK_XBUTTON2) & 0x8000) buttons |= Qt::ForwardButton;
+                        if (GetAsyncKeyState(VK_LBUTTON) & 0x8000) buttons |= Qt::LeftButton;
+                        if (GetAsyncKeyState(VK_RBUTTON) & 0x8000) buttons |= Qt::RightButton;
+                        if (GetAsyncKeyState(VK_MBUTTON) & 0x8000) buttons |= Qt::MiddleButton;
+                        if (GetAsyncKeyState(VK_XBUTTON1) & 0x8000) buttons |= Qt::BackButton;
+                        if (GetAsyncKeyState(VK_XBUTTON2) & 0x8000) buttons |= Qt::ForwardButton;
                         Qt::KeyboardModifiers mods;
                         if (GetKeyState(VK_SHIFT) & 0x8000) mods |= Qt::ShiftModifier;
                         if (GetKeyState(VK_CONTROL) & 0x8000) mods |= Qt::ControlModifier;
@@ -899,11 +926,21 @@ int32_t qApplicationExec() {
     static bool s_lastWindowConnected = false;
     if (!s_lastWindowConnected) {
         QObject::connect(g_app, &QGuiApplication::lastWindowClosed, []() {
+            FILE* f = fopen("C:/CodeTools/cangjie_git/CJQT6/bridge_debug.log", "a");
+            if (f) { fprintf(f, "lastWindowClosed triggered\n"); fclose(f); }
             if (t_currentLoop) t_currentLoop->exit(0);
         });
         s_lastWindowConnected = true;
     }
+    {
+        FILE* f = fopen("C:/CodeTools/cangjie_git/CJQT6/bridge_debug.log", "a");
+        if (f) { fprintf(f, "before loop.exec\n"); fclose(f); }
+    }
     int r = loop.exec();
+    {
+        FILE* f = fopen("C:/CodeTools/cangjie_git/CJQT6/bridge_debug.log", "a");
+        if (f) { fprintf(f, "loop.exec returned %d\n", r); fclose(f); }
+    }
     t_currentLoop = nullptr;
     qUnsetGuiThreadForPoster();
     return r;
@@ -1366,6 +1403,22 @@ void qWidgetSetWindowFlags(int64_t ptr, int32_t flags) {
     if (widget) {
         widget->setWindowFlags(Qt::WindowFlags(QFlag(flags)));
     }
+}
+
+// 焦点相关桥接：仓颉侧点击回调里主动 setFocus 作为 ClickFocus 链路断开的兜底
+// 注：qWidgetSetFocus 已在 bridge_ext_apicomplete.cpp 中定义，此处不重复
+void qWidgetSetFocusPolicy(int64_t ptr, int32_t policy) {
+    QWidget* w = reinterpret_cast<QWidget*>(ptr);
+    if (w) w->setFocusPolicy(static_cast<Qt::FocusPolicy>(policy));
+}
+
+int32_t qWidgetHasFocus(int64_t ptr) {
+    QWidget* w = reinterpret_cast<QWidget*>(ptr);
+    return (w && w->hasFocus()) ? 1 : 0;
+}
+
+int64_t qApplicationFocusWidget() {
+    return reinterpret_cast<int64_t>(QApplication::focusWidget());
 }
 
 // ============================================================

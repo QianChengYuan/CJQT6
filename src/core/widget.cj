@@ -25,6 +25,14 @@ foreign func qWidgetFindChild(ptr: Int64, name: CString): Int64
 foreign func qWidgetUpdate(ptr: Int64): Unit
 // QWidget::repaint() - 立即重绘
 foreign func qWidgetRepaint(ptr: Int64): Unit
+// QWidget::setFocus() - 设置焦点（OtherFocusReason）
+foreign func qWidgetSetFocus(ptr: Int64): Unit
+// QWidget::setFocusPolicy() - 设置焦点策略
+foreign func qWidgetSetFocusPolicy(ptr: Int64, policy: Int32): Unit
+// QWidget::hasFocus() - 是否有焦点
+foreign func qWidgetHasFocus(ptr: Int64): Int32
+// QApplication::focusWidget() - 当前焦点控件
+foreign func qApplicationFocusWidget(): Int64
 
 /// 设置控件位置和大小
 public func setWidgetGeometry(widgetPtr: Int64, x: Int32, y: Int32, width: Int32, height: Int32): Unit {
@@ -302,6 +310,24 @@ public class QWidget <: QtResource {
         unsafe {
             return qWidgetIsEnabled(ptr) == 1
         }
+    }
+
+    /// 设置焦点（ClickFocus 链路断开时的兜底）
+    public func setFocus(): Unit {
+        checkValid()
+        unsafe { qWidgetSetFocus(ptr) }
+    }
+
+    /// 设置焦点策略（0=NoFocus 1=TabFocus 2=ClickFocus 3=StrongFocus 4=WheelFocus）
+    public func setFocusPolicy(policy: Int32): Unit {
+        checkValid()
+        unsafe { qWidgetSetFocusPolicy(ptr, policy) }
+    }
+
+    /// 是否有焦点
+    public func hasFocus(): Bool {
+        checkValid()
+        unsafe { return qWidgetHasFocus(ptr) == 1 }
     }
 
     /// 设置可见性

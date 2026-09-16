@@ -53,6 +53,7 @@ qAnimationGroupRemoveAnimation
 qApplicationCreate
 qApplicationDelete
 qApplicationExec
+qApplicationFocusWidget
 qApplicationLoadAppTranslation
 qApplicationLoadQtTranslation
 qApplicationLocale
@@ -2665,11 +2666,13 @@ qWidgetSelectAll
 qWidgetSetEnabled
 qWidgetSetFixedSize
 qWidgetSetFocus
+qWidgetSetFocusPolicy
 qWidgetSetGeometry
 qWidgetSetLayout
 qWidgetSetMaximumSize
 qWidgetSetMinimumSize
 qWidgetSetParent
+qWidgetHasFocus
 qWidgetSetSizePolicy
 qWidgetSetStyleSheet
 qWidgetSetTitle
