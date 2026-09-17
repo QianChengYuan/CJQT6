@@ -10,7 +10,7 @@ import cjqt6.widgets.*
 // ============================================================
 
 /// 倒计时：从指定秒数递减到 0，结束触发回调
-public class Countdown <: QtResource {
+public class Countdown <: QtWidget {
     private let group: QGroupBox
     private let layout: QVBoxLayout
     private let label: QLabel

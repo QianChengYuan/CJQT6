@@ -44,11 +44,30 @@ public func setWidgetParent(widgetPtr: Int64, parentPtr: Int64): Unit {
     unsafe { qWidgetSetParent(widgetPtr, parentPtr) }
 }
 
+/// 读取控件当前宽度（像素）。
+/// 供跨包使用：`foreign func` 无法跨包可见，此前各包只能自行重复声明
+/// `qWidgetWidth`/`qWidgetHeight`，见 docs/internal/cjmonitor-findings.md P0-3。
+public func widgetWidth(widgetPtr: Int64): Int32 {
+    unsafe { qWidgetWidth(widgetPtr) }
+}
+
+/// 读取控件当前高度（像素）。供跨包使用，见 `widgetWidth`
+public func widgetHeight(widgetPtr: Int64): Int32 {
+    unsafe { qWidgetHeight(widgetPtr) }
+}
+
+/// 设置控件的 objectName（QSS 的 `#id` 选择器依赖它）。
+/// 供任意控件指针使用：控件类各自独立封装，无法通过继承获得该方法
+/// （见 docs/internal/cjmonitor-findings.md P0-4）。
+public func setWidgetObjectName(widgetPtr: Int64, name: String): Unit {
+    withCString(name) {c => unsafe { qWidgetSetObjectName(widgetPtr, c) }}
+}
+
 // QWidget 样式表和扩展功能（公共FFI声明在common.cj中集中管理，信号FFI在signal.cj中声明）
 
 /// 基础窗口部件
 /// 支持资源管理，可使用 try-with-resources 自动释放
-public class QWidget <: QtResource {
+public class QWidget <: QtWidget {
     private var ptr: Int64 = 0
     private var closed: Bool = false
     /// 是否拥有原生对象所有权（fromPtr 包装的指针为 false，close() 只标记关闭不删除）
@@ -125,6 +144,11 @@ public class QWidget <: QtResource {
         unsafe {
             qWidgetHide(ptr)
         }
+    }
+
+    /// 设置窗口标题（Qt 惯用名，与 `setTitle` 等价）
+    public func setWindowTitle(title: String): Unit {
+        setTitle(title)
     }
 
     /// 设置窗口标题
@@ -290,6 +314,12 @@ public class QWidget <: QtResource {
             freeBridgeString(cstr)
             return result
         }
+    }
+
+    /// 设置 objectName（QSS 的 `#id` 选择器依赖它）
+    public func setObjectName(name: String): Unit {
+        checkValid()
+        setWidgetObjectName(ptr, name)
     }
 
     /// 设置启用状态

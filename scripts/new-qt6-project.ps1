@@ -89,7 +89,7 @@ $readmeContent = @"
 
 ```bash
 # 设置 CJQT6_ROOT 环境变量指向 CJQT6 仓库根目录
-# 设置 QTDIR 指向 Qt6 安装路径（如 C:\Qt\6.10.3\msvc2022_64）
+# 设置 QTDIR 指向 Qt6 安装路径（如 C:\Qt\6.9.1\msvc2022_64）
 cjpm build
 ```
 

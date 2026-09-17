@@ -203,6 +203,22 @@ const char* qDateTimeToString(int64_t ptr, const char* format) {
     return cjqt6::emptyString();
 }
 
+// 时间戳换算：QDateTimeAxis 需要 Float64 秒，此前库内无任何换算入口
+// （见 docs/internal/cjmonitor-findings.md P1-2）
+double qDateTimeToSecsSinceEpoch(int64_t ptr) {
+    QDateTime* dt = reinterpret_cast<QDateTime*>(ptr);
+    if (dt) {
+        return static_cast<double>(dt->toSecsSinceEpoch());
+    }
+    return 0.0;
+}
+
+// 由 epoch 秒构造 QDateTime（调用方负责 close()，与 qDateTimeCurrentDateTime 同约定）
+int64_t qDateTimeFromSecsSinceEpoch(double secs) {
+    QDateTime* dt = new QDateTime(QDateTime::fromSecsSinceEpoch(static_cast<qint64>(secs)));
+    return reinterpret_cast<int64_t>(dt);
+}
+
 void qDateTimeSetDate(int64_t ptr, int64_t datePtr) {
     QDateTime* dt = reinterpret_cast<QDateTime*>(ptr);
     QDate* date = reinterpret_cast<QDate*>(datePtr);

@@ -249,6 +249,12 @@ public class QProcess <: QtResource {
         this
     }
 
+    /// 零参启动：沿用已 setProgram / setArguments 的配置
+    public func start(): QProcess {
+        unsafe { qProcessStartBare(ptr) }
+        this
+    }
+
     public func startWithArgs(program: String, args: String): QProcess {
         unsafe {
             var p = LibC.mallocCString(program)
@@ -382,6 +388,17 @@ public class QProcess <: QtResource {
         unsafe {
             var a = LibC.mallocCString(args)
             qProcessSetArguments(ptr, a)
+            LibC.free(a)
+        }
+        this
+    }
+
+    /// 追加单个参数。`setArguments` 会按空格切分，无法表达含空格的单个参数
+    /// （如带空格的可执行文件路径），此时改用本方法逐个追加。
+    public func addArgument(arg: String): QProcess {
+        unsafe {
+            var a = LibC.mallocCString(arg)
+            qProcessAddArgument(ptr, a)
             LibC.free(a)
         }
         this
@@ -521,6 +538,8 @@ foreign func qProcessDelete(p: Int64): Unit
 
 foreign func qProcessStart(p: Int64, program: CString): Unit
 
+foreign func qProcessStartBare(p: Int64): Unit
+
 foreign func qProcessStartWithArgs(p: Int64, program: CString, args: CString): Unit
 
 foreign func qProcessStartCommand(p: Int64, command: CString): Unit
@@ -556,6 +575,8 @@ foreign func qProcessSetProgram(p: Int64, program: CString): Unit
 foreign func qProcessProgram(p: Int64): CString
 
 foreign func qProcessSetArguments(p: Int64, args: CString): Unit
+
+foreign func qProcessAddArgument(p: Int64, arg: CString): Unit
 
 foreign func qProcessArguments(p: Int64): CString
 

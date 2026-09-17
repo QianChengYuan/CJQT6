@@ -10,7 +10,7 @@ import cjqt6.widgets.*
 // ============================================================
 
 /// 统计数值：标题 + 大数值展示，适合数据看板
-public class Statistic <: QtResource {
+public class Statistic <: QtWidget {
     private let group: QGroupBox
     private let layout: QVBoxLayout
     private let titleLabel: QLabel

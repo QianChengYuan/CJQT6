@@ -98,7 +98,7 @@ CJQT6 的演进边界由仓颉语言特性决定，先固定几个**不可绕过
 - 现状：部分 `setOnXxx` 已返回 `SignalConnection` 支持手动断开。
 - 动作：对同一信号多参数重载（如 clicked/clicked(bool)）提供显式命名方法，避免歧义。
 
-**✅ 已有/结论（2026-08-09）**：clicked/clicked(bool) 类重载早已以显式命名方法提供（`setOnPressed`/`setOnPressedChecked`、`SIGNAL_CLICKED`/`SIGNAL_CLICKED_CHECKED`），4.2 无需新增。注意：**Qt6 已移除 `QSpinBox::valueChanged(QString)` / `QDoubleSpinBox::valueChanged(QString)` 重载**（验证于 Qt 6.10.3 头文件，编译期即报错），旋转框的文本变化信号统一走 `textChanged(const QString&)`——库早已提供 `setOnTextChanged`（`CStringCallback`，含前缀/后缀完整文本），与 `setOnValueChanged`（数值）并存互不覆盖，已由 P1 测试覆盖。
+**✅ 已有/结论（2026-08-09）**：clicked/clicked(bool) 类重载早已以显式命名方法提供（`setOnPressed`/`setOnPressedChecked`、`SIGNAL_CLICKED`/`SIGNAL_CLICKED_CHECKED`），4.2 无需新增。注意：**Qt6 已移除 `QSpinBox::valueChanged(QString)` / `QDoubleSpinBox::valueChanged(QString)` 重载**（验证于 Qt 6.9.1 头文件，编译期即报错），旋转框的文本变化信号统一走 `textChanged(const QString&)`——库早已提供 `setOnTextChanged`（`CStringCallback`，含前缀/后缀完整文本），与 `setOnValueChanged`（数值）并存互不覆盖，已由 P1 测试覆盖。
 
 ### 4.3 模型动态化（dataChanged / 增量更新）【P1-a，优先落地】
 - 现状：`QAbstractItemModel` 已用回调桥接（`beginResetModel`/`beginInsertRows` 等已导出），但**缺 `dataChanged`、`layoutChanged`**，实时刷新的表格只能整表 reset。
@@ -228,4 +228,4 @@ CJQT6 的演进边界由仓颉语言特性决定，先固定几个**不可绕过
 
 ---
 
-*关联文档：`docs/guides/architecture.md`（架构）、`docs/internal/api-completeness.md`（覆盖度）、`docs/internal/unwrapped-controls-analysis.md`（控件清单）、`docs/CHANGELOG.md`（演进史）、`docs/CONTRIBUTING.md`（新增控件流程）。*
+*关联文档：`docs/guides/architecture.md`（架构）、`docs/internal/api-completeness.md`（覆盖度）、`docs/internal/unwrapped-controls-analysis.md`（控件清单）、`docs/internal/cjmonitor-findings.md`（实战反推的库缺陷清单，含修复优先级）、`docs/CHANGELOG.md`（演进史）、`docs/CONTRIBUTING.md`（新增控件流程）。*

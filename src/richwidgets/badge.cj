@@ -10,7 +10,7 @@ import cjqt6.widgets.*
 // ============================================================
 
 /// 徽标：数字标记，超过上限显示 "N+"
-public class Badge <: QtResource {
+public class Badge <: QtWidget {
     private let label: QLabel
     private var count: Int32 = 0
     private var maxCount: Int32 = 99

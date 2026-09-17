@@ -435,7 +435,7 @@ public class QPrintDialog <: QtResource {
 }
 
 /// 打印预览对话框
-public class QPrintPreviewDialog <: QtResource {
+public class QPrintPreviewDialog <: QtWidget {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 

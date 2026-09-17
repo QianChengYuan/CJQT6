@@ -326,6 +326,26 @@ void qMainWindowSetMenuBar(int64_t ptr, int64_t menuBarPtr) {
     }
 }
 
+// 取得已有菜单栏。Qt 语义：menuBar() 在未设置时会创建一个空菜单栏，故返回值非空；
+// 该对象由 QMainWindow 持有，调用方只可借用（见 docs/internal/cjmonitor-findings.md P2-2）。
+int64_t qMainWindowMenuBar(int64_t ptr) {
+    QMainWindow* mainWindow = reinterpret_cast<QMainWindow*>(ptr);
+    if (mainWindow) {
+        return reinterpret_cast<int64_t>(mainWindow->menuBar());
+    }
+    return 0;
+}
+
+// 取得已有状态栏。Qt 语义：未设置时 statusBar() 返回 nullptr（即返回 0）。
+// 该对象由 QMainWindow 持有，调用方只可借用。
+int64_t qMainWindowStatusBar(int64_t ptr) {
+    QMainWindow* mainWindow = reinterpret_cast<QMainWindow*>(ptr);
+    if (mainWindow) {
+        return reinterpret_cast<int64_t>(mainWindow->statusBar());
+    }
+    return 0;
+}
+
 void qMainWindowAddToolBar(int64_t ptr, int64_t toolBarPtr) {
     QMainWindow* mainWindow = reinterpret_cast<QMainWindow*>(ptr);
     QToolBar* toolBar = reinterpret_cast<QToolBar*>(toolBarPtr);

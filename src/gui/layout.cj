@@ -78,6 +78,16 @@ public class QVBoxLayout <: QLayout {
         trackObject(ptr)
     }
 
+    /// 添加控件（接收控件对象，避免裸指针误配）
+    public func addWidget(widget: QtResource): Unit {
+        addWidget(widget.getPtr())
+    }
+
+    /// 添加控件并指定伸缩因子（接收控件对象）
+    public func addWidget(widget: QtResource, stretch: Int32): Unit {
+        addWidget(widget.getPtr(), stretch)
+    }
+
     public func addWidget(widgetPtr: Int64): Unit {
         checkValid()
         unsafe {
@@ -189,6 +199,16 @@ public class QHBoxLayout <: QLayout {
         trackObject(ptr)
     }
 
+    /// 添加控件（接收控件对象，避免裸指针误配）
+    public func addWidget(widget: QtResource): Unit {
+        addWidget(widget.getPtr())
+    }
+
+    /// 添加控件并指定伸缩因子（接收控件对象）
+    public func addWidget(widget: QtResource, stretch: Int32): Unit {
+        addWidget(widget.getPtr(), stretch)
+    }
+
     public func addWidget(widgetPtr: Int64): Unit {
         checkValid()
         unsafe {
@@ -298,6 +318,16 @@ public class QGridLayout <: QLayout {
             ptr = qGridLayoutCreate()
         }
         trackObject(ptr)
+    }
+
+    /// 添加控件到指定行列（接收控件对象，避免裸指针误配）
+    public func addWidget(widget: QtResource, row: Int32, col: Int32): Unit {
+        addWidget(widget.getPtr(), row, col)
+    }
+
+    /// 添加控件到指定行列并跨行列（接收控件对象）
+    public func addWidgetSpan(widget: QtResource, row: Int32, col: Int32, rowSpan: Int32, colSpan: Int32): Unit {
+        addWidgetSpan(widget.getPtr(), row, col, rowSpan, colSpan)
     }
 
     public func addWidget(widgetPtr: Int64, row: Int32, col: Int32): Unit {

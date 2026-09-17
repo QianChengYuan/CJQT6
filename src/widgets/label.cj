@@ -43,7 +43,7 @@ foreign func qLabelDelete(ptr: Int64): Unit
 
 /// 标签部件
 /// 支持资源管理，可使用 try-with-resources 自动释放
-public class QLabel <: QtResource {
+public class QLabel <: QtWidget {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 

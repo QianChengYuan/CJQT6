@@ -12,7 +12,7 @@ import std.collection.ArrayList
 // ============================================================
 
 /// 穿梭框：左侧候选项 + 右侧已选项，按钮移动选中项
-public class Transfer <: QtResource {
+public class Transfer <: QtWidget {
     private let group: QGroupBox
     private let layout: QHBoxLayout
     private let leftList: QListWidget

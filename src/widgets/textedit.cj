@@ -112,7 +112,7 @@ foreign func qTextEditConnectSelectionChanged(ptr: Int64, callback: VoidCallback
 
 /// 多行文本编辑框部件
 /// 支持资源管理，可使用 try-with-resources 自动释放
-public class QTextEdit <: QtResource {
+public class QTextEdit <: QtWidget {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 

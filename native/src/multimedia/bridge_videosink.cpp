@@ -2,14 +2,14 @@
  * @file bridge_videosink.cpp
  * @brief QVideoSink 桥接函数
  *
- * Qt 6.10.3 的 QVideoSink 继承自 QObject，API 包括：
+ * Qt 6（含 CI 锁定的 6.9.1）的 QVideoSink 继承自 QObject，API 包括：
  * - videoSize(): 视频帧尺寸
  * - subtitleText()/setSubtitleText(): 字幕文本
  * - setVideoFrame()/videoFrame(): 视频帧（需 QVideoFrame 封装，暂不桥接）
  * - 信号: videoFrameChanged, subtitleTextChanged, videoSizeChanged
  *
  * 注意：Qt5/Qt6 早期版本的 brightness/contrast/hue/saturation 属性
- * 在 Qt 6.10.3 中已不存在，视频调节需通过着色器或帧处理实现。
+ * 在 Qt 6 中已不存在，视频调节需通过着色器或帧处理实现。
  */
 
 #include <QVideoSink>

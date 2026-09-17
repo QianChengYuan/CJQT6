@@ -66,7 +66,7 @@ public class LCDSegmentStyle {
 
 /// LCD数字显示部件
 /// 支持资源管理，可使用 try-with-resources 自动释放
-public class QLCDNumber <: QtResource {
+public class QLCDNumber <: QtWidget {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 

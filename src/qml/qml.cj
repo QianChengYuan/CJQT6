@@ -696,7 +696,7 @@ public class QQuickView <: QtResource {
 // ============================================================
 
 /// QML嵌入Widget，可嵌入到传统Widget布局中
-public class QQuickWidget <: QtResource {
+public class QQuickWidget <: QtWidget {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 

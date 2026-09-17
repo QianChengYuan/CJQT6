@@ -146,7 +146,7 @@ foreign func qFrameDelete(ptr: Int64): Unit
 // ============================================================
 /// 分组框部件
 /// 支持资源管理，可使用 try-with-resources 自动释放
-public class QGroupBox <: QtResource {
+public class QGroupBox <: QtWidget {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
@@ -388,7 +388,7 @@ public class QGroupBox <: QtResource {
 // ============================================================
 /// 标签页部件
 /// 支持资源管理，可使用 try-with-resources 自动释放
-public class QTabWidget <: QtResource {
+public class QTabWidget <: QtWidget {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
@@ -411,6 +411,11 @@ public class QTabWidget <: QtResource {
         unsafe {
             qWidgetHide(ptr)
         }
+    }
+
+    /// 把控件加入为标签页（接收控件对象，避免裸指针误配）
+    public func addTab(widget: QtResource, title: String): Unit {
+        addTab(widget.getPtr(), title)
     }
 
     public func addTab(widgetPtr: Int64, title: String): Unit {
@@ -700,7 +705,7 @@ public class QTabWidget <: QtResource {
 // ============================================================
 /// 滚动区域部件
 /// 支持资源管理，可使用 try-with-resources 自动释放
-public class QScrollArea <: QtResource {
+public class QScrollArea <: QtWidget {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
@@ -924,7 +929,7 @@ public class ScrollBarPolicy {
 
 /// 边框容器部件
 /// 支持资源管理，可使用 try-with-resources 自动释放
-public class QFrame <: QtResource {
+public class QFrame <: QtWidget {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
@@ -1210,7 +1215,7 @@ foreign func qSplitterRestoreState(ptr: Int64, buffer: CPointer<UInt8>, size: In
 
 /// 分割器部件
 /// 支持资源管理，可使用 try-with-resources 自动释放
-public class QSplitter <: QtResource {
+public class QSplitter <: QtWidget {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 

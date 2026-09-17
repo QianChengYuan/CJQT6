@@ -11,7 +11,7 @@ import std.collection.ArrayList
 // ============================================================
 
 /// 步骤条：水平步骤指示，当前步及之前高亮，之后置灰
-public class Steps <: QtResource {
+public class Steps <: QtWidget {
     private let group: QGroupBox
     private let layout: QHBoxLayout
     private let circles: ArrayList<QLabel>

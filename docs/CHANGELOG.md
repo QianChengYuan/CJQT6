@@ -7,6 +7,77 @@
 > - 每个版本对应一组逻辑相关的 git 提交，按功能里程碑划分而非按日期随意递增
 > - 版本号与 git tag 一一对应（`v1.9.0` → tag `v1.9.0`），cjpm.toml `version` 字段同步
 
+## [Unreleased]
+
+### 变更
+
+- **Windows Qt 版本同步降级至 6.9.1（与 GitHub CI 保持一致）**：项目文档、脚本与工具中默认引用的 Qt 版本由 `6.10.3` 统一收敛为 `6.9.1`，涉及 `README.md`、`AGENTS.md`、`docs/guides/*`、`releases/README.md`、`scripts/**`（含 `scripts/lib/common.ps1` 的 Qt 探测顺序）、`tools/cjqt6-diagnose`、`tools/ui2cj` 以及各示例的 `deploy_qt.ps1` / `run_debug*.ps1`。
+  - **降级原因**：GitHub CI（`windows-2022`）的 `setup-qt` action 用 aqtinstall 安装 Qt 6.10.3 时解压失败（`Bad7zFile: QtNoLinkTargetHelpers.cmake`，py7zr 不兼容 Qt 6.10+ 新增文件），CI 侧已先行降级至 6.9.1；项目侧**同步降级**，使「本地开发环境 = CI = `releases/windows-x64/` 预编译产物」三者版本一致。
+  - **注意事项**：bridge 与运行时 Qt 小版本必须匹配。本机若同时安装多个 Qt，需让 `QTDIR` 指向 `6.9.1`；切换 Qt 版本后必须删除 `native/build_windows_x64` 缓存重编 bridge（CMake 缓存会锁定旧的 `CMAKE_PREFIX_PATH`，导致 bridge 一直按旧版本构建）。
+  - Qt 6.10.3 已登记为**退役版本**，重新启用需同步更新 CI、`scripts/lib/common.ps1` 探测顺序与 `releases/windows-x64/` 产物；见 `docs/guides/qt-version-matrix.md`。
+- **新增 `QtWidget` 接口收敛控件通用能力（findings P0-1，破坏性改造第一步）**：`src/core/widget_base.cj` 新增 `public interface QtWidget <: QtResource`，以**默认实现**提供 11 个通用方法——`setStyleSheet` / `styleSheet` / `setObjectName` / `setMinimumSize` / `setMaximumSize` / `setVisible` / `isVisible` / `setEnabled` / `isEnabled` / `width` / `height`，全部基于 `getPtr()` 调用 native 既有 `qWidget*` 导出，实现类无需重复编码。
+  - **两层接口**：`QtWidgetCore`（只要求 `getPtr()`，含 11 个默认实现）与 `QtWidget <: QtResource & QtWidgetCore`（完整控件接口）。前者用于未实现 `QtResource` 的老控件，使其**一行声明**即可纳入统一能力。
+  - **79 个控件类已采纳**：`QtWidget` 61 类（`cjqt6.widgets` / `views` / `dialogs` / `menu` / `multimedia` / `core` 的 `QEventWidget`、`QWidget`、`QQuickWidget`、`QPrintPreviewDialog`）+ `QtWidgetCore` 18 类（`QScrollBar`、`QToolBox`、`QStackedWidget`、`QDockWidget`、`QSizeGrip`、`QRubberBand`、`QCalendarWidget`、`QDateEdit`/`QTimeEdit`/`QDateTimeEdit`、`QKeySequenceEdit`、`QFontComboBox`、`QCommandLinkButton`、`QPlainTextEdit`、`QTextBrowser`、`QMdiArea`/`QMdiSubWindow`、`QDialogButtonBox`）+ `cjqt6.richwidgets` 全部 19 个组合控件。
+  - **效果**：此前 `QPushButton` / `QComboBox` / `QProgressBar` / `QGroupBox` / `QTabWidget` / `QScrollArea` / `QSplitter` 等**没有** `setVisible`，现已统一具备；全部采纳类同时获得 `setObjectName`（QSS `#id` 选择器可用）。
+  - **遗留观察**：18 类老控件虽已获得通用能力，但仍未接入对象存活表（`init` 无 `trackObject`），属独立的内存安全缺口，建议后续单独补齐。
+  - **零行为变更**：类内已有同名同签名方法时以类实现为准，自动覆盖接口默认实现；`cjpm build success`、零冲突。
+  - **安全边界（已写入接口注释）**：仅 QWidget 派生类可实现本接口；非控件类型（`QProcess` / `QTimer` / `QUiLoader` / `QSystemTrayIcon` / `QSqlDatabase` / `QAction` / `QAbstractItemModel` / `QGraphicsScene` 等）**不得**实现，否则默认实现会触发未定义行为。
+  - 新增控件应实现 `QtWidget` 而非 `QtResource`（见 `docs/guides/wrapper-template.md`）。
+- **消费控件的接口新增 `QtResource` 重载（findings P0-5）**：`QTabWidget.addTab`、`QMainWindow.setMenuBar` / `setStatusBar` / `setCentralWidget` / `addToolBar`、`QVBoxLayout` / `QHBoxLayout.addWidget`（含 `stretch` 版本）、`QGridLayout.addWidget` / `addWidgetSpan` 均新增接收 `QtResource` 的重载，入参由裸 `Int64` 指针升级为控件对象。重载内部只做 `getPtr()` 转发，**与既有 `Int64` 版本并存、既有调用零改动、无二义性**；类型误配（传错控件类型或裸指针）从此由编译器拦截。
+- **补 `setWindowTitle` 命名（findings P2-2 命名部分）**：`QWidget` 与 `QMainWindow` 新增 `setWindowTitle(String)`（Qt 惯用名），与既有 `setTitle(String)` 等价（内部转发）。采用**增量别名**而非破坏性改名，既有示例与测试无需改动。native 侧本就使用 `qMainWindowSetWindowTitle`，故无需改桥接层。
+  - 遗留：`menuBar()` / `statusBar()` getter 需要一个「非拥有型包装」设计决策（返回包装类会被误认为可 `close()`，返回裸指针又难以使用），未擅自实现，见 `docs/internal/cjmonitor-findings.md`。
+- **补 `QMainWindow.menuBar()` / `statusBar()` 借用 getter（findings P2-2 收尾）**：新增桥接导出 `qMainWindowMenuBar` / `qMainWindowStatusBar`；`QMenuBar` / `QStatusBar` 各自新增**借用构造** `init(ptr: Int64)`（新增 `ownsPtr` 字段，`close()` 对借用实例只注销不删除），沿用仓库既有的 `QAction` / `QMenu` 非拥有范式。
+  - `menuBar(): QMenuBar`（Qt 语义：未设置时会自动创建，故非空）；`statusBar(): ?QStatusBar`（Qt 语义：未设置返回 `None`）。
+  - **所有权保护**：借用包装的 `close()` 不会删除由 `QMainWindow` 持有的对象；新增测试用例专门断言「借用包装 `close()` 后再次 `statusBar()` 仍可取得对象」。
+  - 解决了「要给已有状态栏追加消息却没有获取入口」的问题：`win.statusBar()?.showMessage("...")`。
+- **18 类老控件接入对象存活表（补齐 findings 遗留观察）**：`QScrollBar`、`QStackedWidget`、`QSizeGrip`、`QCommandLinkButton`、`QKeySequenceEdit`、`QMdiArea`、`QMdiSubWindow`、`QToolBox`、`QRubberBand`、`QDockWidget`、`QDialogButtonBox`、`QFontComboBox`、`QPlainTextEdit`、`QTextBrowser`、`QCalendarWidget`、`QDateEdit`、`QTimeEdit`、`QDateTimeEdit`。
+  - **此前这些类连 `close()` 都没有**：只有一个直接调用 native 删除、且从不 `trackObject` 的 `delete()`——既不参与对象存活表（`isObjectAlive` 失效检测对它们无效），也无法用 try-with-resources 释放。
+  - 现每类补齐 `closed` 字段、`init` 内 `trackObject(ptr)`（多构造函数类逐个补）、`isClosed()` / `isValid()` / `checkValid()` / `close()`；`close()` 先判 `isObjectAlive`，对已失效指针**只 untrack 不删**。
+  - 原 `delete()` 改为委托 `close()`，**保留各自原有的 `qSignalCleanup(ptr)` 调用**（信号回调清理语义不变），因此既有调用点行为不变。
+  - 未改桥接层（各 `qXxxDelete` 导出早已存在）。验证：`cjpm build success`、无 lint 告警、全量测试无回归。
+- **`Toast` 回调不再释放自身对象，并补显式释放入口（findings P1-5）**：`src/richwidgets/toast.cj`
+  - 倒计时回调由 `{=> close()}` 改为「停表 + 关闭标签 + 置 `closed`」的 `handleTimeout()` —— 回调内**不再** `disconnect()`、**不再**删除自身 `QTimer`；
+  - 释放动作收敛到私有 `release()`，只由**回调之外**的 `close()` 触发（幂等；回调内已置 `closed` 后仍可补做释放），`show()` 对已释放实例改为安全短路；
+  - 新增 `Toast.clear()`——静态入口此前把最近一条提示持有在 `private static var latest` 中而**没有任何外部释放手段**，现可显式关闭并复位去重窗口。
+  - **机制更正**：findings 原判「回调内 `disconnect()` 死锁」经源码核对**不成立**（native `bridge_signal.cpp:219` 与仓颉 `callback.cj:27` 均在**锁外**调用回调）。本轮对照实验证实真正现象是**时序敏感挂起**（`Toast.info` → `Toast.showThrottled` 在**无事件循环**时挂起；同类内第二个 `exec` 用例挂起；插入一行 `println` 即通过），细节与未解决边界已如实记入 `docs/internal/cjmonitor-findings.md` P1-5。
+  - 测试：**未投放**自动关闭/静态入口的运行期用例（实测 flaky），`src/test/richwidgets_test.cj` 只保留稳定的「创建 / 关闭」两条；`src/test/richwidgets_test.cj` 顶部注明该取舍原因。
+
+### 工具
+
+- **新增 `scripts/check-api-usage.ps1`（findings P3-1 的 API 存在性门禁）**：以 `src/` 的声明建立符号表，检验示例与测试代码引用的 API 是否真实存在——三级校验：**包名**（`import cjqt6.process.*` 这类不存在的包）、**类型名**（`QXxx` 公共类型）、**方法名**（同文件内 `let x = QType(...)` 的可推导接收者，以及 `QType.method(...)` 静态调用）。已做降噪：剥离行/块注释与**多行字符串**（QSS 文案内的 `QTabBar` 等不再误报）、类型名要求 `Q` + 大写 + 小写（排除 `QSS_*` 常量）、局部变量表**按函数作用域**重置且按行就近生效、方法查询**沿继承链与 `extend` 块**展开。
+  - 用法：`pwsh -File scripts\check-api-usage.ps1`（报告模式）/ `-Strict`（门禁模式，违规即退出码 1）/ `-Scope examples\CjMonitor`（限定范围）。
+  - 误报登记在 `scripts/lib/api-usage-allowlist.txt`（`package:` / `type:` / `method:` / `file:`）。
+  - 实测：`examples/` + `src/test/` 共 137 个文件**零误报**；对第 4 节记录的错误写法（`import cjqt6.process.*`、`QLabel.setMinimumWidth`、`QLabel.setFixedWidth`、`QChartView.fromChart`）**4/4 全部报出**并返回退出码 1。
+
+### 修复
+
+- **`QEventWidget` 补齐通用控件能力（findings P0-2）**：`src/core/events.cj` 新增 `setStyleSheet` / `styleSheet` / `setMinimumSize` / `setMaximumSize` / `setVisible` / `isVisible` / `setEnabled` / `isEnabled` / `width` / `height`。此前 `QEventWidget`（自绘 `setOnPaint` 的唯一入口）缺少这些能力，导致自绘画布无法设最小尺寸、无法取自身宽高做坐标换算。复用 native 既有 `qWidget*` 导出（声明集中在 `src/core/common.cj`），**未改桥接层**。
+- **暴露跨包可用的控件尺寸查询（findings P0-3）**：`src/core/widget.cj` 新增 `public func widgetWidth(ptr: Int64)` / `widgetHeight(ptr: Int64)`。`foreign func` 无法跨包可见，此前每个要用尺寸的包都只能自行重复声明 `qWidgetWidth`/`qWidgetHeight`。
+- **`Toast` 补静态便捷入口与去重节流（findings P1-4）**：`src/richwidgets/toast.cj` 新增 `Toast.info` / `warning` / `success`（命名参数 `durationMs`）与 `Toast.showThrottled(message, windowMs, durationMs)`——同一文案在时间窗内只显示一次，窗口到期自动放行。去重窗口由独立 `QTimer` 承载，**不引入新依赖**（库内无 `std.time` 使用先例）。
+- **补 `setObjectName`，使 QSS `#id` 选择器可用（findings P0-4）**：新增桥接导出 `qWidgetSetObjectName`；仓颉侧新增 `cjqt6.core.setWidgetObjectName(ptr, name)`（任意控件指针可用，因各控件类不继承公共基类）、`QWidget.setObjectName(String)`、`QEventWidget.setObjectName(String)`。
+- **`QLineSeries` 补配色与清空能力（findings P1-1）**：新增桥接导出 `qLineSeriesSetColor` / `qLineSeriesSetColorA` / `qLineSeriesSetPen` / `qLineSeriesClear`；仓颉侧 `QLineSeries` 新增 `setColor(r,g,b)` / `setColor(r,g,b,a)` / `setPen(QPen)` / `clear()`。此前折线既不能配色也不能清空，实时刷新只能整张图表重建。
+- **`QDateTime` 补时间戳换算、`QDateTimeAxis` 收 QDateTime（findings P1-2）**：新增桥接导出 `qDateTimeToSecsSinceEpoch` / `qDateTimeFromSecsSinceEpoch` / `qDateTimeAxisSetMinDateTime` / `qDateTimeAxisSetMaxDateTime`；仓颉侧新增 `QDateTime.toSecsSinceEpoch()`、`QDateTime.fromSecsSinceEpoch(secs)` 与 `QDateTimeAxis.setMin(QDateTime)` / `setMax(QDateTime)` 重载。
+- **`QSqlDatabase` 补事务、`QSqlQuery` 补位置绑定（findings P1-3）**：新增桥接导出 `qSqlDatabaseTransaction` / `Commit` / `Rollback`（与 `qSqlDatabaseOpen` 一致返回 `bool`）与 `qSqlQueryAddBindValue` / `AddBindValueInt` / `AddBindValueDouble`；仓颉侧新增 `QSqlDatabase.transaction/commit/rollback(): Bool`、`QSqlQuery.addBindValue(String/Int32/Float64)`（对应 `?` 位置占位符）。
+- **`QProcess` 补参数数组语义与零参启动（findings P2-3）**：新增桥接导出 `qProcessAddArgument`（逐个追加参数，含空格的路径可完整传递）、`qProcessStartBare`；仓颉侧新增 `QProcess.addArgument(arg)` 与 `QProcess.start()`。**`setArguments(String)` 的按空格切分行为保持不变**，既有调用方不受影响。
+- **桥接库按 Qt 6.9.1 重编并同步 `releases/windows-x64/`**：本轮新增 12 个导出（含 `.def` 注册）后重编 MSVC 2022 桥接库，`cjqt6_bridge.dll` / `.lib` 已与源码同步；顺带修正了此前入库产物仍为 6.10.3 构建、与 `docs/guides/qt-version-matrix.md` 不一致的偏差。桥接库内置校验：9 个新符号均存在，`cjpm build` 通过。
+  - **注意**：让位文件 `releases/windows-x64/cjqt6_bridge.dll.old6103`（旧 6.10.3 构建）因被仓颉语言服务映射暂未删除，语言服务释放后应手工清理，**不要提交**。
+
+### 测试
+
+- **新增 `src/test/api_enhancements_test.cj`（14 个用例）**：覆盖 findings 各项新增 API——`QtWidget` / `QtWidgetCore` 通用能力（含 `objectName` 可被 `QWidget.findChild` 检索）、`QEventWidget` 通用能力、`widgetWidth` / `widgetHeight` / `setWidgetObjectName`、`QtResource` 重载（布局 / 页签 / 主窗口）、`QLineSeries` 配色与清空、`QDateTime` 时间戳换算与 `QDateTimeAxis` 接收 `QDateTime`、`QSqlDatabase` 事务提交与回滚、`QSqlQuery` 位置绑定 + 无参 `exec()`、`QProcess.addArgument`。
+- **补 `QSqlQuery.exec()`（无参）+ 桥接导出 `qSqlQueryExecBare`**：此前只有 `exec(sql)`，而它会按传入 SQL 重新准备并**清空绑定**，导致 `prepare` + `bindValue` / `addBindValue` 的结果无法执行——这是补测试时暴露出的缺口，已一并修复并加用例覆盖。
+- **测试结果**：`TOTAL 1502 / PASSED 1426 / SKIPPED 76 / ERROR 0 / FAILED 0`（排除 `requires_chartview_render` 等需真实渲染环境的标签）。
+- **测试暴露的既有缺陷**：`Toast` 倒计时回调内 `disconnect()` 死锁（findings 新增 **P1-5**）——回调派发锁重入，且会在后续任意事件循环触发、**污染其他用例**（实测导致无关的 `QChartView` 用例同时 30s 超时）。已登记现象/依据/复现/改法；为保持测试集绿色，暂移除该运行期用例。同时按该约束改写了 `Toast.showThrottled` 的去重窗口回调（只 `stop()` 与复位，不 `close()` / `disconnect()`）。
+- **测试脚本标签缺口**：`src/test/chart_test.cj:87` 的 `@Tag[requires_chartview_render]` 未包含在 `scripts/deploy-qt-test.ps1` 的 `-ExcludeTags` 默认清单中，本机运行会 30s 超时（属环境相关，非代码缺陷）；建议把该标签并入默认排除清单。
+
+### 文档
+
+- **新增 `docs/internal/cjmonitor-findings.md`（CjMonitor 反推的 CJQT6 库缺陷清单）**：以 `examples/CjMonitor/` 的完整实现过程为样本（骨架 → 100ms 采集 → 实时自绘 → 仪表与进程表 → 降采样落库 → 告警与主题），逐条记录「需要改库本身」的问题，按 P0 架构级 / P1 能力缺失 / P2 一致性 / P3 文档分级，每条给出**现象 + 源码依据（文件:行）+ 对上层的影响 + 建议改法**，并附「库未修之前的应用侧绕法对照表」与「复核命令」。修复优先级建议同文档第 7 节，首项为 `QEventWidget` 补齐 `setStyleSheet`/`setMinimumSize`/`width`/`height`/`setVisible`（自绘生态的刚性前提）。
+- `docs/roadmap.md` 关联文档登记该清单。
+- **`docs/guides/wrapper-template.md` 新增「跨包调用与语义约定」附录**：常量取整写法辨析（enum 用 `.value()`、struct 用 `.value`，findings P2-1）、同名同义对照表（findings P2-4）、所有权与释放责任约定、`QEventWidget` 可用能力清单、`Toast` 两类入口示例。
+- **`examples/CjMonitor/CjMonitor_开发方案.md` 顶部加 API 校正警示（findings P3-1）**：列出过期写法（`import cjqt6.process.*`、`QChartView.fromChart`、`Toast.show` 等）并指向 `docs/internal/cjmonitor-findings.md` 第 4 节与 `docs/api/`，声明 `src/` 为唯一权威实现。
+- **修正 `docs/internal/cjmonitor-findings.md` 的 P2-5 判断**：复核确认 `QPainter.fromPtr`/`close()`（`src/paint/painter.cj:862-870`）、`QChart.addSeries`（`src/charts/chart.cj:108+`）、`QChartView.setChart`（`src/charts/chartview.cj:53`）、`QLineSeries`（`src/charts/lineseries.cj:30,81`）**均已有所有权注释**，该条由「待修」改为「已具备，保持即可」。
+
 ## [1.9.3] - 2026-09-09
 
 ### 变更

@@ -27,7 +27,7 @@ foreign func qRadioButtonConnectClicked(ptr: Int64, callback: Int32Callback): Un
 
 /// 单选按钮部件
 /// 支持资源管理，可使用 try-with-resources 自动释放
-public class QRadioButton <: QtResource {
+public class QRadioButton <: QtWidget {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 

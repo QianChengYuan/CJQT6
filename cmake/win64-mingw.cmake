@@ -28,7 +28,7 @@ set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE BOTH)
 # Qt6 路径 - Windows Qt MinGW 安装目录 (WSL 路径)
 # 注意: 交叉编译需要 MinGW 版本的 Qt，不能使用 MSVC 版本的 Qt。
 # 请根据实际安装路径修改 Qt6_WIN_PATH。
-set(QT6_WIN_PATH "/mnt/c/Qt/6.10.3/mingw_64")
+set(QT6_WIN_PATH "/mnt/c/Qt/6.9.1/mingw_64")
 set(CMAKE_PREFIX_PATH "${QT6_WIN_PATH}")
 set(Qt6_DIR "${QT6_WIN_PATH}/lib/cmake/Qt6")
 

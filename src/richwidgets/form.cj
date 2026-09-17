@@ -10,7 +10,7 @@ import cjqt6.widgets.*
 // ============================================================
 
 /// 表单：带标题的分组容器，内部用 QFormLayout 实现「标签:控件」对齐排列
-public class Form <: QtResource {
+public class Form <: QtWidget {
     private let group: QGroupBox
     private let layout: QFormLayout
 

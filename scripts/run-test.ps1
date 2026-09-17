@@ -3,7 +3,7 @@
 # ------------------------------------------------------------
 # 用法(可在仓库根目录或任意位置调用):
 #   pwsh -File scripts\run-test.ps1                                              # 完整 6 步流程(bridge + native tests + build + deploy + test + coverage)
-#   pwsh -File scripts\run-test.ps1 -QtDir "C:\Qt\6.10.3\msvc2022_64"           # 指定 Qt6 路径
+#   pwsh -File scripts\run-test.ps1 -QtDir "C:\Qt\6.9.1\msvc2022_64"           # 指定 Qt6 路径
 #   pwsh -File scripts\run-test.ps1 -SkipBridge -SkipNativeTests                # 桥接层未改动时加速
 #   pwsh -File scripts\run-test.ps1 -SkipTest -SkipCoverage                     # 仅构建验证
 #   pwsh -File scripts\run-test.ps1 -Asan                                       # 桥接层测试启用 AddressSanitizer
@@ -50,7 +50,7 @@ Write-Host "cjpm: $($cjpm.Source)" -ForegroundColor Gray
 # ---- 第 1 步: 探测 Qt6 / 设置环境 ----
 $QtDir = Find-QtDir -QtDir $QtDir
 if (-not $QtDir) {
-    Write-Host "错误: 未找到 Qt6,请用 -QtDir 指定(如 C:\Qt\6.10.3\msvc2022_64 或设置 `$env:QTDIR)" -ForegroundColor Red
+    Write-Host "错误: 未找到 Qt6,请用 -QtDir 指定(如 C:\Qt\6.9.1\msvc2022_64 或设置 `$env:QTDIR)" -ForegroundColor Red
     exit 1
 }
 $env:QTDIR = $QtDir

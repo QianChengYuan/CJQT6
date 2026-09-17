@@ -12,7 +12,7 @@
 #   powershell -ExecutionPolicy Bypass -File scripts\verify_all.ps1                                        # 全量:bridge + build + test + coverage + 示例
 #   powershell -ExecutionPolicy Bypass -File scripts\verify_all.ps1 -SkipBridge -SkipExample               # 跳过桥接库重编和示例,加速本地验证
 #   powershell -ExecutionPolicy Bypass -File scripts\verify_all.ps1 -Example notepad                       # 指定冒烟示例名(默认 all_controls_demo)
-#   powershell -ExecutionPolicy Bypass -File scripts\verify_all.ps1 -QtDir "C:\Qt\6.10.3\msvc2022_64"     # 指定 Qt6 路径,跳过探测
+#   powershell -ExecutionPolicy Bypass -File scripts\verify_all.ps1 -QtDir "C:\Qt\6.9.1\msvc2022_64"     # 指定 Qt6 路径,跳过探测
 #   powershell -ExecutionPolicy Bypass -File scripts\verify_all.ps1 -SkipCoverage                         # 跳过覆盖率门禁(仅验证构建+测试)
 #   powershell -ExecutionPolicy Bypass -File scripts\verify_all.ps1 -CoverageThreshold 75                  # 自定义含测试覆盖率阈值(默认 70)
 #   powershell -ExecutionPolicy Bypass -File scripts\verify_all.ps1 -TestTimeoutSec 600                     # 测试整体硬超时 600s(默认 900s),超时强杀并报错

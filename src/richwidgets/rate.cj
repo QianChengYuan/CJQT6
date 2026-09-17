@@ -11,7 +11,7 @@ import std.collection.ArrayList
 // ============================================================
 
 /// 评分：星级评分控件，点击星星设分，支持回调
-public class Rate <: QtResource {
+public class Rate <: QtWidget {
     private let group: QGroupBox
     private let layout: QHBoxLayout
     private let stars: ArrayList<QPushButton>

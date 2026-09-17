@@ -119,7 +119,7 @@ main() {
             println("  ✗ 未找到 Qt6 安装")
             println("")
             println("  请从 https://www.qt.io/download 下载安装 Qt6 (>= 6.2)")
-            println("  并设置环境变量: set QTDIR=C:\\Qt\\6.10.3\\msvc2022_64")
+            println("  并设置环境变量: set QTDIR=C:\\Qt\\6.9.1\\msvc2022_64")
     }
     println("")
 

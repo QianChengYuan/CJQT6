@@ -108,7 +108,7 @@ public class ResizeMode {
 // ============================================================
 // QHeaderView
 // ============================================================
-public class QHeaderView <: QtResource {
+public class QHeaderView <: QtWidget {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 

@@ -423,7 +423,7 @@ public class Modifier {
 // ============================================================
 // QEventWidget - 支持事件的Widget
 // ============================================================
-public class QEventWidget <: QtResource {
+public class QEventWidget <: QtWidget {
     private let id: Int64
     private var ptr: Int64 = 0
     private var closed: Bool = false
@@ -533,6 +533,99 @@ public class QEventWidget <: QtResource {
     public func setLayout(layoutPtr: Int64): Unit {
         unsafe {
             qWidgetSetLayout(ptr, layoutPtr)
+        }
+    }
+
+    // ========== 通用控件能力（与 QWidget 对齐，见 docs/internal/cjmonitor-findings.md P0-2） ==========
+    // 说明：本类是自绘（setOnPaint）的唯一入口，此前缺少尺寸/样式/可见性能力，
+    // 导致自绘画布无法设最小尺寸、无法取自身宽高做坐标换算。以下方法复用
+    // native 既有的 qWidget* 导出（声明集中在 core/common.cj），无需改桥接层。
+
+    /// 设置样式表
+    public func setStyleSheet(styleSheet: String): Unit {
+        unsafe {
+            let cstr = LibC.mallocCString(styleSheet)
+            qWidgetSetStyleSheet(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+
+    /// 设置 objectName（QSS 的 `#id` 选择器依赖它）
+    public func setObjectName(name: String): Unit {
+        withCString(name) {c => unsafe { qWidgetSetObjectName(ptr, c) }}
+    }
+
+    /// 获取样式表
+    public func styleSheet(): String {
+        unsafe {
+            let cstr = qWidgetStyleSheet(ptr)
+            let result = cstr.toString()
+            freeBridgeString(cstr)
+            return result
+        }
+    }
+
+    /// 设置最小尺寸（自绘控件必须设下限，否则放入布局会被压扁）
+    public func setMinimumSize(width: Int32, height: Int32): Unit {
+        unsafe {
+            qWidgetSetMinimumSize(ptr, width, height)
+        }
+    }
+
+    /// 设置最大尺寸
+    public func setMaximumSize(width: Int32, height: Int32): Unit {
+        unsafe {
+            qWidgetSetMaximumSize(ptr, width, height)
+        }
+    }
+
+    /// 设置可见性
+    public func setVisible(visible: Bool): Unit {
+        unsafe {
+            qWidgetSetVisible(ptr, if (visible) {
+                1
+            } else {
+                0
+            })
+        }
+    }
+
+    /// 是否可见
+    public func isVisible(): Bool {
+        unsafe {
+            return qWidgetIsVisible(ptr) == 1
+        }
+    }
+
+    /// 设置启用状态
+    public func setEnabled(enabled: Bool): Unit {
+        unsafe {
+            qWidgetSetEnabled(ptr, if (enabled) {
+                1
+            } else {
+                0
+            })
+        }
+    }
+
+    /// 是否启用
+    public func isEnabled(): Bool {
+        unsafe {
+            return qWidgetIsEnabled(ptr) == 1
+        }
+    }
+
+    /// 当前宽度（像素）。自绘回调内做坐标换算时取画布宽度
+    public func width(): Int32 {
+        unsafe {
+            qWidgetWidth(ptr)
+        }
+    }
+
+    /// 当前高度（像素）。自绘回调内做坐标换算时取画布高度
+    public func height(): Int32 {
+        unsafe {
+            qWidgetHeight(ptr)
         }
     }
 

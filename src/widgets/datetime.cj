@@ -199,6 +199,18 @@ public class QDateTime {
         return dt
     }
 
+    /// 由 Unix 时间戳（秒）构造日期时间
+    public static func fromSecsSinceEpoch(secs: Float64): QDateTime {
+        let dt = QDateTime()
+        unsafe { dt.setPtr(qDateTimeFromSecsSinceEpoch(secs)) }
+        return dt
+    }
+
+    /// 转为 Unix 时间戳（秒）。QDateTimeAxis 的 setMin/setMax/setRange 收 Float64 秒
+    public func toSecsSinceEpoch(): Float64 {
+        unsafe { qDateTimeToSecsSinceEpoch(ptr) }
+    }
+
     public func date(): QDate {
         let d = QDate()
         unsafe {
@@ -305,11 +317,13 @@ public class TimeSpec {
 // 日历部件 QCalendarWidget
 // ============================================================
 
-public class QCalendarWidget {
+public class QCalendarWidget <: QtWidgetCore {
     private var ptr: Int64 = 0
+    private var closed: Bool = false
 
     public init() {
         unsafe { ptr = qCalendarWidgetCreate() }
+        trackObject(ptr)
     }
 
     public func selectedDate(): QDate {
@@ -442,11 +456,49 @@ public class QCalendarWidget {
         ptr
     }
 
-    public func delete(): Unit {
-        if (ptr != 0) {
-            unsafe { qCalendarWidgetDelete(ptr) }
-            ptr = 0
+    /// 是否已关闭
+    public func isClosed(): Bool {
+        closed
+    }
+
+    /// 对象是否仍然可用
+    public func isValid(): Bool {
+        !closed && ptr != 0 && isObjectAlive(ptr)
+    }
+
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
+    /// throws: NullPointerException 空指针访问时抛出
+    public func checkValid(): Unit {
+        if (closed) {
+            throw ResourceDisposedException("QCalendarWidget 已经被释放")
         }
+        if (ptr == 0) {
+            throw NullPointerException("QCalendarWidget 指针为空")
+        }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QCalendarWidget 底层 Qt 对象已失效")
+        }
+    }
+
+    /// 关闭资源，释放 Qt 对象（幂等）
+    public func close(): Unit {
+        if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
+            unsafe { qCalendarWidgetDelete(ptr) }
+        }
+        closed = true
+        ptr = 0
+    }
+
+    /// 删除（兼容旧 API，等价于 close()）
+    public func delete(): Unit {
+        close()
     }
 }
 
@@ -454,15 +506,18 @@ public class QCalendarWidget {
 // 日期编辑 QDateEdit
 // ============================================================
 
-public class QDateEdit {
+public class QDateEdit <: QtWidgetCore {
     private var ptr: Int64 = 0
+    private var closed: Bool = false
 
     public init() {
         unsafe { ptr = qDateEditCreate() }
+        trackObject(ptr)
     }
 
     public init(date: QDate) {
         unsafe { ptr = qDateEditCreateWithDate(date.getPtr()) }
+        trackObject(ptr)
     }
 
     public func date(): QDate {
@@ -551,11 +606,49 @@ public class QDateEdit {
         ptr
     }
 
-    public func delete(): Unit {
-        if (ptr != 0) {
-            unsafe { qDateEditDelete(ptr) }
-            ptr = 0
+    /// 是否已关闭
+    public func isClosed(): Bool {
+        closed
+    }
+
+    /// 对象是否仍然可用
+    public func isValid(): Bool {
+        !closed && ptr != 0 && isObjectAlive(ptr)
+    }
+
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
+    /// throws: NullPointerException 空指针访问时抛出
+    public func checkValid(): Unit {
+        if (closed) {
+            throw ResourceDisposedException("QDateEdit 已经被释放")
         }
+        if (ptr == 0) {
+            throw NullPointerException("QDateEdit 指针为空")
+        }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QDateEdit 底层 Qt 对象已失效")
+        }
+    }
+
+    /// 关闭资源，释放 Qt 对象（幂等）
+    public func close(): Unit {
+        if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
+            unsafe { qDateEditDelete(ptr) }
+        }
+        closed = true
+        ptr = 0
+    }
+
+    /// 删除（兼容旧 API，等价于 close()）
+    public func delete(): Unit {
+        close()
     }
 }
 
@@ -563,15 +656,18 @@ public class QDateEdit {
 // 时间编辑 QTimeEdit
 // ============================================================
 
-public class QTimeEdit {
+public class QTimeEdit <: QtWidgetCore {
     private var ptr: Int64 = 0
+    private var closed: Bool = false
 
     public init() {
         unsafe { ptr = qTimeEditCreate() }
+        trackObject(ptr)
     }
 
     public init(time: QTime) {
         unsafe { ptr = qTimeEditCreateWithTime(time.getPtr()) }
+        trackObject(ptr)
     }
 
     public func time(): QTime {
@@ -647,11 +743,49 @@ public class QTimeEdit {
         ptr
     }
 
-    public func delete(): Unit {
-        if (ptr != 0) {
-            unsafe { qTimeEditDelete(ptr) }
-            ptr = 0
+    /// 是否已关闭
+    public func isClosed(): Bool {
+        closed
+    }
+
+    /// 对象是否仍然可用
+    public func isValid(): Bool {
+        !closed && ptr != 0 && isObjectAlive(ptr)
+    }
+
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
+    /// throws: NullPointerException 空指针访问时抛出
+    public func checkValid(): Unit {
+        if (closed) {
+            throw ResourceDisposedException("QTimeEdit 已经被释放")
         }
+        if (ptr == 0) {
+            throw NullPointerException("QTimeEdit 指针为空")
+        }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QTimeEdit 底层 Qt 对象已失效")
+        }
+    }
+
+    /// 关闭资源，释放 Qt 对象（幂等）
+    public func close(): Unit {
+        if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
+            unsafe { qTimeEditDelete(ptr) }
+        }
+        closed = true
+        ptr = 0
+    }
+
+    /// 删除（兼容旧 API，等价于 close()）
+    public func delete(): Unit {
+        close()
     }
 }
 
@@ -659,15 +793,18 @@ public class QTimeEdit {
 // 日期时间编辑 QDateTimeEdit
 // ============================================================
 
-public class QDateTimeEdit {
+public class QDateTimeEdit <: QtWidgetCore {
     private var ptr: Int64 = 0
+    private var closed: Bool = false
 
     public init() {
         unsafe { ptr = qDateTimeEditCreate() }
+        trackObject(ptr)
     }
 
     public init(dateTime: QDateTime) {
         unsafe { ptr = qDateTimeEditCreateWithDateTime(dateTime.getPtr()) }
+        trackObject(ptr)
     }
 
     public func dateTime(): QDateTime {
@@ -799,11 +936,49 @@ public class QDateTimeEdit {
         ptr
     }
 
-    public func delete(): Unit {
-        if (ptr != 0) {
-            unsafe { qDateTimeEditDelete(ptr) }
-            ptr = 0
+    /// 是否已关闭
+    public func isClosed(): Bool {
+        closed
+    }
+
+    /// 对象是否仍然可用
+    public func isValid(): Bool {
+        !closed && ptr != 0 && isObjectAlive(ptr)
+    }
+
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
+    /// throws: NullPointerException 空指针访问时抛出
+    public func checkValid(): Unit {
+        if (closed) {
+            throw ResourceDisposedException("QDateTimeEdit 已经被释放")
         }
+        if (ptr == 0) {
+            throw NullPointerException("QDateTimeEdit 指针为空")
+        }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QDateTimeEdit 底层 Qt 对象已失效")
+        }
+    }
+
+    /// 关闭资源，释放 Qt 对象（幂等）
+    public func close(): Unit {
+        if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
+            unsafe { qDateTimeEditDelete(ptr) }
+        }
+        closed = true
+        ptr = 0
+    }
+
+    /// 删除（兼容旧 API，等价于 close()）
+    public func delete(): Unit {
+        close()
     }
 }
 
@@ -867,6 +1042,11 @@ foreign func qDateTimeTime(ptr: Int64): Int64
 foreign func qDateTimeCurrentDateTime(): Int64
 
 foreign func qDateTimeToString(ptr: Int64, format: CString): CString
+
+// 时间戳换算（QDateTimeAxis 按 Float64 秒取值）
+foreign func qDateTimeToSecsSinceEpoch(ptr: Int64): Float64
+
+foreign func qDateTimeFromSecsSinceEpoch(secs: Float64): Int64
 
 foreign func qDateTimeSetDate(ptr: Int64, datePtr: Int64): Unit
 

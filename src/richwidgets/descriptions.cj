@@ -11,7 +11,7 @@ import std.collection.ArrayList
 // ============================================================
 
 /// 描述列表：只读键值对展示，适合详情页
-public class Descriptions <: QtResource {
+public class Descriptions <: QtWidget {
     private let group: QGroupBox
     private let layout: QFormLayout
     private let valueLabels: ArrayList<QLabel>

@@ -21,6 +21,12 @@ foreign func qSqlDatabaseOpen(ptr: Int64): Bool
 
 foreign func qSqlDatabaseClose(ptr: Int64): Unit
 
+foreign func qSqlDatabaseTransaction(ptr: Int64): Bool
+
+foreign func qSqlDatabaseCommit(ptr: Int64): Bool
+
+foreign func qSqlDatabaseRollback(ptr: Int64): Bool
+
 foreign func qSqlDatabaseIsOpen(ptr: Int64): Bool
 
 foreign func qSqlDatabaseLastError(ptr: Int64): CString
@@ -38,6 +44,8 @@ foreign func qSqlQueryCreateWithDb(dbPtr: Int64): Int64
 
 foreign func qSqlQueryExec(ptr: Int64, sql: CString): Bool
 
+foreign func qSqlQueryExecBare(ptr: Int64): Bool
+
 foreign func qSqlQueryExecBatch(ptr: Int64): Bool
 
 foreign func qSqlQueryPrepare(ptr: Int64, sql: CString): Bool
@@ -47,6 +55,12 @@ foreign func qSqlQueryBindValue(ptr: Int64, placeholder: CString, value: CString
 foreign func qSqlQueryBindValueInt(ptr: Int64, placeholder: CString, value: Int32): Unit
 
 foreign func qSqlQueryBindValueDouble(ptr: Int64, placeholder: CString, value: Float64): Unit
+
+foreign func qSqlQueryAddBindValue(ptr: Int64, value: CString): Unit
+
+foreign func qSqlQueryAddBindValueInt(ptr: Int64, value: Int32): Unit
+
+foreign func qSqlQueryAddBindValueDouble(ptr: Int64, value: Float64): Unit
 
 foreign func qSqlQueryNext(ptr: Int64): Bool
 
@@ -223,6 +237,24 @@ public class QSqlDatabase <: QtResource {
         unsafe { qSqlDatabaseOpen(ptr) }
     }
 
+    /// 开启事务（返回是否成功）
+    public func transaction(): Bool {
+        checkValid()
+        unsafe { qSqlDatabaseTransaction(ptr) }
+    }
+
+    /// 提交事务
+    public func commit(): Bool {
+        checkValid()
+        unsafe { qSqlDatabaseCommit(ptr) }
+    }
+
+    /// 回滚事务
+    public func rollback(): Bool {
+        checkValid()
+        unsafe { qSqlDatabaseRollback(ptr) }
+    }
+
     /// 关闭数据库连接（如仍需使用数据库对象，调用 closeDatabase 仅关闭连接）
     public func closeDatabase(): Unit {
         checkValid()
@@ -321,6 +353,12 @@ public class QSqlQuery <: QtResource {
         }
     }
 
+    /// 执行已 `prepare` 的查询（不带 SQL 参数），保留 `bindValue` / `addBindValue` 的绑定。
+    /// 用带 SQL 的 `exec(sql)` 执行已准备查询会重新 prepare 并清空绑定。
+    public func exec(): Bool {
+        unsafe { qSqlQueryExecBare(ptr) }
+    }
+
     public func execBatch(): Bool {
         unsafe { qSqlQueryExecBatch(ptr) }
     }
@@ -358,6 +396,25 @@ public class QSqlQuery <: QtResource {
             qSqlQueryBindValueDouble(ptr, pstr, value)
             LibC.free(pstr)
         }
+    }
+
+    /// 位置绑定：按调用顺序绑定到 `?` 占位符（对应 Qt 的 `addBindValue`）
+    public func addBindValue(value: String): Unit {
+        unsafe {
+            var cstr = LibC.mallocCString(value)
+            qSqlQueryAddBindValue(ptr, cstr)
+            LibC.free(cstr)
+        }
+    }
+
+    /// 位置绑定（Int32）
+    public func addBindValue(value: Int32): Unit {
+        unsafe { qSqlQueryAddBindValueInt(ptr, value) }
+    }
+
+    /// 位置绑定（Float64）
+    public func addBindValue(value: Float64): Unit {
+        unsafe { qSqlQueryAddBindValueDouble(ptr, value) }
     }
 
     public func next(): Bool {

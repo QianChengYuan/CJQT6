@@ -63,7 +63,7 @@ foreign func qSliderDelete(ptr: Int64): Unit
 
 /// 滑动条部件
 /// 支持资源管理，可使用 try-with-resources 自动释放
-public class QSlider <: QtResource {
+public class QSlider <: QtWidget {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 

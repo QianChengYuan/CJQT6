@@ -322,6 +322,8 @@ qDateTimeSetDate
 qDateTimeSetTime
 qDateTimeTime
 qDateTimeToString
+qDateTimeToSecsSinceEpoch
+qDateTimeFromSecsSinceEpoch
 qDateToString
 qDateYear
 qDesktopServicesOpenFile
@@ -1098,10 +1100,12 @@ qLocaleTerritoryName
 qMainWindowAddToolBar
 qMainWindowCreate
 qMainWindowDelete
+qMainWindowMenuBar
 qMainWindowSetCentralWidget
 qMainWindowSetMenuBar
 qMainWindowSetStatusBar
 qMainWindowSetWindowTitle
+qMainWindowStatusBar
 qMdiAreaActivationOrder
 qMdiAreaAddSubWindow
 qMdiAreaCascadeSubWindows
@@ -1441,6 +1445,7 @@ qProcessReadAllStandardOutput
 qProcessReadAllStandardOutputLength
 qProcessReadChannel
 qProcessSetArguments
+qProcessAddArgument
 qProcessSetOnErrorOccurred
 qProcessSetOnFinished
 qProcessSetOnReadyReadStandardError
@@ -1453,6 +1458,7 @@ qProcessSetProgram
 qProcessSetReadChannel
 qProcessSetWorkingDirectory
 qProcessStart
+qProcessStartBare
 qProcessStartCommand
 qProcessStartDetached
 qProcessStartDetachedStatic
@@ -1901,6 +1907,9 @@ qSqlDatabaseSetHostName
 qSqlDatabaseSetPassword
 qSqlDatabaseSetPort
 qSqlDatabaseSetUserName
+qSqlDatabaseTransaction
+qSqlDatabaseCommit
+qSqlDatabaseRollback
 qSqlFieldDelete
 qSqlFieldIsAutoValue
 qSqlFieldIsNull
@@ -1911,11 +1920,15 @@ qSqlQueryAt
 qSqlQueryBindValue
 qSqlQueryBindValueDouble
 qSqlQueryBindValueInt
+qSqlQueryAddBindValue
+qSqlQueryAddBindValueInt
+qSqlQueryAddBindValueDouble
 qSqlQueryClear
 qSqlQueryCreate
 qSqlQueryCreateWithDb
 qSqlQueryDelete
 qSqlQueryExec
+qSqlQueryExecBare
 qSqlQueryExecBatch
 qSqlQueryFinish
 qSqlQueryFirst
@@ -2671,6 +2684,7 @@ qWidgetSetGeometry
 qWidgetSetLayout
 qWidgetSetMaximumSize
 qWidgetSetMinimumSize
+qWidgetSetObjectName
 qWidgetSetParent
 qWidgetHasFocus
 qWidgetSetSizePolicy
@@ -2761,6 +2775,10 @@ qLineSeriesDelete
 qLineSeriesAppend
 qLineSeriesSetName
 qLineSeriesCount
+qLineSeriesSetColor
+qLineSeriesSetColorA
+qLineSeriesSetPen
+qLineSeriesClear
 qValueAxisCreate
 qValueAxisDelete
 qValueAxisSetRange
@@ -2950,6 +2968,8 @@ qDateTimeAxisSetFormat
 qDateTimeAxisFormat
 qDateTimeAxisSetTickCount
 qDateTimeAxisTickCount
+qDateTimeAxisSetMinDateTime
+qDateTimeAxisSetMaxDateTime
 qLogValueAxisCreate
 qLogValueAxisDelete
 qLogValueAxisSetMin

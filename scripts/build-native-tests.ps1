@@ -4,7 +4,7 @@
 # 用法:
 #   pwsh -File .\scripts\build-native-tests.ps1                              # 默认编译并跑测试
 #   pwsh -File .\scripts\build-native-tests.ps1 -Asan                        # 启用 AddressSanitizer
-#   pwsh -File .\scripts\build-native-tests.ps1 -QtDir "C:\Qt\6.10.3\msvc2022_64"   # 指定 Qt6 路径
+#   pwsh -File .\scripts\build-native-tests.ps1 -QtDir "C:\Qt\6.9.1\msvc2022_64"   # 指定 Qt6 路径
 # 使用独立构建目录 native\build_native_tests,不影响 bridge 主构建
 # ============================================================
 

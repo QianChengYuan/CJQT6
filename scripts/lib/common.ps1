@@ -72,9 +72,8 @@ function Find-QtDir {
 
     if ([string]::IsNullOrEmpty($QtDir)) {
         $commonPaths = @(
-            "C:\Qt\6.10.3\msvc2022_64",
-            "C:\Qt\6.10.3\mingw_64",
-            "C:\Qt\6.10.2\msvc2022_64",
+            "C:\Qt\6.9.1\msvc2022_64",
+            "C:\Qt\6.9.1\mingw_64",
             "C:\Qt\6.9.3\msvc2022_64",
             "C:\Qt\6.7.0\msvc2019_64",
             "C:\Qt\6.5.0\msvc2019_64"

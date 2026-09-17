@@ -87,7 +87,7 @@ public class SelectionBehavior {
 // ============================================================
 // QTableView
 // ============================================================
-public class QTableView <: QtResource {
+public class QTableView <: QtWidget {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 

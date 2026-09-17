@@ -116,7 +116,7 @@ public class LineEditEchoMode {
 
 /// 单行文本输入框部件
 /// 支持资源管理，可使用 try-with-resources 自动释放
-public class QLineEdit <: QtResource {
+public class QLineEdit <: QtWidget {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 

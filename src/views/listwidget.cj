@@ -124,7 +124,7 @@ public class ListIconType {
 // ============================================================
 // QListWidget - 列表部件
 // ============================================================
-public class QListWidget <: QtResource {
+public class QListWidget <: QtWidget {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 

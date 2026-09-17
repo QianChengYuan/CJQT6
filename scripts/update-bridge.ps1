@@ -3,7 +3,7 @@
 # ------------------------------------------------------------
 # 用法:
 #   pwsh -File .\scripts\update-bridge.ps1                            # 默认重建 bridge
-#   pwsh -File .\scripts\update-bridge.ps1 -QtDir "C:\Qt\6.10.3\msvc2022_64"   # 指定 Qt6 路径
+#   pwsh -File .\scripts\update-bridge.ps1 -QtDir "C:\Qt\6.9.1\msvc2022_64"   # 指定 Qt6 路径
 #   pwsh -File .\scripts\update-bridge.ps1 -RunTests                   # 编 + 跑桥接层 C++ 单元测试
 #   pwsh -File .\scripts\update-bridge.ps1 -RunTests -Asan             # 启用 AddressSanitizer
 # 首次使用或 cmake 未配置时自动运行 cmake configure
@@ -29,7 +29,7 @@ Set-Location $RootDir
 # ---- 探测 Qt6 ----
 $QtDir = Find-QtDir -QtDir $QtDir
 if (-not $QtDir) {
-    Write-Host "❌ 未找到Qt6,请用 -QtDir 指定(如 C:\Qt\6.10.3\msvc2022_64 或设置 `$env:QTDIR)" -ForegroundColor Red
+    Write-Host "❌ 未找到Qt6,请用 -QtDir 指定(如 C:\Qt\6.9.1\msvc2022_64 或设置 `$env:QTDIR)" -ForegroundColor Red
     exit 1
 }
 $env:QTDIR = $QtDir

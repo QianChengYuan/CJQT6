@@ -2,7 +2,7 @@
 
 > 项目定位：仓颉生态第一个完整的桌面 GUI 音乐播放器
 > 技术栈：CJQT6 1.9.x（Qt6 绑定）+ lrc4cj 0.3.0（歌词解析）
-> 基线：Cangjie SDK 1.1.0、Qt6（Windows 6.10.3 MSVC / Linux 6.4.2+）、CMake 3.16+
+> 基线：Cangjie SDK 1.1.0、Qt6（Windows 6.9.1 MSVC / Linux 6.4.2+）、CMake 3.16+
 > 目标平台：Windows x64 / Linux x64
 
 ---
@@ -989,4 +989,4 @@ v0.2.0 的"歌词手动偏移校准"可以直接用 `LyricsEditor.offset(deltaMs
 
 **根因**：`cjpm run` 不自动配 Qt 运行时，且编译后模块 DLL 在 `target/release/cjqt6/` 子目录，Windows 不搜索同级子目录。
 
-**解决方案**：`run_debug.ps1` 把所有 DLL 目录加入 PATH：`target/release/cjqt6`、`target/release/bin`、`target/release/lrc4cj`、`target/release/charset4cj@cangjie_tpc`、`C:\Qt\6.10.3\msvc2022_64\bin`、`releases/windows-x64`。
+**解决方案**：`run_debug.ps1` 把所有 DLL 目录加入 PATH：`target/release/cjqt6`、`target/release/bin`、`target/release/lrc4cj`、`target/release/charset4cj@cangjie_tpc`、`C:\Qt\6.9.1\msvc2022_64\bin`、`releases/windows-x64`。

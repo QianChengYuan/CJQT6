@@ -20,7 +20,8 @@ scripts/
 ├── README.md                  # 本文件
 ├── lib/                       # 共享函数库(bash + PowerShell)
 │   ├── common.sh              #   bash:detect_platform / find_qt / get_jobs / die / warn
-│   └── common.ps1             #   PowerShell:Find-QtDir / Find-Cjpm / Find-Cjcov / Write-Step
+│   ├── common.ps1             #   PowerShell:Find-QtDir / Find-Cjpm / Find-Cjcov / Write-Step
+│   └── api-usage-allowlist.txt #  check-api-usage.ps1 的误报白名单(package:/type:/method:/file:)
 │
 ├── build-all-platforms.sh     # 自动检测平台,调用对应 build-<platform>.sh
 ├── build-linux-x64.sh         # Linux x86_64 FFI 桥接库
@@ -52,6 +53,7 @@ scripts/
 │
 ├── gen-coverage-summary.ps1   # 生成 PR 评论用覆盖率 markdown
 ├── gen-api-index.ps1          # 从 docs/api/ 生成 INDEX.md(覆盖校验)
+├── check-api-usage.ps1        # [新增] 示例/测试代码的 API 存在性门禁(包/类型/方法,-Strict 失败退出)
 ├── gen-ui.ps1                 # Designer .ui 一键转仓颉代码
 ├── fix-throws-annotations.ps1 # 批量补全 /// throws: 注释(消除 G.ERR.01)
 │

@@ -10,7 +10,7 @@ import cjqt6.widgets.*
 // ============================================================
 
 /// 标签：彩色小标签，可设背景色与文字色
-public class Tag <: QtResource {
+public class Tag <: QtWidget {
     private let label: QLabel
     private var bgColor: String = "#1890ff"
     private var fgColor: String = "#ffffff"

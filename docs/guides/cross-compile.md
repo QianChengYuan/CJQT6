@@ -110,7 +110,7 @@ cp lib/libcjqt6_bridge.so ../releases/linux-arm64/
 # 或使用PowerShell（需要先运行vcvars64.bat）
 
 # 配置CMake
-cmake ..\.. -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="C:/Qt/6.10.3/msvc2022_64"
+cmake ..\.. -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="C:/Qt/6.9.1/msvc2022_64"
 
 # 编译
 cmake --build . --config Release
@@ -124,10 +124,10 @@ Copy-Item lib\Release\cjqt6_bridge.lib ..\..\releases\windows-x64\
 
 ```powershell
 # 安装Qt6 MinGW版本（从qt.io下载在线安装器）
-# 安装路径：C:\Qt\6.10.3\mingw_64
+# 安装路径：C:\Qt\6.9.1\mingw_64
 
 # 设置环境
-$env:PATH = "C:\Qt\6.10.3\mingw_64\bin;C:\Qt\Tools\mingw1310_64\bin;$env:PATH"
+$env:PATH = "C:\Qt\6.9.1\mingw_64\bin;C:\Qt\Tools\mingw1310_64\bin;$env:PATH"
 
 # 在项目根目录创建构建目录
 New-Item -ItemType Directory -Force -Path native\build_windows_x64
@@ -137,7 +137,7 @@ cd native\build_windows_x64
 cmake ..\.. `
     -G "MinGW Makefiles" `
     -DCMAKE_BUILD_TYPE=Release `
-    -DCMAKE_PREFIX_PATH="C:/Qt/6.10.3/mingw_64" `
+    -DCMAKE_PREFIX_PATH="C:/Qt/6.9.1/mingw_64" `
     -DCMAKE_CXX_COMPILER="C:/Qt/Tools/mingw1310_64/bin/g++.exe"
 
 # 编译
@@ -287,7 +287,7 @@ $ReleaseDir = Join-Path $ProjectRoot "releases\windows-x64"
 Write-Host "=== 编译Windows x64桥接库 (MSVC 2022) ===" -ForegroundColor Green
 
 # 设置Qt路径（根据实际安装路径调整）
-$QtPath = "C:\Qt\6.10.3\msvc2022_64"
+$QtPath = "C:\Qt\6.9.1\msvc2022_64"
 $env:PATH = "$QtPath\bin;$env:PATH"
 
 # 配置

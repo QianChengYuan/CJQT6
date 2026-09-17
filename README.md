@@ -2,7 +2,7 @@
 
 > 让仓颉语言像 Python 使用 PyQt 一样便捷地开发 Qt6 跨平台 GUI 应用
 
-[![Qt](https://img.shields.io/badge/Qt-6.10.3-blue)](https://www.qt.io/)
+[![Qt](https://img.shields.io/badge/Qt-6.9.1-blue)](https://www.qt.io/)
 [![Cangjie](https://img.shields.io/badge/Cangjie-1.1.0-orange)](https://cangjie-lang.cn/)
 [![Version](https://img.shields.io/badge/version-1.9.0-green)](cjpm.toml)
 [![License](https://img.shields.io/badge/license-MIT-green)](docs/LICENSE)
@@ -34,12 +34,14 @@ CJQT6（版本 1.9.0）是为 [仓颉编程语言](https://cangjie-lang.cn/) 提
 | 依赖 | 版本 | 说明 |
 |---|---|---|
 | **仓颉 SDK** | 1.1.0 | 编译器 `cjc` 及包管理器 `cjpm` |
-| **Qt6** | 6.4.2（Linux）<br/>6.10.3（Windows） | 桌面版，需包含 `qtbase` + `qttools`；见 [版本兼容矩阵](docs/qt-version-matrix.md) |
+| **Qt6** | 6.4.2（Linux）<br/>**6.9.1（Windows）** | 桌面版，需包含 `qtbase` + `qttools`；见 [版本兼容矩阵](docs/guides/qt-version-matrix.md)。<br/>Windows 版本此前为 6.10.3，**已为与 GitHub CI 保持一致而同步降级至 6.9.1** |
 | **C++ 编译器** | MSVC 2022（Win）<br/>GCC 13.3+（Linux） | 仅修改 `native/` 桥接层时需要重编 |
 | **CMake** | 3.16+ | 编译 `native/` 桥接库 |
 | **操作系统** | Windows 10/11 x64<br/>Linux x64（Ubuntu 20.04+ / WSL2）<br/>Linux ARM64 / macOS arm64 | macOS x64 暂不支持（仓颉 1.1.0 版本暂未提供该平台 x64 SDK） |
 
-> ⚠️ **Qt 版本与编译器 ABI 强绑定**：Windows 必须用 MSVC 版 Qt6.10.3，混用 MinGW 会导致链接失败。CJQT6 桥接库对 Qt **小版本**敏感（存在 ABI 差异），换 Qt 版本必须重编 `cjqt6_bridge` 并跑全量测试。
+> ⚠️ **Qt 版本与编译器 ABI 强绑定**：Windows 必须用 MSVC 版 Qt6.9.1，混用 MinGW 会导致链接失败。CJQT6 桥接库对 Qt **小版本**敏感（存在 ABI 差异），换 Qt 版本必须重编 `cjqt6_bridge` 并跑全量测试。
+>
+> 📌 **Windows Qt 版本 = 6.9.1，与 GitHub CI 一致**：项目原先默认 6.10.3，为与 CI 保持同步而**降级至 6.9.1**（CI 侧因 aqtinstall 无法解压 Qt 6.10.3 已先降级，详见 `docs/CHANGELOG.md`）。若本机同时装了多个 Qt，请确保 `QTDIR` 指向 `6.9.1`——bridge 与运行时 Qt 小版本不一致会在加载期直接失败（`0xC0000139` 找不到程序入口）。
 
 <details>
 <summary>🔍 点击查看环境检查命令</summary>
@@ -53,7 +55,7 @@ cmake --version           # CMake
 # Windows (PowerShell)
 cjpm --version
 cmake --version
-echo $env:QTDIR           # Qt6 路径，如 C:\Qt\6.10.3\msvc2022_64
+echo $env:QTDIR           # Qt6 路径，如 C:\Qt\6.9.1\msvc2022_64
 ```
 </details>
 
@@ -77,7 +79,7 @@ cd CJQT6
 ```powershell
 # 设置环境变量（脚本已自动注入，手动跑需确保）
 $env:CJQT6_ROOT = "C:\CodeTools\cangjie_git\CJQT6"   # 仓库根目录
-$env:QTDIR = "C:\Qt\6.10.3\msvc2022_64"
+$env:QTDIR = "C:\Qt\6.9.1\msvc2022_64"
 
 # 步骤1: 重编 C++ FFI 桥接库并同步到 releases/windows-x64/
 .\scripts\update-bridge.ps1
@@ -100,7 +102,7 @@ cjpm build
 <summary>🔧 手动构建（Windows，不用脚本）</summary>
 
 ```powershell
-$env:QTDIR = "C:\Qt\6.10.3\msvc2022_64"
+$env:QTDIR = "C:\Qt\6.9.1\msvc2022_64"
 New-Item -ItemType Directory -Force -Path native\build_windows_x64
 cmake -S native -B native\build_windows_x64 -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="$env:QTDIR"
 cmake --build native\build_windows_x64 --config Release
@@ -198,7 +200,7 @@ CJQT6/
 │   ├── includes/               # 桥接头文件（含 MOC 类）
 │   └── tests/                  # 桥接层 C++ 单元测试
 ├── releases/                   # 预编译桥接库（入库，cjpm 链接目标）
-│   ├── windows-x64/            # MSVC + Qt 6.10.3
+│   ├── windows-x64/            # MSVC + Qt 6.9.1
 │   ├── linux-x64/              # GCC 13.3 + Qt 6.4.2
 │   ├── linux-arm64/            # Linux ARM64（系统 Qt6）
 │   ├── macos-arm64/            # Apple Silicon（dylib）
@@ -247,7 +249,7 @@ powershell -ExecutionPolicy Bypass -File scripts\verify_all.ps1
 
 | 平台 | 预编译 bridge | 运行时验证 | 生产可用度 |
 |---|---|---|---|
-| Windows x64（Win10/11） | ✅ MSVC 2022 + Qt 6.10.3 | ✅ CI 全量测试通过 | **可用** |
+| Windows x64（Win10/11） | ✅ MSVC 2022 + Qt 6.9.1 | ✅ CI 全量测试通过 | **可用** |
 | Linux x64（Ubuntu 20.04+ / WSL2） | ✅ GCC 13.3 + Qt 6.4.2 | ✅ CI 全量测试通过 | **可用** |
 | Linux ARM64（aarch64） | ✅ 系统 Qt6 | ✅ CI 全量测试通过 | **可用** |
 | macOS arm64（Apple Silicon） | ✅ dylib（Qt 6.4.2） | ✅ CI 全量测试通过 | **可用** |

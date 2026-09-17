@@ -208,15 +208,19 @@ QMessageBox.information(parentPtr, "提示", "完成")
 
 仓颉编译器 1.1.0、Qt6(>=6.2)、CMake(>=3.16)。两步：**先构建 C++ 桥接库，再 `cjpm build`**。
 
+> **Windows 锁定 Qt 6.9.1（与 GitHub CI 一致）**：项目此前默认 6.10.3，已为与 CI 保持同步而**降级至 6.9.1**（CI 因 aqtinstall 无法解压 6.10.3 先行降级，见 `docs/CHANGELOG.md`）。
+> 本机同时装有多版本 Qt 时，`QTDIR` 必须指向 `6.9.1`——bridge 与运行时 Qt 小版本不一致会在**加载期**报 `0xC0000139`（找不到程序入口），且症状是「进程秒退、无任何输出」，极难定位。
+> 换 Qt 小版本后必须删除 `native/build_windows_x64`（CMake 缓存锁住旧 `CMAKE_PREFIX_PATH`）再重编 bridge。
+
 ### 5.1 构建 FFI 桥接库（cjqt6_bridge）
 ```powershell
 # 方式1（推荐）：一键脚本，自动探测 Qt 路径
 .\scripts\update-bridge.ps1              # 自动用 $env:QTDIR 或常见路径
-.\scripts\update-bridge.ps1 -QtDir "C:\Qt\6.10.3\msvc2022_64"   # 手动指定
+.\scripts\update-bridge.ps1 -QtDir "C:\Qt\6.9.1\msvc2022_64"   # 手动指定
 
 # 方式2：手动步骤
 # 设置 Qt6 路径（替换为实际路径）
-$env:QTDIR = "C:\Qt\6.10.3\msvc2022_64"
+$env:QTDIR = "C:\Qt\6.9.1\msvc2022_64"
 
 # 构建（MSVC 2022 x64）
 New-Item -ItemType Directory -Force -Path native\build_windows_x64
@@ -270,11 +274,11 @@ cjpm build
 cjpm run
 
 # 方式2：手动把 Qt6 bin 加入 PATH
-$env:PATH = "C:\Qt\6.10.3\msvc2022_64\bin;$env:PATH"
+$env:PATH = "C:\Qt\6.9.1\msvc2022_64\bin;$env:PATH"
 cjpm run
 
 # 方式3：windeployqt 把 Qt DLL 复制到 exe 目录（发布用）
-C:\Qt\6.10.3\msvc2022_64\bin\windeployqt.exe examples\notepad\target\release\bin\main.exe
+C:\Qt\6.9.1\msvc2022_64\bin\windeployqt.exe examples\notepad\target\release\bin\main.exe
 ```
 - 运行示例：`cd examples/notepad && cjpm run`。
 - 完整错误诊断见 `docs/guides/build-guide.md`。

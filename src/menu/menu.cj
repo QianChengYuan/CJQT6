@@ -114,6 +114,10 @@ foreign func qMainWindowSetWindowTitle(ptr: Int64, title: CString): Unit
 
 foreign func qMainWindowDelete(ptr: Int64): Unit
 
+foreign func qMainWindowMenuBar(ptr: Int64): Int64
+
+foreign func qMainWindowStatusBar(ptr: Int64): Int64
+
 // ============================================================
 // QAction - 动作类
 // ============================================================
@@ -320,7 +324,7 @@ public class QAction <: QtResource {
 
 /// 菜单类
 /// 支持资源管理，可使用 try-with-resources 自动释放
-public class QMenu <: QtResource {
+public class QMenu <: QtWidget {
     private var ptr: Int64 = 0
     private var closed: Bool = false
     private let ownsPtr: Bool
@@ -455,9 +459,11 @@ public class QMenu <: QtResource {
 // QMenuBar - 菜单栏类
 // ============================================================
 
-public class QMenuBar <: QtResource {
+public class QMenuBar <: QtWidget {
     private var ptr: Int64 = 0
     private var closed: Bool = false
+    /// 是否拥有底层对象：借用构造（QMainWindow 持有的菜单栏）为 false，close() 只注销不删除
+    private var ownsPtr: Bool = true
 
     /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
@@ -468,6 +474,18 @@ public class QMenuBar <: QtResource {
             }
         }
         trackObject(ptr)
+    }
+
+    /// 从已有指针包装（**不取得所有权**）：用于借用 QMainWindow 持有的菜单栏。
+    /// close() 只标记关闭，不删除底层对象。
+    /// throws: CreateFailedException 指针为空时抛出
+    public init(ptr: Int64) {
+        if (ptr == 0) {
+            throw CreateFailedException("QMenuBar 指针为空")
+        }
+        this.ptr = ptr
+        this.ownsPtr = false
+        this.closed = false
     }
 
     public func addMenu(title: String): QMenu {
@@ -515,6 +533,12 @@ public class QMenuBar <: QtResource {
                 closed = true
                 return
             }
+            if (!ownsPtr) {
+                // 借用包装：底层对象由 QMainWindow 持有，不可删除
+                ptr = 0
+                closed = true
+                return
+            }
             untrackObject(ptr)
             unsafe {
                 qMenuBarDelete(ptr)
@@ -534,7 +558,7 @@ public class QMenuBar <: QtResource {
 // QToolBar - 工具栏类
 // ============================================================
 
-public class QToolBar <: QtResource {
+public class QToolBar <: QtWidget {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
@@ -646,9 +670,11 @@ public class QToolBar <: QtResource {
 // QStatusBar - 状态栏类
 // ============================================================
 
-public class QStatusBar <: QtResource {
+public class QStatusBar <: QtWidget {
     private var ptr: Int64 = 0
     private var closed: Bool = false
+    /// 是否拥有底层对象：借用构造（QMainWindow 持有的状态栏）为 false，close() 只注销不删除
+    private var ownsPtr: Bool = true
 
     /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
@@ -659,6 +685,18 @@ public class QStatusBar <: QtResource {
             }
         }
         trackObject(ptr)
+    }
+
+    /// 从已有指针包装（**不取得所有权**）：用于借用 QMainWindow 持有的状态栏。
+    /// close() 只标记关闭，不删除底层对象。
+    /// throws: CreateFailedException 指针为空时抛出
+    public init(ptr: Int64) {
+        if (ptr == 0) {
+            throw CreateFailedException("QStatusBar 指针为空")
+        }
+        this.ptr = ptr
+        this.ownsPtr = false
+        this.closed = false
     }
 
     public func showMessage(message: String): Unit {
@@ -735,6 +773,12 @@ public class QStatusBar <: QtResource {
                 closed = true
                 return
             }
+            if (!ownsPtr) {
+                // 借用包装：底层对象由 QMainWindow 持有，不可删除
+                ptr = 0
+                closed = true
+                return
+            }
             untrackObject(ptr)
             unsafe {
                 qStatusBarDelete(ptr)
@@ -754,7 +798,7 @@ public class QStatusBar <: QtResource {
 // QMainWindow - 主窗口类
 // ============================================================
 
-public class QMainWindow <: QtResource {
+public class QMainWindow <: QtWidget {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
@@ -783,6 +827,11 @@ public class QMainWindow <: QtResource {
         }
     }
 
+    /// 设置窗口标题（Qt 惯用名，与 `setTitle` 等价）
+    public func setWindowTitle(title: String): Unit {
+        setTitle(title)
+    }
+
     public func setTitle(title: String): Unit {
         checkValid()
         unsafe {
@@ -797,6 +846,44 @@ public class QMainWindow <: QtResource {
         unsafe {
             qWidgetResize(ptr, width, height)
         }
+    }
+
+    /// 取得已有菜单栏（**借用**：对象由 QMainWindow 持有，请勿 close()）。
+    /// Qt 语义：未设置时 menuBar() 会创建一个空菜单栏，故返回值必然可用。
+    public func menuBar(): QMenuBar {
+        checkValid()
+        return QMenuBar(unsafe { qMainWindowMenuBar(ptr) })
+    }
+
+    /// 取得已有状态栏（**借用**：对象由 QMainWindow 持有，请勿 close()）。
+    /// Qt 语义：未设置状态栏时返回 None。
+    public func statusBar(): ?QStatusBar {
+        checkValid()
+        let sbPtr = unsafe { qMainWindowStatusBar(ptr) }
+        if (sbPtr == 0) {
+            return None
+        }
+        return Some(QStatusBar(sbPtr))
+    }
+
+    /// 设置菜单栏（接收控件对象，避免裸指针误配）
+    public func setMenuBar(menuBar: QtResource): Unit {
+        setMenuBar(menuBar.getPtr())
+    }
+
+    /// 设置状态栏（接收控件对象）
+    public func setStatusBar(statusBar: QtResource): Unit {
+        setStatusBar(statusBar.getPtr())
+    }
+
+    /// 设置中心部件（接收控件对象）
+    public func setCentralWidget(widget: QtResource): Unit {
+        setCentralWidget(widget.getPtr())
+    }
+
+    /// 添加工具条（接收控件对象）
+    public func addToolBar(toolBar: QtResource): Unit {
+        addToolBar(toolBar.getPtr())
     }
 
     public func setMenuBar(menuBarPtr: Int64): Unit {

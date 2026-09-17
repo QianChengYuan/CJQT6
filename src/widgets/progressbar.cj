@@ -50,7 +50,7 @@ foreign func qProgressBarDelete(ptr: Int64): Unit
 
 /// 进度条部件
 /// 支持资源管理，可使用 try-with-resources 自动释放
-public class QProgressBar <: QtResource {
+public class QProgressBar <: QtWidget {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 

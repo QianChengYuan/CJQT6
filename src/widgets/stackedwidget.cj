@@ -31,8 +31,9 @@ foreign func qStackedWidgetDelete(ptr: Int64): Unit
 
 /// 堆叠窗口部件
 /// 管理多个子页面，一次只显示一个，常用于多页切换界面
-public class QStackedWidget {
+public class QStackedWidget <: QtWidgetCore {
     private var ptr: Int64 = 0
+    private var closed: Bool = false
 
     public init(parent!: Int64 = 0) {
         unsafe {
@@ -41,6 +42,7 @@ public class QStackedWidget {
                 setWidgetParent(ptr, parent)
             }
         }
+        trackObject(ptr)
     }
 
     /// 显示
@@ -146,13 +148,50 @@ public class QStackedWidget {
         return ptr
     }
 
-    /// 删除堆叠窗口
-    public func delete(): Unit {
-        if (ptr != 0) {
+    /// 是否已关闭
+    public func isClosed(): Bool {
+        closed
+    }
+
+    /// 对象是否仍然可用
+    public func isValid(): Bool {
+        !closed && ptr != 0 && isObjectAlive(ptr)
+    }
+
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
+    /// throws: NullPointerException 空指针访问时抛出
+    public func checkValid(): Unit {
+        if (closed) {
+            throw ResourceDisposedException("QStackedWidget 已经被释放")
+        }
+        if (ptr == 0) {
+            throw NullPointerException("QStackedWidget 指针为空")
+        }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QStackedWidget 底层 Qt 对象已失效")
+        }
+    }
+
+    /// 关闭资源，释放 Qt 对象（幂等）
+    public func close(): Unit {
+        if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qStackedWidgetDelete(ptr)
             }
-            ptr = 0
         }
+        closed = true
+        ptr = 0
+    }
+
+    /// 删除堆叠窗口（兼容旧 API，等价于 close()）
+    public func delete(): Unit {
+        close()
     }
 }

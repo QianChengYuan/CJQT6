@@ -10,7 +10,7 @@ import cjqt6.widgets.*
 // ============================================================
 
 /// 头像：圆形背景 + 居中文字，可设尺寸与颜色
-public class Avatar <: QtResource {
+public class Avatar <: QtWidget {
     private let label: QLabel
     private var diameter: Int32 = 40
     private var bgColor: String = "#1890ff"

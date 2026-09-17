@@ -204,7 +204,7 @@ public const ResizeToContents: Int32 = 3 // 根据内容调整
 // ============================================================
 // QTableWidget - 表格控件
 // ============================================================
-public class QTableWidget <: QtResource {
+public class QTableWidget <: QtWidget {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 

@@ -9,7 +9,7 @@ import cjqt6.widgets.*
 // ============================================================
 
 /// 开关控件：基于可勾选按钮的轻量开关
-public class Switch <: QtResource {
+public class Switch <: QtWidget {
     private let btn: QPushButton
 
     /// 创建开关（默认关闭状态）

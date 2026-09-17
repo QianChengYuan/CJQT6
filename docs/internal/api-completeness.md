@@ -306,7 +306,8 @@
 | 字幕 | `setSubtitleText()` / `subtitleText()` |
 | 资源 | `close()`, `isClosed()`, `isValid()`, `checkValid()` |
 
-> **注意**：Qt 6.10.3 的 QVideoSink 已移除 `brightness`/`contrast`/`hue`/`saturation` 属性（Qt5/Qt6 早期版本曾有），视频调节需通过着色器或帧处理实现。
+> **注意**：Qt 6 的 QVideoSink 已移除 `brightness`/`contrast`/`hue`/`saturation` 属性（Qt5/早期 Qt6 曾有），视频调节需通过着色器或帧处理实现。
+> 项目 Windows 侧锁定版本为 **Qt 6.9.1**（与 GitHub CI 一致，详见 `docs/guides/qt-version-matrix.md`）。
 
 ---
 
@@ -371,5 +372,5 @@ QLabel, QPushButton, QCheckBox, QRadioButton, QComboBox, QSpinBox, QDoubleSpinBo
 当前所有已知常用控件均已完成封装，暂无硬缺口。后续按需补充：
 
 - **QAbstractAnimation 子类化支持**：需派生 QObject，成本较高
-- **QVideoWidget 视频调节**：brightness/contrast/hue/saturation 在 Qt 6.10.3 已移至 QVideoSink（QVideoSink 也已移除），需通过着色器或帧处理实现
+- **QVideoWidget 视频调节**：brightness/contrast/hue/saturation 在 Qt 6 已移至 QVideoSink（QVideoSink 也已移除），需通过着色器或帧处理实现
 - **QTranslator 独立类**：目前仅有 `QApplication.loadQtTranslation()`

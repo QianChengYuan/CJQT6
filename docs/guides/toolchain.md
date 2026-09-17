@@ -85,7 +85,7 @@ cjlint -f src/ -c . -o cjlint-report -r json
 | 变量 | 用途 | 设置位置 |
 |------|------|----------|
 | `CJQT6_ROOT` | 仓库根目录，供 `cjpm.toml` 的 `${CJQT6_ROOT}` 链接路径替换 | `setup-qt-env.ps1/.sh`、CI env、`verify_all.ps1` 等脚本自动注入 |
-| `QTDIR` | Qt6 安装路径（如 `C:\Qt\6.10.3\msvc2022_64`） | `setup-qt-env.ps1/.sh` 自动探测或手动指定 `-QtDir` |
+| `QTDIR` | Qt6 安装路径（如 `C:\Qt\6.9.1\msvc2022_64`） | `setup-qt-env.ps1/.sh` 自动探测或手动指定 `-QtDir` |
 | `CANGJIE_HOME` | 仓颉 SDK 安装路径（cjpm/cjc/cjfmt/cjlint 所在） | CI 中解压 SDK 后设置；本机按安装位置 |
 
 > **命名已统一**：全仓库脚本和 CI 均使用 `CJQT6_ROOT` + `QTDIR`，无变体。

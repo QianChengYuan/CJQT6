@@ -6,7 +6,7 @@
 #
 # 用法:
 #   .\scripts\setup-qt-env.ps1                                                       # 自动探测 Qt6 + MSVC 2022,打印可粘贴到 PowerShell 的环境变量
-#   .\scripts\setup-qt-env.ps1 -QtDir "C:\Qt\6.10.3\msvc2022_64"                     # 指定 Qt6 安装目录,跳过探测
+#   .\scripts\setup-qt-env.ps1 -QtDir "C:\Qt\6.9.1\msvc2022_64"                     # 指定 Qt6 安装目录,跳过探测
 #
 # 与 setup-qt-env.sh 对称(Linux/macOS/WSL);共享函数走 scripts/lib/common.ps1
 # ============================================================
@@ -31,8 +31,8 @@ Write-Section "配置 Qt6 运行环境 (MSVC 2022)"
 $QtDir = Find-QtDir -QtDir $QtDir
 if (-not $QtDir) {
     Write-Host "❌ 未找到Qt6安装路径" -ForegroundColor Red
-    Write-Host "请通过参数指定: .\setup-qt-env.ps1 -QtDir 'C:\Qt\6.10.3\msvc2022_64'" -ForegroundColor Yellow
-    Write-Host '或设置环境变量: $env:QTDIR = "C:\Qt\6.10.3\msvc2022_64"' -ForegroundColor Yellow
+    Write-Host "请通过参数指定: .\setup-qt-env.ps1 -QtDir 'C:\Qt\6.9.1\msvc2022_64'" -ForegroundColor Yellow
+    Write-Host '或设置环境变量: $env:QTDIR = "C:\Qt\6.9.1\msvc2022_64"' -ForegroundColor Yellow
     exit 1
 }
 

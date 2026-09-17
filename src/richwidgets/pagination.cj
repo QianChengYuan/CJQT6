@@ -10,7 +10,7 @@ import cjqt6.widgets.*
 // ============================================================
 
 /// 分页栏：上一页/页码/下一页，支持翻页回调
-public class Pagination <: QtResource {
+public class Pagination <: QtWidget {
     private let group: QGroupBox
     private let layout: QHBoxLayout
     private let prevBtn: QPushButton

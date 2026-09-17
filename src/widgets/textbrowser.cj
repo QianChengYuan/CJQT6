@@ -51,8 +51,9 @@ foreign func qTextBrowserDelete(ptr: Int64): Unit
 
 /// 富文本浏览器
 /// 支持HTML内容显示、超链接导航、前进/后退浏览历史
-public class QTextBrowser {
+public class QTextBrowser <: QtWidgetCore {
     private var ptr: Int64 = 0
+    private var closed: Bool = false
 
     public init(parent!: Int64 = 0) {
         unsafe {
@@ -61,6 +62,7 @@ public class QTextBrowser {
                 setWidgetParent(ptr, parent)
             }
         }
+        trackObject(ptr)
     }
 
     /// 显示
@@ -235,13 +237,50 @@ public class QTextBrowser {
         return ptr
     }
 
-    /// 删除文本浏览器
-    public func delete(): Unit {
-        if (ptr != 0) {
+    /// 是否已关闭
+    public func isClosed(): Bool {
+        closed
+    }
+
+    /// 对象是否仍然可用
+    public func isValid(): Bool {
+        !closed && ptr != 0 && isObjectAlive(ptr)
+    }
+
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
+    /// throws: NullPointerException 空指针访问时抛出
+    public func checkValid(): Unit {
+        if (closed) {
+            throw ResourceDisposedException("QTextBrowser 已经被释放")
+        }
+        if (ptr == 0) {
+            throw NullPointerException("QTextBrowser 指针为空")
+        }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QTextBrowser 底层 Qt 对象已失效")
+        }
+    }
+
+    /// 关闭资源，释放 Qt 对象（幂等）
+    public func close(): Unit {
+        if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qTextBrowserDelete(ptr)
             }
-            ptr = 0
         }
+        closed = true
+        ptr = 0
+    }
+
+    /// 删除文本浏览器（兼容旧 API，等价于 close()）
+    public func delete(): Unit {
+        close()
     }
 }

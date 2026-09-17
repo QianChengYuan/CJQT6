@@ -87,6 +87,32 @@ void qSqlDatabaseClose(int64_t ptr) {
     }
 }
 
+// 事务：此前 QSqlDatabase 无任何事务 API，批量写入只能手工拼 BEGIN/COMMIT
+// （见 docs/internal/cjmonitor-findings.md P1-3）。返回值与 qSqlDatabaseOpen 一致用 bool。
+bool qSqlDatabaseTransaction(int64_t ptr) {
+    QSqlDatabase* db = reinterpret_cast<QSqlDatabase*>(ptr);
+    if (db) {
+        return db->transaction();
+    }
+    return false;
+}
+
+bool qSqlDatabaseCommit(int64_t ptr) {
+    QSqlDatabase* db = reinterpret_cast<QSqlDatabase*>(ptr);
+    if (db) {
+        return db->commit();
+    }
+    return false;
+}
+
+bool qSqlDatabaseRollback(int64_t ptr) {
+    QSqlDatabase* db = reinterpret_cast<QSqlDatabase*>(ptr);
+    if (db) {
+        return db->rollback();
+    }
+    return false;
+}
+
 bool qSqlDatabaseIsOpen(int64_t ptr) {
     QSqlDatabase* db = reinterpret_cast<QSqlDatabase*>(ptr);
     if (db) {
@@ -148,6 +174,16 @@ bool qSqlQueryExec(int64_t ptr, const char* sql) {
     return false;
 }
 
+// 执行已 prepare 的查询：不带 SQL 参数，从而保留 bindValue/addBindValue 的绑定
+// （qSqlQueryExec 会按传入 SQL 重新 prepare 并清空绑定，见 docs/internal/cjmonitor-findings.md P1-3）
+bool qSqlQueryExecBare(int64_t ptr) {
+    QSqlQuery* query = reinterpret_cast<QSqlQuery*>(ptr);
+    if (query) {
+        return query->exec();
+    }
+    return false;
+}
+
 bool qSqlQueryExecBatch(int64_t ptr) {
     QSqlQuery* query = reinterpret_cast<QSqlQuery*>(ptr);
     if (query) {
@@ -182,6 +218,29 @@ void qSqlQueryBindValueDouble(int64_t ptr, const char* placeholder, double value
     QSqlQuery* query = reinterpret_cast<QSqlQuery*>(ptr);
     if (query) {
         query->bindValue(QString::fromUtf8(placeholder), value);
+    }
+}
+
+// 位置绑定（对应 Qt 的 QSqlQuery::addBindValue）：按调用顺序绑定到 ? 占位符
+// （见 docs/internal/cjmonitor-findings.md P1-3）
+void qSqlQueryAddBindValue(int64_t ptr, const char* value) {
+    QSqlQuery* query = reinterpret_cast<QSqlQuery*>(ptr);
+    if (query) {
+        query->addBindValue(QString::fromUtf8(value));
+    }
+}
+
+void qSqlQueryAddBindValueInt(int64_t ptr, int32_t value) {
+    QSqlQuery* query = reinterpret_cast<QSqlQuery*>(ptr);
+    if (query) {
+        query->addBindValue(value);
+    }
+}
+
+void qSqlQueryAddBindValueDouble(int64_t ptr, double value) {
+    QSqlQuery* query = reinterpret_cast<QSqlQuery*>(ptr);
+    if (query) {
+        query->addBindValue(value);
     }
 }
 

@@ -82,7 +82,7 @@ foreign func qTreeViewConnectActivated(ptr: Int64, callback: Int64Callback): Uni
 // ============================================================
 // QTreeView
 // ============================================================
-public class QTreeView <: QtResource {
+public class QTreeView <: QtWidget {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 

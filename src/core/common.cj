@@ -20,6 +20,9 @@ foreign func qWidgetDelete(ptr: Int64): Unit
 foreign func qWidgetSetLayout(widgetPtr: Int64, layoutPtr: Int64): Unit
 // QWidget::setStyleSheet() - 设置样式表
 foreign func qWidgetSetStyleSheet(ptr: Int64, styleSheet: CString): Unit
+
+// QSS 的 #id 选择器依赖 objectName
+foreign func qWidgetSetObjectName(ptr: Int64, name: CString): Unit
 // QWidget::styleSheet() - 获取样式表
 foreign func qWidgetStyleSheet(ptr: Int64): CString
 // QWidget::setEnabled() - 设置启用/禁用

@@ -148,7 +148,7 @@ public class GraphicsViewViewportUpdateMode {
 // QGraphicsView - 图形视图部件
 // ============================================================
 
-public class QGraphicsView <: QtResource {
+public class QGraphicsView <: QtWidget {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 

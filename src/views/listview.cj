@@ -84,7 +84,7 @@ foreign func qModelIndexDelete(ptr: Int64): Unit
 // ============================================================
 // QListView
 // ============================================================
-public class QListView <: QtResource {
+public class QListView <: QtWidget {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 

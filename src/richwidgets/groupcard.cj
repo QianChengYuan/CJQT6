@@ -10,7 +10,7 @@ import cjqt6.widgets.*
 // ============================================================
 
 /// 卡片：带标题的垂直分组容器，适合聚合一组相关控件
-public class GroupCard <: QtResource {
+public class GroupCard <: QtWidget {
     private let group: QGroupBox
     private let layout: QVBoxLayout
 

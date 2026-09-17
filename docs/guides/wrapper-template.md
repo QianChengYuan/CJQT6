@@ -120,7 +120,12 @@ foreign func qMyControlDisconnectValueChanged(ptr: Int64): Unit
 
 /// 我的控件
 /// 支持资源管理，可使用 try-with-resources 自动释放
-public class QMyControl <: QtResource {
+/// 注意：控件类请实现 **QtWidget**（而非 QtResource）——样式 / 尺寸 / 可见性 / 启用态 /
+/// 尺寸查询等 11 个通用能力由该接口默认实现提供，无需自行编码，也无需自行声明 qWidget* FFI。
+/// 若控件尚未接入 QtResource 基础设施（无 close/isValid/checkValid），实现 **QtWidgetCore**
+/// 即可（只要求提供 getPtr()）；非控件的资源类（如 QMyPlayer）才直接实现 QtResource。
+/// 三者关系：`QtWidget <: QtResource & QtWidgetCore`、`QtWidgetCore` 只要求 `getPtr()`。
+public class QMyControl <: QtWidget {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
@@ -282,6 +287,82 @@ w.setOnValueChanged({ value: Int32 => println(value) })
 | `setOnValueChanged(callback: Int32Callback)` | 值变化回调 |
 | `disconnectValueChanged()` / `disconnect()` | 断开信号 |
 | `getPtr(): Int64` / `close()` / `delete()` | 指针与资源释放 |
+
+---
+
+## 附：跨包调用与语义约定（易误用点）
+
+> 来源：`docs/internal/cjmonitor-findings.md`（P2-1 / P2-4 / P2-5）。这些是「能跑但极易写错」的点，新增封装时请一并遵守。
+
+### 1. 常量取整写法不统一 —— 必须先分清 enum 还是 struct
+
+| 类型 | 定义形态 | 取整数写法 | 示例 |
+|------|----------|------------|------|
+| `RenderHint` / `PenStyle` / `BrushStyle` | **enum** | **`.value()`（带括号）** | `painter.setRenderHint(RenderHint.Antialiasing.value())` |
+| `TextAlignment` | **struct** | **`.value`（无括号）** | `painter.drawTextRect(..., TextAlignment.Left.value)` |
+| `Alignment`（布局） | **struct** | `.value`（无括号） | `layout.addWidget(ptr, stretch, Alignment.Left.value)` |
+
+**统一方向**：新增常量/枚举一律按 **struct + 无括号 `.value`** 定义（与 `TextAlignment` 对齐），不再新增 enum 形态常量类；存量 enum 保持不变（改属破坏性变更）。
+
+### 2. 同名同义对照表（同名不可得时以此为准）
+
+| 需求 | CJQT6 真实写法 | 常见误写 |
+|------|----------------|----------|
+| 全局样式表 | `QApp.setStyleSheet(String)` | `QApplication.setStyleSheet(...)` |
+| 窗口标题 | `setWindowTitle(String)` 与 `setTitle(String)` 等价（前者为 Qt 惯用名，二者可互换）；`QChart` / `QGroupBox` / `QMenu` / `QMenuBar` 的标题方法名本就是 `setTitle` | 建议统一用 `setWindowTitle` |
+| 布局/容器收控件 | 优选用新增的 `QtResource` 重载（`layout.addWidget(widget)`、`tabs.addTab(widget, title)`、`win.setCentralWidget(widget)`），编译期即可拦住类型误配 | 传裸 `widget.getPtr()` |
+| 取窗口菜单/状态栏 | 无 getter，只能 `setMenuBar(ptr)` / `setStatusBar(ptr)` | `menuBar()` / `statusBar()` |
+| 颜色构造 | `QColor(Int32,Int32,Int32)` / `QColor.rgba(r,g,b,a)` | `QColor.rgb(...)` |
+| 矩形填充 | `fillRectColor(x,y,w,h,c)` / `setBrush(QBrush)` | `setBrushColor(...)` |
+| 网格跨行列 | `QGridLayout.addWidgetSpan(ptr,r,c,rowSpan,colSpan)` | `addWidget(ptr,r,c,rs,cs)` |
+| 打印常量 | `OutputFormat.pdfFormat()` / `PageSize.a4()` / `PageOrientation.landscape()` | `PrintFormat` / `Orientation` |
+| SQL 绑定 | 命名占位符 `:x` 用 `bindValue` / `bindValueInt` / `bindValueDouble`；位置占位符 `?` 用 `addBindValue` / `addBindValueInt` / `addBindValueDouble` | 混用两种占位符风格 |
+| SQL 取值 | `valueString` / `valueInt` / `valueDouble(Int32)` | `value(...)` |
+| SQL 事务 | `QSqlDatabase.transaction()` / `commit()` / `rollback()`（返回 `Bool`） | 手工 `exec("BEGIN")` / `exec("COMMIT")` |
+| 本地音频 | `QSoundEffect.setSourceFile(path)` | `setSource("qrc:/...")` |
+| 本地图标 | `QIcon(filename)` 构造 | `QIcon.fromFile(...)` |
+| 表格填值 | `setItem(row,col,text)` / `item(r,c).setText(...)` | `setItemText(...)` |
+| 表格表头 | `setColumnWidth` / `setHorizontalHeaderStretchLastSection` | `horizontalHeader()` |
+| 控件显隐 | 79 个已采纳控件类统一具备 `setVisible(Bool)` / `isVisible()`（由 `QtWidget` 提供）；未采纳的非控件类型只能 `show()` / `hide()` | 已无此坑，可直接调 `setVisible` |
+| 定宽/定高 | 只有 `setMinimumSize(Int32,Int32)` / `setMaximumSize` / `setFixedSize` | `setMinimumWidth` / `setFixedWidth` |
+| 时间戳换算 | `QDateTime.toSecsSinceEpoch()` / `QDateTime.fromSecsSinceEpoch(secs)`；`QDateTimeAxis` 另有 `setMin(QDateTime)` / `setMax(QDateTime)` 重载 | `toMSecsSinceEpoch()`（不存在） |
+| 子进程参数 | 逐个追加用 `QProcess.addArgument(arg)`（含空格路径安全）；`setArguments(String)` 按**空格切分** | 用 `setArguments` 传含空格路径 |
+| 折线样式 | `QLineSeries.setColor(r,g,b[,a])` / `setPen(QPen)` / `clear()` | 依赖 `setName` 后重建图表 |
+| 对象样式定位 | `setObjectName(String)`（QWidget / QEventWidget）或 `cjqt6.core.setWidgetObjectName(ptr, name)`（任意控件指针） | 以为 QSS `#id` 不可用 |
+| 序列多态 | `QChart.addSeries` 只按具体序列类型重载 | `addSeries(series.getPtr())` 通用调用 |
+
+### 3. 所有权与释放责任（必须写进新类的注释）
+
+| 场景 | 规则 |
+|------|------|
+| 自建 QObject 封装 | `init` 内 `trackObject(ptr)`；`close()` 先判 `isObjectAlive(ptr)` |
+| 被父容器接管（`chart.addSeries` / `view.setChart` / 布局 `addWidget` 等） | **只 untrack，不 delete**，交由父对象级联释放 |
+| `QPainter.fromPtr(ptr)` | **借用**包装（`owned=false`），其 `close()` 是**空操作**，不构成泄漏源 |
+| `QPainter()` / `QPainter(device)` | **自建**（`owned=true`），**必须 `close()`**，且 `close()` 后不可复用该实例 |
+| `QEventWidget.close()` | 先 `clearAllCallbacks()` 再删底层对象（幂等） |
+| `QProcess` 退出 | 先 `kill()` 再 `close()`，防僵尸进程 |
+
+**回调体内禁止释放所属对象（P1-5）**：`setOnXxxCapture` / `setOnXxx` 的回调体内**不要**调用 `close()`、`SignalConnection.disconnect()`，也不要删除该回调所属的 QTimer/QObject——否则正在派发的事件源会在自己的回调中途被销毁。正确分工是：**回调内只更新状态**，释放由**回调之外**的 `close()` 统一负责（范式见 `src/richwidgets/toast.cj` 的 `handleTimeout()` 与 `release()`）。
+
+### 4. 自绘控件（`QEventWidget`）可用能力
+
+`QEventWidget` 已与 `QWidget` 对齐下列通用能力，自绘时**不需要**再自行声明 `foreign func`：
+
+`setStyleSheet` / `styleSheet` / `setObjectName` / `setMinimumSize` / `setMaximumSize` / `setVisible` / `isVisible` / `setEnabled` / `isEnabled` / `width` / `height` / `show` / `hide` / `setTitle` / `resize` / `setGeometry` / `setLayout` / `update` / `setFocus`，外加鼠标 / 键盘 / 绘制回调。
+
+需要**任意指针**（非 `QEventWidget` 实例）的尺寸或 objectName 时，用 `cjqt6.core.widgetWidth(ptr)` / `widgetHeight(ptr)` / `setWidgetObjectName(ptr, name)`。
+
+### 5. 轻提示（`Toast`）的两类入口
+
+```cangjie
+import cjqt6.richwidgets.*
+
+Toast.info("采集已启动")                              // 静态便捷入口
+Toast.warning("CPU 超阈值", durationMs: 3000)
+Toast.showThrottled("磁盘 IO 超阈值", windowMs: 5000)  // 同内容窗口内只弹一次
+```
+
+> `Toast` 实例入口（`Toast(msg, durationMs)` + `show()`）仍可用；静态入口内部持有最近一条并负责替换。
 
 ---
 

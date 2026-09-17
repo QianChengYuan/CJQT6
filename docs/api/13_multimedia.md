@@ -419,4 +419,4 @@ sink.close()
 | `isClosed(): Bool` / `isValid(): Bool` / `checkValid(): Unit` | QtResource 接口 |
 | `close()` | 释放资源 |
 
-> **注意**：Qt 6.10.3 的 QVideoSink 已移除 brightness/contrast/hue/saturation 属性（Qt5/Qt6 早期版本曾有），视频调节需通过着色器或帧处理实现。
+> **注意**：Qt 6.9.1 的 QVideoSink 已移除 brightness/contrast/hue/saturation 属性（Qt5/Qt6 早期版本曾有），视频调节需通过着色器或帧处理实现。

@@ -26,7 +26,7 @@ param(
     [string]$QtDir = "",     # Qt6 安装目录(默认自动探测 C:\Qt\6.*)
     [switch]$SkipCoverage,   # 不加 --coverage(提速;不生成 gcda,覆盖率步骤会被跳过)
     [string]$Filter = "",    # 传给 --filter,缩小用例范围(定位挂起用例用)
-    [string]$ExcludeTags = "requires_gui_dialog,requires_gui_drag,requires_audio,requires_process_spawn,requires_printer",  # 排除标签(与 CI cjpm-pipeline 对齐)
+    [string]$ExcludeTags = "requires_gui_dialog,requires_gui_drag,requires_audio,requires_process_spawn,requires_printer,requires_chartview_render",  # 排除标签(与 CI cjpm-pipeline 对齐);requires_chartview_render 需真实渲染环境,本机跑会挂起
     [string]$TimeoutEach = "30s",  # 单个用例超时(传给 --timeout-each)
     [int]$TestTimeoutSec = 1800,   # 整体硬超时(秒),超时强杀 cjpm 及其子进程;机器慢可加大
     [int]$Jobs = 1                 # 编译并发数(cjc 并行易挂死/触发 SIGSEGV,默认串行)

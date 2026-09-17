@@ -9,7 +9,7 @@ import cjqt6.widgets.*
 // ============================================================
 
 /// 搜索框：单行输入 + 占位提示 + 清空按钮 + 回车触发搜索
-public class SearchBox <: QtResource {
+public class SearchBox <: QtWidget {
     private let edit: QLineEdit
 
     /// 创建搜索框（默认占位「搜索...」，带清空按钮）

@@ -73,8 +73,9 @@ public class PlainTextLineWrap {
 
 /// 纯文本编辑器
 /// 比 QTextEdit 更轻量，适合代码编辑、日志查看等场景
-public class QPlainTextEdit {
+public class QPlainTextEdit <: QtWidgetCore {
     private var ptr: Int64 = 0
+    private var closed: Bool = false
 
     public init(parent!: Int64 = 0) {
         unsafe {
@@ -83,6 +84,7 @@ public class QPlainTextEdit {
                 setWidgetParent(ptr, parent)
             }
         }
+        trackObject(ptr)
     }
 
     /// 显示
@@ -288,13 +290,50 @@ public class QPlainTextEdit {
         return ptr
     }
 
-    /// 删除纯文本编辑器
-    public func delete(): Unit {
-        if (ptr != 0) {
+    /// 是否已关闭
+    public func isClosed(): Bool {
+        closed
+    }
+
+    /// 对象是否仍然可用
+    public func isValid(): Bool {
+        !closed && ptr != 0 && isObjectAlive(ptr)
+    }
+
+    /// throws: ResourceDisposedException 对象已释放或底层 Qt 对象失效时抛出
+    /// throws: NullPointerException 空指针访问时抛出
+    public func checkValid(): Unit {
+        if (closed) {
+            throw ResourceDisposedException("QPlainTextEdit 已经被释放")
+        }
+        if (ptr == 0) {
+            throw NullPointerException("QPlainTextEdit 指针为空")
+        }
+        if (!isObjectAlive(ptr)) {
+            throw ResourceDisposedException("QPlainTextEdit 底层 Qt 对象已失效")
+        }
+    }
+
+    /// 关闭资源，释放 Qt 对象（幂等）
+    public func close(): Unit {
+        if (!closed && ptr != 0) {
+            if (!isObjectAlive(ptr)) {
+                untrackObject(ptr)
+                ptr = 0
+                closed = true
+                return
+            }
+            untrackObject(ptr)
             unsafe {
                 qPlainTextEditDelete(ptr)
             }
-            ptr = 0
         }
+        closed = true
+        ptr = 0
+    }
+
+    /// 删除纯文本编辑器（兼容旧 API，等价于 close()）
+    public func delete(): Unit {
+        close()
     }
 }

@@ -247,7 +247,7 @@ qmake6 --version
 4. **完成安装并配置环境变量**:
     ```powershell
     # 设置Qt6路径 (根据实际安装路径调整)
-    setx QTDIR "C:\Qt\6.10.3\msvc2022_64"
+    setx QTDIR "C:\Qt\6.9.1\msvc2022_64"
     
     # 添加到PATH
    setx PATH "%PATH%;%QTDIR%\bin"
@@ -772,7 +772,7 @@ cp native/build_linux/lib/libcjqt6_bridge.so /usr/lib/
 ```
 或示例启动即崩溃、窗口不出现。
 
-**原因**：旧版 bridge 源码用 `QObject::findChild<>()` 展开了对 Qt 内部符号 `qt_qFindChild_helper` 的 import，而 Qt 6.10.3 运行时已不再导出该符号。bridge DLL 在加载阶段解析导入表失败 → 整个 DLL 无法加载。
+**原因**：旧版 bridge 源码用 `QObject::findChild<>()` 展开了对 Qt 内部符号 `qt_qFindChild_helper` 的 import，而 Qt 6.9.1 运行时已不再导出该符号。bridge DLL 在加载阶段解析导入表失败 → 整个 DLL 无法加载。
 
 **解决方案**：用已打补丁的 `native/src/qml/bridge_qml.cpp`（改为手动递归遍历 `QObject::children()` + `qobject_cast<QQuickItem*>` + `objectName()` 查找 `QQuickItem*`）**全量重编 bridge**。务必先删除 `native/build_windows_x64/cjqt6_bridge.dir` 再重新 cmake/msbuild（或运行 `scripts/update-bridge.ps1`），然后用以下命令确认导入表中已无该符号：
 ```powershell
@@ -924,12 +924,12 @@ export QT_QPA_PLATFORM=xcb  # 使用X11后端
 
 **Qt6安装**:
 - 参见[2.2 安装Qt6 - Windows](#22-安装qt6)
-- 建议安装路径: `C:\Qt\6.10.3\msvc2022_64`
+- 建议安装路径: `C:\Qt\6.9.1\msvc2022_64`
 
 **环境变量配置**:
 ```powershell
 # Qt6
-setx QTDIR "C:\Qt\6.10.3\msvc2022_64"
+setx QTDIR "C:\Qt\6.9.1\msvc2022_64"
 
 # CJQT6_ROOT（cjpm.toml 用 ${CJQT6_ROOT} 替换桥接库链接路径，必设，否则链接失败）
 setx CJQT6_ROOT "C:\CodeTools\cangjie_git\CJQT6"

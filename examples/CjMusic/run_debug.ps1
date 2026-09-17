@@ -1,5 +1,5 @@
 ﻿$base = 'C:\CodeTools\cangjie_git\CJQT6\examples\CjMusic'
-$env:PATH = "$base\target\release\cjqt6;$base\target\release\bin;$base\target\release\lrc4cj;$base\target\release\charset4cj@cangjie_tpc;C:\Qt\6.10.3\msvc2022_64\bin;C:\CodeTools\cangjie_git\CJQT6\releases\windows-x64;$env:PATH"
+$env:PATH = "$base\target\release\cjqt6;$base\target\release\bin;$base\target\release\lrc4cj;$base\target\release\charset4cj@cangjie_tpc;C:\Qt\6.9.1\msvc2022_64\bin;C:\CodeTools\cangjie_git\CJQT6\releases\windows-x64;$env:PATH"
 $env:CJQT6_ROOT = 'C:\CodeTools\cangjie_git\CJQT6'
 $env:QT_QPA_FONTDIR = 'C:\Windows\Fonts'
 Set-Location $base

@@ -16,8 +16,7 @@ if (-not (Test-Path $BinDir)) {
 }
 
 $QtCandidates = @(
-    "C:\Qt\6.10.3\msvc2022_64",
-    "C:\Qt\6.10.2\msvc2022_64",
+    "C:\Qt\6.9.1\msvc2022_64",
     "C:\Qt\6.7.0\msvc2022_64"
 )
 $QtBin = $null

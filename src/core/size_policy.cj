@@ -2,7 +2,7 @@ package cjqt6.core
 
 // ============================================================
 // QSizePolicy 尺寸策略常量（对应 Qt QSizePolicy::Policy）
-// 值与 Qt 6.10.3 头文件 qsizepolicy.h 严格一致（已核对）：
+// 值与 Qt 6 头文件 qsizepolicy.h 严格一致（Qt 6.x 系列稳定；对照 CI 锁定的 6.9.1 复核）：
 //   PolicyFlag: GrowFlag=1, ExpandFlag=2, ShrinkFlag=4, IgnoreFlag=8
 //   Fixed=0, Minimum=1(GrowFlag), Maximum=4(ShrinkFlag),
 //   Preferred=5, MinimumExpanding=3, Expanding=7, Ignored=13

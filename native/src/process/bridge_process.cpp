@@ -89,6 +89,15 @@ void qProcessStart(int64_t ptr, const char* program) {
     }
 }
 
+// 零参启动：沿用已 setProgram / setArguments 的配置
+// （见 docs/internal/cjmonitor-findings.md P2-3）
+void qProcessStartBare(int64_t ptr) {
+    QProcess* process = reinterpret_cast<QProcess*>(ptr);
+    if (process) {
+        process->start();
+    }
+}
+
 void qProcessStartWithArgs(int64_t ptr, const char* program, const char* args) {
     QProcess* process = reinterpret_cast<QProcess*>(ptr);
     if (process) {
@@ -247,6 +256,17 @@ void qProcessSetArguments(int64_t ptr, const char* args) {
     QProcess* process = reinterpret_cast<QProcess*>(ptr);
     if (process) {
         QStringList argList = QString::fromUtf8(args).split(' ', Qt::SkipEmptyParts);
+        process->setArguments(argList);
+    }
+}
+
+// 逐个追加参数：提供「参数数组」语义，含空格的路径可完整传递（setArguments
+// 按空格切分，无法表达带空格的单个参数，见 docs/internal/cjmonitor-findings.md P2-3）
+void qProcessAddArgument(int64_t ptr, const char* arg) {
+    QProcess* process = reinterpret_cast<QProcess*>(ptr);
+    if (process) {
+        QStringList argList = process->arguments();
+        argList.append(QString::fromUtf8(arg));
         process->setArguments(argList);
     }
 }

@@ -10,7 +10,7 @@ import cjqt6.widgets.*
 // ============================================================
 
 /// 空状态：居中灰色文字占位，用于无数据场景
-public class Empty <: QtResource {
+public class Empty <: QtWidget {
     private let label: QLabel
 
     /// 创建空状态（主文字）

@@ -16,6 +16,7 @@
 #include <QtCharts/QChartView>
 #include <QtCharts/QLineSeries>
 #include <QtCharts/QValueAxis>
+#include <QPen>
 #include <QtCharts/QAbstractSeries>
 #include <QtCharts/QAbstractAxis>
 #include <QtCharts/QBarCategoryAxis>
@@ -146,6 +147,42 @@ void qLineSeriesSetName(int64_t ptr, const char* name) {
 int32_t qLineSeriesCount(int64_t ptr) {
     QLineSeries* series = reinterpret_cast<QLineSeries*>(ptr);
     return series ? static_cast<int32_t>(series->count()) : 0;
+}
+
+// 样式与清空：此前 QLineSeries 既不能配色也不能清空，只能整体重建图表
+// （见 docs/internal/cjmonitor-findings.md P1-1）。与 QScatterSeries/QAreaSeries 的
+// qXxxSeriesSetColor 保持同签名。
+void qLineSeriesSetColor(int64_t ptr, int32_t r, int32_t g, int32_t b) {
+    QLineSeries* series = reinterpret_cast<QLineSeries*>(ptr);
+    if (series) {
+        QPen pen = series->pen();
+        pen.setColor(QColor(r, g, b));
+        series->setPen(pen);
+    }
+}
+
+void qLineSeriesSetColorA(int64_t ptr, int32_t r, int32_t g, int32_t b, int32_t a) {
+    QLineSeries* series = reinterpret_cast<QLineSeries*>(ptr);
+    if (series) {
+        QPen pen = series->pen();
+        pen.setColor(QColor(r, g, b, a));
+        series->setPen(pen);
+    }
+}
+
+void qLineSeriesSetPen(int64_t ptr, int64_t penPtr) {
+    QLineSeries* series = reinterpret_cast<QLineSeries*>(ptr);
+    QPen* pen = reinterpret_cast<QPen*>(penPtr);
+    if (series && pen) {
+        series->setPen(*pen);
+    }
+}
+
+void qLineSeriesClear(int64_t ptr) {
+    QLineSeries* series = reinterpret_cast<QLineSeries*>(ptr);
+    if (series) {
+        series->clear();
+    }
 }
 
 // ============================================================
@@ -1095,6 +1132,25 @@ double qPieSliceAngleSpan(int64_t ptr) {
 
 int64_t qDateTimeAxisCreate() {
     return reinterpret_cast<int64_t>(new QDateTimeAxis());
+}
+
+// 直接接收 QDateTime 的区间设置：QDateTimeAxis 内部按 Float64 秒存储，
+// 但库内 QDateTime 无时间戳换算 API，调用方难以自行喂值
+// （见 docs/internal/cjmonitor-findings.md P1-2）
+void qDateTimeAxisSetMinDateTime(int64_t axisPtr, int64_t dateTimePtr) {
+    QDateTimeAxis* axis = reinterpret_cast<QDateTimeAxis*>(axisPtr);
+    QDateTime* dt = reinterpret_cast<QDateTime*>(dateTimePtr);
+    if (axis && dt) {
+        axis->setMin(*dt);
+    }
+}
+
+void qDateTimeAxisSetMaxDateTime(int64_t axisPtr, int64_t dateTimePtr) {
+    QDateTimeAxis* axis = reinterpret_cast<QDateTimeAxis*>(axisPtr);
+    QDateTime* dt = reinterpret_cast<QDateTime*>(dateTimePtr);
+    if (axis && dt) {
+        axis->setMax(*dt);
+    }
 }
 
 void qDateTimeAxisDelete(int64_t ptr) {

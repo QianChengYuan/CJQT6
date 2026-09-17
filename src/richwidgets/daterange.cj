@@ -10,7 +10,7 @@ import cjqt6.widgets.*
 // ============================================================
 
 /// 日期范围选择器：起始日期 + 结束日期，带日历弹出
-public class DateRangePicker <: QtResource {
+public class DateRangePicker <: QtWidget {
     private let group: QGroupBox
     private let layout: QHBoxLayout
     private let startEdit: QDateEdit

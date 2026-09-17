@@ -21,12 +21,12 @@ foreign func qVideoSinkSubtitleText(ptr: Int64): CString
 // ============================================================
 // QVideoSink - 视频帧接收端
 //
-// Qt 6.10.3 的 QVideoSink 继承自 QObject，提供视频帧尺寸、字幕文本等 API。
+// Qt 6（含 CI 锁定的 6.9.1）的 QVideoSink 继承自 QObject，提供视频帧尺寸、字幕文本等 API。
 // 可通过 QMediaCaptureSession::videoSink() 获取已绑定的实例，
 // 也可直接创建独立实例用于离屏视频处理。
 //
 // 注意：Qt5/Qt6 早期版本的 brightness/contrast/hue/saturation 属性
-// 在 Qt 6.10.3 中已不存在，视频调节需通过着色器或帧处理实现。
+// 在 Qt 6 中已不存在，视频调节需通过着色器或帧处理实现。
 // ============================================================
 public class QVideoSink <: QtResource {
     private var ptr: Int64 = 0

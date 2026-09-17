@@ -37,7 +37,7 @@ foreign func qDialPageStep(ptr: Int64): Int32
 
 /// 旋钮控件部件
 /// 支持资源管理，可使用 try-with-resources 自动释放
-public class QDial <: QtResource {
+public class QDial <: QtWidget {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 

@@ -74,7 +74,7 @@ export DYLD_LIBRARY_PATH=/path/to/cjqt6_bridge:$DYLD_LIBRARY_PATH
 | 依赖 | 版本要求 |
 |------|----------|
 | 仓颉编译器 | >= 1.1.0 |
-| Qt6 | >= 6.2 |
+| Qt6 | >= 6.2（**Windows 锁定 6.9.1**，与 GitHub CI 一致） |
 | CMake | >= 3.16 |
 
 ### Qt6 环境配置
@@ -82,7 +82,7 @@ export DYLD_LIBRARY_PATH=/path/to/cjqt6_bridge:$DYLD_LIBRARY_PATH
 **Windows:**
 ```powershell
 # 设置Qt路径 (MSVC 2022)
-$env:PATH += ";\path\to\Qt\6.10.3\msvc2022_64\bin"
+$env:PATH += ";\path\to\Qt\6.9.1\msvc2022_64\bin"
 ```
 
 **Linux:**

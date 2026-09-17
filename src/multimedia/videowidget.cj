@@ -19,7 +19,7 @@ foreign func qVideoWidgetDelete(ptr: Int64): Unit
 // ============================================================
 // QVideoWidget - 视频显示控件
 // ============================================================
-public class QVideoWidget <: QtResource {
+public class QVideoWidget <: QtWidget {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 

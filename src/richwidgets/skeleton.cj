@@ -11,7 +11,7 @@ import std.collection.ArrayList
 // ============================================================
 
 /// 骨架屏：灰色占位条，用于加载态占位
-public class Skeleton <: QtResource {
+public class Skeleton <: QtWidget {
     private let group: QGroupBox
     private let layout: QVBoxLayout
     private let bars: ArrayList<QLabel>

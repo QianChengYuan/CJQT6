@@ -11,7 +11,7 @@ import cjqt6.widgets.*
 // ============================================================
 
 /// 级联选择器：两级下拉选择，支持自动联动（setCascadeData）或独立设置
-public class Cascader <: QtResource {
+public class Cascader <: QtWidget {
     private let group: QGroupBox
     private let layout: QHBoxLayout
     private let level1: QComboBox

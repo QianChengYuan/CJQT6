@@ -1131,6 +1131,14 @@ const char* qWidgetStyleSheet(int64_t ptr) {
     return cjqt6::emptyString();
 }
 
+// QSS 的 #id 选择器依赖 objectName（此前未导出，见 docs/internal/cjmonitor-findings.md P0-4）
+void qWidgetSetObjectName(int64_t ptr, const char* name) {
+    QWidget* widget = reinterpret_cast<QWidget*>(ptr);
+    if (widget) {
+        widget->setObjectName(QString::fromUtf8(name));
+    }
+}
+
 // 应用级全局样式表：QApplication::setStyleSheet / styleSheet
 void qApplicationSetStyleSheet(const char* styleSheet) {
     if (g_app) {

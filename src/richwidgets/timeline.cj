@@ -11,7 +11,7 @@ import std.collection.ArrayList
 // ============================================================
 
 /// 时间线：垂直事件列表，每条由时间与内容组成
-public class Timeline <: QtResource {
+public class Timeline <: QtWidget {
     private let group: QGroupBox
     private let layout: QVBoxLayout
     private let items: ArrayList<QLabel>

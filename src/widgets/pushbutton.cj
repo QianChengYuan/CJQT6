@@ -107,7 +107,7 @@ public class StandardIcon {
 
 /// 按钮部件
 /// 支持资源管理，可使用 try-with-resources 自动释放
-public class QPushButton <: QtResource {
+public class QPushButton <: QtWidget {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 

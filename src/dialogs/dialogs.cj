@@ -453,7 +453,7 @@ foreign func qProgressDialogReset(ptr: Int64): Unit
 
 /// 进度对话框
 /// 支持资源管理，可使用 try-with-resources 自动释放
-public class QProgressDialog <: QtResource {
+public class QProgressDialog <: QtWidget {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
@@ -650,7 +650,7 @@ foreign func qWizardPageSetCommitPage(ptr: Int64, isCommit: Int32): Unit
 foreign func qWizardPageIsCommitPage(ptr: Int64): Int32
 
 /// 向导页面，作为 QWizard 向导流程中的一页（可设标题、副标题与提交页标记）
-public class QWizardPage <: QtResource {
+public class QWizardPage <: QtWidget {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
@@ -795,7 +795,7 @@ foreign func qWizardShow(ptr: Int64): Unit
 
 /// 向导对话框
 /// 支持资源管理，可使用 try-with-resources 自动释放
-public class QWizard <: QtResource {
+public class QWizard <: QtWidget {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
@@ -965,7 +965,7 @@ foreign func qErrorMessageShow(ptr: Int64): Unit
 
 /// 错误消息对话框
 /// 支持资源管理，可使用 try-with-resources 自动释放
-public class QErrorMessage <: QtResource {
+public class QErrorMessage <: QtWidget {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 

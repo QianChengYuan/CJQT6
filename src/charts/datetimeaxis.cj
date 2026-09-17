@@ -1,6 +1,7 @@
 package cjqt6.charts
 
 import cjqt6.core.*
+import cjqt6.widgets.*
 
 // ============================================================
 // QDateTimeAxis FFI 声明
@@ -27,6 +28,10 @@ foreign func qDateTimeAxisFormat(ptr: Int64): CString
 foreign func qDateTimeAxisSetTickCount(ptr: Int64, count: Int32): Unit
 
 foreign func qDateTimeAxisTickCount(ptr: Int64): Int32
+
+foreign func qDateTimeAxisSetMinDateTime(ptr: Int64, dateTimePtr: Int64): Unit
+
+foreign func qDateTimeAxisSetMaxDateTime(ptr: Int64, dateTimePtr: Int64): Unit
 
 // ============================================================
 // QDateTimeAxis - 日期时间坐标轴
@@ -83,6 +88,18 @@ public class QDateTimeAxis {
     public func setMax(secsSinceEpoch: Float64): Unit {
         checkValid()
         unsafe { qDateTimeAxisSetMax(ptr, secsSinceEpoch) }
+    }
+
+    /// 设置最小值（直接接收 QDateTime，内部转 Float64 秒）
+    public func setMin(min: QDateTime): Unit {
+        checkValid()
+        unsafe { qDateTimeAxisSetMinDateTime(ptr, min.getPtr()) }
+    }
+
+    /// 设置最大值（直接接收 QDateTime）
+    public func setMax(max: QDateTime): Unit {
+        checkValid()
+        unsafe { qDateTimeAxisSetMaxDateTime(ptr, max.getPtr()) }
     }
 
     /// 获取最大值（Unix 时间戳秒）

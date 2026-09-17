@@ -20,8 +20,7 @@ if (-not (Test-Path $BinDir)) {
 
 # ---- 探测 Qt msvc 安装（按候选顺序取第一个存在 Qt6Core.dll 的）----
 $QtCandidates = @(
-    "C:\Qt\6.10.3\msvc2022_64",
-    "C:\Qt\6.10.2\msvc2022_64",
+    "C:\Qt\6.9.1\msvc2022_64",
     "C:\Qt\6.7.0\msvc2022_64"
 )
 $QtBin = $null

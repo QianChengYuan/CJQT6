@@ -1,6 +1,7 @@
 package cjqt6.charts
 
 import cjqt6.core.*
+import cjqt6.paint.*
 
 // ============================================================
 // QLineSeries FFI 声明
@@ -15,6 +16,14 @@ foreign func qLineSeriesAppend(ptr: Int64, x: Float64, y: Float64): Unit
 foreign func qLineSeriesSetName(ptr: Int64, name: CString): Unit
 
 foreign func qLineSeriesCount(ptr: Int64): Int32
+
+foreign func qLineSeriesSetColor(ptr: Int64, r: Int32, g: Int32, b: Int32): Unit
+
+foreign func qLineSeriesSetColorA(ptr: Int64, r: Int32, g: Int32, b: Int32, a: Int32): Unit
+
+foreign func qLineSeriesSetPen(ptr: Int64, penPtr: Int64): Unit
+
+foreign func qLineSeriesClear(ptr: Int64): Unit
 
 // ============================================================
 // QLineSeries - 折线序列
@@ -72,6 +81,30 @@ public class QLineSeries {
     public func count(): Int32 {
         checkValid()
         unsafe { qLineSeriesCount(ptr) }
+    }
+
+    /// 设置线条颜色（与 QScatterSeries / QAreaSeries 的 setColor 同名同义）
+    public func setColor(r: Int32, g: Int32, b: Int32): Unit {
+        checkValid()
+        unsafe { qLineSeriesSetColor(ptr, r, g, b) }
+    }
+
+    /// 设置线条颜色（含透明度，取值 0-255）
+    public func setColor(r: Int32, g: Int32, b: Int32, a: Int32): Unit {
+        checkValid()
+        unsafe { qLineSeriesSetColorA(ptr, r, g, b, a) }
+    }
+
+    /// 设置画笔（线宽/线型等由 QPen 决定）
+    public func setPen(pen: QPen): Unit {
+        checkValid()
+        unsafe { qLineSeriesSetPen(ptr, pen.getPtr()) }
+    }
+
+    /// 清空全部数据点（保留命名与样式），可原地复用同一序列继续追加
+    public func clear(): Unit {
+        checkValid()
+        unsafe { qLineSeriesClear(ptr) }
     }
 
     public func getPtr(): Int64 {

@@ -81,7 +81,7 @@ public const ArrowRight: Int32 = 4 // 右箭头
 
 /// 工具按钮部件
 /// 支持资源管理，可使用 try-with-resources 自动释放
-public class QToolButton <: QtResource {
+public class QToolButton <: QtWidget {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 

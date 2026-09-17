@@ -22,7 +22,10 @@ cjpm build
 
 手动方式（Windows）：`cmake ..\.. -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="$env:QTDIR"` + `cmake --build . --config Release`，再把 `native\build_windows_x64\bin\cjqt6_bridge.dll` 和 `lib\cjqt6_bridge.lib` 拷到 `releases\windows-x64\`。
 
-**运行示例/程序**：Qt 运行时 DLL 必须可找到，先 `.\scripts\setup-qt-env.ps1`（或把 `C:\Qt\6.10.3\msvc2022_64\bin` 加入 PATH），然后 `cd examples/<name> && cjpm run`。发布部署用 `windeployqt.exe` 或示例目录内的 `deploy_qt.ps1`。
+**运行示例/程序**：Qt 运行时 DLL 必须可找到，先 `.\scripts\setup-qt-env.ps1`（或把 `C:\Qt\6.9.1\msvc2022_64\bin` 加入 PATH），然后 `cd examples/<name> && cjpm run`。发布部署用 `windeployqt.exe` 或示例目录内的 `deploy_qt.ps1`。
+
+> **Windows Qt 版本锁定 6.9.1（与 GitHub CI 一致）**：项目此前默认 Qt 6.10.3，已为**与 CI 所使用的版本保持一致而同步降级至 6.9.1**（CI 侧因 aqtinstall 无法解压 6.10.3 先行降级，见 `docs/CHANGELOG.md`）。
+> 本机装有多版本 Qt 时，`QTDIR` 必须指向 `6.9.1`——bridge 与运行时 Qt 小版本不一致会在**加载期**直接失败（`0xC0000139` 找不到程序入口）；切换版本后还必须删除 `native/build_windows_x64` 缓存重编 bridge（CMake 缓存会锁住旧的 `CMAKE_PREFIX_PATH`）。
 
 ## 发布流程（推 GitCode 前必做）
 

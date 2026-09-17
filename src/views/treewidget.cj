@@ -341,7 +341,7 @@ public class QTreeWidgetItem <: QtResource {
 // ============================================================
 // QTreeWidget - 树形部件
 // ============================================================
-public class QTreeWidget <: QtResource {
+public class QTreeWidget <: QtWidget {
     private var ptr: Int64 = 0
     private var closed: Bool = false
 
