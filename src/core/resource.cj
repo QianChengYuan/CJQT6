@@ -36,6 +36,19 @@ public open class CreateFailedException <: QtException {
     }
 }
 
+/// GUI 线程违规异常
+///
+/// 触发场景：在非 `QApplication` 所属线程执行 GUI 操作（创建/显示/销毁顶层窗口等）。
+/// Qt 要求 GUI 操作在 app 所属线程进行；实测在其它线程销毁「已显示」的顶层 `QWidget`
+/// 会阻塞在 `QWidget::~QWidget → QWindow::close → QWindowSystemInterface::flushWindowSystemEvents`
+/// 的 `QWaitCondition::wait()` 上 —— 永久阻塞、CPU 0%、不会自愈。库以抛本异常替代静默挂死，
+/// 详见 docs/internal/cjmonitor-findings.md P1-5。
+public open class GuiThreadViolationException <: QtException {
+    public init(message: String) {
+        super(message)
+    }
+}
+
 // ============================================================
 // QtResource 接口 - 资源管理接口
 // ============================================================

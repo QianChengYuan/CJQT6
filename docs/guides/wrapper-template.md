@@ -344,6 +344,19 @@ w.setOnValueChanged({ value: Int32 => println(value) })
 
 **回调体内禁止释放所属对象（P1-5）**：`setOnXxxCapture` / `setOnXxx` 的回调体内**不要**调用 `close()`、`SignalConnection.disconnect()`，也不要删除该回调所属的 QTimer/QObject——否则正在派发的事件源会在自己的回调中途被销毁。正确分工是：**回调内只更新状态**，释放由**回调之外**的 `close()` 统一负责（范式见 `src/richwidgets/toast.cj` 的 `handleTimeout()` 与 `release()`）。
 
+**GUI 对象必须在 `QApplication` 所属线程操作（P1-5，已用 native 栈坐实）**：Qt 要求控件的创建、显示、销毁都在 app 所属线程执行，**顶层窗口**（无父的 `QWidget` / `QLabel` / 对话框）尤其严格。在其它线程销毁一个**已显示**的顶层控件，会阻塞在
+
+```text
+QWidget::~QWidget() → QWindow::close()
+   → QWindowSystemInterface::flushWindowSystemEvents() → QWaitCondition::wait()
+```
+
+上：该等待需要 app 线程处理事件才会被唤醒；若 app 线程此刻没在跑事件循环（后台线程、测试框架的 adopted worker 线程都属于这种情况）就**永久挂起（CPU 0%，不会自愈）**。
+
+- 库侧已提供快速失败入口：`cjqt6.core.isGuiThread()` / `checkGuiThread(op)`，违规抛 `GuiThreadViolationException`；`Toast.show()` 与「已显示实例的 `close()`」已接入守卫（`/// throws:` 已标注）。
+- 应用侧：GUI 操作一律回到主线程（事件循环线程），不要从后台线程 `show()` / `close()` 窗口。
+- 测试侧：涉及顶层窗口或 `exec()` 的用例应在**用例内/`@BeforeEach`** 建 `QApplication`，且不要与其它线程混跑（`GUITestEnvironment` 只在 `@BeforeAll` 建 app，会把 app 钉在首个线程上）。
+
 ### 4. 自绘控件（`QEventWidget`）可用能力
 
 `QEventWidget` 已与 `QWidget` 对齐下列通用能力，自绘时**不需要**再自行声明 `foreign func`：

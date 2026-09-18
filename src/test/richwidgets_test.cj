@@ -88,13 +88,98 @@ class ToastTests {
 }
 
 // ---------------------------------------------------------------------
-// P1-5：Toast 自动化用例为何只覆盖「创建/关闭」两条最简路径
-// 实测结论（对照实验见 docs/internal/cjmonitor-findings.md P1-5）：任何涉及
-// 「静态入口替换/释放」或「用例内 exec + quit」的 Toast 用例，在本仓库测试进程里
-// 都**时序敏感**——同一份代码会随前后用例顺序、乃至插入一行 println 而时通时挂。
-// 为避免给 CI 引入 flaky 用例，本文件只保留不需要事件循环、且实测稳定的两条；
-// Toast 的自动关闭与静态入口行为改由 docs 记录结论，不作运行期断言。
+// P1-5：为何本文件的 Toast 用例只覆盖「创建/关闭」两条最简路径
+// 根因已用 native 栈定位（见 docs/internal/cjmonitor-findings.md P1-5）：在**非**
+// QApplication 所属线程销毁「已显示」的顶层窗口（Toast 的裸 QLabel），会阻塞在
+//   QWidget::~QWidget → QWindow::close() → QWindowSystemInterface::flushWindowSystemEvents()
+//   → QWaitCondition::wait()
+// 上，永久挂起（CPU 0%、不会自愈）。此前观察到的「时序敏感」其实是测试框架把用例
+// 派到哪个 adopted 线程的差异（与 app 同线程则通过、否则挂起）。
+// 现库侧已加 GUI 线程守卫（抛 GuiThreadViolationException），但测试里**仍不展示
+// 顶层窗口**：测试进程中 app 常归属于其它线程，展示即按设计抛异常。
 // ---------------------------------------------------------------------
+
+// P1-5 回归：非 GUI 线程守卫是否生效（用文件级全局承接子线程结果）
+var gToastGuardCaught: Bool = false
+var gToastGuardOtherThread: Bool = false
+
+@Test
+class ToastThreadGuardTests {
+    /// P1-5 回归：非 GUI 线程的 GUI 操作快速失败。
+    /// 注意：Cangjie `spawn` 是 M:N 调度，新线程既可能落在与调用方不同的 OS 线程，也可能
+    /// 落到「恰好就是 app 所属线程」的池线程上（此时守卫按设计不拦截）。因此多轮探测，
+    /// 判据是**与 app 所属线程比较**（而非与用例线程比较）：只要测到 app 线程之外的线程，
+    /// 就要求它必须抛守卫异常；一轮都没测到则视为本环境不适用（不判失败）。
+    @TestCase
+    func testGuardThrowsOnNonGuiThread() {
+        let app = QApplication()
+        let appPtr = guiThreadPtr()
+        gToastGuardCaught = false
+        gToastGuardOtherThread = false
+        var attempt = 0
+        while (attempt < 12 && !gToastGuardOtherThread) {
+            let fut = spawn {
+                // 仅当「不是 app 所属线程」时才有守卫可验；若本轮恰好落在 app 线程，跳过
+                if (QThread.currentThreadPtr() != appPtr) {
+                    gToastGuardOtherThread = true
+                    try {
+                        checkGuiThread("回归探针")
+                    } catch (_: GuiThreadViolationException) {
+                        gToastGuardCaught = true
+                    }
+                }
+                0
+            }
+            fut.get()
+            attempt += 1
+        }
+        if (gToastGuardOtherThread) {
+            @Expect(gToastGuardCaught, true)
+        } else {
+            @Expect(true)
+        }
+    }
+
+    /// 未显示过的实例：跨线程 close() 不触发守卫（不涉及顶层窗口销毁，属安全路径）
+    @TestCase
+    func testCloseNotShownFromOtherThreadIsSafe() {
+        let app = QApplication()
+        let toast = Toast("未显示", 3000)
+        let fut = spawn {
+            toast.close()
+            0
+        }
+        fut.get()
+        @Expect(toast.isClosed(), true)
+    }
+
+    /// 已显示的实例：跨线程 close() 抛守卫异常（修复前会永久阻塞在 flush 等待上）
+    @TestCase
+    func testCloseShownToastFromOtherThreadThrows() {
+        let app = QApplication()
+        if (!isGuiThread()) {
+            // 本用例线程不是 GUI 线程：按设计 show() 会抛守卫异常，故不展示顶层窗口
+            @Expect(true)
+            return
+        }
+        let toast = Toast("已显示", 3000)
+        toast.show()
+        gToastGuardCaught = false
+        let fut = spawn {
+            try {
+                toast.close()
+            } catch (_: GuiThreadViolationException) {
+                gToastGuardCaught = true
+            }
+            0
+        }
+        fut.get()
+        @Expect(gToastGuardCaught, true)
+        @Expect(toast.isClosed(), false) // 守卫已拦截，未真正销毁
+        toast.close() // 回到 GUI 线程正常关闭
+        @Expect(toast.isClosed(), true)
+    }
+}
 
 @Test
 class SearchBoxTests {

@@ -94,12 +94,59 @@ public class Language {
     }
 }
 
+// ============================================================
+// GUI 线程守卫（见 docs/internal/cjmonitor-findings.md P1-5）
+// ------------------------------------------------------------
+// Qt 要求控件的创建/显示/销毁都在 QApplication 所属线程执行。实测在其它线程销毁一个
+// 「已显示」的顶层 QWidget，会阻塞在：
+//   QWidget::~QWidget → QWindow::close() → QWindowSystemInterface::flushWindowSystemEvents()
+//   → QWaitCondition::wait()
+// 该等待需 app 线程处理事件才会被唤醒；当 app 线程不再跑事件循环（测试框架把用例派到
+// adopted worker 线程、或应用把 GUI 操作放到后台线程）时即永久阻塞（CPU 0%，不会自愈）。
+// 这里记录 app 所属线程，并提供快速失败入口，把「静默挂死」变成「可诊断错误」。
+// ============================================================
+
+/// QApplication 所属线程指针（0 表示尚未创建 app，此时不施加线程约束）
+private var gAppThreadPtr: Int64 = 0
+
+/// 记录 QApplication 所属线程（由 QApplication.init 调用；只在首次创建时记录）
+func recordAppThreadPtr(threadPtr: Int64): Unit {
+    if (gAppThreadPtr == 0) {
+        gAppThreadPtr = threadPtr
+    }
+}
+
+/// 当前线程是否为 QApplication 所属线程。尚未创建 app 时返回 true（不施加约束）。
+public func isGuiThread(): Bool {
+    if (gAppThreadPtr == 0) {
+        return true
+    }
+    QThread.currentThreadPtr() == gAppThreadPtr
+}
+
+/// 查询 QApplication 所属线程指针（0 表示尚未创建 app）。
+/// 用途：调用方自行判断「本线程能否做 GUI 操作」，或把 GUI 操作投递回该线程。
+public func guiThreadPtr(): Int64 {
+    gAppThreadPtr
+}
+
+/// 校验当前线程是否为 QApplication 所属线程，不是则抛异常。
+/// throws: GuiThreadViolationException 在非 GUI 线程执行 GUI 操作时抛出
+public func checkGuiThread(operation: String): Unit {
+    if (!isGuiThread()) {
+        throw GuiThreadViolationException(
+            "${operation} 必须在 QApplication 所属线程调用：Qt 要求控件（尤其顶层窗口）的创建/显示/销毁在同一线程；跨线程销毁已显示的顶层控件会永久阻塞在 QWindowSystemInterface::flushWindowSystemEvents 的等待上。"
+        )
+    }
+}
+
 /// 应用程序主类，管理 Qt 应用生命周期（创建/事件循环/退出）与界面翻译语言
 public class QApplication {
     private var ptr: Int64 = 0
 
     /// throws: CreateFailedException 底层 Qt 对象创建失败时抛出
     public init() {
+        recordAppThreadPtr(QThread.currentThreadPtr())
         unsafe {
             ptr = qApplicationCreate()
             if (ptr == 0) {

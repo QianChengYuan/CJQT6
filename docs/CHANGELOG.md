@@ -41,6 +41,13 @@
   - 新增 `Toast.clear()`——静态入口此前把最近一条提示持有在 `private static var latest` 中而**没有任何外部释放手段**，现可显式关闭并复位去重窗口。
   - **机制更正**：findings 原判「回调内 `disconnect()` 死锁」经源码核对**不成立**（native `bridge_signal.cpp:219` 与仓颉 `callback.cj:27` 均在**锁外**调用回调）。本轮对照实验证实真正现象是**时序敏感挂起**（`Toast.info` → `Toast.showThrottled` 在**无事件循环**时挂起；同类内第二个 `exec` 用例挂起；插入一行 `println` 即通过），细节与未解决边界已如实记入 `docs/internal/cjmonitor-findings.md` P1-5。
   - 测试：**未投放**自动关闭/静态入口的运行期用例（实测 flaky），`src/test/richwidgets_test.cj` 只保留稳定的「创建 / 关闭」两条；`src/test/richwidgets_test.cj` 顶部注明该取舍原因。
+- **P1-5 根因定位并修复：跨线程销毁顶层窗口导致的永久挂起**（`src/core/application.cj`、`src/core/resource.cj`、`src/richwidgets/toast.cj`）
+  - **根因（确定性复现 + `cjdb` 线程栈坐实）**：在**非 `QApplication` 所属线程**销毁一个「已显示」的顶层 `QWidget`，会阻塞在 `QWidget::~QWidget → QWindow::close() → QWindowSystemInterface::flushWindowSystemEvents() → QWaitCondition::wait()`——该等待需 app 线程处理事件才会被唤醒，当 app 线程此刻未跑事件循环（测试框架的 adopted worker 线程、后台线程）时即**永久阻塞（CPU 0%，不会自愈）**。这也解释了此前全部现象：`GUITestEnvironment` 类用例挂起（app 在 `@BeforeAll` 线程、用例在别的 worker 线程）、用例内自建 app 的探针全过、插一行 `println` 即通过、全量套件比单跑更易挂、以及「污染无关用例」。**与 `Toast` 逻辑无关**——Toast 只是全库唯一「自己创建并显示无父顶层窗口」的组件。
+  - **修复 1（库侧快速失败守卫）**：`cjqt6.core` 新增 `isGuiThread()` / `checkGuiThread(op)` 与 `GuiThreadViolationException`，`QApplication.init` 记录 app 所属线程；`Toast.show()` 与「已显示实例的 `close()`」接入守卫——把**永久挂起**变成**可诊断异常**（未显示过的实例跨线程关闭属安全路径，不受影响）。
+  - **修复 2（回调内不抛异常）**：`Toast.handleTimeout()` 在非 GUI 线程时只停表 + 置位、跳过顶层窗口销毁（异常跨越 native 回调边界风险高；宁可留一个对象也不挂死）。
+  - **回归用例**：`src/test/richwidgets_test.cj` 新增 `ToastThreadGuardTests` 三条（多轮探测确认非 GUI 线程必被拦截、未显示实例跨线程 `close()` 安全、已显示实例跨线程 `close()` 抛异常且不阻塞），均为毫秒级通过。
+  - **文档**：`docs/guides/wrapper-template.md` 附录新增「GUI 对象必须在 `QApplication` 所属线程操作」铁律（含栈证据）；`.agents/skills/cjmonitor/SKILL.md` 故障速查追加同一条。
+  - 后续建议（非阻塞）：桥接侧可在 `qWidgetDelete` 对非 GUI 线程改用 `deleteLater()` 排队到 app 线程（需重编桥接 + 四平台回归）。
 
 ### 工具
 

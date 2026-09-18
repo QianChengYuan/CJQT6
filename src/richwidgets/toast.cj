@@ -9,6 +9,12 @@ import cjqt6.widgets.*
 // ============================================================
 
 /// 轻提示：显示一条短暂消息，倒计时结束后自动消失
+///
+/// **线程要求**：Toast 会创建并显示一个**顶层窗口**（裸 `QLabel`）。Qt 要求顶层窗口的
+/// 创建/显示/销毁都在 `QApplication` 所属线程执行——在其它线程销毁「已显示」的顶层控件
+/// 会永久阻塞在 `QWindowSystemInterface::flushWindowSystemEvents` 的等待上（P1-5）。
+/// 因此 `show()`、以及对已显示实例的 `close()`，在非 GUI 线程会抛
+/// `GuiThreadViolationException`（快速失败，而不是静默挂死）。
 public class Toast {
     private let label: QLabel
     private let timer: QTimer
@@ -17,6 +23,9 @@ public class Toast {
     private var conn: ?SignalConnection = None
     private var registered: Bool = false
     private var closed: Bool = false
+    // 是否已显示过（顶层窗口已创建）。只有为 true 时，销毁才走 QWindow::close 的
+    // flush 等待路径，因此线程守卫只对该状态生效（未显示的实例跨线程关闭是安全的）。
+    private var shown: Bool = false
     // 连接与计时器是否已释放。释放动作**只能在回调之外**发生（见 P1-5）：
     // 在自己的 timeout 回调里 disconnect() / 删除自身 QTimer，会让正在派发的
     // 事件源在自己的回调执行期间被销毁（悬垂），表现为用例挂起。
@@ -32,7 +41,10 @@ public class Toast {
     }
 
     /// 显示并开始倒计时（首次调用时注册自动关闭回调）
+    /// throws: GuiThreadViolationException 在非 QApplication 所属线程调用时抛出
+    ///   （顶层窗口必须在 app 所属线程创建/显示，否则销毁时会永久阻塞，见 P1-5）
     public func show(): Unit {
+        checkGuiThread("Toast.show")
         if (closed || released) {
             // 底层 label/timer 已释放，实例不可复用
             return
@@ -42,6 +54,7 @@ public class Toast {
             conn = Some(timer.setOnTimeoutCapture({=> handleTimeout()}))
             registered = true
         }
+        shown = true
         label.show()
         timer.start()
     }
@@ -49,20 +62,31 @@ public class Toast {
     /// 倒计时到点：停表 + 关闭标签 + 置标志。
     /// **不得**在此调用 `close()` / `disconnect()` / `timer.close()`——
     /// 那会在自己的回调内销毁正在派发的事件源（P1-5）。
+    /// 也**不抛异常**（异常跨越 native 回调边界风险高）：若当前线程不是 GUI 线程，
+    /// 只停表并置位、跳过对顶层窗口的销毁——宁可留下一个对象，也不能永久挂死。
     private func handleTimeout(): Unit {
         if (!closed) {
             timer.stop()
-            label.close()
+            if (isGuiThread()) {
+                label.close()
+                shown = false
+            }
             closed = true
         }
     }
 
     /// 立即关闭（幂等；倒计时结束也会自动调用）。
     /// 释放动作由**回调之外**的调用触发；回调内已置 `closed` 时，这里仍会完成释放。
+    /// throws: GuiThreadViolationException 对「已显示」的实例在非 GUI 线程关闭时抛出
+    ///   （未显示过的实例不涉及顶层窗口销毁，跨线程关闭是安全的）
     public func close(): Unit {
+        if (shown) {
+            checkGuiThread("Toast.close")
+        }
         if (!closed) {
             timer.stop()
             label.close()
+            shown = false
             closed = true
         }
         release()
