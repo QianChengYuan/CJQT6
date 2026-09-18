@@ -12,16 +12,21 @@
 #include <functional>
 #include <unordered_map>
 #include <mutex>
-#include <windows.h>
 #include "bridge_delete.h"
 
 // 互斥锁：守护下列全部回调 map 与 g_eventWidgets，避免多线程读写未定义行为
 // （工作线程创建/销毁 EventWidget 与 Qt 事件循环线程读 map 的并发竞争）
-// 用 CRITICAL_SECTION（Windows 原生递归锁）代替 std::recursive_mutex：
-// 实测在仓颉 FFI 环境下 std::recursive_mutex::lock() 会死锁（C++ runtime 初始化问题），
-// CRITICAL_SECTION 是 Windows API 不依赖 C++ runtime，正常工作。
-// qEventWidgetDelete 内持锁 erase 回调表后调 delete widget，
-// 触发 ~EventWidget 再次加锁 erase g_eventWidgets —— CRITICAL_SECTION 是递归锁，同线程可重入。
+//
+// 必须用**递归锁**：qEventWidgetDelete 内持锁 erase 回调表后调 delete widget，
+// 触发 ~EventWidget 再次加锁 erase g_eventWidgets —— 同线程需可重入。
+//
+// 平台分支（本文件曾被误写成仅 Windows 可编译，导致 Linux/macOS 桥接根本构建不出来）：
+//   - Windows：CRITICAL_SECTION。实测在仓颉 FFI 环境下 std::recursive_mutex::lock()
+//     会死锁（C++ runtime 初始化问题），CRITICAL_SECTION 是 Windows API 不依赖 C++ runtime；
+//   - POSIX（Linux/macOS）：pthread 递归互斥量（PTHREAD_MUTEX_RECURSIVE），
+//     语义与 CRITICAL_SECTION 对齐（同为同线程可重入），同样不依赖 C++ runtime。
+#if defined(Q_OS_WIN)
+#include <windows.h>
 static CRITICAL_SECTION g_eventsMutex;
 static bool g_eventsMutexInit = false;
 
@@ -43,6 +48,32 @@ public:
     CSLockGuard(CRITICAL_SECTION& cs) : m_cs(cs) { ensureEventsMutexInit(); EnterCriticalSection(&m_cs); }
     ~CSLockGuard() { LeaveCriticalSection(&m_cs); }
 };
+#else
+#include <pthread.h>
+static pthread_mutex_t g_eventsMutex;
+static pthread_once_t g_eventsMutexOnce = PTHREAD_ONCE_INIT;
+
+// 用 pthread_once 初始化，避免依赖 C++ runtime 的初始化顺序
+static void initEventsMutexFnPosix() {
+    pthread_mutexattr_t attr;
+    pthread_mutexattr_init(&attr);
+    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+    pthread_mutex_init(&g_eventsMutex, &attr);
+    pthread_mutexattr_destroy(&attr);
+}
+static inline void ensureEventsMutexInit() {
+    pthread_once(&g_eventsMutexOnce, initEventsMutexFnPosix);
+}
+
+// RAII 包装类，类似 std::lock_guard（构造签名与 Windows 分支保持一致，
+// 调用处统一写 CSLockGuard lk(g_eventsMutex); 无需平台分支）
+class CSLockGuard {
+    pthread_mutex_t& m_mutex;
+public:
+    CSLockGuard(pthread_mutex_t& m) : m_mutex(m) { ensureEventsMutexInit(); pthread_mutex_lock(&m_mutex); }
+    ~CSLockGuard() { pthread_mutex_unlock(&m_mutex); }
+};
+#endif
 
 // 事件回调映射
 static std::unordered_map<int64_t, std::function<void(int32_t, int32_t, int32_t)>> g_mousePressCallbacks;
