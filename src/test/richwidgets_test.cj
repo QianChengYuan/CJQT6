@@ -192,6 +192,10 @@ class ToastThreadGuardTests {
 //            本用例会一直挂到用例超时（机器可读的失败信号）；
 //   修复后 → 桥接层判定非所属线程，改走 deleteLater()，调用立即返回。
 // spawn 是 M:N 调度，可能落到同一 OS 线程，故多轮探测直到拿到不同线程。
+//
+// ⚠ 必须先用 isGuiThread() 守卫：裸 QLabel.show() 不受 Toast 的线程守卫保护，
+// 而测试框架常把用例派到 adopted worker 线程（app 归属另一线程），此时展示顶层窗口
+// 本身就会挂到用例超时，并连带让后续用例超时（CI 上表现为「挂起用例名每次不同」）。
 // ---------------------------------------------------------------------
 var gCrossThreadClosed: Bool = false
 var gCrossThreadLanded: Bool = false
@@ -201,6 +205,11 @@ class CrossThreadDestroyTests {
     @TestCase
     func testDestroyShownTopLevelWidgetFromOtherThread() {
         let app = QApplication()
+        if (!isGuiThread()) {
+            // 本用例线程不是 QApplication 所属线程：不构造该场景（同 Toast 线程用例）
+            @Expect(true)
+            return
+        }
         let label = QLabel()
         label.setText("P1-5 跨线程销毁回归")
         label.show()
