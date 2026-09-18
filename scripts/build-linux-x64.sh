@@ -10,3 +10,40 @@
 # ============================================================
 
 set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/lib/common.sh"
+
+ROOT_DIR="$(get_root_dir "${BASH_SOURCE[0]}")"
+PLATFORM_DIR="releases/linux-x64"
+BUILD_DIR="$ROOT_DIR/native/build_linux_x64"
+
+print_section "编译 FFI Bridge - Linux x86_64"
+
+QT="$(find_qt || true)"
+if [ -z "$QT" ]; then
+    die "未找到 Qt6,请设置 QTDIR 或安装 Qt6 开发包(见 scripts/lib/common.sh 的 find_qt)"
+fi
+echo "Qt6 路径: $QT"
+
+mkdir -p "$BUILD_DIR"
+cd "$BUILD_DIR"
+
+# 显式传 Qt6_DIR:CMake 缓存中的旧 Qt6_DIR 优先级高于 CMAKE_PREFIX_PATH,
+# 本机装有多套 Qt 时只改 QTDIR 不足以切换(表现为链接期找不到新导出符号)。
+cmake "$ROOT_DIR" \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_PREFIX_PATH="$QT" \
+    -DQt6_DIR="$QT/lib/cmake/Qt6" \
+    -DCMAKE_INSTALL_RPATH='$ORIGIN'
+
+JOBS="$(get_jobs)"
+cmake --build . --config Release --target cjqt6_bridge -j "$JOBS"
+
+# 同步到 releases/:cjpm.toml 的 [target.x86_64-unknown-linux-gnu] link-option
+# 指向 -Lreleases/linux-x64 -lcjqt6_bridge,仓颉侧链接与运行时都取该目录。
+RELEASE_DIR="$ROOT_DIR/$PLATFORM_DIR"
+mkdir -p "$RELEASE_DIR"
+cp lib/libcjqt6_bridge.so "$RELEASE_DIR/"
+echo "已部署: $PLATFORM_DIR/libcjqt6_bridge.so"
