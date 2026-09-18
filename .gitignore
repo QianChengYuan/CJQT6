@@ -98,6 +98,9 @@ examples/*uic2cj/
 examples/qml/
 
 ui/
+# 例外：CjMonitor 的 UI 是**手写包**（非 scripts/gen-ui.ps1 的生成物），必须入库
+!examples/CjMonitor/src/ui/
+!examples/CjMonitor/src/ui/**
 native/src/tools/
 
 # 示例媒体文件（太大）
@@ -159,6 +162,12 @@ releases/windows-x64/tmp_merge/
 # 示例运行时产物（数据库与调试输出不入库）
 examples/**/*.db
 examples/**/stderr_*.txt
+# CjMonitor 自测报告与导出的巡检 PDF（运行期生成，见其 README「运行时产物」）
+examples/CjMonitor/cjmonitor*.txt
+examples/CjMonitor/cjmonitor*.pdf
+
+# AI 助手本地工作目录（团队/自动化/记忆等本机数据，不入库）
+.codebuddy/
 
 # 示例运行时接收目录（文件传输产物）
 examples/**/recv/
