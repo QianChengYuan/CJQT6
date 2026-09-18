@@ -59,7 +59,7 @@ public class RingBuffer {
         var i: Int64 = 1
         while (i < count) {
             let v = buf[(start + i) % cap]
-            if (v > m) {
+            if (m < v) {
                 m = v
             }
             i += 1
@@ -77,7 +77,7 @@ public class RingBuffer {
         var i: Int64 = 1
         while (i < count) {
             let v = buf[(start + i) % cap]
-            if (v < m) {
+            if (m > v) {
                 m = v
             }
             i += 1

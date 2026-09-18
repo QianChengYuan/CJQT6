@@ -91,13 +91,13 @@ public class IntervalStats {
             minMs = d
             maxMs = d
         } else {
-            if (d < minMs) { minMs = d }
-            if (d > maxMs) { maxMs = d }
+            if (minMs > d) { minMs = d }
+            if (maxMs < d) { maxMs = d }
         }
         sumMs += d
         n += 1
-        let dev = if (d > expectedMs) { d - expectedMs } else { expectedMs - d }
-        if (dev > tolMs) {
+        let dev = if (expectedMs < d) { d - expectedMs } else { expectedMs - d }
+        if (tolMs < dev) {
             outliers += 1
         }
     }

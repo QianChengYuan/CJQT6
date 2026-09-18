@@ -24,8 +24,12 @@ public class Alerter {
 
     /// 各通道连续超阈值计数
     private var breaches: Array<Int64> = Array<Int64>(4, repeat: 0)
-    /// 各通道上次提示时间（单调毫秒）
-    private var lastFireMs: Array<Int64> = Array<Int64>(4, repeat: 0)
+    /// 各通道上次提示时间（单调毫秒）；-1 = 尚未提示过。
+    /// 必须用哨兵而非 0：monoMs() 是**进程相对**时钟（见 common/clock.cj），
+    /// 初始 0 会把「进程启动后第一个 toastWindowMs 内」的告警全部误判为
+    /// 「窗口内重复」而丢弃；又因上层判定是精确等值（breaches == required），
+    /// 计数此后不再回到 3 → 该通道在数值回落到阈值下之前**再也无法告警**。
+    private var lastFireMs: Array<Int64> = Array<Int64>(4, repeat: -1)
 
     // 注意：泛型嵌套的连续 '>>' 会被解析成右移运算符，必须留空格
     private var thresholds: Option<ArrayList<Float64> > = None
@@ -34,6 +38,8 @@ public class Alerter {
     private var alertCount: Int64 = 0
     private var lastText: String = ""
     private var lastLevel: Int32 = 0
+    /// 已判定的样本数（可观测性：确认判定器确实被喂到数据、且无数据时能一眼看出）
+    private var seen: Int64 = 0
 
     // 提示音（可选，缺失即静默）
     private var soundPath: String = ""
@@ -65,6 +71,11 @@ public class Alerter {
         alertCount
     }
 
+    /// 已判定的样本数（与 AppState.totalSamples() 对齐，用于自测核对）
+    public func seenSamples(): Int64 {
+        seen
+    }
+
     public func lastMessage(): String {
         lastText
     }
@@ -92,6 +103,7 @@ public class Alerter {
     // ========================================================
 
     public func onSample(s: Sample): Unit {
+        seen += 1
         if (let Some(ts) <- thresholds) {
             var ch: Int64 = 0
             while (ch < Int64(Channel.COUNT)) {
@@ -116,8 +128,9 @@ public class Alerter {
 
     func fire(ch: Int64, v: Float64, th: Float64): Unit {
         let now = monoMs()
-        if (now - lastFireMs[ch] < toastWindowMs) {
-            return   // 展示层去重
+        let last = lastFireMs[ch]
+        if (last >= 0 && now - last < toastWindowMs) {
+            return   // 展示层去重（-1 表示从未提示过，不受窗口约束）
         }
         lastFireMs[ch] = now
         alertCount += 1

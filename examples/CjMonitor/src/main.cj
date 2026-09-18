@@ -69,6 +69,34 @@ main(): Int64 {
         return runSelfTest(app, selfTest)
     }
 
+    // 绘制自测（M2 验收）：不启动采集，直接驱动自绘路径并统计帧率
+    let paintFrames = paintSelfTestFrames()
+    if (paintFrames > 0) {
+        trace("4'. 进入绘制自测")
+        return runPaintSelfTest(app, paintFrames)
+    }
+
+    // 界面自测（M3 验收）：装配与正常运行一致，额外采样布局/降频/状态栏
+    let uiSeconds = uiSelfTestSeconds()
+    if (uiSeconds > 0) {
+        trace("5'. 进入界面自测")
+        return runUiSelfTest(app, uiSeconds)
+    }
+
+    // M4 自测：降采样攒批落库 → 区间查询 → 历史图表重建 → 三页 PDF
+    let m4Seconds = m4SelfTestSeconds()
+    if (m4Seconds > 0) {
+        trace("6'. 进入 M4 自测")
+        return runM4SelfTest(app, m4Seconds)
+    }
+
+    // M5 自测：告警去抖/去重、提示音降级、深色主题、阈值窗口
+    let m5Seconds = m5SelfTestSeconds()
+    if (m5Seconds > 0) {
+        trace("7'. 进入 M5 自测")
+        return runM5SelfTest(app, m5Seconds)
+    }
+
     // ---- 采集与界面装配（main.cj 是唯一装配点）----
     // 容量 1200 点：支持最长 120 秒窗口（100ms × 1200）
     let state = AppState(createPlatformProbe(), 1200, 20)

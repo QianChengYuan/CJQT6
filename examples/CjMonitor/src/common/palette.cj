@@ -40,36 +40,36 @@ func hexDigit(v: Int32): String {
 }
 
 // ---- 背景层次 ----
-public let C_BG_BASE = Rgb(14, 16, 19)        // #0E1013 窗口底
-public let C_BG_PANEL = Rgb(24, 26, 32)       // #181A20 面板
-public let C_BG_ELEVATED = Rgb(31, 35, 43)    // #1F232B 抬升面
-public let C_BORDER = Rgb(42, 47, 58)         // #2A2F3A 描边
+public let C_BG_BASE: Rgb = Rgb(14, 16, 19)        // #0E1013 窗口底
+public let C_BG_PANEL: Rgb = Rgb(24, 26, 32)       // #181A20 面板
+public let C_BG_ELEVATED: Rgb = Rgb(31, 35, 43)    // #1F232B 抬升面
+public let C_BORDER: Rgb = Rgb(42, 47, 58)         // #2A2F3A 描边
 
 // ---- 文字 ----
-public let C_TEXT_PRIMARY = Rgb(230, 234, 242)   // #E6EAF2
-public let C_TEXT_SECONDARY = Rgb(154, 164, 178) // #9AA4B2
-public let C_TEXT_MUTED = Rgb(91, 100, 112)      // #5B6470
-public let C_TEXT_ON_ACCENT = Rgb(255, 255, 255)
+public let C_TEXT_PRIMARY: Rgb = Rgb(230, 234, 242)   // #E6EAF2
+public let C_TEXT_SECONDARY: Rgb = Rgb(154, 164, 178) // #9AA4B2
+public let C_TEXT_MUTED: Rgb = Rgb(91, 100, 112)      // #5B6470
+public let C_TEXT_ON_ACCENT: Rgb = Rgb(255, 255, 255)
 
 // ---- 主色 ----
-public let C_ACCENT = Rgb(0, 217, 181)   // #00D9B5 青
-public let C_CYAN = Rgb(34, 195, 230)    // #22C3E6
-public let C_VIOLET = Rgb(124, 92, 255)  // #7C5CFF
-public let C_BLUE = Rgb(76, 141, 255)    // #4C8DFF
+public let C_ACCENT: Rgb = Rgb(0, 217, 181)   // #00D9B5 青
+public let C_CYAN: Rgb = Rgb(34, 195, 230)    // #22C3E6
+public let C_VIOLET: Rgb = Rgb(124, 92, 255)  // #7C5CFF
+public let C_BLUE: Rgb = Rgb(76, 141, 255)    // #4C8DFF
 
 // ---- 语义色 ----
-public let C_OK = Rgb(61, 214, 140)     // #3DD68C
-public let C_WARN = Rgb(255, 176, 32)   // #FFB020
-public let C_DANGER = Rgb(255, 92, 92)  // #FF5C5C
+public let C_OK: Rgb = Rgb(61, 214, 140)     // #3DD68C
+public let C_WARN: Rgb = Rgb(255, 176, 32)   // #FFB020
+public let C_DANGER: Rgb = Rgb(255, 92, 92)  // #FF5C5C
 
 // ============================================================
 // 通道配色（CPU / MEM / DISK / NET）
 // ============================================================
 
-public let C_CH_CPU = C_ACCENT
-public let C_CH_MEM = C_CYAN
-public let C_CH_DISK = C_VIOLET
-public let C_CH_NET = C_BLUE
+public let C_CH_CPU: Rgb = C_ACCENT
+public let C_CH_MEM: Rgb = C_CYAN
+public let C_CH_DISK: Rgb = C_VIOLET
+public let C_CH_NET: Rgb = C_BLUE
 
 /// 按通道下标取配色（越界回退为主色）
 public func channelColor(idx: Int32): Rgb {

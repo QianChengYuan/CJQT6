@@ -31,6 +31,9 @@ public class CurveWidget {
     private let nameFont: QFont
     private let valueFont: QFont
     private let frames = FrameStats()
+    // 最近一次绘制回调收到的画布尺寸（诊断用；0 表示回调未触发或尺寸不足）
+    private var lastW: Int32 = 0
+    private var lastH: Int32 = 0
 
     private var buffers: ArrayList<RingBuffer> = ArrayList<RingBuffer>()
     private var visiblePoints: Int64 = 300
@@ -72,6 +75,22 @@ public class CurveWidget {
         frames
     }
 
+    /// 最近一次绘制回调收到的画布尺寸（诊断用；0 表示回调未触发或尺寸不足）
+    public func lastPaintWidth(): Int32 {
+        lastW
+    }
+
+    public func lastPaintHeight(): Int32 {
+        lastH
+    }
+
+    /// 诊断文本：当前画布尺寸 + 可见性（不依赖绘制回调，用于定位「绘制未触发」）
+    public func diagText(): String {
+        let w = unsafe { qWidgetWidth(canvas.getPtr()) }
+        let h = unsafe { qWidgetHeight(canvas.getPtr()) }
+        "${w} × ${h}，visible=${canvas.isVisible()}"
+    }
+
     public func dispose(): Unit {
         nameFont.delete()
         valueFont.delete()
@@ -83,12 +102,15 @@ public class CurveWidget {
     // ========================================================
 
     func paint(painterPtr: Int64): Unit {
+        // 先记账再判尺寸：尺寸不足时也要能观察到「回调确实被触发过」
+        frames.onFrame()
         let w = unsafe { qWidgetWidth(canvas.getPtr()) }
         let h = unsafe { qWidgetHeight(canvas.getPtr()) }
+        lastW = w
+        lastH = h
         if (w <= 4 || h <= 4) {
             return
         }
-        frames.onFrame()
 
         let painter = QPainter.fromPtr(painterPtr)
         painter.fillRectColor(0, 0, w, h, rgbSolid(C_BG_PANEL))
@@ -134,7 +156,7 @@ public class CurveWidget {
         if (total < 2) {
             return
         }
-        let shown = if (total < visiblePoints) { total } else { visiblePoints }
+        let shown = if (visiblePoints > total) { total } else { visiblePoints }
         if (shown < 2) {
             return
         }
@@ -148,7 +170,7 @@ public class CurveWidget {
             var i: Int64 = start
             while (i < total) {
                 let v = buf.at(i)
-                if (v > m) {
+                if (m < v) {
                     m = v
                 }
                 i += 1
