@@ -147,12 +147,15 @@ public class Toast {
         // 只引用静态成员，不捕获局部变量。
         // 注意：回调内只复位状态、不释放任何 Qt 对象——释放统一走 close()（P1-5）。
         // 这里只复位窗口状态并停止计时，计时器实例留待下次调用统一关闭。
-        timer.setOnTimeoutCapture({=>
-            lastMessage = ""
-            if (let Some(t) <- dedupTimer) {
-                t.stop()
+        timer.setOnTimeoutCapture(
+            {
+                =>
+                    lastMessage = ""
+                    if (let Some(t) <- dedupTimer) {
+                        t.stop()
+                    }
             }
-        })
+        )
         timer.start()
         showStatic(message, durationMs)
     }

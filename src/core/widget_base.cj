@@ -113,5 +113,4 @@ public interface QtWidgetCore {
 }
 
 /// 完整控件接口：资源管理（QtResource）+ 通用能力（QtWidgetCore）
-public interface QtWidget <: QtResource & QtWidgetCore {
-}
+public interface QtWidget <: QtResource & QtWidgetCore {}

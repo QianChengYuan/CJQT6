@@ -135,8 +135,7 @@ public func guiThreadPtr(): Int64 {
 public func checkGuiThread(operation: String): Unit {
     if (!isGuiThread()) {
         throw GuiThreadViolationException(
-            "${operation} 必须在 QApplication 所属线程调用：Qt 要求控件（尤其顶层窗口）的创建/显示/销毁在同一线程；跨线程销毁已显示的顶层控件会永久阻塞在 QWindowSystemInterface::flushWindowSystemEvents 的等待上。"
-        )
+            "${operation} 必须在 QApplication 所属线程调用：Qt 要求控件（尤其顶层窗口）的创建/显示/销毁在同一线程；跨线程销毁已显示的顶层控件会永久阻塞在 QWindowSystemInterface::flushWindowSystemEvents 的等待上。")
     }
 }
 
