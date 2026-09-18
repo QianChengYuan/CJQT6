@@ -3,6 +3,7 @@
 #include <QFontInfo>
 #include <unordered_map>
 #include "bridge_string_utils.h"
+#include "bridge_delete.h"
 
 // Qt6 的 QFontMetrics 无 font() 成员，需保存创建时的 QFont 以便获取 family
 static std::unordered_map<int64_t, QFont> g_fontMetricsFonts;
@@ -22,7 +23,7 @@ int64_t qFontMetricsCreate(int64_t fontPtr) {
 
 void qFontMetricsDelete(int64_t ptr) {
     g_fontMetricsFonts.erase(ptr);
-    delete reinterpret_cast<QFontMetrics*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QFontMetrics*>(ptr));
 }
 
 int32_t qFontMetricsHeight(int64_t ptr) {
@@ -84,7 +85,7 @@ int64_t qFontInfoCreate(int64_t fontPtr) {
 }
 
 void qFontInfoDelete(int64_t ptr) {
-    delete reinterpret_cast<QFontInfo*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QFontInfo*>(ptr));
 }
 
 const char* qFontInfoFamily(int64_t ptr) {

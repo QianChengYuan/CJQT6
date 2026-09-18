@@ -7,6 +7,7 @@
  */
 
 #include <QVideoWidget>
+#include "bridge_delete.h"
 
 extern "C" {
 
@@ -44,7 +45,7 @@ void qVideoWidgetShow(int64_t ptr) {
 void qVideoWidgetDelete(int64_t ptr) {
     QVideoWidget* widget = reinterpret_cast<QVideoWidget*>(ptr);
     if (widget) {
-        delete widget;
+        cjqt6SafeDelete(widget);
     }
 }
 

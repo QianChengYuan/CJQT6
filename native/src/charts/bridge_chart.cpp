@@ -45,6 +45,7 @@
 #include <QColor>
 #include <QDateTime>
 #include "bridge_string_utils.h"
+#include "bridge_delete.h"
 
 extern "C" {
 
@@ -57,7 +58,7 @@ int64_t qChartCreate() {
 }
 
 void qChartDelete(int64_t ptr) {
-    delete reinterpret_cast<QChart*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QChart*>(ptr));
 }
 
 void qChartAddSeries(int64_t ptr, int64_t seriesPtr) {
@@ -113,7 +114,7 @@ int64_t qChartViewCreate() {
 }
 
 void qChartViewDelete(int64_t ptr) {
-    delete reinterpret_cast<QChartView*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QChartView*>(ptr));
 }
 
 void qChartViewSetChart(int64_t ptr, int64_t chartPtr) {
@@ -131,7 +132,7 @@ int64_t qLineSeriesCreate() {
 }
 
 void qLineSeriesDelete(int64_t ptr) {
-    delete reinterpret_cast<QLineSeries*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QLineSeries*>(ptr));
 }
 
 void qLineSeriesAppend(int64_t ptr, double x, double y) {
@@ -194,7 +195,7 @@ int64_t qValueAxisCreate() {
 }
 
 void qValueAxisDelete(int64_t ptr) {
-    delete reinterpret_cast<QValueAxis*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QValueAxis*>(ptr));
 }
 
 void qValueAxisSetRange(int64_t ptr, double min, double max) {
@@ -231,7 +232,7 @@ int64_t qBarCategoryAxisCreate() {
 }
 
 void qBarCategoryAxisDelete(int64_t ptr) {
-    delete reinterpret_cast<QBarCategoryAxis*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QBarCategoryAxis*>(ptr));
 }
 
 void qBarCategoryAxisAppend(int64_t ptr, const char* category) {
@@ -288,7 +289,7 @@ int64_t qCategoryAxisCreate() {
 }
 
 void qCategoryAxisDelete(int64_t ptr) {
-    delete reinterpret_cast<QCategoryAxis*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QCategoryAxis*>(ptr));
 }
 
 void qCategoryAxisAppend(int64_t ptr, const char* label, double endValue) {
@@ -429,7 +430,7 @@ int64_t qBarSetCreate(const char* label) {
 }
 
 void qBarSetDelete(int64_t ptr) {
-    delete reinterpret_cast<QBarSet*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QBarSet*>(ptr));
 }
 
 void qBarSetAppend(int64_t ptr, double value) {
@@ -486,7 +487,7 @@ int64_t qBarSeriesCreate() {
 }
 
 void qBarSeriesDelete(int64_t ptr) {
-    delete reinterpret_cast<QBarSeries*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QBarSeries*>(ptr));
 }
 
 void qBarSeriesAppend(int64_t ptr, int64_t setPtr) {
@@ -541,7 +542,7 @@ int64_t qPieSeriesCreate() {
 }
 
 void qPieSeriesDelete(int64_t ptr) {
-    delete reinterpret_cast<QPieSeries*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QPieSeries*>(ptr));
 }
 
 void qPieSeriesAppend(int64_t ptr, const char* label, double value) {
@@ -614,7 +615,7 @@ int64_t qScatterSeriesCreate() {
 }
 
 void qScatterSeriesDelete(int64_t ptr) {
-    delete reinterpret_cast<QScatterSeries*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QScatterSeries*>(ptr));
 }
 
 void qScatterSeriesAppend(int64_t ptr, double x, double y) {
@@ -663,7 +664,7 @@ int64_t qAreaSeriesCreate(int64_t upperPtr, int64_t lowerPtr) {
 }
 
 void qAreaSeriesDelete(int64_t ptr) {
-    delete reinterpret_cast<QAreaSeries*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QAreaSeries*>(ptr));
 }
 
 void qAreaSeriesSetColor(int64_t ptr, int32_t r, int32_t g, int32_t b) {
@@ -690,7 +691,7 @@ int64_t qSplineSeriesCreate() {
 }
 
 void qSplineSeriesDelete(int64_t ptr) {
-    delete reinterpret_cast<QSplineSeries*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QSplineSeries*>(ptr));
 }
 
 void qSplineSeriesAppend(int64_t ptr, double x, double y) {
@@ -717,7 +718,7 @@ int64_t qPercentBarSeriesCreate() {
 }
 
 void qPercentBarSeriesDelete(int64_t ptr) {
-    delete reinterpret_cast<QPercentBarSeries*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QPercentBarSeries*>(ptr));
 }
 
 void qPercentBarSeriesAppend(int64_t ptr, int64_t setPtr) {
@@ -750,7 +751,7 @@ int64_t qStackedBarSeriesCreate() {
 }
 
 void qStackedBarSeriesDelete(int64_t ptr) {
-    delete reinterpret_cast<QStackedBarSeries*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QStackedBarSeries*>(ptr));
 }
 
 void qStackedBarSeriesAppend(int64_t ptr, int64_t setPtr) {
@@ -788,7 +789,7 @@ int64_t qBoxSetCreate5(double le, double lq, double m, double uq, double ue, con
 }
 
 void qBoxSetDelete(int64_t ptr) {
-    delete reinterpret_cast<QBoxSet*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QBoxSet*>(ptr));
 }
 
 void qBoxSetAppend(int64_t ptr, double value) {
@@ -830,7 +831,7 @@ int64_t qBoxPlotSeriesCreate() {
 }
 
 void qBoxPlotSeriesDelete(int64_t ptr) {
-    delete reinterpret_cast<QBoxPlotSeries*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QBoxPlotSeries*>(ptr));
 }
 
 void qBoxPlotSeriesAppend(int64_t ptr, int64_t boxPtr) {
@@ -873,7 +874,7 @@ int64_t qCandlestickSetCreateOHLC(double open, double high, double low, double c
 }
 
 void qCandlestickSetDelete(int64_t ptr) {
-    delete reinterpret_cast<QCandlestickSet*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QCandlestickSet*>(ptr));
 }
 
 void qCandlestickSetSetTimestamp(int64_t ptr, double timestamp) {
@@ -935,7 +936,7 @@ int64_t qCandlestickSeriesCreate() {
 }
 
 void qCandlestickSeriesDelete(int64_t ptr) {
-    delete reinterpret_cast<QCandlestickSeries*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QCandlestickSeries*>(ptr));
 }
 
 void qCandlestickSeriesAppend(int64_t ptr, int64_t setPtr) {
@@ -993,7 +994,7 @@ int64_t qPolarChartCreate() {
 }
 
 void qPolarChartDelete(int64_t ptr) {
-    delete reinterpret_cast<QPolarChart*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QPolarChart*>(ptr));
 }
 
 void qPolarChartAddAxis(int64_t ptr, int64_t axisPtr, int32_t polarOrientation) {
@@ -1017,7 +1018,7 @@ int64_t qPieSliceCreateLabelValue(const char* label, double value) {
 }
 
 void qPieSliceDelete(int64_t ptr) {
-    delete reinterpret_cast<QPieSlice*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QPieSlice*>(ptr));
 }
 
 void qPieSliceSetLabel(int64_t ptr, const char* label) {
@@ -1154,7 +1155,7 @@ void qDateTimeAxisSetMaxDateTime(int64_t axisPtr, int64_t dateTimePtr) {
 }
 
 void qDateTimeAxisDelete(int64_t ptr) {
-    delete reinterpret_cast<QDateTimeAxis*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QDateTimeAxis*>(ptr));
 }
 
 void qDateTimeAxisSetMin(int64_t ptr, double secsSinceEpoch) {
@@ -1217,7 +1218,7 @@ int64_t qLogValueAxisCreate() {
 }
 
 void qLogValueAxisDelete(int64_t ptr) {
-    delete reinterpret_cast<QLogValueAxis*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QLogValueAxis*>(ptr));
 }
 
 void qLogValueAxisSetMin(int64_t ptr, double min) {
@@ -1290,7 +1291,7 @@ int64_t qHorizontalBarSeriesCreate() {
 }
 
 void qHorizontalBarSeriesDelete(int64_t ptr) {
-    delete reinterpret_cast<QHorizontalBarSeries*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QHorizontalBarSeries*>(ptr));
 }
 
 void qHorizontalBarSeriesAppend(int64_t ptr, int64_t setPtr) {
@@ -1345,7 +1346,7 @@ int64_t qHorizontalPercentBarSeriesCreate() {
 }
 
 void qHorizontalPercentBarSeriesDelete(int64_t ptr) {
-    delete reinterpret_cast<QHorizontalPercentBarSeries*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QHorizontalPercentBarSeries*>(ptr));
 }
 
 void qHorizontalPercentBarSeriesAppend(int64_t ptr, int64_t setPtr) {
@@ -1400,7 +1401,7 @@ int64_t qHorizontalStackedBarSeriesCreate() {
 }
 
 void qHorizontalStackedBarSeriesDelete(int64_t ptr) {
-    delete reinterpret_cast<QHorizontalStackedBarSeries*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QHorizontalStackedBarSeries*>(ptr));
 }
 
 void qHorizontalStackedBarSeriesAppend(int64_t ptr, int64_t setPtr) {

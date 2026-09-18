@@ -40,6 +40,7 @@
 #include <functional>
 #include <unordered_map>
 #include "bridge_string_utils.h"
+#include "bridge_delete.h"
 
 // �ⲿ�ص�ӳ������
 extern std::unordered_map<int64_t, std::function<void(int64_t)>> g_buttonCallbacks;
@@ -135,7 +136,7 @@ bool qLabelWordWrap(int64_t ptr) {
 void qLabelDelete(int64_t ptr) {
     QLabel* label = reinterpret_cast<QLabel*>(ptr);
     if (label) {
-        delete label;
+        cjqt6SafeDelete(label);
     }
 }
 
@@ -267,7 +268,7 @@ void qButtonDelete(int64_t ptr) {
         qWcoreSignalCleanup(ptr);  // 清理 ext_wcore 中 pressed/released/toggled/clickedChecked 表
         g_buttonCallbacks.erase(ptr);
         g_buttonClickConns.erase(ptr);
-        delete button;
+        cjqt6SafeDelete(button);
     }
 }
 
@@ -357,7 +358,7 @@ void qToolButtonDelete(int64_t ptr) {
     QToolButton* button = reinterpret_cast<QToolButton*>(ptr);
     if (button) {
         qWcoreSignalCleanup(ptr);  // 清理 ext_wcore 中 QToolButton pressed/released/clickedChecked 表
-        delete button;
+        cjqt6SafeDelete(button);
     }
 }
 
@@ -624,7 +625,7 @@ void qLineEditDelete(int64_t ptr) {
         g_textChangedConns.erase(ptr);
         g_passwordToggleCallbacks.erase(ptr);
         g_passwordToggleButtons.erase(ptr);
-        delete lineEdit;
+        cjqt6SafeDelete(lineEdit);
     }
 }
 
@@ -693,7 +694,7 @@ void qTextEditDelete(int64_t ptr) {
     QTextEdit* textEdit = reinterpret_cast<QTextEdit*>(ptr);
     if (textEdit) {
         qWtextSignalCleanup(ptr);
-        delete textEdit;
+        cjqt6SafeDelete(textEdit);
     }
 }
 
@@ -1118,7 +1119,7 @@ void qPlainTextEditDelete(int64_t ptr) {
     QPlainTextEdit* editor = reinterpret_cast<QPlainTextEdit*>(ptr);
     if (editor) {
         qWtextSignalCleanup(ptr);
-        delete editor;
+        cjqt6SafeDelete(editor);
     }
 }
 
@@ -1209,7 +1210,7 @@ void qCompleterComplete(int64_t ptr) {
 void qCompleterDelete(int64_t ptr) {
     QCompleter* completer = reinterpret_cast<QCompleter*>(ptr);
     if (completer) {
-        delete completer;
+        cjqt6SafeDelete(completer);
     }
 }
 
@@ -1301,7 +1302,7 @@ void qTextBrowserDelete(int64_t ptr) {
     QTextBrowser* browser = reinterpret_cast<QTextBrowser*>(ptr);
     if (browser) {
         qWtextSignalCleanup(ptr);
-        delete browser;
+        cjqt6SafeDelete(browser);
     }
 }
 
@@ -1337,7 +1338,7 @@ void qKeySequenceEditDelete(int64_t ptr) {
     QKeySequenceEdit* edit = reinterpret_cast<QKeySequenceEdit*>(ptr);
     if (edit) {
         qWselectSignalCleanup(ptr);
-        delete edit;
+        cjqt6SafeDelete(edit);
     }
 }
 
@@ -1355,7 +1356,7 @@ void qSystemTrayIconDelete(int64_t ptr) {
     QSystemTrayIcon* icon = reinterpret_cast<QSystemTrayIcon*>(ptr);
     if (icon) {
         qWmiscSignalCleanup(ptr);
-        delete icon;
+        cjqt6SafeDelete(icon);
     }
 }
 
@@ -1420,7 +1421,7 @@ int64_t qGraphicsViewCreate(int64_t parentPtr) {
 
 void qGraphicsViewDelete(int64_t ptr) {
     QGraphicsView* view = reinterpret_cast<QGraphicsView*>(ptr);
-    if (view) delete view;
+    if (view) cjqt6SafeDelete(view);
 }
 
 void qGraphicsViewSetScene(int64_t ptr, int64_t scenePtr) {
@@ -1522,7 +1523,7 @@ int64_t qGraphicsSceneCreate() {
 
 void qGraphicsSceneDelete(int64_t ptr) {
     QGraphicsScene* scene = reinterpret_cast<QGraphicsScene*>(ptr);
-    if (scene) delete scene;
+    if (scene) cjqt6SafeDelete(scene);
 }
 
 void qGraphicsSceneAddItem(int64_t ptr, int64_t itemPtr) {
@@ -1709,7 +1710,7 @@ void qGraphicsOpacityEffectSetEnabled(int64_t ptr, bool enabled) {
 
 void qGraphicsOpacityEffectDelete(int64_t ptr) {
     QGraphicsOpacityEffect* effect = reinterpret_cast<QGraphicsOpacityEffect*>(ptr);
-    if (effect) delete effect;
+    if (effect) cjqt6SafeDelete(effect);
 }
 
 // ============================================================
@@ -1748,7 +1749,7 @@ void qGraphicsDropShadowEffectSetEnabled(int64_t ptr, bool enabled) {
 
 void qGraphicsDropShadowEffectDelete(int64_t ptr) {
     QGraphicsDropShadowEffect* effect = reinterpret_cast<QGraphicsDropShadowEffect*>(ptr);
-    if (effect) delete effect;
+    if (effect) cjqt6SafeDelete(effect);
 }
 
 // ============================================================
@@ -1797,7 +1798,7 @@ void qFontComboBoxDelete(int64_t ptr) {
     QFontComboBox* combo = reinterpret_cast<QFontComboBox*>(ptr);
     if (combo) {
         qWselectSignalCleanup(ptr);
-        delete combo;
+        cjqt6SafeDelete(combo);
     }
 }
 
@@ -1868,7 +1869,7 @@ void qDialogButtonBoxDelete(int64_t ptr) {
         g_dialogBtnRejectedCallbacks.erase(ptr);
         g_dialogBtnAcceptedConns.erase(ptr);
         g_dialogBtnRejectedConns.erase(ptr);
-        delete box;
+        cjqt6SafeDelete(box);
     }
 }
 
@@ -1903,7 +1904,7 @@ void qCommandLinkButtonSetDescription(int64_t ptr, const char* description) {
 
 void qCommandLinkButtonDelete(int64_t ptr) {
     QCommandLinkButton* btn = reinterpret_cast<QCommandLinkButton*>(ptr);
-    if (btn) delete btn;
+    if (btn) cjqt6SafeDelete(btn);
 }
 
 // ============================================================
@@ -1969,7 +1970,7 @@ void qScrollBarDelete(int64_t ptr) {
         qWnewSignalCleanup(ptr);
         g_scrollBarCallbacks.erase(ptr);
         g_scrollBarConns.erase(ptr);
-        delete bar;
+        cjqt6SafeDelete(bar);
     }
 }
 
@@ -2007,7 +2008,7 @@ void qLineEditSetValidator(int64_t lineEditPtr, int64_t validatorPtr) {
 
 void qValidatorDelete(int64_t ptr) {
     QValidator* v = reinterpret_cast<QValidator*>(ptr);
-    if (v) delete v;
+    if (v) cjqt6SafeDelete(v);
 }
 
 
@@ -2054,7 +2055,7 @@ void qSplashScreenSetPixmap(int64_t ptr, int64_t pixmapPtr) {
 
 void qSplashScreenDelete(int64_t ptr) {
     QSplashScreen* splash = reinterpret_cast<QSplashScreen*>(ptr);
-    if (splash) delete splash;
+    if (splash) cjqt6SafeDelete(splash);
 }
 
 // ============================================================
@@ -2074,7 +2075,7 @@ void qSizeGripSetVisible(int64_t ptr, bool visible) {
 
 void qSizeGripDelete(int64_t ptr) {
     QSizeGrip* grip = reinterpret_cast<QSizeGrip*>(ptr);
-    if (grip) delete grip;
+    if (grip) cjqt6SafeDelete(grip);
 }
 
 // ============================================================
@@ -2134,7 +2135,7 @@ int64_t qRubberBandGeometryHeight(int64_t ptr) {
 
 void qRubberBandDelete(int64_t ptr) {
     QRubberBand* band = reinterpret_cast<QRubberBand*>(ptr);
-    if (band) delete band;
+    if (band) cjqt6SafeDelete(band);
 }
 
 

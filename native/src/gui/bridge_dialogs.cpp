@@ -17,6 +17,7 @@
 #include <QWizard>
 #include <QWizardPage>
 #include "bridge_string_utils.h"
+#include "bridge_delete.h"
 
 // 安全复制QString为malloc分配的堆字符串
 static char* safeCopyString(const QString& str) {
@@ -236,7 +237,7 @@ int64_t qProgressDialogCreate(int64_t parentPtr, const char* labelText, const ch
 void qProgressDialogDelete(int64_t ptr) {
     QProgressDialog* progress = reinterpret_cast<QProgressDialog*>(ptr);
     if (progress) {
-        delete progress;
+        cjqt6SafeDelete(progress);
     }
 }
 
@@ -354,7 +355,7 @@ int64_t qWizardCreate(int64_t parentPtr) {
 void qWizardDelete(int64_t ptr) {
     QWizard* wizard = reinterpret_cast<QWizard*>(ptr);
     if (wizard) {
-        delete wizard;
+        cjqt6SafeDelete(wizard);
     }
 }
 
@@ -459,7 +460,7 @@ int64_t qWizardPageCreate(int64_t parentPtr) {
 void qWizardPageDelete(int64_t ptr) {
     QWizardPage* page = reinterpret_cast<QWizardPage*>(ptr);
     if (page) {
-        delete page;
+        cjqt6SafeDelete(page);
     }
 }
 
@@ -505,7 +506,7 @@ int64_t qErrorMessageCreate(int64_t parentPtr) {
 void qErrorMessageDelete(int64_t ptr) {
     QErrorMessage* errMsg = reinterpret_cast<QErrorMessage*>(ptr);
     if (errMsg) {
-        delete errMsg;
+        cjqt6SafeDelete(errMsg);
     }
 }
 

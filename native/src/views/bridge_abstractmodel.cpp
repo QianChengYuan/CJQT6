@@ -10,6 +10,7 @@
 #include <QAbstractItemModel>
 #include <QModelIndex>
 #include <QVariant>
+#include "bridge_delete.h"
 
 extern "C" {
 
@@ -166,7 +167,7 @@ int64_t qAbstractItemModelCreate() {
 }
 
 void qAbstractItemModelDelete(int64_t ptr) {
-    delete reinterpret_cast<CjAbstractItemModel*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<CjAbstractItemModel*>(ptr));
 }
 
 void qAbstractItemModelSetRowCountCallback(int64_t ptr, RowCountFunc cb) {

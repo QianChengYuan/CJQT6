@@ -1,6 +1,7 @@
 #include <QItemSelectionModel>
 #include <QAbstractItemModel>
 #include <QModelIndex>
+#include "bridge_delete.h"
 
 extern "C" {
 
@@ -14,7 +15,7 @@ int64_t qItemSelectionModelCreate(int64_t modelPtr) {
 }
 
 void qItemSelectionModelDelete(int64_t ptr) {
-    delete reinterpret_cast<QItemSelectionModel*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QItemSelectionModel*>(ptr));
 }
 
 int32_t qItemSelectionModelCurrentIndexRow(int64_t ptr) {

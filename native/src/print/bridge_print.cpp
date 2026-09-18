@@ -13,6 +13,7 @@
 #include <functional>
 #include <unordered_map>
 #include "bridge_string_utils.h"
+#include "bridge_delete.h"
 
 extern "C" {
 
@@ -267,7 +268,7 @@ void qPrinterSetFromTo(int64_t ptr, int32_t from, int32_t to) {
 void qPrinterDelete(int64_t ptr) {
     QPrinter* printer = reinterpret_cast<QPrinter*>(ptr);
     if (printer) {
-        delete printer;
+        cjqt6SafeDelete(printer);
     }
 }
 
@@ -300,7 +301,7 @@ int64_t qPrintDialogPrinter(int64_t ptr) {
 void qPrintDialogDelete(int64_t ptr) {
     QPrintDialog* dialog = reinterpret_cast<QPrintDialog*>(ptr);
     if (dialog) {
-        delete dialog;
+        cjqt6SafeDelete(dialog);
     }
 }
 
@@ -349,7 +350,7 @@ int64_t qPrintPreviewDialogPrinter(int64_t ptr) {
 void qPrintPreviewDialogDelete(int64_t ptr) {
     QPrintPreviewDialog* dialog = reinterpret_cast<QPrintPreviewDialog*>(ptr);
     if (dialog) {
-        delete dialog;
+        cjqt6SafeDelete(dialog);
     }
 }
 

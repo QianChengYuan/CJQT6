@@ -7,6 +7,7 @@
 #include <QTextCursor>
 #include <QFont>
 #include "bridge_string_utils.h"
+#include "bridge_delete.h"
 
 extern "C" {
 
@@ -23,7 +24,7 @@ int64_t qTextDocumentCreateWithText(const char* text) {
 }
 
 void qTextDocumentDelete(int64_t ptr) {
-    delete reinterpret_cast<QTextDocument*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QTextDocument*>(ptr));
 }
 
 void qTextDocumentSetPlainText(int64_t ptr, const char* text) {
@@ -114,7 +115,7 @@ int64_t qTextCursorCreate(int64_t docPtr) {
 }
 
 void qTextCursorDelete(int64_t ptr) {
-    delete reinterpret_cast<QTextCursor*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QTextCursor*>(ptr));
 }
 
 int32_t qTextCursorPosition(int64_t ptr) {

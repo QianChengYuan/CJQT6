@@ -14,6 +14,7 @@
 #include <QStringList>
 #include <QDebug>
 #include "bridge_string_utils.h"
+#include "bridge_delete.h"
 
 extern "C" {
 
@@ -136,7 +137,7 @@ void qMimeDataClear(int64_t ptr) {
 void qMimeDataDelete(int64_t ptr) {
     QMimeData* mimeData = reinterpret_cast<QMimeData*>(ptr);
     if (mimeData) {
-        delete mimeData;
+        cjqt6SafeDelete(mimeData);
     }
 }
 

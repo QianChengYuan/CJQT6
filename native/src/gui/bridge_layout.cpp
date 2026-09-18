@@ -8,6 +8,7 @@
 #include <QHBoxLayout>
 #include <QGridLayout>
 #include <QFormLayout>
+#include "bridge_delete.h"
 
 extern "C" {
 
@@ -68,7 +69,7 @@ void qVBoxLayoutSetMargin(int64_t ptr, int32_t margin) {
 void qVBoxLayoutDelete(int64_t ptr) {
     QVBoxLayout* layout = reinterpret_cast<QVBoxLayout*>(ptr);
     if (layout) {
-        delete layout;
+        cjqt6SafeDelete(layout);
     }
 }
 
@@ -129,7 +130,7 @@ void qHBoxLayoutSetMargin(int64_t ptr, int32_t margin) {
 void qHBoxLayoutDelete(int64_t ptr) {
     QHBoxLayout* layout = reinterpret_cast<QHBoxLayout*>(ptr);
     if (layout) {
-        delete layout;
+        cjqt6SafeDelete(layout);
     }
 }
 
@@ -175,7 +176,7 @@ void qGridLayoutSetMargin(int64_t ptr, int32_t margin) {
 void qGridLayoutDelete(int64_t ptr) {
     QGridLayout* layout = reinterpret_cast<QGridLayout*>(ptr);
     if (layout) {
-        delete layout;
+        cjqt6SafeDelete(layout);
     }
 }
 
@@ -278,7 +279,7 @@ void qFormLayoutSetRowWrapPolicy(int64_t ptr, int32_t policy) {
 void qFormLayoutDelete(int64_t ptr) {
     QFormLayout* layout = reinterpret_cast<QFormLayout*>(ptr);
     if (layout) {
-        delete layout;
+        cjqt6SafeDelete(layout);
     }
 }
 

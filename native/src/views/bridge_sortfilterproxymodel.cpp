@@ -5,6 +5,7 @@
 
 #include <QSortFilterProxyModel>
 #include <QPersistentModelIndex>
+#include "bridge_delete.h"
 
 extern "C" {
 
@@ -183,7 +184,7 @@ int32_t qSortFilterProxyModelColumnCount(int64_t ptr) {
 void qSortFilterProxyModelDelete(int64_t ptr) {
     QSortFilterProxyModel* model = reinterpret_cast<QSortFilterProxyModel*>(ptr);
     if (model) {
-        delete model;
+        cjqt6SafeDelete(model);
     }
 }
 

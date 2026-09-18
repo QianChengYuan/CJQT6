@@ -23,6 +23,7 @@
 #include <QTreeView>
 #include <QWidget>
 #include <QAbstractItemModel>
+#include "bridge_delete.h"
 
 extern "C" {
 
@@ -201,7 +202,7 @@ int64_t qStyledItemDelegateCreate() {
 }
 
 void qStyledItemDelegateDelete(int64_t ptr) {
-    delete reinterpret_cast<CjStyledItemDelegate*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<CjStyledItemDelegate*>(ptr));
 }
 
 void qStyledItemDelegateSetPaintCallback(int64_t ptr, PaintFunc cb) {

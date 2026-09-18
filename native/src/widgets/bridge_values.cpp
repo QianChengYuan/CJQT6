@@ -13,6 +13,7 @@
 #include <functional>
 #include <unordered_map>
 #include "bridge_string_utils.h"
+#include "bridge_delete.h"
 
 // ============================================================
 // CjqtSlider - QSlider 子类，press 时显式 grabMouse() 建立鼠标捕获
@@ -146,7 +147,7 @@ void qSpinBoxDelete(int64_t ptr) {
     if (spinBox) {
         g_spinBoxCallbacks.erase(ptr);
         qWrangeSignalCleanup(ptr);
-        delete spinBox;
+        cjqt6SafeDelete(spinBox);
     }
 }
 
@@ -327,7 +328,7 @@ void qSliderDelete(int64_t ptr) {
     if (slider) {
         g_sliderCallbacks.erase(ptr);
         qSliderDeleteCleanup(ptr);
-        delete slider;
+        cjqt6SafeDelete(slider);
     }
 }
 
@@ -407,7 +408,7 @@ void qProgressBarDelete(int64_t ptr) {
     QProgressBar* progressBar = reinterpret_cast<QProgressBar*>(ptr);
     if (progressBar) {
         qWrangeSignalCleanup(ptr);
-        delete progressBar;
+        cjqt6SafeDelete(progressBar);
     }
 }
 
@@ -468,7 +469,7 @@ void qDoubleSpinBoxDelete(int64_t ptr) {
     QDoubleSpinBox* spinBox = reinterpret_cast<QDoubleSpinBox*>(ptr);
     if (spinBox) {
         qWrangeSignalCleanup(ptr);
-        delete spinBox;
+        cjqt6SafeDelete(spinBox);
     }
 }
 
@@ -543,7 +544,7 @@ bool qDialNotchesVisible(int64_t ptr) {
 void qDialDelete(int64_t ptr) {
     QDial* dial = reinterpret_cast<QDial*>(ptr);
     if (dial) {
-        delete dial;
+        cjqt6SafeDelete(dial);
     }
 }
 
@@ -647,7 +648,7 @@ bool qLCDNumberCheckOverflow(int64_t ptr, double value) {
 void qLCDNumberDelete(int64_t ptr) {
     QLCDNumber* lcd = reinterpret_cast<QLCDNumber*>(ptr);
     if (lcd) {
-        delete lcd;
+        cjqt6SafeDelete(lcd);
     }
 }
 

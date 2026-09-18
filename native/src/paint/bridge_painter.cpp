@@ -16,6 +16,7 @@
 #include <QImage>
 #include <QFontDatabase>
 #include "bridge_string_utils.h"
+#include "bridge_delete.h"
 
 extern "C" {
 
@@ -41,7 +42,7 @@ int64_t qColorFromName(const char* name) {
 void qColorDelete(int64_t ptr) {
     QColor* color = reinterpret_cast<QColor*>(ptr);
     if (color) {
-        delete color;
+        cjqt6SafeDelete(color);
     }
 }
 
@@ -123,7 +124,7 @@ int64_t qPenCreateColor(int64_t colorPtr) {
 void qPenDelete(int64_t ptr) {
     QPen* pen = reinterpret_cast<QPen*>(ptr);
     if (pen) {
-        delete pen;
+        cjqt6SafeDelete(pen);
     }
 }
 
@@ -212,7 +213,7 @@ int64_t qBrushCreateGradient(int64_t gradientPtr) {
 void qBrushDelete(int64_t ptr) {
     QBrush* brush = reinterpret_cast<QBrush*>(ptr);
     if (brush) {
-        delete brush;
+        cjqt6SafeDelete(brush);
     }
 }
 
@@ -251,7 +252,7 @@ int64_t qLinearGradientCreate(float x1, float y1, float x2, float y2) {
 void qLinearGradientDelete(int64_t ptr) {
     QLinearGradient* gradient = reinterpret_cast<QLinearGradient*>(ptr);
     if (gradient) {
-        delete gradient;
+        cjqt6SafeDelete(gradient);
     }
 }
 
@@ -282,7 +283,7 @@ int64_t qRadialGradientCreate(float cx, float cy, float radius, float fx, float 
 void qRadialGradientDelete(int64_t ptr) {
     QRadialGradient* gradient = reinterpret_cast<QRadialGradient*>(ptr);
     if (gradient) {
-        delete gradient;
+        cjqt6SafeDelete(gradient);
     }
 }
 
@@ -298,7 +299,7 @@ int64_t qConicalGradientCreate(float cx, float cy, float angle) {
 void qConicalGradientDelete(int64_t ptr) {
     QConicalGradient* gradient = reinterpret_cast<QConicalGradient*>(ptr);
     if (gradient) {
-        delete gradient;
+        cjqt6SafeDelete(gradient);
     }
 }
 
@@ -316,7 +317,7 @@ int64_t qFontCreate(const char* family, int32_t pointSize, int32_t bold, int32_t
 void qFontDelete(int64_t ptr) {
     QFont* font = reinterpret_cast<QFont*>(ptr);
     if (font) {
-        delete font;
+        cjqt6SafeDelete(font);
     }
 }
 
@@ -376,7 +377,7 @@ int64_t qPainterFromPtr(int64_t ptr) {
 void qPainterDelete(int64_t ptr) {
     QPainter* painter = reinterpret_cast<QPainter*>(ptr);
     if (painter) {
-        delete painter;
+        cjqt6SafeDelete(painter);
     }
 }
 
@@ -780,7 +781,7 @@ int64_t qPixmapLoad(const char* fileName) {
 void qPixmapDelete(int64_t ptr) {
     QPixmap* pixmap = reinterpret_cast<QPixmap*>(ptr);
     if (pixmap) {
-        delete pixmap;
+        cjqt6SafeDelete(pixmap);
     }
 }
 
@@ -884,7 +885,7 @@ int64_t qImageLoad(const char* fileName) {
 void qImageDelete(int64_t ptr) {
     QImage* image = reinterpret_cast<QImage*>(ptr);
     if (image) {
-        delete image;
+        cjqt6SafeDelete(image);
     }
 }
 
@@ -1012,7 +1013,7 @@ int64_t qPainterPathCreate() {
 void qPainterPathDelete(int64_t ptr) {
     QPainterPath* path = reinterpret_cast<QPainterPath*>(ptr);
     if (path) {
-        delete path;
+        cjqt6SafeDelete(path);
     }
 }
 
@@ -1301,7 +1302,7 @@ int64_t qTransformMultiply(int64_t ptr, int64_t other) {
 void qTransformDelete(int64_t ptr) {
     QTransform* t = reinterpret_cast<QTransform*>(ptr);
     if (t) {
-        delete t;
+        cjqt6SafeDelete(t);
     }
 }
 

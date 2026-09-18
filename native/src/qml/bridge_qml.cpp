@@ -20,6 +20,7 @@
 #include <cstdlib>
 #include <cstring>
 #include "bridge_string_utils.h"
+#include "bridge_delete.h"
 
 extern "C" {
 
@@ -183,7 +184,7 @@ int64_t qQmlEngineRootContext(int64_t ptr) {
 void qQmlEngineDelete(int64_t ptr) {
     QQmlApplicationEngine* engine = reinterpret_cast<QQmlApplicationEngine*>(ptr);
     if (engine) {
-        delete engine;
+        cjqt6SafeDelete(engine);
     }
 }
 
@@ -283,7 +284,7 @@ void qQuickViewSetResizeMode(int64_t ptr, int32_t mode) {
 void qQuickViewDelete(int64_t ptr) {
     QQuickView* view = reinterpret_cast<QQuickView*>(ptr);
     if (view) {
-        delete view;
+        cjqt6SafeDelete(view);
     }
 }
 
@@ -390,7 +391,7 @@ int64_t qQuickWidgetGetPtr(int64_t ptr) {
 void qQuickWidgetDelete(int64_t ptr) {
     QQuickWidget* widget = reinterpret_cast<QQuickWidget*>(ptr);
     if (widget) {
-        delete widget;
+        cjqt6SafeDelete(widget);
     }
 }
 
@@ -719,7 +720,7 @@ int64_t qQuickItemCreate() {
 void qQuickItemDelete(int64_t ptr) {
     QQuickItem* item = reinterpret_cast<QQuickItem*>(ptr);
     if (item) {
-        delete item;
+        cjqt6SafeDelete(item);
     }
 }
 
@@ -798,7 +799,7 @@ int64_t qQmlComponentCreateObject(int64_t ptr, int64_t contextPtr, int64_t paren
 void qQmlComponentDelete(int64_t ptr) {
     QQmlComponent* comp = reinterpret_cast<QQmlComponent*>(ptr);
     if (comp) {
-        delete comp;
+        cjqt6SafeDelete(comp);
     }
 }
 
@@ -875,7 +876,7 @@ int64_t qQmlContextParentContext(int64_t ptr) {
 void qQmlContextDelete(int64_t ptr) {
     QQmlContext* ctx = reinterpret_cast<QQmlContext*>(ptr);
     if (ctx) {
-        delete ctx;
+        cjqt6SafeDelete(ctx);
     }
 }
 
@@ -962,7 +963,7 @@ int64_t qQuickWindowContentItem(int64_t ptr) {
 void qQuickWindowDelete(int64_t ptr) {
     QQuickWindow* win = reinterpret_cast<QQuickWindow*>(ptr);
     if (win) {
-        delete win;
+        cjqt6SafeDelete(win);
     }
 }
 

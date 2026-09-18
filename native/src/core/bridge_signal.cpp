@@ -41,6 +41,7 @@
 #include <vector>
 #include <QDebug>
 #include "signalemitter.h"
+#include "bridge_delete.h"
 
 // ============================================================
 // 复合键与存储
@@ -203,7 +204,7 @@ static void disconnectByKey(ConnKey key) {
         if (f) {
             QObject* w = reinterpret_cast<QObject*>(key.ptr);
             if (w) { w->removeEventFilter(f); }
-            delete f;
+            cjqt6SafeDelete(f);
         }
         g_closeFilters.erase(fi);
     }
@@ -754,7 +755,7 @@ int64_t qEmitterCreate() {
 
 void qEmitterDelete(int64_t ptr) {
     cjfw::SignalEmitter* em = reinterpret_cast<cjfw::SignalEmitter*>(ptr);
-    if (em) { delete em; }
+    if (em) { cjqt6SafeDelete(em); }
 }
 
 void qEmitterConnectVoid(int64_t ptr, void (*callback)(), int32_t connType) {

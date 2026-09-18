@@ -12,6 +12,7 @@
 #include <functional>
 #include <unordered_map>
 #include "bridge_string_utils.h"
+#include "bridge_delete.h"
 
 // 动作触发回调映射
 static std::unordered_map<int64_t, std::function<void(int64_t)>> g_actionCallbacks;
@@ -39,7 +40,7 @@ int64_t qMenuBarAddMenu(int64_t ptr, const char* title) {
 void qMenuBarDelete(int64_t ptr) {
     QMenuBar* menuBar = reinterpret_cast<QMenuBar*>(ptr);
     if (menuBar) {
-        delete menuBar;
+        cjqt6SafeDelete(menuBar);
     }
 }
 
@@ -104,7 +105,7 @@ void qMenuPopup(int64_t ptr, int32_t x, int32_t y) {
 void qMenuDelete(int64_t ptr) {
     QMenu* menu = reinterpret_cast<QMenu*>(ptr);
     if (menu) {
-        delete menu;
+        cjqt6SafeDelete(menu);
     }
 }
 
@@ -221,7 +222,7 @@ void qActionDelete(int64_t ptr) {
     if (action) {
         qSignalCleanup(ptr);
         g_actionCallbacks.erase(ptr);
-        delete action;
+        cjqt6SafeDelete(action);
     }
 }
 
@@ -267,7 +268,7 @@ void qToolBarSetMovable(int64_t ptr, bool movable) {
 void qToolBarDelete(int64_t ptr) {
     QToolBar* toolBar = reinterpret_cast<QToolBar*>(ptr);
     if (toolBar) {
-        delete toolBar;
+        cjqt6SafeDelete(toolBar);
     }
 }
 
@@ -305,7 +306,7 @@ void qStatusBarAddWidget(int64_t ptr, int64_t widgetPtr, int32_t stretch) {
 void qStatusBarDelete(int64_t ptr) {
     QStatusBar* statusBar = reinterpret_cast<QStatusBar*>(ptr);
     if (statusBar) {
-        delete statusBar;
+        cjqt6SafeDelete(statusBar);
     }
 }
 
@@ -380,7 +381,7 @@ void qMainWindowSetWindowTitle(int64_t ptr, const char* title) {
 void qMainWindowDelete(int64_t ptr) {
     QMainWindow* mainWindow = reinterpret_cast<QMainWindow*>(ptr);
     if (mainWindow) {
-        delete mainWindow;
+        cjqt6SafeDelete(mainWindow);
     }
 }
 

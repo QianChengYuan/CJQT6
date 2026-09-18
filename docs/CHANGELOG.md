@@ -11,6 +11,14 @@
 
 ### 变更
 
+- **跨线程销毁顶层窗口「永久挂起」已根治（findings P1-5 收尾）**：新增桥接层统一删除入口 `native/includes/bridge_delete.h` 的 `cjqt6SafeDelete()`，并把 **43 个桥接文件、190 处** `QObject` 删除改为经该入口删除。此前仓颉侧只能「快速失败」（把挂死变成 `GuiThreadViolationException`），本轮从根上消除阻塞。
+  - **挂死路径（已用 native 栈坐实）**：非对象所属线程 `delete` 一个**已显示**的顶层 `QWidget` → `QWidget::~QWidget` → `QWindow::close()` → `QWindowSystemInterface::flushWindowSystemEvents()` → `QWaitCondition::wait()`——等待 app 线程 flush，而 app 线程此时未跑事件循环 → 永久阻塞（CPU 0%、不会自愈）。
+  - **分流规则**（`if constexpr` 编译期决定，**无新增 FFI 导出、无 ABI 变化**）：① 调用线程 == 对象所属线程 → 立即 `delete`（原语义不变）；② 非所属线程且对象是**已创建平台窗口**的 `QWidget`（`windowHandle()` 非空）→ `deleteLater()`（Qt 官方跨线程销毁方式，内部 `postEvent` 线程安全），销毁排队到对象所属线程执行，调用方立即返回；③ 其余情况（非 `QObject` 值类型、未建窗口的 `QWidget`、非 widget 的 `QObject`）→ 裸 `delete`，与改造前**完全一致**。
+  - **为什么只延迟「已建窗口的 QWidget」**：只有它在析构时会同步 flush（即挂死路径）。实测把**所有** `QObject` 都延迟删除后，依赖「`close()` 返回即销毁已完成」假设的信号用例集中报错（`testButtonToggledApi` / `testCheckboxStateChangedApi` / `testButtonSignalsIndependence` / `testMultipleComponentsSignals`）——收窄后全部恢复。
+  - **仓颉侧配套**：`Toast.close()` 撤销 GUI 线程守卫（销毁已安全，可在任意线程调用），`Toast.handleTimeout()` 不再「非 GUI 线程就跳过销毁」；`Toast.show()` **保留**守卫（顶层窗口的创建/显示仍必须在 `QApplication` 所属线程）。
+  - **回归用例**（`src/test/richwidgets_test.cj`）：新增 `CrossThreadDestroyTests.testDestroyShownTopLevelWidgetFromOtherThread`（绕开 `show()` 守卫直击最小复现条件：已显示顶层控件 + 非所属线程销毁；用多轮探测规避 `spawn` 的 M:N 同 OS 线程调度，修复前会挂到用例超时）；`ToastThreadGuardTests` 中「已显示实例跨线程 `close()`」的断言由「抛守卫」改为「不抛异常且状态正确置位」。
+  - **验证**：桥接重编零错误并同步 `releases/windows-x64/`；`cjpm build success`；全量 1507 用例 **1431 PASSED / 76 SKIPPED / 0 FAILED / 0 ERROR**。
+  - **剩余边界**：延迟销毁的窗口在 app 线程跑到事件循环前会短暂存续，若该线程**始终**无事件循环则滞留（有界泄漏，换取不再挂死）；跨线程**创建/显示**顶层窗口仍是 Qt 违规（由 `cjqt6.core.checkGuiThread` 快速失败）；测试框架侧仍应保证同一 app 的 GUI 用例与 app 同线程（见 `docs/internal/cjmonitor-findings.md` P1-5 末段）。
 - **Windows Qt 版本同步降级至 6.9.1（与 GitHub CI 保持一致）**：项目文档、脚本与工具中默认引用的 Qt 版本由 `6.10.3` 统一收敛为 `6.9.1`，涉及 `README.md`、`AGENTS.md`、`docs/guides/*`、`releases/README.md`、`scripts/**`（含 `scripts/lib/common.ps1` 的 Qt 探测顺序）、`tools/cjqt6-diagnose`、`tools/ui2cj` 以及各示例的 `deploy_qt.ps1` / `run_debug*.ps1`。
   - **降级原因**：GitHub CI（`windows-2022`）的 `setup-qt` action 用 aqtinstall 安装 Qt 6.10.3 时解压失败（`Bad7zFile: QtNoLinkTargetHelpers.cmake`，py7zr 不兼容 Qt 6.10+ 新增文件），CI 侧已先行降级至 6.9.1；项目侧**同步降级**，使「本地开发环境 = CI = `releases/windows-x64/` 预编译产物」三者版本一致。
   - **注意事项**：bridge 与运行时 Qt 小版本必须匹配。本机若同时安装多个 Qt，需让 `QTDIR` 指向 `6.9.1`；切换 Qt 版本后必须删除 `native/build_windows_x64` 缓存重编 bridge（CMake 缓存会锁定旧的 `CMAKE_PREFIX_PATH`，导致 bridge 一直按旧版本构建）。

@@ -23,6 +23,7 @@
 #include <QCursor>
 #include <QByteArray>
 #include "bridge_string_utils.h"
+#include "bridge_delete.h"
 
 extern "C" {
 
@@ -119,7 +120,7 @@ int64_t qGraphicsRectItemCreateXYWH(double x, double y, double w, double h) {
 }
 
 void qGraphicsRectItemDelete(int64_t ptr) {
-    delete reinterpret_cast<QGraphicsRectItem*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QGraphicsRectItem*>(ptr));
 }
 
 void qGraphicsRectItemSetRect(int64_t ptr, double x, double y, double w, double h) {
@@ -152,7 +153,7 @@ int64_t qGraphicsEllipseItemCreateXYWH(double x, double y, double w, double h) {
 }
 
 void qGraphicsEllipseItemDelete(int64_t ptr) {
-    delete reinterpret_cast<QGraphicsEllipseItem*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QGraphicsEllipseItem*>(ptr));
 }
 
 void qGraphicsEllipseItemSetRect(int64_t ptr, double x, double y, double w, double h) {
@@ -193,7 +194,7 @@ int64_t qGraphicsLineItemCreateLine(double x1, double y1, double x2, double y2) 
 }
 
 void qGraphicsLineItemDelete(int64_t ptr) {
-    delete reinterpret_cast<QGraphicsLineItem*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QGraphicsLineItem*>(ptr));
 }
 
 void qGraphicsLineItemSetLine(int64_t ptr, double x1, double y1, double x2, double y2) {
@@ -222,7 +223,7 @@ int64_t qGraphicsTextItemCreateText(const char* text) {
 }
 
 void qGraphicsTextItemDelete(int64_t ptr) {
-    delete reinterpret_cast<QGraphicsTextItem*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QGraphicsTextItem*>(ptr));
 }
 
 void qGraphicsTextItemSetText(int64_t ptr, const char* text) {
@@ -264,7 +265,7 @@ int64_t qGraphicsPixmapItemCreatePixmap(int64_t pixmapPtr) {
 }
 
 void qGraphicsPixmapItemDelete(int64_t ptr) {
-    delete reinterpret_cast<QGraphicsPixmapItem*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QGraphicsPixmapItem*>(ptr));
 }
 
 void qGraphicsPixmapItemSetPixmap(int64_t ptr, int64_t pixmapPtr) {
@@ -284,7 +285,7 @@ int64_t qGraphicsPathItemCreate() {
 }
 
 void qGraphicsPathItemDelete(int64_t ptr) {
-    delete reinterpret_cast<QGraphicsPathItem*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QGraphicsPathItem*>(ptr));
 }
 
 void qGraphicsPathItemSetPen(int64_t ptr, int32_t colorR, int32_t colorG, int32_t colorB, int32_t width) {
@@ -304,7 +305,7 @@ int64_t qGraphicsItemGroupCreate() {
 }
 
 void qGraphicsItemGroupDelete(int64_t ptr) {
-    delete reinterpret_cast<QGraphicsItemGroup*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QGraphicsItemGroup*>(ptr));
 }
 
 void qGraphicsItemGroupAddToGroup(int64_t ptr, int64_t itemPtr) {

@@ -13,7 +13,7 @@ package cjqt6.test
 //   P1-2 QDateTime 时间戳换算 + QDateTimeAxis 接收 QDateTime
 //   P1-3 QSqlDatabase 事务 + QSqlQuery 位置绑定与无参 exec
 //   P1-4 Toast 静态入口
-//   P1-5 Toast 自动关闭回调内不得释放自身计时器（含 clear() 释放入口）
+//   P1-5 Toast 跨线程销毁由桥接层兜底（cjqt6SafeDelete）+ 回调内不得释放自身计时器
 //   P2-2 setWindowTitle
 //   P2-3 QProcess.addArgument
 // =====================================================================

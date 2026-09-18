@@ -13,6 +13,7 @@
 #include <unordered_map>
 #include <mutex>
 #include <windows.h>
+#include "bridge_delete.h"
 
 // 互斥锁：守护下列全部回调 map 与 g_eventWidgets，避免多线程读写未定义行为
 // （工作线程创建/销毁 EventWidget 与 Qt 事件循环线程读 map 的并发竞争）
@@ -231,7 +232,7 @@ void qEventWidgetDelete(int64_t ptr) {
         g_keyReleaseCallbacks.erase(widget->id());
         g_paintCallbacks.erase(widget->id());
         // 持锁 delete：~EventWidget 内可重入加锁 erase g_eventWidgets，安全
-        delete widget;
+        cjqt6SafeDelete(widget);
     }
 }
 

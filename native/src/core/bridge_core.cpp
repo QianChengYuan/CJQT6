@@ -52,6 +52,7 @@
 
 
 #include "bridge_string_utils.h"
+#include "bridge_delete.h"
 
 // 全局应用程序指针
 static QApplication* g_app = nullptr;
@@ -1038,7 +1039,7 @@ void qWidgetDelete(int64_t ptr) {
         // 残留条目。仓颉 wrapper close() 已先行调用；此处兜底级联删除/漏调路径，
         // 避免 {ptr,SIG_*} 条目永久驻留（重复调用无害）。
         qSignalCleanup(ptr);
-        delete widget;
+        cjqt6SafeDelete(widget);
     }
 }
 
@@ -1108,7 +1109,7 @@ void qTimerDelete(int64_t ptr) {
             g_timerConns.erase(cit);
         }
         g_timerCallbacks.erase(ptr);
-        delete timer;
+        cjqt6SafeDelete(timer);
     }
 }
 
@@ -1269,7 +1270,7 @@ bool qApplicationLoadQtTranslation(const char* locale) {
     // 删除旧的翻译器
     if (g_qtTranslator) {
         g_app->removeTranslator(g_qtTranslator);
-        delete g_qtTranslator;
+        cjqt6SafeDelete(g_qtTranslator);
     }
     
     g_qtTranslator = new QTranslator();
@@ -1319,7 +1320,7 @@ bool qApplicationLoadQtTranslation(const char* locale) {
         }
     }
     
-    delete g_qtTranslator;
+    cjqt6SafeDelete(g_qtTranslator);
     g_qtTranslator = nullptr;
     return false;
 }
@@ -1331,7 +1332,7 @@ bool qApplicationLoadAppTranslation(const char* qmFile, const char* directory) {
     // 删除旧的翻译器
     if (g_appTranslator) {
         g_app->removeTranslator(g_appTranslator);
-        delete g_appTranslator;
+        cjqt6SafeDelete(g_appTranslator);
     }
     
     g_appTranslator = new QTranslator();
@@ -1344,7 +1345,7 @@ bool qApplicationLoadAppTranslation(const char* qmFile, const char* directory) {
         return true;
     }
     
-    delete g_appTranslator;
+    cjqt6SafeDelete(g_appTranslator);
     g_appTranslator = nullptr;
     return false;
 }
@@ -1512,7 +1513,7 @@ void qShortcutSetAutoRepeat(int64_t ptr, bool repeat) {
 void qShortcutDelete(int64_t ptr) {
     QShortcut* shortcut = reinterpret_cast<QShortcut*>(ptr);
     if (shortcut) {
-        delete shortcut;
+        cjqt6SafeDelete(shortcut);
     }
 }
 
@@ -1562,7 +1563,7 @@ void qFileSystemWatcherRemovePath(int64_t ptr, const char* path) {
 void qFileSystemWatcherDelete(int64_t ptr) {
     QFileSystemWatcher* watcher = reinterpret_cast<QFileSystemWatcher*>(ptr);
     if (watcher) {
-        delete watcher;
+        cjqt6SafeDelete(watcher);
     }
 }
 
@@ -1650,7 +1651,7 @@ void qSettingsRemove(int64_t ptr, const char* key) {
 void qSettingsDelete(int64_t ptr) {
     QSettings* settings = reinterpret_cast<QSettings*>(ptr);
     if (settings) {
-        delete settings;
+        cjqt6SafeDelete(settings);
     }
 }
 
@@ -1714,7 +1715,7 @@ void qPropertyAnimationSetEasingCurve(int64_t ptr, int32_t curveType) {
 
 void qPropertyAnimationDelete(int64_t ptr) {
     QPropertyAnimation* anim = reinterpret_cast<QPropertyAnimation*>(ptr);
-    if (anim) delete anim;
+    if (anim) cjqt6SafeDelete(anim);
 }
 
 // ============================================================
@@ -1777,7 +1778,7 @@ int64_t qLocaleCreate(const char* name) {
 }
 
 void qLocaleDelete(int64_t ptr) {
-    delete reinterpret_cast<QLocale*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QLocale*>(ptr));
 }
 
 const char* qLocaleName(int64_t ptr) {

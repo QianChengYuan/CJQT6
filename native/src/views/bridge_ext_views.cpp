@@ -37,6 +37,7 @@
 #include <functional>
 #include <unordered_map>
 #include "bridge_string_utils.h"
+#include "bridge_delete.h"
 
 extern "C" {
 
@@ -61,7 +62,7 @@ int32_t qModelIndexIsValid(int64_t ptr) {
 
 void qModelIndexDelete(int64_t ptr) {
     QPersistentModelIndex* idx = reinterpret_cast<QPersistentModelIndex*>(ptr);
-    if (idx) delete idx;
+    if (idx) cjqt6SafeDelete(idx);
 }
 
 // ============================================================

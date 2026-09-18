@@ -21,6 +21,7 @@
 #include <atomic>
 #include <thread>
 #include "bridge_string_utils.h"
+#include "bridge_delete.h"
 
 extern "C" {
 
@@ -112,7 +113,7 @@ int64_t qHostAddressCreateWithString(const char* address) {
 }
 
 void qHostAddressDelete(int64_t ptr) {
-    delete reinterpret_cast<QHostAddress*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QHostAddress*>(ptr));
 }
 
 void qHostAddressSetAddress(int64_t ptr, const char* address) {
@@ -186,7 +187,7 @@ void qTcpSocketDelete(int64_t ptr) {
         for (auto& c : conns) {
             if (c) QObject::disconnect(c);
         }
-        delete socket;
+        cjqt6SafeDelete(socket);
     }
 }
 
@@ -466,7 +467,7 @@ void qTcpServerDelete(int64_t ptr) {
         if (conn) {
             QObject::disconnect(conn);
         }
-        delete server;
+        cjqt6SafeDelete(server);
     }
 }
 
@@ -639,7 +640,7 @@ void qUdpSocketDelete(int64_t ptr) {
         for (auto& c : conns) {
             if (c) QObject::disconnect(c);
         }
-        delete socket;
+        cjqt6SafeDelete(socket);
     }
 }
 
@@ -845,7 +846,7 @@ void qSslSocketDelete(int64_t ptr) {
         for (auto& c : conns) {
             if (c) QObject::disconnect(c);
         }
-        delete socket;
+        cjqt6SafeDelete(socket);
     }
 }
 
@@ -979,7 +980,7 @@ int64_t qNetworkProxyCreateWithType(int32_t proxyType) {
 }
 
 void qNetworkProxyDelete(int64_t ptr) {
-    delete reinterpret_cast<QNetworkProxy*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QNetworkProxy*>(ptr));
 }
 
 void qNetworkProxySetType(int64_t ptr, int32_t proxyType) {
@@ -1036,7 +1037,7 @@ int64_t qLocalServerCreate() {
 }
 
 void qLocalServerDelete(int64_t ptr) {
-    delete reinterpret_cast<QLocalServer*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QLocalServer*>(ptr));
 }
 
 bool qLocalServerListen(int64_t ptr, const char* name) {

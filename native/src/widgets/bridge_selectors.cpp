@@ -11,6 +11,7 @@
 #include <functional>
 #include <unordered_map>
 #include "bridge_string_utils.h"
+#include "bridge_delete.h"
 
 // 回调映射
 static std::unordered_map<int64_t, std::function<void(int64_t)>> g_checkBoxCallbacks;
@@ -73,7 +74,7 @@ void qCheckBoxDelete(int64_t ptr) {
     QCheckBox* checkBox = reinterpret_cast<QCheckBox*>(ptr);
     if (checkBox) {
         qWcoreSignalCleanup(ptr);
-        delete checkBox;
+        cjqt6SafeDelete(checkBox);
     }
 }
 
@@ -118,7 +119,7 @@ void qRadioButtonDelete(int64_t ptr) {
     QRadioButton* radioButton = reinterpret_cast<QRadioButton*>(ptr);
     if (radioButton) {
         qWcoreSignalCleanup(ptr);
-        delete radioButton;
+        cjqt6SafeDelete(radioButton);
     }
 }
 
@@ -242,7 +243,7 @@ void qComboBoxDelete(int64_t ptr) {
     QComboBox* comboBox = reinterpret_cast<QComboBox*>(ptr);
     if (comboBox) {
         qWselectSignalCleanup(ptr);
-        delete comboBox;
+        cjqt6SafeDelete(comboBox);
     }
 }
 
@@ -320,7 +321,7 @@ void qButtonGroupDelete(int64_t ptr) {
     QButtonGroup* group = reinterpret_cast<QButtonGroup*>(ptr);
     if (group) {
         qWmiscSignalCleanup(ptr);
-        delete group;
+        cjqt6SafeDelete(group);
     }
 }
 

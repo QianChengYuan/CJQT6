@@ -12,6 +12,7 @@
 #include <QTimer>
 #include <QMediaMetaData>
 #include "bridge_string_utils.h"
+#include "bridge_delete.h"
 
 // 存储播放器状态变化的回调
 static QHash<int64_t, std::function<void(int)>> stateCallbacks;
@@ -276,7 +277,7 @@ void qMediaPlayerDelete(int64_t ptr) {
         stateCallbacks.remove(ptr);
         positionCallbacks.remove(ptr);
         durationCallbacks.remove(ptr);
-        delete player;
+        cjqt6SafeDelete(player);
     }
 }
 
@@ -322,7 +323,7 @@ bool qAudioOutputIsMuted(int64_t ptr) {
 void qAudioOutputDelete(int64_t ptr) {
     QAudioOutput* output = reinterpret_cast<QAudioOutput*>(ptr);
     if (output) {
-        delete output;
+        cjqt6SafeDelete(output);
     }
 }
 
@@ -427,7 +428,7 @@ int32_t qSoundEffectStatus(int64_t ptr) {
 void qSoundEffectDelete(int64_t ptr) {
     QSoundEffect* effect = reinterpret_cast<QSoundEffect*>(ptr);
     if (effect) {
-        delete effect;
+        cjqt6SafeDelete(effect);
     }
 }
 
@@ -440,7 +441,7 @@ int64_t qImageCaptureCreate() {
 }
 
 void qImageCaptureDelete(int64_t ptr) {
-    delete reinterpret_cast<QImageCapture*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QImageCapture*>(ptr));
 }
 
 void qImageCaptureSetCamera(int64_t ptr, int64_t cameraPtr) {

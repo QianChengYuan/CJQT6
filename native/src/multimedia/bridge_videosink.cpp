@@ -15,6 +15,7 @@
 #include <QVideoSink>
 #include <QSize>
 #include "bridge_string_utils.h"
+#include "bridge_delete.h"
 
 extern "C" {
 
@@ -30,7 +31,7 @@ int64_t qVideoSinkCreate() {
 void qVideoSinkDelete(int64_t ptr) {
     QVideoSink* sink = reinterpret_cast<QVideoSink*>(ptr);
     if (sink) {
-        delete sink;
+        cjqt6SafeDelete(sink);
     }
 }
 

@@ -12,6 +12,7 @@
 #include <QDateTime>
 #include <cstring>
 #include "bridge_string_utils.h"
+#include "bridge_delete.h"
 
 // 辅助函数：安全复制字符串
 static const char* safeCopyString(const QString& str) {
@@ -36,7 +37,7 @@ int64_t qDateCreate(int32_t year, int32_t month, int32_t day) {
 void qDateDelete(int64_t ptr) {
     QDate* date = reinterpret_cast<QDate*>(ptr);
     if (date) {
-        delete date;
+        cjqt6SafeDelete(date);
     }
 }
 
@@ -98,7 +99,7 @@ int64_t qTimeCreate(int32_t hour, int32_t minute, int32_t second, int32_t msec) 
 void qTimeDelete(int64_t ptr) {
     QTime* time = reinterpret_cast<QTime*>(ptr);
     if (time) {
-        delete time;
+        cjqt6SafeDelete(time);
     }
 }
 
@@ -167,7 +168,7 @@ int64_t qDateTimeFromDate(int64_t datePtr, int64_t timePtr) {
 void qDateTimeDelete(int64_t ptr) {
     QDateTime* dt = reinterpret_cast<QDateTime*>(ptr);
     if (dt) {
-        delete dt;
+        cjqt6SafeDelete(dt);
     }
 }
 
@@ -248,7 +249,7 @@ void qCalendarWidgetDelete(int64_t ptr) {
     QCalendarWidget* calendar = reinterpret_cast<QCalendarWidget*>(ptr);
     if (calendar) {
         qWmiscSignalCleanup(ptr);
-        delete calendar;
+        cjqt6SafeDelete(calendar);
     }
 }
 
@@ -379,7 +380,7 @@ void qDateEditDelete(int64_t ptr) {
     QDateEdit* edit = reinterpret_cast<QDateEdit*>(ptr);
     if (edit) {
         qWmiscSignalCleanup(ptr);
-        delete edit;
+        cjqt6SafeDelete(edit);
     }
 }
 
@@ -462,7 +463,7 @@ void qTimeEditDelete(int64_t ptr) {
     QTimeEdit* edit = reinterpret_cast<QTimeEdit*>(ptr);
     if (edit) {
         qWmiscSignalCleanup(ptr);
-        delete edit;
+        cjqt6SafeDelete(edit);
     }
 }
 
@@ -533,7 +534,7 @@ void qDateTimeEditDelete(int64_t ptr) {
     QDateTimeEdit* edit = reinterpret_cast<QDateTimeEdit*>(ptr);
     if (edit) {
         qWmiscSignalCleanup(ptr);
-        delete edit;
+        cjqt6SafeDelete(edit);
     }
 }
 

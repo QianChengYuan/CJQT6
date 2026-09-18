@@ -17,6 +17,7 @@
 #include <QIcon>
 #include <QSize>
 #include "bridge_string_utils.h"
+#include "bridge_delete.h"
 
 // 由 bridge_ext_wlayout.cpp 导出：清理 wlayout 控件信号回调 map（QGroupBox/
 // QStackedWidget/QToolBox/QDockWidget/QMdiArea），避免 delete 后地址复用导致
@@ -83,7 +84,7 @@ void qGroupBoxDelete(int64_t ptr) {
     QGroupBox* groupBox = reinterpret_cast<QGroupBox*>(ptr);
     if (groupBox) {
         qWlayoutSignalCleanup(ptr);
-        delete groupBox;
+        cjqt6SafeDelete(groupBox);
     }
 }
 
@@ -263,7 +264,7 @@ void qTabWidgetDelete(int64_t ptr) {
     QTabWidget* tabWidget = reinterpret_cast<QTabWidget*>(ptr);
     if (tabWidget) {
         g_tabChangedCallbacks.erase(ptr);
-        delete tabWidget;
+        cjqt6SafeDelete(tabWidget);
     }
 }
 
@@ -302,7 +303,7 @@ int64_t qScrollAreaWidget(int64_t ptr) {
 void qScrollAreaDelete(int64_t ptr) {
     QScrollArea* scrollArea = reinterpret_cast<QScrollArea*>(ptr);
     if (scrollArea) {
-        delete scrollArea;
+        cjqt6SafeDelete(scrollArea);
     }
 }
 
@@ -339,7 +340,7 @@ void qFrameSetLineWidth(int64_t ptr, int32_t width) {
 void qFrameDelete(int64_t ptr) {
     QFrame* frame = reinterpret_cast<QFrame*>(ptr);
     if (frame) {
-        delete frame;
+        cjqt6SafeDelete(frame);
     }
 }
 
@@ -368,7 +369,7 @@ int64_t qSplitterCreateVertical(int64_t parentPtr) {
 void qSplitterDelete(int64_t ptr) {
     QSplitter* splitter = reinterpret_cast<QSplitter*>(ptr);
     if (splitter) {
-        delete splitter;
+        cjqt6SafeDelete(splitter);
     }
 }
 
@@ -593,7 +594,7 @@ void qStackedWidgetDelete(int64_t ptr) {
     QStackedWidget* stacked = reinterpret_cast<QStackedWidget*>(ptr);
     if (stacked) {
         qWlayoutSignalCleanup(ptr);
-        delete stacked;
+        cjqt6SafeDelete(stacked);
     }
 }
 
@@ -610,7 +611,7 @@ void qToolBoxDelete(int64_t ptr) {
     QToolBox* toolbox = reinterpret_cast<QToolBox*>(ptr);
     if (toolbox) {
         qWlayoutSignalCleanup(ptr);
-        delete toolbox;
+        cjqt6SafeDelete(toolbox);
     }
 }
 
@@ -706,7 +707,7 @@ void qMdiAreaDelete(int64_t ptr) {
     QMdiArea* mdiArea = reinterpret_cast<QMdiArea*>(ptr);
     if (mdiArea) {
         qWlayoutSignalCleanup(ptr);
-        delete mdiArea;
+        cjqt6SafeDelete(mdiArea);
     }
 }
 
@@ -787,7 +788,7 @@ int64_t qMdiSubWindowWidget(int64_t ptr) {
 void qMdiSubWindowDelete(int64_t ptr) {
     QMdiSubWindow* subWin = reinterpret_cast<QMdiSubWindow*>(ptr);
     if (subWin) {
-        delete subWin;
+        cjqt6SafeDelete(subWin);
     }
 }
 
@@ -804,7 +805,7 @@ void qDockWidgetDelete(int64_t ptr) {
     QDockWidget* dock = reinterpret_cast<QDockWidget*>(ptr);
     if (dock) {
         qWlayoutSignalCleanup(ptr);
-        delete dock;
+        cjqt6SafeDelete(dock);
     }
 }
 

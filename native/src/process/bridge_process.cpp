@@ -9,6 +9,7 @@
 #include <functional>
 #include <unordered_map>
 #include "bridge_string_utils.h"
+#include "bridge_delete.h"
 
 // 回调映射
 static std::unordered_map<int64_t, std::function<void(int, int)>> g_finishedCallbacks;
@@ -77,7 +78,7 @@ void qProcessDelete(int64_t ptr) {
         g_readyReadStdErrCallbacks.erase(ptr);
         g_errorCallbacks.erase(ptr);
         g_stateChangedCallbacks.erase(ptr);
-        delete process;
+        cjqt6SafeDelete(process);
     }
 }
 
@@ -511,7 +512,7 @@ int64_t qProcessEnvironmentCreateSystem() {
 void qProcessEnvironmentDelete(int64_t ptr) {
     QProcessEnvironment* env = reinterpret_cast<QProcessEnvironment*>(ptr);
     if (env) {
-        delete env;
+        cjqt6SafeDelete(env);
     }
 }
 

@@ -11,6 +11,7 @@
 #include <QDebug>
 #include <cstring>
 #include "bridge_string_utils.h"
+#include "bridge_delete.h"
 
 extern "C" {
 
@@ -26,7 +27,7 @@ int64_t qUiLoaderCreate() {
 void qUiLoaderDelete(int64_t ptr) {
     QUiLoader* loader = reinterpret_cast<QUiLoader*>(ptr);
     if (loader) {
-        delete loader;
+        cjqt6SafeDelete(loader);
     }
 }
 

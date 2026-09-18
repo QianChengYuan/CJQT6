@@ -5,6 +5,7 @@
 #include <QJsonParseError>
 #include <QStringList>
 #include "bridge_string_utils.h"
+#include "bridge_delete.h"
 
 static QStringList g_jsonKeyList;
 
@@ -24,7 +25,7 @@ int64_t qJsonDocumentFromJson(const char* json) {
 }
 
 void qJsonDocumentDelete(int64_t ptr) {
-    delete reinterpret_cast<QJsonDocument*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QJsonDocument*>(ptr));
 }
 
 const char* qJsonDocumentToJson(int64_t ptr, int32_t indent) {
@@ -76,7 +77,7 @@ int64_t qJsonObjectCreate() {
 }
 
 void qJsonObjectDelete(int64_t ptr) {
-    delete reinterpret_cast<QJsonObject*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QJsonObject*>(ptr));
 }
 
 void qJsonObjectInsert(int64_t ptr, const char* key, int64_t valuePtr) {
@@ -135,7 +136,7 @@ int64_t qJsonArrayCreate() {
 }
 
 void qJsonArrayDelete(int64_t ptr) {
-    delete reinterpret_cast<QJsonArray*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QJsonArray*>(ptr));
 }
 
 void qJsonArrayAppend(int64_t ptr, int64_t valuePtr) {
@@ -206,7 +207,7 @@ int64_t qJsonValueCreateObject(int64_t objPtr) {
 }
 
 void qJsonValueDelete(int64_t ptr) {
-    delete reinterpret_cast<QJsonValue*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QJsonValue*>(ptr));
 }
 
 int32_t qJsonValueType(int64_t ptr) {

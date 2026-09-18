@@ -12,6 +12,7 @@
 #include <QVariant>
 #include <QStringList>
 #include "bridge_string_utils.h"
+#include "bridge_delete.h"
 
 extern "C" {
 
@@ -144,7 +145,7 @@ void qSqlDatabaseRemoveDatabase(const char* name) {
 void qSqlDatabaseDelete(int64_t ptr) {
     QSqlDatabase* db = reinterpret_cast<QSqlDatabase*>(ptr);
     if (db) {
-        delete db;
+        cjqt6SafeDelete(db);
     }
 }
 
@@ -373,7 +374,7 @@ const char* qSqlQueryLastError(int64_t ptr) {
 void qSqlQueryDelete(int64_t ptr) {
     QSqlQuery* query = reinterpret_cast<QSqlQuery*>(ptr);
     if (query) {
-        delete query;
+        cjqt6SafeDelete(query);
     }
 }
 
@@ -449,7 +450,7 @@ int64_t qSqlRecordField(int64_t ptr, int32_t index) {
 
 void qSqlRecordDelete(int64_t ptr) {
     QSqlRecord* record = reinterpret_cast<QSqlRecord*>(ptr);
-    if (record) delete record;
+    if (record) cjqt6SafeDelete(record);
 }
 
 // ============================================================
@@ -489,7 +490,7 @@ const char* qSqlFieldValueString(int64_t ptr) {
 
 void qSqlFieldDelete(int64_t ptr) {
     QSqlField* field = reinterpret_cast<QSqlField*>(ptr);
-    if (field) delete field;
+    if (field) cjqt6SafeDelete(field);
 }
 
 // ============================================================
@@ -503,7 +504,7 @@ int64_t qSqlTableModelCreate(int64_t parent, const char* dbName) {
 }
 
 void qSqlTableModelDelete(int64_t ptr) {
-    delete reinterpret_cast<QSqlTableModel*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QSqlTableModel*>(ptr));
 }
 
 void qSqlTableModelSetTable(int64_t ptr, const char* tableName) {

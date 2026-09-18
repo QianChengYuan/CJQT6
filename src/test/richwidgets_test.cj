@@ -88,15 +88,17 @@ class ToastTests {
 }
 
 // ---------------------------------------------------------------------
-// P1-5：为何本文件的 Toast 用例只覆盖「创建/关闭」两条最简路径
-// 根因已用 native 栈定位（见 docs/internal/cjmonitor-findings.md P1-5）：在**非**
-// QApplication 所属线程销毁「已显示」的顶层窗口（Toast 的裸 QLabel），会阻塞在
+// P1-5：Toast 的线程要求与回归覆盖
+// 历史根因：在**非** QApplication 所属线程销毁「已显示」的顶层窗口（Toast 的裸
+// QLabel），会阻塞在
 //   QWidget::~QWidget → QWindow::close() → QWindowSystemInterface::flushWindowSystemEvents()
 //   → QWaitCondition::wait()
-// 上，永久挂起（CPU 0%、不会自愈）。此前观察到的「时序敏感」其实是测试框架把用例
-// 派到哪个 adopted 线程的差异（与 app 同线程则通过、否则挂起）。
-// 现库侧已加 GUI 线程守卫（抛 GuiThreadViolationException），但测试里**仍不展示
-// 顶层窗口**：测试进程中 app 常归属于其它线程，展示即按设计抛异常。
+// 上永久挂起（CPU 0%、不会自愈）；此前观察到的「时序敏感」其实是测试框架把用例派到
+// 哪个 adopted 线程的差异（与 app 同线程则通过、否则挂起）。
+// 现已在**桥接层根治**：所有 qXxxDelete 统一走 cjqt6SafeDelete，非对象所属线程的
+// 删除改为 deleteLater() 排队到对象所属线程执行，不再同步 flush
+// （见 native/includes/bridge_delete.h）。
+// 因此现在：`close()` 可在任意线程调用；`show()`（创建/显示顶层窗口）仍要求 GUI 线程。
 // ---------------------------------------------------------------------
 
 // P1-5 回归：非 GUI 线程守卫是否生效（用文件级全局承接子线程结果）
@@ -140,7 +142,7 @@ class ToastThreadGuardTests {
         }
     }
 
-    /// 未显示过的实例：跨线程 close() 不触发守卫（不涉及顶层窗口销毁，属安全路径）
+    /// 未显示过的实例：跨线程 close() 直接安全（对象销毁由桥接层按线程归属兜底）
     @TestCase
     func testCloseNotShownFromOtherThreadIsSafe() {
         let app = QApplication()
@@ -153,9 +155,11 @@ class ToastThreadGuardTests {
         @Expect(toast.isClosed(), true)
     }
 
-    /// 已显示的实例：跨线程 close() 抛守卫异常（修复前会永久阻塞在 flush 等待上）
+    /// 已显示的实例：跨线程 close() 不再阻塞 —— P1-5 根治的直接回归。
+    /// 修复前该调用会永久阻塞在 flush 等待上（用例超时）；若桥接层回退为「同线程外直接
+    /// delete」，本用例同样会挂起。判据是「调用能返回、且状态正确置位」。
     @TestCase
-    func testCloseShownToastFromOtherThreadThrows() {
+    func testCloseShownToastFromOtherThreadIsSafe() {
         let app = QApplication()
         if (!isGuiThread()) {
             // 本用例线程不是 GUI 线程：按设计 show() 会抛守卫异常，故不展示顶层窗口
@@ -174,10 +178,57 @@ class ToastThreadGuardTests {
             0
         }
         fut.get()
-        @Expect(gToastGuardCaught, true)
-        @Expect(toast.isClosed(), false) // 守卫已拦截，未真正销毁
-        toast.close() // 回到 GUI 线程正常关闭
+        // 跨线程销毁已由桥接层兜底：不再抛守卫异常，且状态正确置位
+        @Expect(gToastGuardCaught, false)
         @Expect(toast.isClosed(), true)
+    }
+}
+
+// ---------------------------------------------------------------------
+// P1-5 根治的决定性回归：非所属线程销毁「已显示」的顶层控件必须立即返回。
+// 这里刻意绕开 Toast.show() 的 GUI 线程守卫（守卫拦的是「显示」动作），直接用 QLabel
+// 构造最小复现条件——「已显示的顶层控件 + 非所属线程销毁」：
+//   修复前 → 阻塞在 QWindowSystemInterface::flushWindowSystemEvents 的等待上，
+//            本用例会一直挂到用例超时（机器可读的失败信号）；
+//   修复后 → 桥接层判定非所属线程，改走 deleteLater()，调用立即返回。
+// spawn 是 M:N 调度，可能落到同一 OS 线程，故多轮探测直到拿到不同线程。
+// ---------------------------------------------------------------------
+var gCrossThreadClosed: Bool = false
+var gCrossThreadLanded: Bool = false
+
+@Test
+class CrossThreadDestroyTests {
+    @TestCase
+    func testDestroyShownTopLevelWidgetFromOtherThread() {
+        let app = QApplication()
+        let label = QLabel()
+        label.setText("P1-5 跨线程销毁回归")
+        label.show()
+        let owner = QThread.currentThreadPtr()
+        gCrossThreadClosed = false
+        gCrossThreadLanded = false
+        var attempt = 0
+        while (attempt < 20 && !gCrossThreadLanded) {
+            let fut = spawn {
+                if (QThread.currentThreadPtr() != owner) {
+                    gCrossThreadLanded = true
+                    // 关键调用：非所属线程销毁已显示的顶层控件
+                    label.close()
+                    gCrossThreadClosed = true
+                }
+                0
+            }
+            fut.get()
+            attempt += 1
+        }
+        if (gCrossThreadLanded) {
+            @Expect(gCrossThreadClosed, true)
+            @Expect(label.isClosed(), true)
+        } else {
+            // 环境始终拿到同一 OS 线程（M:N 调度偶发），本用例不适用
+            label.close()
+            @Expect(true)
+        }
     }
 }
 

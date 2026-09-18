@@ -11,6 +11,7 @@
 #include <QMediaRecorder>
 #include <QVideoWidget>
 #include "bridge_string_utils.h"
+#include "bridge_delete.h"
 
 extern "C" {
 
@@ -48,7 +49,7 @@ const char* qCameraDeviceId(int64_t ptr) {
 void qCameraDeviceDelete(int64_t ptr) {
     QCameraDevice* dev = reinterpret_cast<QCameraDevice*>(ptr);
     if (dev) {
-        delete dev;
+        cjqt6SafeDelete(dev);
     }
 }
 
@@ -108,7 +109,7 @@ const char* qCameraErrorString(int64_t ptr) {
 void qCameraDelete(int64_t ptr) {
     QCamera* camera = reinterpret_cast<QCamera*>(ptr);
     if (camera) {
-        delete camera;
+        cjqt6SafeDelete(camera);
     }
 }
 
@@ -140,7 +141,7 @@ void qMediaCaptureSessionSetVideoOutput(int64_t ptr, int64_t outputPtr) {
 void qMediaCaptureSessionDelete(int64_t ptr) {
     QMediaCaptureSession* session = reinterpret_cast<QMediaCaptureSession*>(ptr);
     if (session) {
-        delete session;
+        cjqt6SafeDelete(session);
     }
 }
 

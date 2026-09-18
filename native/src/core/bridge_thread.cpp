@@ -11,6 +11,7 @@
 #include <mutex>
 #include <atomic>
 #include <thread>
+#include "bridge_delete.h"
 
 extern "C" {
 
@@ -71,7 +72,7 @@ int64_t qRunnableCreate(void (*callback)()) {
 
 void qRunnableDelete(int64_t ptr) {
     CjRunnable* runnable = reinterpret_cast<CjRunnable*>(ptr);
-    if (runnable) delete runnable;
+    if (runnable) cjqt6SafeDelete(runnable);
 }
 
 // ============================================================
@@ -99,7 +100,7 @@ void qThreadDelete(int64_t ptr) {
             g_threadStartedConns.remove(ptr);
             g_threadFinishedConns.remove(ptr);
         }
-        delete thread;
+        cjqt6SafeDelete(thread);
     }
 }
 

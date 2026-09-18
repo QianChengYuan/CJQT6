@@ -11,6 +11,7 @@
 #include <functional>
 #include <unordered_map>
 #include "bridge_string_utils.h"
+#include "bridge_delete.h"
 
 // 由 bridge_ext_views.cpp 导出：清理视图模块信号回调 map，避免对象 delete 后
 // ptr 地址复用导致去重保护误判、新对象 connect 被跳过。
@@ -40,7 +41,7 @@ void qListWidgetDelete(int64_t ptr) {
     QListWidget* list = reinterpret_cast<QListWidget*>(ptr);
     if (list) {
         qViewsSignalCleanup(ptr);
-        delete list;
+        cjqt6SafeDelete(list);
     }
 }
 

@@ -7,6 +7,7 @@
 #include <QParallelAnimationGroup>
 #include <QPropertyAnimation>
 #include <QObject>
+#include "bridge_delete.h"
 
 extern "C" {
 
@@ -147,14 +148,14 @@ int32_t qAbstractAnimationDirection(int64_t ptr) {
 void qParallelAnimationGroupDelete(int64_t ptr) {
     QParallelAnimationGroup* group = reinterpret_cast<QParallelAnimationGroup*>(ptr);
     if (group) {
-        delete group;
+        cjqt6SafeDelete(group);
     }
 }
 
 void qAbstractAnimationDelete(int64_t ptr) {
     QAbstractAnimation* anim = reinterpret_cast<QAbstractAnimation*>(ptr);
     if (anim) {
-        delete anim;
+        cjqt6SafeDelete(anim);
     }
 }
 

@@ -12,6 +12,7 @@
 #include <QPalette>
 #include <QColor>
 #include <QPoint>
+#include "bridge_delete.h"
 
 extern "C" {
 
@@ -85,7 +86,7 @@ void qIconAddFile(int64_t ptr, const char* filename) {
 void qIconDelete(int64_t ptr) {
     QIcon* icon = reinterpret_cast<QIcon*>(ptr);
     if (icon) {
-        delete icon;
+        cjqt6SafeDelete(icon);
     }
 }
 
@@ -103,7 +104,7 @@ int64_t qCursorCreateWithShape(int32_t shape) {
 
 void qCursorDelete(int64_t ptr) {
     QCursor* c = reinterpret_cast<QCursor*>(ptr);
-    if (c) delete c;
+    if (c) cjqt6SafeDelete(c);
 }
 
 int32_t qCursorShape(int64_t ptr) {
@@ -138,7 +139,7 @@ int64_t qPaletteCreate() {
 
 void qPaletteDelete(int64_t ptr) {
     QPalette* p = reinterpret_cast<QPalette*>(ptr);
-    if (p) delete p;
+    if (p) cjqt6SafeDelete(p);
 }
 
 int64_t qPaletteColor(int64_t ptr, int32_t group, int32_t role) {

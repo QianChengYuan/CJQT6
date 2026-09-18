@@ -12,6 +12,7 @@
 #include <functional>
 #include <cstring>
 #include "bridge_string_utils.h"
+#include "bridge_delete.h"
 
 // ============================================================
 // CallbackUndoCommand - 基于回调的 QUndoCommand
@@ -88,7 +89,7 @@ void qUndoCommandDelete(int64_t ptr) {
     // 但通常 push 后栈拥有所有权
     CallbackUndoCommand* cmd = reinterpret_cast<CallbackUndoCommand*>(ptr);
     if (cmd) {
-        delete cmd;
+        cjqt6SafeDelete(cmd);
     }
 }
 
@@ -226,7 +227,7 @@ void qUndoStackEndMacro(int64_t ptr) {
 void qUndoStackDelete(int64_t ptr) {
     QUndoStack* stack = reinterpret_cast<QUndoStack*>(ptr);
     if (stack) {
-        delete stack;
+        cjqt6SafeDelete(stack);
     }
 }
 

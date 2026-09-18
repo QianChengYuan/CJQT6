@@ -13,6 +13,7 @@
 #include <atomic>
 #include <thread>
 #include "bridge_string_utils.h"
+#include "bridge_delete.h"
 
 extern "C" {
 
@@ -49,7 +50,7 @@ int64_t qNetworkRequestCreate(const char* url) {
 }
 
 void qNetworkRequestDelete(int64_t ptr) {
-    delete reinterpret_cast<QNetworkRequest*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<QNetworkRequest*>(ptr));
 }
 
 void qNetworkRequestSetUrl(int64_t ptr, const char* url) {
@@ -193,7 +194,7 @@ void qNetworkAccessManagerDelete(int64_t ptr) {
             LOCK_NAM_CALLBACKS();
             g_namReplyCallbacks.remove(ptr);
         }
-        delete manager;
+        cjqt6SafeDelete(manager);
     }
 }
 

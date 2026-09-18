@@ -1,6 +1,7 @@
 #include <QSyntaxHighlighter>
 #include <QTextDocument>
 #include <QTextCharFormat>
+#include "bridge_delete.h"
 
 typedef void (*HighlightBlockFunc)(int64_t selfPtr, const char* text);
 
@@ -44,7 +45,7 @@ int64_t qSyntaxHighlighterCreate(int64_t selfId, int64_t docPtr) {
 }
 
 void qSyntaxHighlighterDelete(int64_t ptr) {
-    delete reinterpret_cast<CjSyntaxHighlighter*>(ptr);
+    cjqt6SafeDelete(reinterpret_cast<CjSyntaxHighlighter*>(ptr));
 }
 
 void qSyntaxHighlighterSetCallback(int64_t ptr, HighlightBlockFunc cb) {

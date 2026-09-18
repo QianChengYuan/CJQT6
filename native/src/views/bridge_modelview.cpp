@@ -13,6 +13,7 @@
 #include <QStringList>
 #include <QDir>
 #include "bridge_string_utils.h"
+#include "bridge_delete.h"
 
 // 由 bridge_ext_views.cpp 导出：清理视图模块信号回调 map，避免对象 delete 后
 // ptr 地址复用导致去重保护误判、新对象 connect 被跳过。
@@ -185,7 +186,7 @@ int32_t qStandardItemModelIsItemChecked(int64_t ptr, int32_t row, int32_t col) {
 void qStandardItemModelDelete(int64_t ptr) {
     QStandardItemModel* model = reinterpret_cast<QStandardItemModel*>(ptr);
     if (model) {
-        delete model;
+        cjqt6SafeDelete(model);
     }
 }
 
@@ -225,7 +226,7 @@ void qListViewDelete(int64_t ptr) {
     QListView* view = reinterpret_cast<QListView*>(ptr);
     if (view) {
         qViewsSignalCleanup(ptr);
-        delete view;
+        cjqt6SafeDelete(view);
     }
 }
 
@@ -313,7 +314,7 @@ void qTableViewDelete(int64_t ptr) {
     QTableView* view = reinterpret_cast<QTableView*>(ptr);
     if (view) {
         qViewsSignalCleanup(ptr);
-        delete view;
+        cjqt6SafeDelete(view);
     }
 }
 
@@ -366,7 +367,7 @@ void qTreeViewDelete(int64_t ptr) {
     QTreeView* view = reinterpret_cast<QTreeView*>(ptr);
     if (view) {
         qViewsSignalCleanup(ptr);
-        delete view;
+        cjqt6SafeDelete(view);
     }
 }
 
@@ -425,7 +426,7 @@ void qFileSystemModelDelete(int64_t ptr) {
     QFileSystemModel* model = reinterpret_cast<QFileSystemModel*>(ptr);
     if (model) {
         qViewsSignalCleanup(ptr);
-        delete model;
+        cjqt6SafeDelete(model);
     }
 }
 
@@ -456,7 +457,7 @@ void qHeaderViewDelete(int64_t ptr) {
     QHeaderView* header = reinterpret_cast<QHeaderView*>(ptr);
     if (header) {
         qViewsSignalCleanup(ptr);
-        delete header;
+        cjqt6SafeDelete(header);
     }
 }
 
