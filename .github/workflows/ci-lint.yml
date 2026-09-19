@@ -37,9 +37,11 @@ jobs:
 
       - name: cjfmt 格式检查（src + examples + tools）
         run: |
-          cjfmt -d src/
-          cjfmt -d examples/
-          cjfmt -d tools/
+          # 显式传入仓库配置 cangjie-format.toml：其取值当前与 SDK 默认一致（复检 0 差异），
+          # 但不传 -c 时改这个文件不会对 CI 有任何影响——显式传入后它才是唯一事实来源。
+          cjfmt -d src/ -c cangjie-format.toml
+          cjfmt -d examples/ -c cangjie-format.toml
+          cjfmt -d tools/ -c cangjie-format.toml
           git diff --exit-code src/ examples/ tools/
 
       - name: cjlint 静态检查（封装库）
