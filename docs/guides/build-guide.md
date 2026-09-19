@@ -583,7 +583,7 @@ cjpm build
 cd C:\CodeTools\cangjie_git\CJQT6
 powershell -ExecutionPolicy Bypass -File scripts\verify_all.ps1
 ```
-脚本依次执行:重编原生 bridge(调用 `update-bridge.ps1`)→ `cjpm build`(链接新桥接库)→ 部署 Qt 运行时 + offscreen 平台 + 跑全量 cjpm test(`deploy-qt-test.ps1 -RunTest`)→ cjcov 覆盖率门禁 → 冒烟示例构建。`scripts/rebuild_all.ps1` 已被本脚本替代,保留仅为兼容。
+脚本依次执行:重编原生 bridge(调用 `update-bridge.ps1`)→ `cjpm build`(链接新桥接库)→ 部署 Qt 运行时 + offscreen 平台 + 跑全量 cjpm test(`deploy-qt-test.ps1 -RunTest`)→ cjcov 覆盖率门禁 → 冒烟示例构建。原先的 `scripts/rebuild_all.ps1` 已被本脚本替代,并已于 2026-09-19 **删除**(其缓存清理能力由 `verify_all.ps1` 的缓存守卫与 `clean-example-cache.ps1` 承担)。
 
 **`scripts/update-bridge.ps1` — 仅重编原生 FFI 桥接库并同步到 releases（修改 `native/src/**` 后使用）：**
 ```powershell

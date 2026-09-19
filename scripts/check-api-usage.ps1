@@ -38,8 +38,11 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-$RootDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$RootDir = Split-Path -Parent $RootDir
+
+# 共享函数(定位项目根等):scripts/lib/common.ps1
+. "$PSScriptRoot\lib\common.ps1"
+
+$RootDir = Get-RootDir -ScriptPath $PSCommandPath
 Set-Location $RootDir
 
 # 类型名形状：Q + 大写字母 + 小写字母（QLabel / QSqlQuery / QAbstractItemView …）

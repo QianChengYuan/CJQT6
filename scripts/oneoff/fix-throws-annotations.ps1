@@ -1,16 +1,37 @@
-﻿<#
+﻿# ============================================================
+# [已归档 / 一次性脚本] fix-throws-annotations.ps1
+# ------------------------------------------------------------
+# 状态:一次性 codemod —— G.ERR.01(/// throws: 注释缺失)批量补全,任务已完成。
+#       归档到 scripts/oneoff/,仅供查考,不再随工具链维护,也不在常规脚本清单内。
+# 位置变更(2026-09-19):scripts/fix-throws-annotations.ps1 → scripts/oneoff/fix-throws-annotations.ps1,
+#       故项目根改为「自脚本所在目录向上查找 cjpm.toml」,不再硬编码层级。
+# ============================================================
+
+<#
 .SYNOPSIS
     批量补全 throw 所在方法的 /// throws: 异常类型 注释,消除 cjlint G.ERR.01 告警
 .DESCRIPTION
-    一次性修复脚本。跑 cjlint 收集 G.ERR.01 告警,对每处 throw 找所在方法声明,
+    已归档的一次性修复脚本。跑 cjlint 收集 G.ERR.01 告警,对每处 throw 找所在方法声明,
     在方法文档注释末尾(或声明前)插入 /// throws: XxxException 说明 行。
     同方法同异常类型去重,从后往前插入避免行号偏移。
 .EXAMPLE
-    .\scripts\fix-throws-annotations.ps1                              # 扫描 src/ 下所有 .cj,在 throw 所在方法的 /// 注释末尾追加 /// throws: XxxException 说明 行
+    .\scripts\oneoff\fix-throws-annotations.ps1                       # 扫描 src/ 下所有 .cj,在 throw 所在方法的 /// 注释末尾追加 /// throws: XxxException 说明 行
 #>
 param(
-    [string]$ProjectRoot = (Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path))
+    [string]$ProjectRoot = ""
 )
+
+# 共享函数(定位项目根等):scripts/lib/common.ps1
+. "$PSScriptRoot\..\lib\common.ps1"
+
+if (-not $ProjectRoot) {
+    # 归档后位于 scripts/oneoff/,交由 lib::Get-RootDir 向上定位项目根(不再硬编码层级)
+    $ProjectRoot = Get-RootDir -ScriptPath $PSCommandPath
+}
+if (-not (Test-Path (Join-Path $ProjectRoot "cjpm.toml"))) {
+    Write-Host "错误: 未能定位项目根(应含 cjpm.toml),请用 -ProjectRoot 指定" -ForegroundColor Red
+    exit 1
+}
 
 $env:CJQT6_ROOT = $ProjectRoot
 

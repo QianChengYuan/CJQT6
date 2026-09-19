@@ -845,7 +845,7 @@ M0 从 0.5 天调整为 **1.5~2 天**，因为要额外验证绘制能力、文�
 打包脚本（M5 产出）：
 
 ```powershell
-# scripts/package-windows.ps1
+# 打包参考（仓库暂无 scripts/package-windows.ps1，按此步骤手动执行或后续补齐）：
 # 1. cjpm build --release
 # 2. （仅动态链接时）windeployqt target/release/bin/CjMusic.exe --dir dist
 # 3. 手动复制 lrc4cj.dll + charset4cj 的 dll + cjqt6_bridge.dll 到 dist/

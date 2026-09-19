@@ -14,7 +14,7 @@
 #   4. cjpm build(链接新桥接库)
 #   5. 部署 Qt 运行时 / bridge / MSVC CRT / 平台插件到
 #      target/release/cjqt6,再跑 offscreen 全量测试(+--coverage)
-#   6. 覆盖率报告(cjcov,可跳过)
+#   6. 覆盖率报告(cjcov) + 双口径门禁(可跳过)
 # 关键:第 5 步必须把 releases/ 里最新的 cjqt6_bridge.dll 同步进
 # target/release/cjqt6(测试进程实际加载位置),否则测试会加载过期 bridge
 # ============================================================
@@ -26,7 +26,9 @@ param(
     [switch]$SkipNativeTests,
     [switch]$SkipTest,
     [switch]$SkipCoverage,
-    [switch]$Asan
+    [switch]$Asan,
+    [double]$CoverageThreshold = 70.0,          # 含测试口径门禁阈值(与 verify_all.ps1 一致)
+    [double]$LibraryCoverageThreshold = 52.0    # 库源码口径门禁阈值(与 verify_all.ps1 一致)
 )
 
 $ErrorActionPreference = "Stop"
@@ -53,8 +55,8 @@ if (-not $QtDir) {
     Write-Host "错误: 未找到 Qt6,请用 -QtDir 指定(如 C:\Qt\6.9.1\msvc2022_64 或设置 `$env:QTDIR)" -ForegroundColor Red
     exit 1
 }
-$env:QTDIR = $QtDir
-$env:PATH = "$QtDir\bin;$env:PATH"
+# QTDIR/PATH 注入走 lib::Set-QtEnv
+Set-QtEnv -QtDir $QtDir | Out-Null
 Write-Host "[1/6] Qt6: $QtDir" -ForegroundColor Cyan
 
 # ---- 第 2 步: 桥接库 ----
@@ -107,11 +109,11 @@ if ($SkipTest) {
     }
 }
 
-# ---- 第 6 步: 覆盖率报告 ----
+# ---- 第 6 步: 覆盖率报告 + 双口径门禁 ----
 if ($SkipTest -or $SkipCoverage) {
     Write-Step 6 6 "跳过覆盖率报告(-SkipTest/-SkipCoverage)" Skip
 } else {
-    Write-Step 6 6 "生成覆盖率报告(cjcov)..."
+    Write-Step 6 6 "生成覆盖率报告(cjcov) + 双口径门禁..."
     $cjcov = Find-Cjcov
     if (-not $cjcov) {
         Write-Host "警告: 未在 PATH 中找到 cjcov,跳过覆盖率报告" -ForegroundColor Yellow
@@ -124,15 +126,18 @@ if ($SkipTest -or $SkipCoverage) {
             Write-Host "错误: cjcov 报告生成失败" -ForegroundColor Red
             exit 1
         }
-        if (Test-Path "$RootDir\cov_output\report\coverage.json") {
-            $cov = Get-Content "$RootDir\cov_output\report\coverage.json" -Raw | ConvertFrom-Json
-            $total = 0; $hit = 0
-            foreach ($f in $cov.fileLists) {
-                $total += $f.totalLines
-                $hit += $f.hitLines.Count
+        $covJson = "$RootDir\cov_output\report\coverage.json"
+        if (Test-Path $covJson) {
+            # 双口径统计走 lib::Get-CoverageStats(与 check-coverage.ps1 / gen-coverage-summary.ps1 同一实现)
+            $cov = Get-CoverageStats -CoverageJson $covJson
+            Write-Host ("覆盖率: 含测试 {0}% ({1}/{2} 行) | 库源码 {3}% ({4}/{5} 行) —— 详见 cov_output\report\index.html" -f `
+                $cov.Pct, $cov.Hit, $cov.Total, $cov.LibPct, $cov.LibHit, $cov.LibTotal) -ForegroundColor Green
+            # 与 verify_all.ps1 口径一致:双口径阈值门禁(此前本脚本只打印不门禁,两个入口行为不一致)
+            & "$RootDir\scripts\check-coverage.ps1" -CoverageThreshold $CoverageThreshold -LibraryCoverageThreshold $LibraryCoverageThreshold
+            if ($LASTEXITCODE -ne 0) {
+                Write-Host "详细报告: cov_output\report\index.html" -ForegroundColor Yellow
+                exit 1
             }
-            $pct = if ($total -gt 0) { [math]::Round($hit * 100.0 / $total, 2) } else { 0 }
-            Write-Host "覆盖率: $hit / $total 行 = $pct%(含测试文件,详见 cov_output\report\index.html)" -ForegroundColor Green
         } else {
             Write-Host "警告: coverage.json 未生成,报告可能不完整" -ForegroundColor Yellow
         }

@@ -32,8 +32,8 @@ if (-not $QtDir) {
     Write-Host "❌ 未找到Qt6,请用 -QtDir 指定(如 C:\Qt\6.9.1\msvc2022_64 或设置 `$env:QTDIR)" -ForegroundColor Red
     exit 1
 }
-$env:QTDIR = $QtDir
-$env:PATH = "$QtDir\bin;$env:PATH"
+# QTDIR/PATH 注入走 lib::Set-QtEnv
+Set-QtEnv -QtDir $QtDir | Out-Null
 
 Write-Section "update-bridge"
 Write-Host "Qt6:  $QtDir"

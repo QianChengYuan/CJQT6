@@ -42,7 +42,6 @@ scripts/
 ├── run-test.ps1               # [Windows 完整流程] bridge + build + 部署 + cjpm test + 覆盖率
 ├── run-lint.ps1               # cjlint 静态检查入口(分类统计)
 ├── verify_all.ps1             # [Windows 一键门禁] bridge + build + test + 覆盖率 + 冒烟示例
-├── rebuild_all.ps1            # [DEPRECATED] 已被 verify_all.ps1 替代
 │
 ├── deploy-qt-example.ps1      # [新增] 示例运行时 DLL 部署(Qt + MSVC CRT + bridge + cjqt6 deps)
 ├── deploy-qt-test.ps1         # [新增] 测试运行时 DLL 部署(从 tests/ 合并)
@@ -55,10 +54,11 @@ scripts/
 ├── gen-api-index.ps1          # 从 docs/api/ 生成 INDEX.md(覆盖校验)
 ├── check-api-usage.ps1        # [新增] 示例/测试代码的 API 存在性门禁(包/类型/方法,-Strict 失败退出)
 ├── gen-ui.ps1                 # Designer .ui 一键转仓颉代码
-├── fix-throws-annotations.ps1 # 批量补全 /// throws: 注释(消除 G.ERR.01)
 │
 ├── new-qt6-project.ps1        # Windows 脚手架
-└── new-qt6-project.sh         # Linux/macOS 脚手架
+├── new-qt6-project.sh         # Linux/macOS 脚手架
+└── oneoff/                    # [归档] 已完成的一次性脚本(不随工具链维护、不在常规清单内)
+    └── fix-throws-annotations.ps1   # 批量补全 /// throws: 注释(消除 G.ERR.01),任务已完成
 ```
 
 ## 分类索引(按用途)
@@ -82,7 +82,7 @@ scripts/
 | `build-native-tests.sh` | Linux/macOS | `-asan` 启用 AddressSanitizer |
 | `build-native-tests.ps1` | Windows | `-Asan`(PowerShell switch)启用 AddressSanitizer |
 
-### 3. 仓颉测试与门禁(4 个,active 3 / deprecated 1)
+### 3. 仓颉测试与门禁(4 个)
 
 | 脚本 | 用途 | 备注 |
 |---|---|---|
@@ -90,7 +90,6 @@ scripts/
 | `run-test.ps1` | Windows 完整测试流程 | 调 `update-bridge.ps1` + `build-native-tests.ps1` + `deploy-qt-test.ps1` |
 | `run-lint.ps1` | cjlint 静态检查入口 | 分类统计告警 |
 | `verify_all.ps1` | Windows 一键门禁 | bridge + build + test + 覆盖率 + 冒烟示例 |
-| `rebuild_all.ps1` | (deprecated) | 已被 `verify_all.ps1` 替代,保留仅做向后兼容 |
 
 ### 4. 环境配置(2 个)
 
@@ -132,8 +131,9 @@ scripts/
 | `new-qt6-project.{ps1,sh}` | 创建 CJQT6 应用骨架(`cjpm init --template qt6` 等价物,roadmap 9.5) |
 | `gen-ui.ps1` | Designer `.ui` 文件一键转仓颉代码 |
 | `gen-api-index.ps1` | 从 `docs/api/*.md` 生成 `INDEX.md`(覆盖校验 `-FailOnMissing`) |
-| `fix-throws-annotations.ps1` | 批量补全 `/// throws:` 注释(消除 `G.ERR.01`) |
 | `gen-coverage-summary.ps1` | 生成 PR 评论用覆盖率 markdown(由 CI 调用) |
+
+> `fix-throws-annotations.ps1` 已归档到 `oneoff/`(一次性 codemod,任务完成),见目录树。
 
 ## 共享函数库(`lib/`)
 
@@ -166,6 +166,9 @@ $QtDir = Find-QtDir -QtDir $QtDir      # 探测 Qt6(参数 / $env:QTDIR / 常见
 $cjpm  = Find-Cjpm                     # 探测 cjpm
 $cjcov = Find-Cjcov                    # 探测 cjcov
 
+$cov   = Get-CoverageStats -CoverageJson $covJson   # 双口径覆盖率统计(cjcov 的 coverage.json)
+Set-QtEnv -QtDir $QtDir                             # 注入 QTDIR / PATH(可选 -RemoveOtherQtVersions / -NoPrepend)
+
 Write-Section "标题"                    # 彩色 section 标题
 Write-Step -Step 1 -Total 5 -Text "..." # 步骤进度(支持 Skip/Error 着色)
 Write-Die "致命错误"                    # 红字 + 退出 1
@@ -185,10 +188,17 @@ Write-Die "致命错误"                    # 红字 + 退出 1
    - bash:`set -euo pipefail` + `die` 函数
    - PowerShell:`$ErrorActionPreference = "Stop"` + `Write-Die` 函数
 4. **彩色**:`tput` / `Write-Host -ForegroundColor`,非 TTY 环境自动降级为无色
-5. **路径探测**:`lib/common.sh::find_qt` 与 `lib/common.ps1::Find-QtDir` 是唯一允许的 Qt 路径探测入口
+5. **路径探测与环境注入**:`lib/common.sh::find_qt` 与 `lib/common.ps1::Find-QtDir` 是唯一允许的 Qt 路径探测入口;注入 `QTDIR`/`PATH` 一律走 `lib/common.ps1::Set-QtEnv`(`-RemoveOtherQtVersions` 清除其它 Qt 版本、`-NoPrepend` 交由调用方自行前置部署目录),脚本内不再各自拼 `$env:PATH`。项目根定位一律走 `lib/common.ps1::Get-RootDir`,不再手写 `Split-Path`
 6. **状态标注**:废弃脚本必须在文件最顶部加 `DEPRECATED` 头注释,说明替代方案
 
 ## 改动历史
+
+- **2026-09-19 (round 3)** — 死代码清理与共享抽取(批次 1+2):
+  - **删除 `rebuild_all.ps1`**:自 2026-09-09 起即 DEPRECATED,功能被 `verify_all.ps1` 完全覆盖;其独有的"清 `target/`"已由 `verify_all.ps1` 的缓存守卫与新增的 `clean-example-cache.ps1` 承担。同步更新 `docs/guides/build-guide.md`、`docs/roadmap.md`、`.agents/skills/cjqt6/SKILL.md` 的引用
+  - `fix-throws-annotations.ps1` 归档到 `oneoff/`(一次性 codemod,任务已完成),项目根改为向上查找 `cjpm.toml`
+  - `lib/common.ps1` 新增 `Get-CoverageStats`(双口径覆盖率统计)与 `Set-QtEnv`(`QTDIR`/`PATH` 注入);`check-coverage.ps1`、`gen-coverage-summary.ps1`、`run-test.ps1`、`update-bridge.ps1`、`build-native-tests.ps1`、`deploy-qt-test.ps1` 迁移到共享实现
+  - `check-api-usage.ps1`、`check-release.ps1`、`gen-api-index.ps1`、`gen-ui.ps1`、`run-lint.ps1`、`sync-release-artifacts.ps1` 的 6 处手写 `Split-Path` 改为 `lib::Get-RootDir`(并补 dot-source)
+  - `run-test.ps1` 第 6 步补上双口径覆盖率门禁(此前只打印不门禁,与 `verify_all.ps1` 行为不一致),新增 `-CoverageThreshold` / `-LibraryCoverageThreshold`
 
 - **2026-09-09 (round 2)** — 合并 `tests/` 到 `scripts/`:
   - `tests/deploy_qt.ps1` → `scripts/deploy-qt-example.ps1`(支持 `-ExampleRoot` 参数,使用 lib 函数)

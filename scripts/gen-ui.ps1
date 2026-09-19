@@ -26,7 +26,11 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-$Root = Split-Path -Parent $PSScriptRoot
+
+# 共享函数(定位项目根等):scripts/lib/common.ps1
+. "$PSScriptRoot\lib\common.ps1"
+
+$Root = Get-RootDir -ScriptPath $PSCommandPath
 
 if (-not (Test-Path -LiteralPath $UiFile)) {
     # 允许相对仓库根或相对当前目录

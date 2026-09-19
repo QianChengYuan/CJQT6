@@ -240,7 +240,7 @@ lipo -create \
 
 ### Linux一键编译脚本
 
-创建 `scripts/build-linux.sh`：
+仓库内已有现成实现 `scripts/build-linux-x64.sh`（Linux x86_64）、`scripts/build-linux-arm64.sh`（aarch64）。下面演示其等价手写版本 `scripts/build-linux.sh`：
 
 ```bash
 #!/bin/bash
@@ -275,7 +275,7 @@ ls -lh "$RELEASE_DIR/libcjqt6_bridge.so"
 
 ### Windows一键编译脚本
 
-创建 `scripts\build-windows-msvc.ps1`：
+仓库内已有现成实现 `scripts\update-bridge.ps1`（MSVC 2022，自动 cmake configure + build + 同步 `releases/windows-x64/`）。下面演示其等价手写版本 `scripts\build-windows-msvc.ps1`：
 
 ```powershell
 $ErrorActionPreference = "Stop"

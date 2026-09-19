@@ -20,12 +20,14 @@ param(
     [switch]$Summary
 )
 
-# 定位项目根目录（脚本所在目录的父目录）
-$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$projectRoot = Split-Path -Parent $scriptDir
+# 共享函数(定位项目根等):scripts/lib/common.ps1
+. "$PSScriptRoot\lib\common.ps1"
+
+# 定位项目根目录（走 lib::Get-RootDir,替代手写 Split-Path × 2）
+$projectRoot = Get-RootDir -ScriptPath $PSCommandPath
 
 # 设置 CJQT6_ROOT（与项目其他脚本保持环境变量命名一致）
-$env:CJQT6_ROOT = $projectRoot
+Set-Cjqt6RootEnv -RootDir $projectRoot
 
 Write-Host ""
 Write-Host "=== CJQT6 cjlint 静态检查 ===" -ForegroundColor Cyan

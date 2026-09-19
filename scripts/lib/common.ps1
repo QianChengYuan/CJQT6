@@ -29,15 +29,23 @@ if ($MyInvocation.CommandOrigin -eq '.' -and $script:Cjqt6CommonLoaded) {
 $script:Cjqt6CommonLoaded = $true
 
 # ---------- 定位 CJQT6 项目根 ----------
-# 假设调用脚本位于 scripts/ 下,返回其父目录绝对路径
+# 自脚本所在目录向上查找含 cjpm.toml 的目录,返回其绝对路径。
+# 兼容 scripts/foo.ps1、scripts/lib/common.ps1、scripts/oneoff/foo.ps1 等任意层级;
+# 万一找不到 cjpm.toml(例如脚本被拷到仓库外),退回原语义:按 scripts/ 或 scripts/lib/ 推断。
 function Get-RootDir {
     param([string]$ScriptPath = $PSCommandPath)
     if ([string]::IsNullOrEmpty($ScriptPath)) {
         $ScriptPath = $MyInvocation.MyCommand.Path
     }
     $d = Split-Path -Parent $ScriptPath
-    # scripts/lib/common.ps1 → scripts/lib → scripts → 项目根
-    # scripts/foo.ps1        → scripts      → 项目根
+    $probe = $d
+    while (-not [string]::IsNullOrEmpty($probe)) {
+        if (Test-Path (Join-Path $probe "cjpm.toml")) { return $probe }
+        $parent = Split-Path -Parent $probe
+        if ([string]::IsNullOrEmpty($parent) -or $parent -eq $probe) { break }
+        $probe = $parent
+    }
+    # 兜底(与历史行为一致):scripts/lib/common.ps1 → 上两级;scripts/foo.ps1 → 上一级
     $leaf = Split-Path -Leaf $d
     if ($leaf -eq 'lib') {
         return (Split-Path -Parent (Split-Path -Parent $d))
@@ -231,4 +239,59 @@ function Clear-StaleExampleCache {
 
     Remove-Item $targetDir -Recurse -Force -ErrorAction SilentlyContinue
     return $true
+}
+
+# ---------- 读取 cjcov 的 coverage.json,返回双口径统计 ----------
+# 口径(与 check-coverage.ps1 / gen-coverage-summary.ps1 原先各自实现的一致):
+#   - 含测试口径:全部 fileLists
+#   - 库源码口径:排除 src/test/ 测试源码
+#     注意:cjcov --source=src 生成的路径以 src 为根,src/test/*.cj 显示为 test\*.cj
+#     (无前导分隔符);core\gui_test_env.cj 属 src/core 库源码,不应排除。
+# 返回 [pscustomobject]@{ Hit; Total; Pct; LibHit; LibTotal; LibPct }
+function Get-CoverageStats {
+    param([Parameter(Mandatory = $true)][string]$CoverageJson)
+
+    $cov = Get-Content -LiteralPath $CoverageJson -Raw | ConvertFrom-Json
+    $total = 0; $hit = 0
+    $libTotal = 0; $libHit = 0
+    foreach ($f in $cov.fileLists) {
+        $total += $f.totalLines
+        $hit += $f.hitLines.Count
+        if ($f.filepath -notmatch '(^|[\\/])test[\\/]') {
+            $libTotal += $f.totalLines
+            $libHit += $f.hitLines.Count
+        }
+    }
+    [pscustomobject]@{
+        Hit      = $hit
+        Total    = $total
+        Pct      = if ($total -gt 0) { [math]::Round($hit * 100.0 / $total, 2) } else { 0 }
+        LibHit   = $libHit
+        LibTotal = $libTotal
+        LibPct   = if ($libTotal -gt 0) { [math]::Round($libHit * 100.0 / $libTotal, 2) } else { 0 }
+    }
+}
+
+# ---------- 注入 Qt6 环境变量(QTDIR / PATH) ----------
+# 约定:Qt 路径探测一律走 Find-QtDir,环境注入一律走本函数,脚本内不再各自拼 $env:PATH。
+# -RemoveOtherQtVersions: 先从 PATH 清除其它 Qt 版本(Qt\6.*)的 bin,以及本次的 bin。
+#   运行/测试场景应当启用,否则进程可能加载到版本不匹配的 Qt DLL(加载期即失败)。
+# -NoPrepend: 不把本次 Qt 的 bin 前置。调用方自行把「部署目录」前置时使用
+#   (测试场景把 Qt 运行时 DLL 部署到 target/release/cjqt6,无需 Qt 自身 bin 参与搜索)。
+# 返回本次 Qt 的 bin 路径。
+function Set-QtEnv {
+    param(
+        [Parameter(Mandatory = $true)][string]$QtDir,
+        [switch]$RemoveOtherQtVersions,
+        [switch]$NoPrepend
+    )
+    $qtBin = Join-Path $QtDir "bin"
+    $env:QTDIR = $QtDir
+    if ($RemoveOtherQtVersions) {
+        $env:PATH = (($env:PATH -split ';') | Where-Object { $_ -notmatch '\\Qt\\6\.' -and $_ -ne $qtBin }) -join ';'
+    }
+    if (-not $NoPrepend) {
+        $env:PATH = "$qtBin;$env:PATH"
+    }
+    return $qtBin
 }

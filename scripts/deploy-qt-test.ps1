@@ -148,11 +148,12 @@ $env:QT_QPA_PLATFORM            = "offscreen"
 $env:QT_QPA_PLATFORM_PLUGIN_PATH = $platformsDir
 $env:QT_PLUGIN_PATH              = $cjqt6Dir
 $env:QT_QPA_FONTDIR              = "C:\Windows\Fonts"
-# 覆盖可能存在的 QTDIR(用户环境可能指向其他 Qt 版本,导致插件/DLL 混用)
-$env:QTDIR                       = $QtDir
-# 从 PATH 移除其他 Qt 版本的 bin(防止测试 exe 加载错误版本的 Qt DLL),
-# 再把部署目录加到最前面(bridge + Qt 运行时 DLL 都在这里)
-$env:PATH = (($env:PATH -split ';') | Where-Object { $_ -notmatch '\\Qt\\6\.' -and $_ -ne $qtBin }) -join ';'
+# QTDIR/PATH 注入走 lib::Set-QtEnv:
+#   -RemoveOtherQtVersions 覆盖用户环境里可能指向其他 Qt 版本的 QTDIR,
+#     并从 PATH 清除其它 Qt 的 bin(防止测试 exe 加载版本不匹配的 Qt DLL)
+#   -NoPrepend 不前置 Qt 自身 bin —— 运行时 DLL 已部署到 $cjqt6Dir,由它优先参与搜索
+Set-QtEnv -QtDir $QtDir -RemoveOtherQtVersions -NoPrepend | Out-Null
+# 部署目录(bridge + Qt 运行时 DLL)置于搜索路径最前
 $env:PATH = "$cjqt6Dir;$env:PATH"
 Write-Host "[env] QT_QPA_PLATFORM = $env:QT_QPA_PLATFORM" -ForegroundColor Cyan
 Write-Host "[env] QT_QPA_PLATFORM_PLUGIN_PATH = $env:QT_QPA_PLATFORM_PLUGIN_PATH" -ForegroundColor Cyan

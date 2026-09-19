@@ -37,22 +37,10 @@ if (-not (Test-Path -LiteralPath $CoverageJson)) {
     exit 0
 }
 
-$cov = Get-Content -LiteralPath $CoverageJson -Raw | ConvertFrom-Json
-$total = 0; $hit = 0
-$libTotal = 0; $libHit = 0
-foreach ($f in $cov.fileLists) {
-    $total += $f.totalLines
-    $hit += $f.hitLines.Count
-    # 库源码口径：排除 src/test/ 测试源码
-    # 注意：cjcov --source=src 生成的路径以 src 为根，src/test/*.cj 显示为 test\*.cj
-    #（无前导分隔符），core\gui_test_env.cj 属于 src/core 库源码、不应排除。
-    if ($f.filepath -notmatch '(^|[\\/])test[\\/]') {
-        $libTotal += $f.totalLines
-        $libHit += $f.hitLines.Count
-    }
-}
-$pct = if ($total -gt 0) { [math]::Round($hit * 100.0 / $total, 2) } else { 0 }
-$libPct = if ($libTotal -gt 0) { [math]::Round($libHit * 100.0 / $libTotal, 2) } else { 0 }
+# 双口径统计走 lib::Get-CoverageStats（与 gen-coverage-summary.ps1 共用同一实现，口径不再各写一份）
+$cov = Get-CoverageStats -CoverageJson $CoverageJson
+$total = $cov.Total; $hit = $cov.Hit; $pct = $cov.Pct
+$libTotal = $cov.LibTotal; $libHit = $cov.LibHit; $libPct = $cov.LibPct
 Write-Host "覆盖率: $hit / $total 行 = $pct%（含测试文件）| 库源码口径 $libPct%（排除 src/test/）"
 
 # 覆盖率门禁（P0-1 遗留闭环）：双口径 + 阈值，低于即失败

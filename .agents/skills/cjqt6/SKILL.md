@@ -256,7 +256,7 @@ cjpm build
 ```
 - `cjpm.toml` 已配置各平台 `link-option`：Windows 用 `releases/windows-x64/cjqt6_bridge.lib`（MSVC）/ `.dll`（MinGW），Linux 用 `-Lreleases/linux-x64 -lcjqt6_bridge`。
 - 常见链接错误 `cannot find -lcjqt6_bridge` → 桥接库没构建/没部署到 `releases/`，回到 5.1。
-- 全量重建脚本：`.\scripts\rebuild_all.ps1`（先桥接库后 cjpm + 可选示例，`-Example dormitory_manager` 指定示例，`-SkipExample` 跳过）。
+- 全量重建/门禁脚本：`.\scripts\verify_all.ps1`（先桥接库后 cjpm + 全量测试 + 覆盖率门禁 + 冒烟示例，`-Example dormitory_manager` 指定示例，`-SkipExample` 跳过）。原 `rebuild_all.ps1` 已废弃并删除（2026-09-19）。
 - **工程治理门禁**（提交前建议跑）：
   - `.\scripts\verify_all.ps1` — 一键全量门禁（构建+测试，自动注入 `CJQT6_ROOT`）。
   - `.\scripts\run-test.ps1` / `run-test.sh` — 跑根包测试。

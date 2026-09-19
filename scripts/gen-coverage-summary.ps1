@@ -13,24 +13,18 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+# 共享函数(双口径覆盖率统计):scripts/lib/common.ps1
+. "$PSScriptRoot\lib\common.ps1"
+
 if (-not (Test-Path -LiteralPath $CoverageJson)) {
     Write-Host "::warning::$CoverageJson 不存在,跳过 markdown 生成"
     exit 0
 }
 
-$cov = Get-Content -LiteralPath $CoverageJson -Raw | ConvertFrom-Json
-$total = 0; $hit = 0
-$libTotal = 0; $libHit = 0
-foreach ($f in $cov.fileLists) {
-    $total += $f.totalLines
-    $hit += $f.hitLines.Count
-    if ($f.filepath -notmatch '(^|[\\/])test[\\/]') {
-        $libTotal += $f.totalLines
-        $libHit += $f.hitLines.Count
-    }
-}
-$pct = if ($total -gt 0) { [math]::Round($hit * 100.0 / $total, 2) } else { 0 }
-$libPct = if ($libTotal -gt 0) { [math]::Round($libHit * 100.0 / $libTotal, 2) } else { 0 }
+# 双口径统计走 lib::Get-CoverageStats（与 check-coverage.ps1 共用同一实现，口径不再各写一份）
+$cov = Get-CoverageStats -CoverageJson $CoverageJson
+$total = $cov.Total; $hit = $cov.Hit; $pct = $cov.Pct
+$libTotal = $cov.LibTotal; $libHit = $cov.LibHit; $libPct = $cov.LibPct
 
 # emoji 状态指示
 $badge = if ($libPct -ge 52) { "🟢" } elseif ($libPct -ge 40) { "🟡" } else { "🔴" }

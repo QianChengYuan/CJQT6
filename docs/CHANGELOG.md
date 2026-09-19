@@ -11,6 +11,13 @@
 
 ### 变更
 
+- **`scripts/` 批次 1+2：死代码清理与 `lib` 共享抽取（不涉及库 API，纯工具链）**：
+  - **删除 `scripts/rebuild_all.ps1`**：自 2026-09-09 起即 DEPRECATED，编排功能被 `verify_all.ps1` 完全覆盖；其独有的「无条件清 `target/`」已由 `verify_all.ps1` 的缓存守卫与新增的 `scripts/clean-example-cache.ps1` 承担。同步更新 `docs/guides/build-guide.md`、`docs/roadmap.md`、`.agents/skills/cjqt6/SKILL.md`、`scripts/README.md`。
+  - **归档一次性脚本**：`fix-throws-annotations.ps1`（G.ERR.01 注释批量补全 codemod，任务已完成）移入 `scripts/oneoff/`，并改用 `lib::Get-RootDir` 定位项目根。
+  - **修正文档中不存在的脚本名**：`docs/guides/cross-compile.md` 的示例脚本名（`build-linux.sh` / `build-windows-msvc.ps1`）补注仓库内现成实现（`build-linux-x64.sh` / `build-linux-arm64.sh` / `update-bridge.ps1`）；`examples/CjMusic/CjMusic-开发方案.md` 的 `package-windows.ps1` 注明「仓库暂无，按步骤手动执行」。`docs/CHANGELOG.md` 内历史提及的 `build-windows-x64.ps1` 属记录，不回改。
+  - **`lib/common.ps1` 抽取共享实现（消除重复）**：新增 `Get-CoverageStats`（读 `coverage.json` + 双口径统计；此前在 `check-coverage.ps1` 与 `gen-coverage-summary.ps1` 各写一份、`run-test.ps1` 另写一份单口径）与 `Set-QtEnv`（`QTDIR`/`PATH` 注入，支持 `-RemoveOtherQtVersions` / `-NoPrepend`；此前 4 个脚本各自拼 `$env:PATH`）；`Get-RootDir` 由「按 `scripts/`、`scripts/lib/` 推断层级」加固为「向上查找 `cjpm.toml`」，对既有层级行为不变、对新层级（如 `scripts/oneoff/`）亦成立。
+  - **修复 `run-test.ps1` 与 `verify_all.ps1` 的覆盖率行为不一致**：`run-test.ps1` 第 6 步此前只打印「含测试口径」且**不门禁**，现统一走 `check-coverage.ps1` 双口径门禁，并新增 `-CoverageThreshold` / `-LibraryCoverageThreshold`（默认 70 / 52，与 `verify_all.ps1` 一致）。
+  - **验证**：16 个脚本语法解析通过；`Get-CoverageStats` 与迁移前的内联实现用合成数据对照**结果一致**（含「`core\gui_test_env.cj` 属库源码、不得排除」的边界规则）；`check-coverage.ps1` 门禁通过/失败退出码 0/1 正确；`gen-api-index.ps1` 重生成 `docs/api/INDEX.md` **逐字节未变**；`Get-RootDir` 对 9 个层级解析均为仓库根；`run-test.ps1 -SkipCoverage` 端到端 **PASS(58s)**，实测覆盖 `deploy-qt-test.ps1` 的 `Set-QtEnv -RemoveOtherQtVersions -NoPrepend` 分支；`update-bridge.ps1` 重编通过。另：`--coverage` 路径仍受 cjpm 自身 `backupGcnoData` 的 `FSException` 影响（本机稳定复现，已被 `deploy-qt-test.ps1` 的「无用例统计即 FAIL」防护如实报错），故 `run-test.ps1` 第 6 步的门禁路径以合成数据验证。
 - **本地测试工具链修掉两处「判据不严 / 缓存失效」缺陷（不影响 CI 口径）**：
   - **`--coverage` 下 cjpm 自身崩溃会被误判为 PASS（空过）**：`scripts/deploy-qt-test.ps1` 此前只看退出码——`FAILED: [1-9]` 与编译错误都不匹配时，一律兜底打印「PASS (with warnings)」并 `exit 0`。实测 `--coverage` 收尾备份 gcov 数据时 **cjpm 自身**会抛 `FSException: Native function error return -1`（`backupGcnoData` → `std.fs::FileInfo::isRegular`）而中止，**一个用例统计都不打印**，却被判为 PASS——即「测试根本没跑完也显示绿」。现要求**必须取得用例统计（`PASSED: N`）**才判定通过，否则报 FAIL（非零退出）并提示去掉 `--coverage` 重跑。该口径与 CI 复合 action 的 `run-test.sh` 一致（其在无用例统计时本就以非零退出）；CI 不使用本机脚本，故 CI 行为不变。
   - **`-SkipCoverage` 未透传到测试步骤**：`scripts/run-test.ps1` / `scripts/verify_all.ps1` 的该开关原本只跳过「覆盖率报告」步骤，测试仍强制带 `--coverage` 插桩——于是「想快速验证却踩到上述 cjpm 崩溃」无法规避（本机实测必现）。现两脚本把 `-SkipCoverage` 透传给 `deploy-qt-test.ps1`，并在步骤标题中明示 `--coverage` / 「无覆盖率插桩」。

@@ -73,7 +73,7 @@ CJQT6 的演进边界由仓颉语言特性决定，先固定几个**不可绕过
 
 ### 3.3 CI / 构建门禁（仓颉实际约束内可行）
 - 远端是 GitCode，无 GitHub Actions，但可用 **GitCode CI / 自建脚本门禁**：
-  - `update-bridge.ps1` + `cjpm build` + `cjpm test` 串成一条本地一键命令（`rebuild_all.ps1` 已有雏形）；
+  - `update-bridge.ps1` + `cjpm build` + `cjpm test` 串成一条本地一键命令（已由 `verify_all.ps1` 落地）；
   - Linux 用 `xvfb-run cjpm test` 跑 GUI 测试。
 - 产出：新增 `scripts/verify_all.ps1`（编译桥接 → cjpm build → cjpm test → 冒烟示例）。
 

@@ -10,8 +10,12 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+
+# 共享函数(定位项目根等):scripts/lib/common.ps1
+. "$PSScriptRoot\lib\common.ps1"
+
 $repo = "QianChengYuan/CJQT6"
-$base = Split-Path $PSScriptRoot -Parent
+$base = Get-RootDir -ScriptPath $PSCommandPath
 Set-Location $base
 
 # CI artifact 名 -> releases 目标相对路径（与 .github/workflows/ci.yml 的 upload-artifact 对应）

@@ -60,7 +60,8 @@ Pop-Location
 
 # ---- run ----
 Write-Host "[3/3] ctest 运行..." -ForegroundColor Cyan
-$env:PATH = "$QtDir\bin;$env:PATH"
+# QTDIR/PATH 注入走 lib::Set-QtEnv(ctest 需能找到 Qt6 运行时 DLL)
+Set-QtEnv -QtDir $QtDir | Out-Null
 Push-Location $buildDir
 ctest --output-on-failure -C Release -R bridge_core_tests
 $code = $LASTEXITCODE
