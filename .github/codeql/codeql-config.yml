@@ -1,0 +1,19 @@
+# ============================================================
+# CodeQL 配置 — 严重度过滤
+# ------------------------------------------------------------
+# 阻断策略（"仅 error / warning 阻断，note 不阻断"）分两层实现：
+#   1. 本文件：查询层过滤 —— 排除 problem.severity=recommendation 的查询，
+#      它们对应 GitHub Security 页签里的 note 级别，从源头不产生结果；
+#   2. 工作流末尾「阻断门禁」步骤：解析本次分析产出的 SARIF，
+#      只要还有结果（并再次按 level 过滤掉 note）即判定任务失败。
+#
+# 注：CodeQL 的 problem.severity 取值为 error / warning / recommendation，
+# GitHub 展示时 recommendation 映射为 note。
+# ============================================================
+
+name: "CJQT6 CodeQL 配置"
+
+query-filters:
+  # 只保留 error / warning 级查询（note/recommendation 不参与阻断，降低噪声）
+  - exclude:
+      problem.severity: recommendation

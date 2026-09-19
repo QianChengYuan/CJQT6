@@ -94,6 +94,7 @@ jobs:
         with:
           languages: ${{ matrix.language }}
           build-mode: ${{ matrix.build_mode }}
+          config-file: ./.github/codeql/codeql-config.yml
 
       # 复用仓库自身的桥接构建脚本:与 ci.yml 同一套命令,
       # 既保证 CodeQL 提取到真实编译单元,也顺带验证脚本本身可用。
@@ -107,8 +108,16 @@ jobs:
             bash scripts/build-linux-x64.sh
           fi
 
-      # 执行分析
+      # 执行分析（同时把 SARIF 落盘，供下一步做阻断判定）
       - name: 执行 CodeQL 分析
         uses: github/codeql-action/analyze@v4
         with:
           category: "/language:${{ matrix.language }}"
+          output: codeql-sarif/${{ matrix.language }}
+
+      # 阻断门禁:本次分析只要还有 error/warning 级结果即失败(note 放行)。
+      # 判定逻辑放在 .github/codeql/block-on-findings.ps1(可本地跑,便于自测)。
+      - name: 阻断门禁（error/warning 有结果即失败）
+        shell: pwsh
+        run: pwsh -NoProfile -File .github/codeql/block-on-findings.ps1 -SarifDir "codeql-sarif/${{ matrix.language }}"
+
