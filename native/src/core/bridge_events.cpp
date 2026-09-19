@@ -25,7 +25,11 @@
 //     会死锁（C++ runtime 初始化问题），CRITICAL_SECTION 是 Windows API 不依赖 C++ runtime；
 //   - POSIX（Linux/macOS）：pthread 递归互斥量（PTHREAD_MUTEX_RECURSIVE），
 //     语义与 CRITICAL_SECTION 对齐（同为同线程可重入），同样不依赖 C++ runtime。
-#if defined(Q_OS_WIN)
+// 平台判定优先用编译器预定义的 _WIN32，而非只用 Qt 的 Q_OS_WIN：
+// Q_OS_WIN 由 Qt 头定义，IDE 的 clangd 在缺少 Qt include 路径时解析不到它，
+// 会误落到下面的 POSIX 分支并报「'pthread.h' file not found」的假错误。
+// 二者在 MSVC/MinGW 下等价，保留 Q_OS_WIN 作为兜底。
+#if defined(_WIN32) || defined(Q_OS_WIN)
 #include <windows.h>
 static CRITICAL_SECTION g_eventsMutex;
 static bool g_eventsMutexInit = false;
