@@ -21,10 +21,10 @@ import std.convert.*
 
 // 播放模式
 enum PlayMode {
-    | Sequential  // 顺序播放
-    | Loop        // 循环播放
-    | LoopOne     // 单曲循环
-    | Random      // 随机播放
+    | Sequential // 顺序播放
+    | Loop // 循环播放
+    | LoopOne // 单曲循环
+    | Random // 随机播放
 }
 
 // 音乐项
@@ -34,7 +34,7 @@ class MusicItem {
     public var title: String
     public var artist: String
     public var duration: Int64
-    
+
     public init(path: String) {
         filePath = path
         let p = Path(path)
@@ -43,7 +43,7 @@ class MusicItem {
         artist = "未知艺术家"
         duration = 0
     }
-    
+
     public func updateInfo(player: QMediaPlayer) {
         title = player.title()
         if (title.isEmpty()) {
@@ -61,7 +61,7 @@ class MusicItem {
 class LyricLine {
     public var timeMs: Int64
     public var text: String
-    
+
     public init(timeMs: Int64, text: String) {
         this.timeMs = timeMs
         this.text = text
@@ -79,7 +79,7 @@ var isPlaying: Bool = false
 var isMuted: Bool = false
 var currentVolume: Float32 = 0.7f32
 var currentSpeed: Float32 = 1.0f32
-var isUpdatingSlider: Bool = false  // 防止 slider 更新循环
+var isUpdatingSlider: Bool = false // 防止 slider 更新循环
 let randomGen: Random = Random()
 
 // 歌词状态
@@ -188,8 +188,15 @@ func loadCustomIcons() {
         setIconOnlyButton(btn, "prev", StandardIcon.MediaSkipBackward, "")
     }
     if (let Some(btn) <- playButton) {
-        setIconOnlyButton(btn, if (isPlaying) { "pause" } else { "play" }, 
-            if (isPlaying) { StandardIcon.MediaPause } else { StandardIcon.MediaPlay }, "")
+        setIconOnlyButton(btn, if (isPlaying) {
+            "pause"
+        } else {
+            "play"
+        }, if (isPlaying) {
+            StandardIcon.MediaPause
+        } else {
+            StandardIcon.MediaPlay
+        }, "")
     }
     if (let Some(btn) <- stopButton) {
         setIconOnlyButton(btn, "stop", StandardIcon.MediaStop, "")
@@ -198,8 +205,15 @@ func loadCustomIcons() {
         setIconOnlyButton(btn, "next", StandardIcon.MediaSkipForward, "")
     }
     if (let Some(btn) <- muteButton) {
-        setIconOnlyButton(btn, if (isMuted) { "mute" } else { "volume" }, StandardIcon.No,
-            if (isMuted) { "取消" } else { "静音" })
+        setIconOnlyButton(btn, if (isMuted) {
+            "mute"
+        } else {
+            "volume"
+        }, StandardIcon.No, if (isMuted) {
+            "取消"
+        } else {
+            "静音"
+        })
     }
     if (let Some(btn) <- speedButton) {
         setIconOnlyButton(btn, "speed", StandardIcon.No, "x1")
@@ -222,11 +236,19 @@ func setIconFolder(path: String) {
     iconFolder = path
     useCustomIcons = !path.isEmpty()
     loadCustomIcons()
-    updateStatus(if (useCustomIcons) { "已加载自定义图标: ${path}" } else { "使用标准图标" })
+    updateStatus(if (useCustomIcons) {
+        "已加载自定义图标: ${path}"
+    } else {
+        "使用标准图标"
+    })
 }
 
 func chooseIconFolder() {
-    let parentPtr = if (let Some(w) <- mainWindow) { w.getPtr() } else { 0 }
+    let parentPtr = if (let Some(w) <- mainWindow) {
+        w.getPtr()
+    } else {
+        0
+    }
     let folder = QFileDialog.getExistingDirectory(parentPtr, "选择图标文件夹")
     if (!folder.isEmpty()) {
         setIconFolder(folder)
@@ -281,7 +303,7 @@ func parseLrcTime(tag: String): Int64 {
         if (minutes < 0) {
             return -1
         }
-        let secPart = Float64.parse(rest)  // 支持 ss 或 ss.xx
+        let secPart = Float64.parse(rest) // 支持 ss 或 ss.xx
         if (secPart < 0.0) {
             return -1
         }
@@ -294,7 +316,7 @@ func parseLrcTime(tag: String): Int64 {
 func loadLyrics(filePath: String) {
     lyricLines = ArrayList<LyricLine>()
     currentLyricIndex = -1
-    
+
     // 将扩展名替换为 .lrc
     var lrcPath = filePath
     if (let Some(lastDot) <- filePath.lastIndexOf(".")) {
@@ -306,7 +328,7 @@ func loadLyrics(filePath: String) {
     } else {
         lrcPath = filePath + ".lrc"
     }
-    
+
     try {
         if (!exists(Path(lrcPath))) {
             resetLyrics()
@@ -315,7 +337,7 @@ func loadLyrics(filePath: String) {
         let bytes = File.readFrom(lrcPath)
         let content = String.fromUtf8(bytes)
         let lines = content.split("\n")
-        
+
         // 第一遍：解析所有形如 [mm:ss.xx] 的时间标签行
         var temp: ArrayList<LyricLine> = ArrayList<LyricLine>()
         for (line in lines) {
@@ -342,7 +364,7 @@ func loadLyrics(filePath: String) {
                 }
             }
         }
-        
+
         // 按时间排序（插入排序，保持稳定）
         for (i in 1..temp.size) {
             let key = temp[i]
@@ -353,7 +375,7 @@ func loadLyrics(filePath: String) {
             }
             temp[j] = key
         }
-        
+
         if (temp.size > 0) {
             lyricLines = temp
             renderLyrics()
@@ -381,7 +403,7 @@ func updateLyrics(pos: Int64) {
     if (lyricLines.size == 0) {
         return
     }
-    
+
     // 找到最后一行 timeMs <= pos 的歌词
     var idx: Int32 = -1
     for (i in 0..lyricLines.size) {
@@ -391,7 +413,7 @@ func updateLyrics(pos: Int64) {
             break
         }
     }
-    
+
     if (idx != currentLyricIndex) {
         currentLyricIndex = idx
         renderLyrics()
@@ -406,8 +428,12 @@ func renderLyrics() {
             return
         }
         var sb = ""
-        let idx = if (currentLyricIndex < 0) { Int32(0) } else { currentLyricIndex }
-        
+        let idx = if (currentLyricIndex < 0) {
+            Int32(0)
+        } else {
+            currentLyricIndex
+        }
+
         // 前一行
         if (idx > 0) {
             sb += "<font color='#7a7e8a'>${escapeHtml(lyricLines[Int64(idx) - 1].text)}</font><br/>"
@@ -430,7 +456,7 @@ func updateUI() {
             lbl.setText("<font size='5' color='#ffffff'><b>欢迎使用音乐播放器</b></font>")
         }
     }
-    
+
     if (let Some(lbl) <- artistLabel) {
         if (let Some(item) <- getCurrentItem()) {
             lbl.setText("<font color='#8b8e98'>${item.artist}</font>")
@@ -438,17 +464,24 @@ func updateUI() {
             lbl.setText("<font color='#8b8e98'>双击列表开始播放</font>")
         }
     }
-    
+
     // 播放按钮图标切换（优先自定义图标，回退标准图标）
     if (let Some(btn) <- playButton) {
-        setIconOnlyButton(btn, if (isPlaying) { "pause" } else { "play" },
-            if (isPlaying) { StandardIcon.MediaPause } else { StandardIcon.MediaPlay }, "")
+        setIconOnlyButton(btn, if (isPlaying) {
+            "pause"
+        } else {
+            "play"
+        }, if (isPlaying) {
+            StandardIcon.MediaPause
+        } else {
+            StandardIcon.MediaPlay
+        }, "")
     }
-    
+
     if (let Some(lbl) <- speedLabel) {
         lbl.setText("${currentSpeed}x")
     }
-    
+
     updatePlayModeButton()
 }
 
@@ -481,13 +514,17 @@ func updateStatus(msg: String) {
 // ============================================================
 
 func addFiles() {
-    let parentPtr = if (let Some(w) <- mainWindow) { w.getPtr() } else { 0 }
+    let parentPtr = if (let Some(w) <- mainWindow) {
+        w.getPtr()
+    } else {
+        0
+    }
     let files = QFileDialog.getOpenFileNames(
         parentPtr,
         "添加音乐文件",
         "音频文件 (*.mp3 *.wav *.flac *.ogg *.m4a *.aac *.wma);;所有文件 (*)"
     )
-    
+
     if (!files.isEmpty()) {
         var added: Int32 = 0
         var startIndex = playList.size
@@ -498,18 +535,17 @@ func addFiles() {
                 added++
             }
         }
-        
+
         // 添加到列表控件
         match (playlistWidget) {
-            case Some(list) =>
-                for (i in startIndex..playList.size) {
-                    list.addItem(playList[i].fileName)
-                }
+            case Some(list) => for (i in startIndex..playList.size) {
+                list.addItem(playList[i].fileName)
+            }
             case None => ()
         }
-        
+
         updateStatus("已添加 ${added} 首音乐")
-        
+
         // 如果是第一次添加，自动选择第一首
         if (currentIndex < 0 && playList.size > 0) {
             currentIndex = 0
@@ -522,12 +558,16 @@ func addFiles() {
 }
 
 func addFolder() {
-    let parentPtr = if (let Some(w) <- mainWindow) { w.getPtr() } else { 0 }
+    let parentPtr = if (let Some(w) <- mainWindow) {
+        w.getPtr()
+    } else {
+        0
+    }
     let folder = QFileDialog.getExistingDirectory(
         parentPtr,
         "选择音乐文件夹"
     )
-    
+
     if (!folder.isEmpty()) {
         var added: Int32 = 0
         var startIndex = playList.size
@@ -536,27 +576,24 @@ func addFolder() {
             for (entry in entries) {
                 let name = entry.name
                 // 检查是否是音频文件
-                if (name.endsWith(".mp3") || name.endsWith(".wav") || 
-                    name.endsWith(".flac") || name.endsWith(".ogg") ||
-                    name.endsWith(".m4a") || name.endsWith(".aac") ||
-                    name.endsWith(".wma")) {
+                if (name.endsWith(".mp3") || name.endsWith(".wav") || name.endsWith(".flac") || name.endsWith(".ogg") ||
+                    name.endsWith(".m4a") || name.endsWith(".aac") || name.endsWith(".wma")) {
                     let item = MusicItem(entry.path.toString())
                     playList.add(item)
                     added++
                 }
             }
-            
+
             // 添加到列表控件
             match (playlistWidget) {
-                case Some(list) =>
-                    for (i in startIndex..playList.size) {
-                        list.addItem(playList[i].fileName)
-                    }
+                case Some(list) => for (i in startIndex..playList.size) {
+                    list.addItem(playList[i].fileName)
+                }
                 case None => ()
             }
-            
+
             updateStatus("已添加 ${added} 首音乐")
-            
+
             if (currentIndex < 0 && playList.size > 0) {
                 currentIndex = 0
                 match (playlistWidget) {
@@ -643,7 +680,7 @@ func prev() {
     if (playList.size == 0) {
         return
     }
-    
+
     match (playMode) {
         case PlayMode.Random =>
             // 随机选择
@@ -654,7 +691,7 @@ func prev() {
                 currentIndex = Int32(playList.size) - 1
             }
     }
-    
+
     match (playlistWidget) {
         case Some(list) => list.setCurrentRow(currentIndex)
         case None => ()
@@ -666,17 +703,16 @@ func next() {
     if (playList.size == 0) {
         return
     }
-    
+
     match (playMode) {
-        case PlayMode.Random =>
-            currentIndex = Int32(randomGen.nextFloat64() * Float64(playList.size))
+        case PlayMode.Random => currentIndex = Int32(randomGen.nextFloat64() * Float64(playList.size))
         case _ =>
             currentIndex++
             if (currentIndex >= Int32(playList.size)) {
                 currentIndex = 0
             }
     }
-    
+
     match (playlistWidget) {
         case Some(list) => list.setCurrentRow(currentIndex)
         case None => ()
@@ -703,10 +739,21 @@ func toggleMute() {
         isMuted = !isMuted
         out.setMuted(isMuted)
         if (let Some(btn) <- muteButton) {
-            setIconOnlyButton(btn, if (isMuted) { "mute" } else { "volume" }, StandardIcon.No,
-                if (isMuted) { "取消" } else { "静音" })
+            setIconOnlyButton(btn, if (isMuted) {
+                "mute"
+            } else {
+                "volume"
+            }, StandardIcon.No, if (isMuted) {
+                "取消"
+            } else {
+                "静音"
+            })
         }
-        updateStatus(if (isMuted) { "已静音" } else { "已取消静音" })
+        updateStatus(if (isMuted) {
+            "已静音"
+        } else {
+            "已取消静音"
+        })
     }
 }
 
@@ -742,7 +789,7 @@ func changePlayMode() {
         case PlayMode.Random => playMode = PlayMode.Sequential
     }
     updatePlayModeButton()
-    
+
     var modeName = ""
     match (playMode) {
         case PlayMode.Sequential => modeName = "顺序播放"
@@ -768,7 +815,7 @@ func changeSpeed() {
     } else {
         currentSpeed = 0.5f32
     }
-    
+
     if (let Some(p) <- player) {
         p.setPlaybackRate(currentSpeed)
     }
@@ -781,7 +828,7 @@ func changeSpeed() {
 
 func onPlaybackFinished() {
     isPlaying = false
-    
+
     match (playMode) {
         case PlayMode.Sequential =>
             // 顺序播放，播放下一首
@@ -799,13 +846,11 @@ func onPlaybackFinished() {
                 updateUI()
                 updateStatus("播放完毕")
             }
-        case PlayMode.Loop =>
-            next()
+        case PlayMode.Loop => next()
         case PlayMode.LoopOne =>
             // 单曲循环
             loadAndPlay()
-        case PlayMode.Random =>
-            next()
+        case PlayMode.Random => next()
     }
 }
 
@@ -827,7 +872,7 @@ func removeSelected() {
             if (row >= 0 && row < Int32(playList.size)) {
                 playList.remove(at: Int64(row))
                 list.removeItem(row)
-                
+
                 if (currentIndex == row) {
                     stop()
                     if (playList.size > 0) {
@@ -842,7 +887,7 @@ func removeSelected() {
                 } else if (currentIndex > row) {
                     currentIndex--
                 }
-                
+
                 updateStatus("已移除")
             }
         case None => ()
@@ -854,7 +899,11 @@ func removeSelected() {
 // ============================================================
 
 func about() {
-    let parentPtr = if (let Some(w) <- mainWindow) { w.getPtr() } else { 0 }
+    let parentPtr = if (let Some(w) <- mainWindow) {
+        w.getPtr()
+    } else {
+        0
+    }
     QMessageBox.information(
         parentPtr,
         "关于音乐播放器",
@@ -941,32 +990,33 @@ func cbPlaybackStateChanged(state: Int32): Unit {
     }
 }
 
-let onTogglePlay: VoidCallback = { => togglePlay() }
-let onStop: VoidCallback = { => stop() }
-let onPrev: VoidCallback = { => prev() }
-let onNext: VoidCallback = { => next() }
-let onToggleMute: VoidCallback = { => toggleMute() }
-let onChangePlayMode: VoidCallback = { => changePlayMode() }
-let onChangeSpeed: VoidCallback = { => changeSpeed() }
-let onAddFiles: VoidCallback = { => addFiles() }
-let onAddFolder: VoidCallback = { => addFolder() }
-let onClearPlaylist: VoidCallback = { => clearPlaylist() }
-let onRemoveSelected: VoidCallback = { => removeSelected() }
-let onExit: VoidCallback = { => 
-    if (let Some(p) <- player) {
-        p.stop()
-        p.delete()
-        player = None
-    }
-    if (let Some(out) <- audioOutput) {
-        out.delete()
-        audioOutput = None
-    }
-    QApp.quit()
+let onTogglePlay: VoidCallback = {=> togglePlay()}
+let onStop: VoidCallback = {=> stop()}
+let onPrev: VoidCallback = {=> prev()}
+let onNext: VoidCallback = {=> next()}
+let onToggleMute: VoidCallback = {=> toggleMute()}
+let onChangePlayMode: VoidCallback = {=> changePlayMode()}
+let onChangeSpeed: VoidCallback = {=> changeSpeed()}
+let onAddFiles: VoidCallback = {=> addFiles()}
+let onAddFolder: VoidCallback = {=> addFolder()}
+let onClearPlaylist: VoidCallback = {=> clearPlaylist()}
+let onRemoveSelected: VoidCallback = {=> removeSelected()}
+let onExit: VoidCallback = {
+    =>
+        if (let Some(p) <- player) {
+            p.stop()
+            p.delete()
+            player = None
+        }
+        if (let Some(out) <- audioOutput) {
+            out.delete()
+            audioOutput = None
+        }
+        QApp.quit()
 }
-let onAbout: VoidCallback = { => about() }
-let onChooseIconFolder: VoidCallback = { => chooseIconFolder() }
-let onResetIcons: VoidCallback = { => setIconFolder("") }
+let onAbout: VoidCallback = {=> about()}
+let onChooseIconFolder: VoidCallback = {=> chooseIconFolder()}
+let onResetIcons: VoidCallback = {=> setIconFolder("")}
 
 // ============================================================
 // 主函数
@@ -975,43 +1025,43 @@ main(): Int32 {
     // 设置音频相关环境变量
     setVariable("QT_MEDIA_BACKEND", "windows")
     setVariable("QT_QUICK_BACKEND", "software")
-    
+
     let app = QApplication()
     app.loadQtTranslation("zh_CN")
-    
+
     // 创建媒体播放器和音频输出
     let mediaPlayer = QMediaPlayer()
     let audio = QAudioOutput()
-    audio.setVolume(currentVolume)  // 先设置音量
-    mediaPlayer.setAudioOutput(audio)  // 再设置输出
-    
+    audio.setVolume(currentVolume) // 先设置音量
+    mediaPlayer.setAudioOutput(audio) // 再设置输出
+
     // 注册信号回调（替代定时器轮询）
     mediaPlayer.onPositionChanged(cbPositionChanged)
     mediaPlayer.onDurationChanged(cbDurationChanged)
     mediaPlayer.onMediaStatusChanged(cbMediaStatusChanged)
     mediaPlayer.onPlaybackStateChanged(cbPlaybackStateChanged)
-    
+
     player = mediaPlayer
     audioOutput = audio
-    
+
     // 创建主窗口
     let window = QWidget()
     window.setTitle("音乐播放器 - CJQT6")
     window.resize(460, 640)
     window.setMinimumSize(420, 560)
     mainWindow = window
-    
+
     // 现代深色主题样式
     window.setStyleSheet(QSS_WINDOW)
-    
+
     // 主布局
     let mainLayout = QVBoxLayout()
     mainLayout.setSpacing(10)
     mainLayout.setMargin(14)
-    
+
     // ========== 菜单栏（顶部） ==========
     let menuBar = QMenuBar()
-    
+
     let fileMenu = menuBar.addMenu("文件")
     let addFilesAction = fileMenu.addAction("添加文件")
     addFilesAction.setShortcut("Ctrl+O")
@@ -1021,7 +1071,7 @@ main(): Int32 {
     fileMenu.addSeparator()
     let exitAction = fileMenu.addAction("退出")
     exitAction.setOnTriggered(onExit)
-    
+
     let playMenu = menuBar.addMenu("播放")
     let playAction = playMenu.addAction("播放/暂停")
     playAction.setShortcut("Space")
@@ -1038,61 +1088,63 @@ main(): Int32 {
     playMenu.addSeparator()
     let modeAction = playMenu.addAction("播放模式")
     modeAction.setOnTriggered(onChangePlayMode)
-    
+
     // 设置菜单
     let settingsMenu = menuBar.addMenu("设置")
     let iconFolderAction = settingsMenu.addAction("图标文件夹...")
     iconFolderAction.setOnTriggered(onChooseIconFolder)
     let resetIconsAction = settingsMenu.addAction("重置为标准图标")
     resetIconsAction.setOnTriggered(onResetIcons)
-    
+
     let helpMenu = menuBar.addMenu("帮助")
     let aboutAction = helpMenu.addAction("关于")
     aboutAction.setOnTriggered(onAbout)
-    
+
     mainLayout.addWidget(menuBar.getPtr())
-    
+
     // ========== 头部：封面 + 曲目信息 ==========
     let headerWidget = QWidget()
     headerWidget.setStyleSheet("background: transparent;")
     let headerLayout = QHBoxLayout()
     headerLayout.setSpacing(14)
     headerLayout.setMargin(2)
-    
+
     // 封面占位（圆形渐变）
     let cover = QLabel()
     cover.setMinimumSize(92, 92)
     cover.setMaximumSize(92, 92)
     cover.setAlignment(Alignment.Center.value)
     cover.setText("<span style='font-size:38px; color:#4d9fff;'>&#9835;</span>")
-    cover.setStyleSheet("QLabel { background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #34384a, stop:1 #232530); border: 1px solid #3a3e49; border-radius: 46px; }")
+    cover.setStyleSheet(
+        "QLabel { background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #34384a, stop:1 #232530); border: 1px solid #3a3e49; border-radius: 46px; }")
     headerLayout.addWidget(cover.getPtr())
-    
+
     // 右侧：标题 + 艺术家
     let infoLayout = QVBoxLayout()
     infoLayout.setSpacing(6)
-    
+
     let title = QLabel()
     title.setText("<font size='5' color='#ffffff'><b>欢迎使用音乐播放器</b></font>")
     title.setAlignment((Alignment.Left | Alignment.VCenter).value)
     title.setWordWrap(true)
     titleLabel = title
     infoLayout.addWidget(title.getPtr())
-    
+
     let artist = QLabel()
     artist.setText("<font color='#8b8e98'>双击列表开始播放</font>")
     artist.setAlignment((Alignment.Left | Alignment.VCenter).value)
     artistLabel = artist
     infoLayout.addWidget(artist.getPtr())
-    
+
     headerLayout.addLayout(infoLayout.getPtr())
     headerWidget.setLayout(headerLayout.getPtr())
     mainLayout.addWidget(headerWidget.getPtr())
-    
+
     // ========== 歌词显示区域 ==========
     let lyricWidget = QWidget()
     lyricWidget.setMinimumSize(0, 110)
-    lyricWidget.setStyleSheet("QWidget { background: #232530; border: 1px solid #2f323d; border-radius: 10px; } QLabel { background: transparent; }")
+    lyricWidget.setStyleSheet(
+        "QWidget { background: #232530; border: 1px solid #2f323d; border-radius: 10px; } QLabel { background: transparent; }")
     let lyricLayout = QVBoxLayout()
     lyricLayout.setMargin(10)
     let lyricLbl = QLabel()
@@ -1103,30 +1155,30 @@ main(): Int32 {
     lyricWidget.setLayout(lyricLayout.getPtr())
     mainLayout.addWidget(lyricWidget.getPtr())
     lyricLabel = lyricLbl
-    
+
     // ========== 进度条区域 ==========
     let slider = QSlider()
     slider.setOrientation(0x01)
     slider.setRange(0, 100)
     slider.setValue(0)
-    slider.setOnValueChanged({ pos => setPosition(pos) })
+    slider.setOnValueChanged({pos => setPosition(pos)})
     progressSlider = slider
     mainLayout.addWidget(slider.getPtr())
-    
+
     let time = QLabel()
     time.setText("00:00 / 00:00")
     time.setAlignment(Alignment.Right.value)
     time.setStyleSheet("color: #8b8e98; font-size: 12px;")
     timeLabel = time
     mainLayout.addWidget(time.getPtr())
-    
+
     // ========== 播放控制（上一曲/播放/停止/下一曲） ==========
     let controlWidget = QWidget()
     controlWidget.setStyleSheet("background: transparent;")
     let controlLayout = QHBoxLayout()
     controlLayout.setSpacing(20)
     controlLayout.addStretch()
-    
+
     // 上一曲
     let prevBtn = QPushButton()
     prevBtn.setMinimumSize(40, 40)
@@ -1137,7 +1189,7 @@ main(): Int32 {
     prevBtn.setOnClick(onPrev)
     prevButton = prevBtn
     controlLayout.addWidget(prevBtn.getPtr())
-    
+
     // 播放/暂停 - 主按钮（强调色圆形）
     let playBtn = QPushButton()
     playBtn.setMinimumSize(56, 56)
@@ -1148,7 +1200,7 @@ main(): Int32 {
     playBtn.setOnClick(onTogglePlay)
     playButton = playBtn
     controlLayout.addWidget(playBtn.getPtr())
-    
+
     // 停止
     let stopBtn = QPushButton()
     stopBtn.setMinimumSize(40, 40)
@@ -1159,7 +1211,7 @@ main(): Int32 {
     stopBtn.setOnClick(onStop)
     stopButton = stopBtn
     controlLayout.addWidget(stopBtn.getPtr())
-    
+
     // 下一曲
     let nextBtn = QPushButton()
     nextBtn.setMinimumSize(40, 40)
@@ -1170,17 +1222,17 @@ main(): Int32 {
     nextBtn.setOnClick(onNext)
     nextButton = nextBtn
     controlLayout.addWidget(nextBtn.getPtr())
-    
+
     controlLayout.addStretch()
     controlWidget.setLayout(controlLayout.getPtr())
     mainLayout.addWidget(controlWidget.getPtr())
-    
+
     // ========== 辅助控制（播放模式 / 速度 / 音量） ==========
     let utilWidget = QWidget()
     utilWidget.setStyleSheet("background: transparent;")
     let utilLayout = QHBoxLayout()
     utilLayout.setSpacing(8)
-    
+
     // 播放模式
     let modeBtn = QPushButton()
     modeBtn.setText("顺序")
@@ -1188,7 +1240,7 @@ main(): Int32 {
     modeBtn.setOnClick(onChangePlayMode)
     playModeButton = modeBtn
     utilLayout.addWidget(modeBtn.getPtr())
-    
+
     // 速度
     let speedBtn = QPushButton()
     speedBtn.setMinimumSize(30, 30)
@@ -1199,15 +1251,15 @@ main(): Int32 {
     speedBtn.setOnClick(onChangeSpeed)
     speedButton = speedBtn
     utilLayout.addWidget(speedBtn.getPtr())
-    
+
     let speed = QLabel()
     speed.setText("1.0x")
     speed.setStyleSheet("color: #8b8e98; font-size: 12px; min-width: 34px;")
     speedLabel = speed
     utilLayout.addWidget(speed.getPtr())
-    
+
     utilLayout.addStretch()
-    
+
     // 静音
     let muteBtn = QPushButton()
     muteBtn.setMinimumSize(40, 26)
@@ -1217,7 +1269,7 @@ main(): Int32 {
     muteBtn.setOnClick(onToggleMute)
     muteButton = muteBtn
     utilLayout.addWidget(muteBtn.getPtr())
-    
+
     // 音量滑块
     let volSlider = QSlider()
     volSlider.setOrientation(0x01)
@@ -1225,86 +1277,85 @@ main(): Int32 {
     volSlider.setValue(70)
     volSlider.setMinimumSize(90, 20)
     volSlider.setMaximumSize(120, 20)
-    volSlider.setOnValueChanged({ value => setVolume(value) })
+    volSlider.setOnValueChanged({value => setVolume(value)})
     volumeSlider = volSlider
     utilLayout.addWidget(volSlider.getPtr())
-    
+
     let volPct = QLabel()
     volPct.setText("70%")
     volPct.setStyleSheet("color: #8b8e98; font-size: 12px; min-width: 32px;")
     volumeLabel = volPct
     utilLayout.addWidget(volPct.getPtr())
-    
+
     utilWidget.setLayout(utilLayout.getPtr())
     mainLayout.addWidget(utilWidget.getPtr())
-    
+
     // ========== 播放列表 ==========
     let listWidget = QListWidget()
     listWidget.setMinimumSize(0, 150)
-    listWidget.setOnItemDoubleClicked({ row => onPlaylistDoubleClicked(row) })
+    listWidget.setOnItemDoubleClicked({row => onPlaylistDoubleClicked(row)})
     playlistWidget = listWidget
     mainLayout.addWidget(listWidget.getPtr(), 1)
-    
+
     // ========== 列表操作按钮 ==========
     let listBtnWidget = QWidget()
     listBtnWidget.setStyleSheet("background: transparent;")
     let listBtnLayout = QHBoxLayout()
     listBtnLayout.setSpacing(8)
-    
+
     let addFilesBtn = QPushButton()
     addFilesBtn.setIconSize(16, 16)
     addFilesBtn.setText("添加")
     addFilesBtn.setOnClick(onAddFiles)
     addButton = addFilesBtn
     listBtnLayout.addWidget(addFilesBtn.getPtr())
-    
+
     let addFolderBtn = QPushButton()
     addFolderBtn.setIconSize(16, 16)
     addFolderBtn.setText("目录")
     addFolderBtn.setOnClick(onAddFolder)
     folderButton = addFolderBtn
     listBtnLayout.addWidget(addFolderBtn.getPtr())
-    
+
     let removeBtn = QPushButton()
     removeBtn.setIconSize(16, 16)
     removeBtn.setText("移除")
     removeBtn.setOnClick(onRemoveSelected)
     removeButton = removeBtn
     listBtnLayout.addWidget(removeBtn.getPtr())
-    
+
     let clearBtn = QPushButton()
     clearBtn.setIconSize(16, 16)
     clearBtn.setText("清空")
     clearBtn.setOnClick(onClearPlaylist)
     clearButton = clearBtn
     listBtnLayout.addWidget(clearBtn.getPtr())
-    
+
     listBtnLayout.addStretch()
     listBtnWidget.setLayout(listBtnLayout.getPtr())
     mainLayout.addWidget(listBtnWidget.getPtr())
-    
+
     // ========== 状态栏 ==========
     let status = QLabel()
     status.setText("就绪 - 点击「添加」添加音乐文件")
     status.setStyleSheet("color: #7a7e8a; font-size: 12px;")
     statusLabel = status
     mainLayout.addWidget(status.getPtr())
-    
+
     // 自动加载自定义图标（icons 目录存在时）
     let detectedIcons = detectIconFolder()
     if (!detectedIcons.isEmpty()) {
         setIconFolder(detectedIcons)
     }
-    
+
     window.setLayout(mainLayout.getPtr())
     window.show()
-    
+
     let result = app.exec()
-    
+
     // 清理
     mediaPlayer.delete()
     audio.delete()
-    
+
     return result
 }
-

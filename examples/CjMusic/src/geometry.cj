@@ -28,8 +28,7 @@ let LYRIC_VISIBLE_RADIUS: Int32 = 6
 /// lineHeight: 行高
 /// scrollOffset: 滚动偏移（平滑动画中的插值，0 表示静止）
 /// 返回值：该行基线 Y 坐标（Float64 精确，绘制时转 Int32）
-public func calcRowY(rowIdx: Int32, curIdx: Int32, centerY: Int32, lineHeight: Int32,
-    scrollOffset: Float64): Float64 {
+public func calcRowY(rowIdx: Int32, curIdx: Int32, centerY: Int32, lineHeight: Int32, scrollOffset: Float64): Float64 {
     let delta = Int64(rowIdx - curIdx)
     Float64(centerY) + Float64(delta) * Float64(lineHeight) + scrollOffset
 }
@@ -42,8 +41,7 @@ public func calcRowY(rowIdx: Int32, curIdx: Int32, centerY: Int32, lineHeight: I
 /// curIdx: 当前行索引
 /// 返回值：被点击的行索引（可能超出歌词范围，调用方需校验）
 /// 注意：必须减去 scrollOffset，否则滚动中跳转偏移（4.5 节坑 2）
-public func calcRowIndex(clickY: Int32, centerY: Int32, scrollOffset: Float64,
-    lineHeight: Int32, curIdx: Int32): Int32 {
+public func calcRowIndex(clickY: Int32, centerY: Int32, scrollOffset: Float64, lineHeight: Int32, curIdx: Int32): Int32 {
     let delta = Float64(clickY - centerY) - scrollOffset
     curIdx + Int32(delta / Float64(lineHeight))
 }
@@ -58,9 +56,9 @@ public func calcAlpha(distance: Int32): Int32 {
         case 3 => 50
         case _ =>
             if (distance > LYRIC_VISIBLE_RADIUS) {
-                0   // 超出可见范围不绘制
+                0 // 超出可见范围不绘制
             } else {
-                25  // 递减到很淡
+                25 // 递减到很淡
             }
     }
 }
@@ -124,8 +122,7 @@ public func easeOut(elapsed: Int64, duration: Int64): Float64 {
 /// targetY: 动画目标
 /// elapsed: 已经过时间
 /// duration: 总时长
-public func interpolateScroll(startY: Float64, targetY: Float64,
-    elapsed: Int64, duration: Int64): Float64 {
+public func interpolateScroll(startY: Float64, targetY: Float64, elapsed: Int64, duration: Int64): Float64 {
     let progress = easeOut(elapsed, duration)
     startY + (targetY - startY) * progress
 }

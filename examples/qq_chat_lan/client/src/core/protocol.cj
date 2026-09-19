@@ -38,7 +38,11 @@ public func parseFrame(line: String): ?QJsonObject {
 /// 从对象取字符串字段（内部立即释放 QJsonValue）
 public func jstr(obj: QJsonObject, key: String): String {
     let v = obj.value(key)
-    let s = if (v.isString()) { v.toString() } else { "" }
+    let s = if (v.isString()) {
+        v.toString()
+    } else {
+        ""
+    }
     v.close()
     s
 }

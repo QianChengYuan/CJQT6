@@ -71,12 +71,12 @@ public class ThresholdWindow {
 
         let cancelBtn = QPushButton()
         cancelBtn.setText("取消")
-        cancelBtn.setOnClickCapture({ => this.onCancel() })
+        cancelBtn.setOnClickCapture({=> this.onCancel()})
         row.addWidget(cancelBtn.getPtr())
 
         let okBtn = QPushButton()
         okBtn.setText("确定")
-        okBtn.setOnClickCapture({ => this.onApply() })
+        okBtn.setOnClickCapture({=> this.onApply()})
         row.addWidget(okBtn.getPtr())
 
         v.addLayout(row.getPtr())

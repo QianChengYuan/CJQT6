@@ -169,8 +169,7 @@ class XmlParser {
         let nameStart = scanner.pos
         while (!scanner.eof()) {
             let c = scanner.peek()
-            if (c == b' ' || c == b'\t' || c == b'\n' || c == b'\r' ||
-                c == b'>' || c == b'/') {
+            if (c == b' ' || c == b'\t' || c == b'\n' || c == b'\r' || c == b'>' || c == b'/') {
                 break
             }
             scanner.pos++
@@ -213,8 +212,7 @@ class XmlParser {
             let aStart = scanner.pos
             while (!scanner.eof()) {
                 let cc = scanner.peek()
-                if (cc == b'=' || cc == b' ' || cc == b'\t' || cc == b'\n' ||
-                    cc == b'\r' || cc == b'>' || cc == b'/') {
+                if (cc == b'=' || cc == b' ' || cc == b'\t' || cc == b'\n' || cc == b'\r' || cc == b'>' || cc == b'/') {
                     break
                 }
                 scanner.pos++
@@ -294,7 +292,11 @@ class XmlParser {
             } else {
                 // 普通文本：收集到下一个 '<'
                 let lt = scanner.src.indexOf("<", scanner.pos)
-                let end = if (let Some(i) <- lt) { i } else { scanner.src.size }
+                let end = if (let Some(i) <- lt) {
+                    i
+                } else {
+                    scanner.src.size
+                }
                 if (end > scanner.pos) {
                     textBuf.append(scanner.src[scanner.pos..end])
                     scanner.pos = end
@@ -336,11 +338,21 @@ func decodeEntities(input: String): String {
 }
 
 func decodeEntity(ent: String): String {
-    if (ent == "&amp;") { return "&" }
-    if (ent == "&lt;") { return "<" }
-    if (ent == "&gt;") { return ">" }
-    if (ent == "&quot;") { return "\"" }
-    if (ent == "&apos;") { return "'" }
+    if (ent == "&amp;") {
+        return "&"
+    }
+    if (ent == "&lt;") {
+        return "<"
+    }
+    if (ent == "&gt;") {
+        return ">"
+    }
+    if (ent == "&quot;") {
+        return "\""
+    }
+    if (ent == "&apos;") {
+        return "'"
+    }
     // 数字实体 &#NN; 或 &#xNN;
     if (ent.startsWith("&#")) {
         let body = ent[2..]

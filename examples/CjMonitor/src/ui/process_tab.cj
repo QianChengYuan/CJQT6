@@ -25,7 +25,6 @@ import CjMonitor.app.*
 
 /// Windows 端进程采集脚本（纯 ASCII）
 let PROC_SCRIPT_NAME = "cjmonitor_procs.ps1"
-
 let PROC_SCRIPT = """
 $ErrorActionPreference = 'SilentlyContinue'
 Get-Process |
@@ -118,7 +117,7 @@ public class ProcessTab {
 
         timer = QTimer()
         timer.setInterval(1000)
-        timer.setOnTimeoutCapture({ => this.onTick() })
+        timer.setOnTimeoutCapture({=> this.onTick()})
     }
 
     public func widget(): QWidget {
@@ -131,7 +130,11 @@ public class ProcessTab {
 
     /// 取 CPU 降序的前 n 行文本（巡检报告用）
     public func topLines(n: Int64): ArrayList<String> {
-        let cnt = if (lastRows.size < n) { lastRows.size } else { n }
+        let cnt = if (lastRows.size < n) {
+            lastRows.size
+        } else {
+            n
+        }
         let out = ArrayList<String>()
         var i: Int64 = 0
         while (i < cnt) {
@@ -225,7 +228,11 @@ public class ProcessTab {
         sortByCpuDesc(rows)
         lastRows = rows
 
-        let shown = if (rows.size < maxRows) { rows.size } else { maxRows }
+        let shown = if (rows.size < maxRows) {
+            rows.size
+        } else {
+            maxRows
+        }
         gProcRows = shown
         table.setRowCount(Int32(shown))
         var i: Int64 = 0
@@ -249,7 +256,7 @@ public class ProcessTab {
             return None
         }
         if (!isNumber(f[0])) {
-            return None   // 跳过表头
+            return None // 跳过表头
         }
         if (Platform.isWindows()) {
             Some(ProcRow(f[0], f[1], toF64(f[2]), toF64(f[3])))

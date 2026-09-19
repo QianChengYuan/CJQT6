@@ -120,7 +120,9 @@ public func onLoginOk(obj: QJsonObject): Unit {
     mv.close()
 
     // 界面切换：登录窗 -> 好友面板
-    if (let Some(w) <- gLoginWindow) { w.hide() }
+    if (let Some(w) <- gLoginWindow) {
+        w.hide()
+    }
     if (gMainWindow.isNone()) {
         buildMainWindow()
     }
@@ -128,7 +130,9 @@ public func onLoginOk(obj: QJsonObject): Unit {
         l.setText("${self.nickname}  (QQ号 ${self.account})")
     }
     refreshFriendList()
-    if (let Some(w) <- gMainWindow) { w.show() }
+    if (let Some(w) <- gMainWindow) {
+        w.show()
+    }
 }
 
 /// 追加消息到历史缓存
@@ -153,7 +157,9 @@ public func onChatFrame(obj: QJsonObject): Unit {
     m.text = jstr(obj, "text")
     m.time = jstr(obj, "time")
     m.kind = jstr(obj, "kind")
-    if (m.kind.isEmpty()) { m.kind = "text" }
+    if (m.kind.isEmpty()) {
+        m.kind = "text"
+    }
     m.outgoing = false
     appendHistory(m.fromId, m)
 
@@ -174,7 +180,9 @@ public func onChatAck(obj: QJsonObject): Unit {
 
 /// 聊天窗口是否正打开着指定好友的会话
 public func isChatOpenFor(friendId: Int64): Bool {
-    if (gCurrentChatId != friendId) { return false }
+    if (gCurrentChatId != friendId) {
+        return false
+    }
     match (gChatWindow) {
         case Some(w) => w.isVisible()
         case None => false
@@ -223,7 +231,9 @@ public func onOkFrame(obj: QJsonObject): Unit {
         let fid = jint(obj, "friend")
         let remark = jstr(obj, "remark")
         for (f in gFriends) {
-            if (f.id == fid) { f.remark = remark }
+            if (f.id == fid) {
+                f.remark = remark
+            }
         }
         refreshFriendList()
         closeRemarkDialog()
@@ -271,7 +281,9 @@ public func addFriendFromFrame(obj: QJsonObject): String {
 
 public func hasFriend(friendId: Int64): Bool {
     for (f in gFriends) {
-        if (f.id == friendId) { return true }
+        if (f.id == friendId) {
+            return true
+        }
     }
     false
 }
@@ -303,8 +315,12 @@ public func onErrorFrame(obj: QJsonObject): Unit {
 // 断开连接：回到登录页
 // ============================================================
 public func handleLoggedOut(reason: String): Unit {
-    if (let Some(w) <- gChatWindow) { w.hide() }
-    if (let Some(w) <- gMainWindow) { w.hide() }
+    if (let Some(w) <- gChatWindow) {
+        w.hide()
+    }
+    if (let Some(w) <- gMainWindow) {
+        w.hide()
+    }
     gCurrentChatId = 0
     if (let Some(w) <- gLoginWindow) {
         w.show()
@@ -318,7 +334,9 @@ public func handleLoggedOut(reason: String): Unit {
 public func onHistory(obj: QJsonObject): Unit {
     let friendId = jint(obj, "friend")
     var selfId: Int64 = 0
-    if (let Some(s) <- gSelf) { selfId = s.id }
+    if (let Some(s) <- gSelf) {
+        selfId = s.id
+    }
     let list = ArrayList<ChatMsg>()
     let mv = obj.value("messages")
     if (mv.isArray()) {
@@ -335,7 +353,9 @@ public func onHistory(obj: QJsonObject): Unit {
                 m.text = jstr(item, "text")
                 m.time = jstr(item, "time")
                 m.kind = jstr(item, "kind")
-                if (m.kind.isEmpty()) { m.kind = "text" }
+                if (m.kind.isEmpty()) {
+                    m.kind = "text"
+                }
                 m.recalled = jbool(item, "recalled")
                 m.outgoing = (m.fromId == selfId)
                 list.add(m)
@@ -365,10 +385,11 @@ public func onRecall(obj: QJsonObject): Unit {
 /// 在历史缓存中标记某消息已撤回并重渲染
 public func markRecalled(friendId: Int64, msgId: Int64): Unit {
     match (gHistory.get(friendId)) {
-        case Some(list) =>
-            for (m in list) {
-                if (m.id == msgId) { m.recalled = true }
+        case Some(list) => for (m in list) {
+            if (m.id == msgId) {
+                m.recalled = true
             }
+        }
         case None => ()
     }
     if (isChatOpenFor(friendId)) {
@@ -382,7 +403,9 @@ public func markRecalled(friendId: Int64, msgId: Int64): Unit {
 public func onFileBegin(obj: QJsonObject): Unit {
     let tid = jstr(obj, "tid")
     let size = jint(obj, "size")
-    if (size <= 0 || size > 50 * 1024 * 1024) { return }
+    if (size <= 0 || size > 50 * 1024 * 1024) {
+        return
+    }
     let t = RecvTransfer()
     t.buffer = Array<Byte>(size, repeat: 0)
     t.offset = 0
@@ -415,7 +438,11 @@ public func onFileEnd(obj: QJsonObject): Unit {
         case Some(t) =>
             gTransfers.remove(tid)
             // 落盘
-            try { Directory.create(Path(gRecvDir), recursive: true) } catch (_: Exception) { () }
+            try {
+                Directory.create(Path(gRecvDir), recursive: true)
+            } catch (_: Exception) {
+                ()
+            }
             let fullPath = "${gRecvDir}/${t.fromId}_${t.name}"
             var saved = false
             try {
@@ -423,7 +450,9 @@ public func onFileEnd(obj: QJsonObject): Unit {
                 f.write(t.buffer)
                 f.close()
                 saved = true
-            } catch (_: Exception) { () }
+            } catch (_: Exception) {
+                ()
+            }
 
             let m = ChatMsg()
             m.fromId = t.fromId
@@ -431,7 +460,11 @@ public func onFileEnd(obj: QJsonObject): Unit {
             m.kind = t.kind
             m.fileName = t.name
             m.fileSize = t.buffer.size
-            m.localPath = if (saved) { fullPath } else { "" }
+            m.localPath = if (saved) {
+                fullPath
+            } else {
+                ""
+            }
             m.time = nowString()
             m.outgoing = false
             appendHistory(t.fromId, m)
@@ -452,7 +485,9 @@ public func onNickChanged(obj: QJsonObject): Unit {
     let userId = jint(obj, "userId")
     let nickname = jstr(obj, "nickname")
     for (f in gFriends) {
-        if (f.id == userId) { f.nickname = nickname }
+        if (f.id == userId) {
+            f.nickname = nickname
+        }
     }
     refreshFriendList()
     if (isChatOpenFor(userId)) {
@@ -473,20 +508,26 @@ public func removeFriend(fid: Int64): Unit {
     var idx: Int64 = -1
     var i: Int64 = 0
     for (f in gFriends) {
-        if (f.id == fid) { idx = i }
+        if (f.id == fid) {
+            idx = i
+        }
         i++
     }
     if (idx >= 0) {
         let newList = ArrayList<FriendInfo>()
         var j: Int64 = 0
         for (f in gFriends) {
-            if (j != idx) { newList.add(f) }
+            if (j != idx) {
+                newList.add(f)
+            }
             j++
         }
         gFriends = newList
     }
     if (gCurrentChatId == fid) {
-        if (let Some(w) <- gChatWindow) { w.hide() }
+        if (let Some(w) <- gChatWindow) {
+            w.hide()
+        }
         gCurrentChatId = 0
     }
     refreshFriendList()

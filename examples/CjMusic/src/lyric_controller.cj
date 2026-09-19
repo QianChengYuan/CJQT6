@@ -27,23 +27,22 @@ public func loadLyricsForCurrentImpl(): Unit {
 public func loadLyricsForFile(audioPath: String): Unit {
     // 1. 先查用户手动指定（文档 2.3.5 节第 3 点）
     var lrcPath: ?String = getManualLyric(audioPath)
-    var matchLevel: Int32 = 6  // 手动指定
+    var matchLevel: Int32 = 6 // 手动指定
 
     // 2. 无手动指定 → 分级匹配
     match (lrcPath) {
-        case None =>
-            match (matchLyrics(audioPath)) {
-                case Some(result) =>
-                    lrcPath = Some(result.path)
-                    matchLevel = result.level
-                case None =>
-                    // 无匹配
-                    gHasLyrics = false
-                    gLyricSource = ""
-                    updateStatus("未找到歌词")
-                    return
-            }
-        case Some(_) => ()  // 已有手动指定，跳过匹配
+        case None => match (matchLyrics(audioPath)) {
+            case Some(result) =>
+                lrcPath = Some(result.path)
+                matchLevel = result.level
+            case None =>
+                // 无匹配
+                gHasLyrics = false
+                gLyricSource = ""
+                updateStatus("未找到歌词")
+                return
+        }
+        case Some(_) => () // 已有手动指定，跳过匹配
     }
 
     // 3. 解析歌词文件
@@ -77,8 +76,7 @@ public func loadLyricsForFile(audioPath: String): Unit {
                 gLyricSource = ""
                 updateStatus("歌词加载失败: ${e.message}")
             }
-        case None =>
-            gHasLyrics = false
+        case None => gHasLyrics = false
     }
 }
 
@@ -171,7 +169,7 @@ public func onLyricLineChanged(): Unit {
     // 计算新目标 Y（让当前行居中，即 scrollOffset = 0）
     // 但在动画过程中，需要从当前视觉位置插值到新位置
     gScrollStartY = gScrollCurrentY
-    gScrollTargetY = 0.0  // 目标是让当前行居中，scrollOffset 归零
+    gScrollTargetY = 0.0 // 目标是让当前行居中，scrollOffset 归零
     gScrollElapsed = 0
     // 启动滚动定时器
     if (let Some(timer) <- gScrollTimer) {
@@ -191,7 +189,6 @@ public func scrollTick(): Bool {
         return false
     }
     // 插值计算当前位置
-    gScrollCurrentY = interpolateScroll(gScrollStartY, gScrollTargetY,
-        gScrollElapsed, SCROLL_DURATION)
+    gScrollCurrentY = interpolateScroll(gScrollStartY, gScrollTargetY, gScrollElapsed, SCROLL_DURATION)
     return true
 }

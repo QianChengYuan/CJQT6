@@ -16,21 +16,18 @@ import CjMonitor.common.*
 /// 全局持有当前子进程采集器，供顶层 CFunc 回调路由
 /// （CFunc 不能捕获局部变量，只能经全局变量取上下文）
 var gProcProbe: ?ProcessProbe = None
-
-let onProcProbeStdout: CFunc<() -> Unit> = { =>
-    if (let Some(p) <- gProcProbe) {
+let onProcProbeStdout: CFunc<() -> Unit> = {
+    => if (let Some(p) <- gProcProbe) {
         p.ingestStdout()
     }
 }
-
-let onProcProbeError: CFunc<(Int32) -> Unit> = { code: Int32 =>
-    if (let Some(p) <- gProcProbe) {
+let onProcProbeError: CFunc<(Int32) -> Unit> = {
+    code: Int32 => if (let Some(p) <- gProcProbe) {
         p.noteError(code)
     }
 }
-
-let onProcProbeStderr: CFunc<() -> Unit> = { =>
-    if (let Some(p) <- gProcProbe) {
+let onProcProbeStderr: CFunc<() -> Unit> = {
+    => if (let Some(p) <- gProcProbe) {
         p.ingestStderr()
     }
 }

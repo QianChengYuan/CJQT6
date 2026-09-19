@@ -4,7 +4,6 @@
 package CjMusic
 
 import cjqt6.core.*
-
 import cjqt6.multimedia.*
 import std.env.*
 import std.fs.*
@@ -130,10 +129,14 @@ func cbMediaStatusChanged(status: Int32): Unit {
                     updateStatus("正在播放: ${item.title} - ${item.artist}")
                 }
             }
-            if (let Some(slider) <- gProgressSlider) { slider.setEnabled(true) }
+            if (let Some(slider) <- gProgressSlider) {
+                slider.setEnabled(true)
+            }
         case 0 | 7 =>
             // NoMedia/InvalidMedia → 禁用进度条
-            if (let Some(slider) <- gProgressSlider) { slider.setEnabled(false) }
+            if (let Some(slider) <- gProgressSlider) {
+                slider.setEnabled(false)
+            }
         case _ => ()
     }
 }
@@ -179,4 +182,3 @@ main(): Int32 {
     app.exec()
     0
 }
-

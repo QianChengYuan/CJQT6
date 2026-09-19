@@ -59,7 +59,11 @@ main(args: Array<String>) {
 
     // 自动探测 cjpm 工程：包名 + 默认输出
     // 同时向上寻找 CJQT6 库根（包名 cjqt6，用于无工程时生成可运行工程）
-    let baseDir = if (projectDir.isEmpty()) { dirOf(uiPath) } else { projectDir }
+    let baseDir = if (projectDir.isEmpty()) {
+        dirOf(uiPath)
+    } else {
+        projectDir
+    }
     let (projDir, repoDir) = findProjectAndRepo(baseDir)
     let cjpmDir = projDir
     if (pkgName.isEmpty() && !cjpmDir.isEmpty()) {
@@ -156,8 +160,7 @@ func fileStem(path: String): String {
 func sanitizePkg(name: String): String {
     var sb = StringBuilder()
     for (r in name.runes()) {
-        if ((r >= r'a' && r <= r'z') || (r >= r'A' && r <= r'Z') ||
-            (r >= r'0' && r <= r'9') || r == r'_') {
+        if ((r >= r'a' && r <= r'z') || (r >= r'A' && r <= r'Z') || (r >= r'0' && r <= r'9') || r == r'_') {
             sb.append(r)
         } else {
             sb.append(r'_')
@@ -319,7 +322,8 @@ func writeScaffoldProject(projectDir: String, repoDir: String, pkgName: String):
     deploy.append("    if (Test-Path (Join-Path $q \"bin\\Qt6Core.dll\")) { $QtBin = $q; break }\n")
     deploy.append("}\n")
     deploy.append("if (-not $QtBin) {\n")
-    deploy.append("    Write-Host \"[!] 未找到 Qt6 msvc2022_64 安装，请修改脚本中的 $QtCandidates\" -ForegroundColor Yellow\n")
+    deploy.append(
+        "    Write-Host \"[!] 未找到 Qt6 msvc2022_64 安装，请修改脚本中的 $QtCandidates\" -ForegroundColor Yellow\n")
     deploy.append("    exit 1\n")
     deploy.append("}\n")
     deploy.append("Write-Host \"[*] 使用 Qt: $QtBin\"\n")
@@ -333,7 +337,8 @@ func writeScaffoldProject(projectDir: String, repoDir: String, pkgName: String):
     deploy.append("    if (Test-Path $src) {\n")
     deploy.append("        $dst = Join-Path $BinDir $sub\n")
     deploy.append("        New-Item -ItemType Directory -Force -Path $dst | Out-Null\n")
-    deploy.append("        foreach ($f in (Get-ChildItem $src -Filter \"*.dll\")) { Copy-Item $f.FullName $dst -Force }\n")
+    deploy.append(
+        "        foreach ($f in (Get-ChildItem $src -Filter \"*.dll\")) { Copy-Item $f.FullName $dst -Force }\n")
     deploy.append("        Write-Host (\"[+] 已拷贝插件 $sub : \" + (Get-ChildItem $dst -Filter '*.dll').Count)\n")
     deploy.append("    }\n")
     deploy.append("}\n")
@@ -354,10 +359,12 @@ func writeScaffoldProject(projectDir: String, repoDir: String, pkgName: String):
     deploy.append("         Select-Object -First 1\n")
     deploy.append("    if ($d) { $CrtDir = $d.DirectoryName; break }\n")
     deploy.append("}\n")
-    deploy.append("if (-not $CrtDir) { Write-Host \"[!] 未找到 MSVC 运行库，将依赖系统 PATH\" -ForegroundColor Yellow }\n")
+    deploy.append(
+        "if (-not $CrtDir) { Write-Host \"[!] 未找到 MSVC 运行库，将依赖系统 PATH\" -ForegroundColor Yellow }\n")
     deploy.append("if ($CrtDir) {\n")
     deploy.append("    $crtFiles = Get-ChildItem $CrtDir -Filter \"msvcp140*.dll\" -ErrorAction SilentlyContinue\n")
-    deploy.append("    $crtFiles += Get-ChildItem $CrtDir -Filter \"vcruntime140*.dll\" -ErrorAction SilentlyContinue\n")
+    deploy.append(
+        "    $crtFiles += Get-ChildItem $CrtDir -Filter \"vcruntime140*.dll\" -ErrorAction SilentlyContinue\n")
     deploy.append("    foreach ($f in $crtFiles) { Copy-Item $f.FullName $BinDir -Force }\n")
     deploy.append("    Write-Host (\"[+] 已拷贝 MSVC 运行库: \" + $crtFiles.Count)\n")
     deploy.append("}\n")
@@ -377,7 +384,8 @@ func writeScaffoldProject(projectDir: String, repoDir: String, pkgName: String):
     deploy.append("    Write-Host \"[!] 未找到 $BridgeSrc（请先重建 bridge）\" -ForegroundColor Yellow\n")
     deploy.append("}\n")
     deploy.append("\n")
-    deploy.append("Write-Host (\"`n[OK] 部署完成，bin 目录 DLL 总数: \" + (Get-ChildItem $BinDir -Filter '*.dll').Count)\n")
+    deploy.append(
+        "Write-Host (\"`n[OK] 部署完成，bin 目录 DLL 总数: \" + (Get-ChildItem $BinDir -Filter '*.dll').Count)\n")
     deploy.append("Write-Host \"[*] 现在可以运行: cjpm run\"\n")
 
     let deployPath = Path(projectDir).join("deploy_qt.ps1")

@@ -38,15 +38,13 @@ let M4_SAMPLE_PERIOD_MS: Int64 = 110
 let M4_DOWNSAMPLE: Int64 = 10
 /// 数据库体积上限（M4 指标）
 let M4_DB_LIMIT_BYTES: Int64 = 5 * 1024 * 1024
-
 var gM4State: ?AppState = None
 var gM4Timer: ?QTimer = None
 var gM4StartMs: Int64 = 0
 var gM4TargetMs: Int64 = 0
 var gM4Done: Bool = false
-
-let onM4Tick: VoidCallback = {=>
-    m4Tick()
+let onM4Tick: VoidCallback = {
+    => m4Tick()
 }
 
 /// 读取观察秒数（未设置或非法则为 0）
@@ -93,7 +91,7 @@ func countPdfPages(data: Array<Byte>): Int64 {
             let after = i + plen
             var isPagesRoot = false
             if (after < total && data[after] == UInt8(115)) {
-                isPagesRoot = true   // 's' → /Pages（对象树根，不计）
+                isPagesRoot = true // 's' → /Pages（对象树根，不计）
             }
             if (!isPagesRoot) {
                 n += 1

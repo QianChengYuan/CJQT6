@@ -9,8 +9,6 @@ import std.random.*
 import std.fs.*
 import cjqt6.multimedia.*
 
-
-
 /// 添加多个文件到播放列表
 /// paths: 文件路径列表
 /// 返回新增数量
@@ -47,7 +45,6 @@ public func playlistAddFolder(dirPath: String): Int32 {
     count
 }
 
-
 /// 计算下一曲索引（根据播放模式）
 /// 返回 -1 表示无下一曲（顺序播放到末尾）
 public func calcNextIndex(): Int32 {
@@ -82,8 +79,8 @@ public func calcNextIndex(): Int32 {
                 gCurrentIndex + 1
             } else {
                 match (gPlayMode) {
-                    case Loop => 0  // 循环回到第一首
-                    case _ => -1   // 顺序播放到末尾，停止
+                    case Loop => 0 // 循环回到第一首
+                    case _ => -1 // 顺序播放到末尾，停止
                 }
             }
     }
@@ -97,8 +94,8 @@ public func calcPrevIndex(): Int32 {
     }
     if (gCurrentIndex <= 0) {
         match (gPlayMode) {
-            case Loop => size - 1  // 循环回到最后一首
-            case _ => 0  // 已是第一首，保持
+            case Loop => size - 1 // 循环回到最后一首
+            case _ => 0 // 已是第一首，保持
         }
     } else {
         gCurrentIndex - 1
@@ -323,11 +320,19 @@ public func updateModeButton(): Unit {
 /// 更新传输按钮启用/禁用状态（列表有歌曲时启用）
 public func updateTransportButtons(): Unit {
     let hasItems = gPlaylist.size > 0
-    if (let Some(btn) <- gPrevButton) { btn.setEnabled(hasItems) }
-    if (let Some(btn) <- gPlayButton) { btn.setEnabled(hasItems) }
-    if (let Some(btn) <- gNextButton) { btn.setEnabled(hasItems) }
+    if (let Some(btn) <- gPrevButton) {
+        btn.setEnabled(hasItems)
+    }
+    if (let Some(btn) <- gPlayButton) {
+        btn.setEnabled(hasItems)
+    }
+    if (let Some(btn) <- gNextButton) {
+        btn.setEnabled(hasItems)
+    }
     if (!hasItems) {
-        if (let Some(slider) <- gProgressSlider) { slider.setEnabled(false) }
+        if (let Some(slider) <- gProgressSlider) {
+            slider.setEnabled(false)
+        }
     }
 }
 

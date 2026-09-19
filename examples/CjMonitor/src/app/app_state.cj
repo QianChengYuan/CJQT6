@@ -86,7 +86,7 @@ public class AppState {
         let t = QTimer()
         t.setInterval(intervalMs)
         // Capture 回调可捕获 this，无需全局变量中转
-        t.setOnTimeoutCapture({ => this.onTick() })
+        t.setOnTimeoutCapture({=> this.onTick()})
         t.start()
         timer = Some(t)
     }
@@ -226,7 +226,8 @@ public class AppState {
             let st = stats[i]
             let sz = buffers[i].size()
             let cap = buffers[i].capacity()
-            sb.append("  ${name}: 当前=${fmt1(st.last())}${unit} 峰值=${fmt1(st.max())} 均值=${fmt1(st.avg())} 窗口=${sz}/${cap}\n")
+            sb.append(
+                "  ${name}: 当前=${fmt1(st.last())}${unit} 峰值=${fmt1(st.max())} 均值=${fmt1(st.avg())} 窗口=${sz}/${cap}\n")
             i += 1
         }
         sb.append("===========================================")

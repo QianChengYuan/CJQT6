@@ -25,8 +25,12 @@ func createPageRichWidgets(): QScrollArea {
     sw.setText("启用通知")
     let switchLabel = QLabel()
     switchLabel.setText("状态：关闭")
-    sw.setOnChanged({ =>
-        switchLabel.setText(if (sw.isChecked()) { "状态：开启" } else { "状态：关闭" })
+    sw.setOnChanged({
+        => switchLabel.setText(if (sw.isChecked()) {
+            "状态：开启"
+        } else {
+            "状态：关闭"
+        })
     })
     switchCard.addWidget(sw)
     switchCard.addWidget(switchLabel)
@@ -37,10 +41,13 @@ func createPageRichWidgets(): QScrollArea {
     let toastBtn = QPushButton()
     toastBtn.setText("显示 Toast（3 秒后自动消失）")
     toastBtn.setStyleSheet("background-color: #3498db; color: white; padding: 6px;")
-    toastBtn.setOnClickCapture({ =>
-        let toast = Toast("操作成功！", 3000)
-        toast.show()
-    })
+    toastBtn.setOnClickCapture(
+        {
+            =>
+                let toast = Toast("操作成功！", 3000)
+                toast.show()
+        }
+    )
     toastCard.addWidget(toastBtn)
     layout.addWidget(toastCard.getPtr())
 
@@ -50,8 +57,8 @@ func createPageRichWidgets(): QScrollArea {
     searchBox.setPlaceholder("输入关键词后回车搜索...")
     let searchLabel = QLabel()
     searchLabel.setText("未搜索")
-    searchBox.setOnSearch({ =>
-        searchLabel.setText("搜索关键词：${searchBox.text()}")
+    searchBox.setOnSearch({
+        => searchLabel.setText("搜索关键词：${searchBox.text()}")
     })
     searchCard.addWidget(searchBox)
     searchCard.addWidget(searchLabel)
@@ -81,8 +88,8 @@ func createPageRichWidgets(): QScrollArea {
     pagination.setTotalPages(10)
     let pageLabel = QLabel()
     pageLabel.setText("当前页：1")
-    pagination.setOnPageChanged({ =>
-        pageLabel.setText("当前页：${pagination.getCurrentPage()}")
+    pagination.setOnPageChanged({
+        => pageLabel.setText("当前页：${pagination.getCurrentPage()}")
     })
     pageCard.addWidget(pagination)
     pageCard.addWidget(pageLabel)
@@ -121,14 +128,17 @@ func createPageRichWidgets(): QScrollArea {
     let steps = Steps(["启动", "配置", "开发", "测试", "上线"])
     let nextStepBtn = QPushButton()
     nextStepBtn.setText("下一步")
-    nextStepBtn.setOnClickCapture({ =>
-        let cur = steps.getCurrentStep()
-        var next = cur + 1
-        if (next >= steps.stepCount()) {
-            next = 0
+    nextStepBtn.setOnClickCapture(
+        {
+            =>
+                let cur = steps.getCurrentStep()
+                var next = cur + 1
+                if (next >= steps.stepCount()) {
+                    next = 0
+                }
+                steps.setCurrentStep(next)
         }
-        steps.setCurrentStep(next)
-    })
+    )
     stepsCard.addWidget(steps)
     stepsCard.addWidget(nextStepBtn)
     layout.addWidget(stepsCard.getPtr())
@@ -175,8 +185,8 @@ func createPageRichWidgets(): QScrollArea {
     rate.setRating(3)
     let rateLabel = QLabel()
     rateLabel.setText("当前评分：3")
-    rate.setOnRatingChanged({ =>
-        rateLabel.setText("当前评分：${rate.getRating()}")
+    rate.setOnRatingChanged({
+        => rateLabel.setText("当前评分：${rate.getRating()}")
     })
     rateCard.addWidget(rate)
     rateCard.addWidget(rateLabel)

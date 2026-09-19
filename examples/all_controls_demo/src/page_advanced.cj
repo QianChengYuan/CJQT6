@@ -26,7 +26,8 @@ func createPageAdvanced(): QScrollArea {
     let currentDate = QDate.currentDate()
     let dateStr = currentDate.toString()
     let dateLabel = QLabel()
-    dateLabel.setText("当前日期: ${dateStr}  |  年: ${currentDate.year()} 月: ${currentDate.month()} 日: ${currentDate.day()}")
+    dateLabel.setText(
+        "当前日期: ${dateStr}  |  年: ${currentDate.year()} 月: ${currentDate.month()} 日: ${currentDate.day()}")
     setLabelStyle(dateLabel, "padding: 6px; background-color: #f8f9fa; border-radius: 4px;")
     dateInfo.addWidget(dateLabel.getPtr())
     layout.addLayout(dateInfo.getPtr())
@@ -42,8 +43,8 @@ func createPageAdvanced(): QScrollArea {
     keyRow.addWidget(keyEdit.getPtr())
     let keyBtn = QPushButton()
     keyBtn.setText("获取快捷键")
-    keyBtn.setOnClick({ =>
-        if (let Some(ke) <- gKeyEdit) {
+    keyBtn.setOnClick({
+        => if (let Some(ke) <- gKeyEdit) {
             let seq = ke.keySequence()
             if (let Some(status) <- gStatusLabel) {
                 status.setText("快捷键: ${seq}")

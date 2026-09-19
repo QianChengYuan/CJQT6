@@ -27,26 +27,27 @@ let CENTER_Y: Int32 = 200
 // ============================================================
 
 // 绘制回调 - 使用 CFunc 类型
-let onPaintCallback: CFunc<(Int64) -> Unit> = { painterPtr: Int64 =>
-    let painter = QPainter.fromPtr(painterPtr)
-    
-    // 设置抗锯齿
-    painter.setRenderHint(RenderHint.Antialiasing.value())
-    
-    // 绘制时钟表盘
-    drawClockFace(painter)
-    
-    // 获取当前时间
-    let now = QTime.currentTime()
-    let hour = now.hour()
-    let minute = now.minute()
-    let second = now.second()
-    
-    // 绘制指针
-    drawHand(painter, hour % 12, minute, second)
-    
-    // 绘制中心点
-    drawCenter(painter)
+let onPaintCallback: CFunc<(Int64) -> Unit> = {
+    painterPtr: Int64 =>
+        let painter = QPainter.fromPtr(painterPtr)
+
+        // 设置抗锯齿
+        painter.setRenderHint(RenderHint.Antialiasing.value())
+
+        // 绘制时钟表盘
+        drawClockFace(painter)
+
+        // 获取当前时间
+        let now = QTime.currentTime()
+        let hour = now.hour()
+        let minute = now.minute()
+        let second = now.second()
+
+        // 绘制指针
+        drawHand(painter, hour % 12, minute, second)
+
+        // 绘制中心点
+        drawCenter(painter)
 }
 
 // 绘制时钟表盘
@@ -54,7 +55,7 @@ func drawClockFace(painter: QPainter): Unit {
     let cx = CENTER_X
     let cy = CENTER_Y
     let radius = CLOCK_SIZE / 2
-    
+
     // 绘制外圈
     if (let Some(borderColor) <- gBorderColor) {
         let pen = QPen(borderColor)
@@ -63,17 +64,17 @@ func drawClockFace(painter: QPainter): Unit {
         if (let Some(faceColor) <- gFaceColor) {
             let brush = QBrush(faceColor)
             painter.setBrush(brush)
-            brush.delete()  // 释放临时画刷
+            brush.delete() // 释放临时画刷
         }
-        pen.delete()  // 释放临时画笔
+        pen.delete() // 释放临时画笔
     }
-    
+
     // 绘制刻度
     if (let Some(tickColor) <- gTickColor) {
         let tickPen = QPen(tickColor)
         tickPen.setWidth(2)
         painter.setPen(tickPen)
-        
+
         // 12个小时刻度
         for (i in 0..12) {
             let angle = Float32(i * 30 - 90)
@@ -86,12 +87,12 @@ func drawClockFace(painter: QPainter): Unit {
             let y2 = Float32(cy) + outerR * sin(rad)
             painter.drawLine(Int32(x1), Int32(y1), Int32(x2), Int32(y2))
         }
-        
+
         // 60个分钟刻度
         tickPen.setWidth(1)
         painter.setPen(tickPen)
         for (i in 0..60) {
-            if (i % 5 != 0) {  // 跳过小时刻度位置
+            if (i % 5 != 0) { // 跳过小时刻度位置
                 let angle = Float32(i * 6 - 90)
                 let rad = angle * Float32(3.14159265) / 180.0
                 let innerR = Float32(radius - 10)
@@ -103,10 +104,10 @@ func drawClockFace(painter: QPainter): Unit {
                 painter.drawLine(Int32(x1), Int32(y1), Int32(x2), Int32(y2))
             }
         }
-        
-        tickPen.delete()  // 释放临时画笔
+
+        tickPen.delete() // 释放临时画笔
     }
-    
+
     // 绘制数字
     drawNumbers(painter, cx, cy, radius)
 }
@@ -116,19 +117,19 @@ func drawNumbers(painter: QPainter, cx: Int32, cy: Int32, radius: Int32): Unit {
     let font = QFont("Arial", 14)
     font.setBold(true)
     painter.setFont(font)
-    font.delete()  // 释放字体对象
-    
+    font.delete() // 释放字体对象
+
     if (let Some(tickColor) <- gTickColor) {
         painter.setPenColor(tickColor)
     }
-    
+
     for (i in 1..13) {
         let angle = Float32(i * 30 - 90)
         let rad = angle * Float32(3.14159265) / 180.0
         let textR = Float32(radius - 35)
         let x = Float32(cx) + textR * cos(rad)
         let y = Float32(cy) + textR * sin(rad)
-        
+
         let numStr = "${i}"
         painter.drawTextRect(Int32(x) - 10, Int32(y) - 10, 20, 20, TextAlignment.Center.value, numStr)
     }
@@ -139,15 +140,15 @@ func drawHand(painter: QPainter, hour: Int32, minute: Int32, second: Int32): Uni
     let cx = CENTER_X
     let cy = CENTER_Y
     let radius = CLOCK_SIZE / 2
-    
+
     // 时针角度: (hour * 30) + (minute * 0.5) - 90
     let hourAngle = Float32(hour * 30 + minute / 2 - 90)
     drawSingleHand(painter, hourAngle, radius - 80, 6, gHourHandColor)
-    
+
     // 分针角度: (minute * 6) + (second * 0.1) - 90
     let minuteAngle = Float32(minute * 6 + second / 10 - 90)
     drawSingleHand(painter, minuteAngle, radius - 50, 4, gMinuteHandColor)
-    
+
     // 秒针角度: second * 6 - 90
     let secondAngle = Float32(second * 6 - 90)
     drawSingleHand(painter, secondAngle, radius - 30, 2, gSecondHandColor)
@@ -159,13 +160,13 @@ func drawSingleHand(painter: QPainter, angle: Float32, length: Int32, width: Int
         let pen = QPen(c)
         pen.setWidth(width)
         painter.setPen(pen)
-        pen.delete()  // 释放画笔
+        pen.delete() // 释放画笔
     }
-    
+
     let rad = angle * Float32(3.14159265) / 180.0
     let x = Float32(CENTER_X) + Float32(length) * cos(rad)
     let y = Float32(CENTER_Y) + Float32(length) * sin(rad)
-    
+
     painter.drawLine(CENTER_X, CENTER_Y, Int32(x), Int32(y))
 }
 
@@ -174,14 +175,14 @@ func drawCenter(painter: QPainter): Unit {
     if (let Some(c) <- gSecondHandColor) {
         let brush = QBrush(c)
         painter.setBrush(brush)
-        brush.delete()  // 释放画刷
+        brush.delete() // 释放画刷
     }
     painter.drawCircle(CENTER_X, CENTER_Y, 8)
 }
 
 // 定时器回调 - 每秒更新
-let onTimerCallback: VoidCallback = { =>
-    if (let Some(w) <- gWidget) {
+let onTimerCallback: VoidCallback = {
+    => if (let Some(w) <- gWidget) {
         w.update()
     }
 }
@@ -191,36 +192,36 @@ let onTimerCallback: VoidCallback = { =>
 // ============================================================
 main(): Int32 {
     let app = QApplication()
-    
+
     // 初始化颜色
-    gHourHandColor = QColor(30, 30, 30)       // 深灰色时针
-    gMinuteHandColor = QColor(60, 60, 60)     // 灰色分针
-    gSecondHandColor = QColor(200, 50, 50)    // 红色秒针
-    gTickColor = QColor(50, 50, 50)           // 深灰色刻度
-    gFaceColor = QColor(255, 255, 255)        // 白色表盘
-    gBorderColor = QColor(40, 40, 40)         // 深灰色边框
-    
+    gHourHandColor = QColor(30, 30, 30) // 深灰色时针
+    gMinuteHandColor = QColor(60, 60, 60) // 灰色分针
+    gSecondHandColor = QColor(200, 50, 50) // 红色秒针
+    gTickColor = QColor(50, 50, 50) // 深灰色刻度
+    gFaceColor = QColor(255, 255, 255) // 白色表盘
+    gBorderColor = QColor(40, 40, 40) // 深灰色边框
+
     // 创建窗口
     let widget = QEventWidget()
     widget.setTitle("模拟时钟")
     widget.resize(400, 450)
     gWidget = widget
-    
+
     // 设置绘制回调
     widget.setOnPaint(onPaintCallback)
-    
+
     // 创建定时器 - 每秒刷新
     let timer = QTimer()
-    timer.setInterval(1000)  // 1000毫秒 = 1秒
+    timer.setInterval(1000) // 1000毫秒 = 1秒
     timer.setOnTimeout(onTimerCallback)
     timer.start()
     gTimer = timer
-    
+
     // 显示窗口
     widget.show()
-    
+
     let result = app.exec()
-    
+
     // 清理资源
     if (let Some(t) <- gTimer) {
         t.stop()
@@ -230,12 +231,24 @@ main(): Int32 {
         w.delete()
     }
     // 释放颜色对象
-    if (let Some(c) <- gHourHandColor) { c.delete() }
-    if (let Some(c) <- gMinuteHandColor) { c.delete() }
-    if (let Some(c) <- gSecondHandColor) { c.delete() }
-    if (let Some(c) <- gTickColor) { c.delete() }
-    if (let Some(c) <- gFaceColor) { c.delete() }
-    if (let Some(c) <- gBorderColor) { c.delete() }
-    
+    if (let Some(c) <- gHourHandColor) {
+        c.delete()
+    }
+    if (let Some(c) <- gMinuteHandColor) {
+        c.delete()
+    }
+    if (let Some(c) <- gSecondHandColor) {
+        c.delete()
+    }
+    if (let Some(c) <- gTickColor) {
+        c.delete()
+    }
+    if (let Some(c) <- gFaceColor) {
+        c.delete()
+    }
+    if (let Some(c) <- gBorderColor) {
+        c.delete()
+    }
+
     return result
 }

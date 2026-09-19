@@ -45,9 +45,8 @@ var gUiStartMs: Int64 = 0
 var gUiGeomA: String = ""
 var gUiGeomB: String = ""
 var gUiFinished: Bool = false
-
-let onUiProbe: VoidCallback = {=>
-    uiProbeTick()
+let onUiProbe: VoidCallback = {
+    => uiProbeTick()
 }
 
 /// 读取界面自测观察秒数（未设置或非法则为 0）
@@ -132,7 +131,11 @@ func finishUiSelfTest(): Unit {
 
     let elapsed = monoMs() - gUiStartMs
     let okLayout = layoutOk()
-    let layoutText = if (okLayout) { "不塌（关键控件均非 0 尺寸）" } else { "塌陷（见上方几何）" }
+    let layoutText = if (okLayout) {
+        "不塌（关键控件均非 0 尺寸）"
+    } else {
+        "塌陷（见上方几何）"
+    }
 
     var statusText = lastStatusText()
     if (statusText.isEmpty()) {

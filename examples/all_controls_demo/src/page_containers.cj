@@ -104,7 +104,7 @@ func createPageContainers(): QScrollArea {
     frameRow.addWidget(frame2.getPtr())
 
     let frame3 = QFrame()
-    frame3.setFrameShape(1)  // Box
+    frame3.setFrameShape(1) // Box
     frame3.setFrameShadow(FrameShadow.Plain)
     frame3.setLineWidth(1)
     let frame3Layout = QVBoxLayout()

@@ -73,7 +73,7 @@ public class LinuxProbe <: Probe {
     }
 
     public func dispose(): Unit {
-        ()   // 无外部资源
+        () // 无外部资源
     }
 
     public func sample(): ?Sample {

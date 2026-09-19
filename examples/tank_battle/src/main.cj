@@ -29,15 +29,14 @@ let ENEMY_COUNT: Int64 = 3
 // ============================================================
 var gPlayerX: Int32 = 288
 var gPlayerY: Int32 = 768
-var gPlayerDir: Int32 = 0  // 0=Up, 1=Down, 2=Left, 3=Right
+var gPlayerDir: Int32 = 0 // 0=Up, 1=Down, 2=Left, 3=Right
 var gPlayerLives: Int32 = 3
 var gPlayerAlive: Bool = true
 var gPlayerCooldown: Int32 = 0
-
-var gEnemies: ArrayList<(Int32, Int32, Int32, Bool, Int32)> = ArrayList<(Int32, Int32, Int32, Bool, Int32)>()  // (x, y, dir, alive, cooldown)
-var gBullets: ArrayList<(Int32, Int32, Int32, Bool, Bool)> = ArrayList<(Int32, Int32, Int32, Bool, Bool)>()  // (x, y, dir, active, isPlayer)
-var gExplosions: ArrayList<(Int32, Int32, Int32, Bool)> = ArrayList<(Int32, Int32, Int32, Bool)>()  // (x, y, frame, active)
-var gMap: Array<Array<Int32>> = []  // 0=Empty, 1=Brick, 2=Steel, 3=Water, 4=Grass, 5=Base
+var gEnemies: ArrayList<(Int32, Int32, Int32, Bool, Int32)> = ArrayList<(Int32, Int32, Int32, Bool, Int32)>() // (x, y, dir, alive, cooldown)
+var gBullets: ArrayList<(Int32, Int32, Int32, Bool, Bool)> = ArrayList<(Int32, Int32, Int32, Bool, Bool)>() // (x, y, dir, active, isPlayer)
+var gExplosions: ArrayList<(Int32, Int32, Int32, Bool)> = ArrayList<(Int32, Int32, Int32, Bool)>() // (x, y, frame, active)
+var gMap: Array<Array<Int32>> = [] // 0=Empty, 1=Brick, 2=Steel, 3=Water, 4=Grass, 5=Base
 
 var gScore: Int32 = 0
 var gLevel: Int32 = 1
@@ -47,8 +46,7 @@ var gBaseDestroyed: Bool = false
 var gEnemySpawnTimer: Int32 = 0
 var gTotalEnemies: Int32 = 10
 var gSpawnedEnemies: Int32 = 0
-
-var gKeyState: Array<Bool> = [false, false, false, false, false]  // up, down, left, right, fire
+var gKeyState: Array<Bool> = [false, false, false, false, false] // up, down, left, right, fire
 
 var gApp: ?QApplication = None
 var gWidget: ?QEventWidget = None
@@ -80,10 +78,10 @@ let TILE_BASE: Int32 = 5
 // 辅助函数
 // ============================================================
 func initMap(): Unit {
-    gMap = Array<Array<Int32>>(MAP_HEIGHT, { i => 
-        Array<Int32>(MAP_WIDTH, { j => TILE_EMPTY })
+    gMap = Array<Array<Int32>>(MAP_HEIGHT, {
+        i => Array<Int32>(MAP_WIDTH, {j => TILE_EMPTY})
     })
-    
+
     // 基地周围的砖墙
     setTile(11, 23, TILE_BRICK)
     setTile(12, 23, TILE_BRICK)
@@ -91,7 +89,7 @@ func initMap(): Unit {
     setTile(11, 24, TILE_BRICK)
     setTile(13, 24, TILE_BRICK)
     setTile(12, 24, TILE_BASE)
-    
+
     // 障碍物
     addTiles(3, 5, 4, 2, TILE_BRICK)
     addTiles(18, 5, 4, 2, TILE_BRICK)
@@ -128,11 +126,11 @@ func resetGame(): Unit {
     gPlayerLives = 3
     gPlayerAlive = true
     gPlayerCooldown = 0
-    
+
     gEnemies.clear()
     gBullets.clear()
     gExplosions.clear()
-    
+
     gScore = 0
     gLevel = 1
     gGameOver = false
@@ -141,11 +139,11 @@ func resetGame(): Unit {
     gEnemySpawnTimer = 0
     gTotalEnemies = 10
     gSpawnedEnemies = 0
-    
+
     for (i in 0..5) {
         gKeyState[i] = false
     }
-    
+
     initMap()
 }
 
@@ -156,7 +154,7 @@ func updateGame(): Unit {
     if (gPaused || gGameOver) {
         return
     }
-    
+
     updatePlayer()
     updateEnemies()
     spawnEnemies()
@@ -166,41 +164,43 @@ func updateGame(): Unit {
 }
 
 func updatePlayer(): Unit {
-    if (!gPlayerAlive) { return }
-    
+    if (!gPlayerAlive) {
+        return
+    }
+
     let ts = Int32(TILE_SIZE)
-    
-    if (gKeyState[0]) {  // Up
+
+    if (gKeyState[0]) { // Up
         gPlayerDir = DIR_UP
         let newY = gPlayerY - TANK_SPEED
         if (newY >= 0 && !checkTankCollision(gPlayerX, newY)) {
             gPlayerY = newY
         }
-    } else if (gKeyState[1]) {  // Down
+    } else if (gKeyState[1]) { // Down
         gPlayerDir = DIR_DOWN
         let newY = gPlayerY + TANK_SPEED
         if (newY <= WINDOW_HEIGHT - ts - 60 && !checkTankCollision(gPlayerX, newY)) {
             gPlayerY = newY
         }
-    } else if (gKeyState[2]) {  // Left
+    } else if (gKeyState[2]) { // Left
         gPlayerDir = DIR_LEFT
         let newX = gPlayerX - TANK_SPEED
         if (newX >= 0 && !checkTankCollision(newX, gPlayerY)) {
             gPlayerX = newX
         }
-    } else if (gKeyState[3]) {  // Right
+    } else if (gKeyState[3]) { // Right
         gPlayerDir = DIR_RIGHT
         let newX = gPlayerX + TANK_SPEED
         if (newX <= WINDOW_WIDTH - ts && !checkTankCollision(newX, gPlayerY)) {
             gPlayerX = newX
         }
     }
-    
-    if (gKeyState[4] && gPlayerCooldown <= 0) {  // Fire
+
+    if (gKeyState[4] && gPlayerCooldown <= 0) { // Fire
         fireBullet(gPlayerX + ts / 2, gPlayerY + ts / 2, gPlayerDir, true)
         gPlayerCooldown = 20
     }
-    
+
     if (gPlayerCooldown > 0) {
         gPlayerCooldown--
     }
@@ -212,7 +212,7 @@ func checkTankCollision(x: Int32, y: Int32): Bool {
     let ty1 = Int64(y / ts)
     let tx2 = Int64((x + ts - 1) / ts)
     let ty2 = Int64((y + ts - 1) / ts)
-    
+
     for (ty in ty1..ty2 + 1) {
         for (tx in tx1..tx2 + 1) {
             if (tx >= 0 && tx < MAP_WIDTH && ty >= 0 && ty < MAP_HEIGHT) {
@@ -230,33 +230,35 @@ func fireBullet(x: Int32, y: Int32, dir: Int32, isPlayer: Bool): Unit {
     let ts = Int32(TILE_SIZE)
     var bx = x
     var by = y
-    
+
     match (dir) {
-        case 0 => by = y - 4  // Up
-        case 1 => by = y + ts + 4  // Down
-        case 2 => bx = x - 4  // Left
-        case 3 => bx = x + ts + 4  // Right
+        case 0 => by = y - 4 // Up
+        case 1 => by = y + ts + 4 // Down
+        case 2 => bx = x - 4 // Left
+        case 3 => bx = x + ts + 4 // Right
         case _ => ()
     }
-    
+
     gBullets.add((bx, by, dir, true, isPlayer))
 }
 
 func updateEnemies(): Unit {
     for (i in 0..gEnemies.size) {
         let (x, y, dir, alive, cooldown) = gEnemies[i]
-        if (!alive) { continue }
-        
+        if (!alive) {
+            continue
+        }
+
         var newX = x
         var newY = y
         var newDir = dir
         var newCooldown = cooldown
-        
+
         // 随机改变方向
         if (gRandom.nextUInt64() % 60 == 0) {
             newDir = Int32(gRandom.nextUInt64() % 4)
         }
-        
+
         let ts = Int32(TILE_SIZE)
         match (newDir) {
             case 0 => newY = y - TANK_SPEED
@@ -265,7 +267,7 @@ func updateEnemies(): Unit {
             case 3 => newX = x + TANK_SPEED
             case _ => ()
         }
-        
+
         // 边界检查
         if (newX >= 0 && newX <= WINDOW_WIDTH - ts && newY >= 0 && newY <= WINDOW_HEIGHT - ts - 60) {
             if (!checkTankCollision(newX, newY)) {
@@ -276,14 +278,14 @@ func updateEnemies(): Unit {
         } else {
             gEnemies[i] = (x, y, newDir, true, newCooldown)
         }
-        
+
         // 射击
         if (newCooldown <= 0 && gRandom.nextUInt64() % 30 == 0) {
             let (cx, cy, cdir, _, _) = gEnemies[i]
             fireBullet(cx + ts / 2, cy + ts / 2, cdir, false)
             gEnemies[i] = (cx, cy, cdir, true, 20)
         }
-        
+
         if (newCooldown > 0) {
             let (cx, cy, cdir, _, cc) = gEnemies[i]
             gEnemies[i] = (cx, cy, cdir, true, cc - 1)
@@ -297,7 +299,13 @@ func spawnEnemies(): Unit {
         if (gEnemySpawnTimer >= 120) {
             gEnemySpawnTimer = 0
             let idx = Int32(gRandom.nextUInt64() % 3)
-            let spawnX: Int32 = if (idx == 0) { 0 } else if (idx == 1) { 384 } else { 768 }
+            let spawnX: Int32 = if (idx == 0) {
+                0
+            } else if (idx == 1) {
+                384
+            } else {
+                768
+            }
             gEnemies.add((spawnX, 0, DIR_DOWN, true, 0))
             gSpawnedEnemies++
         }
@@ -360,7 +368,9 @@ func updateBullets(): Unit {
                 // 检查敌人坦克
                 for (j in 0..gEnemies.size) {
                     let (ex, ey, _, eAlive, _) = gEnemies[j]
-                    if (!eAlive) { continue }
+                    if (!eAlive) {
+                        continue
+                    }
                     if (newX >= ex && newX <= ex + ts && newY >= ey && newY <= ey + ts) {
                         bulletActive = false
                         gEnemies[j] = (ex, ey, 0, false, 0)
@@ -370,7 +380,8 @@ func updateBullets(): Unit {
                 }
             } else {
                 // 检查玩家坦克
-                if (gPlayerAlive && newX >= gPlayerX && newX <= gPlayerX + ts && newY >= gPlayerY && newY <= gPlayerY + ts) {
+                if (gPlayerAlive && newX >= gPlayerX && newX <= gPlayerX + ts && newY >= gPlayerY && newY <= gPlayerY +
+                    ts) {
                     bulletActive = false
                     gPlayerLives--
                     gExplosions.add((gPlayerX + ts / 2, gPlayerY + ts / 2, 0, true))
@@ -401,14 +412,14 @@ func updateBullets(): Unit {
 
 func updateExplosions(): Unit {
     let toRemove = ArrayList<Int64>()
-    
+
     for (i in 0..gExplosions.size) {
         let (x, y, frame, active) = gExplosions[i]
         if (!active) {
             toRemove.add(i)
             continue
         }
-        
+
         let newFrame = frame + 1
         if (newFrame >= 15) {
             gExplosions[i] = (x, y, newFrame, false)
@@ -429,11 +440,11 @@ func checkGameState(): Unit {
     if (gBaseDestroyed) {
         gGameOver = true
     }
-    
+
     if (!gPlayerAlive) {
         gGameOver = true
     }
-    
+
     // 清除死亡的敌人
     let toRemove = ArrayList<Int64>()
     for (i in 0..gEnemies.size) {
@@ -447,7 +458,7 @@ func checkGameState(): Unit {
             gEnemies.remove(at: toRemove[i])
         }
     }
-    
+
     // 检查通关
     if (gSpawnedEnemies >= gTotalEnemies && gEnemies.size == 0) {
         gLevel++
@@ -464,17 +475,17 @@ func checkGameState(): Unit {
 // ============================================================
 func onKeyPress(key: Int32, modifiers: Int32, unicode: Int32): Unit {
     if (gGameOver) {
-        if (key == Key.r() || key == 82) {  // R
+        if (key == Key.r() || key == 82) { // R
             resetGame()
         }
         return
     }
-    
-    if (key == Key.p() || key == 80) {  // P
+
+    if (key == Key.p() || key == 80) { // P
         gPaused = !gPaused
         return
     }
-    
+
     if (key == Key.up() || key == Key.w() || key == 87) {
         gKeyState[0] = true
     } else if (key == Key.down() || key == Key.s() || key == 83) {
@@ -522,7 +533,7 @@ public class GameRenderer {
     private var pen: QPen = QPen()
     private var brush: QBrush = QBrush()
     private let TS: Int32 = 32
-    
+
     // 缓存常用颜色（避免每帧创建）
     private let colorBlack: QColor
     private let colorWhite: QColor
@@ -544,12 +555,12 @@ public class GameRenderer {
     private let colorBarBg: QColor
     private let colorExplosionOuter: QColor
     private let colorExplosionInner: QColor
-    
+
     // 缓存字体
     private let fontSmall: QFont
     private let fontLarge: QFont
     private let fontTitle: QFont
-    
+
     public init() {
         // 初始化所有缓存颜色
         colorBlack = Colors.black()
@@ -572,13 +583,13 @@ public class GameRenderer {
         colorBarBg = QColor(30, 30, 30)
         colorExplosionOuter = QColor(255, 100, 0)
         colorExplosionInner = QColor(255, 255, 0)
-        
+
         // 初始化字体
         fontSmall = QFont("Arial", 14)
         fontLarge = QFont("Arial", 16)
         fontTitle = QFont("Arial", 32)
     }
-    
+
     /// 释放缓存的资源
     public func cleanup(): Unit {
         colorBlack.delete()
@@ -607,13 +618,13 @@ public class GameRenderer {
         pen.delete()
         brush.delete()
     }
-    
+
     public func render(painterPtr: Int64): Unit {
         let painter = QPainter.fromPtr(painterPtr)
         painter.setRenderHint(RenderHint.Antialiasing.value())
-        
+
         painter.fillRectColor(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, colorBlack)
-        
+
         renderMap(painter)
         renderBullets(painter)
         renderPlayer(painter)
@@ -621,19 +632,19 @@ public class GameRenderer {
         renderGrass(painter)
         renderExplosions(painter)
         renderStatusBar(painter)
-        
+
         if (gGameOver) {
             renderGameOver(painter)
         }
     }
-    
+
     private func renderMap(painter: QPainter): Unit {
         for (y in 0..MAP_HEIGHT) {
             for (x in 0..MAP_WIDTH) {
                 let tile = gMap[y][x]
                 let px = Int32(x * TILE_SIZE)
                 let py = Int32(y * TILE_SIZE)
-                
+
                 match (tile) {
                     case 1 => renderBrick(painter, px, py)
                     case 2 => renderSteel(painter, px, py)
@@ -644,7 +655,7 @@ public class GameRenderer {
             }
         }
     }
-    
+
     private func renderGrass(painter: QPainter): Unit {
         for (y in 0..MAP_HEIGHT) {
             for (x in 0..MAP_WIDTH) {
@@ -656,20 +667,20 @@ public class GameRenderer {
             }
         }
     }
-    
+
     private func renderBrick(painter: QPainter, x: Int32, y: Int32): Unit {
         painter.fillRectColor(x, y, TS, TS, colorBrick)
         pen.setColor(colorBrickDark)
         pen.setWidth(1)
         painter.setPen(pen)
-        
+
         for (i in 0..4) {
             for (j in 0..4) {
                 painter.drawRect(x + Int32(j) * 8, y + Int32(i) * 8, 8, 8)
             }
         }
     }
-    
+
     private func renderSteel(painter: QPainter, x: Int32, y: Int32): Unit {
         painter.fillRectColor(x, y, TS, TS, colorSteel)
         pen.setColor(colorSteelDark)
@@ -679,7 +690,7 @@ public class GameRenderer {
         painter.drawLine(x, y, x + TS, y + TS)
         painter.drawLine(x + TS, y, x, y + TS)
     }
-    
+
     private func renderWater(painter: QPainter, x: Int32, y: Int32): Unit {
         let gradient = QLinearGradient.fromInt(x, y, x, y + TS)
         gradient.setColorAt(0.0f32, colorWaterLight)
@@ -687,9 +698,9 @@ public class GameRenderer {
         brush = QBrush(gradient)
         painter.setBrush(brush)
         painter.fillRect(x, y, TS, TS, brush)
-        gradient.delete()  // 释放渐变
+        gradient.delete() // 释放渐变
     }
-    
+
     private func renderBase(painter: QPainter, x: Int32, y: Int32): Unit {
         painter.fillRectColor(x, y, TS, TS, colorBase)
         pen.setColor(colorBaseDark)
@@ -699,19 +710,21 @@ public class GameRenderer {
         painter.drawLine(x + 8, y + 8, x + TS / 2, y + TS - 8)
         painter.drawLine(x + TS - 8, y + 8, x + TS / 2, y + TS - 8)
     }
-    
+
     private func renderPlayer(painter: QPainter): Unit {
-        if (!gPlayerAlive) { return }
-        
+        if (!gPlayerAlive) {
+            return
+        }
+
         painter.fillRectColor(gPlayerX, gPlayerY, 6, TS, colorPlayerDark)
         painter.fillRectColor(gPlayerX + TS - 6, gPlayerY, 6, TS, colorPlayerDark)
         painter.fillRectColor(gPlayerX + 6, gPlayerY + 4, TS - 12, TS - 8, colorPlayerBody)
         painter.fillRectColor(gPlayerX + 8, gPlayerY + 8, TS - 16, TS - 16, colorPlayerDark)
-        
+
         pen.setColor(colorPlayerDark)
         pen.setWidth(4)
         painter.setPen(pen)
-        
+
         match (gPlayerDir) {
             case 0 => painter.drawLine(gPlayerX + TS / 2, gPlayerY + TS / 2, gPlayerX + TS / 2, gPlayerY)
             case 1 => painter.drawLine(gPlayerX + TS / 2, gPlayerY + TS / 2, gPlayerX + TS / 2, gPlayerY + TS)
@@ -720,21 +733,23 @@ public class GameRenderer {
             case _ => ()
         }
     }
-    
+
     private func renderEnemies(painter: QPainter): Unit {
         for (enemy in gEnemies) {
             let (x, y, dir, alive, _) = enemy
-            if (!alive) { continue }
-            
+            if (!alive) {
+                continue
+            }
+
             painter.fillRectColor(x, y, 6, TS, colorEnemyDark)
             painter.fillRectColor(x + TS - 6, y, 6, TS, colorEnemyDark)
             painter.fillRectColor(x + 6, y + 4, TS - 12, TS - 8, colorEnemyBody)
             painter.fillRectColor(x + 8, y + 8, TS - 16, TS - 16, colorEnemyDark)
-            
+
             pen.setColor(colorEnemyDark)
             pen.setWidth(4)
             painter.setPen(pen)
-            
+
             match (dir) {
                 case 0 => painter.drawLine(x + TS / 2, y + TS / 2, x + TS / 2, y)
                 case 1 => painter.drawLine(x + TS / 2, y + TS / 2, x + TS / 2, y + TS)
@@ -744,78 +759,89 @@ public class GameRenderer {
             }
         }
     }
-    
+
     private func renderBullets(painter: QPainter): Unit {
         for (bullet in gBullets) {
             let (x, y, _, active, isPlayer) = bullet
-            if (!active) { continue }
-            
-            let color = if (isPlayer) { colorYellow } else { colorRed }
+            if (!active) {
+                continue
+            }
+
+            let color = if (isPlayer) {
+                colorYellow
+            } else {
+                colorRed
+            }
             brush.setColor(color)
             painter.setBrush(brush)
             painter.drawCircle(x, y, 4)
         }
     }
-    
+
     private func renderExplosions(painter: QPainter): Unit {
         for (exp in gExplosions) {
             let (x, y, frame, active) = exp
-            if (!active) { continue }
-            
+            if (!active) {
+                continue
+            }
+
             let progress = Float32(frame) / 15.0f32
             let radius = Int32(Float32(20) * (1.0f32 - progress * 0.5f32))
             let alpha = Int32(255.0f32 * (1.0f32 - progress))
-            
+
             // 创建带透明度的临时颜色
             let outerColor = QColor.rgba(255, 100, 0, alpha)
             brush.setColor(outerColor)
             painter.setBrush(brush)
             painter.drawCircle(x, y, radius)
-            outerColor.delete()  // 释放临时颜色
-            
+            outerColor.delete() // 释放临时颜色
+
             let innerColor = QColor.rgba(255, 255, 0, alpha)
             brush.setColor(innerColor)
             painter.setBrush(brush)
             painter.drawCircle(x, y, radius / 2)
-            innerColor.delete()  // 释放临时颜色
+            innerColor.delete() // 释放临时颜色
         }
     }
-    
+
     private func renderStatusBar(painter: QPainter): Unit {
         let barY = WINDOW_HEIGHT - 55
-        
+
         painter.fillRectColor(0, barY, WINDOW_WIDTH, 55, colorBarBg)
-        
+
         painter.setFont(fontSmall)
         pen.setColor(colorWhite)
         painter.setPen(pen)
         painter.drawText(10, barY + 20, "分数: ${gScore}")
         painter.drawText(10, barY + 40, "生命: ${gPlayerLives}")
-        
+
         painter.drawText(WINDOW_WIDTH - 100, barY + 20, "关卡: ${gLevel}")
         let remaining = gTotalEnemies - gSpawnedEnemies + Int32(gEnemies.size)
         painter.drawText(WINDOW_WIDTH - 100, barY + 40, "敌人: ${remaining}")
-        
+
         if (gPaused) {
             painter.drawText(WINDOW_WIDTH / 2 - 30, barY + 30, "已暂停")
         }
     }
-    
+
     private func renderGameOver(painter: QPainter): Unit {
         painter.setOpacity(0.7f32)
         painter.fillRectColor(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, colorBlack)
         painter.setOpacity(1.0f32)
-        
+
         painter.setFont(fontTitle)
         pen.setColor(colorRed)
         painter.setPen(pen)
-        painter.drawTextRect(WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2 - 50, 200, 50, TextAlignment.Center.value, "游戏结束")
-        
+        painter.drawTextRect(WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2 - 50, 200, 50, TextAlignment.Center.value,
+            "游戏结束")
+
         painter.setFont(fontLarge)
         pen.setColor(colorWhite)
         painter.setPen(pen)
-        painter.drawTextRect(WINDOW_WIDTH / 2 - 80, WINDOW_HEIGHT / 2 + 20, 160, 30, TextAlignment.Center.value, "最终分数: ${gScore}")
-        painter.drawTextRect(WINDOW_WIDTH / 2 - 80, WINDOW_HEIGHT / 2 + 50, 160, 30, TextAlignment.Center.value, "按 R 重新开始")
+        painter.drawTextRect(WINDOW_WIDTH / 2 - 80, WINDOW_HEIGHT / 2 + 20, 160, 30, TextAlignment.Center.value,
+            "最终分数: ${gScore}")
+        painter.drawTextRect(WINDOW_WIDTH / 2 - 80, WINDOW_HEIGHT / 2 + 50, 160, 30, TextAlignment.Center.value,
+            "按 R 重新开始")
     }
 }
 
@@ -827,47 +853,47 @@ main(): Int32 {
     gWidget = QEventWidget()
     gTimer = QTimer()
     gRenderer = GameRenderer()
-    
+
     // 初始化音频播放器
     gAudioOutput = QAudioOutput()
     gMusicPlayer = QMediaPlayer()
-    
+
     if (let Some(audio) <- gAudioOutput) {
-        audio.setVolume(0.5f32)  // 50% 音量
+        audio.setVolume(0.5f32) // 50% 音量
     }
-    
+
     if (let Some(player) <- gMusicPlayer) {
         if (let Some(audio) <- gAudioOutput) {
             player.setAudioOutput(audio)
         }
         // 尝试加载背景音乐（需要将音乐文件放在可执行文件同目录）
         player.setSourceFile("background.mp3")
-        player.setLoops(-1)  // 无限循环
+        player.setLoops(-1) // 无限循环
         player.play()
     }
-    
+
     initMap()
-    
+
     if (let Some(w) <- gWidget) {
         w.resize(WINDOW_WIDTH, WINDOW_HEIGHT)
         w.setTitle("坦克大战 - CJQT6")
-        w.setOnKeyPress({ key, modifiers, unicode => onKeyPress(key, modifiers, unicode) })
-        w.setOnKeyRelease({ key, modifiers, unicode => onKeyRelease(key, modifiers, unicode) })
-        w.setOnPaint({ painterPtr => onPaint(painterPtr) })
+        w.setOnKeyPress({key, modifiers, unicode => onKeyPress(key, modifiers, unicode)})
+        w.setOnKeyRelease({key, modifiers, unicode => onKeyRelease(key, modifiers, unicode)})
+        w.setOnPaint({painterPtr => onPaint(painterPtr)})
         w.show()
     }
-    
+
     if (let Some(t) <- gTimer) {
         t.setInterval(16)
-        t.setOnTimeout({ => onTimer() })
+        t.setOnTimeout({=> onTimer()})
         t.start()
     }
-    
+
     var result: Int32 = 0
     if (let Some(a) <- gApp) {
         result = a.exec()
     }
-    
+
     // 清理资源
     if (let Some(t) <- gTimer) {
         t.stop()
@@ -886,6 +912,6 @@ main(): Int32 {
     if (let Some(ao) <- gAudioOutput) {
         ao.delete()
     }
-    
+
     return result
 }

@@ -91,19 +91,35 @@ func createPageBasic(): QScrollArea {
     progressCtrl.setSpacing(8)
     let btnSet30 = QPushButton()
     btnSet30.setText("30%")
-    btnSet30.setOnClick({ => if (let Some(b) <- gProgressBar) { b.setValue(30) } })
+    btnSet30.setOnClick({
+        => if (let Some(b) <- gProgressBar) {
+            b.setValue(30)
+        }
+    })
     progressCtrl.addWidget(btnSet30.getPtr())
     let btnSet60 = QPushButton()
     btnSet60.setText("60%")
-    btnSet60.setOnClick({ => if (let Some(b) <- gProgressBar) { b.setValue(60) } })
+    btnSet60.setOnClick({
+        => if (let Some(b) <- gProgressBar) {
+            b.setValue(60)
+        }
+    })
     progressCtrl.addWidget(btnSet60.getPtr())
     let btnSet90 = QPushButton()
     btnSet90.setText("90%")
-    btnSet90.setOnClick({ => if (let Some(b) <- gProgressBar) { b.setValue(90) } })
+    btnSet90.setOnClick({
+        => if (let Some(b) <- gProgressBar) {
+            b.setValue(90)
+        }
+    })
     progressCtrl.addWidget(btnSet90.getPtr())
     let btnSet100 = QPushButton()
     btnSet100.setText("100%")
-    btnSet100.setOnClick({ => if (let Some(b) <- gProgressBar) { b.setValue(100) } })
+    btnSet100.setOnClick({
+        => if (let Some(b) <- gProgressBar) {
+            b.setValue(100)
+        }
+    })
     progressCtrl.addWidget(btnSet100.getPtr())
     layout.addLayout(progressCtrl.getPtr())
 

@@ -19,8 +19,8 @@ var gRealtimeAlertLabel: ?QLabel = None
 var gPauseButton: ?QPushButton = None
 
 /// 暂停 / 继续
-let onPauseToggle: VoidCallback = { =>
-    if (let Some(s) <- gAppState) {
+let onPauseToggle: VoidCallback = {
+    => if (let Some(s) <- gAppState) {
         let next = !s.isPaused()
         s.setPaused(next)
         if (let Some(b) <- gPauseButton) {
@@ -30,13 +30,17 @@ let onPauseToggle: VoidCallback = { =>
                 b.setText("暂停")
             }
         }
-        publishStatus(if (next) { "已暂停采样" } else { "已恢复采样" })
+        publishStatus(if (next) {
+            "已暂停采样"
+        } else {
+            "已恢复采样"
+        })
     }
 }
 
 /// 清空窗口数据
-let onClearData: VoidCallback = { =>
-    if (let Some(s) <- gAppState) {
+let onClearData: VoidCallback = {
+    => if (let Some(s) <- gAppState) {
         s.clearData()
         if (let Some(c) <- gRealtimeCurve) {
             c.requestRepaint()
@@ -49,8 +53,8 @@ let onClearData: VoidCallback = { =>
 }
 
 /// 窗口时长切换（下拉框索引 → 可见点数）
-let onWindowChanged: Int32Callback = { idx: Int32 =>
-    if (let Some(c) <- gRealtimeCurve) {
+let onWindowChanged: Int32Callback = {
+    idx: Int32 => if (let Some(c) <- gRealtimeCurve) {
         match (idx) {
             case 1 => c.setVisiblePoints(600)
             case 2 => c.setVisiblePoints(1200)

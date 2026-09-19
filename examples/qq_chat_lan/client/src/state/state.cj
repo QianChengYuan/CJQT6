@@ -85,7 +85,9 @@ public func selectedFriendId(): Int64 {
     match (gFriendList) {
         case Some(list) =>
             let row = list.currentRow()
-            if (row < 0 || Int64(row) >= gFriends.size) { return 0 }
+            if (row < 0 || Int64(row) >= gFriends.size) {
+                return 0
+            }
             gFriends[Int64(row)].id
         case None => 0
     }
@@ -95,7 +97,11 @@ public func selectedFriendId(): Int64 {
 public func displayNameOf(fid: Int64): String {
     for (f in gFriends) {
         if (f.id == fid) {
-            return if (f.remark.isEmpty()) { f.nickname } else { f.remark }
+            return if (f.remark.isEmpty()) {
+                f.nickname
+            } else {
+                f.remark
+            }
         }
     }
     ""

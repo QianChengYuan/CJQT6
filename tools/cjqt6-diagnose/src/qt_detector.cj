@@ -22,20 +22,40 @@ class Qt6Info {
     func isVersionCompatible(minVersion: String): Bool {
         let thisParts = this.version.split(".")
         let minParts = minVersion.split(".")
-        let maxLen = if (thisParts.size > minParts.size) { thisParts.size } else { minParts.size }
+        let maxLen = if (thisParts.size > minParts.size) {
+            thisParts.size
+        } else {
+            minParts.size
+        }
         for (i in 0..maxLen) {
             let thisV = if (i < thisParts.size) {
                 var n: Int64 = 0
-                for (c in thisParts[i]) { if (c >= 48 && c <= 57) { n = n * 10 + Int64(c - 48) } }
+                for (c in thisParts[i]) {
+                    if (c >= 48 && c <= 57) {
+                        n = n * 10 + Int64(c - 48)
+                    }
+                }
                 n
-            } else { 0 }
+            } else {
+                0
+            }
             let minV = if (i < minParts.size) {
                 var n: Int64 = 0
-                for (c in minParts[i]) { if (c >= 48 && c <= 57) { n = n * 10 + Int64(c - 48) } }
+                for (c in minParts[i]) {
+                    if (c >= 48 && c <= 57) {
+                        n = n * 10 + Int64(c - 48)
+                    }
+                }
                 n
-            } else { 0 }
-            if (thisV < minV) { return false }
-            if (thisV > minV) { return true }
+            } else {
+                0
+            }
+            if (thisV < minV) {
+                return false
+            }
+            if (thisV > minV) {
+                return true
+            }
         }
         return true
     }
@@ -100,10 +120,14 @@ func detectQt6(): ?Qt6Info {
 }
 
 func checkQt6Path(path: Path): ?Qt6Info {
-    if (!exists(path)) { return None }
+    if (!exists(path)) {
+        return None
+    }
 
     let qtCoreLib = path.join("bin").join("Qt6Core.dll")
-    if (!exists(qtCoreLib)) { return None }
+    if (!exists(qtCoreLib)) {
+        return None
+    }
 
     let version = parseQtVersion(path.toString())
     let components = scanComponents(path)
@@ -114,11 +138,15 @@ func checkQt6Path(path: Path): ?Qt6Info {
 func parseQtVersion(pathStr: String): String {
     let parts = pathStr.split("\\")
     for (part in parts) {
-        if (part.startsWith("6.")) { return part }
+        if (part.startsWith("6.")) {
+            return part
+        }
     }
     let parts2 = pathStr.split("/")
     for (part in parts2) {
-        if (part.startsWith("6.")) { return part }
+        if (part.startsWith("6.")) {
+            return part
+        }
     }
     return "6.0.0"
 }
@@ -135,7 +163,11 @@ func scanComponents(path: Path): Array<String> {
             if (name.startsWith("Qt6") && (name.endsWith(".dll") || name.endsWith(".so") || name.endsWith(".dylib"))) {
                 // 去掉扩展名
                 let dotIdx = name.size - 4
-                var compName = if (dotIdx > 0) { name[0..dotIdx] } else { name }
+                var compName = if (dotIdx > 0) {
+                    name[0..dotIdx]
+                } else {
+                    name
+                }
                 // 去掉末尾的 'd'（debug 版标记）
                 if (compName.size > 0 && compName[compName.size - 1] == 100) { // 'd'
                     compName = compName[0..compName.size - 1]
@@ -143,7 +175,10 @@ func scanComponents(path: Path): Array<String> {
                 // 去重
                 var alreadyAdded = false
                 for (s in seen) {
-                    if (s == compName) { alreadyAdded = true; break }
+                    if (s == compName) {
+                        alreadyAdded = true
+                        break
+                    }
                 }
                 if (!alreadyAdded) {
                     seen.add(compName)
@@ -165,5 +200,3 @@ func isDir(path: Path): Bool {
         return false
     }
 }
-
-

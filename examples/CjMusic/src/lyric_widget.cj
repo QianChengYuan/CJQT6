@@ -8,7 +8,6 @@ import cjqt6.core.*
 import cjqt6.paint.*
 import std.collection.*
 
-
 // ============================================================
 // 歌词区创建
 // ============================================================
@@ -33,8 +32,8 @@ public func createLyricWidget(): QEventWidget {
     // 创建滚动定时器
     let timer = QTimer()
     timer.setInterval(SCROLL_TIMER_INTERVAL)
-    timer.setOnTimeoutCapture({ =>
-        if (scrollTick()) {
+    timer.setOnTimeoutCapture({
+        => if (scrollTick()) {
             triggerLyricRepaint()
         } else {
             if (let Some(t) <- gScrollTimer) {
@@ -80,8 +79,7 @@ func lyricPaintCallback(painterPtr: Int64): Unit {
         } else {
             "歌词解析失败: ${gLyricSource}"
         }
-        painter.drawTextRect(0, centerY - 20, w, 40,
-            TextAlignment.Center.value, hint)
+        painter.drawTextRect(0, centerY - 20, w, 40, TextAlignment.Center.value, hint)
         return
     }
 
@@ -123,13 +121,12 @@ func lyricPaintCallback(painterPtr: Int64): Unit {
         painter.setPenColor(color)
         // 绘制文本（居中）
 
-        painter.drawTextRect(0, Int32(y) - LYRIC_LINE_HEIGHT / 2, w, LYRIC_LINE_HEIGHT,
-            TextAlignment.Center.value, line.text)
+        painter.drawTextRect(0, Int32(y) - LYRIC_LINE_HEIGHT / 2, w, LYRIC_LINE_HEIGHT, TextAlignment.Center.value,
+            line.text)
 
         // 当前行左侧画 ▶ 三角
         if (distance == 0) {
-            let triColor = QColor.rgba(LYRIC_COLOR_CURRENT_R, LYRIC_COLOR_CURRENT_G,
-                LYRIC_COLOR_CURRENT_B, alpha)
+            let triColor = QColor.rgba(LYRIC_COLOR_CURRENT_R, LYRIC_COLOR_CURRENT_G, LYRIC_COLOR_CURRENT_B, alpha)
             painter.setPenColor(triColor)
             let triX: Int32 = 20
             let triY = Int32(y)

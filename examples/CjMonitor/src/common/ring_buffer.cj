@@ -11,11 +11,15 @@ package CjMonitor.common
 public class RingBuffer {
     private let cap: Int64
     private var buf: Array<Float64>
-    private var head: Int64 = 0   // 下一个写入位置
-    private var count: Int64 = 0  // 已填充数量
+    private var head: Int64 = 0 // 下一个写入位置
+    private var count: Int64 = 0 // 已填充数量
 
     public init(cap: Int64) {
-        let c = if (cap < 2) { 2 } else { cap }
+        let c = if (cap < 2) {
+            2
+        } else {
+            cap
+        }
         this.cap = c
         this.buf = Array<Float64>(c, repeat: 0.0)
     }
@@ -37,7 +41,11 @@ public class RingBuffer {
         if (i < 0 || i >= count) {
             return 0.0
         }
-        let start = if (count < cap) { 0 } else { head }
+        let start = if (count < cap) {
+            0
+        } else {
+            head
+        }
         buf[(start + i) % cap]
     }
 
@@ -54,7 +62,11 @@ public class RingBuffer {
         if (count == 0) {
             return 0.0
         }
-        let start = if (count < cap) { 0 } else { head }
+        let start = if (count < cap) {
+            0
+        } else {
+            head
+        }
         var m = buf[start]
         var i: Int64 = 1
         while (i < count) {
@@ -72,7 +84,11 @@ public class RingBuffer {
         if (count == 0) {
             return 0.0
         }
-        let start = if (count < cap) { 0 } else { head }
+        let start = if (count < cap) {
+            0
+        } else {
+            head
+        }
         var m = buf[start]
         var i: Int64 = 1
         while (i < count) {

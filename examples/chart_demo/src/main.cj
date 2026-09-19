@@ -43,7 +43,7 @@ main() {
     // 4) 定时退出：让事件循环跑 1 秒，触发渲染
     let timer = QTimer()
     timer.setInterval(1000)
-    timer.setOnTimeout({ => QApp.quit() })
+    timer.setOnTimeout({=> QApp.quit()})
     timer.start()
 
     println("图表已显示，1 秒后自动退出...")

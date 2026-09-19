@@ -35,49 +35,63 @@ public func createPlaylistPanel(): QWidget {
     let addBtn = QPushButton()
     addBtn.setText("添加")
     addBtn.setStyleSheet(QSS_BTN_ICON)
-    addBtn.setOnClickCapture({ =>
-        let parentPtr = if (let Some(w) <- gMainWindow) { w.getPtr() } else { 0 }
-        let paths = QFileDialog.getOpenFileNames(parentPtr, "选择音频文件", AUDIO_FILTER)
-        if (paths.isEmpty()) {
-            return
+    addBtn.setOnClickCapture(
+        {
+            =>
+                let parentPtr = if (let Some(w) <- gMainWindow) {
+                    w.getPtr()
+                } else {
+                    0
+                }
+                let paths = QFileDialog.getOpenFileNames(parentPtr, "选择音频文件", AUDIO_FILTER)
+                if (paths.isEmpty()) {
+                    return
+                }
+                let pathList = paths.split("\n", removeEmpty: true)
+                let added = playlistAddMany(pathList)
+                if (added > 0) {
+                    refreshPlaylistUI()
+                    updateStatus("已添加 ${added} 首音乐")
+                    if (gCurrentIndex < 0) {
+                        playAt(0)
+                    }
+                }
         }
-        let pathList = paths.split("\n", removeEmpty: true)
-        let added = playlistAddMany(pathList)
-        if (added > 0) {
-            refreshPlaylistUI()
-            updateStatus("已添加 ${added} 首音乐")
-            if (gCurrentIndex < 0) {
-                playAt(0)
-            }
-        }
-    })
+    )
     gOpenFileButton = Some(addBtn)
     headerLayout.addWidget(addBtn.getPtr())
 
     let folderBtn = QPushButton()
     folderBtn.setText("目录")
     folderBtn.setStyleSheet(QSS_BTN_ICON)
-    folderBtn.setOnClickCapture({ =>
-        let parentPtr = if (let Some(w) <- gMainWindow) { w.getPtr() } else { 0 }
-        let folder = QFileDialog.getExistingDirectory(parentPtr, "选择音乐文件夹")
-        if (folder.isEmpty()) {
-            return
+    folderBtn.setOnClickCapture(
+        {
+            =>
+                let parentPtr = if (let Some(w) <- gMainWindow) {
+                    w.getPtr()
+                } else {
+                    0
+                }
+                let folder = QFileDialog.getExistingDirectory(parentPtr, "选择音乐文件夹")
+                if (folder.isEmpty()) {
+                    return
+                }
+                let added = playlistAddFolder(folder)
+                if (added > 0) {
+                    refreshPlaylistUI()
+                    if (added > 1000) {
+                        updateStatus("已添加前 1000 首音乐（超出上限）")
+                    } else {
+                        updateStatus("已添加 ${added} 首音乐")
+                    }
+                    if (gCurrentIndex < 0) {
+                        playAt(0)
+                    }
+                } else {
+                    updateStatus("未找到音频文件")
+                }
         }
-        let added = playlistAddFolder(folder)
-        if (added > 0) {
-            refreshPlaylistUI()
-            if (added > 1000) {
-                updateStatus("已添加前 1000 首音乐（超出上限）")
-            } else {
-                updateStatus("已添加 ${added} 首音乐")
-            }
-            if (gCurrentIndex < 0) {
-                playAt(0)
-            }
-        } else {
-            updateStatus("未找到音频文件")
-        }
-    })
+    )
     gOpenFolderButton = Some(folderBtn)
     headerLayout.addWidget(folderBtn.getPtr())
 
@@ -87,7 +101,7 @@ public func createPlaylistPanel(): QWidget {
     let listWidget = QListWidget()
     listWidget.setOnItemClicked(onPlaylistItemClicked)
     gPlaylistWidget = Some(listWidget)
-    layout.addWidget(listWidget.getPtr(), 1)  // stretch=1 占满剩余空间
+    layout.addWidget(listWidget.getPtr(), 1) // stretch=1 占满剩余空间
 
     // 底部搜索框
     let searchEdit = QLineEdit()
@@ -146,12 +160,12 @@ public func updatePlaylistItemDisplay(index: Int32): Unit {
         case Some(list) =>
             // 找到在可见列表中的位置
             for (i in 0..gVisibleRows.size) {
-                if (gVisibleRows[Int64(i)] == index) {
-                    let item = gPlaylist[Int64(index)]
-                    list.setItemText(Int32(i), item.displayText())
-                    break
-                }
+            if (gVisibleRows[Int64(i)] == index) {
+                let item = gPlaylist[Int64(index)]
+                list.setItemText(Int32(i), item.displayText())
+                break
             }
+        }
         case None => ()
     }
 }

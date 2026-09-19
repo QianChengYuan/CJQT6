@@ -24,9 +24,13 @@ var gAccum: Int64 = 0
 
 // 通用测时：warmup 后跑 iters 次，打印 ns/op 与总时长
 func bench(name: String, iters: Int64, f: () -> Unit): Unit {
-    for (_ in 0..10000) { f() }
+    for (_ in 0..10000) {
+        f()
+    }
     let start = MonoTime.now()
-    for (_ in 0..iters) { f() }
+    for (_ in 0..iters) {
+        f()
+    }
     let end = MonoTime.now()
     let totalNs = (end - start).toNanoseconds()
     let perOp = Float64(totalNs) / Float64(iters)
@@ -43,16 +47,22 @@ func benchRunOnUiThread(app: QApplication, n: Int64): Unit {
     let c = BenchCounter()
     let start = MonoTime.now()
     for (_ in 0..n) {
-        UiPoster.runOnUiThread({ =>
-            c.value += 1
-            if (c.value >= n) { QApp.quit() }
-        })
+        UiPoster.runOnUiThread(
+            {
+                =>
+                    c.value += 1
+                    if (c.value >= n) {
+                        QApp.quit()
+                    }
+            }
+        )
     }
     app.exec()
     let end = MonoTime.now()
     let totalNs = (end - start).toNanoseconds()
     let perOp = Float64(totalNs) / Float64(n)
-    println("  runOnUiThread (post+drain, n=${n}): ${Int64(perOp)} ns/op   (共 ${Int64(Float64(totalNs) / 1000000.0)} ms)")
+    println(
+        "  runOnUiThread (post+drain, n=${n}): ${Int64(perOp)} ns/op   (共 ${Int64(Float64(totalNs) / 1000000.0)} ms)")
 }
 
 // QTimer 真实事件循环信号派发成本：interval=0 定时器触发 n 次
@@ -60,10 +70,15 @@ func benchTimer(app: QApplication, n: Int64): Unit {
     let c = BenchCounter()
     let timer = QTimer()
     timer.setInterval(0)
-    timer.setOnTimeoutCapture({ =>
-        c.value += 1
-        if (c.value >= n) { QApp.quit() }
-    })
+    timer.setOnTimeoutCapture(
+        {
+            =>
+                c.value += 1
+                if (c.value >= n) {
+                    QApp.quit()
+                }
+        }
+    )
     let start = MonoTime.now()
     timer.start()
     app.exec()
@@ -72,7 +87,8 @@ func benchTimer(app: QApplication, n: Int64): Unit {
     timer.close()
     let totalNs = (end - start).toNanoseconds()
     let perOp = Float64(totalNs) / Float64(n)
-    println("  QTimer(interval=0) 事件循环派发 (n=${n}): ${Int64(perOp)} ns/op   (共 ${Int64(Float64(totalNs) / 1000000.0)} ms)")
+    println(
+        "  QTimer(interval=0) 事件循环派发 (n=${n}): ${Int64(perOp)} ns/op   (共 ${Int64(Float64(totalNs) / 1000000.0)} ms)")
 }
 
 main() {
@@ -84,27 +100,31 @@ main() {
 
     // ---- 基线：纯仓颉闭包调用 + 整数累加（其余用例可比照扣除此成本） ----
     println("[基线]")
-    bench("空 lambda + Int64 累加", ITERS, { => gAccum += 1 })
+    bench("空 lambda + Int64 累加", ITERS, {=> gAccum += 1})
 
     // ---- 1) 纯 FFI 往返（每 op 含 checkValid → isObjectAlive FFI + 注册表查找 + 目标 FFI） ----
     println("[1] 纯 FFI 往返")
-    bench("QSpinBox.value() (Int32 getter)", ITERS, { => gAccum += Int64(spin.value()) })
-    bench("QSpinBox.setValue(7) (Int32 setter)", ITERS, { => spin.setValue(7) })
-    bench("QSpinBox.isEnabled() (Bool getter)", ITERS, { => if (spin.isEnabled()) { gAccum += 1 } })
+    bench("QSpinBox.value() (Int32 getter)", ITERS, {=> gAccum += Int64(spin.value())})
+    bench("QSpinBox.setValue(7) (Int32 setter)", ITERS, {=> spin.setValue(7)})
+    bench("QSpinBox.isEnabled() (Bool getter)", ITERS, {
+        => if (spin.isEnabled()) {
+            gAccum += 1
+        }
+    })
 
     // ---- 2) 字符串过 FFI（含 UTF-16↔UTF-8 转换 + malloc/free） ----
     println("[2] 字符串过 FFI")
-    bench("QPushButton.setText (String→CString→Qt)", ITERS, { => btn.setText("CJQT6 基准") })
-    bench("QPushButton.text() (Qt→CString→String)", ITERS, { => gAccum += btn.text().size })
+    bench("QPushButton.setText (String→CString→Qt)", ITERS, {=> btn.setText("CJQT6 基准")})
+    bench("QPushButton.text() (Qt→CString→String)", ITERS, {=> gAccum += btn.text().size})
 
     // ---- 3) 信号回调吞吐（AutoConnection 同线程=DirectConnection，emit 同步触发） ----
     println("[3] 信号回调吞吐 (DirectConnection)")
-    em.setOnVoid({ => gAccum += 1 })
-    bench("SignalEmitter.emitVoid() (void 回调)", ITERS, { => em.emitVoid() })
-    em.setOnInt({ v => gAccum += Int64(v) })
-    bench("SignalEmitter.emitInt(1) (int 回调)", ITERS, { => em.emitInt(1) })
-    em.setOnString({ s => gAccum += Int64(s.toString().size) })
-    bench("SignalEmitter.emitString(\"x\") (string 回调)", ITERS, { => em.emitString("x") })
+    em.setOnVoid({=> gAccum += 1})
+    bench("SignalEmitter.emitVoid() (void 回调)", ITERS, {=> em.emitVoid()})
+    em.setOnInt({v => gAccum += Int64(v)})
+    bench("SignalEmitter.emitInt(1) (int 回调)", ITERS, {=> em.emitInt(1)})
+    em.setOnString({s => gAccum += Int64(s.toString().size)})
+    bench("SignalEmitter.emitString(\"x\") (string 回调)", ITERS, {=> em.emitString("x")})
 
     // ---- 4) 异步路径（含注册表增删 + 事件队列投递 + 派发） ----
     println("[4] 异步路径")

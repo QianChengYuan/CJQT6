@@ -10,7 +10,9 @@ let B64_TABLE = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+
 /// base64 编码：预分配输出数组，避免反复拼接
 public func base64Encode(data: Array<Byte>): String {
     let outLen = ((data.size + 2) / 3) * 4
-    if (outLen == 0) { return "" }
+    if (outLen == 0) {
+        return ""
+    }
     var out = Array<Byte>(outLen, repeat: 0)
     var i: Int64 = 0
     var o: Int64 = 0
@@ -18,8 +20,16 @@ public func base64Encode(data: Array<Byte>): String {
         let b0 = Int64(data[i])
         let has1 = i + 1 < data.size
         let has2 = i + 2 < data.size
-        let b1 = if (has1) { Int64(data[i + 1]) } else { 0 }
-        let b2 = if (has2) { Int64(data[i + 2]) } else { 0 }
+        let b1 = if (has1) {
+            Int64(data[i + 1])
+        } else {
+            0
+        }
+        let b2 = if (has2) {
+            Int64(data[i + 2])
+        } else {
+            0
+        }
         out[o] = UInt8(UInt32(B64_TABLE[b0 >> 2]))
         out[o + 1] = UInt8(UInt32(B64_TABLE[((b0 & 3) << 4) | (b1 >> 4)]))
         if (has1) {
@@ -41,11 +51,21 @@ public func base64Encode(data: Array<Byte>): String {
 /// 单字符解码值（ASCII），非法返回 -1
 func b64Value(c: Byte): Int64 {
     let v = Int64(c)
-    if (v >= 65 && v <= 90) { return v - 65 }        // A-Z
-    if (v >= 97 && v <= 122) { return v - 71 }       // a-z
-    if (v >= 48 && v <= 57) { return v + 4 }         // 0-9
-    if (v == 43) { return 62 }                       // +
-    if (v == 47) { return 63 }                       // /
+    if (v >= 65 && v <= 90) {
+        return v - 65
+    } // A-Z
+    if (v >= 97 && v <= 122) {
+        return v - 71
+    } // a-z
+    if (v >= 48 && v <= 57) {
+        return v + 4
+    } // 0-9
+    if (v == 43) {
+        return 62
+    } // +
+    if (v == 47) {
+        return 63
+    } // /
     -1
 }
 
@@ -55,7 +75,9 @@ public func base64Decode(text: String): Array<Byte> {
     // 有效字符数
     var valid: Int64 = 0
     for (c in src) {
-        if (b64Value(c) >= 0) { valid++ }
+        if (b64Value(c) >= 0) {
+            valid++
+        }
     }
     let outLen = (valid * 6) / 8
     var out = Array<Byte>(outLen, repeat: 0)
@@ -64,7 +86,9 @@ public func base64Decode(text: String): Array<Byte> {
     var o: Int64 = 0
     for (c in src) {
         let v = b64Value(c)
-        if (v < 0) { continue }
+        if (v < 0) {
+            continue
+        }
         acc = (acc << 6) | v
         bits = bits + 6
         if (bits >= 8) {

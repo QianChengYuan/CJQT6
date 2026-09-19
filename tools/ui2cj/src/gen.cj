@@ -65,8 +65,7 @@ func safeName(name: String): String {
     }
     var safe = StringBuilder()
     for (r in name.runes()) {
-        if ((r >= r'a' && r <= r'z') || (r >= r'A' && r <= r'Z') ||
-            (r >= r'0' && r <= r'9') || r == r'_') {
+        if ((r >= r'a' && r <= r'z') || (r >= r'A' && r <= r'Z') || (r >= r'0' && r <= r'9') || r == r'_') {
             safe.append(r)
         } else {
             safe.append(r'_')
@@ -157,7 +156,7 @@ func initMaps(): Unit {
         ("QToolBar", "QToolBar", "cjqt6.menu"),
         ("QStatusBar", "QStatusBar", "cjqt6.menu"),
         ("QStackedWidget", "QStackedWidget", "cjqt6.widgets"),
-        ("QDockWidget", "QDockWidget", "cjqt6.widgets"),
+        ("QDockWidget", "QDockWidget", "cjqt6.widgets")
     ]
     for (e in entries) {
         WIDGET_MAP[e[0]] = e[1]
@@ -176,7 +175,7 @@ func initLayoutMaps(): Unit {
         ("hboxlayout", "QHBoxLayout", "cjqt6.gui"),
         ("vboxlayout", "QVBoxLayout", "cjqt6.gui"),
         ("gridlayout", "QGridLayout", "cjqt6.gui"),
-        ("formlayout", "QFormLayout", "cjqt6.gui"),
+        ("formlayout", "QFormLayout", "cjqt6.gui")
     ]
     for (e in entries) {
         LAYOUT_TAGS[e[0]] = e[1]
@@ -202,7 +201,7 @@ func initSignalMaps(): Unit {
         ("currentTextChanged(QString)", "setOnCurrentTextChanged", "CStringCallback"),
         ("stateChanged(int)", "setOnStateChanged", "Int32Callback"),
         ("sliderMoved(int)", "setOnSliderMoved", "Int32Callback"),
-        ("activated(int)", "setOnActivated", "Int32Callback"),
+        ("activated(int)", "setOnActivated", "Int32Callback")
     ]
     for (e in entries) {
         SIGNAL_MAP[e[0]] = (e[1], e[2])
@@ -419,7 +418,11 @@ func handleProperty(widgetType: String, propName: String, pr: XmlNode, varName: 
     if (wtype == "QSlider") {
         if (propName == "orientation") {
             let e = getEnum(pr)
-            let horiz = if (e == "Horizontal") { "Horizontal" } else { "Vertical" }
+            let horiz = if (e == "Horizontal") {
+                "Horizontal"
+            } else {
+                "Vertical"
+            }
             lines.add("    ${v}.setOrientation(Orientation.${horiz}.value())")
         } else if (propName == "maximum") {
             lines.add("    ${v}.setRange(0, ${getNumber(pr)})")
@@ -611,8 +614,16 @@ func createLayout(layoutElem: XmlNode, lname: String, codeLines: ArrayList<Strin
                 genWidget(w, wv, codeLines, indent)
                 if (tag == "gridlayout") {
                     if (!rs.isEmpty() || !cs.isEmpty()) {
-                        let rsv: Int64 = if (rs.isEmpty()) { 1 } else { Int64.tryParse(rs).getOrThrow() }
-                        let csv: Int64 = if (cs.isEmpty()) { 1 } else { Int64.tryParse(cs).getOrThrow() }
+                        let rsv: Int64 = if (rs.isEmpty()) {
+                            1
+                        } else {
+                            Int64.tryParse(rs).getOrThrow()
+                        }
+                        let csv: Int64 = if (cs.isEmpty()) {
+                            1
+                        } else {
+                            Int64.tryParse(cs).getOrThrow()
+                        }
                         codeLines.add("${prefix}${lname}.addWidget(${wv}.getPtr(), ${r}, ${c}, ${rsv}, ${csv})")
                     } else {
                         codeLines.add("${prefix}${lname}.addWidget(${wv}.getPtr(), ${r}, ${c})")
@@ -636,7 +647,8 @@ func createLayout(layoutElem: XmlNode, lname: String, codeLines: ArrayList<Strin
 
         if (tag != "gridlayout") {
             row++
-        }    }
+        }
+    }
     return true
 }
 
@@ -927,4 +939,3 @@ func basename(path: String): String {
     }
     return path
 }
-

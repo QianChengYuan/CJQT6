@@ -70,13 +70,9 @@ func createPageText(): QScrollArea {
     layout.addWidget(sectionTitle("QTextBrowser").getPtr())
     let browser = QTextBrowser()
     let htmlContent: String = "<h2 style='color:#3498db;'>HTML 富文本</h2>" +
-        "<p>QTextBrowser 支持 <b>HTML</b> 内容显示。</p>" +
-        "<ul>" +
-        "<li><span style='color:#e74c3c;'>红色</span></li>" +
-        "<li><span style='color:#27ae60;'>绿色</span></li>" +
-        "<li><span style='color:#f39c12;'>橙色</span></li>" +
-        "</ul>" +
-        "<p><a href='#'>超链接示例</a></p>"
+        "<p>QTextBrowser 支持 <b>HTML</b> 内容显示。</p>" + "<ul>" +
+        "<li><span style='color:#e74c3c;'>红色</span></li>" + "<li><span style='color:#27ae60;'>绿色</span></li>" +
+        "<li><span style='color:#f39c12;'>橙色</span></li>" + "</ul>" + "<p><a href='#'>超链接示例</a></p>"
     browser.setHtml(htmlContent)
     browser.setMinimumSize(0, 100)
     layout.addWidget(browser.getPtr())

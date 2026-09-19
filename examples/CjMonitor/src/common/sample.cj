@@ -37,7 +37,7 @@ public class Channel {
             case 0 => 100.0
             case 1 => 100.0
             case 2 => 100.0
-            case _ => 0.0   // 网络速率自适应
+            case _ => 0.0 // 网络速率自适应
         }
     }
 }
@@ -86,21 +86,41 @@ public class Sample {
 /// 保留一位小数的格式化（避免引入额外依赖）
 public func fmt1(v: Float64): String {
     let scaled = v * 10.0
-    let rounded = if (scaled >= 0.0) { Int64(scaled + 0.5) } else { Int64(scaled - 0.5) }
+    let rounded = if (scaled >= 0.0) {
+        Int64(scaled + 0.5)
+    } else {
+        Int64(scaled - 0.5)
+    }
     let neg = rounded < 0
-    let abs = if (neg) { -rounded } else { rounded }
+    let abs = if (neg) {
+        -rounded
+    } else {
+        rounded
+    }
     let head = abs / 10
     let tail = abs % 10
     let body = "${head}.${tail}"
-    if (neg) { "-" + body } else { body }
+    if (neg) {
+        "-" + body
+    } else {
+        body
+    }
 }
 
 /// 保留两位小数的格式化
 public func fmt2(v: Float64): String {
     let scaled = v * 100.0
-    let rounded = if (scaled >= 0.0) { Int64(scaled + 0.5) } else { Int64(scaled - 0.5) }
+    let rounded = if (scaled >= 0.0) {
+        Int64(scaled + 0.5)
+    } else {
+        Int64(scaled - 0.5)
+    }
     let neg = rounded < 0
-    let abs = if (neg) { -rounded } else { rounded }
+    let abs = if (neg) {
+        -rounded
+    } else {
+        rounded
+    }
     let head = abs / 100
     let tail = abs % 100
     var tailStr = "${tail}"
@@ -108,7 +128,11 @@ public func fmt2(v: Float64): String {
         tailStr = "0" + tailStr
     }
     let body = "${head}.${tailStr}"
-    if (neg) { "-" + body } else { body }
+    if (neg) {
+        "-" + body
+    } else {
+        body
+    }
 }
 
 /// 截断到 [0, 1]（自绘归一化用）

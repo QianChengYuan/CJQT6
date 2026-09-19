@@ -58,8 +58,7 @@ main() {
                 println("  标准库      : 未找到")
             }
 
-        case None =>
-            println("  CANGJIE_HOME : 未设置")
+        case None => println("  CANGJIE_HOME : 未设置")
     }
     println("")
 
@@ -84,10 +83,9 @@ main() {
             var coreCount = 0
             var otherCount = 0
             for (comp in qt.components) {
-                if (comp == "Qt6Core" || comp == "Qt6Gui" || comp == "Qt6Widgets" ||
-                    comp == "Qt6Multimedia" || comp == "Qt6Network" || comp == "Qt6Sql" ||
-                    comp == "Qt6PrintSupport" || comp == "Qt6Svg" || comp == "Qt6Test" ||
-                    comp == "Qt6OpenGL" || comp == "Qt6OpenGLWidgets") {
+                if (comp == "Qt6Core" || comp == "Qt6Gui" || comp == "Qt6Widgets" || comp == "Qt6Multimedia" || comp ==
+                    "Qt6Network" || comp == "Qt6Sql" || comp == "Qt6PrintSupport" || comp == "Qt6Svg" || comp ==
+                    "Qt6Test" || comp == "Qt6OpenGL" || comp == "Qt6OpenGLWidgets") {
                     println("    ✓ ${comp}")
                     coreCount++
                 } else {
@@ -105,10 +103,18 @@ main() {
             var hasNetwork = false
             var hasSql = false
             for (comp in qt.components) {
-                if (comp == "Qt6Widgets") { hasWidgets = true }
-                if (comp == "Qt6Multimedia") { hasMultimedia = true }
-                if (comp == "Qt6Network") { hasNetwork = true }
-                if (comp == "Qt6Sql") { hasSql = true }
+                if (comp == "Qt6Widgets") {
+                    hasWidgets = true
+                }
+                if (comp == "Qt6Multimedia") {
+                    hasMultimedia = true
+                }
+                if (comp == "Qt6Network") {
+                    hasNetwork = true
+                }
+                if (comp == "Qt6Sql") {
+                    hasSql = true
+                }
             }
             println("    Qt6Widgets    : ${formatCheck(hasWidgets)}")
             println("    Qt6Multimedia : ${formatCheck(hasMultimedia)}")
@@ -169,7 +175,9 @@ main() {
 }
 
 func formatCheck(found: Bool): String {
-    return if (found) { "✓ 已安装" } else { "✗ 未安装" }
+    return if (found) {
+        "✓ 已安装"
+    } else {
+        "✗ 未安装"
+    }
 }
-
-

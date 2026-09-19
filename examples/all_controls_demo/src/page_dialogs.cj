@@ -96,8 +96,8 @@ func createPageDialogs(): QScrollArea {
     progRow.setSpacing(8)
     let btnProgressDlg = QPushButton()
     btnProgressDlg.setText("⏳ 进度对话框")
-    btnProgressDlg.setOnClick({ =>
-        if (let Some(w) <- gMainWindow) {
+    btnProgressDlg.setOnClick({
+        => if (let Some(w) <- gMainWindow) {
             let progressDlg = QProgressDialog(w.getPtr(), "正在处理...", "取消", 0, 100)
             progressDlg.setWindowTitle("进度")
             for (i in 0..101) {

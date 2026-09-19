@@ -18,7 +18,6 @@ let SELFTEST_DB_FILE = "cjmonitor_selftest.db"
 /// 启动跟踪文件：GUI 进程 stdout 不可见，逐点追加写是定位启动期崩溃最可靠的手段。
 /// 设 CJMONITOR_TRACE=0 可关闭。
 let TRACE_FILE = "cjmonitor_startup.log"
-
 var gTraceOn: Bool = true
 
 /// 记录一个启动阶段（失败静默，不影响主流程）
@@ -173,7 +172,11 @@ func toI64Safe(v: String): Int64 {
             break
         }
     }
-    if (ok) { n } else { 0 }
+    if (ok) {
+        n
+    } else {
+        0
+    }
 }
 
 /// 采集自测：不建窗口，验证采样周期、数据通路与间隔误差

@@ -59,5 +59,9 @@ public class RecvTransfer {
 /// 当前时间字符串（yyyy-MM-dd HH:mm:ss）
 public func nowString(): String {
     let str = DateTime.now().toString()
-    if (str.size >= 19) { str[0..19] } else { str }
+    if (str.size >= 19) {
+        str[0..19]
+    } else {
+        str
+    }
 }

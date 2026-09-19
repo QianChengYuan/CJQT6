@@ -12,10 +12,10 @@ import qq_lan_client.core.*
 import qq_lan_client.state.*
 
 /// 发送按钮回调
-let onSendClick: VoidCallback = { => doSend() }
+let onSendClick: VoidCallback = {=> doSend()}
 
 /// 输入框回车发送
-let onInputReturn: VoidCallback = { => doSend() }
+let onInputReturn: VoidCallback = {=> doSend()}
 
 /// 打开与指定好友的会话（复用同一个聊天窗口）
 public func openChatWithFriend(friendId: Int64): Unit {
@@ -26,7 +26,9 @@ public func openChatWithFriend(friendId: Int64): Unit {
             found = true
         }
     }
-    if (!found) { return }
+    if (!found) {
+        return
+    }
 
     gCurrentChatId = friendId
     // 该好友未读清零
@@ -128,7 +130,8 @@ public func buildChatWindow(): Unit {
 
     let sendBtn = QPushButton()
     sendBtn.setText("发送")
-    sendBtn.setStyleSheet("background: #12B7F5; color: white; border: none; border-radius: 3px; padding: 8px 24px; font-weight: bold;")
+    sendBtn.setStyleSheet(
+        "background: #12B7F5; color: white; border: none; border-radius: 3px; padding: 8px 24px; font-weight: bold;")
     sendBtn.setOnClick(onSendClick)
     inputLayout.addWidget(sendBtn.getPtr())
     inputBar.setLayout(inputLayout.getPtr())
@@ -144,10 +147,9 @@ public func renderHistory(friendId: Int64): Unit {
         case Some(view) =>
             var html = ""
             match (gHistory.get(friendId)) {
-                case Some(list) =>
-                    for (m in list) {
-                        html = html + buildMsgHtml(m)
-                    }
+                case Some(list) => for (m in list) {
+                    html = html + buildMsgHtml(m)
+                }
                 case None => ()
             }
             if (html.isEmpty()) {
@@ -161,20 +163,23 @@ public func renderHistory(friendId: Int64): Unit {
 /// 追加单条气泡（新消息到达 / 自己发送时）
 public func appendBubble(m: ChatMsg): Unit {
     match (gChatHistory) {
-        case Some(view) =>
-            view.append(buildMsgHtml(m))
+        case Some(view) => view.append(buildMsgHtml(m))
         case None => ()
     }
 }
 
 /// 发送当前输入的消息
 public func doSend(): Unit {
-    if (gCurrentChatId == 0) { return }
+    if (gCurrentChatId == 0) {
+        return
+    }
     var text = ""
     if (let Some(e) <- gChatInput) {
         text = e.text()
     }
-    if (text.isEmpty()) { return }
+    if (text.isEmpty()) {
+        return
+    }
 
     // 发送帧（服务端落库并转发给对方）
     sendRaw("{\"type\":\"chat\",\"to\":${gCurrentChatId},\"text\":\"${escapeJson(text)}\"}")

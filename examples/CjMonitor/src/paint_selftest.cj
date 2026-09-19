@@ -55,8 +55,8 @@ var gPaintGaugeFrames: Int64 = 0
 var gPaintStartMs: Int64 = 0
 
 /// 驱动回调：只读全局状态
-let onPaintDrive: VoidCallback = {=>
-    drivePaintFrame()
+let onPaintDrive: VoidCallback = {
+    => drivePaintFrame()
 }
 
 /// 读取绘制自测帧数（未设置或非法则为 0）
@@ -70,7 +70,11 @@ func paintSelfTestFrames(): Int64 {
 /// 合成采样值：锯齿波 + 通道偏置。不依赖数学库，形状确定、可复现。
 func synthPoint(ch: Int32, i: Int64): Float64 {
     let phase = Float64(i % 120) / 120.0
-    let tri = if (phase < 0.5) { phase * 2.0 } else { 2.0 - phase * 2.0 }
+    let tri = if (phase < 0.5) {
+        phase * 2.0
+    } else {
+        2.0 - phase * 2.0
+    }
     if (ch == Channel.NET) {
         // 网络通道是 KB/s，量级与百分比通道不同：顺带验证自适应缩放
         200.0 + tri * 800.0

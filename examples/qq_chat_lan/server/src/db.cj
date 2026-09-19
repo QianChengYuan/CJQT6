@@ -63,7 +63,11 @@ public func sqlEscape(s: String): String {
 /// 当前时间字符串（yyyy-MM-dd HH:mm:ss）
 public func nowString(): String {
     let str = DateTime.now().toString()
-    if (str.size >= 19) { str[0..19] } else { str }
+    if (str.size >= 19) {
+        str[0..19]
+    } else {
+        str
+    }
 }
 
 // ============================================================
@@ -79,30 +83,20 @@ public class ServerDb {
     }
 
     private func createTables(): Unit {
-        if (!query.exec("CREATE TABLE IF NOT EXISTS users (" +
-            "id INTEGER PRIMARY KEY, " +
-            "account INTEGER UNIQUE NOT NULL, " +
-            "password TEXT NOT NULL, " +
-            "nickname TEXT NOT NULL, " +
-            "created_at TEXT NOT NULL)")) {
+        if (!query.exec(
+            "CREATE TABLE IF NOT EXISTS users (" + "id INTEGER PRIMARY KEY, " + "account INTEGER UNIQUE NOT NULL, " +
+                "password TEXT NOT NULL, " + "nickname TEXT NOT NULL, " + "created_at TEXT NOT NULL)")) {
             println("建表错误: CREATE TABLE users 失败")
         }
-        if (!query.exec("CREATE TABLE IF NOT EXISTS friends (" +
-            "user_id INTEGER NOT NULL, " +
-            "friend_id INTEGER NOT NULL, " +
-            "remark TEXT DEFAULT '', " +
-            "PRIMARY KEY (user_id, friend_id))")) {
+        if (!query.exec(
+            "CREATE TABLE IF NOT EXISTS friends (" + "user_id INTEGER NOT NULL, " + "friend_id INTEGER NOT NULL, " +
+                "remark TEXT DEFAULT '', " + "PRIMARY KEY (user_id, friend_id))")) {
             println("建表错误: CREATE TABLE friends 失败")
         }
-        if (!query.exec("CREATE TABLE IF NOT EXISTS messages (" +
-            "id INTEGER PRIMARY KEY, " +
-            "sender_id INTEGER NOT NULL, " +
-            "receiver_id INTEGER NOT NULL, " +
-            "content TEXT NOT NULL, " +
-            "send_time TEXT NOT NULL, " +
-            "is_read INTEGER DEFAULT 0, " +
-            "kind TEXT DEFAULT 'text', " +
-            "recalled INTEGER DEFAULT 0)")) {
+        if (!query.exec(
+            "CREATE TABLE IF NOT EXISTS messages (" + "id INTEGER PRIMARY KEY, " + "sender_id INTEGER NOT NULL, " +
+                "receiver_id INTEGER NOT NULL, " + "content TEXT NOT NULL, " + "send_time TEXT NOT NULL, " +
+                "is_read INTEGER DEFAULT 0, " + "kind TEXT DEFAULT 'text', " + "recalled INTEGER DEFAULT 0)")) {
             println("建表错误: CREATE TABLE messages 失败")
         }
     }
@@ -115,10 +109,14 @@ public class ServerDb {
     }
 
     private func addColumnIfNotExists(tableName: String, columnName: String, columnDef: String): Unit {
-        if (!query.exec("PRAGMA table_info(${tableName})")) { return }
+        if (!query.exec("PRAGMA table_info(${tableName})")) {
+            return
+        }
         var hasColumn = false
         while (query.next()) {
-            if (query.valueString(1) == columnName) { hasColumn = true }
+            if (query.valueString(1) == columnName) {
+                hasColumn = true
+            }
         }
         if (!hasColumn) {
             let _ = query.exec("ALTER TABLE ${tableName} ADD COLUMN ${columnName} ${columnDef}")
@@ -136,12 +134,18 @@ public class ServerDb {
             println("注册错误: 查询最大账号失败")
             return 0
         }
-        if (query.next()) { newAccount = Int64(query.valueInt(0)) }
-        if (newAccount < 10000) { newAccount = 10000 }
+        if (query.next()) {
+            newAccount = Int64(query.valueInt(0))
+        }
+        if (newAccount < 10000) {
+            newAccount = 10000
+        }
         let sql = "INSERT INTO users (id, account, password, nickname, created_at) " +
             "VALUES ((SELECT COALESCE(MAX(id), 0) + 1 FROM users), " +
             "${newAccount}, '${sqlEscape(password)}', '${sqlEscape(nickname)}', '${nowString()}')"
-        if (query.exec(sql)) { return newAccount }
+        if (query.exec(sql)) {
+            return newAccount
+        }
         println("注册错误: 插入用户失败 account=${newAccount}")
         return 0
     }
@@ -178,11 +182,12 @@ public class ServerDb {
 
     /// 校验密码
     public func checkPassword(userId: Int64, password: String): Bool {
-        if (!query.exec("SELECT COUNT(*) FROM users WHERE id = ${userId} " +
-            "AND password = '${sqlEscape(password)}'")) {
+        if (!query.exec("SELECT COUNT(*) FROM users WHERE id = ${userId} " + "AND password = '${sqlEscape(password)}'")) {
             return false
         }
-        if (query.next()) { return query.valueInt(0) > 0 }
+        if (query.next()) {
+            return query.valueInt(0) > 0
+        }
         return false
     }
 
@@ -195,14 +200,20 @@ public class ServerDb {
         if (!query.exec("SELECT COUNT(*) FROM friends WHERE user_id = ${a} AND friend_id = ${b}")) {
             return false
         }
-        if (query.next()) { return query.valueInt(0) > 0 }
+        if (query.next()) {
+            return query.valueInt(0) > 0
+        }
         return false
     }
 
     /// 添加好友（双向各存一行），成功返回 true
     public func addFriend(a: Int64, b: Int64): Bool {
-        if (a == b) { return false }
-        if (areFriends(a, b)) { return false }
+        if (a == b) {
+            return false
+        }
+        if (areFriends(a, b)) {
+            return false
+        }
         if (!query.exec("INSERT OR IGNORE INTO friends (user_id, friend_id) VALUES (${a}, ${b})")) {
             return false
         }
@@ -215,9 +226,9 @@ public class ServerDb {
     /// 获取好友列表（JOIN users 取实时昵称与账号，含备注）
     public func getFriends(userId: Int64): ArrayList<FriendRec> {
         let list = ArrayList<FriendRec>()
-        if (!query.exec("SELECT u.id, u.account, u.nickname, COALESCE(f.remark, '') FROM friends f " +
-            "JOIN users u ON u.id = f.friend_id " +
-            "WHERE f.user_id = ${userId} ORDER BY u.id")) {
+        if (!query.exec(
+            "SELECT u.id, u.account, u.nickname, COALESCE(f.remark, '') FROM friends f " +
+                "JOIN users u ON u.id = f.friend_id " + "WHERE f.user_id = ${userId} ORDER BY u.id")) {
             return list
         }
         while (query.next()) {
@@ -238,7 +249,11 @@ public class ServerDb {
     /// 保存消息；isRead=true 表示接收方在线即时送达；kind: text/image/file
     /// 返回新消息 ID（失败返回 0）
     public func saveMessage(fromId: Int64, toId: Int64, text: String, isRead: Bool, kind: String): Int64 {
-        let readFlag = if (isRead) { 1 } else { 0 }
+        let readFlag = if (isRead) {
+            1
+        } else {
+            0
+        }
         let sql = "INSERT INTO messages (id, sender_id, receiver_id, content, send_time, is_read, kind) " +
             "VALUES ((SELECT COALESCE(MAX(id), 0) + 1 FROM messages), " +
             "${fromId}, ${toId}, '${sqlEscape(text)}', '${nowString()}', ${readFlag}, '${sqlEscape(kind)}')"
@@ -246,20 +261,24 @@ public class ServerDb {
             println("消息保存失败: from=${fromId} to=${toId}")
             return 0
         }
-        if (!query.exec("SELECT MAX(id) FROM messages")) { return 0 }
-        if (query.next()) { return Int64(query.valueInt(0)) }
+        if (!query.exec("SELECT MAX(id) FROM messages")) {
+            return 0
+        }
+        if (query.next()) {
+            return Int64(query.valueInt(0))
+        }
         return 0
     }
 
     /// 获取两人之间的聊天记录（最近 limit 条，正序返回）
     public func getHistory(userId: Int64, friendId: Int64, limit: Int64): ArrayList<HistRec> {
         let list = ArrayList<HistRec>()
-        if (!query.exec("SELECT m.id, m.sender_id, u.nickname, m.content, m.send_time, " +
-            "COALESCE(m.kind, 'text'), COALESCE(m.recalled, 0) " +
-            "FROM messages m JOIN users u ON u.id = m.sender_id " +
-            "WHERE (m.sender_id = ${userId} AND m.receiver_id = ${friendId}) " +
-            "OR (m.sender_id = ${friendId} AND m.receiver_id = ${userId}) " +
-            "ORDER BY m.id DESC LIMIT ${limit}")) {
+        if (!query.exec(
+            "SELECT m.id, m.sender_id, u.nickname, m.content, m.send_time, " +
+                "COALESCE(m.kind, 'text'), COALESCE(m.recalled, 0) " +
+                "FROM messages m JOIN users u ON u.id = m.sender_id " +
+                "WHERE (m.sender_id = ${userId} AND m.receiver_id = ${friendId}) " +
+                "OR (m.sender_id = ${friendId} AND m.receiver_id = ${userId}) " + "ORDER BY m.id DESC LIMIT ${limit}")) {
             return list
         }
         let temp = ArrayList<HistRec>()
@@ -285,13 +304,12 @@ public class ServerDb {
 
     /// 查询单条消息信息（撤回校验用），返回 (senderId, receiverId, sendTime, recalled)
     public func getMessageInfo(msgId: Int64): ?(Int64, Int64, String, Bool) {
-        if (!query.exec("SELECT sender_id, receiver_id, send_time, COALESCE(recalled, 0) " +
-            "FROM messages WHERE id = ${msgId}")) {
+        if (!query.exec(
+            "SELECT sender_id, receiver_id, send_time, COALESCE(recalled, 0) " + "FROM messages WHERE id = ${msgId}")) {
             return None
         }
         if (query.next()) {
-            return Some((Int64(query.valueInt(0)), Int64(query.valueInt(1)),
-                query.valueString(2), query.valueInt(3) == 1))
+            return Some((Int64(query.valueInt(0)), Int64(query.valueInt(1)), query.valueString(2), query.valueInt(3) == 1))
         }
         return None
     }
@@ -307,21 +325,28 @@ public class ServerDb {
 
     /// 修改昵称
     public func updateNickname(userId: Int64, nickname: String): Bool {
-        if (nickname.isEmpty() || nickname.size > 60) { return false }
+        if (nickname.isEmpty() || nickname.size > 60) {
+            return false
+        }
         query.exec("UPDATE users SET nickname = '${sqlEscape(nickname)}' WHERE id = ${userId}")
     }
 
     /// 修改密码（调用方已校验旧密码）
     public func updatePassword(userId: Int64, newPassword: String): Bool {
-        if (newPassword.size < 4 || newPassword.size > 96) { return false }
+        if (newPassword.size < 4 || newPassword.size > 96) {
+            return false
+        }
         query.exec("UPDATE users SET password = '${sqlEscape(newPassword)}' WHERE id = ${userId}")
     }
 
     /// 设置好友备注（仅自己一侧）
     public func setRemark(userId: Int64, friendId: Int64, remark: String): Bool {
-        if (remark.size > 60) { return false }
-        if (!query.exec("UPDATE friends SET remark = '${sqlEscape(remark)}' " +
-            "WHERE user_id = ${userId} AND friend_id = ${friendId}")) {
+        if (remark.size > 60) {
+            return false
+        }
+        if (!query.exec(
+            "UPDATE friends SET remark = '${sqlEscape(remark)}' " +
+                "WHERE user_id = ${userId} AND friend_id = ${friendId}")) {
             return false
         }
         true
@@ -329,8 +354,9 @@ public class ServerDb {
 
     /// 删除好友（双向）
     public func deleteFriend(a: Int64, b: Int64): Bool {
-        if (!query.exec("DELETE FROM friends WHERE (user_id = ${a} AND friend_id = ${b}) " +
-            "OR (user_id = ${b} AND friend_id = ${a})")) {
+        if (!query.exec(
+            "DELETE FROM friends WHERE (user_id = ${a} AND friend_id = ${b}) " +
+                "OR (user_id = ${b} AND friend_id = ${a})")) {
             return false
         }
         true
@@ -339,9 +365,10 @@ public class ServerDb {
     /// 取出并标记已读某用户的全部未读消息
     public func popUnread(userId: Int64): ArrayList<MsgRec> {
         let list = ArrayList<MsgRec>()
-        if (!query.exec("SELECT m.sender_id, u.nickname, m.content, m.send_time " +
-            "FROM messages m JOIN users u ON u.id = m.sender_id " +
-            "WHERE m.receiver_id = ${userId} AND m.is_read = 0 ORDER BY m.id")) {
+        if (!query.exec(
+            "SELECT m.sender_id, u.nickname, m.content, m.send_time " +
+                "FROM messages m JOIN users u ON u.id = m.sender_id " +
+                "WHERE m.receiver_id = ${userId} AND m.is_read = 0 ORDER BY m.id")) {
             return list
         }
         while (query.next()) {

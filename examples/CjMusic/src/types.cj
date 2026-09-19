@@ -14,20 +14,25 @@ import std.random.*
 
 // QEventWidget/QPushButton/QSlider 未暴露部分 QWidget 方法，声明 FFI 直接调用
 foreign func qWidgetSetStyleSheet(ptr: Int64, styleSheet: CString): Unit
+
 foreign func qWidgetSetMinimumSize(ptr: Int64, minw: Int32, minh: Int32): Unit
+
 foreign func qWidgetSetFixedSize(ptr: Int64, width: Int32, height: Int32): Unit
+
 foreign func qWidgetSetToolTip(ptr: Int64, toolTip: CString): Unit
+
 foreign func qWidgetWidth(ptr: Int64): Int32
+
 foreign func qWidgetHeight(ptr: Int64): Int32
 
 // ============================================================
 // 播放模式
 // ============================================================
 public enum PlayMode {
-    | Sequential  // 顺序播放（播完停止）
-    | Loop        // 列表循环
-    | LoopOne     // 单曲循环
-    | Random      // 随机播放
+    | Sequential // 顺序播放（播完停止）
+    | Loop // 列表循环
+    | LoopOne // 单曲循环
+    | Random // 随机播放
 
     // 切换到下一个模式
     public func next(): PlayMode {
@@ -48,7 +53,6 @@ public enum PlayMode {
             case Random => "随机"
         }
     }
-
 }
 
 // ============================================================
@@ -60,7 +64,7 @@ public class MusicItem {
     public var title: String
     public var artist: String
     public var duration: Int64
-    public var invalid: Bool   // 文件损坏/丢失标记
+    public var invalid: Bool // 文件损坏/丢失标记
 
     public init(path: String) {
         filePath = path
@@ -147,23 +151,23 @@ var gPlayMode: PlayMode = PlayMode.Loop
 var gIsPlaying: Bool = false
 var gIsMuted: Bool = false
 var gCurrentVolume: Float32 = 0.7f32
-var gIsUpdatingSlider: Bool = false   // 防 slider valueChanged 循环
-var gIsSeeking: Bool = false          // 用户正在拖动进度条（不更新歌词 + 不被定时器覆盖）
+var gIsUpdatingSlider: Bool = false // 防 slider valueChanged 循环
+var gIsSeeking: Bool = false // 用户正在拖动进度条（不更新歌词 + 不被定时器覆盖）
 let gRandomGen: Random = Random()
 
 // 歌词状态
 var gLyricLines: ArrayList<LyricLineInfo> = ArrayList<LyricLineInfo>()
 var gCurrentLyricIndex: Int32 = -1
-var gLyricOffsetMs: Int64 = 0         // 手动偏移校准（毫秒）
+var gLyricOffsetMs: Int64 = 0 // 手动偏移校准（毫秒）
 var gHasLyrics: Bool = false
-var gLyricSource: String = ""         // 匹配到的 .lrc 文件名（显示匹配来源）
+var gLyricSource: String = "" // 匹配到的 .lrc 文件名（显示匹配来源）
 
 // 歌词滚动动画状态
-var gScrollTargetY: Float64 = 0.0     // 目标 Y 偏移
-var gScrollCurrentY: Float64 = 0.0    // 当前 Y 偏移（插值中）
-var gScrollStartY: Float64 = 0.0      // 动画起点
+var gScrollTargetY: Float64 = 0.0 // 目标 Y 偏移
+var gScrollCurrentY: Float64 = 0.0 // 当前 Y 偏移（插值中）
+var gScrollStartY: Float64 = 0.0 // 动画起点
 
-let SCROLL_DURATION: Int64 = 400      // 动画时长（ms，降级方案：QTimer 无 PreciseTimer，用 400ms 掩盖抖动）
+let SCROLL_DURATION: Int64 = 400 // 动画时长（ms，降级方案：QTimer 无 PreciseTimer，用 400ms 掩盖抖动）
 
 // UI 组件引用
 var gMainWindow: ?QMainWindow = None
@@ -173,8 +177,8 @@ var gSplitter: ?QSplitter = None
 // 左栏：播放列表
 var gPlaylistWidget: ?QListWidget = None
 var gSearchEdit: ?QLineEdit = None
-var gSearchKeyword: String = ""                        // 当前搜索词（由 textChanged 回调更新）
-var gVisibleRows: ArrayList<Int32> = ArrayList<Int32>()  // 搜索过滤后的原始索引
+var gSearchKeyword: String = "" // 当前搜索词（由 textChanged 回调更新）
+var gVisibleRows: ArrayList<Int32> = ArrayList<Int32>() // 搜索过滤后的原始索引
 
 // 右上：歌词区
 var gLyricWidget: ?QEventWidget = None
@@ -184,11 +188,11 @@ var gScrollTimer: ?QTimer = None
 var gTitleLabel: ?QLabel = None
 var gArtistLabel: ?QLabel = None
 var gFileNameLabel: ?QLabel = None
-var gTimeLabel: ?QLabel = None       // 当前时间（左时间戳）
-var gTotalTimeLabel: ?QLabel = None  // 总时间（右时间戳）
+var gTimeLabel: ?QLabel = None // 当前时间（左时间戳）
+var gTotalTimeLabel: ?QLabel = None // 总时间（右时间戳）
 var gProgressSlider: ?QSlider = None
 var gVolumeSlider: ?QSlider = None
-var gVolumeLabel: ?QLabel = None      // 音量百分比标签
+var gVolumeLabel: ?QLabel = None // 音量百分比标签
 var gPlayButton: ?QPushButton = None
 var gPrevButton: ?QPushButton = None
 var gNextButton: ?QPushButton = None

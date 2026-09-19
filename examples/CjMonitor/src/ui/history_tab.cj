@@ -75,7 +75,7 @@ public class HistoryTab {
 
         // 回调必须在所有成员初始化完成后再注册：init 期间捕获 this 会触发
         // “not allowed to be accessed before all member variables are initialized”
-        queryBtn.setOnClickCapture({ => this.runQuery() })
+        queryBtn.setOnClickCapture({=> this.runQuery()})
     }
 
     public func widget(): QWidget {
@@ -152,9 +152,11 @@ public class HistoryTab {
         chart.createDefaultAxes()
         chartView.setChart(chart)
 
-        summary.setText("CPU 峰值=${fmt1(cpuStats.max())}% 均值=${fmt1(cpuStats.avg())}% · " +
-            "内存 峰值=${fmt1(memStats.max())}% 均值=${fmt1(memStats.avg())}%")
-        status.setText("已重建图表：${rows.size} 点，跨度 ${(rows[rows.size - 1].tsMs - baseTs) / 1000}s（图表对象每次重建，不复用）")
+        summary.setText(
+            "CPU 峰值=${fmt1(cpuStats.max())}% 均值=${fmt1(cpuStats.avg())}% · " +
+                "内存 峰值=${fmt1(memStats.max())}% 均值=${fmt1(memStats.avg())}%")
+        status.setText(
+            "已重建图表：${rows.size} 点，跨度 ${(rows[rows.size - 1].tsMs - baseTs) / 1000}s（图表对象每次重建，不复用）")
     }
 }
 

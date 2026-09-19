@@ -44,13 +44,29 @@ func createPageNewWidgets(): QScrollArea {
     dlgRow1.setSpacing(8)
     let box1 = QDialogButtonBox()
     box1.setStandardButtons(makeStandardButtons([StandardButtons.Ok, StandardButtons.Cancel]))
-    box1.setOnAccepted({ => if (let Some(l) <- gNewDlgInfo) { l.setText("结果: 接受 (OK)") } })
-    box1.setOnRejected({ => if (let Some(l) <- gNewDlgInfo) { l.setText("结果: 拒绝 (Cancel)") } })
+    box1.setOnAccepted({
+        => if (let Some(l) <- gNewDlgInfo) {
+            l.setText("结果: 接受 (OK)")
+        }
+    })
+    box1.setOnRejected({
+        => if (let Some(l) <- gNewDlgInfo) {
+            l.setText("结果: 拒绝 (Cancel)")
+        }
+    })
     dlgRow1.addWidget(box1.getPtr())
     let box2 = QDialogButtonBox()
     box2.setStandardButtons(makeStandardButtons([StandardButtons.Yes, StandardButtons.No]))
-    box2.setOnAccepted({ => if (let Some(l) <- gNewDlgInfo) { l.setText("结果: 是 (Yes)") } })
-    box2.setOnRejected({ => if (let Some(l) <- gNewDlgInfo) { l.setText("结果: 否 (No)") } })
+    box2.setOnAccepted({
+        => if (let Some(l) <- gNewDlgInfo) {
+            l.setText("结果: 是 (Yes)")
+        }
+    })
+    box2.setOnRejected({
+        => if (let Some(l) <- gNewDlgInfo) {
+            l.setText("结果: 否 (No)")
+        }
+    })
     dlgRow1.addWidget(box2.getPtr())
     layout.addLayout(dlgRow1.getPtr())
 
@@ -72,8 +88,10 @@ func createPageNewWidgets(): QScrollArea {
     hScroll.setValue(0)
     hScroll.setSingleStep(5)
     hScroll.setPageStep(20)
-    hScroll.setOnValueChanged({ v: Int32 =>
-        if (let Some(l) <- gNewScrollVal) { l.setText("当前值: ${v}") }
+    hScroll.setOnValueChanged({
+        v: Int32 => if (let Some(l) <- gNewScrollVal) {
+            l.setText("当前值: ${v}")
+        }
     })
     layout.addWidget(hScroll.getPtr())
     let vScroll = QScrollBar(ScrollBarOrientation.Vertical)
@@ -211,8 +229,8 @@ func createPageNewWidgets(): QScrollArea {
     layout.addWidget(fsInfo.getPtr())
     let fsBtn = QPushButton()
     fsBtn.setText("获取当前目录路径索引 (验证 API)")
-    fsBtn.setOnClick({ =>
-        if (let Some(m) <- gNewFsModel) {
+    fsBtn.setOnClick({
+        => if (let Some(m) <- gNewFsModel) {
             let idx = m.index(".")
             if (let Some(status) <- gStatusLabel) {
                 status.setText("QFileSystemModel index 获取成功 (ptr=${idx})")
@@ -223,7 +241,7 @@ func createPageNewWidgets(): QScrollArea {
 
     // QHeaderView
     layout.addWidget(sectionTitle("QHeaderView").getPtr())
-    let header = QHeaderView(1 /* Orientation.Horizontal */)
+    let header = QHeaderView(1 /* Orientation.Horizontal */ )
     header.setSectionResizeMode(ResizeMode.Stretch)
     header.setStretchLastSection(true)
     let headerInfo = QLabel()

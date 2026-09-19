@@ -9,8 +9,6 @@ import cjqt6.core.*
 import cjqt6.widgets.*
 import cjqt6.gui.*
 
-
-
 /// 创建右下控制区面板（三段式布局）
 public func createControlBar(): QWidget {
     let panel = QWidget()
@@ -56,7 +54,8 @@ public func createControlBar(): QWidget {
 
     let curTimeLabel = QLabel()
     curTimeLabel.setText("0:00")
-    curTimeLabel.setStyleSheet("QLabel { font-size: 12px; color: #9097a3; background: transparent; font-family: 'Consolas', 'Courier New', monospace; min-width: 36px; }")
+    curTimeLabel.setStyleSheet(
+        "QLabel { font-size: 12px; color: #9097a3; background: transparent; font-family: 'Consolas', 'Courier New', monospace; min-width: 36px; }")
     // 单设水平位标志会冲掉默认的垂直居中，须与 VCenter 组合才能与进度条同线
     curTimeLabel.setAlignment(Alignment.Right.value + Alignment.VCenter.value)
     gTimeLabel = Some(curTimeLabel)
@@ -75,7 +74,8 @@ public func createControlBar(): QWidget {
 
     let totalTimeLabel = QLabel()
     totalTimeLabel.setText("0:00")
-    totalTimeLabel.setStyleSheet("QLabel { font-size: 12px; color: #9097a3; background: transparent; font-family: 'Consolas', 'Courier New', monospace; min-width: 36px; }")
+    totalTimeLabel.setStyleSheet(
+        "QLabel { font-size: 12px; color: #9097a3; background: transparent; font-family: 'Consolas', 'Courier New', monospace; min-width: 36px; }")
     totalTimeLabel.setAlignment(Alignment.Left.value + Alignment.VCenter.value)
     gTotalTimeLabel = Some(totalTimeLabel)
     progressLayout.addWidget(totalTimeLabel.getPtr())
@@ -92,7 +92,7 @@ public func createControlBar(): QWidget {
     prevBtn.setIconSize(20, 20)
     prevBtn.setStyleSheet(QSS_BTN_TRANSPORT)
     unsafe { qWidgetSetFixedSize(prevBtn.getPtr(), 32, 32) }
-    prevBtn.setOnClickCapture({ => prevTrack() })
+    prevBtn.setOnClickCapture({=> prevTrack()})
     prevBtn.setEnabled(false)
     gPrevButton = Some(prevBtn)
     btnLayout.addWidget(prevBtn.getPtr())
@@ -102,7 +102,7 @@ public func createControlBar(): QWidget {
     playBtn.setIconSize(28, 28)
     playBtn.setStyleSheet(QSS_BTN_PLAY)
     unsafe { qWidgetSetFixedSize(playBtn.getPtr(), 44, 44) }
-    playBtn.setOnClickCapture({ => togglePlay() })
+    playBtn.setOnClickCapture({=> togglePlay()})
     playBtn.setEnabled(false)
     gPlayButton = Some(playBtn)
     btnLayout.addWidget(playBtn.getPtr())
@@ -112,7 +112,7 @@ public func createControlBar(): QWidget {
     nextBtn.setIconSize(20, 20)
     nextBtn.setStyleSheet(QSS_BTN_TRANSPORT)
     unsafe { qWidgetSetFixedSize(nextBtn.getPtr(), 32, 32) }
-    nextBtn.setOnClickCapture({ => nextTrack() })
+    nextBtn.setOnClickCapture({=> nextTrack()})
     nextBtn.setEnabled(false)
     gNextButton = Some(nextBtn)
     btnLayout.addWidget(nextBtn.getPtr())
@@ -143,7 +143,7 @@ public func createControlBar(): QWidget {
         qWidgetSetToolTip(modeBtn.getPtr(), tipCstr)
         LibC.free(tipCstr)
     }
-    modeBtn.setOnClickCapture({ => cyclePlayMode() })
+    modeBtn.setOnClickCapture({=> cyclePlayMode()})
     gModeButton = Some(modeBtn)
     rightLayout.addWidget(modeBtn.getPtr())
 
@@ -152,19 +152,22 @@ public func createControlBar(): QWidget {
     muteBtn.setIconSize(18, 18)
     muteBtn.setStyleSheet(QSS_BTN_ICON)
     unsafe { qWidgetSetFixedSize(muteBtn.getPtr(), 30, 30) }
-    muteBtn.setOnClickCapture({ =>
-        gIsMuted = !gIsMuted
-        if (let Some(out) <- gAudioOutput) {
-            out.setMuted(gIsMuted)
+    muteBtn.setOnClickCapture(
+        {
+            =>
+                gIsMuted = !gIsMuted
+                if (let Some(out) <- gAudioOutput) {
+                    out.setMuted(gIsMuted)
+                }
+                if (let Some(btn) <- gMuteButton) {
+                    if (gIsMuted) {
+                        btn.setIcon(gIconDir + "/mute.svg")
+                    } else {
+                        btn.setIcon(gIconDir + "/volume.svg")
+                    }
+                }
         }
-        if (let Some(btn) <- gMuteButton) {
-            if (gIsMuted) {
-                btn.setIcon(gIconDir + "/mute.svg")
-            } else {
-                btn.setIcon(gIconDir + "/volume.svg")
-            }
-        }
-    })
+    )
     gMuteButton = Some(muteBtn)
     rightLayout.addWidget(muteBtn.getPtr())
 
@@ -181,7 +184,8 @@ public func createControlBar(): QWidget {
     // 音量百分比标签（初始值与滑块初值一致；setValue 在连接回调前执行，初始不触发回调）
     let volumeLabel = QLabel()
     volumeLabel.setText("70")
-    volumeLabel.setStyleSheet("QLabel { font-size: 12px; color: #9097a3; background: transparent; font-family: 'Consolas', 'Courier New', monospace; min-width: 32px; padding-left: 4px; }")
+    volumeLabel.setStyleSheet(
+        "QLabel { font-size: 12px; color: #9097a3; background: transparent; font-family: 'Consolas', 'Courier New', monospace; min-width: 32px; padding-left: 4px; }")
     volumeLabel.setAlignment(Alignment.Left.value + Alignment.VCenter.value)
     gVolumeLabel = Some(volumeLabel)
     rightLayout.addWidget(volumeLabel.getPtr())
@@ -199,10 +203,8 @@ public func createControlBar(): QWidget {
 // 回调函数
 // ============================================================
 
-
 @C
 func onVolumeChanged(value: Int32): Unit {
-
     gCurrentVolume = Float32(value) / 100.0f32
     if (let Some(lbl) <- gVolumeLabel) {
         lbl.setText("${value}")

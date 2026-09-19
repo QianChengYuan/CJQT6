@@ -34,7 +34,6 @@ public func listLrcFiles(dirPath: String): Array<String> {
     }
 }
 
-
 // ============================================================
 // 质量标签清洗（文档 2.3.1 节，lrc4cj 不处理这些）
 // ============================================================
@@ -50,7 +49,7 @@ public func stripQualityTags(name: String): String {
                 if (isQualityTag(tag)) {
                     result = result[(closeIdx + 1)..result.size].trimAscii()
                 } else {
-                    break  // 非质量标签，停止
+                    break // 非质量标签，停止
                 }
             case None => break
         }
@@ -73,8 +72,7 @@ public func stripQualityTags(name: String): String {
 
 /// 判断标签是否为质量标签
 func isQualityTag(tag: String): Bool {
-    let qualityTags = ["HQ", "SQ", "HD", "LOSSLESS", "FLAC", "320K", "320KBPS",
-        "192K", "128K", "CD", "母带", "无损"]
+    let qualityTags = ["HQ", "SQ", "HD", "LOSSLESS", "FLAC", "320K", "320KBPS", "192K", "128K", "CD", "母带", "无损"]
     for (qt in qualityTags) {
         if (tag == qt) {
             return true
@@ -240,17 +238,17 @@ public func matchL4(audioPath: String): ?String {
 /// 返回 0~100 的分数
 public func scoreMatch(audioStem: String, lrcStem: String): Int32 {
     if (audioStem == lrcStem) {
-        return 100   // 精确同名
+        return 100 // 精确同名
     }
     let normAudio = normalizeName(audioStem)
     let normLrc = normalizeName(lrcStem)
     if (normAudio == normLrc) {
-        return 90    // 归一化后相同
+        return 90 // 归一化后相同
     }
     let strippedAudio = normalizeName(stripQualityTags(stripArtistPrefix(audioStem)))
     let strippedLrc = normalizeName(stripQualityTags(stripArtistPrefix(lrcStem)))
     if (!strippedAudio.isEmpty() && strippedAudio == strippedLrc) {
-        return 80    // 剥离装饰后相同
+        return 80 // 剥离装饰后相同
     }
     // 包含关系
     if (!normAudio.isEmpty() && !normLrc.isEmpty()) {
@@ -304,8 +302,8 @@ public func matchL5(audioPath: String): ?(String, Int32) {
 /// 匹配结果
 public struct LyricMatchResult {
     public let path: String
-    public let level: Int32      // 命中级别 1~5
-    public let score: Int32      // 分数（L5 有意义）
+    public let level: Int32 // 命中级别 1~5
+    public let score: Int32 // 分数（L5 有意义）
 
     public init(path: String, level: Int32, score: Int32) {
         this.path = path
@@ -349,7 +347,6 @@ public func matchLyrics(audioPath: String): ?LyricMatchResult {
 // 用户手动指定歌词缓存（文档 2.3.5 节第 3 点）
 // ============================================================
 var gManualLyricMap: HashMap<String, String> = HashMap<String, String>()
-
 
 /// 查询用户手动指定的歌词
 public func getManualLyric(audioPath: String): ?String {

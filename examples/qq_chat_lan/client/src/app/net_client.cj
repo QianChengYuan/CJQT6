@@ -36,7 +36,7 @@ public var gPendingRegNickname: String = ""
 public var gPendingRegPassword: String = ""
 
 /// 顶层定时器回调（CFunc 不能捕获变量）
-let onConnectTick: VoidCallback = { => connectTick() }
+let onConnectTick: VoidCallback = {=> connectTick()}
 
 /// 解析 "host:port" 或 "host"（默认端口 9600）
 public func parseServerAddress(addr: String): (String, UInt16) {
@@ -45,7 +45,9 @@ public func parseServerAddress(addr: String): (String, UInt16) {
     var colonPos: Int64 = -1
     var i: Int64 = 0
     while (i < addr.size) {
-        if (addr[i] == 58) { colonPos = i }
+        if (addr[i] == 58) {
+            colonPos = i
+        }
         i++
     }
     if (colonPos >= 0 && colonPos + 1 < addr.size) {
@@ -57,7 +59,9 @@ public func parseServerAddress(addr: String): (String, UInt16) {
             }
         }
     }
-    if (host.isEmpty()) { host = "127.0.0.1" }
+    if (host.isEmpty()) {
+        host = "127.0.0.1"
+    }
     (host, port)
 }
 
@@ -105,10 +109,10 @@ public func beginConnect(host: String, port: UInt16, statusText: String): Unit {
 
     let sock = QTcpSocket()
     gSocket = sock
-    let _ = sock.setOnConnectedCapture({ => onSocketConnected() })
-    let _ = sock.setOnReadyReadCapture({ => onNetData() })
-    let _ = sock.setOnDisconnectedCapture({ => onNetDisconnected() })
-    let _ = sock.setOnErrorCapture({ => onNetError() })
+    let _ = sock.setOnConnectedCapture({=> onSocketConnected()})
+    let _ = sock.setOnReadyReadCapture({=> onNetData()})
+    let _ = sock.setOnDisconnectedCapture({=> onNetDisconnected()})
+    let _ = sock.setOnErrorCapture({=> onNetError()})
     sock.connectToHost(host, port)
     setLoginStatus(statusText)
 

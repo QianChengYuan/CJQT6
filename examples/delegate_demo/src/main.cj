@@ -19,8 +19,8 @@ var gPaintCount: Int64 = 0
 var gSizeHintCount: Int64 = 0
 
 // 自绘回调：统计调用次数，并在每个单元格左下角绘制 "R{行}C{列}" 标识
-let gPaintCb: CFunc<(Int64) -> Unit> = { _ =>
-    if (let Some(d) <- gDelegate) {
+let gPaintCb: CFunc<(Int64) -> Unit> = {
+    _ => if (let Some(d) <- gDelegate) {
         gPaintCount += 1
         // 借用 painter 指针（fromPtr 不拥有所有权，勿 close/delete）
         let painter = QPainter.fromPtr(d.getPainterPtr())
@@ -35,9 +35,10 @@ let gPaintCb: CFunc<(Int64) -> Unit> = { _ =>
 }
 
 // 尺寸回调：统一每格 90x26，统计调用次数
-let gSizeCb: CFunc<(Int64) -> Int64> = { _ =>
-    gSizeHintCount += 1
-    makeSizeHintValue(90, 26)
+let gSizeCb: CFunc<(Int64) -> Int64> = {
+    _ =>
+        gSizeHintCount += 1
+        makeSizeHintValue(90, 26)
 }
 
 main() {
@@ -74,7 +75,7 @@ main() {
     // 4) 定时退出：让事件循环跑 300ms，触发 paintEvent（offscreen 平台离屏渲染）
     let timer = QTimer()
     timer.setInterval(300)
-    timer.setOnTimeout({ => QApp.quit() })
+    timer.setOnTimeout({=> QApp.quit()})
     timer.start()
 
     app.exec()

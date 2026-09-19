@@ -19,9 +19,8 @@ import CjMonitor.common.*
 // 顶层全局 + 回调：CFunc 不能捕获局部变量，只能经全局变量路由。
 // （声明顺序要求：被函数体引用的顶层绑定必须先于使用处出现。）
 var gCurveWidget: ?CurveWidget = None
-
-let onCurvePaint: CFunc<(Int64) -> Unit> = { painterPtr: Int64 =>
-    if (let Some(w) <- gCurveWidget) {
+let onCurvePaint: CFunc<(Int64) -> Unit> = {
+    painterPtr: Int64 => if (let Some(w) <- gCurveWidget) {
         w.paint(painterPtr)
     }
 }
@@ -156,7 +155,11 @@ public class CurveWidget {
         if (total < 2) {
             return
         }
-        let shown = if (visiblePoints > total) { total } else { visiblePoints }
+        let shown = if (visiblePoints > total) {
+            total
+        } else {
+            visiblePoints
+        }
         if (shown < 2) {
             return
         }

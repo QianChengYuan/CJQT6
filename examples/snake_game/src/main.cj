@@ -27,7 +27,7 @@ let DIR_UP: Int32 = 0
 let DIR_DOWN: Int32 = 1
 let DIR_LEFT: Int32 = 2
 let DIR_RIGHT: Int32 = 3
-let ALIGN_CENTER: Int32 = 0x0084  // TextAlignment.Center.value
+let ALIGN_CENTER: Int32 = 0x0084 // TextAlignment.Center.value
 
 // ============================================================
 // 全局状态
@@ -57,27 +57,27 @@ func initGame(): Unit {
     gSnake.add((5, 12))
     gSnake.add((4, 12))
     gSnake.add((3, 12))
-    
+
     gDirection = DIR_RIGHT
     gNextDirection = DIR_RIGHT
     gScore = 0
     gGameOver = false
     gPaused = false
     gGameStarted = true
-    
+
     spawnFood()
 }
 
 func spawnFood(): Unit {
     var validPosition = false
     var attempts = 0
-    
+
     while (!validPosition && attempts < 100) {
         let randX = gRandom.nextUInt64()
         let randY = gRandom.nextUInt64()
         let x = Int32(randX % UInt64(GRID_WIDTH))
         let y = Int32(randY % UInt64(GRID_HEIGHT))
-        
+
         validPosition = true
         for (segment in gSnake) {
             let (sx, sy) = segment
@@ -86,7 +86,7 @@ func spawnFood(): Unit {
                 break
             }
         }
-        
+
         if (validPosition) {
             gFood = (x, y)
         }
@@ -98,13 +98,13 @@ func updateGame(): Unit {
     if (gGameOver || gPaused || !gGameStarted) {
         return
     }
-    
+
     gDirection = gNextDirection
-    
+
     let (headX, headY) = gSnake[0]
     var newX = headX
     var newY = headY
-    
+
     match (gDirection) {
         case 0 => newY = headY - 1
         case 1 => newY = headY + 1
@@ -112,7 +112,7 @@ func updateGame(): Unit {
         case 3 => newX = headX + 1
         case _ => ()
     }
-    
+
     if (newX < 0 || newX >= GRID_WIDTH || newY < 0 || newY >= GRID_HEIGHT) {
         gGameOver = true
         if (gScore > gHighScore) {
@@ -120,7 +120,7 @@ func updateGame(): Unit {
         }
         return
     }
-    
+
     for (segment in gSnake) {
         let (sx, sy) = segment
         if (sx == newX && sy == newY) {
@@ -131,11 +131,11 @@ func updateGame(): Unit {
             return
         }
     }
-    
+
     // 修复：原逻辑 add 到末尾再 reverseList 整个列表，顺序错乱致蛇身乱跳。
     // 正确逻辑：新头插入头部（index 0），没吃到食物则移除末尾。
     gSnake.add((newX, newY), at: 0)
-    
+
     let (foodX, foodY) = gFood
     if (newX == foodX && newY == foodY) {
         gScore += 10
@@ -148,7 +148,6 @@ func updateGame(): Unit {
     }
 }
 
-
 // ============================================================
 // 回调函数
 // ============================================================
@@ -159,17 +158,17 @@ func onKeyPress(key: Int32, modifiers: Int32, unicode: Int32): Unit {
         }
         return
     }
-    
+
     if (key == Key.p() || key == 80) {
         gPaused = !gPaused
         return
     }
-    
+
     if (key == Key.space() || key == 32) {
         gPaused = !gPaused
         return
     }
-    
+
     if ((key == Key.up() || key == Key.w() || key == 87) && gDirection != DIR_DOWN) {
         gNextDirection = DIR_UP
     } else if ((key == Key.down() || key == Key.s() || key == 83) && gDirection != DIR_UP) {
@@ -210,7 +209,7 @@ public class SnakeRenderer {
     private let colorGameOver: QColor
     private let fontSmall: QFont
     private let fontLarge: QFont
-    
+
     public init() {
         pen = QPen()
         brush = QBrush()
@@ -228,7 +227,7 @@ public class SnakeRenderer {
         fontSmall = QFont("Arial", 14)
         fontLarge = QFont("Arial", 28)
     }
-    
+
     public func cleanup(): Unit {
         pen.delete()
         brush.delete()
@@ -243,17 +242,17 @@ public class SnakeRenderer {
         fontSmall.delete()
         fontLarge.delete()
     }
-    
+
     public func render(painterPtr: Int64): Unit {
         let painter = QPainter.fromPtr(painterPtr)
         painter.setRenderHint(RenderHint.Antialiasing.value())
-        
+
         painter.fillRectColor(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, colorBackground)
         renderGrid(painter)
         renderFood(painter)
         renderSnake(painter)
         renderStatusBar(painter)
-        
+
         if (!gGameStarted) {
             renderStartScreen(painter)
         } else if (gGameOver) {
@@ -262,37 +261,37 @@ public class SnakeRenderer {
             renderPaused(painter)
         }
     }
-    
+
     private func renderGrid(painter: QPainter): Unit {
         pen.setColor(colorGrid)
         pen.setWidth(1)
         painter.setPen(pen)
-        
+
         for (x in 0..=GRID_WIDTH) {
             let px = x * CELL_SIZE
             painter.drawLine(px, 0, px, GRID_HEIGHT * CELL_SIZE)
         }
-        
+
         for (y in 0..=GRID_HEIGHT) {
             let py = y * CELL_SIZE
             painter.drawLine(0, py, GRID_WIDTH * CELL_SIZE, py)
         }
     }
-    
+
     private func renderSnake(painter: QPainter): Unit {
         var isFirst = true
         for (segment in gSnake) {
             let (x, y) = segment
             let px = x * CELL_SIZE
             let py = y * CELL_SIZE
-            
+
             if (isFirst) {
                 brush.setColor(colorSnakeHead)
                 isFirst = false
             } else {
                 brush.setColor(colorSnakeBody)
             }
-            
+
             painter.setBrush(brush)
             pen.setColor(Colors.black())
             pen.setWidth(1)
@@ -300,12 +299,12 @@ public class SnakeRenderer {
             painter.drawRect(px + 1, py + 1, CELL_SIZE - 2, CELL_SIZE - 2)
         }
     }
-    
+
     private func renderFood(painter: QPainter): Unit {
         let (x, y) = gFood
         let px = x * CELL_SIZE
         let py = y * CELL_SIZE
-        
+
         brush.setColor(colorFood)
         painter.setBrush(brush)
         pen.setColor(Colors.black())
@@ -313,77 +312,78 @@ public class SnakeRenderer {
         painter.setPen(pen)
         painter.drawEllipse(px + 2, py + 2, CELL_SIZE - 4, CELL_SIZE - 4)
     }
-    
+
     private func renderStatusBar(painter: QPainter): Unit {
         let barY = GRID_HEIGHT * CELL_SIZE
-        
+
         painter.fillRectColor(0, barY, WINDOW_WIDTH, 50, colorStatusBar)
-        
+
         painter.setFont(fontSmall)
         pen.setColor(colorText)
         painter.setPen(pen)
-        
+
         painter.drawText(10, barY + 30, "分数: ${gScore}")
         painter.drawText(WINDOW_WIDTH / 2 - 50, barY + 30, "最高分: ${gHighScore}")
-        
+
         let length = Int32(gSnake.size)
         painter.drawText(WINDOW_WIDTH - 100, barY + 30, "长度: ${length}")
     }
-    
+
     private func renderStartScreen(painter: QPainter): Unit {
         painter.setOpacity(0.7f32)
         painter.fillRectColor(0, 0, WINDOW_WIDTH, GRID_HEIGHT * CELL_SIZE, Colors.black())
         painter.setOpacity(1.0f32)
-        
+
         painter.setFont(fontLarge)
         pen.setColor(colorSnakeHead)
         painter.setPen(pen)
         painter.drawTextRect(0, GRID_HEIGHT * CELL_SIZE / 2 - 60, WINDOW_WIDTH, 50, ALIGN_CENTER, "贪吃蛇")
-        
+
         painter.setFont(fontSmall)
         pen.setColor(colorText)
         painter.setPen(pen)
         painter.drawTextRect(0, GRID_HEIGHT * CELL_SIZE / 2, WINDOW_WIDTH, 30, ALIGN_CENTER, "按 空格 或 回车 开始游戏")
-        painter.drawTextRect(0, GRID_HEIGHT * CELL_SIZE / 2 + 30, WINDOW_WIDTH, 30, ALIGN_CENTER, "方向键 或 WASD 控制方向")
+        painter.drawTextRect(0, GRID_HEIGHT * CELL_SIZE / 2 + 30, WINDOW_WIDTH, 30, ALIGN_CENTER,
+            "方向键 或 WASD 控制方向")
         painter.drawTextRect(0, GRID_HEIGHT * CELL_SIZE / 2 + 60, WINDOW_WIDTH, 30, ALIGN_CENTER, "P 或 空格 暂停游戏")
     }
-    
+
     private func renderGameOver(painter: QPainter): Unit {
         painter.setOpacity(0.7f32)
         painter.fillRectColor(0, 0, WINDOW_WIDTH, GRID_HEIGHT * CELL_SIZE, Colors.black())
         painter.setOpacity(1.0f32)
-        
+
         painter.setFont(fontLarge)
         pen.setColor(colorGameOver)
         painter.setPen(pen)
         painter.drawTextRect(0, GRID_HEIGHT * CELL_SIZE / 2 - 50, WINDOW_WIDTH, 50, ALIGN_CENTER, "游戏结束")
-        
+
         painter.setFont(fontSmall)
         pen.setColor(colorText)
         painter.setPen(pen)
         painter.drawTextRect(0, GRID_HEIGHT * CELL_SIZE / 2, WINDOW_WIDTH, 30, ALIGN_CENTER, "最终分数: ${gScore}")
-        
+
         if (gScore == gHighScore && gScore > 0) {
             pen.setColor(colorFood)
             painter.setPen(pen)
             painter.drawTextRect(0, GRID_HEIGHT * CELL_SIZE / 2 + 30, WINDOW_WIDTH, 30, ALIGN_CENTER, "新纪录!")
         }
-        
+
         pen.setColor(colorText)
         painter.setPen(pen)
         painter.drawTextRect(0, GRID_HEIGHT * CELL_SIZE / 2 + 60, WINDOW_WIDTH, 30, ALIGN_CENTER, "按 空格 重新开始")
     }
-    
+
     private func renderPaused(painter: QPainter): Unit {
         painter.setOpacity(0.7f32)
         painter.fillRectColor(0, 0, WINDOW_WIDTH, GRID_HEIGHT * CELL_SIZE, Colors.black())
         painter.setOpacity(1.0f32)
-        
+
         painter.setFont(fontLarge)
         pen.setColor(colorText)
         painter.setPen(pen)
         painter.drawTextRect(0, GRID_HEIGHT * CELL_SIZE / 2 - 25, WINDOW_WIDTH, 50, ALIGN_CENTER, "已暂停")
-        
+
         painter.setFont(fontSmall)
         painter.drawTextRect(0, GRID_HEIGHT * CELL_SIZE / 2 + 30, WINDOW_WIDTH, 30, ALIGN_CENTER, "按 空格 或 P 继续")
     }
@@ -397,27 +397,27 @@ main(): Int32 {
     gWidget = QEventWidget()
     gTimer = QTimer()
     gRenderer = SnakeRenderer()
-    
+
     if (let Some(w) <- gWidget) {
         w.resize(WINDOW_WIDTH, WINDOW_HEIGHT)
         w.setTitle("贪吃蛇 - CJQT6")
-        w.setOnKeyPress({ key, modifiers, unicode => onKeyPress(key, modifiers, unicode) })
-        w.setOnPaint({ painterPtr => onPaint(painterPtr) })
+        w.setOnKeyPress({key, modifiers, unicode => onKeyPress(key, modifiers, unicode)})
+        w.setOnPaint({painterPtr => onPaint(painterPtr)})
         w.show()
         w.setFocus()
     }
-    
+
     if (let Some(t) <- gTimer) {
         t.setInterval(GAME_SPEED)
-        t.setOnTimeout({ => onTimer() })
+        t.setOnTimeout({=> onTimer()})
         t.start()
     }
-    
+
     var result: Int32 = 0
     if (let Some(a) <- gApp) {
         result = a.exec()
     }
-    
+
     // 清理资源
     if (let Some(t) <- gTimer) {
         t.stop()
@@ -429,6 +429,6 @@ main(): Int32 {
     if (let Some(w) <- gWidget) {
         w.delete()
     }
-    
+
     return result
 }

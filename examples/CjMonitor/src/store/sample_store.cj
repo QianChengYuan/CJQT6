@@ -33,8 +33,16 @@ public class SampleStore {
 
     public init(connName: String, downsampleN: Int64, batchSize: Int64) {
         this.connName = connName
-        this.downsampleN = if (downsampleN < 1) { 1 } else { downsampleN }
-        this.batchSize = if (batchSize < 1) { 1 } else { batchSize }
+        this.downsampleN = if (downsampleN < 1) {
+            1
+        } else {
+            downsampleN
+        }
+        this.batchSize = if (batchSize < 1) {
+            1
+        } else {
+            batchSize
+        }
     }
 
     // ========================================================
@@ -187,14 +195,16 @@ public class SampleStore {
                 return out
             }
             while (q.next()) {
-                out.add(Sample(
-                    Int64(q.valueInt(0)),
-                    q.valueDouble(1),
-                    q.valueDouble(2),
-                    q.valueDouble(3),
-                    q.valueDouble(4),
-                    q.valueDouble(5)
-                ))
+                out.add(
+                    Sample(
+                        Int64(q.valueInt(0)),
+                        q.valueDouble(1),
+                        q.valueDouble(2),
+                        q.valueDouble(3),
+                        q.valueDouble(4),
+                        q.valueDouble(5)
+                    )
+                )
             }
             q.close()
         }

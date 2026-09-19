@@ -62,5 +62,3 @@ public func createMainWindow(): QMainWindow {
     gMainWindow = Some(window)
     window
 }
-
-

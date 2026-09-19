@@ -32,7 +32,7 @@ public class Alerter {
     private var lastFireMs: Array<Int64> = Array<Int64>(4, repeat: -1)
 
     // 注意：泛型嵌套的连续 '>>' 会被解析成右移运算符，必须留空格
-    private var thresholds: Option<ArrayList<Float64> > = None
+    private var thresholds: Option<ArrayList<Float64>> = None
     private var onAlert: Option<(String, Int32) -> Unit> = None
 
     private var alertCount: Int64 = 0
@@ -50,8 +50,16 @@ public class Alerter {
     private var lastToast: Option<Toast> = None
 
     public init(requiredBreaches: Int64, toastWindowMs: Int64) {
-        this.requiredBreaches = if (requiredBreaches < 1) { 1 } else { requiredBreaches }
-        this.toastWindowMs = if (toastWindowMs < 0) { 0 } else { toastWindowMs }
+        this.requiredBreaches = if (requiredBreaches < 1) {
+            1
+        } else {
+            requiredBreaches
+        }
+        this.toastWindowMs = if (toastWindowMs < 0) {
+            0
+        } else {
+            toastWindowMs
+        }
     }
 
     public func attachThresholds(ts: ArrayList<Float64>): Unit {
@@ -130,12 +138,16 @@ public class Alerter {
         let now = monoMs()
         let last = lastFireMs[ch]
         if (last >= 0 && now - last < toastWindowMs) {
-            return   // 展示层去重（-1 表示从未提示过，不受窗口约束）
+            return // 展示层去重（-1 表示从未提示过，不受窗口约束）
         }
         lastFireMs[ch] = now
         alertCount += 1
 
-        let level: Int32 = if (v >= th * 1.1) { 2 } else { 1 }
+        let level: Int32 = if (v >= th * 1.1) {
+            2
+        } else {
+            1
+        }
         lastLevel = level
         let msg = "${Channel.name(Int32(ch))} ${fmt1(v)}${Channel.unit(Int32(ch))} 超过阈值 ${fmt1(th)}"
         lastText = msg
@@ -160,7 +172,7 @@ public class Alerter {
             return
         }
         if (!exists(Path(soundPath))) {
-            return   // 资源缺失：静默降级，不阻塞主流程
+            return // 资源缺失：静默降级，不阻塞主流程
         }
         if (!playerCreated) {
             let se = QSoundEffect()

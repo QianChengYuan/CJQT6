@@ -11,13 +11,13 @@ import std.convert.*
 import qq_lan_client.state.*
 
 /// 登录按钮回调
-let onLoginClick: VoidCallback = { => doLogin() }
+let onLoginClick: VoidCallback = {=> doLogin()}
 
 /// 注册链接回调
-let onShowRegister: VoidCallback = { => showRegisterDialog() }
+let onShowRegister: VoidCallback = {=> showRegisterDialog()}
 
 /// 回车触发登录
-let onLoginReturn: VoidCallback = { => doLogin() }
+let onLoginReturn: VoidCallback = {=> doLogin()}
 
 /// 构建登录窗口并返回
 public func buildLoginUI(): QWidget {
@@ -89,8 +89,9 @@ public func buildLoginUI(): QWidget {
 
     let loginBtn = QPushButton()
     loginBtn.setText("登  录")
-    loginBtn.setStyleSheet("background: #12B7F5; color: white; border: none; border-radius: 3px;" +
-        "padding: 6px 30px; font-size: 14px; font-weight: bold;")
+    loginBtn.setStyleSheet(
+        "background: #12B7F5; color: white; border: none; border-radius: 3px;" +
+            "padding: 6px 30px; font-size: 14px; font-weight: bold;")
     loginBtn.setOnClick(onLoginClick)
     row.addWidget(loginBtn.getPtr())
     vbox.addLayout(row.getPtr())
@@ -111,9 +112,15 @@ public func doLogin(): Unit {
     var accountText = ""
     var password = ""
     var serverAddr = ""
-    if (let Some(e) <- gAccountEdit) { accountText = e.text() }
-    if (let Some(e) <- gPasswordEdit) { password = e.text() }
-    if (let Some(e) <- gServerEdit) { serverAddr = e.text() }
+    if (let Some(e) <- gAccountEdit) {
+        accountText = e.text()
+    }
+    if (let Some(e) <- gPasswordEdit) {
+        password = e.text()
+    }
+    if (let Some(e) <- gServerEdit) {
+        serverAddr = e.text()
+    }
 
     if (accountText.isEmpty() || password.isEmpty()) {
         setLoginStatus("请输入 QQ 号和密码")
@@ -124,7 +131,6 @@ public func doLogin(): Unit {
         case Some(acc) =>
             let (host, port) = parseServerAddress(serverAddr)
             startLogin(host, port, acc, password)
-        case None =>
-            setLoginStatus("QQ 号必须是数字")
+        case None => setLoginStatus("QQ 号必须是数字")
     }
 }

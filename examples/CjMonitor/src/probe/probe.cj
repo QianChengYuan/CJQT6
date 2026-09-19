@@ -93,14 +93,24 @@ public func createPlatformProbe(): Probe {
 /// 该路径仅通过 setWorkingDirectory 传入（不参与空格切分），故含空格也安全。
 public func tempDir(): String {
     match (getVariable("TEMP")) {
-        case Some(v) => if (v.isEmpty()) { fallbackTemp() } else { v }
+        case Some(v) =>
+            if (v.isEmpty()) {
+                fallbackTemp()
+            } else {
+                v
+            }
         case None => fallbackTemp()
     }
 }
 
 func fallbackTemp(): String {
     match (getVariable("TMP")) {
-        case Some(v) => if (v.isEmpty()) { cwdString() } else { v }
+        case Some(v) =>
+            if (v.isEmpty()) {
+                cwdString()
+            } else {
+                v
+            }
         case None => cwdString()
     }
 }
@@ -113,7 +123,11 @@ func cwdString(): String {
 public func writeTempScript(fileName: String, content: String): Bool {
     try {
         let dir = tempDir()
-        let sep = if (dir.endsWith("/") || dir.endsWith("\\")) { "" } else { "\\" }
+        let sep = if (dir.endsWith("/") || dir.endsWith("\\")) {
+            ""
+        } else {
+            "\\"
+        }
         File.writeTo(Path(dir + sep + fileName), content.toArray())
         true
     } catch (_: Exception) {
@@ -187,12 +201,14 @@ public func parseProbeLine(line: String): ?Sample {
     if (!isNumber(f[0]) || !isNumber(f[1]) || !isNumber(f[2]) || !isNumber(f[3]) || !isNumber(f[4])) {
         return None
     }
-    Some(Sample(
-        epochMs(),
-        clampPercent(toF64(f[0])),
-        clampPercent(toF64(f[1])),
-        clampPercent(toF64(f[2])),
-        toF64(f[3]),
-        toF64(f[4])
-    ))
+    Some(
+        Sample(
+            epochMs(),
+            clampPercent(toF64(f[0])),
+            clampPercent(toF64(f[1])),
+            clampPercent(toF64(f[2])),
+            toF64(f[3]),
+            toF64(f[4])
+        )
+    )
 }

@@ -1,4 +1,4 @@
-﻿package all_controls_demo
+package all_controls_demo
 
 import cjqt6.core.*
 import cjqt6.widgets.*
@@ -65,8 +65,8 @@ let pageNames: Array<String> = [
 // ============================================================
 
 // 侧边栏切换回调（懒加载：首次切换时才创建页面内容）
-let onSidebarChanged: CFunc<(Int32) -> Unit> = { row: Int32 =>
-    if (row >= 0) {
+let onSidebarChanged: CFunc<(Int32) -> Unit> = {
+    row: Int32 => if (row >= 0) {
         let r = Int64(row)
         if (let Some(stack) <- gStackedWidget) {
             // 懒加载：首次切换时才创建页面，addWidget 到 stack 末尾，记录实际索引
@@ -100,44 +100,41 @@ let onSidebarChanged: CFunc<(Int32) -> Unit> = { row: Int32 =>
 }
 
 // 基础控件 - 按钮点击
-let onBtnClick: VoidCallback = { =>
-    if (let Some(status) <- gStatusLabel) {
+let onBtnClick: VoidCallback = {
+    => if (let Some(status) <- gStatusLabel) {
         status.setText("按钮被点击了！(点击时间: ${now()})")
     }
 }
-
-let onBtnClear: VoidCallback = { =>
-    if (let Some(status) <- gStatusLabel) {
+let onBtnClear: VoidCallback = {
+    => if (let Some(status) <- gStatusLabel) {
         status.setText("信息已清空 ✓")
     }
 }
-
-let onSliderChanged: Int32Callback = { value: Int32 =>
-    if (let Some(label) <- gSliderValueLabel) {
-        label.setText("当前值: ${value}")
-    }
-    if (let Some(bar) <- gProgressBar) {
-        bar.setValue(value)
-    }
+let onSliderChanged: Int32Callback = {
+    value: Int32 =>
+        if (let Some(label) <- gSliderValueLabel) {
+            label.setText("当前值: ${value}")
+        }
+        if (let Some(bar) <- gProgressBar) {
+            bar.setValue(value)
+        }
 }
-
-let onSpinChanged: Int32Callback = { value: Int32 =>
-    if (let Some(label) <- gSpinValueLabel) {
+let onSpinChanged: Int32Callback = {
+    value: Int32 => if (let Some(label) <- gSpinValueLabel) {
         label.setText("值: ${value}")
     }
 }
-
-let onDialChanged: Int32Callback = { value: Int32 =>
-    if (let Some(label) <- gDialValueLabel) {
-        label.setText("角度: ${value}°")
-    }
-    if (let Some(lcd) <- gLcdNumber) {
-        lcd.displayInt(value)
-    }
+let onDialChanged: Int32Callback = {
+    value: Int32 =>
+        if (let Some(label) <- gDialValueLabel) {
+            label.setText("角度: ${value}°")
+        }
+        if (let Some(lcd) <- gLcdNumber) {
+            lcd.displayInt(value)
+        }
 }
-
-let onCheckChanged: Int32Callback = { state: Int32 =>
-    if (let Some(label) <- gCheckStateLabel) {
+let onCheckChanged: Int32Callback = {
+    state: Int32 => if (let Some(label) <- gCheckStateLabel) {
         if (state == 2) {
             label.setText("复选框: 已选中 ✓")
         } else {
@@ -145,36 +142,32 @@ let onCheckChanged: Int32Callback = { state: Int32 =>
         }
     }
 }
-
-let onRadioChanged: Int32Callback = { checked: Int32 =>
-    if (checked == 1) {
+let onRadioChanged: Int32Callback = {
+    checked: Int32 => if (checked == 1) {
         if (let Some(label) <- gRadioLabel) {
             label.setText("单选: 选项已切换")
         }
     }
 }
-
-let onComboChanged: Int32Callback = { index: Int32 =>
-    if (let Some(label) <- gComboLabel) {
+let onComboChanged: Int32Callback = {
+    index: Int32 => if (let Some(label) <- gComboLabel) {
         label.setText("已选择: 第 ${index + 1} 项")
     }
 }
 
 // 对话框回调
-let onMsgInfo: VoidCallback = { =>
-    if (let Some(w) <- gMainWindow) {
+let onMsgInfo: VoidCallback = {
+    => if (let Some(w) <- gMainWindow) {
         QMessageBox.information(w.getPtr(), "信息", "这是一个信息对话框")
     }
 }
-
-let onMsgWarning: VoidCallback = { =>
-    if (let Some(w) <- gMainWindow) {
+let onMsgWarning: VoidCallback = {
+    => if (let Some(w) <- gMainWindow) {
         QMessageBox.warning(w.getPtr(), "警告", "这是一个警告对话框！")
     }
 }
-
-let onMsgQuestion: VoidCallback = { =>
-    if (let Some(w) <- gMainWindow) {
+let onMsgQuestion: VoidCallback = {
+    => if (let Some(w) <- gMainWindow) {
         let result = QMessageBox.question(w.getPtr(), "询问", "确定要执行此操作吗？")
         if (let Some(status) <- gStatusLabel) {
             if (result) {
@@ -185,15 +178,13 @@ let onMsgQuestion: VoidCallback = { =>
         }
     }
 }
-
-let onMsgError: VoidCallback = { =>
-    if (let Some(w) <- gMainWindow) {
+let onMsgError: VoidCallback = {
+    => if (let Some(w) <- gMainWindow) {
         QMessageBox.critical(w.getPtr(), "错误", "发生了一个严重错误！")
     }
 }
-
-let onFileOpen: VoidCallback = { =>
-    if (let Some(w) <- gMainWindow) {
+let onFileOpen: VoidCallback = {
+    => if (let Some(w) <- gMainWindow) {
         let filePath = QFileDialog.getOpenFileName(w.getPtr(), "选择文件", "所有文件 (*.*)")
         if (!filePath.isEmpty()) {
             if (let Some(status) <- gStatusLabel) {
@@ -202,9 +193,8 @@ let onFileOpen: VoidCallback = { =>
         }
     }
 }
-
-let onFileSave: VoidCallback = { =>
-    if (let Some(w) <- gMainWindow) {
+let onFileSave: VoidCallback = {
+    => if (let Some(w) <- gMainWindow) {
         let filePath = QFileDialog.getSaveFileName(w.getPtr(), "保存文件", "文本文件 (*.txt)")
         if (!filePath.isEmpty()) {
             if (let Some(status) <- gStatusLabel) {
@@ -213,9 +203,8 @@ let onFileSave: VoidCallback = { =>
         }
     }
 }
-
-let onInputText: VoidCallback = { =>
-    if (let Some(w) <- gMainWindow) {
+let onInputText: VoidCallback = {
+    => if (let Some(w) <- gMainWindow) {
         let (text, ok) = QInputDialog.getTextWithResult(w.getPtr(), "输入文本", "请输入内容:", "")
         if (ok) {
             if (let Some(status) <- gStatusLabel) {
@@ -224,9 +213,8 @@ let onInputText: VoidCallback = { =>
         }
     }
 }
-
-let onInputInt: VoidCallback = { =>
-    if (let Some(w) <- gMainWindow) {
+let onInputInt: VoidCallback = {
+    => if (let Some(w) <- gMainWindow) {
         let (value, ok) = QInputDialog.getIntWithResult(w.getPtr(), "输入整数", "请输入一个数字:", 0, 0, 1000)
         if (ok) {
             if (let Some(status) <- gStatusLabel) {
@@ -235,9 +223,8 @@ let onInputInt: VoidCallback = { =>
         }
     }
 }
-
-let onColorPicker: VoidCallback = { =>
-    if (let Some(w) <- gMainWindow) {
+let onColorPicker: VoidCallback = {
+    => if (let Some(w) <- gMainWindow) {
         let color = QColorDialog.getColor(w.getPtr(), "选择颜色")
         if (!color.isEmpty()) {
             if (let Some(status) <- gStatusLabel) {
@@ -246,9 +233,8 @@ let onColorPicker: VoidCallback = { =>
         }
     }
 }
-
-let onFontPicker: VoidCallback = { =>
-    if (let Some(w) <- gMainWindow) {
+let onFontPicker: VoidCallback = {
+    => if (let Some(w) <- gMainWindow) {
         let fontName = QFontDialog.getFontName(w.getPtr(), "选择字体")
         if (!fontName.isEmpty()) {
             if (let Some(status) <- gStatusLabel) {
@@ -261,24 +247,25 @@ let onFontPicker: VoidCallback = { =>
 // 新控件页 (v1.2.0) 回调
 
 // QSplashScreen 超时回调（独立 CFunc，不捕获局部变量）
-let onSplashTimeout: VoidCallback = { =>
-    if (let Some(win) <- gMainWindow) {
-        if (let Some(sp) <- gNewSplash) {
-            sp.finish(win)
-            sp.delete()
-            gNewSplash = None
+let onSplashTimeout: VoidCallback = {
+    =>
+        if (let Some(win) <- gMainWindow) {
+            if (let Some(sp) <- gNewSplash) {
+                sp.finish(win)
+                sp.delete()
+                gNewSplash = None
+            }
         }
-    }
-    if (let Some(t) <- gNewTimer) {
-        t.stop()
-        t.delete()
-        gNewTimer = None
-    }
+        if (let Some(t) <- gNewTimer) {
+            t.stop()
+            t.delete()
+            gNewTimer = None
+        }
 }
 
 // QSplashScreen - 显示 2 秒后自动关闭
-let onShowSplash: VoidCallback = { =>
-    if (let Some(w) <- gMainWindow) {
+let onShowSplash: VoidCallback = {
+    => if (let Some(w) <- gMainWindow) {
         gNewSplash = QSplashScreen()
         if (let Some(sp) <- gNewSplash) {
             sp.showMessage("正在加载 CJQT6 v1.2.0 新控件…")
@@ -302,8 +289,8 @@ let onShowSplash: VoidCallback = { =>
 }
 
 // QRubberBand - 显示选择框
-let onRubberShow: VoidCallback = { =>
-    if (let Some(c) <- gNewContainer) {
+let onRubberShow: VoidCallback = {
+    => if (let Some(c) <- gNewContainer) {
         if (let Some(rb) <- gNewRubberBand) {
             // 已存在，直接显示
             rb.setGeometry(20, 20, 220, 130)
@@ -324,8 +311,8 @@ let onRubberShow: VoidCallback = { =>
 }
 
 // QRubberBand - 隐藏选择框
-let onRubberHide: VoidCallback = { =>
-    if (let Some(rb) <- gNewRubberBand) {
+let onRubberHide: VoidCallback = {
+    => if (let Some(rb) <- gNewRubberBand) {
         rb.hide()
         if (let Some(status) <- gStatusLabel) {
             status.setText("选择框已隐藏")
@@ -338,7 +325,7 @@ let onRubberHide: VoidCallback = { =>
 // ============================================================
 
 func now(): String {
-    "12:00:00"  // 简化实现
+    "12:00:00" // 简化实现
 }
 
 func setLabelStyle(lbl: QLabel, style: String) {
@@ -425,8 +412,8 @@ main(): Int32 {
     // ========== 分割器组装 ==========
     splitter.addWidget(sidebar.getPtr())
     splitter.addWidget(stackedWidget.getPtr())
-    splitter.setStretchFactor(0, 0)  // 侧边栏不拉伸
-    splitter.setStretchFactor(1, 1)  // 内容区域拉伸
+    splitter.setStretchFactor(0, 0) // 侧边栏不拉伸
+    splitter.setStretchFactor(1, 1) // 内容区域拉伸
 
     // ========== 主布局（垂直：分割器 + 状态栏） ==========
     let mainLayout = QVBoxLayout()
@@ -438,7 +425,7 @@ main(): Int32 {
 
     // 状态栏（紧凑）
     let statusBar = QFrame()
-    statusBar.setFrameShape(0)    // NoFrame - 减少边框高度
+    statusBar.setFrameShape(0) // NoFrame - 减少边框高度
     let statusBarLayout = QHBoxLayout()
     statusBarLayout.setMargin(0)
     statusBarLayout.setSpacing(4)
@@ -461,7 +448,8 @@ main(): Int32 {
     window.setLayout(mainLayout.getPtr())
 
     // ========== 样式美化 ==========
-    sidebar.setStyleSheet("""
+    sidebar.setStyleSheet(
+        """
         QListWidget {
             border: none;
             border-right: 1px solid #dcdde1;
@@ -482,7 +470,8 @@ main(): Int32 {
         }
     """)
 
-    window.setStyleSheet("""
+    window.setStyleSheet(
+        """
         QWidget {
             font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
         }

@@ -28,17 +28,15 @@ public func tabWidget(): ?QTabWidget {
     gTabWidget
 }
 
-let onQuitAction: VoidCallback = { =>
-    QApp.quit()
+let onQuitAction: VoidCallback = {
+    => QApp.quit()
 }
-
-let onAboutAction: VoidCallback = { =>
-    QMessageBox.information(
+let onAboutAction: VoidCallback = {
+    => QMessageBox.information(
         0,
         "关于 CjMonitor",
         "CjMonitor —— CJQT6 系统监控台\n\n" +
-            "定位：性能与实时性压测（高频采样 + 实时渲染 + 长稳运行）\n" +
-            "采样周期：100ms\n" +
+            "定位：性能与实时性压测（高频采样 + 实时渲染 + 长稳运行）\n" + "采样周期：100ms\n" +
             "监控通道：CPU / 内存 / 磁盘 / 网络"
     )
 }
@@ -48,17 +46,16 @@ let REPORT_FILE = "cjmonitor_report.pdf"
 
 // 菜单动作：都落在 ui 包内（顶层 CFunc，不捕获局部变量），
 // 由 ui 调用 app / report 的能力，避免 ui 反向依赖根包造成循环。
-let onExportReportAction: VoidCallback = { =>
-    exportInspectionReport(REPORT_FILE)
+let onExportReportAction: VoidCallback = {
+    => exportInspectionReport(REPORT_FILE)
 }
-
-let onTogglePauseAction: VoidCallback = { =>
+let onTogglePauseAction: VoidCallback = {
+    =>
     // CFunc 的调用本身也需要 unsafe 上下文
     unsafe { onPauseToggle() }
 }
-
-let onThresholdAction: VoidCallback = { =>
-    openThresholdWindow()
+let onThresholdAction: VoidCallback = {
+    => openThresholdWindow()
 }
 
 func buildMenuBar(): QMenuBar {

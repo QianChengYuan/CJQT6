@@ -20,24 +20,40 @@ public class ChannelStats {
             minV = v
             hasData = true
         } else {
-            if (v > maxV) { maxV = v }
-            if (v < minV) { minV = v }
+            if (v > maxV) {
+                maxV = v
+            }
+            if (v < minV) {
+                minV = v
+            }
         }
         sum += v
         n += 1
         lastV = v
     }
 
-    public func count(): Int64 { n }
+    public func count(): Int64 {
+        n
+    }
 
-    public func last(): Float64 { lastV }
+    public func last(): Float64 {
+        lastV
+    }
 
-    public func max(): Float64 { maxV }
+    public func max(): Float64 {
+        maxV
+    }
 
-    public func min(): Float64 { minV }
+    public func min(): Float64 {
+        minV
+    }
 
     public func avg(): Float64 {
-        if (n == 0) { 0.0 } else { sum / Float64(n) }
+        if (n == 0) {
+            0.0
+        } else {
+            sum / Float64(n)
+        }
     }
 
     public func reset(): Unit {
@@ -91,28 +107,48 @@ public class IntervalStats {
             minMs = d
             maxMs = d
         } else {
-            if (minMs > d) { minMs = d }
-            if (maxMs < d) { maxMs = d }
+            if (minMs > d) {
+                minMs = d
+            }
+            if (maxMs < d) {
+                maxMs = d
+            }
         }
         sumMs += d
         n += 1
-        let dev = if (expectedMs < d) { d - expectedMs } else { expectedMs - d }
+        let dev = if (expectedMs < d) {
+            d - expectedMs
+        } else {
+            expectedMs - d
+        }
         if (tolMs < dev) {
             outliers += 1
         }
     }
 
-    public func count(): Int64 { n }
-
-    public func minIntervalMs(): Int64 { minMs }
-
-    public func maxIntervalMs(): Int64 { maxMs }
-
-    public func avgIntervalMs(): Float64 {
-        if (n == 0) { 0.0 } else { Float64(sumMs) / Float64(n) }
+    public func count(): Int64 {
+        n
     }
 
-    public func outlierCount(): Int64 { outliers }
+    public func minIntervalMs(): Int64 {
+        minMs
+    }
+
+    public func maxIntervalMs(): Int64 {
+        maxMs
+    }
+
+    public func avgIntervalMs(): Float64 {
+        if (n == 0) {
+            0.0
+        } else {
+            Float64(sumMs) / Float64(n)
+        }
+    }
+
+    public func outlierCount(): Int64 {
+        outliers
+    }
 
     /// 单行摘要：样本数 / 最小 / 最大 / 平均 / 超窗次数
     public func summary(): String {
@@ -149,5 +185,7 @@ public class FrameStats {
         lastFps
     }
 
-    public func currentFps(): Int32 { lastFps }
+    public func currentFps(): Int32 {
+        lastFps
+    }
 }

@@ -35,7 +35,6 @@ let M5_REQUIRED_BREACHES: Int64 = 3
 let M5_TOAST_WINDOW_MS: Int64 = 5000
 /// 集成检查用的通道阈值（设成 1% 以保证真实采样持续超阈）
 let M5_LOW_THRESHOLD: Float64 = 1.0
-
 var gM5State: ?AppState = None
 var gM5Timer: ?QTimer = None
 var gM5Alerter: ?Alerter = None
@@ -50,22 +49,20 @@ var gM5LastFireText: String = ""
 
 /// 确定性路径（合成样本）告警次数
 var gM5DetFires: Int64 = 0
-
-let onM5RealAlert: (String, Int32) -> Unit = { msg: String, level: Int32 =>
-    if (gM5RealFires == 0) {
-        gM5FirstFireMs = monoMs() - gM5StartMs
-    }
-    gM5RealFires += 1
-    gM5LastFireText = msg
-    setAlertText(msg, level)
+let onM5RealAlert: (String, Int32) -> Unit = {
+    msg: String, level: Int32 =>
+        if (gM5RealFires == 0) {
+            gM5FirstFireMs = monoMs() - gM5StartMs
+        }
+        gM5RealFires += 1
+        gM5LastFireText = msg
+        setAlertText(msg, level)
 }
-
-let onM5DetAlert: (String, Int32) -> Unit = { msg: String, level: Int32 =>
-    gM5DetFires += 1
+let onM5DetAlert: (String, Int32) -> Unit = {
+    msg: String, level: Int32 => gM5DetFires += 1
 }
-
-let onM5Tick: VoidCallback = {=>
-    m5Tick()
+let onM5Tick: VoidCallback = {
+    => m5Tick()
 }
 
 /// 读取观察秒数（未设置或非法则为 0）
@@ -126,7 +123,7 @@ func cpuOnlyThresholds(v: Float64): ArrayList<Float64> {
     ts.add(v)
     var i: Int64 = 1
     while (i < Int64(Channel.COUNT)) {
-        ts.add(0.0)   // 0 = 该通道不启用告警
+        ts.add(0.0) // 0 = 该通道不启用告警
         i += 1
     }
     ts
@@ -135,7 +132,7 @@ func cpuOnlyThresholds(v: Float64): ArrayList<Float64> {
 /// 建一个只观察 CPU 通道的判定器
 func mkDetAlerter(th: Float64, windowMs: Int64): Alerter {
     let a = Alerter(M5_REQUIRED_BREACHES, windowMs)
-    a.setSoundPath(M5_SOUND_PATH)   // 资源缺失 → 走静默降级
+    a.setSoundPath(M5_SOUND_PATH) // 资源缺失 → 走静默降级
     a.attachThresholds(cpuOnlyThresholds(th))
     a.setOnAlert(onM5DetAlert)
     a
@@ -148,23 +145,23 @@ func runDeterministicChecks(): (Bool, Bool, Bool, Bool, Bool, Bool) {
     // ---- 去抖 + 精确等值语义 ----
     gM5DetFires = 0
     let a1 = mkDetAlerter(th, M5_TOAST_WINDOW_MS)
-    a1.onSample(mkCpuSample(80.0))          // 第 1 次超阈
+    a1.onSample(mkCpuSample(80.0)) // 第 1 次超阈
     let noFireAt1 = gM5DetFires == 0
-    a1.onSample(mkCpuSample(80.0))          // 第 2 次
+    a1.onSample(mkCpuSample(80.0)) // 第 2 次
     let noFireAt2 = gM5DetFires == 0
-    a1.onSample(mkCpuSample(80.0))          // 第 3 次 → 触发
+    a1.onSample(mkCpuSample(80.0)) // 第 3 次 → 触发
     let fireAt3 = gM5DetFires == 1
-    a1.onSample(mkCpuSample(80.0))          // 第 4~6 次：精确等值 → 不再触发
+    a1.onSample(mkCpuSample(80.0)) // 第 4~6 次：精确等值 → 不再触发
     a1.onSample(mkCpuSample(80.0))
     a1.onSample(mkCpuSample(80.0))
     let noRepeat = gM5DetFires == 1
 
     // ---- 去重：回落后再连续达标，落在 5s 窗口内 → 被抑制 ----
-    a1.onSample(mkCpuSample(10.0))          // 回落到阈值下 → 计数清零
+    a1.onSample(mkCpuSample(10.0)) // 回落到阈值下 → 计数清零
     a1.onSample(mkCpuSample(10.0))
     a1.onSample(mkCpuSample(80.0))
     a1.onSample(mkCpuSample(80.0))
-    a1.onSample(mkCpuSample(80.0))          // 再次达到 3 → 但距上次 <5s → 抑制
+    a1.onSample(mkCpuSample(80.0)) // 再次达到 3 → 但距上次 <5s → 抑制
     let deduped = gM5DetFires == 1
     a1.dispose()
 
@@ -343,7 +340,7 @@ func runM5SelfTest(app: QApplication, seconds: Int64): Int64 {
     let alerter = Alerter(M5_REQUIRED_BREACHES, M5_TOAST_WINDOW_MS)
     alerter.attachThresholds(state.thresholdsRef())
     alerter.setOnAlert(onM5RealAlert)
-    alerter.setSoundPath(M5_SOUND_PATH)   // 资源缺失 → 静默降级
+    alerter.setSoundPath(M5_SOUND_PATH) // 资源缺失 → 静默降级
     state.attachAlerter(alerter)
     gM5Alerter = Some(alerter)
 

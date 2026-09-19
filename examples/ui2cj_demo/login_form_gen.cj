@@ -7,7 +7,8 @@ import cjqt6.gui.*
 import cjqt6.widgets.*
 
 // ===== 事件回调骨架（请在函数体内编写业务逻辑） =====
-let on_loginBtn_clicked: VoidCallback = { =>
+let on_loginBtn_clicked: VoidCallback = {
+    =>
     // TODO: 处理 loginBtn 的 clicked() 事件
 }
 

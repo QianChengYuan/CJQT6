@@ -18,12 +18,11 @@ public var gRegisterDialog: ?QWidget = None
 public var gRegNickname: ?QLineEdit = None
 public var gRegPassword: ?QLineEdit = None
 public var gRegStatus: ?QLabel = None
-
-let onRegisterSubmit: VoidCallback = { => doRegister() }
-let onRegisterCancel: VoidCallback = { => closeRegisterDialog() }
+let onRegisterSubmit: VoidCallback = {=> doRegister()}
+let onRegisterCancel: VoidCallback = {=> closeRegisterDialog()}
 
 /// "添加好友"按钮回调（供 main_window.cj 使用；定义在本文件以引用 showAddFriendDialog）
-public let onAddFriendClick: VoidCallback = { => showAddFriendDialog() }
+public let onAddFriendClick: VoidCallback = {=> showAddFriendDialog()}
 
 /// 打开注册对话框
 public func showRegisterDialog(): Unit {
@@ -72,13 +71,15 @@ public func showRegisterDialog(): Unit {
     let row = QHBoxLayout()
     let cancelBtn = QPushButton()
     cancelBtn.setText("取消")
-    cancelBtn.setStyleSheet("background: transparent; color: #666; border: 1px solid #C5CDD8; border-radius: 3px; padding: 6px 18px;")
+    cancelBtn.setStyleSheet(
+        "background: transparent; color: #666; border: 1px solid #C5CDD8; border-radius: 3px; padding: 6px 18px;")
     cancelBtn.setOnClick(onRegisterCancel)
     row.addWidget(cancelBtn.getPtr())
     row.addStretch()
     let okBtn = QPushButton()
     okBtn.setText("注册")
-    okBtn.setStyleSheet("background: #12B7F5; color: white; border: none; border-radius: 3px; padding: 6px 24px; font-weight: bold;")
+    okBtn.setStyleSheet(
+        "background: #12B7F5; color: white; border: none; border-radius: 3px; padding: 6px 24px; font-weight: bold;")
     okBtn.setOnClick(onRegisterSubmit)
     row.addWidget(okBtn.getPtr())
     vbox.addLayout(row.getPtr())
@@ -99,8 +100,12 @@ public func setRegisterStatus(text: String): Unit {
 public func doRegister(): Unit {
     var nickname = ""
     var password = ""
-    if (let Some(e) <- gRegNickname) { nickname = e.text() }
-    if (let Some(e) <- gRegPassword) { password = e.text() }
+    if (let Some(e) <- gRegNickname) {
+        nickname = e.text()
+    }
+    if (let Some(e) <- gRegPassword) {
+        password = e.text()
+    }
     if (nickname.isEmpty()) {
         setRegisterStatus("请输入昵称")
         return
@@ -111,11 +116,14 @@ public func doRegister(): Unit {
     }
     if (gConnected) {
         setRegisterStatus("正在注册...")
-        sendRaw("{\"type\":\"register\",\"nickname\":\"${escapeJson(nickname)}\",\"password\":\"${escapeJson(password)}\"}")
+        sendRaw(
+            "{\"type\":\"register\",\"nickname\":\"${escapeJson(nickname)}\",\"password\":\"${escapeJson(password)}\"}")
     } else {
         // 未连接：先连接登录页填写的服务器，连接成功后自动发送注册帧
         var serverAddr = ""
-        if (let Some(e) <- gServerEdit) { serverAddr = e.text() }
+        if (let Some(e) <- gServerEdit) {
+            serverAddr = e.text()
+        }
         let (host, port) = parseServerAddress(serverAddr)
         startRegister(host, port, nickname, password)
     }
@@ -134,9 +142,8 @@ public func closeRegisterDialog(): Unit {
 public var gAddFriendDialog: ?QWidget = None
 public var gAddAccountEdit: ?QLineEdit = None
 public var gAddStatus: ?QLabel = None
-
-let onAddFriendSubmit: VoidCallback = { => doAddFriend() }
-let onAddFriendCancel: VoidCallback = { => closeAddFriendDialog() }
+let onAddFriendSubmit: VoidCallback = {=> doAddFriend()}
+let onAddFriendCancel: VoidCallback = {=> closeAddFriendDialog()}
 
 /// 打开添加好友对话框
 public func showAddFriendDialog(): Unit {
@@ -173,13 +180,15 @@ public func showAddFriendDialog(): Unit {
     let row = QHBoxLayout()
     let cancelBtn = QPushButton()
     cancelBtn.setText("取消")
-    cancelBtn.setStyleSheet("background: transparent; color: #666; border: 1px solid #C5CDD8; border-radius: 3px; padding: 6px 18px;")
+    cancelBtn.setStyleSheet(
+        "background: transparent; color: #666; border: 1px solid #C5CDD8; border-radius: 3px; padding: 6px 18px;")
     cancelBtn.setOnClick(onAddFriendCancel)
     row.addWidget(cancelBtn.getPtr())
     row.addStretch()
     let okBtn = QPushButton()
     okBtn.setText("添加")
-    okBtn.setStyleSheet("background: #12B7F5; color: white; border: none; border-radius: 3px; padding: 6px 24px; font-weight: bold;")
+    okBtn.setStyleSheet(
+        "background: #12B7F5; color: white; border: none; border-radius: 3px; padding: 6px 24px; font-weight: bold;")
     okBtn.setOnClick(onAddFriendSubmit)
     row.addWidget(okBtn.getPtr())
     vbox.addLayout(row.getPtr())
@@ -199,7 +208,9 @@ public func setAddFriendStatus(text: String): Unit {
 /// 提交添加好友请求
 public func doAddFriend(): Unit {
     var text = ""
-    if (let Some(e) <- gAddAccountEdit) { text = e.text() }
+    if (let Some(e) <- gAddAccountEdit) {
+        text = e.text()
+    }
     if (text.isEmpty()) {
         setAddFriendStatus("请输入对方 QQ 号")
         return
@@ -208,8 +219,7 @@ public func doAddFriend(): Unit {
         case Some(account) =>
             setAddFriendStatus("正在添加...")
             sendRaw("{\"type\":\"add_friend\",\"account\":${account}}")
-        case None =>
-            setAddFriendStatus("QQ 号必须是数字")
+        case None => setAddFriendStatus("QQ 号必须是数字")
     }
 }
 
@@ -230,26 +240,23 @@ public func closeAddFriendDialog(): Unit {
 public var gRemarkDialog: ?QWidget = None
 public var gRemarkEdit: ?QLineEdit = None
 public var gRemarkTargetId: Int64 = 0
-
 public var gNickDialog: ?QWidget = None
 public var gNickEdit: ?QLineEdit = None
-
 public var gPwdDialog: ?QWidget = None
 public var gOldPwdEdit: ?QLineEdit = None
 public var gNewPwdEdit: ?QLineEdit = None
-
-let onRemarkSubmit: VoidCallback = { => doSetRemark() }
-let onRemarkCancel: VoidCallback = { => closeRemarkDialog() }
-let onNickSubmit: VoidCallback = { => doChangeNick() }
-let onNickCancel: VoidCallback = { => closeProfileDialogs() }
-let onPwdSubmit: VoidCallback = { => doChangePwd() }
-let onPwdCancel: VoidCallback = { => closeProfileDialogs() }
+let onRemarkSubmit: VoidCallback = {=> doSetRemark()}
+let onRemarkCancel: VoidCallback = {=> closeRemarkDialog()}
+let onNickSubmit: VoidCallback = {=> doChangeNick()}
+let onNickCancel: VoidCallback = {=> closeProfileDialogs()}
+let onPwdSubmit: VoidCallback = {=> doChangePwd()}
+let onPwdCancel: VoidCallback = {=> closeProfileDialogs()}
 
 /// 主窗口管理按钮回调（public，供 main_window 引用）
-public let onRemarkClick: VoidCallback = { => showRemarkDialog() }
-public let onDelFriendClick: VoidCallback = { => showDelFriendConfirm() }
-public let onChangeNickClick: VoidCallback = { => showChangeNickDialog() }
-public let onChangePwdClick: VoidCallback = { => showChangePwdDialog() }
+public let onRemarkClick: VoidCallback = {=> showRemarkDialog()}
+public let onDelFriendClick: VoidCallback = {=> showDelFriendConfirm()}
+public let onChangeNickClick: VoidCallback = {=> showChangeNickDialog()}
+public let onChangePwdClick: VoidCallback = {=> showChangePwdDialog()}
 
 /// 打开备注对话框（针对当前选中好友）
 public func showRemarkDialog(): Unit {
@@ -282,13 +289,15 @@ public func showRemarkDialog(): Unit {
     let row = QHBoxLayout()
     let cancelBtn = QPushButton()
     cancelBtn.setText("取消")
-    cancelBtn.setStyleSheet("background: transparent; color: #666; border: 1px solid #C5CDD8; border-radius: 3px; padding: 6px 18px;")
+    cancelBtn.setStyleSheet(
+        "background: transparent; color: #666; border: 1px solid #C5CDD8; border-radius: 3px; padding: 6px 18px;")
     cancelBtn.setOnClick(onRemarkCancel)
     row.addWidget(cancelBtn.getPtr())
     row.addStretch()
     let okBtn = QPushButton()
     okBtn.setText("保存")
-    okBtn.setStyleSheet("background: #12B7F5; color: white; border: none; border-radius: 3px; padding: 6px 24px; font-weight: bold;")
+    okBtn.setStyleSheet(
+        "background: #12B7F5; color: white; border: none; border-radius: 3px; padding: 6px 24px; font-weight: bold;")
     okBtn.setOnClick(onRemarkSubmit)
     row.addWidget(okBtn.getPtr())
     vbox.addLayout(row.getPtr())
@@ -299,13 +308,19 @@ public func showRemarkDialog(): Unit {
 
 public func doSetRemark(): Unit {
     var remark = ""
-    if (let Some(e) <- gRemarkEdit) { remark = e.text() }
+    if (let Some(e) <- gRemarkEdit) {
+        remark = e.text()
+    }
     sendRaw("{\"type\":\"set_remark\",\"friend\":${gRemarkTargetId},\"remark\":\"${escapeJson(remark)}\"}")
 }
 
 public func closeRemarkDialog(): Unit {
-    if (let Some(d) <- gRemarkDialog) { d.hide() }
-    if (let Some(e) <- gRemarkEdit) { e.setText("") }
+    if (let Some(d) <- gRemarkDialog) {
+        d.hide()
+    }
+    if (let Some(e) <- gRemarkEdit) {
+        e.setText("")
+    }
 }
 
 /// 删除好友（确认后发送）
@@ -346,13 +361,15 @@ public func showChangeNickDialog(): Unit {
     let row = QHBoxLayout()
     let cancelBtn = QPushButton()
     cancelBtn.setText("取消")
-    cancelBtn.setStyleSheet("background: transparent; color: #666; border: 1px solid #C5CDD8; border-radius: 3px; padding: 6px 18px;")
+    cancelBtn.setStyleSheet(
+        "background: transparent; color: #666; border: 1px solid #C5CDD8; border-radius: 3px; padding: 6px 18px;")
     cancelBtn.setOnClick(onNickCancel)
     row.addWidget(cancelBtn.getPtr())
     row.addStretch()
     let okBtn = QPushButton()
     okBtn.setText("保存")
-    okBtn.setStyleSheet("background: #12B7F5; color: white; border: none; border-radius: 3px; padding: 6px 24px; font-weight: bold;")
+    okBtn.setStyleSheet(
+        "background: #12B7F5; color: white; border: none; border-radius: 3px; padding: 6px 24px; font-weight: bold;")
     okBtn.setOnClick(onNickSubmit)
     row.addWidget(okBtn.getPtr())
     vbox.addLayout(row.getPtr())
@@ -363,7 +380,9 @@ public func showChangeNickDialog(): Unit {
 
 public func doChangeNick(): Unit {
     var nick = ""
-    if (let Some(e) <- gNickEdit) { nick = e.text() }
+    if (let Some(e) <- gNickEdit) {
+        nick = e.text()
+    }
     if (nick.isEmpty()) {
         QMessageBox.warning(0, "修改昵称", "昵称不能为空")
         return
@@ -399,13 +418,15 @@ public func showChangePwdDialog(): Unit {
     let row = QHBoxLayout()
     let cancelBtn = QPushButton()
     cancelBtn.setText("取消")
-    cancelBtn.setStyleSheet("background: transparent; color: #666; border: 1px solid #C5CDD8; border-radius: 3px; padding: 6px 18px;")
+    cancelBtn.setStyleSheet(
+        "background: transparent; color: #666; border: 1px solid #C5CDD8; border-radius: 3px; padding: 6px 18px;")
     cancelBtn.setOnClick(onPwdCancel)
     row.addWidget(cancelBtn.getPtr())
     row.addStretch()
     let okBtn = QPushButton()
     okBtn.setText("保存")
-    okBtn.setStyleSheet("background: #12B7F5; color: white; border: none; border-radius: 3px; padding: 6px 24px; font-weight: bold;")
+    okBtn.setStyleSheet(
+        "background: #12B7F5; color: white; border: none; border-radius: 3px; padding: 6px 24px; font-weight: bold;")
     okBtn.setOnClick(onPwdSubmit)
     row.addWidget(okBtn.getPtr())
     vbox.addLayout(row.getPtr())
@@ -417,8 +438,12 @@ public func showChangePwdDialog(): Unit {
 public func doChangePwd(): Unit {
     var oldPwd = ""
     var newPwd = ""
-    if (let Some(e) <- gOldPwdEdit) { oldPwd = e.text() }
-    if (let Some(e) <- gNewPwdEdit) { newPwd = e.text() }
+    if (let Some(e) <- gOldPwdEdit) {
+        oldPwd = e.text()
+    }
+    if (let Some(e) <- gNewPwdEdit) {
+        newPwd = e.text()
+    }
     if (newPwd.size < 4) {
         QMessageBox.warning(0, "修改密码", "新密码至少 4 位")
         return
@@ -428,9 +453,19 @@ public func doChangePwd(): Unit {
 
 /// 关闭改昵称/改密码对话框
 public func closeProfileDialogs(): Unit {
-    if (let Some(d) <- gNickDialog) { d.hide() }
-    if (let Some(d) <- gPwdDialog) { d.hide() }
-    if (let Some(e) <- gNickEdit) { e.setText("") }
-    if (let Some(e) <- gOldPwdEdit) { e.setText("") }
-    if (let Some(e) <- gNewPwdEdit) { e.setText("") }
+    if (let Some(d) <- gNickDialog) {
+        d.hide()
+    }
+    if (let Some(d) <- gPwdDialog) {
+        d.hide()
+    }
+    if (let Some(e) <- gNickEdit) {
+        e.setText("")
+    }
+    if (let Some(e) <- gOldPwdEdit) {
+        e.setText("")
+    }
+    if (let Some(e) <- gNewPwdEdit) {
+        e.setText("")
+    }
 }

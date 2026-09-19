@@ -16,9 +16,8 @@ import CjMonitor.common.*
 // ============================================================
 
 var gGaugePanel: ?GaugePanel = None
-
-let onGaugePaint: CFunc<(Int64) -> Unit> = { painterPtr: Int64 =>
-    if (let Some(g) <- gGaugePanel) {
+let onGaugePaint: CFunc<(Int64) -> Unit> = {
+    painterPtr: Int64 => if (let Some(g) <- gGaugePanel) {
         g.paint(painterPtr)
     }
 }

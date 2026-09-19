@@ -13,7 +13,7 @@ import cjqt6.sql.*
 import cjqt6.network.*
 
 /// 清理定时器回调（顶层 CFunc，不捕获变量）
-let onCleanupTick: VoidCallback = { => cleanupTick() }
+let onCleanupTick: VoidCallback = {=> cleanupTick()}
 
 main(): Int32 {
     let app = QApplication()
@@ -69,7 +69,7 @@ main(): Int32 {
         return 1
     }
     gServer = server
-    let _ = server.setOnNewConnectionCapture({ => acceptNewConnections() })
+    let _ = server.setOnNewConnectionCapture({=> acceptNewConnections()})
     serverLog("服务端启动，监听 ${server.serverAddress()}:${server.serverPort()}")
 
     // ---- 会话清理定时器（断开后的套接字统一在此释放）----

@@ -78,7 +78,9 @@ public func serverLog(msg: String): Unit {
 public func updateStatus(): Unit {
     var online = 0
     for ((_, sess) in gSessions) {
-        if (sess.userId != 0) { online++ }
+        if (sess.userId != 0) {
+            online++
+        }
     }
     if (let Some(l) <- gStatus) {
         l.setText("监听端口: ${SERVER_PORT}        在线用户: ${online}")
@@ -103,7 +105,11 @@ public func escapeJson(s: String): String {
 /// 从对象取字符串字段（取完即释放 QJsonValue）
 public func jstr(obj: QJsonObject, key: String): String {
     let v = obj.value(key)
-    let s = if (v.isString()) { v.toString() } else { "" }
+    let s = if (v.isString()) {
+        v.toString()
+    } else {
+        ""
+    }
     v.close()
     s
 }
@@ -118,7 +124,9 @@ public func jint(obj: QJsonObject, key: String): Int64 {
 
 /// 发送一帧 JSON（自动追加换行符）
 public func sendJson(sess: Session, json: String): Unit {
-    if (sess.closing) { return }
+    if (sess.closing) {
+        return
+    }
     let n = sess.socket.writeString(json + "\n")
     if (n < 0) {
         serverLog("发送失败: ${sess.peer}")
@@ -172,8 +180,8 @@ public func acceptNewConnections(): Unit {
                     let ptr = sock.getPtr()
                     gSessions[ptr] = sess
                     // 闭包捕获 ptr，回调内即可定位来源会话
-                    sess.readyReadId = sock.setOnReadyReadCapture({ => onSessionData(ptr) })
-                    sess.disconnectedId = sock.setOnDisconnectedCapture({ => onSessionClosed(ptr) })
+                    sess.readyReadId = sock.setOnReadyReadCapture({=> onSessionData(ptr)})
+                    sess.disconnectedId = sock.setOnDisconnectedCapture({=> onSessionClosed(ptr)})
                     serverLog("新连接: ${sess.peer}")
                 case None => ()
             }
@@ -186,7 +194,9 @@ public func acceptNewConnections(): Unit {
 public func onSessionData(ptr: Int64): Unit {
     match (gSessions.get(ptr)) {
         case Some(sess) =>
-            if (sess.closing) { return }
+            if (sess.closing) {
+                return
+            }
             let chunk = sess.socket.readAll()
             if (chunk.size > 0) {
                 sess.buffer = sess.buffer.concat(chunk)
@@ -237,7 +247,9 @@ public func onSessionClosed(ptr: Int64): Unit {
 
 /// 定时器回调：清理已断开的会话
 public func cleanupTick(): Unit {
-    if (gClosingQueue.size == 0) { return }
+    if (gClosingQueue.size == 0) {
+        return
+    }
     let queue = gClosingQueue
     gClosingQueue = ArrayList<Int64>()
     for (ptr in queue) {
@@ -258,8 +270,12 @@ public func finalizeSession(ptr: Int64): Unit {
             } else {
                 serverLog("连接关闭: ${sess.peer}")
             }
-            if (sess.readyReadId != 0) { unregisterVoidCallback(sess.readyReadId) }
-            if (sess.disconnectedId != 0) { unregisterVoidCallback(sess.disconnectedId) }
+            if (sess.readyReadId != 0) {
+                unregisterVoidCallback(sess.readyReadId)
+            }
+            if (sess.disconnectedId != 0) {
+                unregisterVoidCallback(sess.disconnectedId)
+            }
             sess.socket.disconnectCallbacks()
             sess.socket.close()
         case None => ()
@@ -428,7 +444,11 @@ public func doLogin(sess: Session, account: Int64, password: String): Unit {
                 var first = true
                 for (f in friends) {
                     let item = friendItemJson(f)
-                    friendsJson = if (first) { item } else { "${friendsJson},${item}" }
+                    friendsJson = if (first) {
+                        item
+                    } else {
+                        "${friendsJson},${item}"
+                    }
                     first = false
                 }
 
@@ -438,7 +458,11 @@ public func doLogin(sess: Session, account: Int64, password: String): Unit {
                 first = true
                 for (m in unread) {
                     let item = "{\"from\":${m.fromId},\"fromName\":\"${escapeJson(m.fromName)}\",\"text\":\"${escapeJson(m.text)}\",\"time\":\"${m.time}\"}"
-                    msgsJson = if (first) { item } else { "${msgsJson},${item}" }
+                    msgsJson = if (first) {
+                        item
+                    } else {
+                        "${msgsJson},${item}"
+                    }
                     first = false
                 }
 
@@ -449,8 +473,7 @@ public func doLogin(sess: Session, account: Int64, password: String): Unit {
                 serverLog("用户登录: ${u.nickname}(${u.account}) 来自 ${sess.peer}")
                 broadcastPresence(u.id, true)
                 updateStatus()
-            case None =>
-                sendError(sess, "login", "账号或密码错误")
+            case None => sendError(sess, "login", "账号或密码错误")
         }
     }
 }
@@ -488,8 +511,7 @@ public func doAddFriend(sess: Session, account: Int64): Unit {
                         case None => ()
                     }
                 }
-            case None =>
-                sendError(sess, "add_friend", "账号不存在")
+            case None => sendError(sess, "add_friend", "账号不存在")
         }
     }
 }
@@ -500,7 +522,9 @@ public func doChat(sess: Session, to: Int64, text: String): Unit {
         sendError(sess, "chat", "未登录")
         return
     }
-    if (text.isEmpty()) { return }
+    if (text.isEmpty()) {
+        return
+    }
     if (text.size > 6000) {
         sendError(sess, "chat", "消息过长")
         return
@@ -528,11 +552,10 @@ public func doChat(sess: Session, to: Int64, text: String): Unit {
 /// 把帧转发给指定在线用户
 public func forwardToUser(userId: Int64, frame: String): Unit {
     match (gUserSession.get(userId)) {
-        case Some(ptr) =>
-            match (gSessions.get(ptr)) {
-                case Some(sess) => sendJson(sess, frame)
-                case None => ()
-            }
+        case Some(ptr) => match (gSessions.get(ptr)) {
+            case Some(sess) => sendJson(sess, frame)
+            case None => ()
+        }
         case None => ()
     }
 }
@@ -557,16 +580,26 @@ public func doHistory(sess: Session, friendId: Int64, limit: Int64): Unit {
         return
     }
     var n = limit
-    if (n <= 0 || n > 200) { n = 100 }
+    if (n <= 0 || n > 200) {
+        n = 100
+    }
     if (let Some(db) <- gDb) {
         let list = db.getHistory(sess.userId, friendId, n)
         var items = ""
         var first = true
         for (h in list) {
-            let recalled = if (h.recalled) { "true" } else { "false" }
+            let recalled = if (h.recalled) {
+                "true"
+            } else {
+                "false"
+            }
             let item = "{\"id\":${h.id},\"from\":${h.fromId},\"fromName\":\"${escapeJson(h.fromName)}\"," +
                 "\"text\":\"${escapeJson(h.text)}\",\"time\":\"${h.time}\",\"kind\":\"${h.kind}\",\"recalled\":${recalled}}"
-            items = if (first) { item } else { "${items},${item}" }
+            items = if (first) {
+                item
+            } else {
+                "${items},${item}"
+            }
             first = false
         }
         sendJson(sess, "{\"type\":\"history\",\"friend\":${friendId},\"messages\":[${items}]}")
@@ -579,8 +612,12 @@ public func doHistory(sess: Session, friendId: Int64, limit: Int64): Unit {
 
 /// 判断两个 yyyy-MM-dd HH:mm:ss 时间差是否在 maxMinutes 内（简化：同日内比较）
 public func isWithinMinutes(t1: String, t2: String, maxMinutes: Int64): Bool {
-    if (t1.size < 16 || t2.size < 16) { return false }
-    if (t1[0..10] != t2[0..10]) { return false }
+    if (t1.size < 16 || t2.size < 16) {
+        return false
+    }
+    if (t1[0..10] != t2[0..10]) {
+        return false
+    }
     let h1 = Int64.tryParse(t1[11..13])
     let m1 = Int64.tryParse(t1[14..16])
     let h2 = Int64.tryParse(t2[11..13])
@@ -591,7 +628,11 @@ public func isWithinMinutes(t1: String, t2: String, maxMinutes: Int64): Bool {
                 if (let Some(d) <- m2) {
                     let total1 = a * 60 + b
                     let total2 = c * 60 + d
-                    let diff = if (total2 > total1) { total2 - total1 } else { total1 - total2 }
+                    let diff = if (total2 > total1) {
+                        total2 - total1
+                    } else {
+                        total1 - total2
+                    }
                     return diff <= maxMinutes
                 }
             }
@@ -625,8 +666,7 @@ public func doRecall(sess: Session, msgId: Int64): Unit {
                 serverLog("消息撤回: ${sess.nickname} 撤回 #${msgId}")
                 sendJson(sess, "{\"type\":\"ok\",\"op\":\"recall\",\"msgId\":${msgId}}")
                 forwardToUser(receiver, "{\"type\":\"recall\",\"msgId\":${msgId},\"from\":${sender}}")
-            case None =>
-                sendError(sess, "recall", "消息不存在")
+            case None => sendError(sess, "recall", "消息不存在")
         }
     }
 }
@@ -649,7 +689,6 @@ public class FileTransferMeta {
 
 /// 传输表：tid -> 元数据
 public var gTransfers: HashMap<String, FileTransferMeta> = HashMap<String, FileTransferMeta>()
-
 public let MAX_FILE_SIZE: Int64 = 50 * 1024 * 1024
 
 public func doFileBegin(sess: Session, to: Int64, tid: String, name: String, size: Int64, kind: String): Unit {
@@ -657,7 +696,9 @@ public func doFileBegin(sess: Session, to: Int64, tid: String, name: String, siz
         sendError(sess, "file", "未登录")
         return
     }
-    if (tid.isEmpty() || name.isEmpty()) { return }
+    if (tid.isEmpty() || name.isEmpty()) {
+        return
+    }
     if (size <= 0 || size > MAX_FILE_SIZE) {
         sendError(sess, "file", "文件大小超出限制（50MB）")
         return
@@ -674,38 +715,53 @@ public func doFileBegin(sess: Session, to: Int64, tid: String, name: String, siz
     meta.toId = to
     meta.name = name
     meta.size = size
-    meta.kind = if (kind == "image") { "image" } else { "file" }
+    meta.kind = if (kind == "image") {
+        "image"
+    } else {
+        "file"
+    }
     meta.online = isUserOnline(to)
     gTransfers[tid] = meta
     if (meta.online) {
-        forwardToUser(to, "{\"type\":\"file_begin\",\"tid\":\"${escapeJson(tid)}\",\"from\":${sess.userId}," +
-            "\"fromName\":\"${escapeJson(sess.nickname)}\",\"name\":\"${escapeJson(name)}\"," +
-            "\"size\":${size},\"kind\":\"${meta.kind}\"}")
+        forwardToUser(to,
+            "{\"type\":\"file_begin\",\"tid\":\"${escapeJson(tid)}\",\"from\":${sess.userId}," +
+                "\"fromName\":\"${escapeJson(sess.nickname)}\",\"name\":\"${escapeJson(name)}\"," +
+                "\"size\":${size},\"kind\":\"${meta.kind}\"}")
     }
 }
 
 public func doFileChunk(sess: Session, to: Int64, tid: String, seq: Int64, data: String): Unit {
-    if (sess.userId == 0) { return }
+    if (sess.userId == 0) {
+        return
+    }
     match (gTransfers.get(tid)) {
         case Some(meta) =>
-            if (meta.fromId != sess.userId || meta.toId != to) { return }
+            if (meta.fromId != sess.userId || meta.toId != to) {
+                return
+            }
             if (meta.online) {
-                forwardToUser(to, "{\"type\":\"file_chunk\",\"tid\":\"${escapeJson(tid)}\",\"seq\":${seq},\"data\":\"${data}\"}")
+                forwardToUser(to,
+                    "{\"type\":\"file_chunk\",\"tid\":\"${escapeJson(tid)}\",\"seq\":${seq},\"data\":\"${data}\"}")
             }
         case None => ()
     }
 }
 
 public func doFileEnd(sess: Session, to: Int64, tid: String): Unit {
-    if (sess.userId == 0) { return }
+    if (sess.userId == 0) {
+        return
+    }
     match (gTransfers.get(tid)) {
         case Some(meta) =>
             gTransfers.remove(tid)
-            if (meta.fromId != sess.userId || meta.toId != to) { return }
+            if (meta.fromId != sess.userId || meta.toId != to) {
+                return
+            }
             if (meta.online) {
-                forwardToUser(to, "{\"type\":\"file_end\",\"tid\":\"${escapeJson(tid)}\",\"from\":${sess.userId}," +
-                    "\"fromName\":\"${escapeJson(meta.fromName)}\",\"name\":\"${escapeJson(meta.name)}\"," +
-                    "\"size\":${meta.size},\"kind\":\"${meta.kind}\"}")
+                forwardToUser(to,
+                    "{\"type\":\"file_end\",\"tid\":\"${escapeJson(tid)}\",\"from\":${sess.userId}," +
+                        "\"fromName\":\"${escapeJson(meta.fromName)}\",\"name\":\"${escapeJson(meta.name)}\"," +
+                        "\"size\":${meta.size},\"kind\":\"${meta.kind}\"}")
                 serverLog("文件传输完成: ${meta.fromName} -> 用户${to} [${meta.name}]")
             } else {
                 sendError(sess, "file", "对方不在线，文件未送达")
@@ -732,7 +788,8 @@ public func doChangeNick(sess: Session, nickname: String): Unit {
         }
         sess.nickname = nickname
         sendJson(sess, "{\"type\":\"ok\",\"op\":\"change_nick\",\"nickname\":\"${escapeJson(nickname)}\"}")
-        broadcastToOthers(sess.userId, "{\"type\":\"nick_changed\",\"userId\":${sess.userId},\"nickname\":\"${escapeJson(nickname)}\"}")
+        broadcastToOthers(sess.userId,
+            "{\"type\":\"nick_changed\",\"userId\":${sess.userId},\"nickname\":\"${escapeJson(nickname)}\"}")
         serverLog("修改昵称: 用户${sess.userId} -> ${nickname}")
     }
 }
@@ -772,7 +829,8 @@ public func doSetRemark(sess: Session, friendId: Int64, remark: String): Unit {
             sendError(sess, "set_remark", "备注过长")
             return
         }
-        sendJson(sess, "{\"type\":\"ok\",\"op\":\"set_remark\",\"friend\":${friendId},\"remark\":\"${escapeJson(remark)}\"}")
+        sendJson(sess,
+            "{\"type\":\"ok\",\"op\":\"set_remark\",\"friend\":${friendId},\"remark\":\"${escapeJson(remark)}\"}")
     }
 }
 

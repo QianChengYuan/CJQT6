@@ -61,9 +61,15 @@ func createLineChartView(): QChartView {
 func createBarChartView(): QChartView {
     let series = QBarSeries()
     let set1 = QBarSet("产品A")
-    set1.append(10.0); set1.append(20.0); set1.append(30.0); set1.append(40.0)
+    set1.append(10.0);
+    set1.append(20.0);
+    set1.append(30.0);
+    set1.append(40.0)
     let set2 = QBarSet("产品B")
-    set2.append(15.0); set2.append(25.0); set2.append(35.0); set2.append(45.0)
+    set2.append(15.0);
+    set2.append(25.0);
+    set2.append(35.0);
+    set2.append(45.0)
     series.append(set1)
     series.append(set2)
 
@@ -120,11 +126,19 @@ func createScatterChartView(): QChartView {
 
 func createAreaChartView(): QChartView {
     let upper = QLineSeries()
-    upper.append(0.0, 30.0); upper.append(1.0, 35.0); upper.append(2.0, 40.0)
-    upper.append(3.0, 38.0); upper.append(4.0, 45.0); upper.append(5.0, 42.0)
+    upper.append(0.0, 30.0);
+    upper.append(1.0, 35.0);
+    upper.append(2.0, 40.0)
+    upper.append(3.0, 38.0);
+    upper.append(4.0, 45.0);
+    upper.append(5.0, 42.0)
     let lower = QLineSeries()
-    lower.append(0.0, 10.0); lower.append(1.0, 12.0); lower.append(2.0, 15.0)
-    lower.append(3.0, 13.0); lower.append(4.0, 18.0); lower.append(5.0, 16.0)
+    lower.append(0.0, 10.0);
+    lower.append(1.0, 12.0);
+    lower.append(2.0, 15.0)
+    lower.append(3.0, 13.0);
+    lower.append(4.0, 18.0);
+    lower.append(5.0, 16.0)
 
     // 保存到全局变量，以便最后手动 close
     areaUpper = Some(upper)
@@ -167,11 +181,17 @@ func createSplineChartView(): QChartView {
 func createPercentBarChartView(): QChartView {
     let series = QPercentBarSeries()
     let set1 = QBarSet("产品A")
-    set1.append(10.0); set1.append(20.0); set1.append(30.0)
+    set1.append(10.0);
+    set1.append(20.0);
+    set1.append(30.0)
     let set2 = QBarSet("产品B")
-    set2.append(20.0); set2.append(30.0); set2.append(40.0)
+    set2.append(20.0);
+    set2.append(30.0);
+    set2.append(40.0)
     let set3 = QBarSet("产品C")
-    set3.append(30.0); set3.append(10.0); set3.append(20.0)
+    set3.append(30.0);
+    set3.append(10.0);
+    set3.append(20.0)
     series.append(set1)
     series.append(set2)
     series.append(set3)
@@ -190,11 +210,17 @@ func createPercentBarChartView(): QChartView {
 func createStackedBarChartView(): QChartView {
     let series = QStackedBarSeries()
     let set1 = QBarSet("产品A")
-    set1.append(10.0); set1.append(20.0); set1.append(30.0)
+    set1.append(10.0);
+    set1.append(20.0);
+    set1.append(30.0)
     let set2 = QBarSet("产品B")
-    set2.append(15.0); set2.append(25.0); set2.append(35.0)
+    set2.append(15.0);
+    set2.append(25.0);
+    set2.append(35.0)
     let set3 = QBarSet("产品C")
-    set3.append(20.0); set3.append(15.0); set3.append(25.0)
+    set3.append(20.0);
+    set3.append(15.0);
+    set3.append(25.0)
     series.append(set1)
     series.append(set2)
     series.append(set3)
@@ -239,8 +265,8 @@ func createCandlestickChartView(): QChartView {
 
     // 模拟 5 天 K 线数据（timestamp 为 Unix 时间戳秒数）
     // 2026-08-25 ~ 2026-08-29 共 5 个交易日
-    let baseTime = 1787616000.0  // 2026-08-25 00:00:00 UTC
-    let day = 86400.0            // 一天的秒数
+    let baseTime = 1787616000.0 // 2026-08-25 00:00:00 UTC
+    let day = 86400.0 // 一天的秒数
     let c1 = QCandlestickSet(100.0, 108.0, 95.0, 102.0, baseTime)
     let c2 = QCandlestickSet(102.0, 110.0, 100.0, 98.0, baseTime + day)
     let c3 = QCandlestickSet(98.0, 105.0, 92.0, 103.0, baseTime + day * 2.0)
@@ -313,7 +339,7 @@ func createDateTimeAxisChartView(): QChartView {
     series.setName("访问量")
 
     // 模拟 7 天数据（timestamp 为 Unix 秒）
-    let baseTime = 1787616000.0  // 2026-08-25 00:00:00 UTC
+    let baseTime = 1787616000.0 // 2026-08-25 00:00:00 UTC
     let day = 86400.0
     let values = [120.0, 150.0, 180.0, 140.0, 200.0, 170.0, 210.0]
     for (i in 0..7) {
@@ -385,9 +411,15 @@ func createHorizontalBarChartView(): QChartView {
     let series = QHorizontalBarSeries()
 
     let set1 = QBarSet("产品A")
-    set1.append(10.0); set1.append(20.0); set1.append(30.0); set1.append(40.0)
+    set1.append(10.0);
+    set1.append(20.0);
+    set1.append(30.0);
+    set1.append(40.0)
     let set2 = QBarSet("产品B")
-    set2.append(15.0); set2.append(25.0); set2.append(35.0); set2.append(20.0)
+    set2.append(15.0);
+    set2.append(25.0);
+    set2.append(35.0);
+    set2.append(20.0)
 
     series.append(set1)
     series.append(set2)
@@ -408,11 +440,17 @@ func createHorizontalPercentBarChartView(): QChartView {
     let series = QHorizontalPercentBarSeries()
 
     let set1 = QBarSet("Q1")
-    set1.append(30.0); set1.append(40.0); set1.append(50.0)
+    set1.append(30.0);
+    set1.append(40.0);
+    set1.append(50.0)
     let set2 = QBarSet("Q2")
-    set2.append(50.0); set2.append(30.0); set2.append(20.0)
+    set2.append(50.0);
+    set2.append(30.0);
+    set2.append(20.0)
     let set3 = QBarSet("Q3")
-    set3.append(20.0); set3.append(30.0); set3.append(30.0)
+    set3.append(20.0);
+    set3.append(30.0);
+    set3.append(30.0)
 
     series.append(set1)
     series.append(set2)
@@ -434,11 +472,20 @@ func createHorizontalStackedBarChartView(): QChartView {
     let series = QHorizontalStackedBarSeries()
 
     let set1 = QBarSet("线上")
-    set1.append(10.0); set1.append(15.0); set1.append(20.0); set1.append(25.0)
+    set1.append(10.0);
+    set1.append(15.0);
+    set1.append(20.0);
+    set1.append(25.0)
     let set2 = QBarSet("线下")
-    set2.append(20.0); set2.append(25.0); set2.append(30.0); set2.append(15.0)
+    set2.append(20.0);
+    set2.append(25.0);
+    set2.append(30.0);
+    set2.append(15.0)
     let set3 = QBarSet("其他")
-    set3.append(5.0); set3.append(10.0); set3.append(8.0); set3.append(12.0)
+    set3.append(5.0);
+    set3.append(10.0);
+    set3.append(8.0);
+    set3.append(12.0)
 
     series.append(set1)
     series.append(set2)
@@ -462,7 +509,6 @@ func createPolarChartView(): QChartView {
     // 螺旋线数据
     var i = 0
     while (i < 360) {
-
         let r = Float64(i) / 10.0
         series.append(Float64(i), r)
         i += 5
