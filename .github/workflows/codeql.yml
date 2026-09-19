@@ -2,8 +2,8 @@
 # CodeQL — 安全扫描(native 桥接 C/C++)
 # ------------------------------------------------------------
 # 覆盖:
-#   - C/C++(native/src/** 桥接代码):高优,FFI 边界是攻击面
-#   - Python(.github/actions/**/*.sh + scripts/*):次优,CI 注入风险
+#   - C/C++(native/** 桥接代码):高优,FFI 边界是攻击面
+#   - Python(.github/actions/** + scripts/*):次优,CI 注入风险
 #
 # 不覆盖:
 #   - 仓颉 .cj:CodeQL 不支持,跳过(由 cjlint 替代)
@@ -13,6 +13,13 @@
 #   - schedule:每周一 02:00 跑一次,捕获新规则
 # 矩阵:linux + windows(CI runner 已有,无额外成本)
 # 严重度:仅 error / warning 阻断 PR,note 不阻断(降低噪声)
+#
+# ⚠ C/C++ 是**编译型**语言:CodeQL 必须在构建过程中提取代码。
+#   本工作流曾只有 init + analyze、没有任何构建步骤,故两个 cpp 任务恒报
+#   「CodeQL job status was configuration error」(python 无需构建,一直正常)。
+#   现补:安装 Qt6 → 用仓库自身的桥接构建脚本编译 → 分析。
+#   另注:init 不接受 `paths` 参数(会报 Unexpected input 并被静默忽略),
+#   原先的扫描范围收窄从未生效;此处不再传,范围由仓库结构决定。
 # ============================================================
 
 name: CodeQL
@@ -29,8 +36,8 @@ on:
 
 jobs:
   analyze:
-    name: CodeQL (${{ matrix.language }})
-    timeout-minutes: 30
+    name: CodeQL (${{ matrix.language }} · ${{ matrix.os }})
+    timeout-minutes: 45
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -38,10 +45,16 @@ jobs:
         include:
           - language: cpp
             os: ubuntu-24.04
+            qt_os: linux
+            qt_version: "6.4.2"
+            qt_arch: gcc_64
           - language: python
             os: ubuntu-24.04
           - language: cpp
             os: windows-2022
+            qt_os: windows
+            qt_version: "6.9.1"
+            qt_arch: win64_msvc2022_64
     permissions:
       actions: read
       contents: read
@@ -51,24 +64,43 @@ jobs:
       - name: 检出代码
         uses: actions/checkout@v7
 
-      # CodeQL 初始化(下载 CLI + 数据库创建)
+      # 仅在 C/C++ 任务安装 Qt:构建桥接库时 CMake 需要 find_package(Qt6 ...)
+      - name: 安装 Qt6 ${{ matrix.qt_version }}（C/C++ 构建需要）
+        if: matrix.language == 'cpp'
+        uses: ./.github/actions/setup-qt
+        with:
+          os: ${{ matrix.qt_os }}
+          version: ${{ matrix.qt_version }}
+          arch: ${{ matrix.qt_arch }}
+
+      # CodeQL 初始化(下载 CLI + 创建数据库,并对随后的构建过程做追踪)
       - name: 初始化 CodeQL
         uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
-          # 缩小扫描范围:native bridge C/C++ + CI 脚本 Python
-          paths: |
-            native/src
-            native/includes
-            .github/actions
-            scripts
-          # 不扫 examples/(示例代码)、docs/、src/test/(仓颉测试源码,CodeQL 不支持 .cj)
+
+      # 编译 Qt6Gui 需要 OpenGL/X11 开发头(与 ci.yml 的依赖步骤保持一致)
+      - name: 安装 Qt 构建依赖（Linux）
+        if: matrix.language == 'cpp' && matrix.qt_os == 'linux'
+        run: |
+          sudo apt-get update || true
+          sudo apt-get install -y libgl1-mesa-dev libglvnd-dev libegl-dev libopengl-dev \
+            libxkbcommon-dev libdbus-1-3
+
+      # 复用仓库自身的桥接构建脚本:与 ci.yml 同一套命令,
+      # 既保证 CodeQL 提取到真实编译单元,也顺带验证脚本本身可用。
+      - name: 构建桥接库（供 CodeQL 提取 C/C++）
+        if: matrix.language == 'cpp'
+        shell: bash
+        run: |
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/update-bridge.ps1 -QtDir "$QTDIR"
+          else
+            bash scripts/build-linux-x64.sh
+          fi
 
       # 执行分析
       - name: 执行 CodeQL 分析
         uses: github/codeql-action/analyze@v4
         with:
           category: "/language:${{ matrix.language }}"
-          # 仅 error 级别阻断,降低 warning 噪声
-          # (CodeQL 默认全阻断,实际多数项目改为 warning 阻断即可)
-          # 注:此处不强制阻断,留给 PR review 时人工判断
