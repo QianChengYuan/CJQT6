@@ -845,28 +845,28 @@ let onZoomOut: VoidCallback = {=> zoomOut()}
 let onZoomReset: VoidCallback = {=> zoomReset()}
 let onOpenRecentFile0: VoidCallback = {
     =>
-    gPendingRecentFile = recentFile0
-    openRecentFile()
+        gPendingRecentFile = recentFile0
+        openRecentFile()
 }
 let onOpenRecentFile1: VoidCallback = {
     =>
-    gPendingRecentFile = recentFile1
-    openRecentFile()
+        gPendingRecentFile = recentFile1
+        openRecentFile()
 }
 let onOpenRecentFile2: VoidCallback = {
     =>
-    gPendingRecentFile = recentFile2
-    openRecentFile()
+        gPendingRecentFile = recentFile2
+        openRecentFile()
 }
 let onOpenRecentFile3: VoidCallback = {
     =>
-    gPendingRecentFile = recentFile3
-    openRecentFile()
+        gPendingRecentFile = recentFile3
+        openRecentFile()
 }
 let onOpenRecentFile4: VoidCallback = {
     =>
-    gPendingRecentFile = recentFile4
-    openRecentFile()
+        gPendingRecentFile = recentFile4
+        openRecentFile()
 }
 let onNewFile: VoidCallback = {=> newFile()}
 let onOpenFile: VoidCallback = {=> openFile()}
@@ -886,31 +886,31 @@ let onToggleLineWrap: VoidCallback = {=> toggleLineWrap()}
 let onSetFont: VoidCallback = {=> setFont()}
 let onApplyFormat: VoidCallback = {
     => if (let Some(combo) <- gFontCombo) {
-    let family = combo.currentFont();
-    if (!family.isEmpty()) {
-        currentFontFamily = family
-        if (let Some(edit) <- textEdit) {
-            edit.setFontFamily(family)
+        let family = combo.currentFont();
+        if (!family.isEmpty()) {
+            currentFontFamily = family
+            if (let Some(edit) <- textEdit) {
+                edit.setFontFamily(family)
+            }
         }
     }
-}
 }
 let onSizeChanged: Int32Callback = {
     _ => if (let Some(combo) <- gSizeCombo) {
-    let sizeStr = combo.currentText();
-    var size: Int32 = 12;
-    for (c in sizeStr) {
-        if (c >= 48 && c <= 57) {
-            size = size * 10 + Int32(c - 48)
-        }
-    };
-    if (size > 0) {
-        currentFontSize = size
-        if (let Some(edit) <- textEdit) {
-            edit.setFontSize(size)
+        let sizeStr = combo.currentText();
+        var size: Int32 = 12;
+        for (c in sizeStr) {
+            if (c >= 48 && c <= 57) {
+                size = size * 10 + Int32(c - 48)
+            }
+        };
+        if (size > 0) {
+            currentFontSize = size
+            if (let Some(edit) <- textEdit) {
+                edit.setFontSize(size)
+            }
         }
     }
-}
 }
 let onToggleBold: VoidCallback = {=> toggleBold()}
 let onPickColor: VoidCallback = {=> pickTextColor()}
