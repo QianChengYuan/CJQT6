@@ -992,7 +992,7 @@ class QPainterTests {
         painter.setPenColor(color)
         painter.setBrush(brush)
         painter.setFont(font)
-        painter.setRenderHint(RenderHint.Antialiasing.value())
+        painter.setRenderHint(RenderHint.Antialiasing.value)
         painter.setOpacity(0.5f32)
         @Expect(painter.isActive(), true)
         painter.end()
@@ -1312,66 +1312,66 @@ class PaintEnumTests {
 
     @TestCase
     func testPenStyleValues() {
-        @Expect(PenStyle.NoPen.value(), 0)
-        @Expect(PenStyle.SolidLine.value(), 1)
-        @Expect(PenStyle.DashLine.value(), 2)
-        @Expect(PenStyle.DotLine.value(), 3)
-        @Expect(PenStyle.DashDotLine.value(), 4)
-        @Expect(PenStyle.DashDotDotLine.value(), 5)
-        @Expect(PenStyle.CustomDashLine.value(), 6)
+        @Expect(PenStyle.NoPen.value, 0)
+        @Expect(PenStyle.SolidLine.value, 1)
+        @Expect(PenStyle.DashLine.value, 2)
+        @Expect(PenStyle.DotLine.value, 3)
+        @Expect(PenStyle.DashDotLine.value, 4)
+        @Expect(PenStyle.DashDotDotLine.value, 5)
+        @Expect(PenStyle.CustomDashLine.value, 6)
     }
 
     @TestCase
     func testPenStyleFromValue() {
-        @Expect(PenStyle.fromValue(1).value(), PenStyle.SolidLine.value())
-        @Expect(PenStyle.fromValue(2).value(), PenStyle.DashLine.value())
-        @Expect(PenStyle.fromValue(4).value(), PenStyle.DashDotLine.value())
-        @Expect(PenStyle.fromValue(0).value(), PenStyle.NoPen.value())
+        @Expect(PenStyle.fromValue(1).value, PenStyle.SolidLine.value)
+        @Expect(PenStyle.fromValue(2).value, PenStyle.DashLine.value)
+        @Expect(PenStyle.fromValue(4).value, PenStyle.DashDotLine.value)
+        @Expect(PenStyle.fromValue(0).value, PenStyle.NoPen.value)
     }
 
     @TestCase
     func testBrushStyleValues() {
-        @Expect(BrushStyle.NoBrush.value(), 0)
-        @Expect(BrushStyle.SolidPattern.value(), 1)
-        @Expect(BrushStyle.CrossPattern.value(), 11)
-        @Expect(BrushStyle.LinearGradient.value(), 15)
-        @Expect(BrushStyle.RadialGradient.value(), 16)
-        @Expect(BrushStyle.ConicalGradient.value(), 17)
+        @Expect(BrushStyle.NoBrush.value, 0)
+        @Expect(BrushStyle.SolidPattern.value, 1)
+        @Expect(BrushStyle.CrossPattern.value, 11)
+        @Expect(BrushStyle.LinearGradient.value, 15)
+        @Expect(BrushStyle.RadialGradient.value, 16)
+        @Expect(BrushStyle.ConicalGradient.value, 17)
     }
 
     @TestCase
     func testBrushStyleFromValue() {
-        @Expect(BrushStyle.fromValue(0).value(), BrushStyle.NoBrush.value())
-        @Expect(BrushStyle.fromValue(1).value(), BrushStyle.SolidPattern.value())
-        @Expect(BrushStyle.fromValue(11).value(), BrushStyle.CrossPattern.value())
-        @Expect(BrushStyle.fromValue(15).value(), BrushStyle.LinearGradient.value())
-        @Expect(BrushStyle.fromValue(16).value(), BrushStyle.RadialGradient.value())
-        @Expect(BrushStyle.fromValue(17).value(), BrushStyle.ConicalGradient.value())
+        @Expect(BrushStyle.fromValue(0).value, BrushStyle.NoBrush.value)
+        @Expect(BrushStyle.fromValue(1).value, BrushStyle.SolidPattern.value)
+        @Expect(BrushStyle.fromValue(11).value, BrushStyle.CrossPattern.value)
+        @Expect(BrushStyle.fromValue(15).value, BrushStyle.LinearGradient.value)
+        @Expect(BrushStyle.fromValue(16).value, BrushStyle.RadialGradient.value)
+        @Expect(BrushStyle.fromValue(17).value, BrushStyle.ConicalGradient.value)
     }
 
     @TestCase
     func testRenderHintValues() {
-        @Expect(RenderHint.Antialiasing.value(), 0x01)
-        @Expect(RenderHint.TextAntialiasing.value(), 0x02)
-        @Expect(RenderHint.SmoothPixmapTransform.value(), 0x04)
-        @Expect(RenderHint.HighQualityAntialiasing.value(), 0x08)
-        @Expect(RenderHint.NonCosmeticDefaultPen.value(), 0x10)
+        @Expect(RenderHint.Antialiasing.value, 0x01)
+        @Expect(RenderHint.TextAntialiasing.value, 0x02)
+        @Expect(RenderHint.SmoothPixmapTransform.value, 0x04)
+        @Expect(RenderHint.HighQualityAntialiasing.value, 0x08)
+        @Expect(RenderHint.NonCosmeticDefaultPen.value, 0x10)
     }
 
     @TestCase
     func testImageFormatValues() {
-        @Expect(ImageFormat.Invalid.value(), 0)
-        @Expect(ImageFormat.RGB32.value(), 4)
-        @Expect(ImageFormat.ARGB32.value(), 5)
-        @Expect(ImageFormat.ARGB32_Premultiplied.value(), 6)
-        @Expect(ImageFormat.RGBA8888.value(), 9)
+        @Expect(ImageFormat.Invalid.value, 0)
+        @Expect(ImageFormat.RGB32.value, 4)
+        @Expect(ImageFormat.ARGB32.value, 5)
+        @Expect(ImageFormat.ARGB32_Premultiplied.value, 6)
+        @Expect(ImageFormat.RGBA8888.value, 9)
     }
 
     @TestCase
     func testImageFormatFromValue() {
-        @Expect(ImageFormat.fromValue(4).value(), ImageFormat.RGB32.value())
-        @Expect(ImageFormat.fromValue(5).value(), ImageFormat.ARGB32.value())
-        @Expect(ImageFormat.fromValue(9).value(), ImageFormat.RGBA8888.value())
+        @Expect(ImageFormat.fromValue(4).value, ImageFormat.RGB32.value)
+        @Expect(ImageFormat.fromValue(5).value, ImageFormat.ARGB32.value)
+        @Expect(ImageFormat.fromValue(9).value, ImageFormat.RGBA8888.value)
     }
 
     @TestCase

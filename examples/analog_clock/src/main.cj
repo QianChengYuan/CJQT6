@@ -32,7 +32,7 @@ let onPaintCallback: CFunc<(Int64) -> Unit> = {
         let painter = QPainter.fromPtr(painterPtr)
 
         // 设置抗锯齿
-        painter.setRenderHint(RenderHint.Antialiasing.value())
+        painter.setRenderHint(RenderHint.Antialiasing.value)
 
         // 绘制时钟表盘
         drawClockFace(painter)

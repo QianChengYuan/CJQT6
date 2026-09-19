@@ -59,10 +59,12 @@ public enum Orientation {
     | Horizontal
     | Vertical
 
-    public func value(): Int32 {
-        match (this) {
-            case Horizontal => 1
-            case Vertical => 2
+    public prop value: Int32 {
+        get() {
+            match (this) {
+                case Horizontal => 1
+                case Vertical => 2
+            }
         }
     }
 
@@ -75,11 +77,11 @@ public enum Orientation {
     }
 
     public operator func ==(other: Orientation): Bool {
-        this.value() == other.value()
+        this.value == other.value
     }
 
     public operator func !=(other: Orientation): Bool {
-        this.value() != other.value()
+        this.value != other.value
     }
 }
 

@@ -294,15 +294,19 @@ w.setOnValueChanged({ value: Int32 => println(value) })
 
 > 来源：`docs/internal/cjmonitor-findings.md`（P2-1 / P2-4 / P2-5）。这些是「能跑但极易写错」的点，新增封装时请一并遵守。
 
-### 1. 常量取整写法不统一 —— 必须先分清 enum 还是 struct
+### 1. 常量取整写法已统一为 `.value`（无括号）
 
 | 类型 | 定义形态 | 取整数写法 | 示例 |
 |------|----------|------------|------|
-| `RenderHint` / `PenStyle` / `BrushStyle` | **enum** | **`.value()`（带括号）** | `painter.setRenderHint(RenderHint.Antialiasing.value())` |
-| `TextAlignment` | **struct** | **`.value`（无括号）** | `painter.drawTextRect(..., TextAlignment.Left.value)` |
-| `Alignment`（布局） | **struct** | `.value`（无括号） | `layout.addWidget(ptr, stretch, Alignment.Left.value)` |
+| `RenderHint` / `PenStyle` / `BrushStyle` / `ImageFormat` / `Orientation` | **enum**，取整成员为**只读属性** `prop value: Int32` | **`.value`（无括号）** | `painter.setRenderHint(RenderHint.Antialiasing.value)` |
+| `TextAlignment` | **struct**，`public let value: Int32` | `.value`（无括号） | `painter.drawTextRect(..., TextAlignment.Left.value)` |
+| `Alignment`（布局） | **struct**，`public let value: Int32` | `.value`（无括号） | `layout.addWidget(ptr, stretch, Alignment.Left.value)` |
 
-**统一方向**：新增常量/枚举一律按 **struct + 无括号 `.value`** 定义（与 `TextAlignment` 对齐），不再新增 enum 形态常量类；存量 enum 保持不变（改属破坏性变更）。
+**统一结论（2026-09-19，findings P2-1 闭环）**：5 个存量 enum 的 `func value(): Int32` 已改为只读属性 `prop value: Int32`，与 struct 的 `let value` 写法一致——**取整一律写 `.value`，不再带括号**，无需再按类型区分。
+
+- 新增常量类两种形态皆可：enum 用 `public prop value: Int32 { get() { … } }`，struct 用 `public let value: Int32`；只要取整的对外写法都是 `.value` 即可。
+- **破坏性变更**：同一类型内同名 `func value()` 与 `prop value` 不能共存（编译器报 `redefinition of declaration 'value'`），故**不存在过渡别名**，既有 `.value()` 调用必须去括号（迁移说明见 `docs/CHANGELOG.md`）。
+- 不受影响：控件 / SQL 等**非取整**的 `.value()` 保持原样（如 `QSpinBox.value()`、`QSqlQuery.valueString`）。
 
 ### 2. 同名同义对照表（同名不可得时以此为准）
 

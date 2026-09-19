@@ -172,7 +172,7 @@ main(): Int64 {
 | `QLineEdit` | `text`→`setText`；`placeholderText`→`setPlaceholder(String)`；`readOnly=true`→`setReadOnly(true)`；`echoMode=Password`→`setEchoMode(2)`；`maxLength`→`setMaxLength(Int64)`；`alignment`→`setAlignment` |
 | `QTextEdit`/`QPlainTextEdit`/`QTextBrowser` | `html`/`plainText`→`setText(String)`；`readOnly=true`→`setReadOnly(true)` |
 | `QCheckBox`/`QRadioButton` | `text`→`setText`；`checked=true`→`setChecked(true)` |
-| `QSlider` | `orientation`→`setOrientation(Orientation.Horizontal.value()/...)`；`maximum`→`setRange(0,max)`；`value`→`setValue`；`singleStep`→`setSingleStep` |
+| `QSlider` | `orientation`→`setOrientation(Orientation.Horizontal.value/...)`；`maximum`→`setRange(0,max)`；`value`→`setValue`；`singleStep`→`setSingleStep` |
 | `QProgressBar` | `minimum`→`setRange(min,100)`；`maximum`→`setRange(0,max)`；`value`→`setValue` |
 | `QSpinBox`/`QDoubleSpinBox` | `minimum`/`maximum`/`value`→`setMinimum/setMaximum/setValue`；`prefix`/`suffix`→`setPrefix/setSuffix(String)` |
 | `QComboBox` | `currentIndex`（≠0 才生成）→`setCurrentIndex(Int64)`；`editable=true`→`setEditable(true)` |

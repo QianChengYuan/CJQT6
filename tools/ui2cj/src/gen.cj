@@ -423,7 +423,7 @@ func handleProperty(widgetType: String, propName: String, pr: XmlNode, varName: 
             } else {
                 "Vertical"
             }
-            lines.add("    ${v}.setOrientation(Orientation.${horiz}.value())")
+            lines.add("    ${v}.setOrientation(Orientation.${horiz}.value)")
         } else if (propName == "maximum") {
             lines.add("    ${v}.setRange(0, ${getNumber(pr)})")
         } else if (propName == "value") {

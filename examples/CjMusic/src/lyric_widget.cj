@@ -62,8 +62,8 @@ func lyricPaintCallback(painterPtr: Int64): Unit {
         return
     }
     let painter = QPainter.fromPtr(painterPtr)
-    painter.setRenderHint(RenderHint.TextAntialiasing.value())
-    painter.setRenderHint(RenderHint.Antialiasing.value())
+    painter.setRenderHint(RenderHint.TextAntialiasing.value)
+    painter.setRenderHint(RenderHint.Antialiasing.value)
 
     let centerY = h / 2
     let curIdx = gCurrentLyricIndex

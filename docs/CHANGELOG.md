@@ -11,6 +11,14 @@
 
 ### 变更
 
+- **枚举取整统一为 `.value`（findings P2-1 闭环，⚠️ 破坏性变更）**：5 个枚举的取整成员由 `public func value(): Int32`（调用 `.value()`）改为**只读属性** `public prop value: Int32`（调用 `.value`），与 `Alignment` / `TextAlignment` 等结构体的 `public let value` 写法对齐——取整不再需要按类型记住「带不带括号」。
+  - **涉及类型**：`RenderHint` / `PenStyle` / `BrushStyle` / `ImageFormat`（`src/paint/painter.cj`）、`Orientation`（`src/gui/types.cj`）。`Alignment`（含 `operator func |` 位运算）与 `TextAlignment` **保持不变**。
+  - **迁移方式**：既有代码把取整调用的括号去掉即可——`RenderHint.Antialiasing.value()` → `RenderHint.Antialiasing.value`、`PenStyle.SolidLine.value()` → `PenStyle.SolidLine.value`。枚举值的整数与 `fromValue()` 反查语义**完全不变**；桥接层与 FFI 无改动，`releases/` 产物无需重建。
+  - **无过渡别名，属真破坏性**：语言层面同一类型内同名 `func value()` 与 `prop value` 不能共存（实测编译报 `error: redefinition of declaration 'value'`），因此无法以「加法式」兼容旧写法。
+  - **影响面（本轮已全量迁移）**：库内 41 处（`src/paint/painter.cj` 3、`src/test/gui_extra_test.cj` 4、`src/test/multimedia_paint_test.cj` 37）；示例与工具 7 处（`examples/analog_clock`、`examples/CjMusic`、`examples/snake_game`、`examples/tank_battle`、`tools/ui2cj`）。`tools/ui2cj` 的**代码生成模板**同步更新——它生成的就是 `.value` 形态的代码。
+  - **不受影响**：控件 / SQL 等**非取整**的 `.value()` 一律保持原样（如 `QSpinBox.value()` / `QSlider.value()` / `QProgressBar.value()`）。
+  - **版本号建议**：按本仓库 SemVer 口径（major = 不兼容变更）此项归 **major**。实际影响面小且迁移机械（仅去括号），可先在 `[Unreleased]` 累积，与 P0-1 的 `QtWidget` 接口收敛一并作为下一次 major 发布；若长期不发 major，需在 `README` 的迁移提示中单独说明。
+  - **文档同步**：`docs/guides/wrapper-template.md`（取整约定段改为「一律 `.value`」）、`docs/api/08_paint.md` 示例。
 - **跨线程销毁顶层窗口「永久挂起」已根治（findings P1-5 收尾）**：新增桥接层统一删除入口 `native/includes/bridge_delete.h` 的 `cjqt6SafeDelete()`，并把 **43 个桥接文件、190 处** `QObject` 删除改为经该入口删除。此前仓颉侧只能「快速失败」（把挂死变成 `GuiThreadViolationException`），本轮从根上消除阻塞。
   - **挂死路径（已用 native 栈坐实）**：非对象所属线程 `delete` 一个**已显示**的顶层 `QWidget` → `QWidget::~QWidget` → `QWindow::close()` → `QWindowSystemInterface::flushWindowSystemEvents()` → `QWaitCondition::wait()`——等待 app 线程 flush，而 app 线程此时未跑事件循环 → 永久阻塞（CPU 0%、不会自愈）。
   - **分流规则**（`if constexpr` 编译期决定，**无新增 FFI 导出、无 ABI 变化**）：① 调用线程 == 对象所属线程 → 立即 `delete`（原语义不变）；② 非所属线程且对象是**已创建平台窗口**的 `QWidget`（`windowHandle()` 非空）→ `deleteLater()`（Qt 官方跨线程销毁方式，内部 `postEvent` 线程安全），销毁排队到对象所属线程执行，调用方立即返回；③ 其余情况（非 `QObject` 值类型、未建窗口的 `QWidget`、非 widget 的 `QObject`）→ 裸 `delete`，与改造前**完全一致**。

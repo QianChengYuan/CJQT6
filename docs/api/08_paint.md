@@ -20,7 +20,7 @@ let brushStyle = BrushStyle.SolidPattern
 brush.setBrushStyle(brushStyle)
 
 // RenderHint - 渲染提示
-painter.setRenderHint(RenderHint.Antialiasing.value())
+painter.setRenderHint(RenderHint.Antialiasing.value)
 
 // ImageFormat - 图像格式
 let format = ImageFormat.ARGB32
@@ -423,7 +423,7 @@ let pixmap = QPixmap.withSize(400, 300)
 pixmap.fill(Colors.white())
 
 let painter = QPainter(pixmap.getPtr())
-painter.setRenderHint(RenderHint.Antialiasing.value())
+painter.setRenderHint(RenderHint.Antialiasing.value)
 
 let pen = QPen(Colors.black())
 pen.setWidth(2)
@@ -796,7 +796,7 @@ main(): Int32 {
     pixmap.fill(Colors.white())
     
     let painter = QPainter(pixmap.getPtr())
-    painter.setRenderHint(RenderHint.Antialiasing.value())
+    painter.setRenderHint(RenderHint.Antialiasing.value)
     
     // 绘制渐变背景
     let gradient = QLinearGradient.fromInt(0, 0, 0, 300)

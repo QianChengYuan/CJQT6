@@ -845,10 +845,10 @@ class GuiTypesTests {
 
     @TestCase
     func testOrientation() {
-        @Expect(Orientation.Horizontal.value(), 1)
-        @Expect(Orientation.Vertical.value(), 2)
-        @Expect(Orientation.fromValue(2).value(), 2)
-        @Expect(Orientation.fromValue(99).value(), 1)
+        @Expect(Orientation.Horizontal.value, 1)
+        @Expect(Orientation.Vertical.value, 2)
+        @Expect(Orientation.fromValue(2).value, 2)
+        @Expect(Orientation.fromValue(99).value, 1)
         @Expect(Orientation.Horizontal == Orientation.Horizontal, true)
         @Expect(Orientation.Horizontal != Orientation.Vertical, true)
     }

@@ -621,7 +621,7 @@ public class GameRenderer {
 
     public func render(painterPtr: Int64): Unit {
         let painter = QPainter.fromPtr(painterPtr)
-        painter.setRenderHint(RenderHint.Antialiasing.value())
+        painter.setRenderHint(RenderHint.Antialiasing.value)
 
         painter.fillRectColor(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, colorBlack)
 

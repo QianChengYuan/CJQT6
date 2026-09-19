@@ -142,15 +142,17 @@ public enum PenStyle {
     | DashDotDotLine
     | CustomDashLine
 
-    public func value(): Int32 {
-        match (this) {
-            case NoPen => 0
-            case SolidLine => 1
-            case DashLine => 2
-            case DotLine => 3
-            case DashDotLine => 4
-            case DashDotDotLine => 5
-            case CustomDashLine => 6
+    public prop value: Int32 {
+        get() {
+            match (this) {
+                case NoPen => 0
+                case SolidLine => 1
+                case DashLine => 2
+                case DotLine => 3
+                case DashDotLine => 4
+                case DashDotDotLine => 5
+                case CustomDashLine => 6
+            }
         }
     }
 
@@ -167,11 +169,11 @@ public enum PenStyle {
     }
 
     public operator func ==(other: PenStyle): Bool {
-        this.value() == other.value()
+        this.value == other.value
     }
 
     public operator func !=(other: PenStyle): Bool {
-        this.value() != other.value()
+        this.value != other.value
     }
 }
 
@@ -193,23 +195,25 @@ public enum BrushStyle {
     | RadialGradient
     | ConicalGradient
 
-    public func value(): Int32 {
-        match (this) {
-            case NoBrush => 0
-            case SolidPattern => 1
-            case Dense1Pattern => 2
-            case Dense2Pattern => 3
-            case Dense3Pattern => 4
-            case Dense4Pattern => 5
-            case Dense5Pattern => 6
-            case Dense6Pattern => 7
-            case Dense7Pattern => 8
-            case HorPattern => 9
-            case VerPattern => 10
-            case CrossPattern => 11
-            case LinearGradient => 15
-            case RadialGradient => 16
-            case ConicalGradient => 17
+    public prop value: Int32 {
+        get() {
+            match (this) {
+                case NoBrush => 0
+                case SolidPattern => 1
+                case Dense1Pattern => 2
+                case Dense2Pattern => 3
+                case Dense3Pattern => 4
+                case Dense4Pattern => 5
+                case Dense5Pattern => 6
+                case Dense6Pattern => 7
+                case Dense7Pattern => 8
+                case HorPattern => 9
+                case VerPattern => 10
+                case CrossPattern => 11
+                case LinearGradient => 15
+                case RadialGradient => 16
+                case ConicalGradient => 17
+            }
         }
     }
 
@@ -235,11 +239,11 @@ public enum BrushStyle {
     }
 
     public operator func ==(other: BrushStyle): Bool {
-        this.value() == other.value()
+        this.value == other.value
     }
 
     public operator func !=(other: BrushStyle): Bool {
-        this.value() != other.value()
+        this.value != other.value
     }
 }
 
@@ -251,22 +255,24 @@ public enum RenderHint {
     | HighQualityAntialiasing
     | NonCosmeticDefaultPen
 
-    public func value(): Int32 {
-        match (this) {
-            case Antialiasing => 0x01
-            case TextAntialiasing => 0x02
-            case SmoothPixmapTransform => 0x04
-            case HighQualityAntialiasing => 0x08
-            case NonCosmeticDefaultPen => 0x10
+    public prop value: Int32 {
+        get() {
+            match (this) {
+                case Antialiasing => 0x01
+                case TextAntialiasing => 0x02
+                case SmoothPixmapTransform => 0x04
+                case HighQualityAntialiasing => 0x08
+                case NonCosmeticDefaultPen => 0x10
+            }
         }
     }
 
     public operator func ==(other: RenderHint): Bool {
-        this.value() == other.value()
+        this.value == other.value
     }
 
     public operator func !=(other: RenderHint): Bool {
-        this.value() != other.value()
+        this.value != other.value
     }
 }
 
@@ -310,18 +316,20 @@ public enum ImageFormat {
     | RGB888
     | RGBA8888
 
-    public func value(): Int32 {
-        match (this) {
-            case Invalid => 0
-            case Mono => 1
-            case MonoLSB => 2
-            case Indexed8 => 3
-            case RGB32 => 4
-            case ARGB32 => 5
-            case ARGB32_Premultiplied => 6
-            case RGB16 => 7
-            case RGB888 => 8
-            case RGBA8888 => 9
+    public prop value: Int32 {
+        get() {
+            match (this) {
+                case Invalid => 0
+                case Mono => 1
+                case MonoLSB => 2
+                case Indexed8 => 3
+                case RGB32 => 4
+                case ARGB32 => 5
+                case ARGB32_Premultiplied => 6
+                case RGB16 => 7
+                case RGB888 => 8
+                case RGBA8888 => 9
+            }
         }
     }
 
@@ -342,11 +350,11 @@ public enum ImageFormat {
     }
 
     public operator func ==(other: ImageFormat): Bool {
-        this.value() == other.value()
+        this.value == other.value
     }
 
     public operator func !=(other: ImageFormat): Bool {
-        this.value() != other.value()
+        this.value != other.value
     }
 }
 
@@ -383,7 +391,7 @@ public class QPen {
     }
     /// 设置样式（类型安全枚举）
     public func setPenStyle(s: PenStyle): QPen {
-        unsafe { qPenSetStyle(ptr, s.value()) };
+        unsafe { qPenSetStyle(ptr, s.value) };
         this
     }
     public func getPtr(): Int64 {
@@ -440,7 +448,7 @@ public class QBrush {
     }
     /// 设置样式（类型安全枚举）
     public func setBrushStyle(s: BrushStyle): QBrush {
-        unsafe { qBrushSetStyle(ptr, s.value()) };
+        unsafe { qBrushSetStyle(ptr, s.value) };
         this
     }
     public func getPtr(): Int64 {
@@ -801,7 +809,7 @@ public class QImage {
     }
 
     public static func withSize(w: Int32, h: Int32): QImage {
-        unsafe { QImage(qImageCreateSize(w, h, ImageFormat.ARGB32.value())) }
+        unsafe { QImage(qImageCreateSize(w, h, ImageFormat.ARGB32.value)) }
     }
 
     public func width(): Int32 {

@@ -215,7 +215,7 @@ public class SnakeRenderer {
         brush = QBrush()
         // 修复：QBrush() 默认 Qt::NoBrush 不填充，drawRect/drawEllipse 只画边框
         // 不填充颜色，致蛇身和食物显示为黑色边框无填充。设为 SolidPattern 才填充。
-        brush.setStyle(BrushStyle.SolidPattern.value())
+        brush.setStyle(BrushStyle.SolidPattern.value)
         colorBackground = QColor(20, 20, 30)
         colorGrid = QColor(40, 40, 50)
         colorSnakeHead = QColor(50, 205, 50)
@@ -245,7 +245,7 @@ public class SnakeRenderer {
 
     public func render(painterPtr: Int64): Unit {
         let painter = QPainter.fromPtr(painterPtr)
-        painter.setRenderHint(RenderHint.Antialiasing.value())
+        painter.setRenderHint(RenderHint.Antialiasing.value)
 
         painter.fillRectColor(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, colorBackground)
         renderGrid(painter)
