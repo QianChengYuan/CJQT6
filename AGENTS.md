@@ -22,7 +22,7 @@ cjpm build
 
 手动方式（Windows）：`cmake ..\.. -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="$env:QTDIR"` + `cmake --build . --config Release`，再把 `native\build_windows_x64\bin\cjqt6_bridge.dll` 和 `lib\cjqt6_bridge.lib` 拷到 `releases\windows-x64\`。
 
-**运行示例/程序**：Qt 运行时 DLL 必须可找到，先 `.\scripts\setup-qt-env.ps1`（或把 `C:\Qt\6.9.1\msvc2022_64\bin` 加入 PATH），然后 `cd examples/<name> && cjpm run`。发布部署用 `windeployqt.exe` 或示例目录内的 `deploy_qt.ps1`。
+**运行示例/程序**：Qt 运行时 DLL 必须可找到，先 `.\scripts\setup-qt-env.ps1`（或把 `C:\Qt\6.9.1\msvc2022_64\bin` 加入 PATH），然后 `cd examples/<name> && cjpm run`。发布部署用 `windeployqt.exe` 或示例目录内的 `deploy_qt.ps1`。**改过 `src/` 后再构建示例若报 `undefined symbol`，先跑 `.\scripts\clean-example-cache.ps1`**（见「已知坑」中的示例缓存条目）。
 
 > **Windows Qt 版本锁定 6.9.1（与 GitHub CI 一致）**：项目此前默认 Qt 6.10.3，已为**与 CI 所使用的版本保持一致而同步降级至 6.9.1**（CI 侧因 aqtinstall 无法解压 6.10.3 先行降级，见 `docs/CHANGELOG.md`）。
 > 本机装有多版本 Qt 时，`QTDIR` 必须指向 `6.9.1`——bridge 与运行时 Qt 小版本不一致会在**加载期**直接失败（`0xC0000139` 找不到程序入口）；切换版本后还必须删除 `native/build_windows_x64` 缓存重编 bridge（CMake 缓存会锁住旧的 `CMAKE_PREFIX_PATH`）。
@@ -54,8 +54,9 @@ git push origin main
 - **增量构建陷阱**：`native\build_windows_x64` 有 CMake 缓存时，`cmake --build` 可能判定"已最新"跳过链接，导致改了 C++ 代码但行为不变。强制重编：`cmake --build . --config Release --clean-first`，或删掉 `native\build_windows_x64` 重来。
 - **`cjpm.toml` 用 `${CJQT6_ROOT}` 环境变量替换链接路径**（Windows 目标段 `[target.x86_64-w64-mingw32]`：`link-option = "${CJQT6_ROOT}/releases/windows-x64/cjqt6_bridge.dll"`）。构建前必须设置 `CJQT6_ROOT` 指向仓库根目录（`scripts/update-bridge.ps1`、`scripts/verify_all.ps1`、`scripts/setup-qt-env.ps1/.sh` 已自动注入，CI 用 `github.workspace`）；**不设置会拼成 `/releases/...` 直接链接失败**。cjc 实际目标三元组是 `x86_64-w64-mingw32`（`cjc -v` 实测），顶层 `link-option` 已置空。
 - **测试源码已迁入根包 `src/test/`**（`package cjqt6.test`，49 个 `*_test.cj`），根目录 `cjpm test` 直接发现并运行；`docs/internal/`、`PUBLISHING.md`、`.agents/skills/`（除 `cjqt6/SKILL.md`）不入库；`tests/` 已删除（脚本迁入 `scripts/deploy-qt-example.ps1` 与 `scripts/deploy-qt-test.ps1`，2026-09-09）。
-- **`cjpm test --coverage` 不要用默认并行编译**：并行时 `cjc.exe` 可能挂死成孤儿进程（CPU 0.00s / 内存 ~0MB，父进程 cjpm 已退出），而这些孤儿继承了 stdout 句柄，导致调用方**永远等不到 EOF —— 表现为"卡住且一行输出都没有"**（实测 5m40s 无任何输出，手动杀掉孤儿 cjc 才结束）。挂死的 cjc 命令行形如 `cjc -p <仓库>\src\charts ... --coverage ...`。因此 `scripts/deploy-qt-test.ps1` 默认 `-j 1` 串行，并在开跑前/结束后清理孤儿 `cjc.exe`。
+- **`cjpm test --coverage` 不要用默认并行编译**：并行时 `cjc.exe` 可能挂死成孤儿进程（CPU 0.00s / 内存 ~0MB，父进程 cjpm 已退出），而这些孤儿继承了 stdout 句柄，导致调用方**永远等不到 EOF —— 表现为"卡住且一行输出都没有"**（实测 5m40s 无任何输出，手动杀掉孤儿 cjc 才结束）。挂死的 cjc 命令行形如 `cjc -p <仓库>\src\charts ... --coverage ...`。因此 `scripts/deploy-qt-test.ps1` 默认 `-j 1` 串行，并在开跑前/结束后清理孤儿 `cjc.exe`。另注：本机实测 `--coverage` 还可能让 **cjpm 自身**在收尾备份 gcov 数据时抛 `FSException: Native function error return -1`（`backupGcnoData` → `FileInfo::isRegular`）而中止，**此时一个用例统计都不会打印**——`run-test.ps1` / `verify_all.ps1` 的 `-SkipCoverage` 现已透传到测试步骤（此前只跳过了覆盖率报告步骤），`deploy-qt-test.ps1` 也新增了「未取得用例统计即判 FAIL」的空过防护（此前会兜底误报 PASS）。
 - 示例（`examples/`）是独立 cjpm 工程，通过 `cjqt6 = { path = "../../" }` 依赖根包；其 `link-option` 也含本机绝对路径。
+- **示例缓存会跨库版本复用，改过 `src/` 后构建示例可能报缺符号**：cjpm 把库各子包编译成 DLL + `.cjo` 放进 `examples/<name>/target/release/cjqt6/`，并连同 `target/.dep-cache` 指纹一起复用；库的对外形态变更后（如给接口加默认实现），旧缓存可能只被「重新链接」而不重新编译，于是 `cjpm build` 在链接期失败：`ld.lld: error: undefined symbol: _CN10cjqt6.core12QtWidgetCore13setStyleSheetHRNat6StringE`、`undefined symbol: cjqt6.core:QtWidget.ti`。**这类失败与示例代码无关**，清掉该示例的 `target/` 即可恢复（`--coverage` 插桩也会因此停下）。一键处理：`.\scripts\clean-example-cache.ps1`（按 `src/` mtime 判定陈旧，`-Force` 无条件清）；`scripts/verify_all.ps1` 在构建冒烟示例前已自动执行同一判定。
 - `src/main.cj` 只是打印占位，不是入口；库本身是 `output-type = "dynamic"`，真正的运行入口在各示例。
 
 ## 目录地图（只列会影响行为的）

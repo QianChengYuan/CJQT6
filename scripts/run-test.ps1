@@ -93,10 +93,14 @@ if ($LASTEXITCODE -ne 0) {
 if ($SkipTest) {
     Write-Step 5 6 "跳过部署+全量测试(-SkipTest)" Skip
 } else {
-    Write-Step 5 6 "部署 Qt 运行时 + 全量测试(offscreen,--coverage)..."
+    $covLabel = if ($SkipCoverage) { "无覆盖率插桩" } else { "--coverage" }
+    Write-Step 5 6 "部署 Qt 运行时 + 全量测试(offscreen,$covLabel)..."
     # -SkipBuild:第 4 步已构建;该脚本负责把 releases 最新 bridge + Qt 运行时
     # 同步进 target/release/cjqt6 并设置 offscreen / 字体环境后运行 cjpm test
-    & powershell -ExecutionPolicy Bypass -File "$RootDir\scripts\deploy-qt-test.ps1" -RunTest -SkipBuild -QtDir "$QtDir"
+    # -SkipCoverage 必须透传:否则本步仍带 --coverage 插桩(该开关原本只跳过了第 6 步报告)
+    $testArgs = @("-RunTest", "-SkipBuild", "-QtDir", $QtDir)
+    if ($SkipCoverage) { $testArgs += "-SkipCoverage" }
+    & powershell -ExecutionPolicy Bypass -File "$RootDir\scripts\deploy-qt-test.ps1" @testArgs
     if ($LASTEXITCODE -ne 0) {
         Write-Host "错误: 测试失败" -ForegroundColor Red
         exit 1

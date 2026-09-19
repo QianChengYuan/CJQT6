@@ -11,6 +11,10 @@
 
 ### 变更
 
+- **本地测试工具链修掉两处「判据不严 / 缓存失效」缺陷（不影响 CI 口径）**：
+  - **`--coverage` 下 cjpm 自身崩溃会被误判为 PASS（空过）**：`scripts/deploy-qt-test.ps1` 此前只看退出码——`FAILED: [1-9]` 与编译错误都不匹配时，一律兜底打印「PASS (with warnings)」并 `exit 0`。实测 `--coverage` 收尾备份 gcov 数据时 **cjpm 自身**会抛 `FSException: Native function error return -1`（`backupGcnoData` → `std.fs::FileInfo::isRegular`）而中止，**一个用例统计都不打印**，却被判为 PASS——即「测试根本没跑完也显示绿」。现要求**必须取得用例统计（`PASSED: N`）**才判定通过，否则报 FAIL（非零退出）并提示去掉 `--coverage` 重跑。该口径与 CI 复合 action 的 `run-test.sh` 一致（其在无用例统计时本就以非零退出）；CI 不使用本机脚本，故 CI 行为不变。
+  - **`-SkipCoverage` 未透传到测试步骤**：`scripts/run-test.ps1` / `scripts/verify_all.ps1` 的该开关原本只跳过「覆盖率报告」步骤，测试仍强制带 `--coverage` 插桩——于是「想快速验证却踩到上述 cjpm 崩溃」无法规避（本机实测必现）。现两脚本把 `-SkipCoverage` 透传给 `deploy-qt-test.ps1`，并在步骤标题中明示 `--coverage` / 「无覆盖率插桩」。
+  - **示例复用「旧版本库」缓存产物导致链接失败（新增一键修复）**：示例是独立 cjpm 工程，cjpm 把库各子包编成 DLL + `.cjo` 放进 `examples/<name>/target/release/cjqt6/` 并连同 `target/.dep-cache` 指纹复用；库的对外形态变更后，旧缓存可能只被「重新链接」而不重新编译，`cjpm build` 即在链接期失败（`undefined symbol: _CN10cjqt6.core12QtWidgetCore13setStyleSheetHRNat6StringE`、`cjqt6.core:QtWidget.ti`）。新增 `scripts/clean-example-cache.ps1` 与 `scripts/lib/common.ps1` 的 `Clear-StaleExampleCache`：当 `src/**/*.cj` 或根 `cjpm.toml` 的 mtime 晚于该示例缓存里的库产物时判定陈旧并清理该示例 `target/`（`-Force` 可无条件清）；`scripts/verify_all.ps1` 在构建冒烟示例前自动执行同一判定。症状与处置见 `AGENTS.md`「已知坑」。
 - **枚举取整统一为 `.value`（findings P2-1 闭环，⚠️ 破坏性变更）**：5 个枚举的取整成员由 `public func value(): Int32`（调用 `.value()`）改为**只读属性** `public prop value: Int32`（调用 `.value`），与 `Alignment` / `TextAlignment` 等结构体的 `public let value` 写法对齐——取整不再需要按类型记住「带不带括号」。
   - **涉及类型**：`RenderHint` / `PenStyle` / `BrushStyle` / `ImageFormat`（`src/paint/painter.cj`）、`Orientation`（`src/gui/types.cj`）。`Alignment`（含 `operator func |` 位运算）与 `TextAlignment` **保持不变**。
   - **迁移方式**：既有代码把取整调用的括号去掉即可——`RenderHint.Antialiasing.value()` → `RenderHint.Antialiasing.value`、`PenStyle.SolidLine.value()` → `PenStyle.SolidLine.value`。枚举值的整数与 `fromValue()` 反查语义**完全不变**；桥接层与 FFI 无改动，`releases/` 产物无需重建。

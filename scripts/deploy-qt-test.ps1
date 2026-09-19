@@ -291,9 +291,21 @@ if ($RunTest) {
             Write-Host "[test] FAIL - 编译失败(exit=$testExitCode,见日志 $logFile)" -ForegroundColor Red
             exit $testExitCode
         }
+        # 空过防护:必须见到用例统计,才能判定"测试确实跑过"。
+        # cjpm 自身崩溃时不会打印任何统计 —— 实测 --coverage 下 backupGcnoData 抛
+        #   "FSException: Native function error return -1. at std.fs::FileInfo::isRegular()"
+        # 此时 exit code 非 0,但既无 FAILED 也无编译错误 → 旧逻辑会兜底误报 PASS(空过)。
+        $hasSummary = ($cleanOutput | Select-String -Pattern "PASSED:\s*\d+" -Quiet)
+        if (-not $hasSummary) {
+            Write-Host "[test] FAIL - 未取得用例统计(PASSED/FAILED):测试未跑完,或被 cjpm 内部错误中断" -ForegroundColor Red
+            Write-Host "[test]       完整日志: $logFile" -ForegroundColor Red
+            Write-Host "[test]       若日志含 FSException @ backupGcnoData,请去掉 --coverage 重跑(-SkipCoverage)" -ForegroundColor Yellow
+            exit $testExitCode
+        }
         # FAILED: 0 但有 ERROR — 偶发的 GC/Qt 问题(如 QMenu addAction 崩溃、killTimer warning),
         # 不影响测试正确性,与 Linux/macOS CI 容错口径对齐
-        Write-Host "[test] PASS (with warnings - FAILED: 0, ERROR is sporadic GC/Qt issue)" -ForegroundColor Yellow
+        $summary = ($cleanOutput | Select-String -Pattern "PASSED:\s*\d+.*" | Select-Object -Last 1).Line.Trim()
+        Write-Host "[test] PASS (with warnings - $summary ; ERROR is sporadic GC/Qt issue)" -ForegroundColor Yellow
         # 必须显式 exit 0 覆盖 $LASTEXITCODE(cjpm 返回 1),
         # 否则 GitHub Actions pwsh shell wrapper 会以 $LASTEXITCODE 退出导致 CI 失败
         exit 0

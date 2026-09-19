@@ -75,8 +75,12 @@ if ($LASTEXITCODE -ne 0) {
 if ($SkipTest) {
     Write-Step 3 5 "跳过测试(-SkipTest)" Skip
 } else {
-    Write-Step 3 5 "部署 Qt 运行时 + 全量测试(offscreen,--coverage,上限 ${TestTimeoutSec}s)..."
-    & pwsh -ExecutionPolicy Bypass -File "$RootDir\scripts\deploy-qt-test.ps1" -RunTest -SkipBuild -TestTimeoutSec $TestTimeoutSec
+    $covLabel = if ($SkipCoverage) { "无覆盖率插桩" } else { "--coverage" }
+    Write-Step 3 5 "部署 Qt 运行时 + 全量测试(offscreen,$covLabel,上限 ${TestTimeoutSec}s)..."
+    # -SkipCoverage 必须透传:否则本步仍带 --coverage 插桩(该开关原本只跳过了第 4 步报告)
+    $testArgs = @("-RunTest", "-SkipBuild", "-TestTimeoutSec", $TestTimeoutSec)
+    if ($SkipCoverage) { $testArgs += "-SkipCoverage" }
+    & pwsh -ExecutionPolicy Bypass -File "$RootDir\scripts\deploy-qt-test.ps1" @testArgs
     if ($LASTEXITCODE -ne 0) {
         Write-Host "错误: 测试失败" -ForegroundColor Red
         exit 1
@@ -119,6 +123,11 @@ if ($SkipExample) {
     if (-not (Test-Path "examples\$Example")) {
         Write-Host "错误: 示例不存在 examples\$Example" -ForegroundColor Red
         exit 1
+    }
+    # 示例缓存里的库产物若由旧版本库构建,链接期会以 undefined symbol 失败
+    # (典型: QtWidgetCore 等接口默认实现),必须在 cjpm build 之前失效
+    if (Clear-StaleExampleCache -ExampleDir (Join-Path $RootDir "examples\$Example") -RootDir $RootDir) {
+        Write-Host "  [i] examples\$Example 的库缓存早于 src/,已清理 target/(将全量重建)" -ForegroundColor Yellow
     }
     Push-Location "examples\$Example"
     & $cjpm build

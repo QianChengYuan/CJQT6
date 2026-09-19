@@ -188,3 +188,47 @@ function Write-Die {
     Write-Host "错误: $Text" -ForegroundColor Red
     exit 1
 }
+
+# ---------- 清理「由旧版本库构建」的示例缓存(返回 $true 表示已清理) ----------
+# 背景: 示例是独立 cjpm 工程(cjqt6 = { path = "../../" })。cjpm 会把库各子包编译成
+#   DLL + .cjo 放进 <示例>/target/release/cjqt6/,并连同 target/.dep-cache 指纹一起复用。
+#   库的对外形态变更后(例如给接口加默认实现),旧缓存可能只被「重新链接」而不重新编译,
+#   于是链接期报缺符号,形如:
+#     ld.lld: error: undefined symbol: _CN10cjqt6.core12QtWidgetCore13setStyleSheetHRNat6StringE
+#     ld.lld: error: undefined symbol: cjqt6.core:QtWidget.ti
+#   这类失败与示例自身代码无关,清掉该示例的 target/ 即可恢复(与旧 rebuild_all.ps1 的做法一致);
+#   ⚠ 必须在 cjpm build 之前清理 —— build 已经失败后再清就没意义了。
+# 判据: src/**/*.cj 或根 cjpm.toml 的 mtime 晚于示例缓存里最新的 libcjqt6* 产物 → 判定陈旧。
+function Clear-StaleExampleCache {
+    param(
+        [Parameter(Mandatory = $true)][string]$ExampleDir,
+        [Parameter(Mandatory = $true)][string]$RootDir
+    )
+    $targetDir = Join-Path $ExampleDir "target"
+    $libCacheDir = Join-Path $targetDir "release\cjqt6"
+    if (-not (Test-Path $libCacheDir)) { return $false }
+
+    # 库侧最近改动时间(src 下全部 .cj + 根 cjpm.toml)
+    $libNewest = $null
+    $srcDir = Join-Path $RootDir "src"
+    if (Test-Path $srcDir) {
+        foreach ($f in (Get-ChildItem $srcDir -Recurse -File -Filter "*.cj" -ErrorAction SilentlyContinue)) {
+            if (-not $libNewest -or $f.LastWriteTime -gt $libNewest) { $libNewest = $f.LastWriteTime }
+        }
+    }
+    $toml = Join-Path $RootDir "cjpm.toml"
+    if (Test-Path $toml) {
+        $t = (Get-Item $toml).LastWriteTime
+        if (-not $libNewest -or $t -gt $libNewest) { $libNewest = $t }
+    }
+    if (-not $libNewest) { return $false }
+
+    # 示例缓存里最新的库产物时间
+    $cached = Get-ChildItem $libCacheDir -File -Filter "libcjqt6*" -ErrorAction SilentlyContinue |
+              Sort-Object LastWriteTime -Descending | Select-Object -First 1
+    if (-not $cached) { return $false }
+    if ($libNewest -le $cached.LastWriteTime) { return $false }
+
+    Remove-Item $targetDir -Recurse -Force -ErrorAction SilentlyContinue
+    return $true
+}
