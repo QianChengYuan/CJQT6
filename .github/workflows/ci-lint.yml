@@ -35,10 +35,17 @@ jobs:
           version: "1.1.0"
           url-override: ${{ vars.CANGJIE_SDK_URL_LINUX }}
 
-      - name: cjfmt 格式检查
+      - name: cjfmt 格式检查（src + examples + tools）
         run: |
           cjfmt -d src/
-          git diff --exit-code src/
+          cjfmt -d examples/
+          cjfmt -d tools/
+          git diff --exit-code src/ examples/ tools/
 
-      - name: cjlint 静态检查
+      - name: cjlint 静态检查（封装库）
         run: cjlint -f src/ -c .
+
+      # examples/ 与 tools/ 是各自独立的 cjpm 工程;其中仅 CjMonitor 维护了示例级
+      # 规则集（根白名单 − G.VAR.02/G.ITF.04,理由见其 config/README.md），故单独校验。
+      - name: cjlint 静态检查（CjMonitor 示例）
+        run: cjlint -f examples/CjMonitor/src -c examples/CjMonitor
