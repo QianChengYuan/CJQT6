@@ -11,13 +11,19 @@
 # 触发:
 #   - push main / PR main:扫描当前代码
 #   - schedule:每周一 02:00 跑一次,捕获新规则
-# 矩阵:linux + windows(CI runner 已有,无额外成本)
 # 严重度:仅 error / warning 阻断 PR,note 不阻断(降低噪声)
 #
-# ⚠ C/C++ 是**编译型**语言:CodeQL 必须在构建过程中提取代码。
+# ⚠ 构建模式(build-mode)说明:
+#   C/C++ 是**编译型**语言,CodeQL 默认需要在构建过程中提取代码。
 #   本工作流曾只有 init + analyze、没有任何构建步骤,故两个 cpp 任务恒报
 #   「CodeQL job status was configuration error」(python 无需构建,一直正常)。
-#   现补:安装 Qt6 → 用仓库自身的桥接构建脚本编译 → 分析。
+#   现按平台分开:
+#     - Linux cpp : manual —— 装 Qt6 + 用仓库脚本 scripts/build-linux-x64.sh 真实构建,
+#                   提取精度最高(约 3 分钟);
+#     - Windows cpp: none  —— 免构建分析。Windows 上从零 configure + 全量编译
+#                   ≈50 个 Qt 重头文件+CodeQL 构建追踪,单步要十几分钟且几乎无输出
+#                   (观感即卡死,任务上限 45 分钟),而 Windows 侧的编译正确性
+#                   已由 ci.yml 覆盖,不值得为扫描再付这份成本。
 #   另注:init 不接受 `paths` 参数(会报 Unexpected input 并被静默忽略),
 #   原先的扫描范围收窄从未生效;此处不再传,范围由仓库结构决定。
 # ============================================================
@@ -45,16 +51,16 @@ jobs:
         include:
           - language: cpp
             os: ubuntu-24.04
+            build_mode: manual
             qt_os: linux
             qt_version: "6.4.2"
             qt_arch: gcc_64
           - language: python
             os: ubuntu-24.04
+            build_mode: none
           - language: cpp
             os: windows-2022
-            qt_os: windows
-            qt_version: "6.9.1"
-            qt_arch: win64_msvc2022_64
+            build_mode: none
     permissions:
       actions: read
       contents: read
@@ -64,33 +70,35 @@ jobs:
       - name: 检出代码
         uses: actions/checkout@v7
 
-      # 仅在 C/C++ 任务安装 Qt:构建桥接库时 CMake 需要 find_package(Qt6 ...)
+      # 仅在需要真实构建的 Linux cpp 任务安装 Qt:
+      # 构建桥接库时 CMake 需要 find_package(Qt6 ...)
       - name: 安装 Qt6 ${{ matrix.qt_version }}（C/C++ 构建需要）
-        if: matrix.language == 'cpp'
+        if: matrix.qt_os == 'linux'
         uses: ./.github/actions/setup-qt
         with:
           os: ${{ matrix.qt_os }}
           version: ${{ matrix.qt_version }}
           arch: ${{ matrix.qt_arch }}
 
-      # CodeQL 初始化(下载 CLI + 创建数据库,并对随后的构建过程做追踪)
-      - name: 初始化 CodeQL
-        uses: github/codeql-action/init@v4
-        with:
-          languages: ${{ matrix.language }}
-
       # 编译 Qt6Gui 需要 OpenGL/X11 开发头(与 ci.yml 的依赖步骤保持一致)
       - name: 安装 Qt 构建依赖（Linux）
-        if: matrix.language == 'cpp' && matrix.qt_os == 'linux'
+        if: matrix.qt_os == 'linux'
         run: |
           sudo apt-get update || true
           sudo apt-get install -y libgl1-mesa-dev libglvnd-dev libegl-dev libopengl-dev \
             libxkbcommon-dev libdbus-1-3
 
+      # CodeQL 初始化(下载 CLI + 创建数据库,并对随后的构建过程做追踪)
+      - name: 初始化 CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build_mode }}
+
       # 复用仓库自身的桥接构建脚本:与 ci.yml 同一套命令,
       # 既保证 CodeQL 提取到真实编译单元,也顺带验证脚本本身可用。
       - name: 构建桥接库（供 CodeQL 提取 C/C++）
-        if: matrix.language == 'cpp'
+        if: matrix.build_mode == 'manual'
         shell: bash
         run: |
           if [ "${{ runner.os }}" = "Windows" ]; then
