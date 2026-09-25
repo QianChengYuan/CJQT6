@@ -12,6 +12,7 @@
 # 覆盖:
 #   - Linux/Windows/macOS bridge 层 C++ 单元测试均带 ASAN(P0-3,统一口径)
 #   - Windows 独享覆盖率门禁(P0-1)
+#   - 末尾 min-version-build:仓颉 1.1.0(cjpm.toml 的 cjc-version 下限)最小编译门禁
 # 文档变更(.md、docs/、README、PERSONAL_NOTES 等)触发 ci-lint.yml,
 # 本工作流不跑构建(节省 ~9 分钟/次)。
 # ------------------------------------------------------------
@@ -50,7 +51,9 @@ permissions:
   pull-requests: write
 
 env:
-  CANGJIE_VERSION: "1.1.0"
+  # 主流水线使用的最新 STS 版本（1.2.0, 2026-09-22 发布）。
+  # 最低支持版本（cjpm.toml 的 cjc-version = "1.1.0"）由末尾 min-version-build 门禁单独守住。
+  CANGJIE_VERSION: "1.2.0"
   QT_VERSION_LINUX: "6.4.2"
   QT_ARCH_LINUX: "gcc_64"
   QT_VERSION_MACOS: "6.4.2"
@@ -369,3 +372,41 @@ jobs:
           name: cjqt6-bridge-v${{ env.CANGJIE_VERSION }}-linux-arm64
           path: releases/linux-arm64/libcjqt6_bridge.so
           if-no-files-found: error
+
+  # ============================================================
+  # 最低支持版本编译门禁(仓颉 1.1.0)
+  # ------------------------------------------------------------
+  # 为什么需要它:cjpm.toml 的 cjc-version = "1.1.0" 是对外承诺的「最低支持版本」,
+  #   而上面四个 job 全部跑最新 STS(1.2.0)。若不设这道门禁,1.1.0 的兼容性将
+  #   完全无人验证 —— 承诺便成了无法兑现的话,误用 1.2.0 独有 API 也不会被发现。
+  # 只做最小验证:cjpm build(编译 + 链接),不建 bridge、不跑测试、不跑覆盖率。
+  #   链接目标 releases/linux-x64/libcjqt6_bridge.so 已随仓库入库,无需重编。
+  # 依赖:不传 url-override/sha-override,走 install.sh 内置的 1.1.0 下载源,
+  #   避免与主流水线的 vars.CANGJIE_SDK_URL_LINUX(1.2.0) 相互干扰。
+  # ============================================================
+  min-version-build:
+    name: 最低版本 1.1.0 编译门禁
+    timeout-minutes: 20
+    runs-on: ubuntu-24.04
+    env:
+      CJQT6_ROOT: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: 安装仓颉 SDK 1.1.0(最低支持版本)
+        uses: ./.github/actions/setup-cangjie
+        with:
+          os: linux
+          version: "1.1.0"
+
+      - name: 安装 Qt6 库(尽力而为)
+        run: |
+          sudo apt-get update || true
+          # 链接期实际只用到仓库内预编译的 libcjqt6_bridge.so,通常无需 Qt;
+          # 这里装基础库(+Charts)仅作保险,装不上也不阻塞(真缺库链接器会明确报错)。
+          sudo apt-get install -y qt6-base-dev libqt6charts6-dev || true
+
+      - name: cjpm build(最低版本编译门禁)
+        run: |
+          cjpm build
+          echo "== 仓颉 1.1.0 编译通过:cjc-version = \"1.1.0\" 的下限承诺成立 =="

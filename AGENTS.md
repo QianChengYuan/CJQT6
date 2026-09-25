@@ -1,6 +1,8 @@
 # AGENTS.md — CJQT6
 
-CJQT6（版本 1.9.0）是仓颉(Cangjie)语言的 Qt6 封装库：仓颉源码（`src/`）通过 FFI 调用 C++ 桥接动态库（`cjqt6_bridge`，`native/`）包装 Qt6 API。远端仓库在 **GitCode**（`https://gitcode.com/Cangjie-TPC/CJQT6.git`）；GitHub 镜像仓（`QianChengYuan/CJQT6`）挂载 `.github/workflows/ci.yml` 跑四平台无人值守 CI（Windows x64 / Linux x64 / Linux ARM64 / macOS arm64）。**GitCode 为主仓、GitHub 为镜像，CI 全绿后再推 GitCode。**
+CJQT6（版本 1.9.0）是仓颉(Cangjie)语言的 Qt6 封装库：仓颉源码（`src/`）通过 FFI 调用 C++ 桥接动态库（`cjqt6_bridge`，`native/`）包装 Qt6 API。远端仓库在 **GitCode**（`https://gitcode.com/Cangjie-TPC/CJQT6.git`）；GitHub 镜像仓（`QianChengYuan/CJQT6`）挂载 `.github/workflows/ci.yml` 跑四平台无人值守 CI（Windows x64 / Linux x64 / Linux ARM64 / macOS arm64）。**GitCode 为主仓、GitHub 为镜像，CI 全绿后再推 GitCode。** CI 主流水线跑仓颉 **1.2.0**（最新 STS），另设 `min-version-build` 门禁单独跑 **1.1.0** —— 因为 `cjpm.toml` 的 `cjc-version = "1.1.0"` 是对外承诺的最低支持版本，主流水线升版本后必须有人守住这个下限。
+
+> **仓颉 SDK 下载源**：各平台各版本的 `objectKey` 与 SHA-256 内置在 `.github/actions/setup-cangjie/install.{sh,ps1}` 的「`<平台>_<版本>`」表中（**升级 SDK 版本必须同步该表**，objectKey 与版本一一对应）；GitHub 仓库 variables `CANGJIE_SDK_URL_*` / `CANGJIE_SDK_SHA_*` 存在时优先于内置表，升级版本时要一并更新（**当前实测该仓库未配置任何 variables，走内置表**）。
 
 > **最重要参考**：本仓库自带 `.agents/skills/cjqt6/SKILL.md`（随 git 版本化），包含模块地图、API 约定、信号槽写法、内存管理陷阱与常见错误速查。写任何 cjqt6 代码前先读它，再以同模块已有 `.cj` 文件为范式。
 

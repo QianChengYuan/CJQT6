@@ -116,7 +116,7 @@ function Find-Cjpm {
     $candidates = @(
         "$env:CANGJIE_HOME\tools\bin\cjpm.exe",
         "$env:USERPROFILE\.cangjie\tools\bin\cjpm.exe",
-        "C:\CodeTools\cangjie\cangjie_1.1.0\tools\bin\cjpm.exe"
+        "C:\CodeTools\cangjie\cangjie_1.2.0\tools\bin\cjpm.exe"
     )
     foreach ($c in $candidates) {
         if ($c -and (Test-Path $c)) { return (Get-Command $c) }
@@ -135,7 +135,7 @@ function Find-Cjcov {
     $candidates = @(
         "$env:CANGJIE_HOME\tools\bin\cjcov.exe",
         "$env:USERPROFILE\.cangjie\tools\bin\cjcov.exe",
-        "C:\CodeTools\cangjie\cangjie_1.1.0\tools\bin\cjcov.exe"
+        "C:\CodeTools\cangjie\cangjie_1.2.0\tools\bin\cjcov.exe"
     )
     foreach ($c in $candidates) {
         if ($c -and (Test-Path $c)) { return (Get-Command $c) }
