@@ -176,3 +176,8 @@ examples/**/recv/
 # AI 辅助缺陷分析/修复方案文档（本地参考，不入库）
 DEFECTS_REVIEW.md
 HIGH_PRIORITY_FIX_PLAN.md
+
+# 审查/缺陷/修复报告类文档（AI 或人工审查产物，仅本地留存参考，不入库）
+AUDIT-REPORT.md
+DEFECTS.md
+FIX-REPORT-ROUND*.md
