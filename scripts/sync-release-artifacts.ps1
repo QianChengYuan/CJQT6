@@ -6,7 +6,7 @@
 
 param(
     [string]$RunId = "",
-    [string]$CangjieVersion = "1.1.0"  # 与 ci.yml env.CANGJIE_VERSION 同步
+    [string]$CangjieVersion = "1.2.0"  # 与 ci.yml env.CANGJIE_VERSION 同步
 )
 
 $ErrorActionPreference = "Stop"

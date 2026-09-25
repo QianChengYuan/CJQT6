@@ -4,8 +4,12 @@
 #   - uses: ./.github/actions/setup-cangjie
 #     with:
 #       os: linux | windows | macos | linux-arm64
+#       version: 1.2.0                                     # 可选,默认 1.2.0
 #       url-override: ${{ vars.CANGJIE_SDK_URL_LINUX }}    # 可选
-#       sha-override: ${{ vars.CANGJIE_SDK_SHA_LINUX }}    # 可选,空则跳过校验
+#       sha-override: ${{ vars.CANGJIE_SDK_SHA_LINUX }}    # 可选,空则用内置 SHA
+# 说明: 内置下载源表覆盖 1.2.0(四平台全部) 与 1.1.0(linux x64,供最低版本门禁),
+#       objectKey/SHA-256 随版本列举在 install.sh / install.ps1 中。
+# ------------------------------------------------------------------------
 # 输出:
 #   cangjie-home: 仓颉 SDK 安装根目录
 # 副作用(写入 $GITHUB_ENV / $GITHUB_PATH):
@@ -24,7 +28,7 @@ inputs:
   version:
     description: 仓颉 SDK 版本
     required: false
-    default: "1.1.0"
+    default: "1.2.0"
   url-override:
     description: SDK 下载 URL 覆盖(vars.CANGJIE_SDK_URL_<PLATFORM>)
     required: false
