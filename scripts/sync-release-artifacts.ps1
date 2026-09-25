@@ -28,9 +28,11 @@ $map = [ordered]@{
 }
 
 if ([string]::IsNullOrEmpty($RunId)) {
-    $RunId = (gh run list --repo $repo --branch main --status success --limit 1 --json databaseId --jq ".[0].databaseId") 2>$null
+    # 必须显式 --workflow ci.yml：Dependabot 的自动更新 run 同样落在 main 分支且结论 success，
+    # 只按 --branch main --status success 取最近一条会选中它，而它不含 bridge 产物。
+    $RunId = (gh run list --repo $repo --workflow ci.yml --branch main --status success --limit 1 --json databaseId --jq ".[0].databaseId") 2>$null
     if ([string]::IsNullOrEmpty($RunId)) {
-        throw "未找到成功的 main CI run，请用 -RunId <id> 指定（gh run list --repo $repo）"
+        throw "未找到成功的 main CI run，请用 -RunId <id> 指定（gh run list --repo $repo --workflow ci.yml）"
     }
 }
 Write-Host "==> 从 CI run $RunId 同步四平台桥接库到 releases/" -ForegroundColor Cyan
