@@ -77,6 +77,15 @@ function Copy-Plugin($sub) {
 Copy-Plugin "platforms"
 Copy-Plugin "styles"
 Copy-Plugin "imageformats"
+# sqldrivers：QSQLITE 驱动（缺它 QSqlDatabase/QSqlQuery 初始化失败）
+Copy-Plugin "sqldrivers"
+# multimedia：QMediaPlayer/QAudioOutput 的音频后端（缺它示例能启动、但播放会静默失败）
+Copy-Plugin "multimedia"
+# iconengines / tls / networkinformation / platformthemes：图标、HTTPS、网络状态、原生主题
+Copy-Plugin "iconengines"
+Copy-Plugin "tls"
+Copy-Plugin "networkinformation"
+Copy-Plugin "platformthemes"
 
 # ---- 拷贝 MSVC 运行库 ----
 if ($CrtDir) {

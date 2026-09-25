@@ -72,7 +72,7 @@ git push origin main
 | `native/src/<module>/bridge_*.cpp` | C++ FFI 桥接实现（56 个 .cpp，模块含 core/gui/widgets/views/multimedia/network/paint/print/process/qml/sql/tools/charts），`extern "C"` 导出 `qXxx*` 函数；改它必须重编 bridge |
 | `native/includes/*.h` | 桥接头文件（含 MOC 类 gui.h/widgets.h/signalemitter.h） |
 | `releases/<platform>/` | 预编译桥接库（入库），cjpm 链接目标；`windows-x64/`、`linux-x64/`、`linux-arm64/`、`macos-arm64/`(dylib) 含实际产物；`macos-x64/` 仅占位 README——仓颉 1.1.0 版本暂未提供 macOS x64 SDK，`cjpm.toml` 对应 target 已注释，暂不支持 |
-| `examples/` | 20 个示例/工具工程目录（notepad/calculator/dormitory_manager/qq_chat_lan/all_controls_demo/music_player/snake_game/tank_battle/todo_list/charts_demo…） |
+| `examples/` | 20 个示例/工具工程目录（notepad/calculator/dormitory_manager/qq_chat_lan/all_controls_demo/music_player/snake_game/tank_battle/todo_list/charts_demo…）；**一键运行脚本 `run-example.ps1` / `run-example.sh`（换示例名即可，自动对齐 Qt 版本 + ABI 自检 + 部署运行时），用法与排查见 `examples/README.md`** |
 | `scripts/` | 构建/部署/同步工具（`update-bridge.ps1` 重编 bridge + 同步 releases；`verify_all.ps1` 一键门禁；`setup-qt-env.ps1/.sh` 配置环境；`build-linux-x64.sh` 等跨平台构建；`deploy-qt-example.ps1` / `deploy-qt-test.ps1` 部署运行时；`sync-release-artifacts.ps1` 拉取 CI 产物入库）；共享函数 `scripts/lib/common.{sh,ps1}`；PowerShell 脚本要求 pwsh 7+。`tests/` 已删除（2026-09-09）。 |
 | `docs/` | `guides/`（构建/架构/交叉编译/性能/版本矩阵/封装模板）、`api/01~20`、`internal/`（评估/覆盖度/控件分析）、`resource/`、`testing/`、`tutorial/` |
 | `.agents/skills/cjqt6/SKILL.md` | 项目自带 skill，权威速查（必读） |

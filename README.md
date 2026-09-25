@@ -126,21 +126,41 @@ cjpm build
 
 ### 3. 运行示例
 
-Qt 运行时 DLL 必须可找到，先配置环境：
+推荐用 `examples/` 下的一键脚本，**换示例名即可**（脚本会自动选定与桥接库 ABI 匹配的 Qt、
+把其它 Qt 版本从 PATH 中剔除、部署运行时到 exe 同目录，并在启动前做一次 ABI 自检）：
 
 ```powershell
 # Windows
-.\scripts\setup-qt-env.ps1
+.\examples\run-example.ps1                 # 列出全部可运行示例
+.\examples\run-example.ps1 notepad         # 构建 + 部署 + 运行
+```
+
+```bash
+# Linux / macOS
+./examples/run-example.sh notepad
+```
+
+手动方式（不使用脚本时）：
+
+```powershell
+# 注意：setup-qt-env.ps1 要用点号加载，环境变量才会作用于当前会话
+. .\scripts\setup-qt-env.ps1
 cd examples\notepad
+cjpm build
+pwsh -File ..\..\scripts\deploy-qt-example.ps1 -ExampleRoot .
 cjpm run
 ```
 
 ```bash
-# Linux
-./scripts/setup-qt-env.sh
+source ./scripts/setup-qt-env.sh
 cd examples/notepad
+cjpm build
 cjpm run
 ```
+
+> **Qt 版本必须与桥接库一致**：`releases/windows-x64/cjqt6_bridge.dll` 由 Qt **6.9.1** 编译，
+> 运行时若加载了别的版本（如 6.10.x），会在启动时弹「无法定位程序输入点 … 于 cjqt6_bridge.dll 上」。
+> 详细排查见 [examples/README.md](examples/README.md#常见问题)。
 
 发布部署用 `windeployqt.exe` 或示例目录内的 `deploy_qt.ps1`。
 

@@ -635,12 +635,30 @@ ls target/release/
 
 ### 4.3 运行示例程序验证
 
-**运行示例程序验证**:
+**推荐：用示例一键脚本**（自动对齐 Qt 版本、剔除 PATH 中其它 Qt、部署运行时到 exe 同目录，并在启动前做 bridge↔Qt 的 ABI 自检）：
+
+```powershell
+# Windows
+.\examples\run-example.ps1 all_controls_demo      # 不带参数可列出全部示例
+```
+
 ```bash
-# 进入示例目录运行（cjpm 不支持 --example 参数，须 cd 到示例工程）
+# Linux / macOS
+./examples/run-example.sh all_controls_demo
+```
+
+**不用脚本时**（cjpm 不支持 `--example` 参数，须 cd 到示例工程）：
+
+```bash
 cd examples/all_controls_demo
+cjpm build
 cjpm run
 ```
+
+> Windows 手动跑时还需把 Qt 运行时部署到示例的 `target/release/bin`
+> （`pwsh -File ..\..\scripts\deploy-qt-example.ps1 -ExampleRoot .`），
+> 否则可能因 PATH 中的 Qt 版本与桥接库不一致而在启动时报「无法定位程序输入点」。
+> 详见 [examples/README.md](../../examples/README.md)。
 
 **预期结果**:
 - ✓ 程序启动无错误

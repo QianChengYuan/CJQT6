@@ -11,6 +11,17 @@
 
 ### 变更
 
+- **修复示例「能启动但音乐静默不播」（CjMusic 回归，由本轮新增的部署脚本引入）**：
+  - **`scripts/deploy-qt-example.ps1` 插件集不全**：此前只部署 `platforms`/`styles`/`imageformats`，**缺 `multimedia`** —— `QMediaPlayer`/`QAudioOutput` 的音频后端（`plugins/multimedia/ffmpegmediaplugin.dll`）缺失后播放静默失效（界面与进程都正常，故表现为「不播」而非报错）。现补齐为 `platforms / styles / imageformats / sqldrivers / multimedia / iconengines / tls / networkinformation / platformthemes`，与 `scripts/deploy-qt-test.ps1`、`examples/CjMonitor/deploy_qt.ps1` 的既有做法对齐。
+  - **运行时插件路径被其它 Qt 版本劫持**：用户级环境变量 `QT_PLUGIN_PATH` 若指向别的 Qt（实测 `C:\Qt\6.10.3\msvc2022_64\plugins`），Qt 会优先搜索它，日志刷出大量 `uses incompatible Qt library (6.10.0)`，多媒体后端因此加载失败。`examples/run-example.ps1` 现在在运行前把 `QT_PLUGIN_PATH` / `QT_QPA_PLATFORM_PLUGIN_PATH` 指向示例 `bin` 目录（与 `deploy-qt-test.ps1` 同做法），不再受外部 Qt 版本干扰。
+  - **顺带修复启动期 `0xC0000135`（找不到 DLL）**：`run-example.ps1` 现在把示例 `target/release` 及其全部子目录（`cjqt6`、以及第三方依赖如 `lrc4cj`、`charset4cj@cangjie_tpc`）加入 PATH —— 此前只靠 `cjpm run` 时会因缺这些依赖而启动失败。
+  - **验证方式（可复现）**：`QT_DEBUG_PLUGINS=1` 抓插件加载日志 —— 修复前 Qt 只试 `C:/Qt/6.10.3/.../multimedia` 并因版本不兼容失败；修复后输出 `.../target/release/bin/multimedia/ffmpegmediaplugin.dll loaded library` 与 `Using Qt multimedia with FFmpeg version 7.1.3`，且日志中 `6.10.3` 出现次数为 **0**。
+- **新增示例一键运行脚本与说明文档（换示例名即可跑）**：新增 `examples/run-example.ps1`（Windows）与 `examples/run-example.sh`（Linux/macOS），用法 `.\examples\run-example.ps1 <示例名>`，不带参数即列出全部可运行示例；支持 `-NoRun`/`-n`（只构建+部署）与 `-SkipBuild`/`-s`。
+  - **脚本自动处理四类上手坑**：① 把 `CJQT6_ROOT` 指向当前这份仓库（避免误用其它克隆目录的产物）；② 选中与桥接库 ABI 匹配的 Qt（`-QtDir` → `$QTDIR` → 常见路径），并把 PATH 中其它 `\Qt\6.*` 目录剔除；③ 构建前判定并清理陈旧示例缓存（复用 `Clear-StaleExampleCache`）；④ 把 Qt 运行时/平台插件/MSVC CRT/cjqt6 依赖/bridge 部署到 exe 同目录，使运行不再依赖 PATH 选对 Qt。
+  - **新增 bridge ↔ Qt 的 ABI 自检**：启动前比对 `cjqt6_bridge.dll` 需要的 `QEventDispatcherWin32::registerTimer` 符号签名与本机 `Qt6Core.dll` 实际导出的签名，不一致时给出可读报错（含两侧签名与三种处理建议），替代 Windows 原生那句「无法定位程序输入点 … 于 cjqt6_bridge.dll 上」。实测：指定 Qt 6.10.3 时正确拦截（退出码 1）；Qt 6.9.1 下「构建 + 部署」后，`main.exe` 在 **PATH 只有 6.10.3** 的会话中仍能正常启动。
+  - **新增 `examples/README.md`**：快速开始、环境要求、脚本参数、20 个示例清单、脚本自动规避的坑，以及 6 条常见问题（Qt 版本不匹配 / 缺 Qt DLL / 链接期 `undefined symbol: …cjqt6.core…` / 无显示器用 offscreen / CjMusic 依赖中心仓包 / qq_chat_lan 的 C-S 结构）。
+  - **删除三个「硬编码本机路径」的旧运行脚本**：`examples/run_example.sh`（无任何引用、只接受可执行文件路径、硬编码 `/home/yuan123/cangjie/cangjie_1.1.0/...`）、`examples/CjMusic/run_debug.ps1` 与 `examples/CjMusic/run_debug2.ps1`（硬编码 `C:\CodeTools\cangjie_git\CJQT6\...` 的本机调试脚本），统一由新的 `run-example.ps1` / `run-example.sh` 取代。
+  - **文档同步**：根 `README.md`「运行示例」改为推荐一键脚本，保留手动步骤并显式提示「Qt 版本必须与桥接库一致（6.9.1）」与「`setup-qt-env.ps1` 需点号加载才作用于当前会话」；`AGENTS.md` 目录地图补充脚本与文档入口。
 - **CI 主流水线升级到仓颉 SDK 1.2.0，并新增 1.1.0 最低版本编译门禁**：`ci.yml` 的 `CANGJIE_VERSION` 由 `1.1.0` 升为 `1.2.0`（四平台主流水线全跑最新 STS），`ci-lint.yml` 同步升到 `1.2.0`。
   - **新增 `min-version-build` job（ubuntu-24.04）**：只用仓颉 **1.1.0** 跑一次 `cjpm build`。理由是 `cjpm.toml` 的 `cjc-version = "1.1.0"` 是对外承诺的最低支持版本，主流水线升到 1.2.0 后若无人验证 1.1.0，该承诺即失去意义（误用 1.2.0 独有 API 也不会被发现）。该 job 不建 bridge、不装完整 Qt、不跑测试与覆盖率，链接直接用仓库内预编译的 `releases/linux-x64/libcjqt6_bridge.so`，额外成本约 1~2 分钟。
   - **`setup-cangjie` 内置下载源表改为「平台 + 版本」整条列举**：`objectKey` 是官方对象存储的文件 ID、与版本一一对应，原先「`fileName` 用版本变量拼 + `objectKey` 写死」的写法换版本时必然下错包或失败。现同时收录 **1.2.0（linux-x64 / linux-aarch64 / mac-aarch64 / windows-x64）** 与 **1.1.0（linux-x64，供门禁 job 使用）**，并**补齐 macOS 的 SHA-256**（此前 macOS 默认跳过校验），校验实现兼容 macOS 无 `sha256sum` 的情况（回退 `shasum -a 256 -c`）。`action.yml` 的 `version` 默认值与 `.github/dependabot.yml` 注释同步更新。
