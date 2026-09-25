@@ -57,6 +57,8 @@ git push origin main
 - **`cjpm test --coverage` 不要用默认并行编译**：并行时 `cjc.exe` 可能挂死成孤儿进程（CPU 0.00s / 内存 ~0MB，父进程 cjpm 已退出），而这些孤儿继承了 stdout 句柄，导致调用方**永远等不到 EOF —— 表现为"卡住且一行输出都没有"**（实测 5m40s 无任何输出，手动杀掉孤儿 cjc 才结束）。挂死的 cjc 命令行形如 `cjc -p <仓库>\src\charts ... --coverage ...`。因此 `scripts/deploy-qt-test.ps1` 默认 `-j 1` 串行，并在开跑前/结束后清理孤儿 `cjc.exe`。另注：本机实测 `--coverage` 还可能让 **cjpm 自身**在收尾备份 gcov 数据时抛 `FSException: Native function error return -1`（`backupGcnoData` → `FileInfo::isRegular`）而中止，**此时一个用例统计都不会打印**——`run-test.ps1` / `verify_all.ps1` 的 `-SkipCoverage` 现已透传到测试步骤（此前只跳过了覆盖率报告步骤），`deploy-qt-test.ps1` 也新增了「未取得用例统计即判 FAIL」的空过防护（此前会兜底误报 PASS）。
 - 示例（`examples/`）是独立 cjpm 工程，通过 `cjqt6 = { path = "../../" }` 依赖根包；其 `link-option` 也含本机绝对路径。
 - **示例缓存会跨库版本复用，改过 `src/` 后构建示例可能报缺符号**：cjpm 把库各子包编译成 DLL + `.cjo` 放进 `examples/<name>/target/release/cjqt6/`，并连同 `target/.dep-cache` 指纹一起复用；库的对外形态变更后（如给接口加默认实现），旧缓存可能只被「重新链接」而不重新编译，于是 `cjpm build` 在链接期失败：`ld.lld: error: undefined symbol: _CN10cjqt6.core12QtWidgetCore13setStyleSheetHRNat6StringE`、`undefined symbol: cjqt6.core:QtWidget.ti`。**这类失败与示例代码无关**，清掉该示例的 `target/` 即可恢复（`--coverage` 插桩也会因此停下）。一键处理：`.\scripts\clean-example-cache.ps1`（按 `src/` mtime 判定陈旧，`-Force` 无条件清）；`scripts/verify_all.ps1` 在构建冒烟示例前已自动执行同一判定。
+- **`cjpm clean` 在仓颉 1.2.0 下会打印 `FSException: Native function error return -1`**（`std.fs::FileInfo::isRegular`，栈为 `doClean → cleanCov`），但 `target/` **实际已被删除、退出码仍为 0** —— 属噪音性报错（1.1.0 下同类异常只在 `--coverage` 收尾 `backupGcnoData` 时出现）。脚本里要静默清理时用 `Remove-Item -Recurse -Force target`，或忽略该 stderr、只看 `$LASTEXITCODE`。
+- **仓颉 1.2.0 的 cjpm 对未知 CLI 参数不再宽容**：`cjpm build --no-tests` 会直接报 `the customized key 'no-tests' is wrong, the example is 'cfg_1'` 并失败（1.1.0 下被静默忽略）。脚本里只能用 cjpm 内置选项；自定义选项须先在 `[profile.customized-option]` 声明再以 `--<key>` 启用。仓库内 `scripts/`、`tools/`、`examples/` 的 cjpm 调用（`build`/`test`/`run` + `-j` / `--exclude-tags=` / `--timeout-each=`）已实测全部有效。
 - `src/main.cj` 只是打印占位，不是入口；库本身是 `output-type = "dynamic"`，真正的运行入口在各示例。
 
 ## 目录地图（只列会影响行为的）
@@ -73,7 +75,7 @@ git push origin main
 | `docs/` | `guides/`（构建/架构/交叉编译/性能/版本矩阵/封装模板）、`api/01~20`、`internal/`（评估/覆盖度/控件分析）、`resource/`、`testing/`、`tutorial/` |
 | `.agents/skills/cjqt6/SKILL.md` | 项目自带 skill，权威速查（必读） |
 
-## 写仓颉代码的硬约束（仓颉 1.1.0）
+## 写仓颉代码的硬约束（仓颉 1.1.0+；工具链已在 1.2.0 全量验证通过）
 
 - 每个 Qt 对象封装为 class，实现 `QtResource` 接口：持有 `ptr: Int64`，`checkValid()` 守卫，`close()` 释放，`getPtr(): Int64` 取指针。
 - **QObject 封装类必须接入对象存活表**（防级联销毁 use-after-free）：自建构造创建原生 QObject 后立即 `trackObject(ptr)`；`close()`/`delete()` 必须先判 `isObjectAlive(ptr)`——对象被 Qt 父子树或父容器接管（`addWidget` 入布局、`chart.addSeries/addAxis`、`view.setChart`、`series.append` 等）后随父对象析构而级联销毁时，存活表返回 `false`，此时只 `untrackObject(ptr)` 置空、**不** `delete`，否则 double-free/UAF；`checkValid()` 也要查 `isObjectAlive` 并抛 `ResourceDisposedException`。**值类型非 QObject（`QFont`/`QColor`/`QTransform`/`QPainter`/`QSqlDatabase` 等）禁止 `trackObject`**（强转 QObject 是 UB）。范式见 `src/widgets/`、`src/charts/`、`src/views/` 已有类的双分支 `close()`。

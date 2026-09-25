@@ -11,6 +11,9 @@
 
 ### 变更
 
+- **仓颉 SDK 1.2.0 兼容性验证通过（无源码改动）**：在 `cjc` / `cjpm` **1.2.0**（`CANGJIE_HOME` 指向 1.2.0 安装目录）+ Qt 6.9.1 下全量复核，**未发现破坏性变更，`src/` 与 `cjpm.toml` 均无需修改**（`cjc-version` 保持 `1.1.0` —— 该字段语义为*最低*版本，保持对 1.1.0 用户的兼容；代码未使用 1.2.0 独有特性）。
+  - **验证口径**：手动清 `target/` 后 `cjpm build -j 1` **success**（19s）→ `cjpm test --no-run -j 1` **success**（69s）→ `scripts/deploy-qt-test.ps1 -RunTest -SkipCoverage` 得 **TOTAL 1507 / PASSED 1431 / SKIPPED 76 / ERROR 0 / FAILED 0**；示例冒烟（`hello_cjqt6` / `notepad` / `charts_demo` / `all_controls_demo`，清各自 `target/` 后重建）与工具工程（`tools/ui2cj` / `tools/cjqt6-diagnose`）`cjpm build` 全部 success。SKIPPED 的 76 个为 `cjpm.toml` `exclude-tags` 排除项，与 SDK 版本无关。C++ 桥接层只依赖 Qt6 与 MSVC、不依赖仓颉 SDK，`releases/` 产物无需重建。
+  - **1.2.0 的两处工具链行为变化**（同步记入 `AGENTS.md`「已知坑」）：① `cjpm clean` 打印 `FSException`（`doClean → cleanCov → std.fs::FileInfo::isRegular`）但 `target/` 已删除、退出码 0，属噪音性报错；② cjpm 对未知 CLI 参数不再宽容（`cjpm build --no-tests` 直接报错），已核查仓库内所有 cjpm 调用均只用有效参数，无脚本受影响。
 - **`scripts/` 批次 1+2：死代码清理与 `lib` 共享抽取（不涉及库 API，纯工具链）**：
   - **删除 `scripts/rebuild_all.ps1`**：自 2026-09-09 起即 DEPRECATED，编排功能被 `verify_all.ps1` 完全覆盖；其独有的「无条件清 `target/`」已由 `verify_all.ps1` 的缓存守卫与新增的 `scripts/clean-example-cache.ps1` 承担。同步更新 `docs/guides/build-guide.md`、`docs/roadmap.md`、`.agents/skills/cjqt6/SKILL.md`、`scripts/README.md`。
   - **归档一次性脚本**：`fix-throws-annotations.ps1`（G.ERR.01 注释批量补全 codemod，任务已完成）移入 `scripts/oneoff/`，并改用 `lib::Get-RootDir` 定位项目根。
