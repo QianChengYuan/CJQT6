@@ -166,6 +166,24 @@ $env:QT_QPA_PLATFORM = "offscreen"
 .\examples\run-example.ps1 qq_chat_lan/client     # 终端 2
 ```
 
+### 7. Linux：窗口打开了，但内容空白（透出后方窗口）
+
+**典型**：运行 `./examples/run-example.sh hello_cjqt6`，窗口标题正常，内容区却什么都不显示——
+看起来像透出了后面的其它窗口。
+
+**原因**：本机装了多个 Qt（系统 Qt + 自装 Qt）时，`releases/linux-x64/libcjqt6_bridge.so`
+与运行期实际加载的 Qt / 平台插件**不是同一份**。库与插件跨版本混用会让窗口能创建但不渲染。
+
+**自查与修复**：
+
+```bash
+source ./scripts/setup-qt-env.sh        # 选定一份 Qt,并把「库 + 插件」一并注入(会打印所选版本)
+ldd releases/linux-x64/libcjqt6_bridge.so | grep -i qt6 | head   # 应与 $QTDIR 指向同一份 Qt
+```
+
+`run-example.sh` 已内置该检查（不一致时打印警告）。完整排查步骤见
+[docs/guides/build-guide.md](../docs/guides/build-guide.md) 的「多 Qt 环境下窗口空白」(5.4.1)。
+
 ---
 
 ## 不用脚本时的手动步骤

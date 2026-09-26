@@ -144,9 +144,15 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/common.sh"
 
 PLATFORM=$(detect_platform)        # linux-x64 / linux-arm64 / wsl / macos-x64 / macos-arm64 / windows / unknown
-QTDIR=$(find_qt)                   # 探测 Qt6 路径(QTDIR 环境变量优先,失败 exit 1)
+QTDIR=$(find_qt)                   # 探测 Qt6 路径(QTDIR 优先;多版本取最高;校验真安装根)
 JOBS=$(get_jobs)                   # nproc / sysctl / fallback 4
 ROOT=$(get_root_dir "$0")          # 定位项目根
+
+# Qt6 环境(与 PowerShell 侧 Set-QtEnv 对称):
+is_qt6_root "$QTDIR"               # 是否真正的 Qt6 安装根(而非库目录)
+qt_version "$QTDIR"                # 版本号,如 6.4.2
+apply_qt_env "$QTDIR"              # 注入 QTDIR / PATH / LD_LIBRARY_PATH / QT_PLUGIN_PATH(全部幂等)
+qt_runtime_check "$BRIDGE_SO"      # 桥接库运行期实际解析到的 Qt 是否与所选一致(0/1/2)
 
 print_section "标题"                # 打印彩色 section 标题
 die "错误消息"                       # 红字 + 退出 1

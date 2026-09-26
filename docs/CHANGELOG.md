@@ -11,6 +11,14 @@
 
 ### 变更
 
+- **补齐 Linux/macOS 侧示例运行链的 Qt 防护（与 `run-example.ps1` 对齐；多 Qt 机器上「窗口空白」的根因）**：
+  - **`scripts/setup-qt-env.sh` 由空壳实装**：此前去掉注释后只剩 `set -e`，而根 `README.md` 与 `examples/README.md` 都教用户 `source ./scripts/setup-qt-env.sh` —— 等于「静默无效果」。现按 `setup-qt-env.ps1` 的语义实装：选定一份 Qt6（参数 > `QTDIR` > 自动探测）并导出 `QTDIR` / `PATH` / `LD_LIBRARY_PATH`（macOS 用 `DYLD_*`）/ `QT_PLUGIN_PATH` / `QT_QPA_PLATFORM_PLUGIN_PATH` / `CJQT6_ROOT`；多 Qt 并存时打印所选版本与其它可用版本；可 `source`（不污染调用者 shell），直接执行只做预览。
+  - **`examples/run-example.sh` 补齐 `.ps1` 已有、`.sh` 缺失的三项能力**：① 未设 `QTDIR` 时**自动探测 Qt**（此前静默使用系统 Qt）；② 注入**插件路径**（此前只注入库路径）；③ 运行前做 **bridge ↔ Qt 运行期一致性自检**。
+  - **症状与机制**：装有多个 Qt 时，`releases/<平台>/libcjqt6_bridge.so` 与运行期实际加载的 Qt / 平台插件若不同源，会出现「窗口能创建但不渲染」——标题栏正常、内容区空白（像是透出后方的其它窗口），程序不崩、控制台无报错。`0534a94` 已在 Windows `.ps1` 侧解决同类问题（剔除其它 Qt、ABI 自检、插件路径指向 exe 同目录）；`.sh` 侧此前没有这些防护。
+  - **`scripts/lib/common.sh` 新增共享函数**（与 PowerShell 侧 `Set-QtEnv` 对称）：`is_qt6_root` / `qt_query` / `qt_version` / `qt_lib_dir` / `qt_plugin_dir` / `prepend_path_var` / `apply_qt_env` / `qt_runtime_check`；`find_qt` 加固为「校验真正的 Qt6 安装根」（原实现只判目录存在，会把 `/usr/lib/x86_64-linux-gnu/qt6` 这类**库目录**当安装根，进而把 `-DQt6_DIR` 与插件路径全指错），并在多版本中取版本号最大者。
+  - **新增排查文档**：`docs/guides/build-guide.md` 5.4.1「多 Qt 环境下窗口空白」与 `docs/guides/qt-version-matrix.md` 3.3 给出三步排查（`source scripts/setup-qt-env.sh` → `ldd` 看桥接库实际解析到哪一份 Qt → `QT_DEBUG_PLUGINS=1` 看插件来源）；`examples/README.md` 新增常见问题第 7 条。
+  - **附带**：新增 `.gitattributes` 固定 `*.sh` 为 LF —— Windows 上 `core.autocrlf=true` 会把 shell 脚本检出成 CRLF，含反斜杠续行的脚本（如 `scripts/build-win64.sh`）会直接 `syntax error: unexpected end of file`。
+  - **验证**：WSL bash 下 **44 项断言全部通过**：`bash -n` 覆盖全部 `.sh`；伪造 6.4.2/6.8.0 两套 Qt 安装树验证 `find_qt` 取最高版本且 `QTDIR` 优先、`apply_qt_env` 注入齐全且幂等、`setup-qt-env.sh` 预览与 `source` 两种模式；再用 gcc 伪造两份 `libQt6Core.so.6` 与真实 `.so`，端到端验证 ABI 版本判据（6.4.2 桥接库 + 所选 6.8.0 → 判定不一致并给出可读说明；同版本 → 判定一致）。
 - **修复示例「能启动但音乐静默不播」（CjMusic 回归，由本轮新增的部署脚本引入）**：
   - **`scripts/deploy-qt-example.ps1` 插件集不全**：此前只部署 `platforms`/`styles`/`imageformats`，**缺 `multimedia`** —— `QMediaPlayer`/`QAudioOutput` 的音频后端（`plugins/multimedia/ffmpegmediaplugin.dll`）缺失后播放静默失效（界面与进程都正常，故表现为「不播」而非报错）。现补齐为 `platforms / styles / imageformats / sqldrivers / multimedia / iconengines / tls / networkinformation / platformthemes`，与 `scripts/deploy-qt-test.ps1`、`examples/CjMonitor/deploy_qt.ps1` 的既有做法对齐。
   - **运行时插件路径被其它 Qt 版本劫持**：用户级环境变量 `QT_PLUGIN_PATH` 若指向别的 Qt（实测 `C:\Qt\6.10.3\msvc2022_64\plugins`），Qt 会优先搜索它，日志刷出大量 `uses incompatible Qt library (6.10.0)`，多媒体后端因此加载失败。`examples/run-example.ps1` 现在在运行前把 `QT_PLUGIN_PATH` / `QT_QPA_PLATFORM_PLUGIN_PATH` 指向示例 `bin` 目录（与 `deploy-qt-test.ps1` 同做法），不再受外部 Qt 版本干扰。

@@ -774,6 +774,40 @@ cp native/build_linux/lib/libcjqt6_bridge.so /usr/lib/
 | `SIGSEGV: address not mapped to object` | 访问已释放的对象 | 检查对象生命周期，使用调试版本构建 |
 | `This application failed to start because no Qt platform plugin could be initialized` | Qt平台插件缺失 | Linux: `sudo apt install qt6-platform-plugins` |
 
+#### 5.4.1 多 Qt 环境下窗口空白（Linux/macOS）
+
+**现象**：窗口边框与标题正常，但**内容区不绘制** —— 看起来像"透出后方的其它窗口"，
+或整片空白/纯色；程序不崩、控制台无报错。示例（如 `hello_cjqt6`）本应显示一个居中的
+`QLabel`，实际却什么都看不到。
+
+**机制**：Qt 的**库与插件必须来自同一份安装**。本机同时装有系统 Qt（如 Ubuntu 24.04 的
+6.4.2）与用户自装 Qt（`~/Qt/6.x.x/gcc_64`）时，常见两种错配：
+① `releases/<平台>/libcjqt6_bridge.so` 用 A 版编译，运行期按 `ldconfig` 加载了 B 版；
+② 库来自 A 版，而平台插件（`platforms/libqxcb.so`）从 B 版目录加载。
+两者都会导致"能开窗但不渲染"。
+
+**诊断（三步）**：
+```bash
+# 1) 选定一份 Qt,并把「库 + 插件」一起注入(会打印所选版本与其它可用版本)
+source scripts/setup-qt-env.sh
+
+# 2) 看桥接库 / 可执行文件实际解析到哪一份 Qt —— 应与 $QTDIR 指向同一份
+ldd releases/linux-x64/libcjqt6_bridge.so | grep -i qt6 | head
+ldd examples/hello_cjqt6/target/release/bin/hello_cjqt6 | grep -i Qt6Core
+
+# 3) 怀疑插件来自别处时,看插件到底从哪个目录被加载
+QT_DEBUG_PLUGINS=1 ./examples/run-example.sh hello_cjqt6 2>&1 | grep -i "loaded library"
+```
+
+`./examples/run-example.sh <示例>` 已内置第 2 步的检查：未设置 `QTDIR` 时自动探测 Qt，
+注入库与插件路径，并在桥接库解析到**别的** Qt 时打印警告。
+
+**修复**（任选其一，关键是让库与插件同源）：
+- 让 `QTDIR` 指向**桥接库编译时所用的那份 Qt**，再 `source scripts/setup-qt-env.sh` 重新注入；
+- 或用运行期那份 Qt **重编桥接库**：`QTDIR=<同一份 Qt> bash scripts/build-linux-x64.sh`，
+  然后重新 `cjpm build`（参见本指南 5.3 与 `docs/guides/qt-version-matrix.md` 第 3 节）；
+- 不要出现"`LD_LIBRARY_PATH` 指向用户 Qt、`QT_PLUGIN_PATH` 指向系统 Qt"这类混合配置。
+
 ### 5.5 Windows特定错误
 
 | 错误信息 | 原因 | 解决方案 |

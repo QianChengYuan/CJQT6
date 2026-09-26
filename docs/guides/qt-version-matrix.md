@@ -54,6 +54,22 @@ Qt **小版本之间存在 ABI 差异**，换版本后旧 bridge 可能**静默�
 但**仓颉侧只需重编 bridge**（bridge 是唯一静态绑定 Qt ABI 的层）。不重编 bridge 直接换运行时 =
 加载旧符号集，行为不可预期。
 
+### 3.3 多 Qt 并存：先确认运行期实际加载哪一份
+
+本机同时装有系统 Qt（如 Ubuntu 24.04 的 6.4.2）与用户自装 Qt（`~/Qt/6.x.x/gcc_64`）时，
+最容易踩的不是"版本选错"，而是**库与插件来自不同版本**：桥接库链接 A 版、运行期却按
+`ldconfig` 加载了 B 版，或库来自 A 版而平台插件从 B 版目录加载。典型症状是**窗口能打开但
+内容空白**（像是透出后方的其它窗口）、主题异常或启动即崩。
+
+```bash
+source scripts/setup-qt-env.sh                                  # 选定一份 Qt,库与插件一并注入
+ldd releases/linux-x64/libcjqt6_bridge.so | grep -i qt6 | head   # 桥接库实际解析到哪一份
+```
+
+判据：`ldd` 的输出应与 `$QTDIR` 指向同一份 Qt。`examples/run-example.sh` 已内置该检查
+（不一致时给出警告）；完整排查步骤见 `docs/guides/build-guide.md` 的
+「多 Qt 环境下窗口空白」（5.4.1）。
+
 ## 4. 当前锁定版本的实测记录
 
 | 版本 | 平台/工具链 | 实测结论 |

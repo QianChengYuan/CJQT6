@@ -28,6 +28,10 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
+# 共享函数(探测 Qt / 注入环境 / 运行期一致性校验):scripts/lib/common.sh
+# shellcheck disable=SC1091
+source "$ROOT_DIR/scripts/lib/common.sh"
+
 NAME=""
 NO_RUN=0
 SKIP_BUILD=0
@@ -75,6 +79,25 @@ if [ "$(uname -s)" = "Linux" ] && [ "$(uname -m)" = "aarch64" ]; then
     REL_DIR="linux-arm64"
 fi
 
+# ---------- 选定 Qt6:未设置 QTDIR 时自动探测,避免静默使用系统 Qt ----------
+# 多 Qt 机器上"静默用系统 Qt"是窗口空白 / 加载失败的主因 —— 桥接库与运行期 Qt
+# 必须是同一份(含插件);只把库放进搜索路径而插件来自别处,同样会渲染异常。
+QT_DIR="${QTDIR:-}"
+if [ -z "$QT_DIR" ]; then
+    QT_DIR="$(find_qt || true)"
+    if [ -n "$QT_DIR" ]; then
+        echo "==> 未设置 QTDIR,自动探测到 Qt6: $QT_DIR"
+        echo "    (如需固定版本: export QTDIR=$QT_DIR)"
+    fi
+fi
+if [ -n "$QT_DIR" ]; then
+    # 注入库 + 插件路径(QTDIR 在该函数内导出)
+    apply_qt_env "$QT_DIR" || true
+else
+    echo "[!] 未探测到 Qt6 —— 将使用系统默认 Qt。若桥接库由其它 Qt 构建,会出现窗口空白" >&2
+    echo "    或加载失败;请显式设置 QTDIR,或用 source scripts/setup-qt-env.sh 配置环境" >&2
+fi
+
 # ---------- 组装动态库搜索路径 ----------
 LIBS="$ROOT_DIR/releases/$REL_DIR"
 if [ -n "${QTDIR:-}" ] && [ -d "$QTDIR/lib" ]; then
@@ -99,10 +122,26 @@ echo "==> 示例      : $NAME"
 echo "==> CJQT6_ROOT: $CJQT6_ROOT"
 echo "==> 桥接库目录: releases/$REL_DIR"
 if [ -n "${QTDIR:-}" ]; then
-    echo "==> QTDIR     : $QTDIR"
+    _qver="$(qt_version "$QTDIR" 2>/dev/null || true)"
+    echo "==> QTDIR     : $QTDIR${_qver:+  (Qt $_qver)}"
+    echo "==> 插件路径  : ${QT_PLUGIN_PATH:-（未设置,插件按 Qt 默认规则查找）}"
 fi
-if [ ! -f "$ROOT_DIR/releases/$REL_DIR/libcjqt6_bridge.so" ] && [ ! -f "$ROOT_DIR/releases/$REL_DIR/libcjqt6_bridge.dylib" ]; then
+
+# ---------- Qt 一致性自查:桥接库在运行期实际解析到哪一份 Qt ----------
+# 不一致意味着库/插件跨版本混用,典型症状是"窗口能打开但内容空白"(或主题异常/启动即崩)
+BRIDGE_LIB="$ROOT_DIR/releases/$REL_DIR/libcjqt6_bridge.so"
+[ -f "$BRIDGE_LIB" ] || BRIDGE_LIB="$ROOT_DIR/releases/$REL_DIR/libcjqt6_bridge.dylib"
+if [ ! -f "$BRIDGE_LIB" ]; then
     echo "[!] 未找到 releases/$REL_DIR 下的桥接库,若链接或加载失败请先构建(见 docs/guides/build-guide.md)" >&2
+else
+    qt_runtime_check "$BRIDGE_LIB"
+    case $? in
+        0) ;;
+        1) echo "[!] 桥接库解析到的 Qt 与所选 Qt 不一致:库/插件跨版本混用会表现为窗口能打开" >&2
+           echo "    但内容空白。修复:让 QTDIR 指向桥接库编译时所用的那份 Qt,或按" >&2
+           echo "    docs/guides/build-guide.md「多 Qt 环境下窗口空白」重新构建桥接库。" >&2 ;;
+        2) ;;
+    esac
 fi
 
 cd "$EX_DIR"

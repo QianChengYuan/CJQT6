@@ -1,0 +1,8 @@
+# 行尾约定（默认：交给 core.autocrlf；此处只钉死必须固定的两类）
+#
+# *.sh 必须是 LF:shell 脚本里的反斜杠续行、heredoc 都依赖 LF;
+#   Windows 上若有 core.autocrlf=true(本机默认开启)会把工作区检出为 CRLF,
+#   此时 bash 会报 "syntax error: unexpected end of file"(已实际踩到),
+#   而 scripts/README.md 明确把 Git Bash 列为受支持环境。
+# *.ps1 不在此钉死:PowerShell 7+ 对 LF/CRLF 均可,保持各人平台的检出习惯。
+*.sh   text eol=lf
